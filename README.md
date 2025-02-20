@@ -14,11 +14,9 @@
 
 ## About this project
 
-This project is a UI and functional conversion to React and extension of Udemy's Vue - The Complete Guide (incl. Router & Composition API) > 'Find a coach' project.
+This project is a UI and functional conversion from Vue to React and extends the original Udemy Vue - The Complete Guide (incl. Router & Composition API) course > 'Find a coach' project.
 
 If has been converted from "finding a coach" to "finding popular travel destinations" tied to a registered traveller.
-
-Tailored to be developed using Visual Studio Code.
 
 ## Stack
 
@@ -57,7 +55,7 @@ After cloning the repository, install the dependencies by running:
 npm install
 ```
 
-This will install all the required packages defined in the package.json file.
+This will install all the required package dependencies defined in the package.json file.
 
 ## Setup
 
@@ -108,7 +106,7 @@ Once the project is set-up the following build products are required in order to
 
 #### `.env`
 
-Locate your config details located under Project > Project settings > General tab, create a `.env` file and add the applicable project values against the following key/value pairs:
+Locate your config details located under the **\*Project > Project settings > General** tab, create a `.env` file and add the applicable project values against the following key/value pairs:
 
 ```bash
 
@@ -128,10 +126,12 @@ VITE_FIREBASE_MESSAGING_SENDER_ID="" # firebaseConfig > messagingSenderId (delet
 VITE_FIREBASE_APP_ID="" # firebaseConfig > appId (delete comment after value added)
 VITE_FIREBASE_MEASUREMENT_ID="" # firebaseConfig > measurementId (delete comment after value added)
 
-# UNIQUE ID FOR 'EMAIL/PASSWORD' REGISTERED FIREBASE AUTHENTICATED USER THAT WILL HAVE ADMIN RIGHTS ON APP, ALLOWING FOR THE DELETION OF TRAVELLERS FROM THE UI FRONT END, EXCLUDING REGISTERED ADMIN USER
+# UNIQUE ID FOR 'EMAIL/PASSWORD' REGISTERED FIREBASE AUTHENTICATED USER THAT WILL HAVE ADMIN RIGHTS ON APP, ALLOWING FOR THE DELETION OF TRAVELLERS FROM THE UI FRONT END, EXCLUDING REGISTERED ADMIN USER *
 VITE_ADMIN_ID=''
 
 ```
+
+[Features](#features) section below outlines steps on how to obtain the VITE_ADMIN_ID.
 
 #### `.firebaserc`
 
@@ -190,3 +190,13 @@ npm run serve
 Follow the [Vercel getting started instructions](https://vercel.com/docs/getting-started-with-vercel) and [Deploying Git Repositories with Vercel](https://vercel.com/docs/deployments/git) to set-up deployment via GitHub.
 
 Project deployment workflow can be viewed and configured via GitHub > Integrations > Applications > Vercel.
+
+## Features
+
+NB: The trip-fotos-vue App requires registered login credentials for full access. By default, a user is only able to login.
+
+To enable a user to 'Sign-up' and then register as a traveller uncomment the 'switch mode' button (src/pages/auth/UserAuth.vue), lines 38-43. Once a users have been signed-up, validate the entries in Firebase > Authentication > Users, and copy and paste the **User UID** of your choice into the .env **VITE_ADMIN_ID** property for user Admin access, allowing this user to delete registered travellers using the Front End UI. Deleting the traveller will delete all traveller information, including images, but their authenticated sign-up details will remain.
+
+- When registering travellers can optionally upload photos against their profile for others to view.
+
+- Registered travellers can leave personal 'messages', as opposed to 'requests', on other traveller profiles
