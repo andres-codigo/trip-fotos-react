@@ -1,0 +1,24 @@
+# LOGS
+*.log
+npm-debug.log*
+
+# NODE MODULES AND BUILD DIRECTORIES
+node_modules
+dist
+
+# EDITOR DIRECTORIES
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+
+# NPM
+.npm
+
+# ENVIRONMENT
+.env
+
+# LINTING
+.eslintcache
+
+# VITE
+.vite
