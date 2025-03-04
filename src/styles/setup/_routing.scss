@@ -1,0 +1,35 @@
+// Variables
+$transition-duration: 0.3s;
+$transition-ease-out: ease-out;
+$transition-ease-in: ease-in;
+$translate-distance: 30px;
+
+// Route enter styles
+.route-enter-from {
+	opacity: 0;
+	transform: translateY(-$translate-distance);
+}
+
+.route-enter-active {
+	transition: all $transition-duration $transition-ease-out;
+}
+
+.route-enter-to {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+// Route leave styles
+.route-leave-to {
+	opacity: 0;
+	transform: translateY($translate-distance);
+}
+
+.route-leave-active {
+	transition: all $transition-duration $transition-ease-in;
+}
+
+.route-leave-from {
+	opacity: 1;
+	transform: translateY(0);
+}
