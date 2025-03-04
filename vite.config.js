@@ -31,16 +31,6 @@ export default defineConfig({
 			exclude: ['node_modules', 'dist'],
 		}),
 	],
-	css: {
-		preprocessorOptions: {
-			scss: {
-				api: 'modern-compiler',
-				additionalData: `
-              @use '@/styles/global.scss' as global;
-            `,
-			},
-		},
-	},
 	resolve: {
 		alias: [
 			{
