@@ -1,0 +1,258 @@
+@use '../../styles/setup/variables' as variables;
+@use '../../styles/setup/mixins/mixins' as mixins;
+
+header {
+	align-items: center;
+	background-color: variables.$color-pigment-indigo;
+	display: flex;
+	height: 5rem;
+	position: fixed;
+	justify-content: center;
+	width: 100%;
+	z-index: 1;
+
+	.navbar {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+		margin: auto;
+		width: 90%;
+
+		h1 {
+			margin: 0;
+
+			a {
+				color: variables.$color-white;
+				margin: 0;
+				text-decoration: none;
+			}
+		}
+
+		.navMenuItemsContainer {
+			align-items: center;
+			display: flex;
+			list-style: none;
+			justify-content: space-between;
+			margin: 0;
+			padding: 0;
+
+			.navMenuItem {
+				margin: 0 0.5rem;
+
+				ul {
+					align-items: center;
+					display: flex;
+					justify-content: center;
+					list-style: none;
+					margin: 0;
+					padding: 0;
+
+					li {
+						margin: 0 0.5rem;
+					}
+				}
+
+				a {
+					border: 1px solid transparent;
+					color: variables.$color-white;
+					display: inline-block;
+					padding: 0.75rem 1.5rem;
+					position: relative;
+					text-decoration: none;
+
+					.totalMessagesContainer {
+						--size: 1.4rem;
+						--font-size: 0.75rem;
+						appearance: none;
+						border: 1px solid variables.$color-pigment-indigo;
+						color: inherit;
+						cursor: pointer;
+						height: var(--size);
+						line-height: var(--size);
+						padding: 0;
+						position: absolute;
+						top: 0rem;
+						width: var(--size);
+
+						@include mixins.fadeIn(ease, 2s, 1, forwards);
+
+						.totalMessages {
+							display: inline-block;
+							font-size: var(--font-size);
+							position: relative;
+							text-align: center;
+							width: 100%;
+						}
+					}
+
+					&:hover {
+						color: variables.$color-lavender-magenta;
+
+						.totalMessagesContainer {
+							border: 1px solid variables.$color-pigment-indigo;
+						}
+					}
+
+					// TODO: remove vue router specific class and update with react router class names
+					&.router-link-active {
+						border: 1px solid variables.$color-white;
+						color: variables.$color-white;
+
+						.totalMessagesContainer {
+							border: 1px solid variables.$color-pigment-indigo;
+						}
+
+						&:hover {
+							border: 1px solid variables.$color-lavender-magenta;
+							color: variables.$color-lavender-magenta;
+
+							.totalMessagesContainer {
+								border: 1px solid variables.$color-pigment-indigo;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		.hamburger {
+			display: none;
+		}
+
+		.bar {
+			background-color: variables.$color-white;
+			display: block;
+			height: 3px;
+			margin: 5px auto;
+			width: 25px;
+			-webkit-transition: all 0.3s ease-in-out;
+			transition: all 0.3s ease-in-out;
+		}
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	header {
+		.navbar {
+			.navMenuItemsContainer {
+				position: absolute;
+				left: -100%;
+				top: 4.9rem;
+				flex-direction: column;
+				background-color: variables.$color-pigment-indigo;
+				width: 100%;
+				text-align: center;
+				box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+
+				&.active {
+					left: 0;
+
+					.navMenuItem {
+						margin: 0;
+						width: 100%;
+
+						ul {
+							display: block;
+							padding-inline-start: 0;
+
+							li {
+								margin: 0;
+
+								a {
+									padding: 1.25rem 0;
+									width: 100%;
+
+									// TODO: remove vue router specific class and update with react router class names
+									&.router-link-active {
+										background-color: variables.$color-ripe-eggplant;
+										border: none;
+										width: 100%;
+
+										&:hover {
+											border: none;
+										}
+									}
+								}
+							}
+						}
+
+						a {
+							padding: 1.25rem 0;
+							width: 100%;
+
+							.totalMessagesContainer {
+								--size: 2rem;
+								--font-size: 1rem;
+								appearance: none;
+								border: none;
+								border-radius: var(--size);
+
+								@include mixins.fadeIn(ease, 2s, 1, forwards);
+
+								.totalMessages {
+									bottom: 1px;
+									display: inline-block;
+									font-size: var(--font-size);
+									position: relative;
+									text-align: center;
+									width: 100%;
+								}
+							}
+
+							&:active,
+							&:hover {
+								color: variables.$color-lavender-magenta;
+
+								.totalMessagesContainer {
+									border: none;
+								}
+							}
+
+							// TODO: remove vue router specific class and update with react router class names
+							&.router-link-active {
+								background-color: variables.$color-ripe-eggplant;
+								border: none;
+								width: 100%;
+
+								&:hover {
+									border: none;
+								}
+							}
+						}
+
+						button {
+							background-color: variables.$color-pigment-indigo;
+							border: 1px solid variables.$color-pigment-indigo;
+							border-radius: 0;
+							margin: 0;
+							padding: 1.25rem 0;
+							width: inherit;
+
+							&:active,
+							&:hover {
+								color: variables.$color-lavender-magenta;
+							}
+						}
+					}
+				}
+			}
+
+			.hamburger {
+				display: block;
+				cursor: pointer;
+
+				&.active .bar:nth-child(2) {
+					opacity: 0;
+				}
+
+				&.active .bar:nth-child(1) {
+					transform: translateY(8px) rotate(45deg);
+				}
+
+				&.active .bar:nth-child(3) {
+					transform: translateY(-8px) rotate(-45deg);
+				}
+			}
+		}
+	}
+}
