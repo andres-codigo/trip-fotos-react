@@ -1,15 +1,16 @@
 import { useEffect, useRef } from 'react';
 import classNames from 'classnames';
+import PropTypes from 'prop-types';
 
 import styles from './Button.module.scss';
 
 function Button({
 	children,
-	isLink,
-	isError,
-	isDisabled,
+	isLink = false,
+	isError = false,
+	isDisabled = false,
 	modeType,
-	url,
+	url = '#',
 	className,
 	...rest
 }) {
@@ -46,5 +47,15 @@ function Button({
 		</>
 	);
 }
+
+Button.propTypes = {
+	children: PropTypes.node.isRequired,
+	isLink: PropTypes.bool,
+	isError: PropTypes.bool,
+	isDisabled: PropTypes.bool,
+	modeType: PropTypes.string,
+	url: PropTypes.string,
+	className: PropTypes.string,
+};
 
 export default Button;

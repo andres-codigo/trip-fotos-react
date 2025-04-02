@@ -60,7 +60,7 @@ export default [
 				{ allowConstantExport: true },
 			],
 			'no-unused-vars': 'warn',
-			'react/prop-types': 'off',
+			'react/prop-types': 'error',
 			'no-console': ['error', { allow: ['warn', 'error'] }],
 			'no-debugger': 'warn',
 			'prettier/prettier': 'error',
