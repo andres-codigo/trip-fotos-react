@@ -10,7 +10,7 @@ function Button({
 	isError = false,
 	isDisabled = false,
 	modeType,
-	url = '#',
+	to = '/',
 	className,
 	...rest
 }) {
@@ -37,7 +37,7 @@ function Button({
 			) : (
 				<a
 					{...rest}
-					href={url}
+					href={to}
 					ref={elementRef}
 					className={combinedClassName}
 					aria-disabled={isDisabled}>
@@ -54,7 +54,7 @@ Button.propTypes = {
 	isError: PropTypes.bool,
 	isDisabled: PropTypes.bool,
 	modeType: PropTypes.string,
-	url: PropTypes.string,
+	to: PropTypes.string,
 	className: PropTypes.string,
 };
 

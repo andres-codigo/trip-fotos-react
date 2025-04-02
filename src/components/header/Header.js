@@ -59,7 +59,7 @@ function Header() {
 		<header className={headerStyles.header}>
 			<nav className={headerStyles.navbar}>
 				<h1 className="navHeaderTitleLink">
-					<Button isLink url="#" className="navLink">
+					<Button isLink to="/" className="navLink">
 						Trip Fotos
 					</Button>
 				</h1>
@@ -73,7 +73,7 @@ function Header() {
 							<li
 								className="navMenuItemMessages"
 								onClick={handleActiveClassRemovalClick}>
-								<Button isLink url="#" className="navLink">
+								<Button isLink to="/" className="navLink">
 									Messages
 									{!!totalMessages && totalMessages > 0 && (
 										<span
@@ -93,7 +93,7 @@ function Header() {
 							<li
 								className="navMenuItemAllTravellers"
 								onClick={handleActiveClassRemovalClick}>
-								<Button isLink url="#" className="navLink">
+								<Button isLink to="/" className="navLink">
 									All Travellers
 								</Button>
 							</li>
@@ -105,7 +105,7 @@ function Header() {
 							'nav-menu-item-logout',
 						)}
 						onClick={handleLogoutClick}>
-						<Button url="#" className="navLink">
+						<Button to="/" className="navLink">
 							Logout {travellerName}
 						</Button>
 					</li>
