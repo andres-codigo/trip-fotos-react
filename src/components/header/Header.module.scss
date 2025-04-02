@@ -31,7 +31,6 @@ header {
 		.navMenuItemsContainer {
 			align-items: center;
 			display: flex;
-			list-style: none;
 			justify-content: space-between;
 			margin: 0;
 			padding: 0;
@@ -43,73 +42,11 @@ header {
 					align-items: center;
 					display: flex;
 					justify-content: center;
-					list-style: none;
 					margin: 0;
 					padding: 0;
 
 					li {
 						margin: 0 0.5rem;
-					}
-				}
-
-				a {
-					border: 1px solid transparent;
-					color: variables.$color-white;
-					display: inline-block;
-					padding: 0.75rem 1.5rem;
-					position: relative;
-					text-decoration: none;
-
-					.totalMessagesContainer {
-						--size: 1.4rem;
-						--font-size: 0.75rem;
-						appearance: none;
-						border: 1px solid variables.$color-pigment-indigo;
-						color: inherit;
-						cursor: pointer;
-						height: var(--size);
-						line-height: var(--size);
-						padding: 0;
-						position: absolute;
-						top: 0rem;
-						width: var(--size);
-
-						@include mixins.fadeIn(ease, 2s, 1, forwards);
-
-						.totalMessages {
-							display: inline-block;
-							font-size: var(--font-size);
-							position: relative;
-							text-align: center;
-							width: 100%;
-						}
-					}
-
-					&:hover {
-						color: variables.$color-lavender-magenta;
-
-						.totalMessagesContainer {
-							border: 1px solid variables.$color-pigment-indigo;
-						}
-					}
-
-					// TODO: remove vue router specific class and update with react router class names
-					&.router-link-active {
-						border: 1px solid variables.$color-white;
-						color: variables.$color-white;
-
-						.totalMessagesContainer {
-							border: 1px solid variables.$color-pigment-indigo;
-						}
-
-						&:hover {
-							border: 1px solid variables.$color-lavender-magenta;
-							color: variables.$color-lavender-magenta;
-
-							.totalMessagesContainer {
-								border: 1px solid variables.$color-pigment-indigo;
-							}
-						}
 					}
 				}
 			}
@@ -157,80 +94,6 @@ header {
 
 							li {
 								margin: 0;
-
-								a {
-									padding: 1.25rem 0;
-									width: 100%;
-
-									// TODO: remove vue router specific class and update with react router class names
-									&.router-link-active {
-										background-color: variables.$color-ripe-eggplant;
-										border: none;
-										width: 100%;
-
-										&:hover {
-											border: none;
-										}
-									}
-								}
-							}
-						}
-
-						a {
-							padding: 1.25rem 0;
-							width: 100%;
-
-							.totalMessagesContainer {
-								--size: 2rem;
-								--font-size: 1rem;
-								appearance: none;
-								border: none;
-								border-radius: var(--size);
-
-								@include mixins.fadeIn(ease, 2s, 1, forwards);
-
-								.totalMessages {
-									bottom: 1px;
-									display: inline-block;
-									font-size: var(--font-size);
-									position: relative;
-									text-align: center;
-									width: 100%;
-								}
-							}
-
-							&:active,
-							&:hover {
-								color: variables.$color-lavender-magenta;
-
-								.totalMessagesContainer {
-									border: none;
-								}
-							}
-
-							// TODO: remove vue router specific class and update with react router class names
-							&.router-link-active {
-								background-color: variables.$color-ripe-eggplant;
-								border: none;
-								width: 100%;
-
-								&:hover {
-									border: none;
-								}
-							}
-						}
-
-						button {
-							background-color: variables.$color-pigment-indigo;
-							border: 1px solid variables.$color-pigment-indigo;
-							border-radius: 0;
-							margin: 0;
-							padding: 1.25rem 0;
-							width: inherit;
-
-							&:active,
-							&:hover {
-								color: variables.$color-lavender-magenta;
 							}
 						}
 					}
