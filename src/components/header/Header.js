@@ -56,9 +56,11 @@ function Header() {
 	};
 
 	return (
-		<header className={headerStyles.header}>
+		<header className={headerStyles.header} data-cy="nav-header-container">
 			<nav className={headerStyles.navbar}>
-				<h1 className="navHeaderTitleLink">
+				<h1
+					className="navHeaderTitleLink"
+					data-cy="nav-header-title-link">
 					<Button isLink to="/" className="navLink">
 						Trip Fotos
 					</Button>
@@ -67,11 +69,13 @@ function Header() {
 					className={classNames(headerStyles.navMenuItemsContainer, {
 						[headerStyles.active]: isMenuOpen,
 					})}
+					data-cy="nav-menu-items-container"
 					ref={navMenuRef}>
 					<li className={headerStyles.navMenuItem}>
 						<ul>
 							<li
 								className="navMenuItemMessages"
+								data-cy="nav-menu-item-messages"
 								onClick={handleActiveClassRemovalClick}>
 								<Button isLink to="/" className="navLink">
 									Messages
@@ -83,7 +87,8 @@ function Header() {
 											<span
 												className={
 													buttonStyles.totalMessages
-												}>
+												}
+												data-cy="total-messages">
 												{totalMessages}
 											</span>
 										</span>
@@ -92,6 +97,7 @@ function Header() {
 							</li>
 							<li
 								className="navMenuItemAllTravellers"
+								data-cy="nav-menu-item-all-travellers"
 								onClick={handleActiveClassRemovalClick}>
 								<Button isLink to="/" className="navLink">
 									All Travellers
@@ -99,13 +105,31 @@ function Header() {
 							</li>
 						</ul>
 					</li>
+					{/* <li
+						className={classNames(
+							headerStyles.navMenuItem,
+							'nav-menu-item-login',
+						)}
+						data-cy="nav-menu-item-login"
+						onClick={handleActiveClassRemovalClick}>
+						<Button
+							isLink
+							to="/"
+							className="navLink"
+							data-cy="nav-login-link">
+							Login
+						</Button>
+					</li> */}
 					<li
 						className={classNames(
 							headerStyles.navMenuItem,
 							'nav-menu-item-logout',
 						)}
 						onClick={handleLogoutClick}>
-						<Button to="/" className="navLink">
+						<Button
+							to="/"
+							className="navLink"
+							data-cy="nav-menu-item-logout">
 							Logout {travellerName}
 						</Button>
 					</li>

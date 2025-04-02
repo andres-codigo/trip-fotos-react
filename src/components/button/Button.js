@@ -12,7 +12,7 @@ function Button({
 	modeType,
 	to = '/',
 	className,
-	...rest
+	...props
 }) {
 	const elementRef = useRef();
 
@@ -28,19 +28,19 @@ function Button({
 		<>
 			{!isLink ? (
 				<button
-					{...rest}
 					ref={elementRef}
 					className={combinedClassName}
-					disabled={isDisabled}>
+					disabled={isDisabled}
+					{...props}>
 					{children}
 				</button>
 			) : (
 				<a
-					{...rest}
 					href={to}
 					ref={elementRef}
 					className={combinedClassName}
-					aria-disabled={isDisabled}>
+					aria-disabled={isDisabled}
+					{...props}>
 					{children}
 				</a>
 			)}
