@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 
-const useMobileMenu = (hamburgerRef, navMenuRef, setIsMenuOpen) => {
+const useMobileMenu = (hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn) => {
 	useEffect(() => {
+		if (!isLoggedIn) return;
+
 		const hamburger = hamburgerRef.current;
 
 		const mobileMenu = (event) => {
@@ -20,7 +22,7 @@ const useMobileMenu = (hamburgerRef, navMenuRef, setIsMenuOpen) => {
 		return () => {
 			hamburger.removeEventListener('click', mobileMenu);
 		};
-	}, [hamburgerRef, navMenuRef, setIsMenuOpen]);
+	}, [hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn]);
 };
 
 export default useMobileMenu;

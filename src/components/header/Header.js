@@ -1,5 +1,9 @@
 import { useState, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+// import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
+
+import { logout } from '../../store/slices/authSlice';
 
 import Button from '../button/Button';
 import buttonStyles from '../button/Button.module.scss';
@@ -11,6 +15,14 @@ import useMobileMenu from './hooks/useMobileMenu';
 import useLoggedInTravellerName from './hooks/useLoggedInTravellerName';
 
 function Header() {
+	const dispatch = useDispatch();
+	// const navigate = useNavigate();
+
+	const isLoggedIn = useSelector((state) => state.auth.token !== null);
+	// const usersName = useSelector((state) => state.travellers.travellerName);
+	// const isTraveller = useSelector((state) => state.travellers.isTraveller);
+	// const messagesCount = useSelector((state) => state.messages.messagesCount);
+
 	const [travellerName, setTravellerName] = useLoggedInTravellerName();
 	const [totalMessages, setTotalMessages] = useState(null);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,8 +44,38 @@ function Header() {
 		}
 	};
 
+	//// START
+
+	/// TODO: ENSURE THIS IS WORKING CORRECTLY ONCE TRAVELLERS AND MESSAGES STORE IS ADDED
+	/// UPDATE IMPORT LINE 1: import { useEffect, useState, useRef } from 'react';
+
+	// useEffect(() => {
+	// 	setTravellerName(usersName);
+	// }, [usersName, setTravellerName]);
+
+	// useEffect(() => {
+	// 	setTotalMessages(messagesCount);
+	// }, [messagesCount]);
+
+	// useEffect(() => {
+	// 	if (isLoggedIn) {
+	// 		setTravellerName();
+	// 		if (totalMessages === null) {
+	// 			setMessageCount();
+	// 		}
+	// 	}
+	// }, [isLoggedIn, totalMessages, setTravellerName]);
+
+	// const setMessageCount = () => {
+	// 	dispatch({ type: 'messages/loadMessages' }).then(() => {
+	// 		setTotalMessages(messagesCount);
+	// 	});
+	// };
+
+	//// END
+
 	useClickOutside(navMenuRef, closeHamburgerMenu);
-	useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen);
+	useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn);
 
 	const handleActiveClassRemovalClick = (event) => {
 		event.preventDefault();
@@ -43,16 +85,16 @@ function Header() {
 		}
 	};
 
-	const handleLogoutClick = async (event) => {
+	const handleLogoutClick = (event) => {
 		event.preventDefault();
 
 		setTravellerName('');
 		setTotalMessages(null);
 		handleActiveClassRemovalClick(event);
 
-		// await this.$store.dispatch('logout').then(() => {
-		// 	this.$router.go('/')
-		// })
+		dispatch(logout());
+
+		// navigate('/');
 	};
 
 	return (
@@ -71,78 +113,73 @@ function Header() {
 					})}
 					data-cy="nav-menu-items-container"
 					ref={navMenuRef}>
-					<li className={headerStyles.navMenuItem}>
-						<ul>
-							<li
-								className="navMenuItemMessages"
-								data-cy="nav-menu-item-messages"
-								onClick={handleActiveClassRemovalClick}>
-								<Button isLink to="/" className="navLink">
-									Messages
-									{!!totalMessages && totalMessages > 0 && (
-										<span
-											className={
-												buttonStyles.totalMessagesContainer
-											}>
-											<span
-												className={
-													buttonStyles.totalMessages
-												}
-												data-cy="total-messages">
-												{totalMessages}
-											</span>
-										</span>
-									)}
-								</Button>
-							</li>
-							<li
-								className="navMenuItemAllTravellers"
-								data-cy="nav-menu-item-all-travellers"
-								onClick={handleActiveClassRemovalClick}>
-								<Button isLink to="/" className="navLink">
-									All Travellers
-								</Button>
-							</li>
-						</ul>
-					</li>
-					{/* <li
-						className={classNames(
-							headerStyles.navMenuItem,
-							'nav-menu-item-login',
-						)}
-						data-cy="nav-menu-item-login"
-						onClick={handleActiveClassRemovalClick}>
-						<Button
-							isLink
-							to="/"
-							className="navLink"
-							data-cy="nav-login-link">
-							Login
-						</Button>
-					</li> */}
-					<li
-						className={classNames(
-							headerStyles.navMenuItem,
-							'nav-menu-item-logout',
-						)}
-						onClick={handleLogoutClick}>
-						<Button
-							to="/"
-							className="navLink"
-							data-cy="nav-menu-item-logout">
-							Logout {travellerName}
-						</Button>
-					</li>
+					{isLoggedIn && (
+						<li className={headerStyles.navMenuItem}>
+							<ul>
+								{/* {isTraveller && ( */}
+								<li
+									className="navMenuItemMessages"
+									data-cy="nav-menu-item-messages"
+									onClick={handleActiveClassRemovalClick}>
+									<Button isLink to="/" className="navLink">
+										Messages
+										{!!totalMessages &&
+											totalMessages > 0 && (
+												<span
+													className={
+														buttonStyles.totalMessagesContainer
+													}>
+													<span
+														className={
+															buttonStyles.totalMessages
+														}
+														data-cy="total-messages">
+														{totalMessages}
+													</span>
+												</span>
+											)}
+									</Button>
+								</li>
+								{/* )} */}
+								<li
+									className="navMenuItemAllTravellers"
+									data-cy="nav-menu-item-all-travellers"
+									onClick={handleActiveClassRemovalClick}>
+									<Button isLink to="/" className="navLink">
+										All Travellers
+									</Button>
+								</li>
+							</ul>
+						</li>
+					)}
+					{/* /// TODO: When routing is enabled add !== to 'auth' url to isLoggedIn condition */}
+					{isLoggedIn && (
+						<li
+							className={classNames(
+								headerStyles.navMenuItem,
+								'nav-menu-item-logout',
+							)}
+							onClick={handleLogoutClick}>
+							<Button
+								to="/"
+								className="navLink"
+								data-cy="nav-menu-item-logout">
+								Logout {travellerName}
+							</Button>
+						</li>
+					)}
 				</ul>
-				<div
-					className={classNames(headerStyles.hamburger, {
-						[headerStyles.active]: isMenuOpen,
-					})}
-					ref={hamburgerRef}>
-					<span className={headerStyles.bar}></span>
-					<span className={headerStyles.bar}></span>
-					<span className={headerStyles.bar}></span>
-				</div>
+				{isLoggedIn && (
+					<div
+						className={classNames(headerStyles.hamburger, {
+							[headerStyles.active]: isMenuOpen,
+						})}
+						ref={hamburgerRef}>
+						<span className={headerStyles.bar}></span>
+						<span className={headerStyles.bar}></span>
+						<span className={headerStyles.bar}></span>
+					</div>
+				)}
 			</nav>
 		</header>
 	);
