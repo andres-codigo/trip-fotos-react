@@ -12,24 +12,24 @@
 - [Deployment](#deployment)
 - [Features](#features)
 
-## About this project
+## About This Project
 
-This project is a UI and functional conversion from Vue to React and extends the original Udemy Vue - The Complete Guide (incl. Router & Composition API) course > 'Find a coach' project.
-
-If has been converted from "finding a coach" to "finding popular travel destinations" tied to a registered traveller.
+This project is a UI and functional conversion from Vue to React and extends the original Udemy Vue - The Complete Guide (incl. Router & Composition API) course > 'Find a coach' project. It has been reimagined as "finding popular travel destinations" tied to a registered traveller.
 
 ## Stack
 
+This project uses the following technologies:
+
 - [Vite](https://vite.dev/) for development and build.
-- [React](https://react.dev/) as Front-End Library.
-- []() for React routing.
-- [Redux](https://redux.js.org/) for State Management.
-- []() for CSS preprocessing
-- [ESLint](https://eslint.org/) for JavaScript linting
-- [Prettier](https://prettier.io/) for code formatting
-- []() for frontend test automation
-- [Firebase Realtime Database](https://firebase.google.com/docs/database) for storing Travellers and Messages.
-- [Firebase Authentication](https://firebase.google.com/docs/auth) for storing Sign-in credentials.
+- [React](https://react.dev/) as the front-end library.
+- [React Router](https://reactrouter.com/) for routing.
+- [Redux](https://redux.js.org/) for state management.
+- [SCSS](https://sass-lang.com/) for CSS preprocessing.
+- [ESLint](https://eslint.org/) for JavaScript linting.
+- [Prettier](https://prettier.io/) for code formatting.
+- [Cypress](https://www.cypress.io/) for end-to-end testing.
+- [Firebase Realtime Database](https://firebase.google.com/docs/database) for storing travellers and messages.
+- [Firebase Authentication](https://firebase.google.com/docs/auth) for managing sign-in credentials.
 - [Firebase Cloud Storage](https://firebase.google.com/docs/storage) for storing uploaded traveller images.
 
 ## Installation
@@ -38,7 +38,10 @@ To get started with the project, follow these steps:
 
 ### Prerequisites
 
-Make sure you have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/) installed.
+Ensure you have the following installed:
+
+- [Node.js](https://nodejs.org/)
+- [npm](https://www.npmjs.com/)
 
 ### Clone the repository
 
@@ -49,91 +52,94 @@ cd trip-fotos-react
 
 ### Install dependencies
 
-After cloning the repository, install the dependencies by running:
+Run the following command to install all required dependencies:
 
 ```bash
 npm install
 ```
 
-This will install all the required package dependencies defined in the package.json file.
-
 ## Setup
 
-### Firebase
+### Firebase Configuration
 
-#### A pre-requisite of having a Google Account is required, and a [Blaze Plan](https://firebase.google.com/pricing?hl=en) necessary for Database and the Storing of images.
+#### Prerequisites
 
-Sign-in to your [Firebase](https://firebase.google.com) account and go to your [Firebase console](https://console.firebase.google.com) to create a [your-project-name] Firebase project.
+- A [Google Account](https://accounts.google.com/) is required.
+- A [Blaze Plan](https://firebase.google.com/pricing?hl=en) is necessary for database and storage capabilities.
 
-Once the project is set-up the following build products are required in order to run the App. These products are located inside the project, on the left hand side, under the "Product Categories > Build" dropdown menu:
+#### Steps
 
-1.  <u>**Realtime Database:**</u>
+1. **Create a Firebase Project**
+   Sign in to your [Firebase Console](https://console.firebase.google.com) and create a new project.
 
-- **United States (us-central1, us-east1, or us-west1)** Realtime Database location is required for "No-cost up 'X' GB-months" tier prior to [Cloud Store pricing](https://cloud.google.com/storage/pricing?authuser=0#regions) kicking in, as the [Blaze Pricing Plan](https://firebase.google.com/pricing?hl=en) is now required for use of the Firebase products.
-- The Realtime Database url is required for the **.env > VITE_BACKEND_BASE_URL** key/value (see [Needed Files](#needed-files) below)
+2. **Enable Required Firebase Products**
+   Navigate to the "Build" dropdown menu in your Firebase project and enable the following:
 
-    Once set-up select the Rules tab and update as follows:
+    - **Realtime Database**
 
-    ```json
-    {
-    	"rules": {
-    		"travellers": {
-    			".read": true,
-    			".write": "auth != null"
-    		},
-    		"messages": {
-    			".read": "auth != null",
-    			".write": true
-    		}
-    	}
-    }
-    ```
+        - Set the location to **United States (us-central1, us-east1, or us-west1)**.
+        - Copy the database URL and add it to your `.env` file under `VITE_BACKEND_BASE_URL`.
+        - Update the database rules as follows:
+            ```json
+            {
+            	"rules": {
+            		"travellers": {
+            			".read": true,
+            			".write": "auth != null"
+            		},
+            		"messages": {
+            			".read": "auth != null",
+            			".write": true
+            		}
+            	}
+            }
+            ```
 
-2.  <u>**Authentication:**</u>
+    - **Authentication**
 
-- Sign-in Method > Native providers > Email/Password (enabled), and Email link (passwordless sign-in) NOT enabled
+        - Go to "Sign-in Method" and enable **Email/Password**. Ensure **Email link (passwordless sign-in)** is NOT enabled.
 
-3.  <u>**Storage:**</u>
+    - **Cloud Storage**
+        - Set up a [Blaze Plan](https://firebase.google.com/pricing?hl=en) to enable storage capabilities.
 
-- Set-up a [Blaze Plan](https://firebase.google.com/pricing?hl=en) account to enable storage capabilities
+3. **Add Firebase to Your Web App**
+    - Register your app in the Firebase Console.
+    - Copy the Firebase configuration values and add them to your `.env` file.
 
-4. <u>**Add Firebase to your web app**</u>
+### Environment Variables
 
-- Register the app
-- Select Firebase SDK using npm **(npm firebase install is not required as already added to package.json)**
-
-### Needed Files
-
-#### `.env`
-
-Locate your config details located under the **\*Project > Project settings > General** tab, create a `.env` file and add the applicable project values against the following key/value pairs:
+Create a `.env` file in the root directory and add the following key-value pairs:
 
 ```bash
 
-# FIREBASE AUTH REST API
+# Firebase Auth REST API
 VITE_API_URL='https://identitytoolkit.googleapis.com/v1/accounts:'
-VITE_API_KEY='' # firebaseConfig > apiKey (delete comment after value added)
+VITE_API_KEY='' # firebaseConfig > apiKey
 
-VITE_BACKEND_BASE_URL='' # firebaseConfig > databaseURL (delete comment after value added)
+# Firebase Realtime Database
+VITE_BACKEND_BASE_URL='' # firebaseConfig > databaseURL
 
-# FIREBASE APP CONFIGURATION FOR SDK USAGE
-VITE_FIREBASE_API_KEY="" # firebaseConfig > apiKey (delete comment after value added)
-VITE_FIREBASE_AUTH_DOMAIN="" # firebaseConfig > authDomain (delete comment after value added)
+# Firebase App Configuration
+VITE_FIREBASE_API_KEY='' # firebaseConfig > apiKey
+VITE_FIREBASE_AUTH_DOMAIN='' # firebaseConfig > authDomain
 VITE_DATABASE_URL=$VITE_BACKEND_BASE_URL
-VITE_FIREBASE_PROJECT_ID="" # firebaseConfig > projectId (delete comment after value added)
-VITE_FIREBASE_STORAGE_BUCKET="" # firebaseConfig > storageBucket (delete comment after value added)
-VITE_FIREBASE_MESSAGING_SENDER_ID="" # firebaseConfig > messagingSenderId (delete comment after value added)
-VITE_FIREBASE_APP_ID="" # firebaseConfig > appId (delete comment after value added)
-VITE_FIREBASE_MEASUREMENT_ID="" # firebaseConfig > measurementId (delete comment after value added)
+VITE_FIREBASE_PROJECT_ID='' # firebaseConfig > projectId
+VITE_FIREBASE_STORAGE_BUCKET='' # firebaseConfig > storageBucket
+VITE_FIREBASE_MESSAGING_SENDER_ID='' # firebaseConfig > messagingSenderId
+VITE_FIREBASE_APP_ID='' # firebaseConfig > appId
+VITE_FIREBASE_MEASUREMENT_ID='' # firebaseConfig > measurementId
+
+# Admin User ID
 
 # UNIQUE ID FOR 'EMAIL/PASSWORD' REGISTERED FIREBASE AUTHENTICATED USER THAT WILL HAVE ADMIN RIGHTS ON APP, ALLOWING FOR THE DELETION OF TRAVELLERS FROM THE UI FRONT END, EXCLUDING REGISTERED ADMIN USER *
+
 VITE_ADMIN_ID=''
 
 ```
 
-[Features](#features) section below outlines steps on how to obtain the VITE_ADMIN_ID.
+### Firebase Project Configuration File
 
-#### `.firebaserc`
+Create a `.firebaserc` file in the root directory with the following content:
 
 ```json
 {
@@ -143,60 +149,151 @@ VITE_ADMIN_ID=''
 }
 ```
 
+---
+
 ## Development
 
-### Local Setup
+### Start the Development Server
 
-### Compiles and hot-reloads from a local web server with Hot Module Replacement for development
+Run the following command to start the local development server with hot module replacement:
 
-```
+```bash
 npm run dev
 ```
 
-### ESLints and fixes files for the project
+### Linting and Formatting
+
+- Run ESLint to check for issues:
+    ```bash
+    npm run lint:js
+    ```
+- Automatically fix linting issues:
+    ```bash
+    npm run lint:fix
+    ```
+- Format files using Prettier:
+    ```bash
+    npm run format
+    ```
+
+---
+
+## Testing
+
+This project uses [Cypress](https://www.cypress.io/) for end-to-end testing.
+
+### Install Cypress
+
+```bash
+npm install cypress --save-dev
+```
+
+### Run Cypress Tests
+
+- Open the Cypress Test Runner:
+    ```bash
+    npx cypress open
+    ```
+- Run all tests in headless mode:
+    ```bash
+    npx cypress run
+    ```
+
+### Test Directory Structure
 
 ```
-npm run lint:js
+cypress/
+  ├── e2e/         # End-to-end test files (e.g., homepage.cy.js)
+  ├── fixtures/    # Mock data used in tests
+  ├── support/     # Custom commands and test setup
 ```
 
-or to fix issues automatically
-
-```
-npm run lint:fix
-```
-
-### Prettier and reformat files on the project based on '.prettierrc.json' configuration file
-
-```
-npm run format
-```
+---
 
 ## Build
 
-### Compiles and minifies the project, outputted to the './dist' folder ready for production
+### Build for Production
 
-```
+Compile and minify the project for production:
+
+```bash
 npm run build
 ```
 
-### Preview production build from a local web server that serves the './dist' build solution
+The output will be located in the `./dist` folder.
 
-```
+### Preview Production Build
+
+Serve the production build locally:
+
+```bash
 npm run serve
 ```
 
+---
+
 ## Deployment
 
-Follow the [Vercel getting started instructions](https://vercel.com/docs/getting-started-with-vercel) and [Deploying Git Repositories with Vercel](https://vercel.com/docs/deployments/git) to set-up deployment via GitHub.
+This project is configured for deployment on [Vercel](https://vercel.com/).
 
-Project deployment workflow can be viewed and configured via GitHub > Integrations > Applications > Vercel.
+### Steps
+
+1. Follow the [Vercel Getting Started Guide](https://vercel.com/docs/getting-started-with-vercel).
+2. Deploy the project by linking your GitHub repository to Vercel.
+3. Configure environment variables in the Vercel dashboard.
 
 ## Features
+
+- **User Registration and Authentication**
+  Users can sign up and log in using Firebase Authentication.
+
+- **Admin Access**
+  Assign admin rights to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`.
+
+- **Traveller Profiles**
+  Registered travellers can upload photos and leave personal messages on other traveller profiles.
 
 NB: The trip-fotos-vue App requires registered login credentials for full access. By default, a user is only able to login.
 
 To enable a user to 'Sign-up' and then register as a traveller uncomment the 'switch mode' button (src/pages/auth/UserAuth.vue), lines 38-43. Once a users have been signed-up, validate the entries in Firebase > Authentication > Users, and copy and paste the **User UID** of your choice into the .env **VITE_ADMIN_ID** property for user Admin access, allowing this user to delete registered travellers using the Front End UI. Deleting the traveller will delete all traveller information, including images, but their authenticated sign-up details will remain.
 
-- When registering travellers can optionally upload photos against their profile for others to view.
+## Folder Structure
 
-- Registered travellers can leave personal 'messages', as opposed to 'requests', on other traveller profiles
+```
+trip-fotos-react/
+├── cypress/            # Cypress tests
+├── public/             # Static assets
+├── src/
+│   ├── assets/         # Fonts, svg's
+│   ├── components/     # Reusable React components
+│   ├── constants/      # firebase, api
+│   ├── pages/          # Page components for routing
+│   ├── store/          # Redux store and slices
+│   ├── styles/         # SCSS stylesheets
+│   ├── utils/          # Utility functions
+│   └── App.js          # Main application component
+├── .firebaserc                 # Firebase project configuration
+├── .gitignore                  # Git ignore rules
+├── .prettierignore             # Prettier ignore rules
+├── .prettierrc.json            # Prettier configuration
+├── cypress.config.js           # Cypress testing configuration
+├── eslint.config.mjs           # ESLint configuration
+├── vercel.json                 # Vercel deployment configuration
+├── vite.config.js              # Vite build tool configuration
+├── package.json                # Project dependencies and scripts
+├── README.md                   # Project documentation
+└── .env                        # Environment variables (not committed to version control)
+```
+
+### Explanation of Additional Files:
+
+1. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
+2. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).
+3. **`.prettierignore`**: Specifies files and directories to be ignored by Prettier for formatting.
+4. **`.prettierrc.json`**: Configuration file for Prettier to enforce consistent code formatting.
+5. **`cypress.config.js`**: Configuration file for Cypress end-to-end testing.
+6. **`eslint.config.mjs`**: ESLint configuration file for linting JavaScript/TypeScript code.
+7. **`vercel.json`**: Configuration file for deploying the project to Vercel.
+8. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
+
+---
