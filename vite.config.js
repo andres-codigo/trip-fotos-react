@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, transformWithEsbuild } from 'vite';
 import react from '@vitejs/plugin-react';
 import eslint from 'vite-plugin-eslint2';
@@ -30,6 +31,15 @@ export default defineConfig({
 			exclude: ['node_modules', 'dist'],
 		}),
 	],
+	resolve: {
+		alias: [
+			{
+				find: '@',
+				replacement: fileURLToPath(new URL('./src', import.meta.url)),
+			},
+		],
+		extensions: ['.js', '.json', '.mjs', '.vue', 'svg', 'scss'],
+	},
 	optimizeDeps: {
 		force: true,
 		esbuildOptions: {

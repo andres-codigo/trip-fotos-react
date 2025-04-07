@@ -1,5 +1,8 @@
+import './App.module.scss';
+import Header from './components/header/Header';
+
 function App() {
-	return <div>App</div>;
+	return <Header />;
 }
 
 export default App;

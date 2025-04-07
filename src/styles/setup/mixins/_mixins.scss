@@ -2,6 +2,17 @@
 $default-opacity: 0.3;
 $prefixes: '-moz-', '-webkit-', '-o-', '-ms-', '';
 
+@mixin flex-center {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+@mixin transition($property, $duration, $ease) {
+	transition: $property $duration $ease;
+	-webkit-transition: $property $duration $ease;
+}
+
 // Mixin for user-select
 @mixin user-select($value) {
 	-webkit-touch-callout: $value; /* iOS Safari */
