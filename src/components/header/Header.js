@@ -1,21 +1,18 @@
-import { useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 
-import { logout } from '../../store/slices/authSlice';
-
 import Button from '../button/Button';
-import buttonStyles from '../button/Button.module.scss';
-
+import MessagesButton from './MessagesButton';
 import headerStyles from './Header.module.scss';
 
-import useClickOutside from './hooks/useClickOutside';
+import { useCloseHamburgerMenu } from './hooks/useCloseHamburgerMenu';
+import { useHeaderState } from './hooks/useHeaderState';
+import { useLogout } from './hooks/useLogout';
 import useMobileMenu from './hooks/useMobileMenu';
-import useLoggedInTravellerName from './hooks/useLoggedInTravellerName';
 
 function Header() {
-	const dispatch = useDispatch();
 	// const navigate = useNavigate();
 
 	const isLoggedIn = useSelector((state) => state.auth.token !== null);
@@ -23,26 +20,20 @@ function Header() {
 	// const isTraveller = useSelector((state) => state.travellers.isTraveller);
 	// const messagesCount = useSelector((state) => state.messages.messagesCount);
 
-	const [travellerName, setTravellerName] = useLoggedInTravellerName();
-	const [totalMessages, setTotalMessages] = useState(null);
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const {
+		travellerName,
+		setTravellerName,
+		totalMessages,
+		setTotalMessages,
+		isMenuOpen,
+		setIsMenuOpen,
+	} = useHeaderState();
 
 	const hamburgerRef = useRef(null);
 	const navMenuRef = useRef(null);
 
-	const closeHamburgerMenu = (event) => {
-		if (document.documentElement.clientWidth <= 768) {
-			const hamburger = hamburgerRef.current;
-			const navMenu = navMenuRef.current;
-			if (
-				isMenuOpen &&
-				!hamburger.contains(event.target) &&
-				!navMenu.contains(event.target)
-			) {
-				setIsMenuOpen(false);
-			}
-		}
-	};
+	useCloseHamburgerMenu(isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen);
+	useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn);
 
 	//// START
 
@@ -74,28 +65,11 @@ function Header() {
 
 	//// END
 
-	useClickOutside(navMenuRef, closeHamburgerMenu);
-	useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn);
-
-	const handleActiveClassRemovalClick = (event) => {
-		event.preventDefault();
-
-		if (document.documentElement.clientWidth <= 768) {
-			setIsMenuOpen(false);
-		}
-	};
-
-	const handleLogoutClick = (event) => {
-		event.preventDefault();
-
-		setTravellerName('');
-		setTotalMessages(null);
-		handleActiveClassRemovalClick(event);
-
-		dispatch(logout());
-
-		// navigate('/');
-	};
+	const handleLogoutClick = useLogout(
+		setTravellerName,
+		setTotalMessages,
+		setIsMenuOpen,
+	);
 
 	return (
 		<header className={headerStyles.header} data-cy="nav-header-container">
@@ -117,34 +91,11 @@ function Header() {
 						<li className={headerStyles.navMenuItem}>
 							<ul>
 								{/* {isTraveller && ( */}
-								<li
-									className="navMenuItemMessages"
-									data-cy="nav-menu-item-messages"
-									onClick={handleActiveClassRemovalClick}>
-									<Button isLink to="/" className="navLink">
-										Messages
-										{!!totalMessages &&
-											totalMessages > 0 && (
-												<span
-													className={
-														buttonStyles.totalMessagesContainer
-													}>
-													<span
-														className={
-															buttonStyles.totalMessages
-														}
-														data-cy="total-messages">
-														{totalMessages}
-													</span>
-												</span>
-											)}
-									</Button>
-								</li>
+								<MessagesButton totalMessages={totalMessages} />
 								{/* )} */}
 								<li
 									className="navMenuItemAllTravellers"
-									data-cy="nav-menu-item-all-travellers"
-									onClick={handleActiveClassRemovalClick}>
+									data-cy="nav-menu-item-all-travellers">
 									<Button isLink to="/" className="navLink">
 										All Travellers
 									</Button>
