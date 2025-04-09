@@ -41,16 +41,12 @@ function Header() {
 	/// UPDATE IMPORT LINE 1: import { useEffect, useState, useRef } from 'react';
 
 	// useEffect(() => {
-	// 	setTravellerName(usersName);
-	// }, [usersName, setTravellerName]);
-
-	// useEffect(() => {
 	// 	setTotalMessages(messagesCount);
 	// }, [messagesCount]);
 
 	// useEffect(() => {
 	// 	if (isLoggedIn) {
-	// 		setTravellerName();
+	// 		setTravellerName(usersName);
 	// 		if (totalMessages === null) {
 	// 			setMessageCount();
 	// 		}
