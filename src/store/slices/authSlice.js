@@ -16,8 +16,8 @@ export const login = createAsyncThunk(
 			const response = await fetch(url, {
 				method: APIConstants.POST,
 				body: JSON.stringify({
-					email: '',
-					password: '',
+					email: payload.email,
+					password: payload.password,
 					returnSecureToken: true,
 				}),
 			});
