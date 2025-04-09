@@ -1,11 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+import { AuthenticationActionTypes } from '../../constants/action-types';
 import { APIConstants } from '../../constants/api';
 
 let timer;
 
+export const selectAuthenticationToken = (state) => state.authentication.token;
+
 export const login = createAsyncThunk(
-	'auth/login',
+	AuthenticationActionTypes.LOGIN,
 	async (payload, { dispatch, rejectWithValue }) => {
 		const url =
 			payload.mode === APIConstants.API_AUTH_SIGNUP_MODE
@@ -56,7 +59,7 @@ export const login = createAsyncThunk(
 );
 
 export const tryLogin = createAsyncThunk(
-	'auth/tryLogin',
+	AuthenticationActionTypes.TRY_LOGIN,
 	async (_, { dispatch }) => {
 		const token = localStorage.getItem('token');
 		const userId = localStorage.getItem('userId');
@@ -84,7 +87,7 @@ export const tryLogin = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk(
-	'auth/logout',
+	AuthenticationActionTypes.LOGOUT,
 	async (_, { dispatch }) => {
 		localStorage.removeItem('token');
 		localStorage.removeItem('userId');
@@ -99,7 +102,7 @@ export const logout = createAsyncThunk(
 );
 
 export const autoLogout = createAsyncThunk(
-	'auth/autoLogout',
+	AuthenticationActionTypes.AUTO_LOGOUT,
 	async (_, { dispatch }) => {
 		dispatch(logout());
 		dispatch(authSlice.actions.setAutoLogout());
@@ -107,7 +110,7 @@ export const autoLogout = createAsyncThunk(
 );
 
 const authSlice = createSlice({
-	name: 'auth',
+	name: 'authentication',
 	initialState: {
 		token: null,
 		userId: null,

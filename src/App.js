@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 // import { useSelector, useDispatch } from 'react-redux';
 // import { useNavigate } from 'react-router-dom';
-import { tryLogin } from './store/slices/authSlice';
+import { tryLogin } from './store/slices/authenticationSlice';
 
 import './App.module.scss';
 import Header from './components/header/Header';
@@ -12,7 +12,7 @@ function App() {
 	// const navigate = useNavigate();
 
 	// Access the `didAutoLogout` state from the Redux store
-	// const didAutoLogout = useSelector((state) => state.auth.didAutoLogout);
+	// const didAutoLogout = useSelector((state) => state.authentication.didAutoLogout);
 
 	// Dispatch `tryLogin` on component mount
 	useEffect(() => {
@@ -22,7 +22,7 @@ function App() {
 	// Watch for changes in `didAutoLogout` and redirect to the login page
 	// useEffect(() => {
 	// 	if (didAutoLogout) {
-	// 		navigate('/auth'); // Redirect to the login page
+	// 		navigate('/authentication'); // Redirect to the login page
 	// 	}
 	// }, [didAutoLogout, navigate]);
 

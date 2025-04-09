@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 // import { useNavigate } from 'react-router-dom';
-import { logout } from '../../../store/slices/authSlice';
+import { logout } from '../../../store/slices/authenticationSlice';
 
 export function useLogout(setTravellerName, setTotalMessages, setIsMenuOpen) {
 	const dispatch = useDispatch();

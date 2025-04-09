@@ -15,7 +15,9 @@ import useMobileMenu from './hooks/useMobileMenu';
 function Header() {
 	// const navigate = useNavigate();
 
-	const isLoggedIn = useSelector((state) => state.auth.token !== null);
+	const isLoggedIn = useSelector(
+		(state) => state.authentication.token !== null,
+	);
 	// const usersName = useSelector((state) => state.travellers.travellerName);
 	// const isTraveller = useSelector((state) => state.travellers.isTraveller);
 	// const messagesCount = useSelector((state) => state.messages.messagesCount);
@@ -99,7 +101,7 @@ function Header() {
 							</ul>
 						</li>
 					)}
-					{/* /// TODO: When routing is enabled add !== to 'auth' url to isLoggedIn condition */}
+					{/* /// TODO: When routing is enabled add !== to 'authentication' url to isLoggedIn condition */}
 					{isLoggedIn && (
 						<li
 							className={classNames(
