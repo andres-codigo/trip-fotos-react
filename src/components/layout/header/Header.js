@@ -3,7 +3,7 @@ import { useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 
-import Button from '../button/Button';
+import Button from '../../button/Button';
 import MessagesButton from './MessagesButton';
 import headerStyles from './Header.module.scss';
 

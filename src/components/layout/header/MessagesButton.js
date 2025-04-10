@@ -1,5 +1,5 @@
-import Button from '../button/Button';
-import buttonStyles from '../button/Button.module.scss';
+import Button from '../../button/Button';
+import buttonStyles from '../../button/Button.module.scss';
 import PropTypes from 'prop-types';
 
 function MessagesButton({ totalMessages }) {
