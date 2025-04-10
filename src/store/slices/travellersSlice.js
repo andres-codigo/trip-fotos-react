@@ -11,9 +11,10 @@ import { APIConstants } from '../../constants/api';
 export const travellerName = createAsyncThunk(
 	TravellersActionTypes.TRAVELLER_NAME,
 	async (data, { getState, rejectWithValue, dispatch }) => {
+		const fullName = `${data.first} ${data.last}`;
+
 		try {
 			const token = selectAuthenticationToken(getState());
-			const fullName = `${data.first} ${data.last}`;
 
 			const response = await fetch(
 				`${APIConstants.API_URL}update?key=${APIConstants.API_KEY}`,
@@ -44,7 +45,7 @@ export const travellerName = createAsyncThunk(
 			return rejectWithValue(
 				handleApiError(
 					error,
-					`${APIErrorMessageConstants.UPDATE_TRAVELLER_NAME_CATCH} ${data.first} ${data.last}.`,
+					`${APIErrorMessageConstants.UPDATE_TRAVELLER_NAME_CATCH}${fullName}`,
 				),
 			);
 		}
