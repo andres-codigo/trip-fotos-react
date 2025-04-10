@@ -20,5 +20,6 @@ dist
 # LINTING
 .eslintcache
 
-# VITE
+# VITE & VITEST
 .vite
+coverage
