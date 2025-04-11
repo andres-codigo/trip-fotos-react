@@ -1,7 +1,7 @@
 @use '../../../styles/setup/variables' as variables;
 @use '../../../styles/setup/mixins/mixins' as mixins;
 
-header {
+.headerContainer {
 	align-items: center;
 	background-color: variables.$color-pigment-indigo;
 	display: flex;
@@ -64,7 +64,7 @@ header {
 }
 
 @media only screen and (max-width: 768px) {
-	header {
+	.headerContainer {
 		.navbar {
 			.navMenuItemsContainer {
 				position: absolute;

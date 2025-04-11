@@ -1,5 +1,5 @@
-import Button from '../../button/Button';
-import buttonStyles from '../../button/Button.module.scss';
+import Button from '../../../components/ui/button/BaseButton.js';
+import BaseButtonStyles from '../../../components/ui/button/BaseButton.module.scss';
 import PropTypes from 'prop-types';
 
 function MessagesButton({ totalMessages }) {
@@ -8,9 +8,9 @@ function MessagesButton({ totalMessages }) {
 			<Button isLink to="/" className="navLink">
 				Messages
 				{!!totalMessages && totalMessages > 0 && (
-					<span className={buttonStyles.totalMessagesContainer}>
+					<span className={BaseButtonStyles.totalMessagesContainer}>
 						<span
-							className={buttonStyles.totalMessages}
+							className={BaseButtonStyles.totalMessages}
 							data-cy="total-messages">
 							{totalMessages}
 						</span>

@@ -3,8 +3,9 @@ import { useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 
-import Button from '../../button/Button';
+import BaseButton from '../../ui/button/BaseButton';
 import MessagesButton from './MessagesButton';
+
 import headerStyles from './Header.module.scss';
 
 import { useCloseHamburgerMenu } from './hooks/useCloseHamburgerMenu';
@@ -70,14 +71,16 @@ function Header() {
 	);
 
 	return (
-		<header className={headerStyles.header} data-cy="nav-header-container">
+		<header
+			className={headerStyles.headerContainer}
+			data-cy="nav-header-container">
 			<nav className={headerStyles.navbar}>
 				<h1
 					className="navHeaderTitleLink"
 					data-cy="nav-header-title-link">
-					<Button isLink to="/" className="navLink">
+					<BaseButton isLink to="/" className="navLink">
 						Trip Fotos
-					</Button>
+					</BaseButton>
 				</h1>
 				<ul
 					className={classNames(headerStyles.navMenuItemsContainer, {
@@ -94,9 +97,12 @@ function Header() {
 								<li
 									className="navMenuItemAllTravellers"
 									data-cy="nav-menu-item-all-travellers">
-									<Button isLink to="/" className="navLink">
+									<BaseButton
+										isLink
+										to="/"
+										className="navLink">
 										All Travellers
-									</Button>
+									</BaseButton>
 								</li>
 							</ul>
 						</li>
@@ -109,12 +115,12 @@ function Header() {
 								'nav-menu-item-logout',
 							)}
 							onClick={handleLogoutClick}>
-							<Button
+							<BaseButton
 								to="/"
 								className="navLink"
 								data-cy="nav-menu-item-logout">
 								Logout {travellerName}
-							</Button>
+							</BaseButton>
 						</li>
 					)}
 				</ul>

@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
-import styles from './Button.module.scss';
+import styles from './BaseButton.module.scss';
 
-function Button({
+function BaseButton({
 	children,
 	isLink = false,
 	isError = false,
@@ -48,7 +48,7 @@ function Button({
 	);
 }
 
-Button.propTypes = {
+BaseButton.propTypes = {
 	children: PropTypes.node.isRequired,
 	isLink: PropTypes.bool,
 	isError: PropTypes.bool,
@@ -58,4 +58,4 @@ Button.propTypes = {
 	className: PropTypes.string,
 };
 
-export default Button;
+export default BaseButton;
