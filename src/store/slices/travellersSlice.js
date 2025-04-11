@@ -4,12 +4,12 @@ import { selectAuthenticationToken } from './authenticationSlice';
 
 import { handleApiError } from '../../utils/errorHandler';
 
-import { TravellersActionTypes } from '../../constants/action-types';
-import { APIErrorMessageConstants } from '../../constants/api-messages';
-import { APIConstants } from '../../constants/api';
+import { TRAVELLERS_ACTION_TYPES } from '../../constants/action-types';
+import { API_ERROR_MESSAGE } from '../../constants/api-messages';
+import { API_DATABASE } from '../../constants/api';
 
 export const travellerName = createAsyncThunk(
-	TravellersActionTypes.TRAVELLER_NAME,
+	TRAVELLERS_ACTION_TYPES.TRAVELLER_NAME,
 	async (data, { getState, rejectWithValue, dispatch }) => {
 		const fullName = `${data.first} ${data.last}`;
 
@@ -17,9 +17,9 @@ export const travellerName = createAsyncThunk(
 			const token = selectAuthenticationToken(getState());
 
 			const response = await fetch(
-				`${APIConstants.API_URL}update?key=${APIConstants.API_KEY}`,
+				`${API_DATABASE.API_URL}update?key=${API_DATABASE.API_KEY}`,
 				{
-					method: APIConstants.POST,
+					method: API_DATABASE.POST,
 					headers: {
 						'Content-Type': 'application/json',
 					},
@@ -34,7 +34,7 @@ export const travellerName = createAsyncThunk(
 
 			if (!response.ok) {
 				return rejectWithValue(
-					`${APIErrorMessageConstants.UPDATE_TRAVELLER_NAME}${fullName}.`,
+					`${API_ERROR_MESSAGE.UPDATE_TRAVELLER_NAME}${fullName}.`,
 				);
 			}
 
@@ -45,7 +45,7 @@ export const travellerName = createAsyncThunk(
 			return rejectWithValue(
 				handleApiError(
 					error,
-					`${APIErrorMessageConstants.UPDATE_TRAVELLER_NAME_CATCH}${fullName}`,
+					`${API_ERROR_MESSAGE.UPDATE_TRAVELLER_NAME_CATCH}${fullName}`,
 				),
 			);
 		}

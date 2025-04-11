@@ -1,23 +1,23 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import { AuthenticationActionTypes } from '../../constants/action-types';
-import { APIConstants } from '../../constants/api';
+import { AUTHENTICATION_ACTION_TYPES } from '../../constants/action-types';
+import { API_DATABASE } from '../../constants/api';
 
 let timer;
 
 export const selectAuthenticationToken = (state) => state.authentication.token;
 
 export const login = createAsyncThunk(
-	AuthenticationActionTypes.LOGIN,
+	AUTHENTICATION_ACTION_TYPES.LOGIN,
 	async (payload, { dispatch, rejectWithValue }) => {
 		const url =
-			payload.mode === APIConstants.API_AUTH_SIGNUP_MODE
-				? `${APIConstants.API_URL}signUp?key=${APIConstants.API_KEY}`
-				: `${APIConstants.API_URL}signInWithPassword?key=${APIConstants.API_KEY}`;
+			payload.mode === API_DATABASE.API_AUTH_SIGNUP_MODE
+				? `${API_DATABASE.API_URL}signUp?key=${API_DATABASE.API_KEY}`
+				: `${API_DATABASE.API_URL}signInWithPassword?key=${API_DATABASE.API_KEY}`;
 
 		try {
 			const response = await fetch(url, {
-				method: APIConstants.POST,
+				method: API_DATABASE.POST,
 				body: JSON.stringify({
 					email: payload.email,
 					password: payload.password,
@@ -59,7 +59,7 @@ export const login = createAsyncThunk(
 );
 
 export const tryLogin = createAsyncThunk(
-	AuthenticationActionTypes.TRY_LOGIN,
+	AUTHENTICATION_ACTION_TYPES.TRY_LOGIN,
 	async (_, { dispatch }) => {
 		const token = localStorage.getItem('token');
 		const userId = localStorage.getItem('userId');
@@ -87,7 +87,7 @@ export const tryLogin = createAsyncThunk(
 );
 
 export const logout = createAsyncThunk(
-	AuthenticationActionTypes.LOGOUT,
+	AUTHENTICATION_ACTION_TYPES.LOGOUT,
 	async (_, { dispatch }) => {
 		localStorage.removeItem('token');
 		localStorage.removeItem('userId');
@@ -102,7 +102,7 @@ export const logout = createAsyncThunk(
 );
 
 export const autoLogout = createAsyncThunk(
-	AuthenticationActionTypes.AUTO_LOGOUT,
+	AUTHENTICATION_ACTION_TYPES.AUTO_LOGOUT,
 	async (_, { dispatch }) => {
 		dispatch(logout());
 		dispatch(authSlice.actions.setAutoLogout());

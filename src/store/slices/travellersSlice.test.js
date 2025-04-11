@@ -15,7 +15,7 @@ const MOCK_FULL_NAME = 'John Doe';
 const MOCK_AUTH_TOKEN = 'mock-auth-token';
 
 vi.mock('../../constants/api', () => ({
-	APIConstants: {
+	API_DATABASE: {
 		API_URL: 'https://mock-api-url.com/',
 		API_KEY: 'mock-api-key',
 		POST: 'POST',

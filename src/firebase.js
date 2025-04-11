@@ -1,16 +1,16 @@
-import { FirebaseConstants } from '@/constants/firebase';
+import { FIREBASE } from '@/constants/firebase';
 
 import { initializeApp } from 'firebase/app';
 
 const firebaseConfig = {
-	apiKey: FirebaseConstants.API_KEY,
-	authDomain: FirebaseConstants.AUTH_DOMAIN,
-	databaseURL: FirebaseConstants.DATABASE_URL,
-	projectId: FirebaseConstants.PROJECT_ID,
-	storageBucket: FirebaseConstants.STORAGE_BUCKET,
-	messagingSenderId: FirebaseConstants.MESSAGING_SENDER_ID,
-	appId: FirebaseConstants.APP_ID,
-	measurementId: FirebaseConstants.MEASUREMENT_ID,
+	apiKey: FIREBASE.API_KEY,
+	authDomain: FIREBASE.AUTH_DOMAIN,
+	databaseURL: FIREBASE.DATABASE_URL,
+	projectId: FIREBASE.PROJECT_ID,
+	storageBucket: FIREBASE.STORAGE_BUCKET,
+	messagingSenderId: FIREBASE.MESSAGING_SENDER_ID,
+	appId: FIREBASE.APP_ID,
+	measurementId: FIREBASE.MEASUREMENT_ID,
 };
 
 export const firebaseApp = initializeApp(firebaseConfig);

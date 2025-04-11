@@ -1,8 +1,8 @@
-export const TravellersActionTypes = Object.freeze({
+export const TRAVELLERS_ACTION_TYPES = Object.freeze({
 	TRAVELLER_NAME: 'travellers/travellerName',
 });
 
-export const AuthenticationActionTypes = Object.freeze({
+export const AUTHENTICATION_ACTION_TYPES = Object.freeze({
 	LOGIN: 'authentication/login',
 	TRY_LOGIN: 'authentication/tryLogin',
 	LOGOUT: 'authentication/logout',
