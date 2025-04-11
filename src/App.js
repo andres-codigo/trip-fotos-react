@@ -1,18 +1,23 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { tryLogin } from './store/slices/authenticationSlice';
+
+import PATHS from './constants/paths';
 
 import './App.module.scss';
 import Header from './components/layout/header/Header';
+import UserAuth from './pages/UserAuth';
 
 function App() {
 	const dispatch = useDispatch();
-	// const navigate = useNavigate();
+	const navigate = useNavigate();
 
 	// Access the `didAutoLogout` state from the Redux store
-	// const didAutoLogout = useSelector((state) => state.authentication.didAutoLogout);
+	const didAutoLogout = useSelector(
+		(state) => state.authentication.didAutoLogout,
+	);
 
 	// Dispatch `tryLogin` on component mount
 	useEffect(() => {
@@ -20,13 +25,21 @@ function App() {
 	}, [dispatch]);
 
 	// Watch for changes in `didAutoLogout` and redirect to the login page
-	// useEffect(() => {
-	// 	if (didAutoLogout) {
-	// 		navigate('/authentication'); // Redirect to the login page
-	// 	}
-	// }, [didAutoLogout, navigate]);
+	useEffect(() => {
+		if (didAutoLogout) {
+			navigate(PATHS.AUTHENTICATION); // Redirect to the login page
+		}
+	}, [didAutoLogout, navigate]);
 
-	return <Header />;
+	return (
+		<>
+			<Header />
+			<Routes>
+				<Route index path={PATHS.HOME} element={<UserAuth />} />
+				<Route path={PATHS.AUTHENTICATION} element={<UserAuth />} />
+			</Routes>
+		</>
+	);
 }
 
 export default App;
