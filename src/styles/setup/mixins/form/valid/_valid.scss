@@ -4,6 +4,7 @@
 @mixin label() {
 	label {
 		display: block;
+		font-family: 'Roboto', sans-serif;
 		font-weight: 500;
 		margin-bottom: 0.5rem;
 	}
@@ -54,7 +55,8 @@
 		& + label {
 			cursor: pointer;
 			display: inline-block;
-			font-weight: normal;
+			font-family: 'Roboto', sans-serif;
+			font-weight: 400;
 			line-height: 20px;
 			padding-left: 20px + 10;
 			position: relative;
