@@ -1,4 +1,5 @@
-// Import Roboto font
+// Roboto font
+// https: //fonts.google.com/specimen/Roboto
 @font-face {
 	font-family: 'Roboto';
 	font-weight: 400;
@@ -9,4 +10,16 @@
 		local('Roboto'),
 		url('@/assets/fonts/Roboto-Regular.woff') format('woff'),
 		url('@/assets/fonts/Roboto-Regular.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+	unicode-range: U+000-5FF;
+	src:
+		local('Roboto'),
+		url('@/assets/fonts/Roboto-Medium.woff') format('woff'),
+		url('@/assets/fonts/Roboto-Medium.ttf') format('truetype');
 }
