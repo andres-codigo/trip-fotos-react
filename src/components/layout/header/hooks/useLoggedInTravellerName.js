@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const useLoggedInTravellerName = () => {
+export function useLoggedInTravellerName() {
 	const [travellerName, setTravellerName] = useState(
 		() => localStorage.getItem('userName') || '',
 	);
@@ -25,6 +25,4 @@ const useLoggedInTravellerName = () => {
 	}, [syncTravellerName]);
 
 	return [travellerName, setTravellerName];
-};
-
-export default useLoggedInTravellerName;
+}

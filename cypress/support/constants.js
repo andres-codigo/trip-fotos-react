@@ -16,8 +16,8 @@ export const domAttributeUrls = {
 };
 
 export const topNavigationSelectors = {
-	navHeaderContainer: '[data-cy="nav-header-container"]',
-	navHeaderTitleLink: '[data-cy="nav-header-title-link"]',
+	siteHeader: '[data-cy="site-header"]',
+	siteHeaderTitleLink: '[data-cy="site-header-title-link"]',
 	navMenuItemMessages: '[data-cy="nav-menu-item-messages"]',
 	totalMessages: '[data-cy="total-messages"]',
 	navMenuItemAllTravellers: '[data-cy="nav-menu-item-all-travellers"]',

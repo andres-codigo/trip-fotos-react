@@ -3,15 +3,16 @@ import { useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 
-import BaseButton from '../../ui/button/BaseButton';
-import MessagesButton from './MessagesButton';
-
 import headerStyles from './Header.module.scss';
 
 import { useCloseHamburgerMenu } from './hooks/useCloseHamburgerMenu';
 import { useHeaderState } from './hooks/useHeaderState';
 import { useLogout } from './hooks/useLogout';
-import useMobileMenu from './hooks/useMobileMenu';
+import { useMobileMenu } from './hooks/useMobileMenu';
+
+import NavMenuButtonLink from './nav-menu/NavMenuButtonLink';
+import NavMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss';
+import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink';
 
 function Header() {
 	// const navigate = useNavigate();
@@ -71,16 +72,17 @@ function Header() {
 	);
 
 	return (
-		<header
-			className={headerStyles.headerContainer}
-			data-cy="nav-header-container">
+		<header className={headerStyles.siteHeader} data-cy="site-header">
 			<nav className={headerStyles.navbar}>
 				<h1
-					className="navHeaderTitleLink"
-					data-cy="nav-header-title-link">
-					<BaseButton isLink to="/" className="navLink">
+					className="siteHeaderTitleLink"
+					data-cy="site-header-title-link">
+					<NavMenuButtonLink
+						isLink
+						to="/"
+						className={NavMenuButtonLinkStyles.navMenuButtonLink}>
 						Trip Fotos
-					</BaseButton>
+					</NavMenuButtonLink>
 				</h1>
 				<ul
 					className={classNames(headerStyles.navMenuItemsContainer, {
@@ -92,17 +94,24 @@ function Header() {
 						<li className={headerStyles.navMenuItem}>
 							<ul>
 								{/* {isTraveller && ( */}
-								<MessagesButton totalMessages={totalMessages} />
+								<NavMenuMessagesLink
+									className={
+										NavMenuButtonLinkStyles.navMenuButtonLink
+									}
+									totalMessages={totalMessages}
+								/>
 								{/* )} */}
 								<li
 									className="navMenuItemAllTravellers"
 									data-cy="nav-menu-item-all-travellers">
-									<BaseButton
+									<NavMenuButtonLink
 										isLink
 										to="/"
-										className="navLink">
+										className={
+											NavMenuButtonLinkStyles.navMenuButtonLink
+										}>
 										All Travellers
-									</BaseButton>
+									</NavMenuButtonLink>
 								</li>
 							</ul>
 						</li>
@@ -115,12 +124,14 @@ function Header() {
 								'nav-menu-item-logout',
 							)}
 							onClick={handleLogoutClick}>
-							<BaseButton
+							<NavMenuButtonLink
 								to="/"
-								className="navLink"
+								className={
+									NavMenuButtonLinkStyles.navMenuButtonLink
+								}
 								data-cy="nav-menu-item-logout">
 								Logout {travellerName}
-							</BaseButton>
+							</NavMenuButtonLink>
 						</li>
 					)}
 				</ul>
