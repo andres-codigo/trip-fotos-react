@@ -1,0 +1,113 @@
+@use '../../../styles/setup/variables';
+
+.backdrop {
+	background-color: rgba(0, 0, 0, 0.75);
+	height: 100%;
+	left: 0;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 10;
+}
+
+.dialog {
+	background-color: variables.$color-white;
+	border: none;
+	border-radius: 12px;
+	bottom: 0;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+	left: 0;
+	overflow: hidden;
+	padding: 0;
+	position: fixed;
+	right: 0;
+	top: 0;
+	width: 80%;
+	z-index: 100;
+
+	.header {
+		background-color: variables.$color-ripe-plum;
+		color: variables.$color-white;
+		padding: 1rem;
+		width: 100%;
+
+		h2 {
+			margin: 0;
+		}
+	}
+
+	section {
+		&.imageSection {
+			align-items: center;
+			display: flex;
+			padding: 2.5rem 0 1rem 0;
+		}
+
+		&.generalSection {
+			padding: 1rem;
+
+			p {
+				text-align: center;
+			}
+		}
+
+		img {
+			display: block;
+			margin: 0 auto;
+			object-fit: cover;
+			padding: 10px;
+		}
+	}
+
+	menu {
+		display: flex;
+		justify-content: flex-end;
+		margin: 0;
+		padding: 1rem;
+	}
+}
+
+.dialog-appear {
+	opacity: 0;
+	transform: scale(0.8);
+}
+
+.dialog-appear-active {
+	opacity: 1;
+	transform: scale(1);
+	transition: all 0.3s ease-out;
+}
+
+.dialog-enter {
+	opacity: 0;
+	transform: scale(0.8);
+}
+
+.dialog-enter-active {
+	opacity: 1;
+	transform: scale(1);
+	transition: all 0.3s ease-out;
+}
+
+.dialog-exit {
+	opacity: 1;
+	transform: scale(1);
+}
+
+.dialog-exit-active {
+	opacity: 0;
+	transform: scale(0.8);
+	transition: all 0.3s ease-in;
+}
+
+@media only screen and (max-width: 767px) {
+	.dialog {
+		width: 80%;
+	}
+}
+
+@media only screen and (min-width: 768px) {
+	.dialog {
+		width: 50%;
+	}
+}

@@ -8,11 +8,11 @@
 	position: relative;
 	top: 80px;
 
-	.user-authentication {
+	.userAuthentication {
 		margin: 1rem;
 		padding: 1rem;
 
-		.form-control {
+		.formControl {
 			margin: 0.5rem 0;
 
 			@include valid.input;
