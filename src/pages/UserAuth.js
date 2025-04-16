@@ -3,11 +3,11 @@ import { useState } from 'react';
 // import { useNavigate, useLocation } from 'react-router-dom';
 // import { API_DATABASE } from '@/constants/api';
 // import { API_ERROR_MESSAGE } from '@/constants/api-messages';
-import { GLOBAL } from '@/constants/global';
+// import { GLOBAL } from '@/constants/global';
 import BaseDialog from '@/components/ui/dialog/BaseDialog';
 // import BaseCard from '@/components/BaseCard';
 // import BaseButton from '@/components/ui/button/BaseButton';
-// import BaseSpinner from '@/components/BaseSpinner';
+import BaseSpinner from '@/components/ui/spinner/BaseSpinner';
 
 import userAuthStyles from './UserAuth.module.scss';
 
@@ -24,8 +24,8 @@ const UserAuth = () => {
 	// });
 	// const [formIsValid, setFormIsValid] = useState(true);
 	// const [mode, setMode] = useState(API_DATABASE.API_AUTH_LOGIN_MODE);
-	// const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
+	// const [error, setError] = useState(true);
 
 	// const dispatch = useDispatch();
 	// const navigate = useNavigate();
@@ -116,21 +116,21 @@ const UserAuth = () => {
 	// 	);
 	// };
 
-	const handleError = () => setError(null);
+	// const handleError = () => setError(null);
 
 	return (
 		<section className={userAuthStyles.userAuthenticationContainer}>
-			<BaseDialog
+			{/* <BaseDialog
 				show={!!error}
 				isError={!!error}
 				title={GLOBAL.ERROR_DIALOG_TITLE}
 				onClose={handleError}>
 				<p>{error}</p>
-			</BaseDialog>
-			{/* <BaseDialog show={isLoading} title="Authenticating" fixed>
+			</BaseDialog> */}
+			<BaseDialog show={isLoading} title="Authenticating" fixed>
 				<p>Authenticating your details, one moment please...</p>
 				<BaseSpinner />
-			</BaseDialog> */}
+			</BaseDialog>
 			{/* <BaseCard>
 				<form className={userAuthStyles.userAuthentication} onSubmit={submitForm}>
 					<div
