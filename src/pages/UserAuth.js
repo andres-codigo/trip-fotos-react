@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
+
+import { login } from '../store/slices/authenticationSlice';
+
 import { API_DATABASE } from '@/constants/api';
 import { API_ERROR_MESSAGE } from '@/constants/api-messages';
 import { GLOBAL } from '@/constants/global';
+import { PATHS } from '@/constants/paths';
+
 import BaseDialog from '@/components/ui/dialog/BaseDialog';
 import BaseCard from '@/components/ui/card/BaseCard';
 import BaseButton from '@/components/ui/button/BaseButton';
@@ -22,7 +27,7 @@ const UserAuth = () => {
 		isValid: true,
 		message: '',
 	});
-	const [formIsValid, setFormIsValid] = useState(true);
+
 	const [mode, setMode] = useState(API_DATABASE.API_AUTH_LOGIN_MODE);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState(false);
@@ -31,81 +36,91 @@ const UserAuth = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const validateEmail = (value) => {
-		if (
-			/^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*@[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\.[a-zA-Z]{2,3}$/.test(
+	const validateEmail = async (value) => {
+		const isValid =
+			/^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*@[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\.[a-zA-Z]{2,6}$/.test(
 				value,
-			)
-		) {
-			setEmail({ ...email, isValid: true, message: '' });
-			setFormIsValid(true);
+			);
+
+		if (isValid) {
+			setEmail((prev) => ({ ...prev, isValid: true, message: '' }));
+			return true;
 		} else {
-			setEmail({
-				...email,
+			setEmail((prev) => ({
+				...prev,
 				isValid: false,
 				message: 'Please enter a valid email address.',
-			});
-			setFormIsValid(false);
+			}));
+			return false;
 		}
 	};
 
-	const validatePassword = (value) => {
-		if (value.length < 8) {
-			setPassword({
-				...password,
+	const validatePassword = async (value) => {
+		let difference = 6 - value.length;
+
+		if (value.length < 6) {
+			setPassword((prev) => ({
+				...prev,
 				isValid: false,
-				message: `Your password must be a minimum of 8 characters long! ${8 - value.length} characters left.`,
-			});
-			setFormIsValid(false);
+				message: `Your password must be a minimum of 6 characters long! ${difference} characters left.`,
+			}));
+			return false;
 		} else {
-			setPassword({ ...password, isValid: true, message: '' });
-			setFormIsValid(true);
+			setPassword((prev) => ({
+				...prev,
+				isValid: true,
+				message: '',
+			}));
+			return true;
 		}
 	};
 
-	const validateForm = () => {
-		setFormIsValid(true);
-		if (email.value === '') validateEmail(email.value);
-		if (password.value === '') validatePassword(password.value);
+	const validateForm = async () => {
+		const emailValid = await validateEmail(email.value);
+		const passwordValid = await validatePassword(password.value);
+		return emailValid && passwordValid;
 	};
 
 	const submitForm = async (e) => {
 		e.preventDefault();
-		validateForm();
+		const isFormValid = await validateForm();
 
-		if (!formIsValid) return;
-
-		setIsLoading(true);
-
-		const actionPayload = { email: email.value, password: password.value };
+		if (!isFormValid) return;
 
 		try {
+			setIsLoading(true);
+
+			const actionPayload = {
+				mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+				email: email.value,
+				password: password.value,
+			};
+
 			if (mode === API_DATABASE.API_AUTH_LOGIN_MODE) {
-				await dispatch({
-					type: API_DATABASE.API_AUTH_LOGIN_MODE,
-					payload: actionPayload,
-				});
-				await dispatch({
-					type: 'travellers/loadTravellers',
-					payload: { forceRefresh: true },
-				});
+				await dispatch(login(actionPayload));
+
+				setEmail({ value: '', isValid: true, message: '' });
+				setPassword({ value: '', isValid: true, message: '' });
 			} else {
 				await dispatch({
 					type: API_DATABASE.API_AUTH_SIGNUP_MODE,
 					payload: actionPayload,
 				});
+
+				setEmail({ value: '', isValid: true, message: '' });
+				setPassword({ value: '', isValid: true, message: '' });
 			}
 
 			const redirectUrl =
-				'/' +
-				(new URLSearchParams(location.search).get('redirect') ||
-					'trips');
+				new URLSearchParams(location.search).get('redirect') ||
+				PATHS.TRIPS;
+
 			navigate(redirectUrl);
 		} catch (err) {
 			setError(err.message || API_ERROR_MESSAGE.FAILED_TO_AUTHENTICATE);
+		} finally {
+			setIsLoading(false);
 		}
-
-		setIsLoading(false);
 	};
 
 	const switchAuthMode = () => {
@@ -144,10 +159,15 @@ const UserAuth = () => {
 							id="email"
 							type="email"
 							value={email.value}
-							onChange={(e) =>
-								setEmail({ ...email, value: e.target.value })
+							onChange={async (e) => {
+								const value = e.target.value;
+
+								setEmail((prev) => ({ ...prev, value }));
+								await validateEmail(value);
+							}}
+							onBlur={async () =>
+								await validateEmail(email.value)
 							}
-							onBlur={() => validateEmail(email.value)}
 						/>
 						{!email.isValid && <p>{email.message}</p>}
 					</div>
@@ -162,13 +182,15 @@ const UserAuth = () => {
 							id="password"
 							type="password"
 							value={password.value}
-							onChange={(e) =>
-								setPassword({
-									...password,
-									value: e.target.value,
-								})
+							onChange={async (e) => {
+								const value = e.target.value;
+
+								setPassword((prev) => ({ ...prev, value }));
+								await validatePassword(e.target.value);
+							}}
+							onBlur={async () =>
+								await validatePassword(password.value)
 							}
-							onBlur={() => validatePassword(password.value)}
 						/>
 						{!password.isValid && <p>{password.message}</p>}
 					</div>
