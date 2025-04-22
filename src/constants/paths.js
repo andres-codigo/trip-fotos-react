@@ -1,6 +1,5 @@
-const PATHS = {
+export const PATHS = Object.freeze({
 	HOME: '/',
 	AUTHENTICATION: '/authentication',
-};
-
-export default PATHS;
+	TRIPS: '/trips',
+});

@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { tryLogin } from './store/slices/authenticationSlice';
 
-import PATHS from './constants/paths';
+import { PATHS } from './constants/paths';
 
 import './App.module.scss';
 import Header from './components/layout/header/Header';
@@ -27,7 +27,7 @@ function App() {
 	// Watch for changes in `didAutoLogout` and redirect to the login page
 	useEffect(() => {
 		if (didAutoLogout) {
-			navigate(PATHS.AUTHENTICATION); // Redirect to the login page
+			navigate(PATHS.AUTHENTICATION);
 		}
 	}, [didAutoLogout, navigate]);
 
@@ -37,6 +37,7 @@ function App() {
 			<Routes>
 				<Route index path={PATHS.HOME} element={<UserAuth />} />
 				<Route path={PATHS.AUTHENTICATION} element={<UserAuth />} />
+				<Route path={PATHS.TRIPS} element={<UserAuth />} />
 			</Routes>
 		</>
 	);
