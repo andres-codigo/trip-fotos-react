@@ -1,31 +1,6 @@
-@use '../styles/setup/mixins/mixins';
-@use '../styles/setup/mixins/form/valid/valid';
-@use '../styles/setup/mixins/form/invalid/invalid';
-
 .userAuthenticationContainer {
 	display: inline-block;
 	padding: 0 20px;
 	position: relative;
 	top: 80px;
-
-	.userAuthentication {
-		margin: 1rem;
-		padding: 1rem;
-
-		.formControl {
-			margin: 0.5rem 0;
-
-			@include valid.input;
-
-			&.invalid {
-				p {
-					@include invalid.error-message;
-				}
-
-				input {
-					@include invalid.invalid-border;
-				}
-			}
-		}
-	}
 }
