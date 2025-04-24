@@ -62,12 +62,18 @@ beforeEach(() => {
 
 describe('authenticationSlice actions', () => {
 	describe.each([
-		['empty string', ''],
-		['non-empty string', 'Test User'],
+		['empty string', '', API_DATABASE.API_AUTH_LOGIN_MODE],
+		['non-empty string', 'Test User', API_DATABASE.API_AUTH_LOGIN_MODE],
+		['empty string (signup)', '', API_DATABASE.API_AUTH_SIGNUP_MODE],
+		[
+			'non-empty string (signup)',
+			'Test User',
+			API_DATABASE.API_AUTH_SIGNUP_MODE,
+		],
 	])(
-		'login success with displayName as %s action',
-		(description, displayName) => {
-			it(`should store token and user details when displayName is ${description}`, async () => {
+		'login success with displayName as %s and mode as %s action',
+		(description, displayName, mode) => {
+			it(`should store token and user details when displayName is ${description} and mode is ${mode}`, async () => {
 				const mockResponse = {
 					idToken: MOCK_ID_TOKEN,
 					localId: MOCK_LOCAL_ID,
@@ -83,14 +89,19 @@ describe('authenticationSlice actions', () => {
 
 				await store.dispatch(
 					login({
-						mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+						mode,
 						email: MOCK_EMAIL,
 						password: MOCK_PASSWORD,
 					}),
 				);
 
+				const expectedUrl =
+					mode === API_DATABASE.API_AUTH_SIGNUP_MODE
+						? `${MOCK_API_URL}signUp?key=${MOCK_API_KEY}`
+						: `${MOCK_API_URL}signInWithPassword?key=${MOCK_API_KEY}`;
+
 				expect(fetch).toHaveBeenCalledWith(
-					`${MOCK_API_URL}signInWithPassword?key=${MOCK_API_KEY}`,
+					expectedUrl,
 					expect.objectContaining({
 						method: API_DATABASE.POST,
 						body: JSON.stringify({
