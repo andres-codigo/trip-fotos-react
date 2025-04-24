@@ -366,6 +366,20 @@ describe('authenticationSlice', () => {
 				expect(state.userName).toBeNull();
 				expect(state.userEmail).toBeNull();
 			});
+
+			it('should handle empty localStorage during tryLogin', async () => {
+				localStorage.getItem.mockImplementation(() => null);
+
+				await store.dispatch(tryLogin());
+
+				const state = store.getState().authentication;
+
+				expect(state.token).toBeNull();
+				expect(state.userId).toBeNull();
+				expect(state.userName).toBeNull();
+				expect(state.userEmail).toBeNull();
+				expect(state.didAutoLogout).toBe(false);
+			});
 		});
 
 		describe('logout', () => {

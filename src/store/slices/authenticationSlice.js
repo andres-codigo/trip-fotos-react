@@ -23,14 +23,15 @@ export const login = createAsyncThunk(
 					password: payload.password,
 					returnSecureToken: true,
 				}),
+				headers: {
+					'Content-Type': 'application/json',
+				},
 			});
 
 			const data = await response.json();
 
 			if (!response.ok) {
-				throw new Error(
-					data.error.message || 'Failed to authenticate.',
-				);
+				throw new Error(data.error.message || 'Login failed.');
 			}
 
 			const expiresIn = +data.expiresIn * 1000;
@@ -78,11 +79,21 @@ export const tryLogin = createAsyncThunk(
 			dispatch(autoLogout());
 		}, expiresIn);
 
-		if (token && userId) {
-			return { token, userId, userName, userEmail };
+		if (
+			!token ||
+			!tokenExpiration ||
+			new Date().getTime() > +tokenExpiration
+		) {
+			dispatch(authActions.clearUser());
+			return null;
 		}
 
-		return null;
+		return {
+			token,
+			userId,
+			userName,
+			userEmail,
+		};
 	},
 );
 
@@ -97,7 +108,7 @@ export const logout = createAsyncThunk(
 
 		clearTimeout(timer);
 
-		dispatch(authSlice.actions.clearUser());
+		dispatch(authActions.clearUser());
 	},
 );
 
@@ -105,7 +116,8 @@ export const autoLogout = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.AUTO_LOGOUT,
 	async (_, { dispatch }) => {
 		dispatch(logout());
-		dispatch(authSlice.actions.setAutoLogout());
+		dispatch(authActions.clearUser());
+		dispatch(authActions.setAutoLogout());
 	},
 );
 
