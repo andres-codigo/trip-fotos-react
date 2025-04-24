@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { tryLogin } from './store/slices/authenticationSlice';
 
-import { PATHS } from './constants/paths';
+import { PATHS } from '@/constants/paths';
 
-import './App.module.scss';
-import Header from './components/layout/header/Header';
-import UserAuth from './pages/UserAuth';
+import { tryLogin } from '@/store/slices/authenticationSlice';
+
+import Header from '@/components/layout/header/Header';
+import UserAuth from '@/pages/UserAuth';
 
 function App() {
 	const dispatch = useDispatch();
