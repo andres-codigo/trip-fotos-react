@@ -133,18 +133,32 @@ describe('authenticationSlice actions', () => {
 		EXPIRATION: new Date().getTime() + 3600 * 1000,
 	};
 
-	describe.each([
-		['empty string', '', API_DATABASE.API_AUTH_LOGIN_MODE],
-		['non-empty string', 'Test User', API_DATABASE.API_AUTH_LOGIN_MODE],
-		['empty string (signup)', '', API_DATABASE.API_AUTH_SIGNUP_MODE],
-		[
-			'non-empty string (signup)',
-			'Test User',
-			API_DATABASE.API_AUTH_SIGNUP_MODE,
-		],
-	])(
+	const loginTestCases = [
+		{
+			description: 'empty string',
+			displayName: '',
+			mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+		},
+		{
+			description: 'non-empty string',
+			displayName: 'Test User',
+			mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+		},
+		{
+			description: 'empty string (signup)',
+			displayName: '',
+			mode: API_DATABASE.API_AUTH_SIGNUP_MODE,
+		},
+		{
+			description: 'non-empty string (signup)',
+			displayName: 'Test User',
+			mode: API_DATABASE.API_AUTH_SIGNUP_MODE,
+		},
+	];
+
+	describe.each(loginTestCases)(
 		'login action with displayName as %s and mode as %s',
-		(description, displayName, mode) => {
+		({ description, displayName, mode }) => {
 			it(`should handle login success when displayName is ${description} and mode is ${mode}`, async () => {
 				const mockResponse = {
 					idToken: MOCK_KEYS.ID_TOKEN,
@@ -283,13 +297,21 @@ describe('authenticationSlice actions', () => {
 		});
 	});
 
+	const tryLoginTestCases = [
+		{
+			description: 'empty string',
+			displayName: '',
+		},
+		{
+			description: 'non-empty string',
+			displayName: 'Test User',
+		},
+	];
+
 	describe('tryLogin action', () => {
-		describe.each([
-			['empty string', ''],
-			['non-empty string', 'Test User'],
-		])(
+		describe.each(tryLoginTestCases)(
 			'tryLogin success with displayName as %s',
-			(description, displayName) => {
+			({ description, displayName }) => {
 				it(`should handle tryLogin success when displayName is ${description}`, async () => {
 					localStorage.getItem.mockImplementation((key) => {
 						switch (key) {
