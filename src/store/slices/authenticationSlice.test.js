@@ -11,11 +11,6 @@ import { API_DATABASE } from '@/constants/api';
 
 const MOCK_API_URL = 'https://mock-api-url.com/';
 const MOCK_API_KEY = 'mock-api-key';
-const MOCK_EMAIL = 'test@example.com';
-const MOCK_PASSWORD = 'password123';
-const MOCK_ID_TOKEN = 'mock-id-token';
-const MOCK_LOCAL_ID = 'mock-local-id';
-const MOCK_EXPIRATION = new Date().getTime() + 3600 * 1000;
 
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
@@ -121,6 +116,12 @@ describe('authenticationSlice reducers', () => {
 });
 
 describe('authenticationSlice actions', () => {
+	const MOCK_EMAIL = 'test@example.com';
+	const MOCK_PASSWORD = 'password123';
+	const MOCK_ID_TOKEN = 'mock-id-token';
+	const MOCK_LOCAL_ID = 'mock-local-id';
+	const MOCK_EXPIRATION = new Date().getTime() + 3600 * 1000;
+
 	describe.each([
 		['empty string', '', API_DATABASE.API_AUTH_LOGIN_MODE],
 		['non-empty string', 'Test User', API_DATABASE.API_AUTH_LOGIN_MODE],
@@ -131,9 +132,9 @@ describe('authenticationSlice actions', () => {
 			API_DATABASE.API_AUTH_SIGNUP_MODE,
 		],
 	])(
-		'login success with displayName as %s and mode as %s action',
+		'login action with displayName as %s and mode as %s',
 		(description, displayName, mode) => {
-			it(`should store token and user details when displayName is ${description} and mode is ${mode}`, async () => {
+			it(`should handle login success when displayName is ${description} and mode is ${mode}`, async () => {
 				const mockResponse = {
 					idToken: MOCK_ID_TOKEN,
 					localId: MOCK_LOCAL_ID,
@@ -236,7 +237,7 @@ describe('authenticationSlice actions', () => {
 			expect(result.meta.rejectedWithValue).toBe(true);
 		});
 
-		it('should handle network errors gracefully', async () => {
+		it('should handle network errors', async () => {
 			const mockError = new Error('Network Error');
 			fetch.mockRejectedValueOnce(mockError);
 
@@ -276,9 +277,9 @@ describe('authenticationSlice actions', () => {
 			['empty string', ''],
 			['non-empty string', 'Test User'],
 		])(
-			'tryLogin success with displayName as %s action',
+			'tryLogin success with displayName as %s',
 			(description, displayName) => {
-				it(`should handle tryLogin successfully when displayName is ${description}`, async () => {
+				it(`should handle tryLogin success when displayName is ${description}`, async () => {
 					localStorage.getItem.mockImplementation((key) => {
 						switch (key) {
 							case 'token':
@@ -329,7 +330,7 @@ describe('authenticationSlice actions', () => {
 		});
 	});
 
-	describe('logout and autoLogout actions', () => {
+	describe('logout actions', () => {
 		it('should handle logout', async () => {
 			await store.dispatch(logout());
 
@@ -348,7 +349,9 @@ describe('authenticationSlice actions', () => {
 				'tokenExpiration',
 			);
 		});
+	});
 
+	describe('autoLogout actions', () => {
 		it('should handle autoLogout', async () => {
 			await store.dispatch(autoLogout());
 
