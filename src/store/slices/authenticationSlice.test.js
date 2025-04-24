@@ -5,6 +5,7 @@ import authenticationReducer, {
 	tryLogin,
 	logout,
 	autoLogout,
+	authActions,
 } from './authenticationSlice';
 import { API_DATABASE } from '@/constants/api';
 
@@ -72,6 +73,28 @@ describe('authenticationSlice reducers', () => {
 
 		const state = authenticationReducer(undefined, { type: undefined });
 		expect(state).toEqual(initialState);
+	});
+
+	it('should handle clearUser', () => {
+		const previousState = {
+			token: 'mock-token',
+			userId: 'mock-user-id',
+			userName: 'mock-user-name',
+			userEmail: 'mock-user-email',
+			didAutoLogout: false,
+		};
+
+		const state = authenticationReducer(
+			previousState,
+			authActions.clearUser(),
+		);
+		expect(state).toEqual({
+			token: null,
+			userId: null,
+			userName: null,
+			userEmail: null,
+			didAutoLogout: false,
+		});
 	});
 });
 
