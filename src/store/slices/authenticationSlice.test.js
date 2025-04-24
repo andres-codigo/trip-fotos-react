@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
-import authenticationReducer, { login } from './authenticationSlice';
+import authenticationReducer, { login, tryLogin } from './authenticationSlice';
 import { API_DATABASE } from '@/constants/api';
 
 const MOCK_API_URL = 'https://mock-api-url.com/';
@@ -9,6 +9,7 @@ const MOCK_EMAIL = 'test@example.com';
 const MOCK_PASSWORD = 'password123';
 const MOCK_ID_TOKEN = 'mock-id-token';
 const MOCK_LOCAL_ID = 'mock-local-id';
+const MOCK_EXPIRATION = new Date().getTime() + 3600 * 1000;
 
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
@@ -191,6 +192,64 @@ describe('authenticationSlice actions', () => {
 
 			expect(result.payload).toBe(mockError.message);
 			expect(result.meta.rejectedWithValue).toBe(true);
+		});
+	});
+
+	describe('tryLogin action', () => {
+		describe.each([
+			['empty string', ''],
+			['non-empty string', 'Test User'],
+		])(
+			'tryLogin success with displayName as %s action',
+			(description, displayName) => {
+				it(`should handle tryLogin successfully when displayName is ${description}`, async () => {
+					localStorage.getItem.mockImplementation((key) => {
+						switch (key) {
+							case 'token':
+								return MOCK_ID_TOKEN;
+							case 'userId':
+								return MOCK_LOCAL_ID;
+							case 'userName':
+								return displayName;
+							case 'userEmail':
+								return MOCK_EMAIL;
+							case 'tokenExpiration':
+								return MOCK_EXPIRATION.toString();
+							default:
+								return null;
+						}
+					});
+
+					await store.dispatch(tryLogin());
+
+					const state = store.getState().authentication;
+
+					expect(state.token).toBe(MOCK_ID_TOKEN);
+					expect(state.userId).toBe(MOCK_LOCAL_ID);
+					expect(state.userName).toBe(displayName);
+					expect(state.userEmail).toBe(MOCK_EMAIL);
+				});
+			},
+		);
+
+		it('should handle tryLogin with expired token', async () => {
+			localStorage.getItem.mockImplementation((key) => {
+				switch (key) {
+					case 'tokenExpiration':
+						return (new Date().getTime() - 1000).toString();
+					default:
+						return null;
+				}
+			});
+
+			await store.dispatch(tryLogin());
+
+			const state = store.getState().authentication;
+
+			expect(state.token).toBeNull();
+			expect(state.userId).toBeNull();
+			expect(state.userName).toBeNull();
+			expect(state.userEmail).toBeNull();
 		});
 	});
 });
