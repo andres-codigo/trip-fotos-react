@@ -121,7 +121,7 @@ describe('authenticationSlice actions', () => {
 		},
 	);
 
-	describe('login failure', () => {
+	describe('login failure action', () => {
 		it('should handle login failure and return error message', async () => {
 			const mockErrorMessage = 'INVALID_PASSWORD';
 			fetch.mockResolvedValueOnce({
