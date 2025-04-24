@@ -60,6 +60,21 @@ beforeEach(() => {
 	resetMocks();
 });
 
+describe('authenticationSlice reducers', () => {
+	it('should return the initial state', () => {
+		const initialState = {
+			token: null,
+			userId: null,
+			userName: null,
+			userEmail: null,
+			didAutoLogout: false,
+		};
+
+		const state = authenticationReducer(undefined, { type: undefined });
+		expect(state).toEqual(initialState);
+	});
+});
+
 describe('authenticationSlice actions', () => {
 	describe.each([
 		['empty string', '', API_DATABASE.API_AUTH_LOGIN_MODE],
