@@ -59,9 +59,9 @@ describe('authenticationSlice actions', () => {
 		['empty string', ''],
 		['non-empty string', 'Test User'],
 	])(
-		'login success with displayName as either empty or non-empty string',
+		'login success with displayName as %s action',
 		(description, displayName) => {
-			it('should store token and user details on successful login', async () => {
+			it(`should store token and user details when displayName is ${description}`, async () => {
 				const mockResponse = {
 					idToken: MOCK_ID_TOKEN,
 					localId: MOCK_LOCAL_ID,
