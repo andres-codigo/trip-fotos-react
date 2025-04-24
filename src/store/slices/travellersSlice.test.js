@@ -4,7 +4,7 @@ import travellersReducer, {
 	travellerName,
 	setTravellerName,
 } from './travellersSlice';
-import { handleApiError } from '../../utils/errorHandler';
+import { handleApiError } from '@/utils/errorHandler';
 
 const MOCK_API_URL = 'https://mock-api-url.com/';
 const MOCK_API_KEY = 'mock-api-key';
@@ -14,7 +14,7 @@ const MOCK_LAST_NAME = 'Doe';
 const MOCK_FULL_NAME = 'John Doe';
 const MOCK_AUTH_TOKEN = 'mock-auth-token';
 
-vi.mock('../../constants/api', () => ({
+vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
 		API_URL: 'https://mock-api-url.com/',
 		API_KEY: 'mock-api-key',
@@ -22,7 +22,7 @@ vi.mock('../../constants/api', () => ({
 	},
 }));
 
-vi.mock('../../utils/errorHandler', () => ({
+vi.mock('@/utils/errorHandler', () => ({
 	handleApiError: vi.fn((error, message) => `${message}: ${error.message}`),
 }));
 
