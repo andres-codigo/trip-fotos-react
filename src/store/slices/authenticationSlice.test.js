@@ -54,27 +54,82 @@ beforeEach(() => {
 	resetMocks();
 });
 
-describe.each([
-	['empty string', ''],
-	['non-empty string', 'Test User'],
-])(
-	'authenticationSlice - login success with displayName as either empty or non-empty string',
-	(description, displayName) => {
-		it('should store token and user details on successful login', async () => {
-			const mockResponse = {
-				idToken: MOCK_ID_TOKEN,
-				localId: MOCK_LOCAL_ID,
-				displayName: displayName,
-				email: MOCK_EMAIL,
-				expiresIn: '3600',
-			};
+describe('authenticationSlice actions', () => {
+	describe.each([
+		['empty string', ''],
+		['non-empty string', 'Test User'],
+	])(
+		'login success with displayName as either empty or non-empty string',
+		(description, displayName) => {
+			it('should store token and user details on successful login', async () => {
+				const mockResponse = {
+					idToken: MOCK_ID_TOKEN,
+					localId: MOCK_LOCAL_ID,
+					displayName: displayName,
+					email: MOCK_EMAIL,
+					expiresIn: '3600',
+				};
 
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => mockResponse,
+				});
+
+				await store.dispatch(
+					login({
+						mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+						email: MOCK_EMAIL,
+						password: MOCK_PASSWORD,
+					}),
+				);
+
+				expect(fetch).toHaveBeenCalledWith(
+					`${MOCK_API_URL}signInWithPassword?key=${MOCK_API_KEY}`,
+					expect.objectContaining({
+						method: API_DATABASE.POST,
+						body: JSON.stringify({
+							email: MOCK_EMAIL,
+							password: MOCK_PASSWORD,
+							returnSecureToken: true,
+						}),
+					}),
+				);
+
+				const state = store.getState().authentication;
+				expect(state.token).toBe(MOCK_ID_TOKEN);
+				expect(state.userId).toBe(MOCK_LOCAL_ID);
+				expect(state.userName).toBe(displayName);
+				expect(state.userEmail).toBe(MOCK_EMAIL);
+
+				expect(localStorage.setItem).toHaveBeenCalledWith(
+					'token',
+					MOCK_ID_TOKEN,
+				);
+				expect(localStorage.setItem).toHaveBeenCalledWith(
+					'userId',
+					MOCK_LOCAL_ID,
+				);
+				expect(localStorage.setItem).toHaveBeenCalledWith(
+					'userName',
+					displayName,
+				);
+				expect(localStorage.setItem).toHaveBeenCalledWith(
+					'userEmail',
+					MOCK_EMAIL,
+				);
+			});
+		},
+	);
+
+	describe('login failure', () => {
+		it('should handle login failure and return error message', async () => {
+			const mockErrorMessage = 'INVALID_PASSWORD';
 			fetch.mockResolvedValueOnce({
-				ok: true,
-				json: async () => mockResponse,
+				ok: false,
+				json: async () => ({ error: { message: mockErrorMessage } }),
 			});
 
-			await store.dispatch(
+			const result = await store.dispatch(
 				login({
 					mode: API_DATABASE.API_AUTH_LOGIN_MODE,
 					email: MOCK_EMAIL,
@@ -95,100 +150,47 @@ describe.each([
 			);
 
 			const state = store.getState().authentication;
-			expect(state.token).toBe(MOCK_ID_TOKEN);
-			expect(state.userId).toBe(MOCK_LOCAL_ID);
-			expect(state.userName).toBe(displayName);
-			expect(state.userEmail).toBe(MOCK_EMAIL);
+			expect(state.token).toBeNull();
+			expect(state.userId).toBeNull();
+			expect(state.userName).toBeNull();
+			expect(state.userEmail).toBeNull();
 
-			expect(localStorage.setItem).toHaveBeenCalledWith(
-				'token',
-				MOCK_ID_TOKEN,
-			);
-			expect(localStorage.setItem).toHaveBeenCalledWith(
-				'userId',
-				MOCK_LOCAL_ID,
-			);
-			expect(localStorage.setItem).toHaveBeenCalledWith(
-				'userName',
-				displayName,
-			);
-			expect(localStorage.setItem).toHaveBeenCalledWith(
-				'userEmail',
-				MOCK_EMAIL,
-			);
-		});
-	},
-);
-
-describe('authenticationSlice - login failure', () => {
-	it('should handle login failure and return error message', async () => {
-		const mockErrorMessage = 'INVALID_PASSWORD';
-		fetch.mockResolvedValueOnce({
-			ok: false,
-			json: async () => ({ error: { message: mockErrorMessage } }),
+			expect(result.payload).toBe(mockErrorMessage);
+			expect(result.meta.rejectedWithValue).toBe(true);
 		});
 
-		const result = await store.dispatch(
-			login({
-				mode: API_DATABASE.API_AUTH_LOGIN_MODE,
-				email: MOCK_EMAIL,
-				password: MOCK_PASSWORD,
-			}),
-		);
+		it('should handle network errors gracefully', async () => {
+			const mockError = new Error('Network Error');
+			fetch.mockRejectedValueOnce(mockError);
 
-		expect(fetch).toHaveBeenCalledWith(
-			`${MOCK_API_URL}signInWithPassword?key=${MOCK_API_KEY}`,
-			expect.objectContaining({
-				method: API_DATABASE.POST,
-				body: JSON.stringify({
+			const result = await store.dispatch(
+				login({
+					mode: API_DATABASE.API_AUTH_LOGIN_MODE,
 					email: MOCK_EMAIL,
 					password: MOCK_PASSWORD,
-					returnSecureToken: true,
 				}),
-			}),
-		);
+			);
 
-		const state = store.getState().authentication;
-		expect(state.token).toBeNull();
-		expect(state.userId).toBeNull();
-		expect(state.userName).toBeNull();
-		expect(state.userEmail).toBeNull();
-
-		expect(result.payload).toBe(mockErrorMessage);
-		expect(result.meta.rejectedWithValue).toBe(true);
-	});
-
-	it('should handle network errors gracefully', async () => {
-		const mockError = new Error('Network Error');
-		fetch.mockRejectedValueOnce(mockError);
-
-		const result = await store.dispatch(
-			login({
-				mode: API_DATABASE.API_AUTH_LOGIN_MODE,
-				email: MOCK_EMAIL,
-				password: MOCK_PASSWORD,
-			}),
-		);
-
-		expect(fetch).toHaveBeenCalledWith(
-			`${MOCK_API_URL}signInWithPassword?key=${MOCK_API_KEY}`,
-			expect.objectContaining({
-				method: API_DATABASE.POST,
-				body: JSON.stringify({
-					email: MOCK_EMAIL,
-					password: MOCK_PASSWORD,
-					returnSecureToken: true,
+			expect(fetch).toHaveBeenCalledWith(
+				`${MOCK_API_URL}signInWithPassword?key=${MOCK_API_KEY}`,
+				expect.objectContaining({
+					method: API_DATABASE.POST,
+					body: JSON.stringify({
+						email: MOCK_EMAIL,
+						password: MOCK_PASSWORD,
+						returnSecureToken: true,
+					}),
 				}),
-			}),
-		);
+			);
 
-		const state = store.getState().authentication;
-		expect(state.token).toBeNull();
-		expect(state.userId).toBeNull();
-		expect(state.userName).toBeNull();
-		expect(state.userEmail).toBeNull();
+			const state = store.getState().authentication;
+			expect(state.token).toBeNull();
+			expect(state.userId).toBeNull();
+			expect(state.userName).toBeNull();
+			expect(state.userEmail).toBeNull();
 
-		expect(result.payload).toBe(mockError.message);
-		expect(result.meta.rejectedWithValue).toBe(true);
+			expect(result.payload).toBe(mockError.message);
+			expect(result.meta.rejectedWithValue).toBe(true);
+		});
 	});
 });
