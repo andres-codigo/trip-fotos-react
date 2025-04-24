@@ -96,6 +96,28 @@ describe('authenticationSlice reducers', () => {
 			didAutoLogout: false,
 		});
 	});
+
+	it('should handle setAutoLogout', () => {
+		const previousState = {
+			token: 'mock-token',
+			userId: 'mock-user-id',
+			userName: 'mock-user-name',
+			userEmail: 'mock-user-email',
+			didAutoLogout: false,
+		};
+
+		const state = authenticationReducer(
+			previousState,
+			authActions.setAutoLogout(),
+		);
+		expect(state).toEqual({
+			token: 'mock-token',
+			userId: 'mock-user-id',
+			userName: 'mock-user-name',
+			userEmail: 'mock-user-email',
+			didAutoLogout: true,
+		});
+	});
 });
 
 describe('authenticationSlice actions', () => {
