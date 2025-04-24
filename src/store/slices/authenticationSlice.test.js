@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
-import authenticationReducer, { login, tryLogin } from './authenticationSlice';
+import authenticationReducer, {
+	login,
+	tryLogin,
+	logout,
+	autoLogout,
+} from './authenticationSlice';
 import { API_DATABASE } from '@/constants/api';
 
 const MOCK_API_URL = 'https://mock-api-url.com/';
@@ -250,6 +255,39 @@ describe('authenticationSlice actions', () => {
 			expect(state.userId).toBeNull();
 			expect(state.userName).toBeNull();
 			expect(state.userEmail).toBeNull();
+		});
+	});
+
+	describe('logout and autoLogout actions', () => {
+		it('should handle logout', async () => {
+			await store.dispatch(logout());
+
+			const state = store.getState().authentication;
+
+			expect(state.token).toBeNull();
+			expect(state.userId).toBeNull();
+			expect(state.userName).toBeNull();
+			expect(state.userEmail).toBeNull();
+
+			expect(localStorage.removeItem).toHaveBeenCalledWith('token');
+			expect(localStorage.removeItem).toHaveBeenCalledWith('userId');
+			expect(localStorage.removeItem).toHaveBeenCalledWith('userName');
+			expect(localStorage.removeItem).toHaveBeenCalledWith('userEmail');
+			expect(localStorage.removeItem).toHaveBeenCalledWith(
+				'tokenExpiration',
+			);
+		});
+
+		it('should handle autoLogout', async () => {
+			await store.dispatch(autoLogout());
+
+			const state = store.getState().authentication;
+
+			expect(state.token).toBeNull();
+			expect(state.userId).toBeNull();
+			expect(state.userName).toBeNull();
+			expect(state.userEmail).toBeNull();
+			expect(state.didAutoLogout).toBe(true);
 		});
 	});
 });
