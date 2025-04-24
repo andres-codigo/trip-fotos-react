@@ -1,5 +1,5 @@
 import './BaseSpinner.module.scss'; // Ensure the styles are in a separate SCSS file
-import loadingSpinner from '../../../assets/loading-spinner.svg';
+import loadingSpinner from '@/assets/loading-spinner.svg';
 
 const BaseSpinner = () => {
 	return (

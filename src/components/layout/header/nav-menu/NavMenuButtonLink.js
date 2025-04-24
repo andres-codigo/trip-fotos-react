@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
-import BaseButton from '../../../ui/button/BaseButton.js';
+import BaseButton from '@/components/ui/button/BaseButton.js';
 
 import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss';
 

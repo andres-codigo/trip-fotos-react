@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import { AUTHENTICATION_ACTION_TYPES } from '../../constants/action-types';
-import { API_DATABASE } from '../../constants/api';
+import { AUTHENTICATION_ACTION_TYPES } from '@/constants/action-types';
+import { API_DATABASE } from '@/constants/api';
 
 let timer;
 

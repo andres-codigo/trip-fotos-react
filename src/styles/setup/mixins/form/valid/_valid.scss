@@ -1,5 +1,5 @@
-@use '../../../variables' as variables;
-@use '../../mixins' as mixins;
+@use '@/styles/setup/variables' as variables;
+@use '@/styles/setup/mixins/mixins' as mixins;
 
 @mixin label() {
 	label {
