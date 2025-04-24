@@ -330,7 +330,7 @@ describe('authenticationSlice actions', () => {
 		});
 	});
 
-	describe('logout actions', () => {
+	describe('logout action', () => {
 		it('should handle logout', async () => {
 			await store.dispatch(logout());
 
@@ -351,7 +351,7 @@ describe('authenticationSlice actions', () => {
 		});
 	});
 
-	describe('autoLogout actions', () => {
+	describe('autoLogout action', () => {
 		it('should handle autoLogout', async () => {
 			await store.dispatch(autoLogout());
 
