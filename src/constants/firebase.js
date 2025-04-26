@@ -1,4 +1,4 @@
-export const FirebaseConstants = Object.freeze({
+export const FIREBASE = Object.freeze({
 	API_KEY: import.meta.env.VITE_FIREBASE_API_KEY,
 	AUTH_DOMAIN: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
 	DATABASE_URL: import.meta.env.VITE_DATABASE_URL,

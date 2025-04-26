@@ -28,6 +28,7 @@ export default [
 	...compat.env({
 		es2020: true,
 		node: true,
+		vitest: true,
 	}),
 	{
 		ignores: ['dist/'],

@@ -1,32 +1,7 @@
-@use '../../styles/setup/variables' as variables;
-@use '../../styles/setup/mixins/mixins' as mixins;
+@use '@/styles/setup/variables' as variables;
+@use '@/styles/setup/mixins/mixins' as mixins;
 
-button {
-	background-color: variables.$color-ripe-plum;
-	border: 1px solid variables.$color-ripe-plum;
-	border-radius: 30px;
-	color: variables.$color-white;
-	cursor: pointer;
-	display: inline-block;
-	font: inherit;
-	padding: 0.75rem 1.5rem;
-	margin-right: 0.5rem;
-	text-decoration: none;
-
-	&:hover,
-	&:active {
-		background-color: variables.$color-ripe-eggplant;
-		border-color: variables.$color-ripe-eggplant;
-	}
-}
-
-a {
-	border: 1px solid transparent;
-	color: variables.$color-white;
-	display: inline-block;
-	padding: 0.75rem 1.5rem;
-	position: relative;
-
+a.navMenuButtonLink {
 	.totalMessagesContainer {
 		--size: 1.4rem;
 		--font-size: 0.75rem;
@@ -52,16 +27,8 @@ a {
 		}
 	}
 
-	&:hover {
-		color: variables.$color-lavender-magenta;
-
-		.totalMessagesContainer {
-			border: 1px solid variables.$color-pigment-indigo;
-		}
-	}
-
 	// TODO: remove vue router specific class and update with react router class names
-	&.router-link-active {
+	&.routerLinkActive {
 		border: 1px solid variables.$color-white;
 		color: variables.$color-white;
 
@@ -80,47 +47,18 @@ a {
 	}
 }
 
-button,
-a {
-	&.flat {
-		background-color: transparent;
-		color: variables.$color-ripe-plum;
-		border: none;
+a.navMenuButtonLink {
+	&:hover {
+		color: variables.$color-lavender-magenta;
 
-		&:hover,
-		&:active {
-			background-color: variables.$color-blue-chalk;
-		}
-	}
-
-	&.outline,
-	&.disabled {
-		border-color: variables.$color-ripe-eggplant;
-		color: variables.$color-ripe-eggplant;
-	}
-
-	&.outline {
-		background-color: transparent;
-
-		&:hover,
-		&:active {
-			background-color: variables.$color-blue-chalk;
-		}
-	}
-
-	&.disabled {
-		background-color: variables.$color-silver;
-		cursor: default;
-
-		&:hover,
-		&:active {
-			background-color: variables.$color-silver;
+		.totalMessagesContainer {
+			border: 1px solid variables.$color-pigment-indigo;
 		}
 	}
 }
 
 @media only screen and (max-width: 768px) {
-	button {
+	button.navMenuButtonLink {
 		background-color: variables.$color-pigment-indigo;
 		border: 1px solid variables.$color-pigment-indigo;
 		border-radius: 0;
@@ -130,11 +68,13 @@ a {
 
 		&:active,
 		&:hover {
+			background-color: variables.$color-pigment-indigo;
+			border: 1px solid variables.$color-pigment-indigo;
 			color: variables.$color-lavender-magenta;
 		}
 	}
 
-	a {
+	a.navMenuButtonLink {
 		padding: 1.25rem 0;
 		width: 100%;
 
@@ -167,7 +107,7 @@ a {
 		}
 
 		// TODO: remove vue router specific class and update with react router class names
-		&.router-link-active {
+		&.routerLinkActive {
 			background-color: variables.$color-ripe-eggplant;
 			border: none;
 			width: 100%;

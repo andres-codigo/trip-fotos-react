@@ -3,19 +3,23 @@ import { useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 
-import Button from '../button/Button';
-import MessagesButton from './MessagesButton';
 import headerStyles from './Header.module.scss';
 
 import { useCloseHamburgerMenu } from './hooks/useCloseHamburgerMenu';
 import { useHeaderState } from './hooks/useHeaderState';
 import { useLogout } from './hooks/useLogout';
-import useMobileMenu from './hooks/useMobileMenu';
+import { useMobileMenu } from './hooks/useMobileMenu';
+
+import NavMenuButtonLink from './nav-menu/NavMenuButtonLink';
+import NavMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss';
+import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink';
 
 function Header() {
 	// const navigate = useNavigate();
 
-	const isLoggedIn = useSelector((state) => state.auth.token !== null);
+	const isLoggedIn = useSelector(
+		(state) => state.authentication.token !== null,
+	);
 	// const usersName = useSelector((state) => state.travellers.travellerName);
 	// const isTraveller = useSelector((state) => state.travellers.isTraveller);
 	// const messagesCount = useSelector((state) => state.messages.messagesCount);
@@ -41,16 +45,12 @@ function Header() {
 	/// UPDATE IMPORT LINE 1: import { useEffect, useState, useRef } from 'react';
 
 	// useEffect(() => {
-	// 	setTravellerName(usersName);
-	// }, [usersName, setTravellerName]);
-
-	// useEffect(() => {
 	// 	setTotalMessages(messagesCount);
 	// }, [messagesCount]);
 
 	// useEffect(() => {
 	// 	if (isLoggedIn) {
-	// 		setTravellerName();
+	// 		setTravellerName(usersName);
 	// 		if (totalMessages === null) {
 	// 			setMessageCount();
 	// 		}
@@ -72,14 +72,17 @@ function Header() {
 	);
 
 	return (
-		<header className={headerStyles.header} data-cy="nav-header-container">
+		<header className={headerStyles.siteHeader} data-cy="site-header">
 			<nav className={headerStyles.navbar}>
 				<h1
-					className="navHeaderTitleLink"
-					data-cy="nav-header-title-link">
-					<Button isLink to="/" className="navLink">
+					className="siteHeaderTitleLink"
+					data-cy="site-header-title-link">
+					<NavMenuButtonLink
+						isLink
+						to="/"
+						className={NavMenuButtonLinkStyles.navMenuButtonLink}>
 						Trip Fotos
-					</Button>
+					</NavMenuButtonLink>
 				</h1>
 				<ul
 					className={classNames(headerStyles.navMenuItemsContainer, {
@@ -91,19 +94,29 @@ function Header() {
 						<li className={headerStyles.navMenuItem}>
 							<ul>
 								{/* {isTraveller && ( */}
-								<MessagesButton totalMessages={totalMessages} />
+								<NavMenuMessagesLink
+									className={
+										NavMenuButtonLinkStyles.navMenuButtonLink
+									}
+									totalMessages={totalMessages}
+								/>
 								{/* )} */}
 								<li
 									className="navMenuItemAllTravellers"
 									data-cy="nav-menu-item-all-travellers">
-									<Button isLink to="/" className="navLink">
+									<NavMenuButtonLink
+										isLink
+										to="/"
+										className={
+											NavMenuButtonLinkStyles.navMenuButtonLink
+										}>
 										All Travellers
-									</Button>
+									</NavMenuButtonLink>
 								</li>
 							</ul>
 						</li>
 					)}
-					{/* /// TODO: When routing is enabled add !== to 'auth' url to isLoggedIn condition */}
+					{/* /// TODO: When routing is enabled add !== to 'authentication' url to isLoggedIn condition */}
 					{isLoggedIn && (
 						<li
 							className={classNames(
@@ -111,12 +124,14 @@ function Header() {
 								'nav-menu-item-logout',
 							)}
 							onClick={handleLogoutClick}>
-							<Button
+							<NavMenuButtonLink
 								to="/"
-								className="navLink"
+								className={
+									NavMenuButtonLinkStyles.navMenuButtonLink
+								}
 								data-cy="nav-menu-item-logout">
 								Logout {travellerName}
-							</Button>
+							</NavMenuButtonLink>
 						</li>
 					)}
 				</ul>

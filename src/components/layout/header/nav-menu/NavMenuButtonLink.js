@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
-import styles from './Button.module.scss';
+import BaseButton from '@/components/ui/button/BaseButton.js';
 
-function Button({
+import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss';
+
+function NavMenuButtonLink({
 	children,
 	isLink = false,
 	isError = false,
@@ -22,33 +24,26 @@ function Button({
 		}
 	}, [isError]);
 
-	const combinedClassName = classNames(className, styles[modeType]);
+	const combinedClassName = classNames(
+		className,
+		navMenuButtonLinkStyles[modeType],
+	);
 
 	return (
-		<>
-			{!isLink ? (
-				<button
-					ref={elementRef}
-					className={combinedClassName}
-					disabled={isDisabled}
-					{...props}>
-					{children}
-				</button>
-			) : (
-				<a
-					href={to}
-					ref={elementRef}
-					className={combinedClassName}
-					aria-disabled={isDisabled}
-					{...props}>
-					{children}
-				</a>
-			)}
-		</>
+		<BaseButton
+			ref={elementRef}
+			className={combinedClassName}
+			isLink={isLink}
+			to={to}
+			isError={isError}
+			isDisabled={isDisabled}
+			{...props}>
+			{children}
+		</BaseButton>
 	);
 }
 
-Button.propTypes = {
+NavMenuButtonLink.propTypes = {
 	children: PropTypes.node.isRequired,
 	isLink: PropTypes.bool,
 	isError: PropTypes.bool,
@@ -58,4 +53,4 @@ Button.propTypes = {
 	className: PropTypes.string,
 };
 
-export default Button;
+export default NavMenuButtonLink;

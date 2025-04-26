@@ -1,9 +1,10 @@
-@use '../setup/variables' as variables;
+@use '@/styles/setup/variables' as variables;
 
 .isLoggedInUser {
 	background-color: variables.$color-blue-chalk;
 	h3,
 	h4 {
+		font-family: 'Roboto', sans-serif;
 		font-weight: 100;
 	}
 }

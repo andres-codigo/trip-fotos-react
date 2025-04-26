@@ -1,0 +1,74 @@
+@use '@/styles/setup/variables';
+
+button {
+	background-color: variables.$color-ripe-plum;
+	border: 1px solid variables.$color-ripe-plum;
+	border-radius: 30px;
+	color: variables.$color-white;
+	cursor: pointer;
+	display: inline-block;
+	font: inherit;
+	padding: 0.75rem 1.5rem;
+	margin-right: 0.5rem;
+	text-decoration: none;
+
+	&:hover,
+	&:active {
+		background-color: variables.$color-ripe-eggplant;
+		border-color: variables.$color-ripe-eggplant;
+	}
+}
+
+a {
+	border: 1px solid transparent;
+	color: variables.$color-white;
+	display: inline-block;
+	padding: 0.75rem 1.5rem;
+	position: relative;
+}
+
+button,
+a {
+	&.flat {
+		background-color: transparent;
+		color: variables.$color-ripe-plum;
+		border: none;
+
+		&:hover,
+		&:active {
+			background-color: variables.$color-blue-chalk;
+		}
+	}
+
+	&.outline,
+	&.disabled {
+		border-color: variables.$color-ripe-eggplant;
+		color: variables.$color-ripe-eggplant;
+	}
+
+	&.outline {
+		background-color: transparent;
+
+		&:hover,
+		&:active {
+			background-color: variables.$color-blue-chalk;
+		}
+	}
+
+	&.disabled {
+		background-color: variables.$color-silver;
+		cursor: default;
+
+		&:hover,
+		&:active {
+			background-color: variables.$color-silver;
+		}
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	button,
+	a {
+		padding: 0.5rem 1rem;
+	}
+}

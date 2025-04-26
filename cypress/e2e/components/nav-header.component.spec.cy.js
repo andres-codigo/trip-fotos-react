@@ -6,15 +6,15 @@ describe('Desktop > User Login Render Tests', () => {
 	});
 
 	it('The top navigation container displays the app title as a link', () => {
-		cy.get(topNavigationSelectors.navHeaderTitleLink).as(
-			'navHeaderTitleLink',
+		cy.get(topNavigationSelectors.siteHeaderTitleLink).as(
+			'siteHeaderTitleLink',
 		);
 
-		cy.get('@navHeaderTitleLink')
-			.should('have.class', 'navHeaderTitleLink')
+		cy.get('@siteHeaderTitleLink')
+			.should('have.class', 'siteHeaderTitleLink')
 			.find('a')
-			.then(($navHeaderTitleLink) => {
-				expect($navHeaderTitleLink.text()).to.equal('Trip Fotos');
+			.then(($siteHeaderTitleLink) => {
+				expect($siteHeaderTitleLink.text()).to.equal('Trip Fotos');
 			});
 	});
 });

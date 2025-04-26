@@ -1,33 +1,37 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import { APIConstants } from '../../constants/api';
+import { AUTHENTICATION_ACTION_TYPES } from '@/constants/action-types';
+import { API_DATABASE } from '@/constants/api';
 
 let timer;
 
+export const selectAuthenticationToken = (state) => state.authentication.token;
+
 export const login = createAsyncThunk(
-	'auth/login',
+	AUTHENTICATION_ACTION_TYPES.LOGIN,
 	async (payload, { dispatch, rejectWithValue }) => {
 		const url =
-			payload.mode === APIConstants.API_AUTH_SIGNUP_MODE
-				? `${APIConstants.API_URL}signUp?key=${APIConstants.API_KEY}`
-				: `${APIConstants.API_URL}signInWithPassword?key=${APIConstants.API_KEY}`;
+			payload.mode === API_DATABASE.API_AUTH_SIGNUP_MODE
+				? `${API_DATABASE.API_URL}signUp?key=${API_DATABASE.API_KEY}`
+				: `${API_DATABASE.API_URL}signInWithPassword?key=${API_DATABASE.API_KEY}`;
 
 		try {
 			const response = await fetch(url, {
-				method: APIConstants.POST,
+				method: API_DATABASE.POST,
 				body: JSON.stringify({
-					email: '',
-					password: '',
+					email: payload.email,
+					password: payload.password,
 					returnSecureToken: true,
 				}),
+				headers: {
+					'Content-Type': 'application/json',
+				},
 			});
 
 			const data = await response.json();
 
 			if (!response.ok) {
-				throw new Error(
-					data.error.message || 'Failed to authenticate.',
-				);
+				throw new Error(data.error.message || 'Login failed.');
 			}
 
 			const expiresIn = +data.expiresIn * 1000;
@@ -56,7 +60,7 @@ export const login = createAsyncThunk(
 );
 
 export const tryLogin = createAsyncThunk(
-	'auth/tryLogin',
+	AUTHENTICATION_ACTION_TYPES.TRY_LOGIN,
 	async (_, { dispatch }) => {
 		const token = localStorage.getItem('token');
 		const userId = localStorage.getItem('userId');
@@ -64,27 +68,34 @@ export const tryLogin = createAsyncThunk(
 		const userEmail = localStorage.getItem('userEmail');
 		const tokenExpiration = localStorage.getItem('tokenExpiration');
 
-		const expiresIn = +tokenExpiration - new Date().getTime();
-
-		if (expiresIn < 0) {
-			dispatch(autoLogout());
+		if (
+			!token ||
+			!tokenExpiration ||
+			new Date().getTime() > +tokenExpiration
+		) {
+			dispatch(authActions.clearUser());
+			dispatch(authActions.setAutoLogout(false));
 			return null;
 		}
 
+		const expiresIn = +tokenExpiration - new Date().getTime();
 		timer = setTimeout(() => {
 			dispatch(autoLogout());
 		}, expiresIn);
 
-		if (token && userId) {
-			return { token, userId, userName, userEmail };
-		}
+		dispatch(authActions.setAutoLogout(false));
 
-		return null;
+		return {
+			token,
+			userId,
+			userName,
+			userEmail,
+		};
 	},
 );
 
 export const logout = createAsyncThunk(
-	'auth/logout',
+	AUTHENTICATION_ACTION_TYPES.LOGOUT,
 	async (_, { dispatch }) => {
 		localStorage.removeItem('token');
 		localStorage.removeItem('userId');
@@ -94,20 +105,21 @@ export const logout = createAsyncThunk(
 
 		clearTimeout(timer);
 
-		dispatch(authSlice.actions.clearUser());
+		dispatch(authActions.clearUser());
 	},
 );
 
 export const autoLogout = createAsyncThunk(
-	'auth/autoLogout',
+	AUTHENTICATION_ACTION_TYPES.AUTO_LOGOUT,
 	async (_, { dispatch }) => {
 		dispatch(logout());
-		dispatch(authSlice.actions.setAutoLogout());
+		dispatch(authActions.clearUser());
+		dispatch(authActions.setAutoLogout());
 	},
 );
 
 const authSlice = createSlice({
-	name: 'auth',
+	name: 'authentication',
 	initialState: {
 		token: null,
 		userId: null,
@@ -121,9 +133,10 @@ const authSlice = createSlice({
 			state.userId = null;
 			state.userName = null;
 			state.userEmail = null;
+			state.didAutoLogout = false;
 		},
-		setAutoLogout(state) {
-			state.didAutoLogout = true;
+		setAutoLogout(state, action) {
+			state.didAutoLogout = action.payload ?? true;
 		},
 	},
 	extraReducers: (builder) => {
