@@ -68,25 +68,22 @@ export const tryLogin = createAsyncThunk(
 		const userEmail = localStorage.getItem('userEmail');
 		const tokenExpiration = localStorage.getItem('tokenExpiration');
 
-		const expiresIn = +tokenExpiration - new Date().getTime();
-
-		if (expiresIn < 0) {
-			dispatch(autoLogout());
-			return null;
-		}
-
-		timer = setTimeout(() => {
-			dispatch(autoLogout());
-		}, expiresIn);
-
 		if (
 			!token ||
 			!tokenExpiration ||
 			new Date().getTime() > +tokenExpiration
 		) {
 			dispatch(authActions.clearUser());
+			dispatch(authActions.setAutoLogout(false));
 			return null;
 		}
+
+		const expiresIn = +tokenExpiration - new Date().getTime();
+		timer = setTimeout(() => {
+			dispatch(autoLogout());
+		}, expiresIn);
+
+		dispatch(authActions.setAutoLogout(false));
 
 		return {
 			token,
@@ -136,9 +133,10 @@ const authSlice = createSlice({
 			state.userId = null;
 			state.userName = null;
 			state.userEmail = null;
+			state.didAutoLogout = false;
 		},
-		setAutoLogout(state) {
-			state.didAutoLogout = true;
+		setAutoLogout(state, action) {
+			state.didAutoLogout = action.payload ?? true;
 		},
 	},
 	extraReducers: (builder) => {
