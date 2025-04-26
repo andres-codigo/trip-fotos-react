@@ -380,6 +380,18 @@ describe('authenticationSlice', () => {
 				expect(state.userEmail).toBeNull();
 				expect(state.didAutoLogout).toBe(false);
 			});
+
+			it('should clear user details and set didAutoLogout to true', async () => {
+				await store.dispatch(autoLogout());
+
+				const state = store.getState().authentication;
+
+				expect(state.token).toBeNull();
+				expect(state.userId).toBeNull();
+				expect(state.userName).toBeNull();
+				expect(state.userEmail).toBeNull();
+				expect(state.didAutoLogout).toBe(true);
+			});
 		});
 
 		describe('logout', () => {
