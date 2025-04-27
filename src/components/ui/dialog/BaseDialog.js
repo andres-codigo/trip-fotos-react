@@ -5,7 +5,7 @@ import { CSSTransition } from 'react-transition-group';
 
 import BaseButton from '@/components/ui/button/BaseButton.js';
 
-import styles from './BaseDialog.module.scss';
+import baseDialogStyles from './BaseDialog.module.scss';
 
 const BaseDialog = ({
 	children,
@@ -37,30 +37,34 @@ const BaseDialog = ({
 
 	return ReactDOM.createPortal(
 		<>
-			{show && <div className={styles.backdrop} onClick={tryClose}></div>}
+			{show && (
+				<div
+					className={baseDialogStyles.backdrop}
+					onClick={tryClose}></div>
+			)}
 			<CSSTransition
 				in={show}
 				appear={show}
 				nodeRef={nodeRef}
 				timeout={300}
 				classNames={{
-					appear: styles['dialog-appear'],
-					appearActive: styles['dialog-appear-active'],
-					enter: styles['dialog-enter'],
-					enterActive: styles['dialog-enter-active'],
-					exit: styles['dialog-exit'],
-					exitActive: styles['dialog-exit-active'],
+					appear: baseDialogStyles['dialog-appear'],
+					appearActive: baseDialogStyles['dialog-appear-active'],
+					enter: baseDialogStyles['dialog-enter'],
+					enterActive: baseDialogStyles['dialog-enter-active'],
+					exit: baseDialogStyles['dialog-exit'],
+					exitActive: baseDialogStyles['dialog-exit-active'],
 				}}
 				unmountOnExit>
-				<dialog ref={nodeRef} open className={styles.dialog}>
-					<header className={styles.header}>
+				<dialog ref={nodeRef} open className={baseDialogStyles.dialog}>
+					<header className={baseDialogStyles.header}>
 						{header ? header : <h2>{title}</h2>}
 					</header>
 					<section
 						className={
 							sectionClasses
-								? styles.imageSection
-								: styles.generalSection
+								? baseDialogStyles.imageSection
+								: baseDialogStyles.generalSection
 						}>
 						{children}
 					</section>

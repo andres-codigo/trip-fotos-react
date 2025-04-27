@@ -11,7 +11,7 @@ import { useMobileMenu } from './hooks/useMobileMenu';
 import NavMenuButtonLink from './nav-menu/NavMenuButtonLink';
 import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink';
 
-import NavMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss';
+import navMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss';
 import headerStyles from './Header.module.scss';
 
 function Header() {
@@ -80,7 +80,7 @@ function Header() {
 					<NavMenuButtonLink
 						isLink
 						to="/"
-						className={NavMenuButtonLinkStyles.navMenuButtonLink}>
+						className={navMenuButtonLinkStyles.navMenuButtonLink}>
 						Trip Fotos
 					</NavMenuButtonLink>
 				</h1>
@@ -96,7 +96,7 @@ function Header() {
 								{/* {isTraveller && ( */}
 								<NavMenuMessagesLink
 									className={
-										NavMenuButtonLinkStyles.navMenuButtonLink
+										navMenuButtonLinkStyles.navMenuButtonLink
 									}
 									totalMessages={totalMessages}
 								/>
@@ -108,7 +108,7 @@ function Header() {
 										isLink
 										to="/"
 										className={
-											NavMenuButtonLinkStyles.navMenuButtonLink
+											navMenuButtonLinkStyles.navMenuButtonLink
 										}>
 										All Travellers
 									</NavMenuButtonLink>
@@ -127,7 +127,7 @@ function Header() {
 							<NavMenuButtonLink
 								to="/"
 								className={
-									NavMenuButtonLinkStyles.navMenuButtonLink
+									navMenuButtonLinkStyles.navMenuButtonLink
 								}
 								data-cy="nav-menu-item-logout">
 								Logout {travellerName}

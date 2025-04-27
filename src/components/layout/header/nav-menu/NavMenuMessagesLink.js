@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 
 import NavMenuButtonLink from './NavMenuButtonLink.js';
 
-import NavMenuButtonLinkStyles from './NavMenuButtonLink.module.scss';
+import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss';
 
 function NavMenuMessagesLink({ totalMessages, className }) {
-	const combinedClassName = classNames(className, NavMenuButtonLinkStyles);
+	const combinedClassName = classNames(className, navMenuButtonLinkStyles);
 
 	return (
 		<li className="navMenuItemMessages" data-cy="nav-menu-item-messages">
@@ -15,10 +15,10 @@ function NavMenuMessagesLink({ totalMessages, className }) {
 				{!!totalMessages && totalMessages > 0 && (
 					<span
 						className={
-							NavMenuButtonLinkStyles.totalMessagesContainer
+							navMenuButtonLinkStyles.totalMessagesContainer
 						}>
 						<span
-							className={NavMenuButtonLinkStyles.totalMessages}
+							className={navMenuButtonLinkStyles.totalMessages}
 							data-cy="total-messages">
 							{totalMessages}
 						</span>
