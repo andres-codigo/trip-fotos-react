@@ -10,6 +10,7 @@ import store from '@/store/store';
 // import './index.css';
 
 import App from './App.js';
+
 import '@/styles/global.scss';
 
 createRoot(document.getElementById('app')).render(

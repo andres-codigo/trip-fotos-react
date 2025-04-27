@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+
 import baseStyles from './BaseCard.module.scss';
 
 function BaseCard({ children }) {

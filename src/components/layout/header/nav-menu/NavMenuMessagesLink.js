@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
 import NavMenuButtonLink from './NavMenuButtonLink.js';
+
 import NavMenuButtonLinkStyles from './NavMenuButtonLink.module.scss';
 
 function NavMenuMessagesLink({ totalMessages, className }) {

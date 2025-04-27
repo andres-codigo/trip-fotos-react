@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-
 import { CSSTransition } from 'react-transition-group';
 
 import BaseButton from '@/components/ui/button/BaseButton.js';
+
 import styles from './BaseDialog.module.scss';
 
 const BaseDialog = ({

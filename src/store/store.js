@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+
 import authenticationReducer from './slices/authenticationSlice';
 import travellersReducer from './slices/travellersSlice';
 

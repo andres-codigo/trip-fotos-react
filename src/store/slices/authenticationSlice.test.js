@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
+
+import { API_DATABASE } from '@/constants/api';
+
 import authenticationReducer, {
 	login,
 	tryLogin,
@@ -7,8 +10,6 @@ import authenticationReducer, {
 	autoLogout,
 	authActions,
 } from './authenticationSlice';
-
-import { API_DATABASE } from '@/constants/api';
 
 const MOCK_API_URL = 'https://mock-api-url.com/';
 const MOCK_API_KEY = 'mock-api-key';

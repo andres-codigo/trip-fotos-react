@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
+
 import travellersReducer, {
 	travellerName,
 	setTravellerName,
 } from './travellersSlice';
-import { handleApiError } from '@/utils/errorHandler';
 
 const MOCK_API_URL = 'https://mock-api-url.com/';
 const MOCK_API_KEY = 'mock-api-key';
@@ -13,6 +13,8 @@ const MOCK_FIRST_NAME = 'John';
 const MOCK_LAST_NAME = 'Doe';
 const MOCK_FULL_NAME = 'John Doe';
 const MOCK_AUTH_TOKEN = 'mock-auth-token';
+
+import { handleApiError } from '@/utils/errorHandler';
 
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
