@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
 
 import { API_DATABASE } from '@/constants/api';
+import { MOCK } from './constants/mock';
 
 import authenticationReducer, {
 	login,
@@ -10,9 +11,6 @@ import authenticationReducer, {
 	autoLogout,
 	authActions,
 } from './authenticationSlice';
-
-const MOCK_API_URL = 'https://mock-api-url.com/';
-const MOCK_API_KEY = 'mock-api-key';
 
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
@@ -186,8 +184,8 @@ describe('authenticationSlice', () => {
 
 						const expectedUrl =
 							mode === API_DATABASE.API_AUTH_SIGNUP_MODE
-								? `${MOCK_API_URL}signUp?key=${MOCK_API_KEY}`
-								: `${MOCK_API_URL}signInWithPassword?key=${MOCK_API_KEY}`;
+								? `${MOCK.API_URL}signUp?key=${MOCK.API_KEY}`
+								: `${MOCK.API_URL}signInWithPassword?key=${MOCK.API_KEY}`;
 
 						expect(fetch).toHaveBeenCalledWith(
 							expectedUrl,
@@ -246,7 +244,7 @@ describe('authenticationSlice', () => {
 					);
 
 					expect(fetch).toHaveBeenCalledWith(
-						`${MOCK_API_URL}signInWithPassword?key=${MOCK_API_KEY}`,
+						`${MOCK.API_URL}signInWithPassword?key=${MOCK.API_KEY}`,
 						expect.objectContaining({
 							method: API_DATABASE.POST,
 							body: JSON.stringify({
@@ -280,7 +278,7 @@ describe('authenticationSlice', () => {
 					);
 
 					expect(fetch).toHaveBeenCalledWith(
-						`${MOCK_API_URL}signInWithPassword?key=${MOCK_API_KEY}`,
+						`${MOCK.API_URL}signInWithPassword?key=${MOCK.API_KEY}`,
 						expect.objectContaining({
 							method: API_DATABASE.POST,
 							body: JSON.stringify({

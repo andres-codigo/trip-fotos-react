@@ -1,18 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
 
+import { MOCK } from './constants/mock';
+
 import travellersReducer, {
 	travellerName,
 	setTravellerName,
 } from './travellersSlice';
-
-const MOCK_API_URL = 'https://mock-api-url.com/';
-const MOCK_API_KEY = 'mock-api-key';
-const MOCK_API_METHOD = 'POST';
-const MOCK_FIRST_NAME = 'John';
-const MOCK_LAST_NAME = 'Doe';
-const MOCK_FULL_NAME = 'John Doe';
-const MOCK_AUTH_TOKEN = 'mock-auth-token';
 
 import { handleApiError } from '@/utils/errorHandler';
 
@@ -29,7 +23,7 @@ vi.mock('@/utils/errorHandler', () => ({
 }));
 
 vi.mock('./authenticationSlice', () => ({
-	selectAuthenticationToken: vi.fn(() => MOCK_AUTH_TOKEN),
+	selectAuthenticationToken: vi.fn(() => MOCK.AUTH_TOKEN),
 }));
 
 global.fetch = vi.fn();
@@ -85,34 +79,34 @@ describe('travellersSlice', () => {
 	});
 
 	it('should update travellerName and set status to succeeded on successful API call', async () => {
-		const mockResponse = { displayName: MOCK_FULL_NAME };
+		const mockResponse = { displayName: MOCK.FULL_NAME };
 		fetch.mockResolvedValueOnce({
 			ok: true,
 			json: async () => mockResponse,
 		});
 
 		await store.dispatch(
-			travellerName({ first: MOCK_FIRST_NAME, last: MOCK_LAST_NAME }),
+			travellerName({ first: MOCK.FIRST_NAME, last: MOCK.LAST_NAME }),
 		);
 
 		expect(fetch).toHaveBeenCalledWith(
-			`${MOCK_API_URL}update?key=${MOCK_API_KEY}`,
+			`${MOCK.API_URL}update?key=${MOCK.API_KEY}`,
 			expect.objectContaining({
-				method: MOCK_API_METHOD,
+				method: MOCK.API_METHOD,
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					idToken: MOCK_AUTH_TOKEN,
-					displayName: MOCK_FULL_NAME,
+					idToken: MOCK.AUTH_TOKEN,
+					displayName: MOCK.FULL_NAME,
 				}),
 			}),
 		);
 
 		const state = store.getState().travellers;
-		expect(state.travellerName).toBe(MOCK_FULL_NAME);
+		expect(state.travellerName).toBe(MOCK.FULL_NAME);
 		expect(state.status).toBe('succeeded');
 		expect(localStorage.setItem).toHaveBeenCalledWith(
 			'userName',
-			MOCK_FULL_NAME,
+			MOCK.FULL_NAME,
 		);
 	});
 
@@ -123,7 +117,7 @@ describe('travellersSlice', () => {
 		});
 
 		await store.dispatch(
-			travellerName({ first: MOCK_FIRST_NAME, last: MOCK_LAST_NAME }),
+			travellerName({ first: MOCK.FIRST_NAME, last: MOCK.LAST_NAME }),
 		);
 
 		const state = store.getState().travellers;
@@ -137,7 +131,7 @@ describe('travellersSlice', () => {
 		fetch.mockRejectedValueOnce(mockError);
 
 		await store.dispatch(
-			travellerName({ first: MOCK_FIRST_NAME, last: MOCK_LAST_NAME }),
+			travellerName({ first: MOCK.FIRST_NAME, last: MOCK.LAST_NAME }),
 		);
 
 		expect(handleApiError).toHaveBeenCalledWith(
