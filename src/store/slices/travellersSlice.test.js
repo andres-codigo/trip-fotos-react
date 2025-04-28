@@ -15,6 +15,8 @@ import travellersReducer, {
 
 import { handleApiError } from '@/utils/errorHandler';
 
+import { setupMocks } from '@/testUtils/testSetup';
+
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
 		API_URL: 'https://mock-api-url.com/',
@@ -30,18 +32,6 @@ vi.mock('@/utils/errorHandler', () => ({
 vi.mock('./authenticationSlice', () => ({
 	selectAuthenticationToken: vi.fn(() => MOCK_USER.TOKEN),
 }));
-
-global.fetch = vi.fn();
-
-Object.defineProperty(global, 'localStorage', {
-	value: {
-		setItem: vi.fn(),
-		getItem: vi.fn(),
-		removeItem: vi.fn(),
-		clear: vi.fn(),
-	},
-	writable: true,
-});
 
 let store;
 
@@ -63,6 +53,8 @@ beforeEach(() => {
 	initializeStore();
 	resetMocks();
 });
+
+setupMocks();
 
 describe('travellersSlice', () => {
 	it('should initialize with default state', () => {

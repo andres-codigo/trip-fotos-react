@@ -18,6 +18,8 @@ import authenticationReducer, {
 	authActions,
 } from './authenticationSlice';
 
+import { setupMocks } from '@/testUtils/testSetup';
+
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
 		API_URL: 'https://mock-api-url.com/',
@@ -27,18 +29,6 @@ vi.mock('@/constants/api', () => ({
 		API_AUTH_SIGNUP_MODE: 'signup',
 	},
 }));
-
-global.fetch = vi.fn();
-
-Object.defineProperty(global, 'localStorage', {
-	value: {
-		setItem: vi.fn(),
-		getItem: vi.fn(),
-		removeItem: vi.fn(),
-		clear: vi.fn(),
-	},
-	writable: true,
-});
 
 let store;
 
@@ -56,6 +46,8 @@ const resetMocks = () => {
 	localStorage.getItem.mockClear();
 	localStorage.removeItem.mockClear();
 };
+
+setupMocks();
 
 describe('authenticationSlice', () => {
 	beforeEach(() => {
