@@ -256,7 +256,7 @@ describe('authenticationSlice', () => {
 				});
 
 				it('should handle network errors', async () => {
-					const mockError = new Error('Network Error');
+					const mockError = new Error(MOCK_MESSAGES.NETWORK_ERROR);
 					fetch.mockRejectedValueOnce(mockError);
 
 					const result = await store.dispatch(
