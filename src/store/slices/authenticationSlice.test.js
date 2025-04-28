@@ -115,97 +115,99 @@ describe('authenticationSlice', () => {
 	});
 
 	describe('actions', () => {
-		const loginTestCases = [
-			{
-				description: 'empty string',
-				displayName: '',
-				mode: API_DATABASE.API_AUTH_LOGIN_MODE,
-			},
-			{
-				description: 'non-empty string',
-				displayName: 'Test User',
-				mode: API_DATABASE.API_AUTH_LOGIN_MODE,
-			},
-			{
-				description: 'empty string (signup)',
-				displayName: '',
-				mode: API_DATABASE.API_AUTH_SIGNUP_MODE,
-			},
-			{
-				description: 'non-empty string (signup)',
-				displayName: 'Test User',
-				mode: API_DATABASE.API_AUTH_SIGNUP_MODE,
-			},
-		];
-
 		describe('login', () => {
-			describe.each(loginTestCases)(
-				'success scenarios',
-				({ description, displayName, mode }) => {
-					it(`should handle login success when displayName is ${description} and mode is ${mode}`, async () => {
-						const mockResponse = {
-							idToken: MOCK_KEYS.ID_TOKEN,
-							localId: MOCK_KEYS.LOCAL_ID,
-							displayName: displayName,
-							email: MOCK_KEYS.EMAIL,
-							expiresIn: MOCK_KEYS.EXPIRES_IN,
-						};
+			describe('success scenarios', () => {
+				const loginTestCases = [
+					{
+						description: 'empty string',
+						displayName: '',
+						mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+					},
+					{
+						description: 'non-empty string',
+						displayName: 'Test User',
+						mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+					},
+					{
+						description: 'empty string (signup)',
+						displayName: '',
+						mode: API_DATABASE.API_AUTH_SIGNUP_MODE,
+					},
+					{
+						description: 'non-empty string (signup)',
+						displayName: 'Test User',
+						mode: API_DATABASE.API_AUTH_SIGNUP_MODE,
+					},
+				];
 
-						fetch.mockResolvedValueOnce({
-							ok: true,
-							json: async () => mockResponse,
-						});
-
-						await store.dispatch(
-							login({
-								mode,
+				describe.each(loginTestCases)(
+					'login test cases',
+					({ description, displayName, mode }) => {
+						it(`should handle login success when displayName is ${description} and mode is ${mode}`, async () => {
+							const mockResponse = {
+								idToken: MOCK_KEYS.ID_TOKEN,
+								localId: MOCK_KEYS.LOCAL_ID,
+								displayName: displayName,
 								email: MOCK_KEYS.EMAIL,
-								password: MOCK_KEYS.PASSWORD,
-							}),
-						);
+								expiresIn: MOCK_KEYS.EXPIRES_IN,
+							};
 
-						const expectedUrl =
-							mode === API_DATABASE.API_AUTH_SIGNUP_MODE
-								? `${MOCK_API.URL}signUp?key=${MOCK_API.KEY}`
-								: `${MOCK_API.URL}signInWithPassword?key=${MOCK_API.KEY}`;
+							fetch.mockResolvedValueOnce({
+								ok: true,
+								json: async () => mockResponse,
+							});
 
-						expect(fetch).toHaveBeenCalledWith(
-							expectedUrl,
-							expect.objectContaining({
-								method: API_DATABASE.POST,
-								body: JSON.stringify({
+							await store.dispatch(
+								login({
+									mode,
 									email: MOCK_KEYS.EMAIL,
 									password: MOCK_KEYS.PASSWORD,
-									returnSecureToken: true,
 								}),
-							}),
-						);
+							);
 
-						const state = store.getState().authentication;
-						expect(state.token).toBe(MOCK_KEYS.ID_TOKEN);
-						expect(state.userId).toBe(MOCK_KEYS.LOCAL_ID);
-						expect(state.userName).toBe(displayName);
-						expect(state.userEmail).toBe(MOCK_KEYS.EMAIL);
+							const expectedUrl =
+								mode === API_DATABASE.API_AUTH_SIGNUP_MODE
+									? `${MOCK_API.URL}signUp?key=${MOCK_API.KEY}`
+									: `${MOCK_API.URL}signInWithPassword?key=${MOCK_API.KEY}`;
 
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.TOKEN,
-							MOCK_KEYS.ID_TOKEN,
-						);
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.USER_ID,
-							MOCK_KEYS.LOCAL_ID,
-						);
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.USER_NAME,
-							displayName,
-						);
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.USER_EMAIL,
-							MOCK_KEYS.EMAIL,
-						);
-					});
-				},
-			);
+							expect(fetch).toHaveBeenCalledWith(
+								expectedUrl,
+								expect.objectContaining({
+									method: API_DATABASE.POST,
+									body: JSON.stringify({
+										email: MOCK_KEYS.EMAIL,
+										password: MOCK_KEYS.PASSWORD,
+										returnSecureToken: true,
+									}),
+								}),
+							);
+
+							const state = store.getState().authentication;
+							expect(state.token).toBe(MOCK_KEYS.ID_TOKEN);
+							expect(state.userId).toBe(MOCK_KEYS.LOCAL_ID);
+							expect(state.userName).toBe(displayName);
+							expect(state.userEmail).toBe(MOCK_KEYS.EMAIL);
+
+							expect(localStorage.setItem).toHaveBeenCalledWith(
+								MOCK_STORAGE_KEYS.TOKEN,
+								MOCK_KEYS.ID_TOKEN,
+							);
+							expect(localStorage.setItem).toHaveBeenCalledWith(
+								MOCK_STORAGE_KEYS.USER_ID,
+								MOCK_KEYS.LOCAL_ID,
+							);
+							expect(localStorage.setItem).toHaveBeenCalledWith(
+								MOCK_STORAGE_KEYS.USER_NAME,
+								displayName,
+							);
+							expect(localStorage.setItem).toHaveBeenCalledWith(
+								MOCK_STORAGE_KEYS.USER_EMAIL,
+								MOCK_KEYS.EMAIL,
+							);
+						});
+					},
+				);
+			});
 
 			describe('failure scenarios', () => {
 				it('should handle login failure and return error message', async () => {
@@ -283,138 +285,144 @@ describe('authenticationSlice', () => {
 			});
 		});
 
-		const tryLoginTestCases = [
-			{
-				description: 'empty string',
-				displayName: '',
-			},
-			{
-				description: 'non-empty string',
-				displayName: 'Test User',
-			},
-		];
-
 		describe('tryLogin', () => {
-			describe.each(tryLoginTestCases)(
-				'success scenarios',
-				({ description, displayName }) => {
-					it(`should restore user details from localStorage when displayName is ${description}`, async () => {
-						localStorage.getItem.mockImplementation((key) => {
-							switch (key) {
-								case MOCK_STORAGE_KEYS.TOKEN:
-									return MOCK_KEYS.ID_TOKEN;
-								case MOCK_STORAGE_KEYS.USER_ID:
-									return MOCK_KEYS.LOCAL_ID;
-								case MOCK_STORAGE_KEYS.USER_NAME:
-									return displayName;
-								case MOCK_STORAGE_KEYS.USER_EMAIL:
-									return MOCK_KEYS.EMAIL;
-								case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
-									return MOCK_KEYS.EXPIRATION.toString();
-								default:
-									return null;
-							}
+			describe('success scenarios', () => {
+				const tryLoginTestCases = [
+					{
+						description: 'empty string',
+						displayName: '',
+					},
+					{
+						description: 'non-empty string',
+						displayName: 'Test User',
+					},
+				];
+
+				describe.each(tryLoginTestCases)(
+					'tryLogin test cases',
+					({ description, displayName }) => {
+						it(`should restore user details from localStorage when displayName is ${description}`, async () => {
+							localStorage.getItem.mockImplementation((key) => {
+								switch (key) {
+									case MOCK_STORAGE_KEYS.TOKEN:
+										return MOCK_KEYS.ID_TOKEN;
+									case MOCK_STORAGE_KEYS.USER_ID:
+										return MOCK_KEYS.LOCAL_ID;
+									case MOCK_STORAGE_KEYS.USER_NAME:
+										return displayName;
+									case MOCK_STORAGE_KEYS.USER_EMAIL:
+										return MOCK_KEYS.EMAIL;
+									case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
+										return MOCK_KEYS.EXPIRATION.toString();
+									default:
+										return null;
+								}
+							});
+
+							await store.dispatch(tryLogin());
+
+							const state = store.getState().authentication;
+
+							expect(state.token).toBe(MOCK_KEYS.ID_TOKEN);
+							expect(state.userId).toBe(MOCK_KEYS.LOCAL_ID);
+							expect(state.userName).toBe(displayName);
+							expect(state.userEmail).toBe(MOCK_KEYS.EMAIL);
 						});
+					},
+				);
 
-						await store.dispatch(tryLogin());
-
-						const state = store.getState().authentication;
-
-						expect(state.token).toBe(MOCK_KEYS.ID_TOKEN);
-						expect(state.userId).toBe(MOCK_KEYS.LOCAL_ID);
-						expect(state.userName).toBe(displayName);
-						expect(state.userEmail).toBe(MOCK_KEYS.EMAIL);
+				it('should handle expired token', async () => {
+					localStorage.getItem.mockImplementation((key) => {
+						switch (key) {
+							case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
+								return (new Date().getTime() - 1000).toString();
+							default:
+								return null;
+						}
 					});
-				},
-			);
 
-			it('should handle expired token', async () => {
-				localStorage.getItem.mockImplementation((key) => {
-					switch (key) {
-						case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
-							return (new Date().getTime() - 1000).toString();
-						default:
-							return null;
-					}
+					await store.dispatch(tryLogin());
+
+					const state = store.getState().authentication;
+
+					expect(state.token).toBeNull();
+					expect(state.userId).toBeNull();
+					expect(state.userName).toBeNull();
+					expect(state.userEmail).toBeNull();
 				});
 
-				await store.dispatch(tryLogin());
+				it('should handle empty localStorage during tryLogin', async () => {
+					localStorage.getItem.mockImplementation(() => null);
 
-				const state = store.getState().authentication;
+					await store.dispatch(tryLogin());
 
-				expect(state.token).toBeNull();
-				expect(state.userId).toBeNull();
-				expect(state.userName).toBeNull();
-				expect(state.userEmail).toBeNull();
-			});
+					const state = store.getState().authentication;
 
-			it('should handle empty localStorage during tryLogin', async () => {
-				localStorage.getItem.mockImplementation(() => null);
+					expect(state.token).toBeNull();
+					expect(state.userId).toBeNull();
+					expect(state.userName).toBeNull();
+					expect(state.userEmail).toBeNull();
+					expect(state.didAutoLogout).toBe(false);
+				});
 
-				await store.dispatch(tryLogin());
+				it('should clear user details and set didAutoLogout to true', async () => {
+					await store.dispatch(autoLogout());
 
-				const state = store.getState().authentication;
+					const state = store.getState().authentication;
 
-				expect(state.token).toBeNull();
-				expect(state.userId).toBeNull();
-				expect(state.userName).toBeNull();
-				expect(state.userEmail).toBeNull();
-				expect(state.didAutoLogout).toBe(false);
-			});
-
-			it('should clear user details and set didAutoLogout to true', async () => {
-				await store.dispatch(autoLogout());
-
-				const state = store.getState().authentication;
-
-				expect(state.token).toBeNull();
-				expect(state.userId).toBeNull();
-				expect(state.userName).toBeNull();
-				expect(state.userEmail).toBeNull();
-				expect(state.didAutoLogout).toBe(true);
+					expect(state.token).toBeNull();
+					expect(state.userId).toBeNull();
+					expect(state.userName).toBeNull();
+					expect(state.userEmail).toBeNull();
+					expect(state.didAutoLogout).toBe(true);
+				});
 			});
 		});
 
 		describe('logout', () => {
-			it('should clear user details and localStorage', async () => {
-				await store.dispatch(logout());
+			describe('success scenarios', () => {
+				it('should clear user details and localStorage', async () => {
+					await store.dispatch(logout());
 
-				const state = store.getState().authentication;
+					const state = store.getState().authentication;
 
-				expect(state.token).toBeNull();
-				expect(state.userId).toBeNull();
-				expect(state.userName).toBeNull();
-				expect(state.userEmail).toBeNull();
+					expect(state.token).toBeNull();
+					expect(state.userId).toBeNull();
+					expect(state.userName).toBeNull();
+					expect(state.userEmail).toBeNull();
 
-				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					MOCK_STORAGE_KEYS.TOKEN,
-				);
-				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					MOCK_STORAGE_KEYS.USER_ID,
-				);
-				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					MOCK_STORAGE_KEYS.USER_NAME,
-				);
-				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					MOCK_STORAGE_KEYS.USER_EMAIL,
-				);
-				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
-				);
+					expect(localStorage.removeItem).toHaveBeenCalledWith(
+						MOCK_STORAGE_KEYS.TOKEN,
+					);
+					expect(localStorage.removeItem).toHaveBeenCalledWith(
+						MOCK_STORAGE_KEYS.USER_ID,
+					);
+					expect(localStorage.removeItem).toHaveBeenCalledWith(
+						MOCK_STORAGE_KEYS.USER_NAME,
+					);
+					expect(localStorage.removeItem).toHaveBeenCalledWith(
+						MOCK_STORAGE_KEYS.USER_EMAIL,
+					);
+					expect(localStorage.removeItem).toHaveBeenCalledWith(
+						MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
+					);
+				});
 			});
 		});
 
 		describe('autoLogout', () => {
-			it('should clear user details and set didAutoLogout to true', async () => {
-				await store.dispatch(autoLogout());
+			describe('success scenarios', () => {
+				it('should clear user details and set didAutoLogout to true', async () => {
+					await store.dispatch(autoLogout());
 
-				const state = store.getState().authentication;
+					const state = store.getState().authentication;
 
-				expect(state.token).toBeNull();
-				expect(state.userId).toBeNull();
-				expect(state.userName).toBeNull();
-				expect(state.userEmail).toBeNull();
-				expect(state.didAutoLogout).toBe(true);
+					expect(state.token).toBeNull();
+					expect(state.userId).toBeNull();
+					expect(state.userName).toBeNull();
+					expect(state.userEmail).toBeNull();
+					expect(state.didAutoLogout).toBe(true);
+				});
 			});
 		});
 	});
