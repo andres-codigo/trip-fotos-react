@@ -197,19 +197,19 @@ npm install vitest --save-dev
 
 **Run Tests**
 
-Run all Tests:
+- Run all tests:
 
 ```bash
 npm run test
 ```
 
-Run Tests in Watch Mode:
+- Run tests in watch mode:
 
 ```bash
 npm run test:watch
 ```
 
-**Generate Coverage Report**
+- Generate a coverage report
 
 ```bash
 npm run test:coverage
@@ -276,19 +276,19 @@ Cypress is pre-configured in this project. Feel free to customise the [cypress.c
 
 **Run Tests**
 
-**Interactive Mode**: Opens the Cypress Test Runner for a visual testing experience.
+- **Interactive Mode**: Opens the Cypress Test Runner for a visual testing experience.
 
 ```bash
 npx cypress open
 ```
 
-**Headless Mode:** Runs all tests in the terminal without opening the Test Runner
+- **Headless Mode:** Runs all tests in the terminal without opening the Test Runner
 
 ```bash
 npx cypress run
 ```
 
-To run a specific test file, use the following command:
+- Run a specific test file:
 
 ```bash
 npx cypress run --spec "cypress/e2e/<test-file>.cy.js"
@@ -371,6 +371,7 @@ To enable a user to 'Sign-up' and then register as a traveller uncomment the 'sw
 ```
 trip-fotos-react/
 ├── cypress/            # Cypress tests
+├── declarations/       # Breaking issue fix when using ESLint V9
 ├── public/             # Static assets
 ├── src/
 │   ├── assets/         # Fonts, svg's
@@ -379,19 +380,24 @@ trip-fotos-react/
 │   ├── pages/          # Page components for routing
 │   ├── store/          # Redux store and slices
 │   ├── styles/         # SCSS stylesheets
+│   ├── testUtils/      # Vitest utility functions
 │   ├── utils/          # Utility functions
-│   └── App.js          # Main application component
+│   ├── App.js          # Main application component
+│   ├── firebase.js     # Firebase configuration
+│   ├── index.js        # Root App
+│   └── setupTests.js   # Testing environment configuration
+├── .env                        # Environment variables (not committed to version control)
 ├── .firebaserc                 # Firebase project configuration
 ├── .gitignore                  # Git ignore rules
 ├── .prettierignore             # Prettier ignore rules
 ├── .prettierrc.json            # Prettier configuration
 ├── cypress.config.js           # Cypress testing configuration
 ├── eslint.config.mjs           # ESLint configuration
-├── vercel.json                 # Vercel deployment configuration
-├── vite.config.js              # Vite build tool configuration
+├── jsconfig.json               # JS configuration
 ├── package.json                # Project dependencies and scripts
 ├── README.md                   # Project documentation
-└── .env                        # Environment variables (not committed to version control)
+├── vercel.json                 # Vercel deployment configuration
+└── vite.config.js              # Vite build tool configuration
 ```
 
 ### Explanation of Additional Files:
