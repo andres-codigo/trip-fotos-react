@@ -3,16 +3,16 @@ import { useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 
-import headerStyles from './Header.module.scss';
-
 import { useCloseHamburgerMenu } from './hooks/useCloseHamburgerMenu';
 import { useHeaderState } from './hooks/useHeaderState';
 import { useLogout } from './hooks/useLogout';
 import { useMobileMenu } from './hooks/useMobileMenu';
 
 import NavMenuButtonLink from './nav-menu/NavMenuButtonLink';
-import NavMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss';
 import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink';
+
+import navMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss';
+import headerStyles from './Header.module.scss';
 
 function Header() {
 	// const navigate = useNavigate();
@@ -80,7 +80,7 @@ function Header() {
 					<NavMenuButtonLink
 						isLink
 						to="/"
-						className={NavMenuButtonLinkStyles.navMenuButtonLink}>
+						className={navMenuButtonLinkStyles.navMenuButtonLink}>
 						Trip Fotos
 					</NavMenuButtonLink>
 				</h1>
@@ -96,7 +96,7 @@ function Header() {
 								{/* {isTraveller && ( */}
 								<NavMenuMessagesLink
 									className={
-										NavMenuButtonLinkStyles.navMenuButtonLink
+										navMenuButtonLinkStyles.navMenuButtonLink
 									}
 									totalMessages={totalMessages}
 								/>
@@ -108,7 +108,7 @@ function Header() {
 										isLink
 										to="/"
 										className={
-											NavMenuButtonLinkStyles.navMenuButtonLink
+											navMenuButtonLinkStyles.navMenuButtonLink
 										}>
 										All Travellers
 									</NavMenuButtonLink>
@@ -127,7 +127,7 @@ function Header() {
 							<NavMenuButtonLink
 								to="/"
 								className={
-									NavMenuButtonLinkStyles.navMenuButtonLink
+									navMenuButtonLinkStyles.navMenuButtonLink
 								}
 								data-cy="nav-menu-item-logout">
 								Logout {travellerName}

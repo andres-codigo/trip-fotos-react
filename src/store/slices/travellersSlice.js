@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import { selectAuthenticationToken } from './authenticationSlice';
-
-import { handleApiError } from '@/utils/errorHandler';
-
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/action-types';
 import { API_ERROR_MESSAGE } from '@/constants/api-messages';
 import { API_DATABASE } from '@/constants/api';
+
+import { selectAuthenticationToken } from './authenticationSlice';
+
+import { handleApiError } from '@/utils/errorHandler';
 
 export const travellerName = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.TRAVELLER_NAME,

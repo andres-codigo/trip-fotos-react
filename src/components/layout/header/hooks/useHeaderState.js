@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { useLoggedInTravellerName } from './useLoggedInTravellerName';
 
 export function useHeaderState() {

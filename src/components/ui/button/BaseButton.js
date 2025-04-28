@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
-import styles from './BaseButton.module.scss';
+import baseButtonStyles from './BaseButton.module.scss';
 
 function BaseButton({
 	children,
@@ -22,7 +22,7 @@ function BaseButton({
 		}
 	}, [isError]);
 
-	const combinedClassName = classNames(className, styles[modeType]);
+	const combinedClassName = classNames(className, baseButtonStyles[modeType]);
 
 	return (
 		<>

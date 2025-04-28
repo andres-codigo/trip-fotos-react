@@ -1,9 +1,9 @@
-import './BaseSpinner.module.scss'; // Ensure the styles are in a separate SCSS file
+import baseSpinnerStyles from './BaseSpinner.module.scss';
 import loadingSpinner from '@/assets/loading-spinner.svg';
 
 const BaseSpinner = () => {
 	return (
-		<div className="spinner">
+		<div className={baseSpinnerStyles.spinner}>
 			<img src={loadingSpinner} alt="Loading..." />
 		</div>
 	);

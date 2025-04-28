@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
-import baseStyles from './BaseCard.module.scss';
+
+import baseCardStyles from './BaseCard.module.scss';
 
 function BaseCard({ children }) {
-	return <div className={baseStyles.card}>{children}</div>;
+	return <div className={baseCardStyles.card}>{children}</div>;
 }
 
 BaseCard.propTypes = {
