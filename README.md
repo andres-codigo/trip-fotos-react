@@ -27,6 +27,7 @@ This project uses the following technologies:
 - [SCSS](https://sass-lang.com/) for CSS preprocessing.
 - [ESLint](https://eslint.org/) for JavaScript linting.
 - [Prettier](https://prettier.io/) for code formatting.
+- [Vitest](https://vitest.dev/) for unit and integration testing.
 - [Cypress](https://www.cypress.io/) for end-to-end testing.
 - [Firebase Realtime Database](https://firebase.google.com/docs/database) for storing travellers and messages.
 - [Firebase Authentication](https://firebase.google.com/docs/auth) for managing sign-in credentials.
@@ -52,7 +53,7 @@ cd trip-fotos-react
 
 ### Install dependencies
 
-Run the following command to install all required dependencies:
+Run the following command to install all required dependencies, including Cypress and Vitest:
 
 ```bash
 npm install
@@ -180,35 +181,143 @@ npm run dev
 
 ## Testing
 
-This project uses [Cypress](https://www.cypress.io/) for end-to-end testing.
+This project uses [Vitest](https://vitest.dev/) for unit and integration testing, and [Cypress](https://www.cypress.io/) for end-to-end testing.
 
-### Install Cypress
+### 1. Vitest Setup
+
+Vitest is already configured in the project.
+
+To get started:
+
+**Install Vitest** (if not already installed):
 
 ```bash
-npm install cypress --save-dev
+npm install vitest --save-dev
 ```
 
-### Run Cypress Tests
+**Run Tests**
 
-- Open the Cypress Test Runner:
-    ```bash
-    npx cypress open
-    ```
-- Run all tests in headless mode:
-    ```bash
-    npx cypress run
-    ```
+Run all Tests:
 
-### Test Directory Structure
-
-```
-cypress/
-  ├── e2e/         # End-to-end test files (e.g., homepage.cy.js)
-  ├── fixtures/    # Mock data used in tests
-  ├── support/     # Custom commands and test setup
+```bash
+npm run test
 ```
 
----
+Run Tests in Watch Mode:
+
+```bash
+npm run test:watch
+```
+
+**Generate Coverage Report**
+
+```bash
+npm run test:coverage
+```
+
+**Vitest Directory Structure**
+
+```
+src/
+    ├── store/
+    │   ├── slices/
+    │   │   ├── <test-file>.js
+    │   │   ├── <test-file>.test.js
+```
+
+**Writing Tests**
+
+Test files are located alongside the source files they test, following the convention \*.test.js.
+
+```javascript
+import { describe, it, expect } from 'vitest';
+
+describe('Example Test Suite', () => {
+	it('should pass this test', () => {
+		expect(1 + 1).toBe(2);
+	});
+});
+```
+
+### Vitest Test Utilities
+
+Reusable test utilities are located in the [testSetup](https://github.com/andres-codigo/trip-fotos-react/blob/main/src/testUtils/testSetup.js) file. These include:
+
+- **Mock Setup**: Functions to mock `fetch`, `localStorage`, and other global objects.
+
+Example usage:
+
+```javascript
+import { setupMocks, resetMocks } from '@/testUtils/testSetup';
+
+beforeEach(() => {
+	setupMocks();
+	resetMocks();
+});
+```
+
+### 2. Cypress Setup
+
+Cypress is already configured in the project.
+
+To get started:
+
+**Install Cypress**
+
+Cypress is included in the project dependencies. If you haven't already installed the dependencies, run:
+
+```bash
+npm install
+```
+
+**Cypress Configuration**
+
+Cypress is pre-configured in this project. Feel free to customise the [cypress.config.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/cypress.config.js) file as needed for your testing requirements.
+
+**Run Tests**
+
+**Interactive Mode**: Opens the Cypress Test Runner for a visual testing experience.
+
+```bash
+npx cypress open
+```
+
+**Headless Mode:** Runs all tests in the terminal without opening the Test Runner
+
+```bash
+npx cypress run
+```
+
+To run a specific test file, use the following command:
+
+```bash
+npx cypress run --spec "cypress/e2e/<test-file>.cy.js"
+```
+
+**Cypress Directory Structure**
+
+**Fixtures**: Contains mock data used in tests (e.g., JSON files for API responses).
+**Support**: Contains custom commands and global test setup files.
+
+```
+    cypress/
+      ├── e2e/         # End-to-end test files (e.g., homepage.cy.js)
+      ├── fixtures/    # Mock data used in tests
+      ├── support/     # Custom commands and test setup
+```
+
+**Test Artifacts**
+
+Cypress stores screenshots and videos (if enabled) in the following directories:
+
+- **Screenshots**: `cypress/screenshots/`
+- **Videos**: `cypress/videos/`
+
+You can configure these paths in the [cypress.config.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/cypress.config.js) file.
+
+**Debugging Cypress Tests**
+
+To debug tests, use the Cypress Test Runner in interactive mode (`npx cypress open`). You can inspect elements and view console logs using the browser's developer tools.
 
 ## Build
 
