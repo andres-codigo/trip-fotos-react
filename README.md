@@ -171,10 +171,7 @@ VITE_FIREBASE_APP_ID='' # firebaseConfig > appId
 VITE_FIREBASE_MEASUREMENT_ID='' # firebaseConfig > measurementId
 
 # Admin User ID
-
-# UNIQUE ID FOR 'EMAIL/PASSWORD' REGISTERED FIREBASE AUTHENTICATED USER THAT WILL HAVE ADMIN RIGHTS ON APP, ALLOWING FOR THE DELETION OF TRAVELLERS FROM THE UI FRONT END, EXCLUDING REGISTERED ADMIN USER *
-
-VITE_ADMIN_ID=''
+VITE_ADMIN_ID='' # Firebase authenticated User UID for deletion of users rights
 
 ```
 
@@ -374,10 +371,6 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 - **Traveller Profiles**
   Registered travellers can upload photos and leave personal messages on other traveller profiles.
-
-NB: The trip-fotos-vue App requires registered login credentials for full access. By default, a user is only able to login.
-
-To enable a user to 'Sign-up' and then register as a traveller uncomment the 'switch mode' button (src/pages/auth/UserAuth.vue), lines 38-43. Once a users have been signed-up, validate the entries in Firebase > Authentication > Users, and copy and paste the **User UID** of your choice into the .env **VITE_ADMIN_ID** property for user Admin access, allowing this user to delete registered travellers using the Front End UI. Deleting the traveller will delete all traveller information, including images, but their authenticated sign-up details will remain.
 
 ## Folder Structure
 
