@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
 
 import { API_DATABASE } from '@/constants/api';
-import { MOCK } from './constants/mock';
+import {
+	MOCK_API,
+	MOCK_USER,
+	STORAGE_KEYS,
+	MOCK_KEYS,
+	MOCK_MESSAGES,
+} from './constants/mock';
 
 import authenticationReducer, {
 	login,
@@ -73,10 +79,10 @@ describe('authenticationSlice', () => {
 
 		it('should handle clearUser', () => {
 			const previousState = {
-				token: 'mock-token',
-				userId: 'mock-user-id',
-				userName: 'mock-user-name',
-				userEmail: 'mock-user-email',
+				token: MOCK_USER.TOKEN,
+				userId: MOCK_USER.USER_ID,
+				userName: MOCK_USER.USER_NAME,
+				userEmail: MOCK_USER.USER_EMAIL,
 				didAutoLogout: false,
 			};
 
@@ -95,10 +101,10 @@ describe('authenticationSlice', () => {
 
 		it('should handle setAutoLogout', () => {
 			const previousState = {
-				token: 'mock-token',
-				userId: 'mock-user-id',
-				userName: 'mock-user-name',
-				userEmail: 'mock-user-email',
+				token: MOCK_USER.TOKEN,
+				userId: MOCK_USER.USER_ID,
+				userName: MOCK_USER.USER_NAME,
+				userEmail: MOCK_USER.USER_EMAIL,
 				didAutoLogout: false,
 			};
 
@@ -107,32 +113,16 @@ describe('authenticationSlice', () => {
 				authActions.setAutoLogout(),
 			);
 			expect(state).toEqual({
-				token: 'mock-token',
-				userId: 'mock-user-id',
-				userName: 'mock-user-name',
-				userEmail: 'mock-user-email',
+				token: MOCK_USER.TOKEN,
+				userId: MOCK_USER.USER_ID,
+				userName: MOCK_USER.USER_NAME,
+				userEmail: MOCK_USER.USER_EMAIL,
 				didAutoLogout: true,
 			});
 		});
 	});
 
 	describe('actions', () => {
-		const STORAGE_KEYS = {
-			TOKEN: 'token',
-			USER_ID: 'userId',
-			USER_NAME: 'userName',
-			USER_EMAIL: 'userEmail',
-			TOKEN_EXPIRATION: 'tokenExpiration',
-		};
-
-		const MOCK_KEYS = {
-			EMAIL: 'test@example.com',
-			PASSWORD: 'password123',
-			ID_TOKEN: 'mock-id-token',
-			LOCAL_ID: 'mock-local-id',
-			EXPIRATION: new Date().getTime() + 3600 * 1000,
-		};
-
 		const loginTestCases = [
 			{
 				description: 'empty string',
@@ -166,7 +156,7 @@ describe('authenticationSlice', () => {
 							localId: MOCK_KEYS.LOCAL_ID,
 							displayName: displayName,
 							email: MOCK_KEYS.EMAIL,
-							expiresIn: '3600',
+							expiresIn: MOCK_KEYS.EXPIRES_IN,
 						};
 
 						fetch.mockResolvedValueOnce({
@@ -184,8 +174,8 @@ describe('authenticationSlice', () => {
 
 						const expectedUrl =
 							mode === API_DATABASE.API_AUTH_SIGNUP_MODE
-								? `${MOCK.API_URL}signUp?key=${MOCK.API_KEY}`
-								: `${MOCK.API_URL}signInWithPassword?key=${MOCK.API_KEY}`;
+								? `${MOCK_API.URL}signUp?key=${MOCK_API.KEY}`
+								: `${MOCK_API.URL}signInWithPassword?key=${MOCK_API.KEY}`;
 
 						expect(fetch).toHaveBeenCalledWith(
 							expectedUrl,
@@ -227,7 +217,7 @@ describe('authenticationSlice', () => {
 
 			describe('failure scenarios', () => {
 				it('should handle login failure and return error message', async () => {
-					const mockErrorMessage = 'INVALID_PASSWORD';
+					const mockErrorMessage = MOCK_MESSAGES.INVALID_PASSWORD;
 					fetch.mockResolvedValueOnce({
 						ok: false,
 						json: async () => ({
@@ -244,7 +234,7 @@ describe('authenticationSlice', () => {
 					);
 
 					expect(fetch).toHaveBeenCalledWith(
-						`${MOCK.API_URL}signInWithPassword?key=${MOCK.API_KEY}`,
+						`${MOCK_API.URL}signInWithPassword?key=${MOCK_API.KEY}`,
 						expect.objectContaining({
 							method: API_DATABASE.POST,
 							body: JSON.stringify({
@@ -278,7 +268,7 @@ describe('authenticationSlice', () => {
 					);
 
 					expect(fetch).toHaveBeenCalledWith(
-						`${MOCK.API_URL}signInWithPassword?key=${MOCK.API_KEY}`,
+						`${MOCK_API.URL}signInWithPassword?key=${MOCK_API.KEY}`,
 						expect.objectContaining({
 							method: API_DATABASE.POST,
 							body: JSON.stringify({
