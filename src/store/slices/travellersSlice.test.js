@@ -4,9 +4,9 @@ import { configureStore } from '@reduxjs/toolkit';
 import {
 	MOCK_API,
 	MOCK_USER,
-	STORAGE_KEYS,
+	MOCK_STORAGE_KEYS,
 	MOCK_MESSAGES,
-} from './constants/mock';
+} from '@/constants/mock-data';
 
 import travellersReducer, {
 	travellerName,
@@ -103,7 +103,7 @@ describe('travellersSlice', () => {
 		expect(state.travellerName).toBe(MOCK_USER.FULL_NAME);
 		expect(state.status).toBe('succeeded');
 		expect(localStorage.setItem).toHaveBeenCalledWith(
-			STORAGE_KEYS.USER_NAME,
+			MOCK_STORAGE_KEYS.USER_NAME,
 			MOCK_USER.FULL_NAME,
 		);
 	});

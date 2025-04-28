@@ -5,10 +5,10 @@ import { API_DATABASE } from '@/constants/api';
 import {
 	MOCK_API,
 	MOCK_USER,
-	STORAGE_KEYS,
+	MOCK_STORAGE_KEYS,
 	MOCK_KEYS,
 	MOCK_MESSAGES,
-} from './constants/mock';
+} from '@/constants/mock-data';
 
 import authenticationReducer, {
 	login,
@@ -188,19 +188,19 @@ describe('authenticationSlice', () => {
 						expect(state.userEmail).toBe(MOCK_KEYS.EMAIL);
 
 						expect(localStorage.setItem).toHaveBeenCalledWith(
-							STORAGE_KEYS.TOKEN,
+							MOCK_STORAGE_KEYS.TOKEN,
 							MOCK_KEYS.ID_TOKEN,
 						);
 						expect(localStorage.setItem).toHaveBeenCalledWith(
-							STORAGE_KEYS.USER_ID,
+							MOCK_STORAGE_KEYS.USER_ID,
 							MOCK_KEYS.LOCAL_ID,
 						);
 						expect(localStorage.setItem).toHaveBeenCalledWith(
-							STORAGE_KEYS.USER_NAME,
+							MOCK_STORAGE_KEYS.USER_NAME,
 							displayName,
 						);
 						expect(localStorage.setItem).toHaveBeenCalledWith(
-							STORAGE_KEYS.USER_EMAIL,
+							MOCK_STORAGE_KEYS.USER_EMAIL,
 							MOCK_KEYS.EMAIL,
 						);
 					});
@@ -301,15 +301,15 @@ describe('authenticationSlice', () => {
 					it(`should restore user details from localStorage when displayName is ${description}`, async () => {
 						localStorage.getItem.mockImplementation((key) => {
 							switch (key) {
-								case STORAGE_KEYS.TOKEN:
+								case MOCK_STORAGE_KEYS.TOKEN:
 									return MOCK_KEYS.ID_TOKEN;
-								case STORAGE_KEYS.USER_ID:
+								case MOCK_STORAGE_KEYS.USER_ID:
 									return MOCK_KEYS.LOCAL_ID;
-								case STORAGE_KEYS.USER_NAME:
+								case MOCK_STORAGE_KEYS.USER_NAME:
 									return displayName;
-								case STORAGE_KEYS.USER_EMAIL:
+								case MOCK_STORAGE_KEYS.USER_EMAIL:
 									return MOCK_KEYS.EMAIL;
-								case STORAGE_KEYS.TOKEN_EXPIRATION:
+								case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
 									return MOCK_KEYS.EXPIRATION.toString();
 								default:
 									return null;
@@ -331,7 +331,7 @@ describe('authenticationSlice', () => {
 			it('should handle expired token', async () => {
 				localStorage.getItem.mockImplementation((key) => {
 					switch (key) {
-						case STORAGE_KEYS.TOKEN_EXPIRATION:
+						case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
 							return (new Date().getTime() - 1000).toString();
 						default:
 							return null;
@@ -387,19 +387,19 @@ describe('authenticationSlice', () => {
 				expect(state.userEmail).toBeNull();
 
 				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					STORAGE_KEYS.TOKEN,
+					MOCK_STORAGE_KEYS.TOKEN,
 				);
 				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					STORAGE_KEYS.USER_ID,
+					MOCK_STORAGE_KEYS.USER_ID,
 				);
 				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					STORAGE_KEYS.USER_NAME,
+					MOCK_STORAGE_KEYS.USER_NAME,
 				);
 				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					STORAGE_KEYS.USER_EMAIL,
+					MOCK_STORAGE_KEYS.USER_EMAIL,
 				);
 				expect(localStorage.removeItem).toHaveBeenCalledWith(
-					STORAGE_KEYS.TOKEN_EXPIRATION,
+					MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
 				);
 			});
 		});
