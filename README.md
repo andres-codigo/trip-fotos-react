@@ -4,6 +4,7 @@
 
 - [About This Project](#about-this-project)
 - [Stack](#stack)
+- [Quick Start](#quick-start)
 - [Installation](#installation)
 - [Scripts](#scripts)
 - [Setup](#setup)
@@ -12,6 +13,8 @@
 - [Build](#build)
 - [Deployment](#deployment)
 - [Features](#features)
+- [Folder Structure](#folder-structure)
+- [Troubleshooting](#troubleshooting)
 
 ## About This Project
 
@@ -33,6 +36,29 @@ This project uses the following technologies:
 - [Firebase Realtime Database](https://firebase.google.com/docs/database) for storing travellers and messages.
 - [Firebase Authentication](https://firebase.google.com/docs/auth) for managing sign-in credentials.
 - [Firebase Cloud Storage](https://firebase.google.com/docs/storage) for storing uploaded traveller images.
+
+## Quick Start
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/andres-codigo/trip-fotos-react
+    cd trip-fotos-react
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+3. Start the development server:
+
+    ```bash
+    npm run dev
+    ```
+
+4. Open the app in your browser at http://localhost:3000
 
 ## Installation
 
@@ -186,8 +212,6 @@ Create a `.firebaserc` file in the root directory with the following content:
 	}
 }
 ```
-
----
 
 ## Development
 
@@ -346,7 +370,7 @@ The output will be located in the `./dist` folder.
 Serve the production build locally:
 
 ```bash
-npm run serve
+npm run preview
 ```
 
 ---
@@ -367,10 +391,10 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
   Users can sign up and log in using Firebase Authentication.
 
 - **Admin Access**
-  Assign admin rights to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`.
+  Assign admin rights to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`. This allows the admin user to delete other travellers.
 
 - **Traveller Profiles**
-  Registered travellers can upload photos and leave personal messages on other traveller profiles.
+  Registered travellers can add a description of their travel destination, choose where they travelled to, the number of days spent there, as well as upload photos. They are also able to leave contact and send a messages on other traveller against their profile.
 
 ## Folder Structure
 
@@ -380,17 +404,17 @@ trip-fotos-react/
 ├── declarations/       # Breaking issue fix when using ESLint V9
 ├── public/             # Static assets
 ├── src/
-│   ├── assets/         # Fonts, svg's
+│   ├── assets/         # Fonts, SVGs, and other static assets
 │   ├── components/     # Reusable React components
-│   ├── constants/      # firebase, api
+│   ├── constants/      # Global, Firebase, API, paths, and other constants
 │   ├── pages/          # Page components for routing
 │   ├── store/          # Redux store and slices
 │   ├── styles/         # SCSS stylesheets
 │   ├── testUtils/      # Vitest utility functions
-│   ├── utils/          # Utility functions
+│   ├── utils/          # General utility functions
 │   ├── App.js          # Main application component
 │   ├── firebase.js     # Firebase configuration
-│   ├── index.js        # Root App
+│   ├── index.js        # Root application entry point
 │   └── setupTests.js   # Testing environment configuration
 ├── .env                        # Environment variables (not committed to version control)
 ├── .firebaserc                 # Firebase project configuration
@@ -417,4 +441,11 @@ trip-fotos-react/
 7. **`vercel.json`**: Configuration file for deploying the project to Vercel.
 8. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
 
----
+## Troubleshooting
+
+- **Issue**: `npm install` fails.
+
+    - **Solution**: Ensure you have Node.js and npm installed. Check the required versions in the [Node.js](https://nodejs.org/) documentation.
+
+- **Issue**: Firebase environment variables are not working.
+    - **Solution**: Ensure you have created a [.env](http://_vscodecontentref_/1) file in the root directory with the correct Firebase configuration values.
