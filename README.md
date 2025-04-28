@@ -5,6 +5,7 @@
 - [About This Project](#about-this-project)
 - [Stack](#stack)
 - [Installation](#installation)
+- [Scripts](#scripts)
 - [Setup](#setup)
 - [Development](#development)
 - [Testing](#testing)
@@ -57,6 +58,45 @@ Run the following command to install all required dependencies, including Cypres
 
 ```bash
 npm install
+```
+
+## Scripts
+
+Below are the available npm scripts for this project:
+
+```bash
+# Start the development server with linting
+npm run dev
+
+# Build the project for production
+npm run build
+
+# Preview the production build locally
+npm run preview
+
+# Open the Cypress Test Runner in interactive mode
+npm run cy:open
+
+# Run all tests using Vitest
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate a test coverage report
+npm run test:coverage
+
+# Run ESLint to check for issues
+npm run lint:js
+
+# Automatically fix linting issues and format files
+npm run lint:fix
+
+# Watch for file changes and run ESLint
+npm run lint:watch
+
+# Format files using Prettier
+npm run format
 ```
 
 ## Setup
@@ -164,18 +204,7 @@ npm run dev
 
 ### Linting and Formatting
 
-- Run ESLint to check for issues:
-    ```bash
-    npm run lint:js
-    ```
-- Automatically fix linting issues:
-    ```bash
-    npm run lint:fix
-    ```
-- Format files using Prettier:
-    ```bash
-    npm run format
-    ```
+Refer to the [Scripts](#scripts) section for commands to run ESLint, fix linting issues, and format files using Prettier.
 
 ---
 
@@ -197,23 +226,7 @@ npm install vitest --save-dev
 
 **Run Tests**
 
-- Run all tests:
-
-```bash
-npm run test
-```
-
-- Run tests in watch mode:
-
-```bash
-npm run test:watch
-```
-
-- Generate a coverage report
-
-```bash
-npm run test:coverage
-```
+Refer to the [Scripts](#scripts) section for commands to run tests.
 
 **Vitest Directory Structure**
 
