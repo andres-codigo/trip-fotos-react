@@ -4,13 +4,17 @@
 
 - [About This Project](#about-this-project)
 - [Stack](#stack)
+- [Quick Start](#quick-start)
 - [Installation](#installation)
+- [Scripts](#scripts)
 - [Setup](#setup)
 - [Development](#development)
 - [Testing](#testing)
 - [Build](#build)
 - [Deployment](#deployment)
 - [Features](#features)
+- [Folder Structure](#folder-structure)
+- [Troubleshooting](#troubleshooting)
 
 ## About This Project
 
@@ -27,10 +31,34 @@ This project uses the following technologies:
 - [SCSS](https://sass-lang.com/) for CSS preprocessing.
 - [ESLint](https://eslint.org/) for JavaScript linting.
 - [Prettier](https://prettier.io/) for code formatting.
+- [Vitest](https://vitest.dev/) for unit and integration testing.
 - [Cypress](https://www.cypress.io/) for end-to-end testing.
 - [Firebase Realtime Database](https://firebase.google.com/docs/database) for storing travellers and messages.
 - [Firebase Authentication](https://firebase.google.com/docs/auth) for managing sign-in credentials.
 - [Firebase Cloud Storage](https://firebase.google.com/docs/storage) for storing uploaded traveller images.
+
+## Quick Start
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/andres-codigo/trip-fotos-react
+    cd trip-fotos-react
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+3. Start the development server:
+
+    ```bash
+    npm run dev
+    ```
+
+4. Open the app in your browser at http://localhost:3000
 
 ## Installation
 
@@ -52,10 +80,49 @@ cd trip-fotos-react
 
 ### Install dependencies
 
-Run the following command to install all required dependencies:
+Run the following command to install all required dependencies, including Cypress and Vitest:
 
 ```bash
 npm install
+```
+
+## Scripts
+
+Below are the available npm scripts for this project:
+
+```bash
+# Start the development server with linting
+npm run dev
+
+# Build the project for production
+npm run build
+
+# Preview the production build locally
+npm run preview
+
+# Open the Cypress Test Runner in interactive mode
+npm run cy:open
+
+# Run all tests using Vitest
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate a test coverage report
+npm run test:coverage
+
+# Run ESLint to check for issues
+npm run lint:js
+
+# Automatically fix linting issues and format files
+npm run lint:fix
+
+# Watch for file changes and run ESLint
+npm run lint:watch
+
+# Format files using Prettier
+npm run format
 ```
 
 ## Setup
@@ -130,10 +197,7 @@ VITE_FIREBASE_APP_ID='' # firebaseConfig > appId
 VITE_FIREBASE_MEASUREMENT_ID='' # firebaseConfig > measurementId
 
 # Admin User ID
-
-# UNIQUE ID FOR 'EMAIL/PASSWORD' REGISTERED FIREBASE AUTHENTICATED USER THAT WILL HAVE ADMIN RIGHTS ON APP, ALLOWING FOR THE DELETION OF TRAVELLERS FROM THE UI FRONT END, EXCLUDING REGISTERED ADMIN USER *
-
-VITE_ADMIN_ID=''
+VITE_ADMIN_ID='' # Firebase authenticated User UID for deletion of users rights
 
 ```
 
@@ -149,8 +213,6 @@ Create a `.firebaserc` file in the root directory with the following content:
 }
 ```
 
----
-
 ## Development
 
 ### Start the Development Server
@@ -163,52 +225,133 @@ npm run dev
 
 ### Linting and Formatting
 
-- Run ESLint to check for issues:
-    ```bash
-    npm run lint:js
-    ```
-- Automatically fix linting issues:
-    ```bash
-    npm run lint:fix
-    ```
-- Format files using Prettier:
-    ```bash
-    npm run format
-    ```
+Refer to the [Scripts](#scripts) section for commands to run ESLint, fix linting issues, and format files using Prettier.
 
 ---
 
 ## Testing
 
-This project uses [Cypress](https://www.cypress.io/) for end-to-end testing.
+This project uses [Vitest](https://vitest.dev/) for unit and integration testing, and [Cypress](https://www.cypress.io/) for end-to-end testing.
 
-### Install Cypress
+### 1. Vitest Setup
+
+Vitest is already configured in the project.
+
+To get started:
+
+**Install Vitest** (if not already installed):
 
 ```bash
-npm install cypress --save-dev
+npm install vitest --save-dev
 ```
 
-### Run Cypress Tests
+**Run Tests**
 
-- Open the Cypress Test Runner:
-    ```bash
-    npx cypress open
-    ```
-- Run all tests in headless mode:
-    ```bash
-    npx cypress run
-    ```
+Refer to the [Scripts](#scripts) section for commands to run tests.
 
-### Test Directory Structure
+**Vitest Directory Structure**
 
 ```
-cypress/
-  ├── e2e/         # End-to-end test files (e.g., homepage.cy.js)
-  ├── fixtures/    # Mock data used in tests
-  ├── support/     # Custom commands and test setup
+src/
+    ├── store/
+    │   ├── slices/
+    │   │   ├── <test-file>.js
+    │   │   ├── <test-file>.test.js
 ```
 
----
+**Writing Tests**
+
+Test files are located alongside the source files they test, following the convention \*.test.js.
+
+```javascript
+import { describe, it, expect } from 'vitest';
+
+describe('Example Test Suite', () => {
+	it('should pass this test', () => {
+		expect(1 + 1).toBe(2);
+	});
+});
+```
+
+### Vitest Test Utilities
+
+Reusable test utilities are located in the [testSetup](https://github.com/andres-codigo/trip-fotos-react/blob/main/src/testUtils/testSetup.js) file. These include:
+
+- **Mock Setup**: Functions to mock `fetch`, `localStorage`, and other global objects.
+
+Example usage:
+
+```javascript
+import { setupMocks, resetMocks } from '@/testUtils/testSetup';
+
+beforeEach(() => {
+	setupMocks();
+	resetMocks();
+});
+```
+
+### 2. Cypress Setup
+
+Cypress is already configured in the project.
+
+To get started:
+
+**Install Cypress**
+
+Cypress is included in the project dependencies. If you haven't already installed the dependencies, run:
+
+```bash
+npm install
+```
+
+**Cypress Configuration**
+
+Cypress is pre-configured in this project. Feel free to customise the [cypress.config.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/cypress.config.js) file as needed for your testing requirements.
+
+**Run Tests**
+
+- **Interactive Mode**: Opens the Cypress Test Runner for a visual testing experience.
+
+```bash
+npx cypress open
+```
+
+- **Headless Mode:** Runs all tests in the terminal without opening the Test Runner
+
+```bash
+npx cypress run
+```
+
+- Run a specific test file:
+
+```bash
+npx cypress run --spec "cypress/e2e/<test-file>.cy.js"
+```
+
+**Cypress Directory Structure**
+
+**Fixtures**: Contains mock data used in tests (e.g., JSON files for API responses).
+**Support**: Contains custom commands and global test setup files.
+
+```
+    cypress/
+      ├── e2e/         # End-to-end test files (e.g., homepage.cy.js)
+      ├── fixtures/    # Mock data used in tests
+      ├── support/     # Custom commands and test setup
+```
+
+**Test Artifacts**
+
+Cypress stores screenshots and videos (if enabled) in the following directories:
+
+- **Screenshots**: `cypress/screenshots/`
+- **Videos**: `cypress/videos/`
+
+You can configure these paths in the [cypress.config.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/cypress.config.js) file.
+
+**Debugging Cypress Tests**
+
+To debug tests, use the Cypress Test Runner in interactive mode (`npx cypress open`). You can inspect elements and view console logs using the browser's developer tools.
 
 ## Build
 
@@ -227,7 +370,7 @@ The output will be located in the `./dist` folder.
 Serve the production build locally:
 
 ```bash
-npm run serve
+npm run preview
 ```
 
 ---
@@ -248,41 +391,43 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
   Users can sign up and log in using Firebase Authentication.
 
 - **Admin Access**
-  Assign admin rights to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`.
+  Assign admin rights to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`. This allows the admin user to delete other travellers.
 
 - **Traveller Profiles**
-  Registered travellers can upload photos and leave personal messages on other traveller profiles.
-
-NB: The trip-fotos-vue App requires registered login credentials for full access. By default, a user is only able to login.
-
-To enable a user to 'Sign-up' and then register as a traveller uncomment the 'switch mode' button (src/pages/auth/UserAuth.vue), lines 38-43. Once a users have been signed-up, validate the entries in Firebase > Authentication > Users, and copy and paste the **User UID** of your choice into the .env **VITE_ADMIN_ID** property for user Admin access, allowing this user to delete registered travellers using the Front End UI. Deleting the traveller will delete all traveller information, including images, but their authenticated sign-up details will remain.
+  Registered travellers can add a description of their travel destination, choose where they travelled to, the number of days spent there, as well as upload photos. They are also able to leave contact and send a messages on other traveller against their profile.
 
 ## Folder Structure
 
 ```
 trip-fotos-react/
 ├── cypress/            # Cypress tests
+├── declarations/       # Breaking issue fix when using ESLint V9
 ├── public/             # Static assets
 ├── src/
-│   ├── assets/         # Fonts, svg's
+│   ├── assets/         # Fonts, SVGs, and other static assets
 │   ├── components/     # Reusable React components
-│   ├── constants/      # firebase, api
+│   ├── constants/      # Global, Firebase, API, paths, and other constants
 │   ├── pages/          # Page components for routing
 │   ├── store/          # Redux store and slices
 │   ├── styles/         # SCSS stylesheets
-│   ├── utils/          # Utility functions
-│   └── App.js          # Main application component
+│   ├── testUtils/      # Vitest utility functions
+│   ├── utils/          # General utility functions
+│   ├── App.js          # Main application component
+│   ├── firebase.js     # Firebase configuration
+│   ├── index.js        # Root application entry point
+│   └── setupTests.js   # Testing environment configuration
+├── .env                        # Environment variables (not committed to version control)
 ├── .firebaserc                 # Firebase project configuration
 ├── .gitignore                  # Git ignore rules
 ├── .prettierignore             # Prettier ignore rules
 ├── .prettierrc.json            # Prettier configuration
 ├── cypress.config.js           # Cypress testing configuration
 ├── eslint.config.mjs           # ESLint configuration
-├── vercel.json                 # Vercel deployment configuration
-├── vite.config.js              # Vite build tool configuration
+├── jsconfig.json               # JS configuration
 ├── package.json                # Project dependencies and scripts
 ├── README.md                   # Project documentation
-└── .env                        # Environment variables (not committed to version control)
+├── vercel.json                 # Vercel deployment configuration
+└── vite.config.js              # Vite build tool configuration
 ```
 
 ### Explanation of Additional Files:
@@ -296,4 +441,11 @@ trip-fotos-react/
 7. **`vercel.json`**: Configuration file for deploying the project to Vercel.
 8. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
 
----
+## Troubleshooting
+
+- **Issue**: `npm install` fails.
+
+    - **Solution**: Ensure you have Node.js and npm installed. Check the required versions in the [Node.js](https://nodejs.org/) documentation.
+
+- **Issue**: Firebase environment variables are not working.
+    - **Solution**: Ensure you have created a [.env](http://_vscodecontentref_/1) file in the root directory with the correct Firebase configuration values.
