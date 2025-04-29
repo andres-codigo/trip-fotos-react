@@ -2,26 +2,30 @@
 
 ## Contents
 
-- [About This Project](#about-this-project)
-- [Stack](#stack)
-- [Quick Start](#quick-start)
-- [Installation](#installation)
-- [Scripts](#scripts)
-- [Setup](#setup)
-- [Development](#development)
-- [Testing](#testing)
-- [CI/CD Workflows](#cicd-workflows)
-- [Build](#build)
-- [Deployment](#deployment)
-- [Features](#features)
-- [Folder Structure](#folder-structure)
-- [Troubleshooting](#troubleshooting)
+- [📘 About This Project](#about-this-project)
+- [🧱 Stack](#stack)
+- [⚡ Quick Start](#quick-start)
+- [💾 Installation](#installation)
+- [🎯 Scripts](#scripts)
+- [⚙️ Setup](#setup)
+- [👨‍💻 Development](#development)
+- [🧪 Testing](#testing)
+- [🚀 CI/CD Workflows](#cicd-workflows)
+- [🛠️ Build](#build)
+- [📦 Deployment](#deployment)
+- [✨ Features](#features)
+- [📁 Folder Structure](#folder-structure)
+- [🧯 Troubleshooting](#troubleshooting)
 
-## About This Project
+<a id="about-this-project"></a>
+
+## 📘 About This Project
 
 This project is a UI and functional conversion from Vue to React and extends the original Udemy Vue - The Complete Guide (incl. Router & Composition API) course > 'Find a coach' project. It has been reimagined as "finding popular travel destinations" tied to a registered traveller.
 
-## Stack
+<a id="stack"></a>
+
+## 🧱 Stack
 
 This project uses the following technologies:
 
@@ -38,7 +42,9 @@ This project uses the following technologies:
 - [Firebase Authentication](https://firebase.google.com/docs/auth) for managing sign-in credentials.
 - [Firebase Cloud Storage](https://firebase.google.com/docs/storage) for storing uploaded traveller images.
 
-## Quick Start
+<a id="quick-start"></a>
+
+## ⚡ Quick Start
 
 1. Clone the repository:
 
@@ -61,7 +67,9 @@ This project uses the following technologies:
 
 4. Open the app in your browser at http://localhost:3000
 
-## Installation
+<a id="installation"></a>
+
+## 💾 Installation
 
 To get started with the project, follow these steps:
 
@@ -87,7 +95,9 @@ Run the following command to install all required dependencies, including Cypres
 npm install
 ```
 
-## Scripts
+<a id="scripts"></a>
+
+## 🎯 Scripts
 
 Below are the available npm scripts for this project:
 
@@ -126,7 +136,9 @@ npm run lint:watch
 npm run format
 ```
 
-## Setup
+<a id="setup"></a>
+
+## ⚙️ Setup
 
 ### Firebase Configuration
 
@@ -214,7 +226,9 @@ Create a `.firebaserc` file in the root directory with the following content:
 }
 ```
 
-## Development
+<a id="development"></a>
+
+## 👨‍💻 Development
 
 ### Start the Development Server
 
@@ -230,7 +244,9 @@ Refer to the [Scripts](#scripts) section for commands to run ESLint, fix linting
 
 ---
 
-## Testing
+<a id="testing"></a>
+
+## 🧪 Testing
 
 This project uses [Vitest](https://vitest.dev/) for unit and integration testing, and [Cypress](https://www.cypress.io/) for end-to-end testing.
 
@@ -354,7 +370,9 @@ You can configure these paths in the [cypress.config.js](https://github.com/andr
 
 To debug tests, use the Cypress Test Runner in interactive mode (`npx cypress open`). You can inspect elements and view console logs using the browser's developer tools.
 
-## CI/CD Workflows
+<a id="cicd-workflows"></a>
+
+## 🚀 CI/CD Workflows
 
 This project uses GitHub Actions to automate key development and monitoring tasks.
 
@@ -397,7 +415,9 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 > This is useful for manually re-running workflows after configuration changes or failed automated runs.
 
-## Build
+<a id="build"></a>
+
+## 🛠️ Build
 
 ### Build for Production
 
@@ -419,7 +439,9 @@ npm run preview
 
 ---
 
-## Deployment
+<a id="deployment"></a>
+
+## 📦 Deployment
 
 This project is configured for deployment on [Vercel](https://vercel.com/).
 
@@ -429,7 +451,9 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 2. Deploy the project by linking your GitHub repository to Vercel.
 3. Configure environment variables in the Vercel dashboard.
 
-## Features
+<a id="features"></a>
+
+## ✨ Features
 
 - **User Registration and Authentication**
   Users can sign up and log in using Firebase Authentication.
@@ -440,7 +464,9 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 - **Traveller Profiles**
   Registered travellers can add a description of their travel destination, choose where they travelled to, the number of days spent there, as well as upload photos. They are also able to leave contact and send a messages on other traveller against their profile.
 
-## Folder Structure
+<a id="folder-structure"></a>
+
+## 📁 Folder Structure
 
 ```
 trip-fotos-react/
@@ -485,7 +511,9 @@ trip-fotos-react/
 7. **`vercel.json`**: Configuration file for deploying the project to Vercel.
 8. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
 
-## Troubleshooting
+<a id="troubleshooting"></a>
+
+## 🧯 Troubleshooting
 
 - **Issue**: `npm install` fails.
 
