@@ -10,6 +10,7 @@
 - [Setup](#setup)
 - [Development](#development)
 - [Testing](#testing)
+- [CI/CD Workflows](#cicd-workflows)
 - [Build](#build)
 - [Deployment](#deployment)
 - [Features](#features)
@@ -352,6 +353,49 @@ You can configure these paths in the [cypress.config.js](https://github.com/andr
 **Debugging Cypress Tests**
 
 To debug tests, use the Cypress Test Runner in interactive mode (`npx cypress open`). You can inspect elements and view console logs using the browser's developer tools.
+
+## CI/CD Workflows
+
+This project uses GitHub Actions to automate key development and monitoring tasks.
+
+### Vitest CI Workflow
+
+- **Location:** `.github/workflows/vitest.yml`
+- **Triggers:**
+    - On **push** to any branch
+    - On **pull requests** to `main`
+    - Manually via **Actions → "Run workflow"**
+- **Purpose:** Runs the full test suite to ensure code quality.
+- **Merge Blocking:** Pull requests must pass this test workflow before merging into `main`.
+
+#### Test Commands
+
+```bash
+npm run test:full     # Run all tests in CI mode with coverage reporting
+npm run test:watch    # Run tests in watch mode (local dev)
+npm run test:coverage # Run tests with coverage reporting
+```
+
+### Clone Tracker Workflow
+
+- **Location:** `.github/workflows/clone-tracker.yml`
+- **Purpose:** Sends a webhook notification (e.g., to Discord) when the repository is cloned.
+- **Use Case:** Useful for monitoring interest and visibility of the project.
+
+> Note: This workflow uses the GitHub [Traffic API](https://docs.github.com/en/rest/metrics/traffic) and requires the appropriate permissions to access clone statistics.
+
+---
+
+### 🛠 Manual Triggers
+
+Some workflows, like the **Vitest test runner**, can be manually executed from the GitHub UI:
+
+1. Navigate to the **Actions** tab of the repository
+2. Select the desired workflow (e.g., **"Run Vitest Tests"**)
+3. Click the **"Run workflow"** button on the right side
+4. The workflow will be executed immediately (no input needed)
+
+> This is useful for manually re-running workflows after configuration changes or failed automated runs.
 
 ## Build
 
