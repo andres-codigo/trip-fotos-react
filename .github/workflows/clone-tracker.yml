@@ -27,10 +27,9 @@ jobs:
           echo "Total Clones: $CLONE_COUNT"
           echo "Unique Cloners: $UNIQUE_COUNT"
 
-          # Example: Send to Discord webhook (replace YOUR_WEBHOOK_URL)
           if (( CLONE_COUNT > 0 )); then
             curl -H "Content-Type: application/json" \
               -X POST \
               -d "{\"content\": \"🚨 Repo cloned! Total: $CLONE_COUNT, Unique: $UNIQUE_COUNT\"}" \
-              ${{ secrets.DISCORD_WEBHOOK }}
+              ${{ secrets.TRIP_FOTOS_REACT_WEBHOOK }}
           fi
