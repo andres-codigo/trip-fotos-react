@@ -3,7 +3,11 @@ name: Run Vitest Tests
 on:
     push:
         branches:
-            - '**'
+            - main
+        paths:
+            - 'src/**'
+            - 'package.json'
+            - 'vitest.config.*'
     pull_request:
         branches:
             - main
