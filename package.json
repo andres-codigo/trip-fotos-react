@@ -1,7 +1,7 @@
 {
   "name": "react-starter-project",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.11.0",
   "description": "Conversion to React and extension of Udemy's Vue - The Complete Guide (incl. Router & Composition API) 'Find a coach' project.",
   "type": "module",
   "scripts": {
