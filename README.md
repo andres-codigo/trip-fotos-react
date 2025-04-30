@@ -1,5 +1,7 @@
 # trip-fotos-react
 
+[![Run Vitest Tests](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/vitest.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/vitest.yml)
+
 ## Contents
 
 - [📘 About This Project](#about-this-project)
