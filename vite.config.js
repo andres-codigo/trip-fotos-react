@@ -27,7 +27,7 @@ export default defineConfig({
 		},
 		react(),
 		eslint({
-			include: ['src/**/*.ts', 'src/**/*.tsx'],
+			include: ['src/**/*.js', 'src/**/*.jsx'],
 			exclude: ['node_modules', 'dist'],
 		}),
 	],
