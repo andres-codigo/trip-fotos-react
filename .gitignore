@@ -23,3 +23,6 @@ dist
 # VITE & VITEST
 .vite
 coverage
+
+# DEPCHECK ANALYSIS FILES
+scripts/dependency-check/

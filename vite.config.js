@@ -2,7 +2,6 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, transformWithEsbuild } from 'vite';
 import react from '@vitejs/plugin-react';
 import eslint from 'vite-plugin-eslint2';
-import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
 	server: {
@@ -14,7 +13,6 @@ export default defineConfig({
 		open: true,
 	},
 	plugins: [
-		tailwindcss(),
 		{
 			name: 'treat-js-files-as-jsx',
 			async transform(code, id) {
@@ -27,7 +25,7 @@ export default defineConfig({
 		},
 		react(),
 		eslint({
-			include: ['src/**/*.ts', 'src/**/*.tsx'],
+			include: ['src/**/*.js', 'src/**/*.jsx'],
 			exclude: ['node_modules', 'dist'],
 		}),
 	],
@@ -52,5 +50,9 @@ export default defineConfig({
 		globals: true,
 		environment: 'jsdom',
 		setupFiles: './src/setupTests.js',
+		coverage: {
+			provider: 'v8',
+			reportsDirectory: './coverage',
+		},
 	},
 });
