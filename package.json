@@ -1,7 +1,7 @@
 {
   "name": "react-starter-project",
   "private": true,
-  "version": "0.11.0",
+  "version": "0.11.2",
   "description": "Conversion to React and extension of Udemy's Vue - The Complete Guide (incl. Router & Composition API) 'Find a coach' project.",
   "type": "module",
   "scripts": {
@@ -17,7 +17,8 @@
     "lint:fix": "eslint src --fix --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0 && prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss,json,md}'",
     "lint:watch": "chokidar 'src/**/*.{js,jsx,ts,tsx}' -c 'eslint src --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0'",
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss,json,md}'",
-    "check:deps": "mkdir -p scripts/dependency-check && depcheck --txt > scripts/dependency-check/depcheck-output.txt"
+    "check:deps": "mkdir -p scripts/dependency-check && depcheck --txt > scripts/dependency-check/depcheck-output.txt",
+    "browserslist": "npx browserslist"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
@@ -61,5 +62,15 @@
   },
   "engines": {
     "node": "20.x"
+  },
+  "browserslist": {
+    "production": [
+      "defaults"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
