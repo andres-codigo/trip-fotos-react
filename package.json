@@ -16,8 +16,8 @@
     "lint:js": "eslint src --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --fix --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0 && prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss,json,md}'",
     "lint:watch": "chokidar 'src/**/*.{js,jsx,ts,tsx}' -c 'eslint src --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0'",
-    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss,json,md}'",
-    "check:deps": "mkdir -p scripts/dependency-check && depcheck --txt > scripts/dependency-check/depcheck-output.txt",
+    "prettier:format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss,json,md}'",
+    "check:dependencies": "mkdir -p scripts/dependency-check && depcheck --txt > scripts/dependency-check/depcheck-output.txt",
     "browserslist": "npx browserslist"
   },
   "dependencies": {
