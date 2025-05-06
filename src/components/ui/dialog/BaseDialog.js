@@ -7,7 +7,7 @@ import BaseButton from '@/components/ui/button/BaseButton.js';
 
 import baseDialogStyles from './BaseDialog.module.scss';
 
-const BaseDialog = ({
+function BaseDialog({
 	children,
 	isError = false,
 	show,
@@ -17,7 +17,7 @@ const BaseDialog = ({
 	onClose,
 	actions,
 	header,
-}) => {
+}) {
 	const nodeRef = useRef(null);
 	const [isVisible, setIsVisible] = useState(show);
 
@@ -86,7 +86,7 @@ const BaseDialog = ({
 		</>,
 		document.body,
 	);
-};
+}
 
 BaseDialog.propTypes = {
 	children: PropTypes.node,
