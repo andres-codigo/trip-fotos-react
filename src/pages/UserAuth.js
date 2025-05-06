@@ -111,17 +111,21 @@ const UserAuth = () => {
 
 	return (
 		<section className={userAuthStyles.userAuthenticationContainer}>
-			<BaseDialog
-				show={!!error}
-				isError={!!error}
-				title={GLOBAL.ERROR_DIALOG_TITLE}
-				onClose={handleError}>
-				<p>{error}</p>
-			</BaseDialog>
-			<BaseDialog show={isLoading} title="Authenticating" fixed>
-				<p>Authenticating your details, one moment please...</p>
-				<BaseSpinner />
-			</BaseDialog>
+			{error && (
+				<BaseDialog
+					show={true}
+					isError={true}
+					title={GLOBAL.ERROR_DIALOG_TITLE}
+					onClose={handleError}>
+					<p>{error}</p>
+				</BaseDialog>
+			)}
+			{isLoading && (
+				<BaseDialog show={true} title="Authenticating" fixed>
+					<p>Authenticating your details, one moment please...</p>
+					<BaseSpinner />
+				</BaseDialog>
+			)}
 			<BaseCard>
 				<UserAuthForm
 					email={email}
