@@ -140,6 +140,7 @@ function Header() {
 						className={classNames(headerStyles.hamburger, {
 							[headerStyles.active]: isMenuOpen,
 						})}
+						data-cy="hamburger-menu"
 						ref={hamburgerRef}>
 						<span className={headerStyles.bar}></span>
 						<span className={headerStyles.bar}></span>
