@@ -1,16 +1,13 @@
-import {
-	urls,
-	user,
-	topNavigationSelectors,
-	authenticationFormSelectors,
-} from '../../support/constants';
+import { urls, user, topNavigationSelectors } from '../../support/constants';
 
-describe('Desktop > User Login Render Tests', () => {
+describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests"', () => {
 	beforeEach(() => {
 		cy.visit(urls.cyAuth);
 	});
 
-	it('The top navigation container displays the app title as a link', () => {
+	it('Displays the title as a link and does not render the hamburger menu', () => {
+		cy.setViewportToDesktop();
+
 		cy.get(topNavigationSelectors.siteHeaderTitleLink).as(
 			'siteHeaderTitleLink',
 		);
@@ -21,16 +18,21 @@ describe('Desktop > User Login Render Tests', () => {
 			.then(($siteHeaderTitleLink) => {
 				expect($siteHeaderTitleLink.text()).to.equal('Trip Fotos');
 			});
+
+		cy.get(topNavigationSelectors.navHamburgerMenu).should('not.exist');
 	});
 });
 
-describe('Desktop > Hamburger Menu Tests', () => {
+describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
 		cy.visit(urls.cyAuth);
+		cy.login(user.email, user.password);
+	});
 
-		cy.get(authenticationFormSelectors.emailInput).type(user.email);
-		cy.get(authenticationFormSelectors.passwordInput).type(user.password);
-		cy.get(authenticationFormSelectors.submitButtonLogin).click();
+	it('Displays the mobile layout on small screens', () => {
+		cy.setViewportToMobile();
+
+		cy.get(topNavigationSelectors.navHamburgerMenu).should('exist');
 	});
 	it('Toggles the hamburger menu open and closed on mobile viewports', () => {
 		cy.setViewportToMobile();
