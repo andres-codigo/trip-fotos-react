@@ -32,7 +32,7 @@ describe('Desktop > Hamburger Menu Tests', () => {
 		cy.get(authenticationFormSelectors.passwordInput).type(user.password);
 		cy.get(authenticationFormSelectors.submitButtonLogin).click();
 	});
-	it('Opens and closes the hamburger menu when clicked', () => {
+	it('Toggles the hamburger menu open and closed on mobile viewports', () => {
 		cy.setViewportToMobile();
 
 		cy.get(topNavigationSelectors.siteHeader).as('header');
