@@ -12,6 +12,7 @@ function BaseButton({
 	modeType,
 	to = '/',
 	className,
+	dataCypress,
 	...props
 }) {
 	const elementRef = useRef();
@@ -30,6 +31,7 @@ function BaseButton({
 				<button
 					ref={elementRef}
 					className={combinedClassName}
+					data-cy={dataCypress}
 					disabled={isDisabled}
 					{...props}>
 					{children}
@@ -39,6 +41,7 @@ function BaseButton({
 					href={to}
 					ref={elementRef}
 					className={combinedClassName}
+					data-cy={dataCypress}
 					aria-disabled={isDisabled}
 					{...props}>
 					{children}
@@ -56,6 +59,7 @@ BaseButton.propTypes = {
 	modeType: PropTypes.string,
 	to: PropTypes.string,
 	className: PropTypes.string,
+	dataCypress: PropTypes.string,
 };
 
 export default BaseButton;

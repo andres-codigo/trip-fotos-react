@@ -27,6 +27,7 @@ const UserAuthForm = ({
 				value={email.value}
 				onChange={onEmailChange}
 				onBlur={onEmailChange}
+				data-cy="email-input"
 			/>
 			{!email.isValid && <p>{email.message}</p>}
 		</div>
@@ -41,13 +42,18 @@ const UserAuthForm = ({
 				value={password.value}
 				onChange={onPasswordChange}
 				onBlur={onPasswordChange}
+				data-cy="password-input"
 			/>
 			{!password.isValid && <p>{password.message}</p>}
 		</div>
-		<BaseButton>
+		<BaseButton dataCypress="submit-button-login">
 			{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? 'Login' : 'Sign-up'}
 		</BaseButton>
-		<BaseButton type="button" mode="flat" onClick={onSwitchMode}>
+		<BaseButton
+			type="button"
+			mode="flat"
+			onClick={onSwitchMode}
+			dataCypress="submit-button-signup">
 			{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? 'Sign-up' : 'Login'}
 		</BaseButton>
 	</form>
