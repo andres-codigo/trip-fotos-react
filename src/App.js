@@ -8,7 +8,7 @@ import { PATHS } from '@/constants/paths';
 import { tryLogin } from '@/store/slices/authenticationSlice';
 
 import Header from '@/components/layout/header/Header';
-import UserAuth from '@/pages/UserAuth';
+import UserAuth from '@/pages/authentication/UserAuth';
 import Trips from '@/pages/trips/Trips';
 
 function App() {
