@@ -3,6 +3,8 @@ import { useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 
+import { PATHS } from '@/constants/paths';
+
 import { useCloseHamburgerMenu } from './hooks/useCloseHamburgerMenu';
 import { useHeaderState } from './hooks/useHeaderState';
 import { useLogout } from './hooks/useLogout';
@@ -79,7 +81,7 @@ function Header() {
 					data-cy="site-header-title-link">
 					<NavMenuButtonLink
 						isLink
-						to="/"
+						to={isLoggedIn ? PATHS.TRIPS : PATHS.AUTHENTICATION}
 						className={navMenuButtonLinkStyles.navMenuButtonLink}>
 						Trip Fotos
 					</NavMenuButtonLink>
