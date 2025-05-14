@@ -24,6 +24,20 @@ Cypress.Commands.add('setViewportToMobile', () => {
 	});
 });
 
+// HEADER
+Cypress.Commands.add('assertHeaderTitleLink', () => {
+	cy.get(topNavigationSelectors.siteHeaderTitleLink).as(
+		'siteHeaderTitleLink',
+	);
+
+	cy.get('@siteHeaderTitleLink')
+		.should('have.class', 'siteHeaderTitleLink')
+		.find('a')
+		.then(($siteHeaderTitleLink) => {
+			expect($siteHeaderTitleLink.text()).to.equal('Trip Fotos');
+		});
+});
+
 // TOP NAVIGATION HAMBURGER MENU
 Cypress.Commands.add('assertHamburgerMenuState', (isActive) => {
 	cy.get(topNavigationSelectors.navHamburgerMenu)
