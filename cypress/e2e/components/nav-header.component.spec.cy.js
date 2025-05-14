@@ -7,19 +7,14 @@ describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests"', (
 
 	it('Displays the title as a link and does not render the hamburger menu', () => {
 		cy.setViewportToDesktop();
-
-		cy.get(topNavigationSelectors.siteHeaderTitleLink).as(
-			'siteHeaderTitleLink',
-		);
-
-		cy.get('@siteHeaderTitleLink')
-			.should('have.class', 'siteHeaderTitleLink')
-			.find('a')
-			.then(($siteHeaderTitleLink) => {
-				expect($siteHeaderTitleLink.text()).to.equal('Trip Fotos');
-			});
+		cy.assertHeaderTitleLink();
 
 		cy.get(topNavigationSelectors.navHamburgerMenu).should('not.exist');
+	});
+
+	it('Navigates to the "authentication" page when clicking the app title', () => {
+		cy.get(topNavigationSelectors.siteHeaderTitleLink).click();
+		cy.url().should('eq', urls.cyAuth);
 	});
 });
 
@@ -29,11 +24,18 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 		cy.login(user.email, user.password);
 	});
 
-	it('Displays the mobile layout on small screens', () => {
+	it('Displays the title as a link and renders the hamburger menu', () => {
 		cy.setViewportToMobile();
+		cy.assertHeaderTitleLink();
 
 		cy.get(topNavigationSelectors.navHamburgerMenu).should('exist');
 	});
+
+	it('Navigates to the "trips" page when clicking the app title', () => {
+		cy.get(topNavigationSelectors.siteHeaderTitleLink).click();
+		cy.url().should('eq', urls.cyTrips);
+	});
+
 	it('Toggles the hamburger menu open and closed on mobile viewports', () => {
 		cy.setViewportToMobile();
 
