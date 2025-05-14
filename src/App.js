@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 import { PATHS } from '@/constants/paths';
 
@@ -9,12 +9,16 @@ import { tryLogin } from '@/store/slices/authenticationSlice';
 
 import Header from '@/components/layout/header/Header';
 import UserAuth from '@/pages/UserAuth';
+import Trips from '@/pages/trips/Trips';
 
 function App() {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
-	// Access the `didAutoLogout` state from the Redux store
+	// Access the `isLoggedIn` and `didAutoLogout` states from the Redux store
+	const isLoggedIn = useSelector(
+		(state) => state.authentication.token !== null,
+	);
 	const didAutoLogout = useSelector(
 		(state) => state.authentication.didAutoLogout,
 	);
@@ -35,9 +39,29 @@ function App() {
 		<>
 			<Header />
 			<Routes>
-				<Route index path={PATHS.HOME} element={<UserAuth />} />
-				<Route path={PATHS.AUTHENTICATION} element={<UserAuth />} />
-				<Route path={PATHS.TRIPS} element={<UserAuth />} />
+				{!isLoggedIn && (
+					<>
+						<Route
+							path={PATHS.AUTHENTICATION}
+							element={<UserAuth />}
+						/>
+						<Route
+							path="*"
+							element={<Navigate to={PATHS.AUTHENTICATION} />}
+						/>
+					</>
+				)}
+
+				{isLoggedIn && (
+					<>
+						<Route path={PATHS.HOME} element={<Trips />} />
+						<Route path={PATHS.TRIPS} element={<Trips />} />
+						<Route
+							path="*"
+							element={<Navigate to={PATHS.HOME} />}
+						/>
+					</>
+				)}
 			</Routes>
 		</>
 	);
