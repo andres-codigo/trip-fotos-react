@@ -3,6 +3,7 @@ export const baseUrl = Cypress.config('baseUrl');
 export const urls = {
 	cyAuth: baseUrl + Cypress.env('AUTHENTICATION_URL'),
 	cyTrips: baseUrl + Cypress.env('TRIPS_URL'),
+	cyMessages: baseUrl + Cypress.env('MESSAGES_URL'),
 };
 
 export const viewports = {

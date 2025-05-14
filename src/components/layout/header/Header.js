@@ -100,6 +100,8 @@ function Header() {
 									className={
 										navMenuButtonLinkStyles.navMenuButtonLink
 									}
+									to={PATHS.MESSAGES}
+									data-cy="nav-menu-item-messages"
 									totalMessages={totalMessages}
 								/>
 								{/* )} */}

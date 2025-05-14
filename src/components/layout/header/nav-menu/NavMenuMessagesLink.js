@@ -5,12 +5,12 @@ import NavMenuButtonLink from './NavMenuButtonLink.js';
 
 import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss';
 
-function NavMenuMessagesLink({ totalMessages, className }) {
+function NavMenuMessagesLink({ totalMessages, to, className }) {
 	const combinedClassName = classNames(className, navMenuButtonLinkStyles);
 
 	return (
 		<li className="navMenuItemMessages" data-cy="nav-menu-item-messages">
-			<NavMenuButtonLink isLink to="/" className={combinedClassName}>
+			<NavMenuButtonLink isLink to={to} className={combinedClassName}>
 				Messages
 				{!!totalMessages && totalMessages > 0 && (
 					<span
@@ -31,6 +31,7 @@ function NavMenuMessagesLink({ totalMessages, className }) {
 NavMenuMessagesLink.propTypes = {
 	totalMessages: PropTypes.number,
 	onClick: PropTypes.func.isRequired,
+	to: PropTypes.string,
 	className: PropTypes.string,
 };
 
