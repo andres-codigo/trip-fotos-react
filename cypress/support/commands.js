@@ -1,25 +1,46 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+import {
+	viewports,
+	topNavigationSelectors,
+	authenticationFormSelectors,
+} from './constants';
+
+// LOGIN
+Cypress.Commands.add('login', (email, password) => {
+	cy.get(authenticationFormSelectors.emailInput).type(email);
+	cy.get(authenticationFormSelectors.passwordInput).type(password);
+	cy.get(authenticationFormSelectors.submitButtonLogin).click();
+});
+
+// VIEWPORTS
+Cypress.Commands.add('setViewportToDesktop', () => {
+	cy.window().then((win) => {
+		cy.viewport(viewports.desktop.width, win.innerHeight);
+	});
+});
+
+Cypress.Commands.add('setViewportToMobile', () => {
+	cy.window().then((win) => {
+		cy.viewport(viewports.mobile.width, win.innerHeight);
+	});
+});
+
+// HEADER
+Cypress.Commands.add('assertHeaderTitleLink', () => {
+	cy.get(topNavigationSelectors.siteHeaderTitleLink).as(
+		'siteHeaderTitleLink',
+	);
+
+	cy.get('@siteHeaderTitleLink')
+		.should('have.class', 'siteHeaderTitleLink')
+		.find('a')
+		.then(($siteHeaderTitleLink) => {
+			expect($siteHeaderTitleLink.text()).to.equal('Trip Fotos');
+		});
+});
+
+// TOP NAVIGATION HAMBURGER MENU
+Cypress.Commands.add('assertHamburgerMenuState', (isActive) => {
+	cy.get(topNavigationSelectors.navHamburgerMenu)
+		.invoke('attr', 'class')
+		.should(isActive ? 'contain' : 'not.contain', '_active_');
+});

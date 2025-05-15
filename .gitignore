@@ -26,3 +26,6 @@ coverage
 
 # DEPCHECK ANALYSIS FILES
 scripts/dependency-check/
+
+# BASH SCRIPTS
+.bash-scripts
