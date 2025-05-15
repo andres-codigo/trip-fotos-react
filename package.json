@@ -1,24 +1,21 @@
 {
   "name": "react-starter-project",
   "private": true,
-  "version": "0.11.3",
+  "version": "0.12.3",
   "description": "Conversion to React and extension of Udemy's Vue - The Complete Guide (incl. Router & Composition API) 'Find a coach' project.",
   "type": "module",
   "scripts": {
-    "dev": "npm run lint:js && vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "vite",
+    "lint": "eslint src --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --fix --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0 && prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss,json,md}'",
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss,json,md}'",
+    "check:dependencies": "mkdir -p scripts/dependency-check && depcheck --txt > scripts/dependency-check/depcheck-output.txt",
     "cy:open": "cypress open",
     "test": "vitest",
     "test:watch": "vitest watch",
     "test:coverage": "vitest --coverage",
-    "test:full": "vitest run --coverage",
-    "lint:js": "eslint src --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint src --fix --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0 && prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss,json,md}'",
-    "lint:watch": "chokidar 'src/**/*.{js,jsx,ts,tsx}' -c 'eslint src --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0'",
-    "prettier:format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,css,scss,json,md}'",
-    "check:dependencies": "mkdir -p scripts/dependency-check && depcheck --txt > scripts/dependency-check/depcheck-output.txt",
-    "browserslist": "npx browserslist"
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
