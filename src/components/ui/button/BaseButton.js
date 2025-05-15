@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
@@ -37,15 +39,15 @@ function BaseButton({
 					{children}
 				</button>
 			) : (
-				<a
-					href={to}
+				<Link
+					to={to}
 					ref={elementRef}
 					className={combinedClassName}
 					data-cy={dataCypress}
 					aria-disabled={isDisabled}
 					{...props}>
 					{children}
-				</a>
+				</Link>
 			)}
 		</>
 	);
