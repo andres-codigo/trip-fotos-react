@@ -29,5 +29,8 @@ jobs:
             - name: Install dependencies
               run: npm install
 
-            - name: Run Vitest (CI Mode)
-              run: npm run test:full
+            - name: Run Vitest with Coverage
+              run: npm run test:coverage
+
+            - name: Display Coverage Summary
+              run: cat coverage/lcov-report/index.html
