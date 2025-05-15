@@ -22,7 +22,16 @@ const store = configureStore({
 	reducer: persistedReducer,
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({
-			serializableCheck: false,
+			serializableCheck: {
+				ignoreActions: [
+					'persist/FLUSH',
+					'persist/REHYDRATE',
+					'persist/PAUSE',
+					'persist/PERSIST',
+					'persist/PURGE',
+					'persist/REGISTER',
+				],
+			},
 		}),
 });
 

@@ -1,6 +1,6 @@
 import { urls, user, topNavigationSelectors } from '../../support/constants';
 
-describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests"', () => {
+describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
 		cy.visit(urls.cyAuth);
 	});
