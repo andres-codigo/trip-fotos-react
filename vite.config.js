@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig, transformWithEsbuild } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import eslint from 'vite-plugin-eslint2';
 
@@ -13,16 +13,6 @@ export default defineConfig({
 		open: true,
 	},
 	plugins: [
-		{
-			name: 'treat-js-files-as-jsx',
-			async transform(code, id) {
-				if (!id.match(/src\/.*\.js$/)) return null;
-				return transformWithEsbuild(code, id, {
-					loader: 'jsx',
-					jsx: 'automatic',
-				});
-			},
-		},
 		react(),
 		eslint({
 			include: ['src/**/*.js', 'src/**/*.jsx'],
@@ -40,11 +30,6 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		force: true,
-		esbuildOptions: {
-			loader: {
-				'.js': 'jsx',
-			},
-		},
 	},
 	test: {
 		globals: true,
