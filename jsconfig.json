@@ -1,7 +1,7 @@
 {
-  "compilerOptions": {
-    "checkJs": false,
-    "allowJs": true
-  },
-  "exclude": ["node_modules"]
+	"compilerOptions": {
+		"checkJs": false,
+		"allowJs": true
+	},
+	"exclude": ["node_modules"]
 }

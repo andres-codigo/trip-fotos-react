@@ -1,58 +1,58 @@
-import { urls, user, topNavigationSelectors } from '../../support/constants';
+import { urls, user, topNavigationSelectors } from '../../support/constants'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
-		cy.visit(urls.cyAuth);
-	});
+		cy.visit(urls.cyAuth)
+	})
 
 	it('Displays the title as a link and does not render the hamburger menu', () => {
-		cy.setViewportToDesktop();
-		cy.assertHeaderTitleLink();
+		cy.setViewportToDesktop()
+		cy.assertHeaderTitleLink()
 
-		cy.get(topNavigationSelectors.navHamburgerMenu).should('not.exist');
-	});
+		cy.get(topNavigationSelectors.navHamburgerMenu).should('not.exist')
+	})
 
 	it('Navigates to the "authentication" page when clicking the app title', () => {
-		cy.get(topNavigationSelectors.siteHeaderTitleLink).click();
-		cy.url().should('eq', urls.cyAuth);
-	});
-});
+		cy.get(topNavigationSelectors.siteHeaderTitleLink).click()
+		cy.url().should('eq', urls.cyAuth)
+	})
+})
 
 describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
-		cy.visit(urls.cyAuth);
-		cy.login(user.email, user.password);
-	});
+		cy.visit(urls.cyAuth)
+		cy.login(user.email, user.password)
+	})
 
 	it('Displays the title as a link and renders the hamburger menu', () => {
-		cy.setViewportToMobile();
-		cy.assertHeaderTitleLink();
+		cy.setViewportToMobile()
+		cy.assertHeaderTitleLink()
 
-		cy.get(topNavigationSelectors.navHamburgerMenu).should('exist');
-	});
+		cy.get(topNavigationSelectors.navHamburgerMenu).should('exist')
+	})
 
 	it('Navigates to the "trips" page when clicking the app title', () => {
-		cy.get(topNavigationSelectors.siteHeaderTitleLink).click();
-		cy.url().should('eq', urls.cyTrips);
-	});
+		cy.get(topNavigationSelectors.siteHeaderTitleLink).click()
+		cy.url().should('eq', urls.cyTrips)
+	})
 
 	it('Toggles the hamburger menu open and closed on mobile viewports', () => {
-		cy.setViewportToMobile();
+		cy.setViewportToMobile()
 
-		cy.get(topNavigationSelectors.siteHeader).as('header');
+		cy.get(topNavigationSelectors.siteHeader).as('header')
 		cy.get('@header')
 			.find(topNavigationSelectors.navHamburgerMenu)
-			.as('hamburgerMenu');
+			.as('hamburgerMenu')
 
 		// Ensure the menu is initially closed
-		cy.assertHamburgerMenuState(false);
+		cy.assertHamburgerMenuState(false)
 
 		// Click to open the menu
-		cy.get('@hamburgerMenu').click();
-		cy.assertHamburgerMenuState(true);
+		cy.get('@hamburgerMenu').click()
+		cy.assertHamburgerMenuState(true)
 
 		// Click to close the menu
-		cy.get('@hamburgerMenu').click();
-		cy.assertHamburgerMenuState(false);
-	});
-});
+		cy.get('@hamburgerMenu').click()
+		cy.assertHamburgerMenuState(false)
+	})
+})

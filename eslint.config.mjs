@@ -1,31 +1,31 @@
-import eslintJs from '@eslint/js';
-import { includeIgnoreFile } from '@eslint/compat';
-import { fileURLToPath } from 'node:url';
-import { FlatCompat } from '@eslint/eslintrc';
-import globals from 'globals';
-import path from 'node:path';
+import eslintJs from '@eslint/js'
+import { includeIgnoreFile } from '@eslint/compat'
+import { fileURLToPath } from 'node:url'
+import { FlatCompat } from '@eslint/eslintrc'
+import globals from 'globals'
+import path from 'node:path'
 
-import react from 'eslint-plugin-react';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
+import react from 'eslint-plugin-react'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
 
-import pluginCypress from 'eslint-plugin-cypress/flat';
+import pluginCypress from 'eslint-plugin-cypress/flat'
 
-import vitest from 'eslint-plugin-vitest';
+import vitest from 'eslint-plugin-vitest'
 
-import languageOptions from './rules/language-options.js';
-import reactRules from './rules/react.js';
-import cypressRules from './rules/cypress.js';
+import languageOptions from './rules/language-options.js'
+import reactRules from './rules/react.js'
+import cypressRules from './rules/cypress.js'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 const compat = new FlatCompat({
 	baseDirectory: __dirname,
 	recommendedConfig: eslintJs.configs.recommended,
-});
+})
 
-const resolvePath = (file) => path.resolve(__dirname, file);
-const gitignorePath = resolvePath('.gitignore');
+const resolvePath = (file) => path.resolve(__dirname, file)
+const gitignorePath = resolvePath('.gitignore')
 
 export default [
 	// Cypress global configurations
@@ -105,4 +105,4 @@ export default [
 			...vitest.configs.recommended.rules,
 		},
 	},
-];
+]
