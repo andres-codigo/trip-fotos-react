@@ -24,6 +24,9 @@ dist
 .vite
 coverage
 
+# CYRPESS TESTING
+cypress/downloads/
+
 # DEPCHECK ANALYSIS FILES
 scripts/dependency-check/
 
