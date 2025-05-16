@@ -1,27 +1,27 @@
-import { useSelector } from 'react-redux';
-import { useRef } from 'react';
+import { useSelector } from 'react-redux'
+import { useRef } from 'react'
 // import { useNavigate } from 'react-router-dom';
-import classNames from 'classnames';
+import classNames from 'classnames'
 
-import { PATHS } from '@/constants/paths';
+import { PATHS } from '@/constants/paths'
 
-import { useCloseHamburgerMenu } from './hooks/useCloseHamburgerMenu';
-import { useHeaderState } from './hooks/useHeaderState';
-import { useLogout } from './hooks/useLogout';
-import { useMobileMenu } from './hooks/useMobileMenu';
+import { useCloseHamburgerMenu } from './hooks/useCloseHamburgerMenu'
+import { useHeaderState } from './hooks/useHeaderState'
+import { useLogout } from './hooks/useLogout'
+import { useMobileMenu } from './hooks/useMobileMenu'
 
-import NavMenuButtonLink from './nav-menu/NavMenuButtonLink';
-import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink';
+import NavMenuButtonLink from './nav-menu/NavMenuButtonLink'
+import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink'
 
-import navMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss';
-import headerStyles from './Header.module.scss';
+import navMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss'
+import headerStyles from './Header.module.scss'
 
 function Header() {
 	// const navigate = useNavigate();
 
 	const isLoggedIn = useSelector(
 		(state) => state.authentication.token !== null,
-	);
+	)
 	// const usersName = useSelector((state) => state.travellers.travellerName);
 	// const isTraveller = useSelector((state) => state.travellers.isTraveller);
 	// const messagesCount = useSelector((state) => state.messages.messagesCount);
@@ -33,13 +33,13 @@ function Header() {
 		setTotalMessages,
 		isMenuOpen,
 		setIsMenuOpen,
-	} = useHeaderState();
+	} = useHeaderState()
 
-	const hamburgerRef = useRef(null);
-	const navMenuRef = useRef(null);
+	const hamburgerRef = useRef(null)
+	const navMenuRef = useRef(null)
 
-	useCloseHamburgerMenu(isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen);
-	useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn);
+	useCloseHamburgerMenu(isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen)
+	useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn)
 
 	//// START
 
@@ -71,10 +71,12 @@ function Header() {
 		setTravellerName,
 		setTotalMessages,
 		setIsMenuOpen,
-	);
+	)
 
 	return (
-		<header className={headerStyles.siteHeader} data-cy="site-header">
+		<header
+			className={headerStyles.siteHeader}
+			data-cy="site-header">
 			<nav className={headerStyles.navbar}>
 				<h1
 					className="siteHeaderTitleLink"
@@ -153,7 +155,7 @@ function Header() {
 				)}
 			</nav>
 		</header>
-	);
+	)
 }
 
-export default Header;
+export default Header

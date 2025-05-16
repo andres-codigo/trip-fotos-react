@@ -1,10 +1,10 @@
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'
 
-import { API_DATABASE } from '@/constants/api';
+import { API_DATABASE } from '@/constants/api'
 
-import BaseButton from '@/components/ui/button/BaseButton';
+import BaseButton from '@/components/ui/button/BaseButton'
 
-import userAuthStyles from './UserAuthForm.module.scss';
+import userAuthStyles from './UserAuthForm.module.scss'
 
 const UserAuthForm = ({
 	email,
@@ -15,7 +15,9 @@ const UserAuthForm = ({
 	onSubmit,
 	onSwitchMode,
 }) => (
-	<form className={userAuthStyles.userAuthentication} onSubmit={onSubmit}>
+	<form
+		className={userAuthStyles.userAuthentication}
+		onSubmit={onSubmit}>
 		<div
 			className={`${userAuthStyles.formControl} ${
 				!email.isValid ? userAuthStyles.invalid : ''
@@ -57,7 +59,7 @@ const UserAuthForm = ({
 			{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? 'Sign-up' : 'Login'}
 		</BaseButton>
 	</form>
-);
+)
 
 UserAuthForm.propTypes = {
 	email: PropTypes.shape({
@@ -75,6 +77,6 @@ UserAuthForm.propTypes = {
 	onPasswordChange: PropTypes.func.isRequired,
 	onSubmit: PropTypes.func.isRequired,
 	onSwitchMode: PropTypes.func.isRequired,
-};
+}
 
-export default UserAuthForm;
+export default UserAuthForm

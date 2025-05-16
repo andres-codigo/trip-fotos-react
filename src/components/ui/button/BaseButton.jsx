@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 
-import classNames from 'classnames';
-import PropTypes from 'prop-types';
+import classNames from 'classnames'
+import PropTypes from 'prop-types'
 
-import baseButtonStyles from './BaseButton.module.scss';
+import baseButtonStyles from './BaseButton.module.scss'
 
 function BaseButton({
 	children,
@@ -17,15 +17,15 @@ function BaseButton({
 	dataCypress,
 	...props
 }) {
-	const elementRef = useRef();
+	const elementRef = useRef()
 
 	useEffect(() => {
 		if (isError && elementRef.current) {
-			elementRef.current.focus();
+			elementRef.current.focus()
 		}
-	}, [isError]);
+	}, [isError])
 
-	const combinedClassName = classNames(className, baseButtonStyles[modeType]);
+	const combinedClassName = classNames(className, baseButtonStyles[modeType])
 
 	return (
 		<>
@@ -50,7 +50,7 @@ function BaseButton({
 				</Link>
 			)}
 		</>
-	);
+	)
 }
 
 BaseButton.propTypes = {
@@ -62,6 +62,6 @@ BaseButton.propTypes = {
 	to: PropTypes.string,
 	className: PropTypes.string,
 	dataCypress: PropTypes.string,
-};
+}
 
-export default BaseButton;
+export default BaseButton

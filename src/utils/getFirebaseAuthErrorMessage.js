@@ -1,8 +1,8 @@
 export const getFirebaseAuthErrorMessage = (error) => {
 	switch (error) {
 		case 'INVALID_LOGIN_CREDENTIALS':
-			return 'The email or password you entered is incorrect.';
+			return 'The email or password you entered is incorrect.'
 		default:
-			return 'An unexpected error occurred. Please try again.';
+			return 'An unexpected error occurred. Please try again.'
 	}
-};
+}

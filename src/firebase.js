@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp } from 'firebase/app'
 
-import { FIREBASE } from '@/constants/firebase';
+import { FIREBASE } from '@/constants/firebase'
 
 const firebaseConfig = {
 	apiKey: FIREBASE.API_KEY,
@@ -11,6 +11,6 @@ const firebaseConfig = {
 	messagingSenderId: FIREBASE.MESSAGING_SENDER_ID,
 	appId: FIREBASE.APP_ID,
 	measurementId: FIREBASE.MEASUREMENT_ID,
-};
+}
 
-export const firebaseApp = initializeApp(firebaseConfig);
+export const firebaseApp = initializeApp(firebaseConfig)

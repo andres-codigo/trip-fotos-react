@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from 'react'
 
 export function useMobileMenu(
 	hamburgerRef,
@@ -7,25 +7,25 @@ export function useMobileMenu(
 	isLoggedIn,
 ) {
 	useEffect(() => {
-		if (!isLoggedIn) return;
+		if (!isLoggedIn) return
 
-		const hamburger = hamburgerRef.current;
+		const hamburger = hamburgerRef.current
 
 		const mobileMenu = (event) => {
 			if (
 				event.target === hamburger ||
 				hamburger.contains(event.target)
 			) {
-				setIsMenuOpen((prev) => !prev);
-				hamburger.classList.toggle('active');
-				navMenuRef.current.classList.toggle('active');
+				setIsMenuOpen((prev) => !prev)
+				hamburger.classList.toggle('active')
+				navMenuRef.current.classList.toggle('active')
 			}
-		};
+		}
 
-		hamburger.addEventListener('click', mobileMenu);
+		hamburger.addEventListener('click', mobileMenu)
 
 		return () => {
-			hamburger.removeEventListener('click', mobileMenu);
-		};
-	}, [hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn]);
+			hamburger.removeEventListener('click', mobileMenu)
+		}
+	}, [hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn])
 }

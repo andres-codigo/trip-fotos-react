@@ -8,4 +8,4 @@ export const GLOBAL = Object.freeze({
 
 	// IMAGE UPLOAD
 	LOADING_IMAGE: 'loading',
-});
+})

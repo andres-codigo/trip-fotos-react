@@ -1,14 +1,14 @@
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics } from '@vercel/analytics/react'
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import store from '@/store/store';
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import { Provider } from 'react-redux'
+import store from '@/store/store'
 
-import App from './App.jsx';
+import App from './App.jsx'
 
-import '@/styles/global.scss';
+import '@/styles/global.scss'
 
 createRoot(document.getElementById('app')).render(
 	<StrictMode>
@@ -19,4 +19,4 @@ createRoot(document.getElementById('app')).render(
 			<Analytics />
 		</Provider>
 	</StrictMode>,
-);
+)
