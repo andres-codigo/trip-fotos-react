@@ -11,6 +11,8 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 
 import pluginCypress from 'eslint-plugin-cypress/flat';
 
+import vitest from 'eslint-plugin-vitest';
+
 import languageOptions from './rules/language-options.js';
 import reactRules from './rules/react.js';
 import cypressRules from './rules/cypress.js';
@@ -85,5 +87,18 @@ export default [
 			globals: { ...globals.node, ...globals.amd },
 		},
 		rules: cypressRules,
+	},
+
+	// Vitest
+	{
+		files: ['**/*.test.js', '**/*.test.jsx'],
+		plugins: { vitest },
+		languageOptions: {
+			sourceType: 'module',
+			globals: { ...globals.node, ...globals.es2022 },
+		},
+		rules: {
+			...vitest.configs.recommended.rules,
+		},
 	},
 ];
