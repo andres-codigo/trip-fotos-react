@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { CSSTransition } from 'react-transition-group';
 
-import BaseButton from '@/components/ui/button/BaseButton.js';
+import BaseButton from '@/components/ui/button/BaseButton';
 
 import baseDialogStyles from './BaseDialog.module.scss';
 

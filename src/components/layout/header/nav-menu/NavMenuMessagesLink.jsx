@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
-import NavMenuButtonLink from './NavMenuButtonLink.js';
+import NavMenuButtonLink from './NavMenuButtonLink';
 
 import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss';
 

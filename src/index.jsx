@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from '@/store/store';
 
-import App from './App.js';
+import App from './App.jsx';
 
 import '@/styles/global.scss';
 
