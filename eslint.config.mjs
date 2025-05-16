@@ -35,11 +35,15 @@ export default [
 	includeIgnoreFile(gitignorePath),
 
 	// Base ESLint and Prettier configurations
-	...compat.extends('eslint:recommended', 'plugin:prettier/recommended'),
+	...compat.extends(
+		'eslint:recommended',
+		'plugin:react/recommended',
+		'plugin:prettier/recommended',
+	),
 
 	// Environment settings
 	...compat.env({
-		es2020: true,
+		es2022: true,
 		node: true,
 		vitest: true,
 	}),
@@ -59,7 +63,7 @@ export default [
 
 	// React configurations
 	{
-		files: ['**/*.{js,jsx,ts,tsx}'],
+		files: ['**/*.{js,jsx}'],
 		languageOptions,
 		plugins: {
 			react,

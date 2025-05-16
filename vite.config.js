@@ -36,7 +36,7 @@ export default defineConfig({
 				replacement: fileURLToPath(new URL('./src', import.meta.url)),
 			},
 		],
-		extensions: ['.js', '.json', '.mjs', '.vue', 'svg', 'scss'],
+		extensions: ['.js', '.jsx', '.json', '.mjs', '.vue', 'svg', 'scss'],
 	},
 	optimizeDeps: {
 		force: true,
