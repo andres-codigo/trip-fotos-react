@@ -10,4 +10,4 @@ export default {
 	'no-debugger': 'warn',
 	'prettier/prettier': 'error',
 	quotes: ['error', 'single'],
-};
+}

@@ -1,7 +1,7 @@
-import { fileURLToPath, URL } from 'node:url';
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import eslint from 'vite-plugin-eslint2';
+import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import eslint from 'vite-plugin-eslint2'
 
 export default defineConfig({
 	server: {
@@ -40,4 +40,4 @@ export default defineConfig({
 			reportsDirectory: './coverage',
 		},
 	},
-});
+})

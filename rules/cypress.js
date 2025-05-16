@@ -7,4 +7,4 @@ export default {
 	'cypress/no-async-tests': 'error',
 	'cypress/no-async-before': 'error',
 	'cypress/no-pause': 'error',
-};
+}

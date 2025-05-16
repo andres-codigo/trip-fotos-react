@@ -24,20 +24,20 @@
 // 	export default plugin;
 // }
 
-import { Linter, Rule } from 'eslint';
+import { Linter, Rule } from 'eslint'
 
 const configs = {
 	recommended: new Linter.Config(),
-};
+}
 
 const rules = {
 	'rules-of-hooks': new Rule.RuleModule(),
 	'exhaustive-deps': new Rule.RuleModule(),
-};
+}
 
 const plugin = {
 	configs: configs,
 	rules: rules,
-};
+}
 
-module.exports = plugin;
+module.exports = plugin
