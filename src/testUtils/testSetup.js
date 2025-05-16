@@ -1,7 +1,7 @@
-import { vi } from 'vitest';
+import { vi } from 'vitest'
 
 export const setupMocks = () => {
-	global.fetch = vi.fn();
+	global.fetch = vi.fn()
 
 	Object.defineProperty(global, 'localStorage', {
 		value: {
@@ -11,5 +11,5 @@ export const setupMocks = () => {
 			clear: vi.fn(),
 		},
 		writable: true,
-	});
-};
+	})
+}

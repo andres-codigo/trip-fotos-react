@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from 'react'
 
 export function useCloseHamburgerMenu(
 	isMenuOpen,
@@ -14,11 +14,11 @@ export function useCloseHamburgerMenu(
 				!hamburgerRef.current.contains(event.target) &&
 				!navMenuRef.current.contains(event.target)
 			) {
-				setIsMenuOpen(false);
+				setIsMenuOpen(false)
 			}
-		};
+		}
 
-		document.addEventListener('click', handleClickOutside);
-		return () => document.removeEventListener('click', handleClickOutside);
-	}, [isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen]);
+		document.addEventListener('click', handleClickOutside)
+		return () => document.removeEventListener('click', handleClickOutside)
+	}, [isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen])
 }

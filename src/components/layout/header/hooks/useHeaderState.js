@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState } from 'react'
 
-import { useLoggedInTravellerName } from './useLoggedInTravellerName';
+import { useLoggedInTravellerName } from './useLoggedInTravellerName'
 
 export function useHeaderState() {
-	const [travellerName, setTravellerName] = useLoggedInTravellerName();
-	const [totalMessages, setTotalMessages] = useState(null);
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [travellerName, setTravellerName] = useLoggedInTravellerName()
+	const [totalMessages, setTotalMessages] = useState(null)
+	const [isMenuOpen, setIsMenuOpen] = useState(false)
 
 	return {
 		travellerName,
@@ -14,5 +14,5 @@ export function useHeaderState() {
 		setTotalMessages,
 		isMenuOpen,
 		setIsMenuOpen,
-	};
+	}
 }

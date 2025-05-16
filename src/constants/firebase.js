@@ -7,4 +7,4 @@ export const FIREBASE = Object.freeze({
 	STORAGE_BUCKET: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
 	MESSAGING_SENDER_ID: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
 	APP_ID: import.meta.env.VITE_FIREBASE_APP_ID,
-});
+})

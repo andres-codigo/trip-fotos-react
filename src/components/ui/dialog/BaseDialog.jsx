@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom';
-import PropTypes from 'prop-types';
-import { CSSTransition } from 'react-transition-group';
+import { useState, useEffect, useRef } from 'react'
+import ReactDOM from 'react-dom'
+import PropTypes from 'prop-types'
+import { CSSTransition } from 'react-transition-group'
 
-import BaseButton from '@/components/ui/button/BaseButton';
+import BaseButton from '@/components/ui/button/BaseButton'
 
-import baseDialogStyles from './BaseDialog.module.scss';
+import baseDialogStyles from './BaseDialog.module.scss'
 
 function BaseDialog({
 	children,
@@ -18,22 +18,22 @@ function BaseDialog({
 	actions,
 	header,
 }) {
-	const nodeRef = useRef(null);
-	const [isVisible, setIsVisible] = useState(show);
+	const nodeRef = useRef(null)
+	const [isVisible, setIsVisible] = useState(show)
 
 	useEffect(() => {
 		if (show) {
-			setIsVisible(true);
+			setIsVisible(true)
 		}
-	}, [show]);
+	}, [show])
 
 	const tryClose = () => {
 		if (!fixed) {
-			onClose();
+			onClose()
 		}
-	};
+	}
 
-	if (!isVisible && !show) return null;
+	if (!isVisible && !show) return null
 
 	return ReactDOM.createPortal(
 		<>
@@ -56,7 +56,10 @@ function BaseDialog({
 					exitActive: baseDialogStyles['dialog-exit-active'],
 				}}
 				unmountOnExit>
-				<dialog ref={nodeRef} open className={baseDialogStyles.dialog}>
+				<dialog
+					ref={nodeRef}
+					open
+					className={baseDialogStyles.dialog}>
 					<header className={baseDialogStyles.header}>
 						{header ? header : <h2>{title}</h2>}
 					</header>
@@ -85,7 +88,7 @@ function BaseDialog({
 			</CSSTransition>
 		</>,
 		document.body,
-	);
+	)
 }
 
 BaseDialog.propTypes = {
@@ -98,6 +101,6 @@ BaseDialog.propTypes = {
 	onClose: PropTypes.func.isRequired,
 	actions: PropTypes.node,
 	header: PropTypes.node,
-};
+}
 
-export default BaseDialog;
+export default BaseDialog

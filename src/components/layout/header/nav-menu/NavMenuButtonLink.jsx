@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react';
-import classNames from 'classnames';
-import PropTypes from 'prop-types';
+import { useEffect, useRef } from 'react'
+import classNames from 'classnames'
+import PropTypes from 'prop-types'
 
-import BaseButton from '@/components/ui/button/BaseButton';
+import BaseButton from '@/components/ui/button/BaseButton'
 
-import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss';
+import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss'
 
 function NavMenuButtonLink({
 	children,
@@ -16,18 +16,18 @@ function NavMenuButtonLink({
 	className,
 	...props
 }) {
-	const elementRef = useRef();
+	const elementRef = useRef()
 
 	useEffect(() => {
 		if (isError && elementRef.current) {
-			elementRef.current.focus();
+			elementRef.current.focus()
 		}
-	}, [isError]);
+	}, [isError])
 
 	const combinedClassName = classNames(
 		className,
 		navMenuButtonLinkStyles[modeType],
-	);
+	)
 
 	return (
 		<BaseButton
@@ -40,7 +40,7 @@ function NavMenuButtonLink({
 			{...props}>
 			{children}
 		</BaseButton>
-	);
+	)
 }
 
 NavMenuButtonLink.propTypes = {
@@ -51,6 +51,6 @@ NavMenuButtonLink.propTypes = {
 	modeType: PropTypes.string,
 	to: PropTypes.string,
 	className: PropTypes.string,
-};
+}
 
-export default NavMenuButtonLink;
+export default NavMenuButtonLink

@@ -1,22 +1,22 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import { combineReducers } from 'redux';
+import { configureStore } from '@reduxjs/toolkit'
+import { persistStore, persistReducer } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
+import { combineReducers } from 'redux'
 
-import authenticationReducer from './slices/authenticationSlice';
-import travellersReducer from './slices/travellersSlice';
+import authenticationReducer from './slices/authenticationSlice'
+import travellersReducer from './slices/travellersSlice'
 
 const rootReducer = combineReducers({
 	authentication: authenticationReducer,
 	travellers: travellersReducer,
-});
+})
 
 const persistConfig = {
 	key: 'root',
 	storage,
-};
+}
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 const store = configureStore({
 	reducer: persistedReducer,
@@ -33,8 +33,8 @@ const store = configureStore({
 				],
 			},
 		}),
-});
+})
 
-export const persistor = persistStore(store);
+export const persistor = persistStore(store)
 
-export default store;
+export default store

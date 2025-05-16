@@ -11,4 +11,4 @@ export const API_DATABASE = Object.freeze({
 	POST: 'POST',
 	PUT: 'PUT',
 	DELETE: 'DELETE',
-});
+})
