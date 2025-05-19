@@ -35,7 +35,7 @@ This project uses the following technologies:
 - [React](https://react.dev/) as the front-end library.
 - [React Router](https://reactrouter.com/) for routing.
 - [Redux](https://redux.js.org/) for state management.
-- [SCSS](https://sass-lang.com/) for CSS preprocessing.
+- [SASS](https://sass-lang.com/) for CSS preprocessing.
 - [ESLint](https://eslint.org/) for JavaScript linting.
 - [Prettier](https://prettier.io/) for code formatting.
 - [Vitest](https://vitest.dev/) for unit and integration testing.
@@ -107,11 +107,14 @@ Below are the available npm scripts for this project:
 # Start the development server with linting
 npm run dev
 
-# Build the project for production
-npm run build
+# Run ESLint to check for issues
+npm run lint
 
-# Preview the production build locally
-npm run preview
+# Automatically fix linting issues and format files
+npm run lint:fix
+
+# Format files using Prettier
+npm run format
 
 # Open the Cypress Test Runner in interactive mode
 npm run cy:open
@@ -122,20 +125,17 @@ npm run test
 # Run tests in watch mode
 npm run test:watch
 
+# Run tests
+npm run test:run
+
 # Generate a test coverage report
 npm run test:coverage
 
-# Run ESLint to check for issues
-npm run lint:js
+# Build the project for production
+npm run build
 
-# Automatically fix linting issues and format files
-npm run lint:fix
-
-# Watch for file changes and run ESLint
-npm run lint:watch
-
-# Format files using Prettier
-npm run format
+# Preview the production build locally
+npm run preview
 ```
 
 <a id="setup"></a>
@@ -213,6 +213,10 @@ VITE_FIREBASE_MEASUREMENT_ID='' # firebaseConfig > measurementId
 
 # Admin User ID
 VITE_ADMIN_ID='' # Firebase authenticated User UID for deletion of users rights
+
+# CYPRESS TESTING
+CYPRESS_USER_EMAIL=''
+CYPRESS_USER_PASSWORD=''
 
 ```
 
@@ -475,6 +479,7 @@ trip-fotos-react/
 ├── cypress/            # Cypress tests
 ├── declarations/       # Breaking issue fix when using ESLint V9
 ├── public/             # Static assets
+├── rules/              # ESLint configuration rules
 ├── src/
 │   ├── assets/         # Fonts, SVGs, and other static assets
 │   ├── components/     # Reusable React components
