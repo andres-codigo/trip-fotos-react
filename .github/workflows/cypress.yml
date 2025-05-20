@@ -32,7 +32,7 @@ jobs:
               run: npm install
 
             - name: Start app & run Cypress tests
-              uses: cypress-io/github-action@v6
+              uses: cypress-io/github-action@v6.14.0
               env:
                   VITE_API_URL: ${{ secrets.VITE_API_URL }}
                   VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
