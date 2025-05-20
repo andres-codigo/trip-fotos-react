@@ -18,8 +18,6 @@ import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseCard from '@/components/ui/card/BaseCard'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-import userAuthStyles from './UserAuth.module.scss'
-
 const UserAuth = () => {
 	const [email, setEmail] = useFormField('')
 	const [password, setPassword] = useFormField('')
@@ -110,7 +108,7 @@ const UserAuth = () => {
 	const handleError = () => setError(null)
 
 	return (
-		<section className={userAuthStyles.userAuthenticationContainer}>
+		<section className="pageSection">
 			{error && (
 				<BaseDialog
 					show={true}

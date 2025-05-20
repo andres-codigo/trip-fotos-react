@@ -7,7 +7,11 @@ import pageNotFoundStyles from './pageNotFound.module.scss'
 
 const PageNotFound = () => {
 	return (
-		<section className={pageNotFoundStyles.pageNotFoundContainer}>
+		<section
+			className={[
+				'pageSection',
+				pageNotFoundStyles.pageNotFoundContainer,
+			].join(' ')}>
 			<BaseCard>
 				<h2>This page isn&apos;t available. Sorry about that.</h2>
 				<p>
