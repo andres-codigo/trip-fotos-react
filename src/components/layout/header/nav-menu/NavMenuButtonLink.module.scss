@@ -48,6 +48,10 @@ a.navMenuButtonLink {
 }
 
 a.navMenuButtonLink {
+	color: variables.$color-white;
+	padding: 0.75rem 1.5rem;
+	position: relative;
+
 	&:hover {
 		color: variables.$color-lavender-magenta;
 

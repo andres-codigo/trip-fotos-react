@@ -1,6 +1,12 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import {
+	Routes,
+	Route,
+	Navigate,
+	useNavigate,
+	useLocation,
+} from 'react-router-dom'
 
 import { PATHS } from '@/constants/paths'
 
@@ -10,10 +16,12 @@ import Header from '@/components/layout/header/Header'
 import UserAuth from '@/pages/authentication/UserAuth'
 import Trips from '@/pages/trips/Trips'
 import Messages from '@/pages/messages/Messages'
+import PageNotFound from '@/pages/PageNotFound'
 
 function App() {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
+	const location = useLocation()
 
 	// Access the `isLoggedIn` and `didAutoLogout` states from the Redux store
 	const isLoggedIn = useSelector(
@@ -35,43 +43,46 @@ function App() {
 		}
 	}, [didAutoLogout, navigate])
 
+	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
+	useEffect(() => {
+		if (!isLoggedIn && location.pathname !== PATHS.AUTHENTICATION) {
+			navigate(PATHS.AUTHENTICATION, { replace: true })
+		}
+	}, [isLoggedIn, location.pathname, navigate])
+
 	return (
 		<>
 			<Header />
 			<Routes>
-				{!isLoggedIn && (
-					<>
-						<Route
-							path={PATHS.AUTHENTICATION}
-							element={<UserAuth />}
+				<Route
+					path={PATHS.HOME}
+					element={<Trips />}
+				/>
+				<Route
+					path={PATHS.AUTHENTICATION}
+					element={<UserAuth />}
+				/>
+				<Route
+					path={PATHS.TRIPS}
+					element={<Trips />}
+				/>
+				<Route
+					path={PATHS.MESSAGES}
+					element={<Messages />}
+				/>
+				<Route
+					path={PATHS.PAGENOTFOUND}
+					element={<PageNotFound />}
+				/>
+				<Route
+					path="*"
+					element={
+						<Navigate
+							to={PATHS.PAGENOTFOUND}
+							replace
 						/>
-						<Route
-							path="*"
-							element={<Navigate to={PATHS.AUTHENTICATION} />}
-						/>
-					</>
-				)}
-
-				{isLoggedIn && (
-					<>
-						<Route
-							path={PATHS.HOME}
-							element={<Trips />}
-						/>
-						<Route
-							path={PATHS.TRIPS}
-							element={<Trips />}
-						/>
-						<Route
-							path={PATHS.MESSAGES}
-							element={<Messages />}
-						/>
-						<Route
-							path="*"
-							element={<Navigate to={PATHS.HOME} />}
-						/>
-					</>
-				)}
+					}
+				/>
 			</Routes>
 		</>
 	)

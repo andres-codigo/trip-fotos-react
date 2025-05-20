@@ -4,4 +4,5 @@ export const PATHS = Object.freeze({
 	AUTHENTICATION: '/authentication',
 	TRIPS: '/trips',
 	MESSAGES: '/messages',
+	PAGENOTFOUND: '/404',
 })

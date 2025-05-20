@@ -131,7 +131,6 @@ function Header() {
 							)}
 							onClick={handleLogoutClick}>
 							<NavMenuButtonLink
-								to="/"
 								className={
 									navMenuButtonLinkStyles.navMenuButtonLink
 								}
