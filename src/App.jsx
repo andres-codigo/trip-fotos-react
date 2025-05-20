@@ -10,6 +10,7 @@ import Header from '@/components/layout/header/Header'
 import UserAuth from '@/pages/authentication/UserAuth'
 import Trips from '@/pages/trips/Trips'
 import Messages from '@/pages/messages/Messages'
+import PageNotFound from '@/pages/PageNotFound'
 
 function App() {
 	const dispatch = useDispatch()
@@ -45,10 +46,6 @@ function App() {
 							path={PATHS.AUTHENTICATION}
 							element={<UserAuth />}
 						/>
-						<Route
-							path="*"
-							element={<Navigate to={PATHS.AUTHENTICATION} />}
-						/>
 					</>
 				)}
 
@@ -66,12 +63,21 @@ function App() {
 							path={PATHS.MESSAGES}
 							element={<Messages />}
 						/>
-						<Route
-							path="*"
-							element={<Navigate to={PATHS.HOME} />}
-						/>
 					</>
 				)}
+				<Route
+					path={PATHS.PAGENOTFOUND}
+					element={<PageNotFound />}
+				/>
+				<Route
+					path="*"
+					element={
+						<Navigate
+							to={PATHS.PAGENOTFOUND}
+							replace
+						/>
+					}
+				/>
 			</Routes>
 		</>
 	)
