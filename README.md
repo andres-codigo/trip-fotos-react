@@ -192,6 +192,10 @@ npm run preview
 
 Create a `.env` file in the root directory and add the following key-value pairs:
 
+**Note:**
+Do not commit your `.env` file to version control.
+Instead, create a `.env.example` file (without sensitive values) to document required environment variables for collaborators.
+
 ```bash
 
 # Firebase Auth REST API
