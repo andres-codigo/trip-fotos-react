@@ -20,7 +20,7 @@
 @forward '@/styles/setup/routing';
 
 // pages styles
-@forward './setup/pages';
+@forward '@/styles/setup/pages';
 
 // traveller component styles
 @forward '@/styles/components/_travellers';
