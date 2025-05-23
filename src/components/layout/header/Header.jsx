@@ -108,15 +108,15 @@ function Header() {
 								/>
 								{/* )} */}
 								<li
-									className="navMenuItemAllTravellers"
-									data-cy="nav-menu-item-all-travellers">
+									className="navMenuItemTravellers"
+									data-cy="nav-menu-item-travellers">
 									<NavMenuButtonLink
 										isLink
 										to="/"
 										className={
 											navMenuButtonLinkStyles.navMenuButtonLink
 										}>
-										All Travellers
+										Travellers
 									</NavMenuButtonLink>
 								</li>
 							</ul>
