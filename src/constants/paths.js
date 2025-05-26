@@ -6,5 +6,5 @@ export const PATHS = Object.freeze({
 	MESSAGES: '/messages',
 	PAGENOTFOUND: '/404',
 	// TEST PATHS
-	NON_EXISTENT_ROUTE: '/cy-non-existent-route',
+	NON_EXISTENT_PATH: '/cy-non-existent-route',
 })
