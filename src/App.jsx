@@ -45,8 +45,15 @@ function App() {
 
 	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
 	useEffect(() => {
-		if (!isLoggedIn && location.pathname !== PATHS.AUTHENTICATION) {
-			navigate(PATHS.AUTHENTICATION, { replace: true })
+		const publicPaths = [PATHS.AUTHENTICATION, PATHS.PAGENOTFOUND]
+		const isPublic = publicPaths.includes(location.pathname)
+
+		if (!isLoggedIn && !isPublic) {
+			// Only redirect if the route is a known protected route
+			const protectedPaths = [PATHS.HOME, PATHS.TRIPS, PATHS.MESSAGES]
+			if (protectedPaths.includes(location.pathname)) {
+				navigate(PATHS.AUTHENTICATION, { replace: true })
+			}
 		}
 	}, [isLoggedIn, location.pathname, navigate])
 
