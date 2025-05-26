@@ -16,7 +16,7 @@ import Header from '@/components/layout/header/Header'
 import UserAuth from '@/pages/authentication/UserAuth'
 import Trips from '@/pages/trips/Trips'
 import Messages from '@/pages/messages/Messages'
-import PageNotFound from '@/pages/PageNotFound'
+import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
 function App() {
 	const dispatch = useDispatch()
