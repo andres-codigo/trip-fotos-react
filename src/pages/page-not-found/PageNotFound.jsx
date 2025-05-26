@@ -19,9 +19,7 @@ function PageNotFound() {
 				pageNotFoundStyles.pageNotFoundContainer,
 			].join(' ')}>
 			<BaseCard>
-				<h2>
-					This {isLoggedIn} page is not available. Sorry about that.
-				</h2>
+				<h2>This page is not available. Sorry about that.</h2>
 				<p>
 					Best return to the
 					<BaseButton
