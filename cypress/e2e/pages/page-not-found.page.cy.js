@@ -8,7 +8,7 @@ import {
 describe('PageNotFound page', () => {
 	it('displays the 404 page and user can navigate home', () => {
 		// Visit a non-existent route
-		cy.visit(urls.cyNonExistentRoute, { failOnStatusCode: false })
+		cy.visit(urls.cyNonExistentPath, { failOnStatusCode: false })
 
 		// Check the 404 Page Not Found Page URL is correct
 		cy.url().should('eq', baseUrl + urls.cyPageNotFound)
@@ -28,6 +28,6 @@ describe('PageNotFound page', () => {
 		cy.url().should('eq', baseUrl + urls.cyAuth)
 
 		// Revisit a non-existent route
-		cy.visit(urls.cyNonExistentRoute, { failOnStatusCode: false })
+		cy.visit(urls.cyNonExistentPath, { failOnStatusCode: false })
 	})
 })
