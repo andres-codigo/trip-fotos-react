@@ -6,7 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export default defineConfig({
-	baseUrl: process.env.VITE_ROOT_URL,
+	baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',
 	env: {
 		// PATHS
 		ROOT_URL: PATHS.HOME,
