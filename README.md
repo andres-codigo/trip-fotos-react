@@ -198,6 +198,8 @@ Instead, create a `.env.example` file (without sensitive values) to document req
 
 ```bash
 
+VITE_ROOT_URL='http://localhost:3000'
+
 # Firebase Auth REST API
 VITE_API_URL='https://identitytoolkit.googleapis.com/v1/accounts:'
 VITE_API_KEY='' # firebaseConfig > apiKey
