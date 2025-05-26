@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export default defineConfig({
+	baseUrl: process.env.VITE_ROOT_URL,
 	env: {
 		// PATHS
 		ROOT_URL: PATHS.HOME,
@@ -20,9 +21,6 @@ export default defineConfig({
 		USER_PASSWORD: process.env.CYPRESS_USER_PASSWORD,
 		// BACKEND
 		VITE_DATABASE_URL: process.env.VITE_BACKEND_BASE_URL,
-	},
-	e2e: {
-		baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',
 	},
 
 	component: {
