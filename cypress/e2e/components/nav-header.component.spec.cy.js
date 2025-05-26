@@ -1,8 +1,13 @@
-import { urls, user, topNavigationSelectors } from '../../support/constants'
+import {
+	baseUrl,
+	urls,
+	user,
+	topNavigationSelectors,
+} from '../../support/constants'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
-		cy.visit(urls.cyAuth)
+		cy.visit(baseUrl + urls.cyAuth)
 	})
 
 	it('Displays the title as a link and does not render the hamburger menu', () => {
@@ -14,13 +19,13 @@ describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', ()
 
 	it('Navigates to the "authentication" page when clicking the app title', () => {
 		cy.get(topNavigationSelectors.siteHeaderTitleLink).click()
-		cy.url().should('eq', urls.cyAuth)
+		cy.url().should('eq', baseUrl + urls.cyAuth)
 	})
 })
 
 describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
-		cy.visit(urls.cyAuth)
+		cy.visit(baseUrl + urls.cyAuth)
 		cy.login(user.email, user.password)
 	})
 
@@ -33,7 +38,7 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 
 	it('Navigates to the "trips" page when clicking the app title', () => {
 		cy.get(topNavigationSelectors.siteHeaderTitleLink).click()
-		cy.url().should('eq', urls.cyTrips)
+		cy.url().should('eq', baseUrl + urls.cyTrips)
 	})
 
 	it('Toggles the hamburger menu open and closed on mobile viewports', () => {
