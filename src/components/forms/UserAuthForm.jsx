@@ -31,7 +31,9 @@ const UserAuthForm = ({
 				onBlur={onEmailChange}
 				data-cy="email-input"
 			/>
-			{!email.isValid && <p>{email.message}</p>}
+			{!email.isValid && (
+				<p data-cy="email-error-message">{email.message}</p>
+			)}
 		</div>
 		<div
 			className={`${userAuthStyles.formControl} ${
@@ -46,13 +48,20 @@ const UserAuthForm = ({
 				onBlur={onPasswordChange}
 				data-cy="password-input"
 			/>
-			{!password.isValid && <p>{password.message}</p>}
+			{!password.isValid && (
+				<p data-cy="password-error-message">{password.message}</p>
+			)}
 		</div>
-		<BaseButton dataCypress="submit-button-login">
+		<BaseButton
+			id="login-button"
+			type="submit"
+			mode="flat"
+			dataCypress="submit-button-login">
 			{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? 'Login' : 'Sign-up'}
 		</BaseButton>
 		<BaseButton
-			type="button"
+			id="sign-up-button"
+			type="submit"
 			mode="flat"
 			onClick={onSwitchMode}
 			dataCypress="submit-button-signup">
