@@ -54,14 +54,14 @@ const UserAuthForm = ({
 		</div>
 		<BaseButton
 			id="login-button"
-			type="submit"
+			type="button"
 			mode="flat"
 			dataCypress="submit-button-login">
 			{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? 'Login' : 'Sign-up'}
 		</BaseButton>
 		<BaseButton
 			id="sign-up-button"
-			type="submit"
+			type="button"
 			mode="flat"
 			onClick={onSwitchMode}
 			dataCypress="submit-button-signup">
