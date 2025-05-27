@@ -1,7 +1,22 @@
-export const api = {
+export const apiDatabase = {
 	// API
-	apiUrl: Cypress.env('VITE_API_URL'),
-	apiKey: Cypress.env('VITE_API_KEY'),
+	apiUrl: Cypress.env('API_URL'),
+	apiKey: Cypress.env('API_KEY'),
+
+	// DATABASE
+	POST: 'POST',
+}
+
+export const apiUrls = {
+	signInWithPassword: `${apiDatabase.apiUrl}signInWithPassword?key=${apiDatabase.apiKey}`,
+}
+
+export const errorMessage = {
+	INVALID_LOGIN_CREDENTIALS:
+		'The email or password you entered is incorrect.',
+	TOO_MANY_ATTEMPTS_TRY_LATER:
+		'Too many unsuccessful login attempts. Please try again later.',
+	DEFAULT: 'An unexpected error occurred. Please try again.',
 }
 
 export const baseUrl = Cypress.config('baseUrl')
@@ -66,7 +81,7 @@ export const authenticationFormSelectors = {
 	submitButtonLogin: '[data-cy="submit-button-login"]',
 	submitButtonTextSignup: 'Sign-up',
 	submitButtonSignup: '[data-cy="submit-button-signup"]',
-	// Dialogs
+	// Dialog's
 	invalidEmailOrPasswordDialog:
 		'[data-cy="invalid-email-or-password-dialog"]',
 	loadingDialog: '[data-cy="loading-dialog"]',
