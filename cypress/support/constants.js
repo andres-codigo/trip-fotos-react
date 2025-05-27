@@ -1,3 +1,9 @@
+export const api = {
+	// API
+	apiUrl: Cypress.env('VITE_API_URL'),
+	apiKey: Cypress.env('VITE_API_KEY'),
+}
+
 export const baseUrl = Cypress.config('baseUrl')
 
 export const urls = {
@@ -24,8 +30,11 @@ export const viewports = {
 }
 
 export const user = {
-	email: Cypress.env('USER_EMAIL'),
-	password: Cypress.env('USER_PASSWORD'),
+	validEmail: Cypress.env('USER_EMAIL'),
+	validPassword: Cypress.env('USER_PASSWORD'),
+	invalidEmail: 'invalid-email',
+	invalidPassword: 'invalid-password',
+	invalidPasswordTooShort: '12345',
 }
 
 export const domAttributeUrls = {
@@ -44,10 +53,23 @@ export const topNavigationSelectors = {
 }
 
 export const authenticationFormSelectors = {
+	// Email fields
+	emailLabel: 'E-Mail',
 	emailInput: '[data-cy="email-input"]',
+	emailErrorMessage: '[data-cy="email-error-message"]',
+	// Password fields
+	passwordLabel: 'Password',
 	passwordInput: '[data-cy="password-input"]',
+	passwordErrorMessage: '[data-cy="password-error-message"]',
+	// Submit buttons
+	submitButtonTextLogin: 'Login',
 	submitButtonLogin: '[data-cy="submit-button-login"]',
+	submitButtonTextSignup: 'Sign-up',
 	submitButtonSignup: '[data-cy="submit-button-signup"]',
+	// Dialogs
+	invalidEmailOrPasswordDialog:
+		'[data-cy="invalid-email-or-password-dialog"]',
+	loadingDialog: '[data-cy="loading-dialog"]',
 }
 
 export const pageNotFoundSelectors = {
