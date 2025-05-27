@@ -63,14 +63,15 @@ function BaseDialog({
 					className={baseDialogStyles.dialog}
 					data-cy={dataCypress}>
 					<header className={baseDialogStyles.header}>
-						{header ? header : <h2>{title}</h2>}
+						{header ? header : <h2 data-cy="title">{title}</h2>}
 					</header>
 					<section
 						className={
 							sectionClasses
 								? baseDialogStyles.imageSection
 								: baseDialogStyles.generalSection
-						}>
+						}
+						data-cy="content">
 						{children}
 					</section>
 					{!fixed && (
