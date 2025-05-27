@@ -6,6 +6,7 @@ import {
 	urls,
 	user,
 	dialog,
+	dialogMessages,
 	authenticationFormSelectors,
 } from '../../support/constants'
 
@@ -115,10 +116,13 @@ describe('User authentication page', () => {
 		cy.get(dialog.loading)
 			.parent()
 			.within(() => {
-				cy.get(dialog.title).should('contain.text', 'Authenticating')
-				cy.get(dialog.content).should(
+				cy.get(dialog.title).should(
 					'contain.text',
-					'Authenticating your details, one moment please...',
+					dialogMessages.loading.title,
+				)
+				cy.get(dialog.textContent).should(
+					'contain.text',
+					dialogMessages.loading.text,
 				)
 				cy.get(dialog.spinnerContainer).should('exist')
 				cy.get(dialog.spinnerImage)
@@ -128,6 +132,14 @@ describe('User authentication page', () => {
 			})
 
 		cy.wait('@loginRequest')
+	})
+
+	it('redirects on successful login', () => {
+		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
+		cy.login(user.validEmail, user.validPassword)
+		cy.wait('@loginRequest')
+
+		cy.url().should('include', urls.cyTrips)
 	})
 })
 
@@ -142,8 +154,11 @@ describe("Log in error Dialog's > User authentication page", () => {
 		cy.get(dialog.invalidEmailOrPassword)
 			.parent()
 			.within(() => {
-				cy.get(dialog.title).should('contain.text', 'An error occurred')
-				cy.get(dialog.content).should(
+				cy.get(dialog.title).should(
+					'contain.text',
+					dialogMessages.error.title,
+				)
+				cy.get(dialog.textContent).should(
 					'contain.text',
 					errorMessage[messageKey],
 				)
