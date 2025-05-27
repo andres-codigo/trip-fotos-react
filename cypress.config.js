@@ -16,6 +16,8 @@ export default defineConfig({
 		// TEST PATHS
 		NON_EXISTENT_URL: PATHS.NON_EXISTENT_PATH,
 		// API
+		VITE_API_URL: process.env.VITE_API_URL,
+		VITE_API_KEY: process.env.VITE_API_KEY,
 		USER_EMAIL: process.env.CYPRESS_USER_EMAIL,
 		USER_PASSWORD: process.env.CYPRESS_USER_PASSWORD,
 		// BACKEND
