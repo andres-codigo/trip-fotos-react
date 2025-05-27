@@ -5,6 +5,7 @@ import {
 	baseUrl,
 	urls,
 	user,
+	dialog,
 	authenticationFormSelectors,
 } from '../../support/constants'
 
@@ -106,6 +107,28 @@ describe('User authentication page', () => {
 			authenticationFormSelectors.submitButtonTextLogin,
 		)
 	})
+
+	it('shows a loading dialog with spinner while authenticating', () => {
+		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
+		cy.login(user.validEmail, user.validPassword)
+
+		cy.get(dialog.loading)
+			.parent()
+			.within(() => {
+				cy.get(dialog.title).should('contain.text', 'Authenticating')
+				cy.get(dialog.content).should(
+					'contain.text',
+					'Authenticating your details, one moment please...',
+				)
+				cy.get(dialog.spinnerContainer).should('exist')
+				cy.get(dialog.spinnerImage)
+					.should('exist')
+					.and('have.attr', 'src')
+					.and('match', /^data:image\/svg\+xml/)
+			})
+
+		cy.wait('@loginRequest')
+	})
 })
 
 describe("Log in error Dialog's > User authentication page", () => {
@@ -116,11 +139,14 @@ describe("Log in error Dialog's > User authentication page", () => {
 	})
 
 	function assertErrorDialog(messageKey) {
-		cy.get(authenticationFormSelectors.invalidEmailOrPasswordDialog)
+		cy.get(dialog.invalidEmailOrPassword)
 			.parent()
 			.within(() => {
-				cy.get('h2').should('contain.text', 'An error occurred')
-				cy.get('p').should('contain.text', errorMessage[messageKey])
+				cy.get(dialog.title).should('contain.text', 'An error occurred')
+				cy.get(dialog.content).should(
+					'contain.text',
+					errorMessage[messageKey],
+				)
 				cy.get('footer > button').should('contain.text', 'Close')
 				cy.get('footer > button').click()
 			})
