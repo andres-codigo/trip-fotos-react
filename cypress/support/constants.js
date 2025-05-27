@@ -56,6 +56,17 @@ export const domAttributeUrls = {
 	root: Cypress.env('ROOT_URL'),
 }
 
+export const dialog = {
+	// Dialog's
+	invalidEmailOrPassword: '[data-cy="invalid-email-or-password-dialog"]',
+	loading: '[data-cy="loading-dialog"]',
+	// Dialog elements
+	title: '[data-cy="title"]',
+	content: '[data-cy="content"]',
+	spinnerContainer: '[data-cy="base-spinner"]',
+	spinnerImage: '[data-cy="base-spinner-img"]',
+}
+
 export const topNavigationSelectors = {
 	siteHeader: '[data-cy="site-header"]',
 	siteHeaderTitleLink: '[data-cy="site-header-title-link"]',
@@ -81,10 +92,6 @@ export const authenticationFormSelectors = {
 	submitButtonLogin: '[data-cy="submit-button-login"]',
 	submitButtonTextSignup: 'Sign-up',
 	submitButtonSignup: '[data-cy="submit-button-signup"]',
-	// Dialog's
-	invalidEmailOrPasswordDialog:
-		'[data-cy="invalid-email-or-password-dialog"]',
-	loadingDialog: '[data-cy="loading-dialog"]',
 }
 
 export const pageNotFoundSelectors = {
