@@ -62,9 +62,19 @@ export const dialog = {
 	loading: '[data-cy="loading-dialog"]',
 	// Dialog elements
 	title: '[data-cy="title"]',
-	content: '[data-cy="content"]',
+	textContent: '[data-cy="text-content"]',
 	spinnerContainer: '[data-cy="base-spinner"]',
 	spinnerImage: '[data-cy="base-spinner-img"]',
+}
+
+export const dialogMessages = {
+	loading: {
+		title: 'Authenticating',
+		text: 'Authenticating your details, one moment please...',
+	},
+	error: {
+		title: 'An error occurred',
+	},
 }
 
 export const topNavigationSelectors = {
