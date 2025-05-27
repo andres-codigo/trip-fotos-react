@@ -71,7 +71,7 @@ function BaseDialog({
 								? baseDialogStyles.imageSection
 								: baseDialogStyles.generalSection
 						}
-						data-cy="content">
+						data-cy="text-content">
 						{children}
 					</section>
 					{!fixed && (
