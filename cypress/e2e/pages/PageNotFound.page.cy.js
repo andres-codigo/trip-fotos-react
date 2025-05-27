@@ -7,9 +7,11 @@ import {
 } from '../../support/constants'
 
 describe('Logged in > PageNotFound page', () => {
+	const loginUrl = baseUrl + urls.cyAuth
+
 	beforeEach(() => {
-		cy.visit(baseUrl + urls.cyAuth)
-		cy.login(user.email, user.password)
+		cy.visit(loginUrl)
+		cy.login(user.validEmail, user.validPassword)
 	})
 	it('displays the 404 page and user can navigate to the home page', () => {
 		cy.url().should('eq', baseUrl + urls.cyTrips)
@@ -40,6 +42,8 @@ describe('Logged in > PageNotFound page', () => {
 
 describe('Not logged in > PageNotFound page', () => {
 	it('displays the 404 page and user can only navigate to the authentication page', () => {
+		const loginUrl = baseUrl + urls.cyAuth
+
 		cy.visit(baseUrl)
 
 		// // Visit a non-existent route
@@ -60,7 +64,7 @@ describe('Not logged in > PageNotFound page', () => {
 		// Click the back to home link and verify url
 		cy.get(pageNotFoundSelectors.homeLink).as('homeLink')
 		cy.get('@homeLink').click()
-		cy.url().should('eq', baseUrl + urls.cyAuth)
+		cy.url().should('eq', loginUrl)
 
 		// Revisit a non-existent route
 		cy.visit(urls.cyNonExistentPath, { failOnStatusCode: false })
