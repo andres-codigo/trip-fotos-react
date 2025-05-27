@@ -9,5 +9,4 @@ export default {
 	'no-console': ['error', { allow: ['warn', 'error'] }],
 	'no-debugger': 'warn',
 	'prettier/prettier': 'error',
-	quotes: ['error', 'single'],
 }

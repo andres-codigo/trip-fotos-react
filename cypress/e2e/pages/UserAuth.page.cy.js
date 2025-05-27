@@ -108,7 +108,7 @@ describe('User authentication page', () => {
 	})
 })
 
-describe('Log in error Dialogs > User authentication page', () => {
+describe("Log in error Dialog's > User authentication page", () => {
 	const loginUrl = baseUrl + urls.cyAuth
 
 	beforeEach(() => {
