@@ -11,12 +11,13 @@ function BaseDialog({
 	children,
 	isError = false,
 	show,
+	header,
 	title = null,
-	sectionClasses = false,
 	fixed = false,
 	onClose,
 	actions,
-	header,
+	sectionClasses = false,
+	dataCypress,
 }) {
 	const nodeRef = useRef(null)
 	const [isVisible, setIsVisible] = useState(show)
@@ -59,7 +60,8 @@ function BaseDialog({
 				<dialog
 					ref={nodeRef}
 					open
-					className={baseDialogStyles.dialog}>
+					className={baseDialogStyles.dialog}
+					data-cy={dataCypress}>
 					<header className={baseDialogStyles.header}>
 						{header ? header : <h2>{title}</h2>}
 					</header>
@@ -72,7 +74,7 @@ function BaseDialog({
 						{children}
 					</section>
 					{!fixed && (
-						<menu>
+						<footer>
 							{actions ? (
 								actions
 							) : (
@@ -82,7 +84,7 @@ function BaseDialog({
 									Close
 								</BaseButton>
 							)}
-						</menu>
+						</footer>
 					)}
 				</dialog>
 			</CSSTransition>
@@ -95,12 +97,13 @@ BaseDialog.propTypes = {
 	children: PropTypes.node,
 	isError: PropTypes.bool,
 	show: PropTypes.bool.isRequired,
+	header: PropTypes.node,
 	title: PropTypes.string,
-	sectionClasses: PropTypes.bool,
 	fixed: PropTypes.bool,
 	onClose: PropTypes.func.isRequired,
 	actions: PropTypes.node,
-	header: PropTypes.node,
+	sectionClasses: PropTypes.bool,
+	dataCypress: PropTypes.string,
 }
 
 export default BaseDialog
