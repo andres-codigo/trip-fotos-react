@@ -1,5 +1,4 @@
 import {
-	apiUrls,
 	viewports,
 	topNavigationSelectors,
 	authenticationFormSelectors,
@@ -13,6 +12,10 @@ Cypress.Commands.add('login', (email, password) => {
 })
 
 //INTERCEPTORS
+Cypress.Commands.add('interceptLogin', (method, url) => {
+	cy.intercept(method, url).as('loginRequest')
+})
+
 Cypress.Commands.add('interceptLoginError', (method, url, message) => {
 	cy.intercept(method, url, {
 		statusCode: 400,
