@@ -74,6 +74,38 @@ describe('User authentication page', () => {
 		cy.get(authenticationFormSelectors.submitButtonLogin).click()
 		cy.get(authenticationFormSelectors.passwordErrorMessage).should('exist')
 	})
+
+	it('switches between login and signup modes', () => {
+		cy.get(authenticationFormSelectors.submitButtonSignup)
+			.should('exist')
+			.and(
+				'contain.text',
+				authenticationFormSelectors.submitButtonTextSignup,
+			)
+			.click()
+
+		cy.get(authenticationFormSelectors.submitButtonSignup).should(
+			'contain.text',
+			authenticationFormSelectors.submitButtonTextLogin,
+		)
+
+		cy.get(authenticationFormSelectors.submitButtonLogin).should(
+			'contain.text',
+			authenticationFormSelectors.submitButtonTextSignup,
+		)
+
+		cy.get(authenticationFormSelectors.submitButtonSignup).click()
+
+		cy.get(authenticationFormSelectors.submitButtonSignup).should(
+			'contain.text',
+			authenticationFormSelectors.submitButtonTextSignup,
+		)
+
+		cy.get(authenticationFormSelectors.submitButtonLogin).should(
+			'contain.text',
+			authenticationFormSelectors.submitButtonTextLogin,
+		)
+	})
 })
 
 describe('Log in error Dialogs > User authentication page', () => {
