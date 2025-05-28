@@ -60,7 +60,7 @@ const UserAuthForm = ({
 			type="submit"
 			mode="flat"
 			dataCypress="submit-button-login"
-			disabled={isLoading}>
+			isDisabled={isLoading}>
 			{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? 'Login' : 'Sign-up'}
 		</BaseButton>
 		<BaseButton
@@ -69,7 +69,7 @@ const UserAuthForm = ({
 			mode="flat"
 			onClick={onSwitchMode}
 			dataCypress="submit-button-signup"
-			disabled={isLoading}>
+			isDisabled={isLoading}>
 			{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? 'Sign-up' : 'Login'}
 		</BaseButton>
 	</form>
