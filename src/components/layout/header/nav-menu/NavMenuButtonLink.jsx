@@ -6,7 +6,7 @@ import BaseButton from '@/components/ui/button/BaseButton'
 
 import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss'
 
-function NavMenuButtonLink({
+const NavMenuButtonLink = ({
 	children,
 	isLink = false,
 	isError = false,
@@ -15,7 +15,7 @@ function NavMenuButtonLink({
 	to = '/',
 	className,
 	...props
-}) {
+}) => {
 	const elementRef = useRef()
 
 	useEffect(() => {

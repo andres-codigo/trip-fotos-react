@@ -5,7 +5,7 @@ import NavMenuButtonLink from './NavMenuButtonLink'
 
 import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss'
 
-function NavMenuMessagesLink({ totalMessages, to, className }) {
+const NavMenuMessagesLink = ({ totalMessages, to, className }) => {
 	const combinedClassName = classNames(className, navMenuButtonLinkStyles)
 
 	return (

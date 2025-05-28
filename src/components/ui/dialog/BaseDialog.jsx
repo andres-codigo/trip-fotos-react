@@ -7,7 +7,7 @@ import BaseButton from '@/components/ui/button/BaseButton'
 
 import baseDialogStyles from './BaseDialog.module.scss'
 
-function BaseDialog({
+const BaseDialog = ({
 	children,
 	isError = false,
 	show,
@@ -18,7 +18,7 @@ function BaseDialog({
 	actions,
 	sectionClasses = false,
 	dataCypress,
-}) {
+}) => {
 	const nodeRef = useRef(null)
 	const [isVisible, setIsVisible] = useState(show)
 
