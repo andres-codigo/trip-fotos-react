@@ -12,10 +12,12 @@ Cypress.Commands.add('login', (email, password) => {
 })
 
 //INTERCEPTORS
+// Intercept successful login requests
 Cypress.Commands.add('interceptLogin', (method, url) => {
 	cy.intercept(method, url).as('loginRequest')
 })
 
+// Intercept error login requests with a specific error message response
 Cypress.Commands.add('interceptLoginError', (method, url, message) => {
 	cy.intercept(method, url, {
 		statusCode: 400,
@@ -25,6 +27,15 @@ Cypress.Commands.add('interceptLoginError', (method, url, message) => {
 			},
 		},
 	}).as('loginErrorRequest')
+})
+
+// Intercept login requests with a delay
+Cypress.Commands.add('interceptDelayedLogin', (method, url, time) => {
+	cy.intercept(method, url, (req) => {
+		req.on('response', (res) => {
+			res.setDelay(time)
+		})
+	}).as('delayedLogin')
 })
 
 // VIEWPORTS
