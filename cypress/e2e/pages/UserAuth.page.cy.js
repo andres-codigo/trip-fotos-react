@@ -107,7 +107,6 @@ describe('Login > User authentication page', () => {
 		cy.wait('@loginRequest')
 			.its('request.body')
 			.should((body) => {
-				console.log('Request body:', body)
 				expect(body.email).to.eq(user.validEmail)
 				expect(body.password).to.eq(user.validPassword)
 			})
