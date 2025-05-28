@@ -94,7 +94,7 @@ describe('Login > User authentication page', () => {
 		cy.get(dialog.loading).should('exist')
 	})
 
-	it.only('trims leading/trailing spaces in email and password before submitting', () => {
+	it('trims leading/trailing spaces in email and password before submitting', () => {
 		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword).as(
 			'loginRequest',
 		)
