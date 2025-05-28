@@ -6,7 +6,7 @@ import PropTypes from 'prop-types'
 
 import baseButtonStyles from './BaseButton.module.scss'
 
-function BaseButton({
+const BaseButton = ({
 	children,
 	isLink = false,
 	isError = false,
@@ -16,7 +16,7 @@ function BaseButton({
 	className,
 	dataCypress,
 	...props
-}) {
+}) => {
 	const elementRef = useRef()
 
 	useEffect(() => {

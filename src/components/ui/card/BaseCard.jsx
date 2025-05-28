@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 
 import baseCardStyles from './BaseCard.module.scss'
 
-function BaseCard({ children }) {
+const BaseCard = ({ children }) => {
 	return <div className={baseCardStyles.card}>{children}</div>
 }
 

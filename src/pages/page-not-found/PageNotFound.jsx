@@ -7,7 +7,7 @@ import BaseButton from '@/components/ui/button/BaseButton'
 
 import pageNotFoundStyles from './pageNotFound.module.scss'
 
-function PageNotFound() {
+const PageNotFound = () => {
 	const isLoggedIn = useSelector(
 		(state) => state.authentication.token !== null,
 	)
