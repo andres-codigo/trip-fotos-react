@@ -208,8 +208,7 @@ describe("Login error Dialog's > User authentication page", () => {
 		logInUsingIntercept('DEFAULT')
 	})
 
-	it.only('closes the error dialog when Escape is pressed', () => {
-		// Trigger an error dialog (e.g., invalid credentials)
+	it('closes the error dialog when Escape is pressed', () => {
 		cy.interceptLoginError(
 			apiDatabase.POST,
 			apiUrls.signInWithPassword,
@@ -218,13 +217,10 @@ describe("Login error Dialog's > User authentication page", () => {
 		cy.login(user.validEmail, user.invalidPassword)
 		cy.wait('@loginErrorRequest')
 
-		// Ensure dialog is visible
 		cy.get(dialog.invalidEmailOrPassword).should('exist')
 
-		// Press Escape
 		cy.get('body').type('{esc}')
 
-		// Dialog should be closed
 		cy.get(dialog.invalidEmailOrPassword).should('not.exist')
 	})
 })
