@@ -94,6 +94,25 @@ describe('Login > User authentication page', () => {
 		cy.get(dialog.loading).should('exist')
 	})
 
+	it.only('trims leading/trailing spaces in email and password before submitting', () => {
+		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword).as(
+			'loginRequest',
+		)
+
+		const emailWithSpaces = `   ${user.validEmail}   `
+		const passwordWithSpaces = `   ${user.validPassword}   `
+
+		cy.login(emailWithSpaces, passwordWithSpaces)
+
+		cy.wait('@loginRequest')
+			.its('request.body')
+			.should((body) => {
+				console.log('Request body:', body)
+				expect(body.email).to.eq(user.validEmail)
+				expect(body.password).to.eq(user.validPassword)
+			})
+	})
+
 	it('switches between login and signup modes', () => {
 		cy.get(authenticationFormSelectors.submitButtonSignup)
 			.should('exist')
