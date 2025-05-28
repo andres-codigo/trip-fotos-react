@@ -140,6 +140,7 @@ const UserAuth = () => {
 					}
 					onSubmit={submitForm}
 					onSwitchMode={switchAuthMode}
+					isLoading={isLoading}
 				/>
 			</BaseCard>
 		</section>
