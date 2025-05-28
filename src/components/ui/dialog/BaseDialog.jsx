@@ -34,6 +34,19 @@ function BaseDialog({
 		}
 	}
 
+	useEffect(() => {
+		if (!show) return
+
+		const handleKeyDown = (e) => {
+			if (e.key === 'Escape') {
+				onClose?.()
+			}
+		}
+
+		window.addEventListener('keydown', handleKeyDown)
+		return () => window.removeEventListener('keydown', handleKeyDown)
+	}, [show, onClose])
+
 	if (!isVisible && !show) return null
 
 	return ReactDOM.createPortal(

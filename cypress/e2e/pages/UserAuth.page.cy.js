@@ -10,7 +10,7 @@ import {
 	authenticationFormSelectors,
 } from '../../support/constants'
 
-describe('User authentication page', () => {
+describe('Login > User authentication page', () => {
 	const loginUrl = baseUrl + urls.cyAuth
 
 	beforeEach(() => {
@@ -75,6 +75,23 @@ describe('User authentication page', () => {
 
 		cy.get(authenticationFormSelectors.submitButtonLogin).click()
 		cy.get(authenticationFormSelectors.passwordErrorMessage).should('exist')
+	})
+
+	it('shows validation error for invalid password when Enter is pressed in the email field and password field is empty', () => {
+		cy.get(authenticationFormSelectors.emailInput).type(
+			user.validEmail + '{enter}',
+		)
+
+		cy.get(authenticationFormSelectors.passwordErrorMessage).should('exist')
+	})
+
+	it('submits the form when Enter is pressed in the password field', () => {
+		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
+		cy.get(authenticationFormSelectors.passwordInput)
+			.type(user.validPassword)
+			.type('{enter}')
+
+		cy.get(dialog.loading).should('exist')
 	})
 
 	it('switches between login and signup modes', () => {
@@ -143,7 +160,7 @@ describe('User authentication page', () => {
 	})
 })
 
-describe("Log in error Dialog's > User authentication page", () => {
+describe("Login error Dialog's > User authentication page", () => {
 	const loginUrl = baseUrl + urls.cyAuth
 
 	beforeEach(() => {
@@ -189,5 +206,25 @@ describe("Log in error Dialog's > User authentication page", () => {
 
 	it('shows the default error dialog', () => {
 		logInUsingIntercept('DEFAULT')
+	})
+
+	it.only('closes the error dialog when Escape is pressed', () => {
+		// Trigger an error dialog (e.g., invalid credentials)
+		cy.interceptLoginError(
+			apiDatabase.POST,
+			apiUrls.signInWithPassword,
+			'INVALID_LOGIN_CREDENTIALS',
+		)
+		cy.login(user.validEmail, user.invalidPassword)
+		cy.wait('@loginErrorRequest')
+
+		// Ensure dialog is visible
+		cy.get(dialog.invalidEmailOrPassword).should('exist')
+
+		// Press Escape
+		cy.get('body').type('{esc}')
+
+		// Dialog should be closed
+		cy.get(dialog.invalidEmailOrPassword).should('not.exist')
 	})
 })
