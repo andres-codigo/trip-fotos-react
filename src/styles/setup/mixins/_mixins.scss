@@ -81,7 +81,7 @@ $prefixes: '-moz-', '-webkit-', '-o-', '-ms-', '';
 // ********************
 @mixin media-query-portrait-landscape($query, $max-image-width, $orientation) {
 	@media only screen and #{$query} {
-		.image-section {
+		.image {
 			img {
 				@if $orientation == 'portrait' {
 					&.portrait {

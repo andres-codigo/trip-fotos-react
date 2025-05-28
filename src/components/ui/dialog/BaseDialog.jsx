@@ -78,15 +78,15 @@ function BaseDialog({
 					<header className={baseDialogStyles.header}>
 						{header ? header : <h2 data-cy="title">{title}</h2>}
 					</header>
-					<section
+					<main
 						className={
 							sectionClasses
-								? baseDialogStyles.imageSection
-								: baseDialogStyles.generalSection
+								? baseDialogStyles.image
+								: baseDialogStyles.general
 						}
 						data-cy="text-content">
 						{children}
-					</section>
+					</main>
 					{!fixed && (
 						<footer>
 							{actions ? (

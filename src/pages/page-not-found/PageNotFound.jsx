@@ -13,9 +13,9 @@ function PageNotFound() {
 	)
 
 	return (
-		<section
+		<main
 			className={[
-				'pageSection',
+				'mainContainer',
 				pageNotFoundStyles.pageNotFoundContainer,
 			].join(' ')}>
 			<BaseCard>
@@ -31,7 +31,7 @@ function PageNotFound() {
 					home page to get back on track.
 				</p>
 			</BaseCard>
-		</section>
+		</main>
 	)
 }
 

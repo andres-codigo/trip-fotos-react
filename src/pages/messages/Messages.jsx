@@ -1,8 +1,8 @@
 const Messages = () => {
 	return (
-		<section className="pageSection">
+		<main className="mainContainer">
 			<h1>Messages page</h1>
-		</section>
+		</main>
 	)
 }
 

@@ -36,14 +36,14 @@
 		}
 	}
 
-	section {
-		&.imageSection {
+	main {
+		&.image {
 			align-items: center;
 			display: flex;
 			padding: 2.5rem 0 1rem 0;
 		}
 
-		&.generalSection {
+		&.general {
 			padding: 1rem;
 
 			p {

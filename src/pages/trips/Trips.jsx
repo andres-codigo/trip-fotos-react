@@ -1,8 +1,8 @@
 const Trips = () => {
 	return (
-		<section className="pageSection">
+		<main className="mainContainer">
 			<h1>Trips page</h1>
-		</section>
+		</main>
 	)
 }
 
