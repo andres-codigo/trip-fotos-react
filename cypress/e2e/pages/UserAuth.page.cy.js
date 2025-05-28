@@ -151,6 +151,29 @@ describe('Login > User authentication page', () => {
 		cy.wait('@loginRequest')
 	})
 
+	it('disables form fields and buttons while loading dialog displayed', () => {
+		cy.interceptDelayedLogin(
+			apiDatabase.POST,
+			apiUrls.signInWithPassword,
+			1000,
+		)
+		cy.login(user.validEmail, user.validPassword)
+
+		cy.get(authenticationFormSelectors.emailInput).should('be.disabled')
+		cy.get(authenticationFormSelectors.passwordInput).should('be.disabled')
+		cy.get(authenticationFormSelectors.submitButtonLogin).should(
+			'be.disabled',
+		)
+		cy.get(authenticationFormSelectors.submitButtonSignup).should(
+			'be.disabled',
+		)
+
+		cy.get(authenticationFormSelectors.submitButtonLogin).click({
+			force: true,
+		})
+		cy.wait('@delayedLogin')
+	})
+
 	it('redirects on successful login', () => {
 		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
 		cy.login(user.validEmail, user.validPassword)
