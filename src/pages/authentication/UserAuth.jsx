@@ -123,7 +123,7 @@ const UserAuth = () => {
 	const handleError = () => setError(null)
 
 	return (
-		<section className="pageSection">
+		<main className="mainContainer">
 			{error && (
 				<BaseDialog
 					show={true}
@@ -158,7 +158,7 @@ const UserAuth = () => {
 					isLoading={isLoading}
 				/>
 			</BaseCard>
-		</section>
+		</main>
 	)
 }
 
