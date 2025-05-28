@@ -57,7 +57,7 @@ export const domAttributeUrls = {
 }
 
 export const dialog = {
-	// Dialog's
+	// Dialogs
 	invalidEmailOrPassword: '[data-cy="invalid-email-or-password-dialog"]',
 	loading: '[data-cy="loading-dialog"]',
 	// Dialog elements

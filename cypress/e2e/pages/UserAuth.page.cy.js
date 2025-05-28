@@ -10,9 +10,9 @@ import {
 	authenticationFormSelectors,
 } from '../../support/constants'
 
-describe('Login > User authentication page', () => {
-	const loginUrl = baseUrl + urls.cyAuth
+const loginUrl = baseUrl + urls.cyAuth
 
+describe('Form rendering and validation', () => {
 	beforeEach(() => {
 		cy.visit(loginUrl)
 	})
@@ -84,6 +84,12 @@ describe('Login > User authentication page', () => {
 
 		cy.get(authenticationFormSelectors.passwordErrorMessage).should('exist')
 	})
+})
+
+describe('Form submission', () => {
+	beforeEach(() => {
+		cy.visit(loginUrl)
+	})
 
 	it('submits the form when Enter is pressed in the password field', () => {
 		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
@@ -110,6 +116,20 @@ describe('Login > User authentication page', () => {
 				expect(body.email).to.eq(user.validEmail)
 				expect(body.password).to.eq(user.validPassword)
 			})
+	})
+
+	it('redirects on successful login', () => {
+		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
+		cy.login(user.validEmail, user.validPassword)
+		cy.wait('@loginRequest')
+
+		cy.url().should('include', urls.cyTrips)
+	})
+})
+
+describe('UI state and mode switching', () => {
+	beforeEach(() => {
+		cy.visit(loginUrl)
 	})
 
 	it('switches between login and signup modes', () => {
@@ -191,19 +211,9 @@ describe('Login > User authentication page', () => {
 		})
 		cy.wait('@delayedLogin')
 	})
-
-	it('redirects on successful login', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
-		cy.login(user.validEmail, user.validPassword)
-		cy.wait('@loginRequest')
-
-		cy.url().should('include', urls.cyTrips)
-	})
 })
 
-describe("Login error Dialog's > User authentication page", () => {
-	const loginUrl = baseUrl + urls.cyAuth
-
+describe('UI error dialogs', () => {
 	beforeEach(() => {
 		cy.visit(loginUrl)
 	})
