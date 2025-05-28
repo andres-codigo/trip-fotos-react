@@ -26,7 +26,7 @@ describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', ()
 describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
 		cy.visit(baseUrl + urls.cyAuth)
-		cy.login(user.email, user.password)
+		cy.login(user.validEmail, user.validPassword)
 	})
 
 	it('Displays the title as a link and renders the hamburger menu', () => {

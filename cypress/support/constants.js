@@ -1,3 +1,24 @@
+export const apiDatabase = {
+	// API
+	apiUrl: Cypress.env('API_URL'),
+	apiKey: Cypress.env('API_KEY'),
+
+	// DATABASE
+	POST: 'POST',
+}
+
+export const apiUrls = {
+	signInWithPassword: `${apiDatabase.apiUrl}signInWithPassword?key=${apiDatabase.apiKey}`,
+}
+
+export const errorMessage = {
+	INVALID_LOGIN_CREDENTIALS:
+		'The email or password you entered is incorrect.',
+	TOO_MANY_ATTEMPTS_TRY_LATER:
+		'Too many unsuccessful login attempts. Please try again later.',
+	DEFAULT: 'An unexpected error occurred. Please try again.',
+}
+
 export const baseUrl = Cypress.config('baseUrl')
 
 export const urls = {
@@ -24,12 +45,36 @@ export const viewports = {
 }
 
 export const user = {
-	email: Cypress.env('USER_EMAIL'),
-	password: Cypress.env('USER_PASSWORD'),
+	validEmail: Cypress.env('USER_EMAIL'),
+	validPassword: Cypress.env('USER_PASSWORD'),
+	invalidEmail: 'invalid-email',
+	invalidPassword: 'invalid-password',
+	invalidPasswordTooShort: '12345',
 }
 
 export const domAttributeUrls = {
 	root: Cypress.env('ROOT_URL'),
+}
+
+export const dialog = {
+	// Dialogs
+	invalidEmailOrPassword: '[data-cy="invalid-email-or-password-dialog"]',
+	loading: '[data-cy="loading-dialog"]',
+	// Dialog elements
+	title: '[data-cy="title"]',
+	textContent: '[data-cy="text-content"]',
+	spinnerContainer: '[data-cy="base-spinner"]',
+	spinnerImage: '[data-cy="base-spinner-img"]',
+}
+
+export const dialogMessages = {
+	loading: {
+		title: 'Authenticating',
+		text: 'Authenticating your details, one moment please...',
+	},
+	error: {
+		title: 'An error occurred',
+	},
 }
 
 export const topNavigationSelectors = {
@@ -44,9 +89,18 @@ export const topNavigationSelectors = {
 }
 
 export const authenticationFormSelectors = {
+	// Email fields
+	emailLabel: 'E-Mail',
 	emailInput: '[data-cy="email-input"]',
+	emailErrorMessage: '[data-cy="email-error-message"]',
+	// Password fields
+	passwordLabel: 'Password',
 	passwordInput: '[data-cy="password-input"]',
+	passwordErrorMessage: '[data-cy="password-error-message"]',
+	// Submit buttons
+	submitButtonTextLogin: 'Login',
 	submitButtonLogin: '[data-cy="submit-button-login"]',
+	submitButtonTextSignup: 'Sign-up',
 	submitButtonSignup: '[data-cy="submit-button-signup"]',
 }
 

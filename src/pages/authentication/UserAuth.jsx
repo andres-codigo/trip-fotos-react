@@ -43,24 +43,39 @@ const UserAuth = () => {
 	}
 
 	const validateForm = async () => {
-		const emailValid = await validateEmailHandler(email.value)
-		const passwordValid = await validatePasswordHandler(password.value)
-		return emailValid && passwordValid
+		const trimmedEmail = email.value.trim()
+		const trimmedPassword = password.value.trim()
+
+		const emailValid = await validateEmailHandler(trimmedEmail)
+		const passwordValid = await validatePasswordHandler(trimmedPassword)
+
+		if (!emailValid || !passwordValid)
+			return {
+				email: trimmedEmail,
+				password: trimmedPassword,
+				isValid: false,
+			}
+
+		return { email: trimmedEmail, password: trimmedPassword, isValid: true }
 	}
 
 	const submitForm = async (e) => {
 		e.preventDefault()
-		const isFormValid = await validateForm()
+		const {
+			email: trimmedEmail,
+			password: trimmedPassword,
+			isValid,
+		} = await validateForm()
 
-		if (!isFormValid) return
+		if (!isValid) return
 
 		try {
 			setIsLoading(true)
 
 			const actionPayload = {
 				mode: API_DATABASE.API_AUTH_LOGIN_MODE,
-				email: email.value,
-				password: password.value,
+				email: trimmedEmail,
+				password: trimmedPassword,
 			}
 
 			let result
@@ -114,7 +129,8 @@ const UserAuth = () => {
 					show={true}
 					isError={true}
 					title={GLOBAL.ERROR_DIALOG_TITLE}
-					onClose={handleError}>
+					onClose={handleError}
+					dataCypress="invalid-email-or-password-dialog">
 					<p>{error}</p>
 				</BaseDialog>
 			)}
@@ -122,7 +138,8 @@ const UserAuth = () => {
 				<BaseDialog
 					show={true}
 					title="Authenticating"
-					fixed>
+					fixed
+					dataCypress="loading-dialog">
 					<p>Authenticating your details, one moment please...</p>
 					<BaseSpinner />
 				</BaseDialog>
@@ -138,6 +155,7 @@ const UserAuth = () => {
 					}
 					onSubmit={submitForm}
 					onSwitchMode={switchAuthMode}
+					isLoading={isLoading}
 				/>
 			</BaseCard>
 		</section>

@@ -14,6 +14,7 @@ const UserAuthForm = ({
 	onPasswordChange,
 	onSubmit,
 	onSwitchMode,
+	isLoading,
 }) => (
 	<form
 		className={userAuthStyles.userAuthentication}
@@ -30,8 +31,11 @@ const UserAuthForm = ({
 				onChange={onEmailChange}
 				onBlur={onEmailChange}
 				data-cy="email-input"
+				disabled={isLoading}
 			/>
-			{!email.isValid && <p>{email.message}</p>}
+			{!email.isValid && (
+				<p data-cy="email-error-message">{email.message}</p>
+			)}
 		</div>
 		<div
 			className={`${userAuthStyles.formControl} ${
@@ -45,17 +49,27 @@ const UserAuthForm = ({
 				onChange={onPasswordChange}
 				onBlur={onPasswordChange}
 				data-cy="password-input"
+				disabled={isLoading}
 			/>
-			{!password.isValid && <p>{password.message}</p>}
+			{!password.isValid && (
+				<p data-cy="password-error-message">{password.message}</p>
+			)}
 		</div>
-		<BaseButton dataCypress="submit-button-login">
+		<BaseButton
+			id="login-button"
+			type="submit"
+			mode="flat"
+			dataCypress="submit-button-login"
+			isDisabled={isLoading}>
 			{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? 'Login' : 'Sign-up'}
 		</BaseButton>
 		<BaseButton
-			type="button"
+			id="sign-up-button"
+			type="submit"
 			mode="flat"
 			onClick={onSwitchMode}
-			dataCypress="submit-button-signup">
+			dataCypress="submit-button-signup"
+			isDisabled={isLoading}>
 			{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? 'Sign-up' : 'Login'}
 		</BaseButton>
 	</form>
@@ -77,6 +91,7 @@ UserAuthForm.propTypes = {
 	onPasswordChange: PropTypes.func.isRequired,
 	onSubmit: PropTypes.func.isRequired,
 	onSwitchMode: PropTypes.func.isRequired,
+	isLoading: PropTypes.bool,
 }
 
 export default UserAuthForm
