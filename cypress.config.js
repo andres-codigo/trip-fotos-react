@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import viteConfig from './vite.config.js'
 
 import { PATHS } from './src/constants/paths'
 
@@ -32,6 +33,7 @@ export default defineConfig({
 		devServer: {
 			framework: 'react',
 			bundler: 'vite',
+			viteConfig,
 		},
 	},
 })
