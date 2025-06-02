@@ -18,6 +18,20 @@ describe('<Input />', () => {
 		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('have.value', 'Hello')
 	})
 
+	it('renders without a label', () => {
+		cy.mount(
+			<Input
+				id={TEST_IDS.INPUT}
+				value="No label"
+				onChange={() => {}}
+				isValid={true}
+				dataCyInput={TEST_IDS.INPUT}
+			/>,
+		)
+		cy.get('label').should('not.exist')
+		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('have.value', 'No label')
+	})
+
 	it('calls onChange when typing', () => {
 		const handleChange = cy.stub().as('onChange')
 		cy.mount(
