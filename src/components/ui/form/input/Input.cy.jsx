@@ -61,6 +61,9 @@ describe('<Input />', () => {
 				dataCyErrorMessage="test"
 			/>,
 		)
-		cy.get('[data-cy="test-error-message"]').should('contain', 'Error!')
+		cy.get(`[data-cy="${TEST_IDS.INPUT_ERROR}"]`).should(
+			'contain',
+			'Error!',
+		)
 	})
 })
