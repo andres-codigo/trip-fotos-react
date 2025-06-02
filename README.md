@@ -116,8 +116,11 @@ npm run lint:fix
 # Format files using Prettier
 npm run format
 
-# Open the Cypress Test Runner in interactive mode
-npm run cy:open
+# Open the Cypress E2E Test Runner in interactive mode
+npm run cy:open:e2e
+
+# Open the Cypress Component Test Runner in interactive mode
+npm run cy:open:ct
 
 # Run all tests using Vitest
 npm run test
