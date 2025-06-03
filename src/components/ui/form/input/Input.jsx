@@ -36,9 +36,7 @@ const Input = ({
 			className={className}
 			{...props}
 		/>
-		{!isValid && message && (
-			<p data-cy={`${dataCyErrorMessage}-error-message`}>{message}</p>
-		)}
+		{!isValid && message && <p data-cy={dataCyErrorMessage}>{message}</p>}
 	</div>
 )
 

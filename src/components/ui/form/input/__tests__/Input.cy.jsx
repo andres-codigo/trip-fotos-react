@@ -127,7 +127,7 @@ describe('<Input />', () => {
 				isValid={false}
 				message="Error!"
 				dataCyInput={INPUT.ID}
-				dataCyErrorMessage="test"
+				dataCyErrorMessage={INPUT.ERROR_ID}
 			/>,
 		)
 		cy.get(getByDataCy(INPUT.ERROR_ID)).should('contain', 'Error!')
