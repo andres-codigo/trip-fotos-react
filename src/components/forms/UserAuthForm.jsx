@@ -19,7 +19,8 @@ const UserAuthForm = ({
 }) => (
 	<form
 		className={userAuthStyles.userAuthentication}
-		onSubmit={onSubmit}>
+		onSubmit={onSubmit}
+		noValidate>
 		<div
 			className={`${userAuthStyles.formControl} ${
 				!email.isValid ? userAuthStyles.invalid : ''
