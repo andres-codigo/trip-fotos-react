@@ -34,6 +34,7 @@ const UserAuthForm = ({
 				isValid={email.isValid}
 				message={email.message}
 				disabled={isLoading}
+				required
 				dataCyInput="email-input"
 				dataCyErrorMessage="email"
 			/>
@@ -52,6 +53,7 @@ const UserAuthForm = ({
 				isValid={password.isValid}
 				message={password.message}
 				disabled={isLoading}
+				required
 				dataCyInput="password-input"
 				dataCyErrorMessage="password"
 			/>

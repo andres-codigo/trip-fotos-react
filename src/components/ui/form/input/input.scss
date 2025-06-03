@@ -1,0 +1,5 @@
+@use '@/styles/setup/variables' as variables;
+
+.input-required {
+	color: variables.$color-red;
+}

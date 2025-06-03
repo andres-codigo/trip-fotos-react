@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types'
 
+import './input.scss'
+
 const Input = ({
 	id,
 	label,
@@ -10,13 +12,18 @@ const Input = ({
 	isValid = true,
 	message = '',
 	disabled = false,
+	required = false,
 	dataCyInput,
 	dataCyErrorMessage,
 	className = '',
 	...props
 }) => (
-	<div className={className}>
-		{label && <label htmlFor={id}>{label}</label>}
+	<div>
+		{label && (
+			<label htmlFor={id}>
+				{label} {required && <span className="input-required">*</span>}
+			</label>
+		)}
 		<input
 			id={id}
 			type={type}
@@ -25,6 +32,8 @@ const Input = ({
 			onBlur={onBlur}
 			data-cy={dataCyInput}
 			disabled={disabled}
+			required={required}
+			className={className}
 			{...props}
 		/>
 		{!isValid && message && (
@@ -43,6 +52,7 @@ Input.propTypes = {
 	isValid: PropTypes.bool,
 	message: PropTypes.string,
 	disabled: PropTypes.bool,
+	required: PropTypes.bool,
 	dataCyInput: PropTypes.string,
 	dataCyErrorMessage: PropTypes.string,
 	className: PropTypes.string,
