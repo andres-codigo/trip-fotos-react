@@ -23,7 +23,7 @@ const UserAuthForm = ({
 		noValidate>
 		<div
 			className={`${userAuthStyles.formControl} ${
-				!email.isValid ? userAuthStyles.invalid : ''
+				!email.isValid ? userAuthStyles.invalidForm : ''
 			}`}>
 			<Input
 				id="email"
@@ -42,7 +42,7 @@ const UserAuthForm = ({
 		</div>
 		<div
 			className={`${userAuthStyles.formControl} ${
-				!password.isValid ? userAuthStyles.invalid : ''
+				!password.isValid ? userAuthStyles.invalidForm : ''
 			}`}>
 			<Input
 				id="password"

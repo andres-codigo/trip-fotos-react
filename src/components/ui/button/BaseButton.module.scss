@@ -1,4 +1,4 @@
-@use '@/styles/setup/variables';
+@use '@/styles/setup/variables' as variables;
 
 button {
 	background-color: variables.$color-ripe-plum;
