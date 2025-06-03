@@ -32,6 +32,23 @@ describe('<Input />', () => {
 		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('have.value', 'No label')
 	})
 
+	it('renders required input with asterisk', () => {
+		cy.mount(
+			<Input
+				id={TEST_IDS.INPUT}
+				label="Required Field"
+				value=""
+				onChange={() => {}}
+				isValid={true}
+				dataCyInput={TEST_IDS.INPUT}
+				required={true}
+			/>,
+		)
+		cy.get('label').should('contain', 'Required Field')
+		cy.get('label .input-required').should('contain', '*')
+		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('have.attr', 'required')
+	})
+
 	it('renders as disabled when disabled prop is true', () => {
 		cy.mount(
 			<Input
