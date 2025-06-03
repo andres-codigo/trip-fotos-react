@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { API_DATABASE } from '@/constants/api'
 
 import BaseButton from '@/components/ui/button/BaseButton'
+import Input from '@/components/ui/form/input/Input'
 
 import userAuthStyles from './UserAuthForm.module.scss'
 
@@ -18,42 +19,45 @@ const UserAuthForm = ({
 }) => (
 	<form
 		className={userAuthStyles.userAuthentication}
-		onSubmit={onSubmit}>
+		onSubmit={onSubmit}
+		noValidate>
 		<div
 			className={`${userAuthStyles.formControl} ${
 				!email.isValid ? userAuthStyles.invalid : ''
 			}`}>
-			<label htmlFor="email">E-Mail</label>
-			<input
+			<Input
 				id="email"
+				label="E-Mail"
 				type="email"
 				value={email.value}
 				onChange={onEmailChange}
 				onBlur={onEmailChange}
-				data-cy="email-input"
+				isValid={email.isValid}
+				message={email.message}
 				disabled={isLoading}
+				required
+				dataCyInput="email-input"
+				dataCyErrorMessage="email"
 			/>
-			{!email.isValid && (
-				<p data-cy="email-error-message">{email.message}</p>
-			)}
 		</div>
 		<div
 			className={`${userAuthStyles.formControl} ${
 				!password.isValid ? userAuthStyles.invalid : ''
 			}`}>
-			<label htmlFor="password">Password</label>
-			<input
+			<Input
 				id="password"
+				label="Password"
 				type="password"
 				value={password.value}
 				onChange={onPasswordChange}
 				onBlur={onPasswordChange}
-				data-cy="password-input"
+				isValid={password.isValid}
+				message={password.message}
 				disabled={isLoading}
+				required
+				dataCyInput="password-input"
+				dataCyErrorMessage="password"
 			/>
-			{!password.isValid && (
-				<p data-cy="password-error-message">{password.message}</p>
-			)}
 		</div>
 		<BaseButton
 			id="login-button"

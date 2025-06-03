@@ -116,8 +116,11 @@ npm run lint:fix
 # Format files using Prettier
 npm run format
 
-# Open the Cypress Test Runner in interactive mode
-npm run cy:open
+# Open the Cypress E2E Test Runner in interactive mode
+npm run cy:open:e2e
+
+# Open the Cypress Component Test Runner in interactive mode
+npm run cy:open:ct
 
 # Run all tests using Vitest
 npm run test
@@ -276,9 +279,17 @@ npm install vitest --save-dev
 
 **Run Tests**
 
-Refer to the [Scripts](#scripts) section for commands to run tests.
+Refer to the [Scripts](#scripts) section for commands to run tests, such as:
+
+```bash
+npm run test         # Run all tests
+npm run test:watch   # Run tests in watch mode
+npm run test:coverage # Generate coverage report
+```
 
 **Vitest Directory Structure**
+
+Vitest test files are located alongside the source files they test, following the convention `*.test.js`.
 
 ```
 src/
@@ -289,8 +300,6 @@ src/
 ```
 
 **Writing Tests**
-
-Test files are located alongside the source files they test, following the convention \*.test.js.
 
 ```javascript
 import { describe, it, expect } from 'vitest'
@@ -321,13 +330,11 @@ beforeEach(() => {
 
 ### 2. Cypress Setup
 
-Cypress is already configured in the project.
-
-To get started:
+Cypress is already configured in the project for both end-to-end (E2E) and component testing.
 
 **Install Cypress**
 
-Cypress is included in the project dependencies. If you haven't already installed the dependencies, run:
+Cypress is included in the project dependencies. If you haven't already installed dependencies, run:
 
 ```bash
 npm install
@@ -337,25 +344,24 @@ npm install
 
 Cypress is pre-configured in this project. Feel free to customise the [cypress.config.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/cypress.config.js) file as needed for your testing requirements.
 
-**Run Tests**
+**Run Cypress Tests**
 
-- **Interactive Mode**: Opens the Cypress Test Runner for a visual testing experience.
-
-```bash
-npx cypress open
-```
-
-- **Headless Mode:** Runs all tests in the terminal without opening the Test Runner
-
-```bash
-npx cypress run
-```
-
-- Run a specific test file:
-
-```bash
-npx cypress run --spec "cypress/e2e/<test-file>.cy.js"
-```
+- **Open Cypress E2E Test Runner (interactive mode):**
+    ```bash
+    npm run cy:open:e2e
+    ```
+- **Open Cypress Component Test Runner (interactive mode):**
+    ```bash
+    npm run cy:open:ct
+    ```
+- **Run Cypress E2E tests in headless mode:**
+    ```bash
+    npx cypress run
+    ```
+- **Run a specific test file:**
+    ```bash
+    npx cypress run --spec "cypress/e2e/<test-file>.cy.js"
+    ```
 
 **Cypress Directory Structure**
 
@@ -364,7 +370,8 @@ npx cypress run --spec "cypress/e2e/<test-file>.cy.js"
 
 ```
     cypress/
-      ├── e2e/         # End-to-end test files (e.g., homepage.cy.js)
+      ├── component/   # Component test files (e.g., Input.cy.jsx)
+      ├── e2e/         # End-to-end test files (e.g., UserAuth.page.cy.js)
       ├── fixtures/    # Mock data used in tests
       ├── support/     # Custom commands and test setup
 ```
