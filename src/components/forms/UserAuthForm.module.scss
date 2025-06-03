@@ -1,6 +1,6 @@
-@use '@/styles/setup/mixins/mixins';
-@use '@/styles/setup/mixins/form/valid/valid';
-@use '@/styles/setup/mixins/form/invalid/invalid';
+@use '@/styles/setup/mixins/mixins' as mixins;
+@use '@/styles/setup/mixins/form/valid/valid' as valid;
+@use '@/styles/setup/mixins/form/invalid/invalid' as invalid;
 
 .userAuthentication {
 	margin: 1rem;
