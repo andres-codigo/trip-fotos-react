@@ -3,6 +3,7 @@ import { TEST_IDS } from '@/constants/test-ids'
 import Input from './Input'
 
 describe('<Input />', () => {
+	// Rendering tests
 	it('renders with label and value', () => {
 		cy.mount(
 			<Input
@@ -82,6 +83,29 @@ describe('<Input />', () => {
 		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('be.disabled')
 	})
 
+	it('renders different input types correctly', () => {
+		const types = ['text', 'password', 'email', 'number']
+		types.forEach((type) => {
+			cy.mount(
+				<Input
+					id={TEST_IDS.INPUT}
+					label={`Type: ${type}`}
+					value=""
+					onChange={() => {}}
+					isValid={true}
+					type={type}
+					dataCyInput={TEST_IDS.INPUT}
+				/>,
+			)
+			cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should(
+				'have.attr',
+				'type',
+				type,
+			)
+		})
+	})
+
+	// Behavior tests
 	it('calls onChange when typing', () => {
 		const handleChange = cy.stub().as('onChange')
 		cy.mount(
