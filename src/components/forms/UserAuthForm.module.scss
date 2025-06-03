@@ -1,6 +1,6 @@
 @use '@/styles/setup/mixins/mixins' as mixins;
-@use '@/styles/setup/mixins/form/valid/valid' as valid;
-@use '@/styles/setup/mixins/form/invalid/invalid' as invalid;
+@use '@/styles/setup/mixins/form/valid/valid' as validForm;
+@use '@/styles/setup/mixins/form/invalid/invalid' as invalidForm;
 
 .userAuthentication {
 	margin: 1rem;
@@ -9,15 +9,15 @@
 	.formControl {
 		margin: 0.5rem 0;
 
-		@include valid.input;
+		@include validForm.input;
 
-		&.invalid {
+		&.invalidForm {
 			p {
-				@include invalid.error-message;
+				@include invalidForm.error-message;
 			}
 
 			input {
-				@include invalid.invalid-border;
+				@include invalidForm.invalid-border;
 			}
 		}
 	}
