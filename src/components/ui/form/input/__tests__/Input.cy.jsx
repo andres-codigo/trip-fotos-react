@@ -1,107 +1,102 @@
-import { TEST_IDS } from '@/constants/test-ids'
+import { INPUT } from '@/constants/test/input'
 
-import Input from '../../src/components/ui/form/input/Input'
+import { getByDataCy } from '../../../../../../cypress/support/utils/selectors'
+
+import Input from '@/components/ui/form/input/Input'
 
 describe('<Input />', () => {
 	// Rendering tests
 	it('renders with label and value', () => {
 		cy.mount(
 			<Input
-				id={TEST_IDS.INPUT}
+				id={INPUT.ID}
 				label="Test Label"
 				value="Hello"
 				onChange={() => {}}
 				isValid={true}
-				dataCyInput={TEST_IDS.INPUT}
+				dataCyInput={INPUT.ID}
 			/>,
 		)
 		cy.get('label').should('contain', 'Test Label')
-		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('have.value', 'Hello')
+		cy.get(getByDataCy(INPUT.ID)).should('have.value', 'Hello')
 	})
 
 	it('renders without a label', () => {
 		cy.mount(
 			<Input
-				id={TEST_IDS.INPUT}
+				id={INPUT.ID}
 				value="No label"
 				onChange={() => {}}
 				isValid={true}
-				dataCyInput={TEST_IDS.INPUT}
+				dataCyInput={INPUT.ID}
 			/>,
 		)
 		cy.get('label').should('not.exist')
-		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('have.value', 'No label')
+		cy.get(getByDataCy(INPUT.ID)).should('have.value', 'No label')
 	})
 
 	it('applies custom className to the input', () => {
 		cy.mount(
 			<Input
-				id={TEST_IDS.INPUT}
+				id={INPUT.ID}
 				label="Test Label"
 				value="Hello"
 				onChange={() => {}}
 				isValid={true}
 				className="my-custom-class"
-				dataCyInput={TEST_IDS.INPUT}
+				dataCyInput={INPUT.ID}
 			/>,
 		)
-		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should(
-			'have.class',
-			'my-custom-class',
-		)
+		cy.get(getByDataCy(INPUT.ID)).should('have.class', 'my-custom-class')
 	})
 
 	it('renders required input with asterisk', () => {
 		cy.mount(
 			<Input
-				id={TEST_IDS.INPUT}
+				id={INPUT.ID}
 				label="Required Field"
 				value=""
 				onChange={() => {}}
 				isValid={true}
-				dataCyInput={TEST_IDS.INPUT}
+				dataCyInput={INPUT.ID}
 				required={true}
 			/>,
 		)
 		cy.get('label').should('contain', 'Required Field')
 		cy.get('label .input-required').should('contain', '*')
-		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('have.attr', 'required')
+		cy.get(getByDataCy(INPUT.ID)).should('have.attr', 'required')
 	})
 
 	it('renders as disabled when disabled prop is true', () => {
 		cy.mount(
 			<Input
-				id={TEST_IDS.INPUT}
+				id={INPUT.ID}
 				label="Disabled Input"
 				value="Can't edit"
 				onChange={() => {}}
 				isValid={true}
-				dataCyInput={TEST_IDS.INPUT}
+				dataCyInput={INPUT.ID}
 				disabled={true}
 			/>,
 		)
-		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('be.disabled')
+		cy.get(getByDataCy(INPUT.ID)).should('be.disabled')
 	})
 
 	it('renders different input types correctly', () => {
-		const types = ['text', 'password', 'email', 'number']
+		const types = INPUT.TYPES
 		types.forEach((type) => {
 			cy.mount(
 				<Input
-					id={TEST_IDS.INPUT}
+					id={INPUT.ID}
 					label={`Type: ${type}`}
 					value=""
 					onChange={() => {}}
 					isValid={true}
 					type={type}
-					dataCyInput={TEST_IDS.INPUT}
+					dataCyInput={INPUT.ID}
 				/>,
 			)
-			cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should(
-				'have.attr',
-				'type',
-				type,
-			)
+			cy.get(getByDataCy(INPUT.ID)).should('have.attr', 'type', type)
 		})
 	})
 
@@ -110,34 +105,31 @@ describe('<Input />', () => {
 		const handleChange = cy.stub().as('onChange')
 		cy.mount(
 			<Input
-				id={TEST_IDS.INPUT}
+				id={INPUT.ID}
 				label="Test Label"
 				value=""
 				onChange={handleChange}
 				isValid={true}
-				dataCyInput={TEST_IDS.INPUT}
+				dataCyInput={INPUT.ID}
 			/>,
 		)
-		cy.get('[data-cy="test-input"]').type('abc')
+		cy.get(getByDataCy(INPUT.ID)).type('abc')
 		cy.get('@onChange').should('have.been.called')
 	})
 
 	it('shows error message when invalid', () => {
 		cy.mount(
 			<Input
-				id={TEST_IDS.INPUT}
+				id={INPUT.ID}
 				label="Test Label"
 				value=""
 				onChange={() => {}}
 				isValid={false}
 				message="Error!"
-				dataCyInput={TEST_IDS.INPUT}
+				dataCyInput={INPUT.ID}
 				dataCyErrorMessage="test"
 			/>,
 		)
-		cy.get(`[data-cy="${TEST_IDS.INPUT_ERROR}"]`).should(
-			'contain',
-			'Error!',
-		)
+		cy.get(getByDataCy(INPUT.ERROR_ID)).should('contain', 'Error!')
 	})
 })
