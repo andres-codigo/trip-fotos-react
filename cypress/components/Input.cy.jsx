@@ -1,6 +1,6 @@
 import { TEST_IDS } from '@/constants/test-ids'
 
-import Input from './Input'
+import Input from '../../src/components/ui/form/input/Input'
 
 describe('<Input />', () => {
 	// Rendering tests
