@@ -32,6 +32,24 @@ describe('<Input />', () => {
 		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should('have.value', 'No label')
 	})
 
+	it('applies custom className to the input', () => {
+		cy.mount(
+			<Input
+				id={TEST_IDS.INPUT}
+				label="Test Label"
+				value="Hello"
+				onChange={() => {}}
+				isValid={true}
+				className="my-custom-class"
+				dataCyInput={TEST_IDS.INPUT}
+			/>,
+		)
+		cy.get(`[data-cy="${TEST_IDS.INPUT}"]`).should(
+			'have.class',
+			'my-custom-class',
+		)
+	})
+
 	it('renders required input with asterisk', () => {
 		cy.mount(
 			<Input
