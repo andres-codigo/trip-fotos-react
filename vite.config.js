@@ -1,7 +1,12 @@
-import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
 import react from '@vitejs/plugin-react'
 import eslint from 'vite-plugin-eslint2'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 export default defineConfig({
 	server: {
@@ -20,12 +25,9 @@ export default defineConfig({
 		}),
 	],
 	resolve: {
-		alias: [
-			{
-				find: '@',
-				replacement: fileURLToPath(new URL('./src', import.meta.url)),
-			},
-		],
+		alias: {
+			'@': resolve(__dirname, 'src'),
+		},
 		extensions: ['.js', '.jsx', '.json', '.mjs', '.vue', '.svg', '.scss'],
 	},
 	optimizeDeps: {
