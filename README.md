@@ -39,7 +39,7 @@ This project uses the following technologies:
 - [ESLint](https://eslint.org/) for JavaScript linting.
 - [Prettier](https://prettier.io/) for code formatting.
 - [Vitest](https://vitest.dev/) for unit and integration testing.
-- [Cypress](https://www.cypress.io/) for end-to-end testing.
+- [Cypress](https://www.cypress.io/) for end-to-end and component testing.
 - [Firebase Realtime Database](https://firebase.google.com/docs/database) for storing travellers and messages.
 - [Firebase Authentication](https://firebase.google.com/docs/auth) for managing sign-in credentials.
 - [Firebase Cloud Storage](https://firebase.google.com/docs/storage) for storing uploaded traveller images.
