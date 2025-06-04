@@ -40,30 +40,30 @@ describe('Form rendering and validation', () => {
 				)
 			})
 
-		cy.get(authenticationFormSelectors.submitButtonLogin)
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton)
 			.should('exist')
 			.and(
 				'contain.text',
 				authenticationFormSelectors.submitButtonTextLogin,
 			)
 
-		cy.get(authenticationFormSelectors.submitButtonSignup)
+		cy.get(authenticationFormSelectors.loginSignupToggleLink)
 			.should('exist')
 			.and(
 				'contain.text',
-				authenticationFormSelectors.submitButtonTextSignup,
+				authenticationFormSelectors.signupTextToggleLink,
 			)
 	})
 
 	it('shows validation errors for empty fields', () => {
-		cy.get(authenticationFormSelectors.submitButtonLogin).click()
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
 		cy.get(authenticationFormSelectors.emailErrorMessage).should('exist')
 		cy.get(authenticationFormSelectors.passwordErrorMessage).should('exist')
 	})
 
 	it('shows validation error for invalid email', () => {
 		cy.get(authenticationFormSelectors.emailInput).type(user.invalidEmail)
-		cy.get(authenticationFormSelectors.submitButtonLogin).click()
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
 		cy.get(authenticationFormSelectors.emailErrorMessage).should('exist')
 	})
 
@@ -73,7 +73,7 @@ describe('Form rendering and validation', () => {
 			user.invalidPasswordTooShort,
 		)
 
-		cy.get(authenticationFormSelectors.submitButtonLogin).click()
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
 		cy.get(authenticationFormSelectors.passwordErrorMessage).should('exist')
 	})
 
@@ -91,7 +91,7 @@ describe('Form submission', () => {
 		cy.visit(loginUrl)
 	})
 
-	it('submits the form when Enter is pressed in the password field', () => {
+	it('submits the form when the Enter key is pressed in the password field', () => {
 		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
 		cy.get(authenticationFormSelectors.passwordInput)
 			.type(user.validPassword)
@@ -100,7 +100,7 @@ describe('Form submission', () => {
 		cy.get(dialog.loading).should('exist')
 	})
 
-	it('trims leading/trailing spaces in email and password before submitting', () => {
+	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
 		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword).as(
 			'loginRequest',
 		)
@@ -133,34 +133,34 @@ describe('UI state and mode switching', () => {
 	})
 
 	it('switches between login and signup modes', () => {
-		cy.get(authenticationFormSelectors.submitButtonSignup)
+		cy.get(authenticationFormSelectors.loginSignupToggleLink)
 			.should('exist')
 			.and(
 				'contain.text',
-				authenticationFormSelectors.submitButtonTextSignup,
+				authenticationFormSelectors.signupTextToggleLink,
 			)
 			.click()
 
-		cy.get(authenticationFormSelectors.submitButtonSignup).should(
+		cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
 			'contain.text',
-			authenticationFormSelectors.submitButtonTextLogin,
+			authenticationFormSelectors.loginTextToggleLink,
 		)
 
-		cy.get(authenticationFormSelectors.submitButtonLogin).should(
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
 			'contain.text',
-			authenticationFormSelectors.submitButtonTextSignup,
+			authenticationFormSelectors.signupTextSubmitButton,
 		)
 
-		cy.get(authenticationFormSelectors.submitButtonSignup).click()
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
 
-		cy.get(authenticationFormSelectors.submitButtonSignup).should(
+		cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
 			'contain.text',
-			authenticationFormSelectors.submitButtonTextSignup,
+			authenticationFormSelectors.loginTextToggleLink,
 		)
 
-		cy.get(authenticationFormSelectors.submitButtonLogin).should(
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
 			'contain.text',
-			authenticationFormSelectors.submitButtonTextLogin,
+			authenticationFormSelectors.signupTextSubmitButton,
 		)
 	})
 
@@ -189,7 +189,7 @@ describe('UI state and mode switching', () => {
 		cy.wait('@loginRequest')
 	})
 
-	it('disables form fields and buttons while loading dialog displayed', () => {
+	it('disables form fields and buttons while the loading dialog displayed', () => {
 		cy.interceptDelayedLogin(
 			apiDatabase.POST,
 			apiUrls.signInWithPassword,
@@ -199,21 +199,23 @@ describe('UI state and mode switching', () => {
 
 		cy.get(authenticationFormSelectors.emailInput).should('be.disabled')
 		cy.get(authenticationFormSelectors.passwordInput).should('be.disabled')
-		cy.get(authenticationFormSelectors.submitButtonLogin).should(
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
 			'be.disabled',
 		)
-		cy.get(authenticationFormSelectors.submitButtonSignup).should(
-			'be.disabled',
+		cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
+			'have.attr',
+			'aria-disabled',
+			'true',
 		)
 
-		cy.get(authenticationFormSelectors.submitButtonLogin).click({
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click({
 			force: true,
 		})
 		cy.wait('@delayedLogin')
 	})
 })
 
-describe('UI error dialogs', () => {
+describe('UI error dialog', () => {
 	beforeEach(() => {
 		cy.visit(loginUrl)
 	})
@@ -259,7 +261,7 @@ describe('UI error dialogs', () => {
 		logInUsingIntercept('DEFAULT')
 	})
 
-	it('closes the error dialog when Escape is pressed', () => {
+	it('closes the error dialog when the Escape key is pressed', () => {
 		cy.interceptLoginError(
 			apiDatabase.POST,
 			apiUrls.signInWithPassword,

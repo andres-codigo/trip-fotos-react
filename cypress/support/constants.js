@@ -98,10 +98,13 @@ export const authenticationFormSelectors = {
 	passwordInput: '[data-cy="password-input"]',
 	passwordErrorMessage: '[data-cy="password-error-message"]',
 	// Submit buttons
-	submitButtonTextLogin: 'Login',
-	submitButtonLogin: '[data-cy="submit-button-login"]',
-	submitButtonTextSignup: 'Sign-up',
-	submitButtonSignup: '[data-cy="submit-button-signup"]',
+	submitButtonTextLogin: 'Log in',
+	signupTextSubmitButton: 'Sign up',
+	loginSignupSubmitButton: '[data-cy="login-submit-button"]',
+	// Toggle link for switching between login and signup
+	loginSignupToggleLink: '[data-cy="login-signup-toggle-link"]',
+	loginTextToggleLink: 'Switch to Login',
+	signupTextToggleLink: 'Switch to Signup',
 }
 
 export const pageNotFoundSelectors = {

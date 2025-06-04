@@ -13,6 +13,7 @@ const Input = ({
 	message = '',
 	disabled = false,
 	required = false,
+	showRequiredMark = false,
 	dataCypress,
 	dataCypressError,
 	className = '',
@@ -21,7 +22,10 @@ const Input = ({
 	<div>
 		{label && (
 			<label htmlFor={id}>
-				{label} {required && <span className="input-required">*</span>}
+				{label + ' '}
+				{(showRequiredMark || required) && (
+					<span className="input-required">*</span>
+				)}
 			</label>
 		)}
 		<input
@@ -51,6 +55,7 @@ Input.propTypes = {
 	message: PropTypes.string,
 	disabled: PropTypes.bool,
 	required: PropTypes.bool,
+	showRequiredMark: PropTypes.bool,
 	dataCypress: PropTypes.string,
 	dataCypressError: PropTypes.string,
 	className: PropTypes.string,
