@@ -116,6 +116,9 @@ npm run lint:fix
 # Format files using Prettier
 npm run format
 
+# NPM package dependency check
+npm run check:dependencies
+
 # Open the Cypress E2E Test Runner in interactive mode
 npm run cy:open:e2e
 
@@ -123,16 +126,13 @@ npm run cy:open:e2e
 npm run cy:open:ct
 
 # Run all tests using Vitest
-npm run test
+npm run vitest
 
 # Run tests in watch mode
-npm run test:watch
-
-# Run tests
-npm run test:run
+npm run vitest:watch
 
 # Generate a test coverage report
-npm run test:coverage
+npm run vitest:coverage
 
 # Build the project for production
 npm run build
@@ -282,9 +282,9 @@ npm install vitest --save-dev
 Refer to the [Scripts](#scripts) section for commands to run tests, such as:
 
 ```bash
-npm run test         # Run all tests
-npm run test:watch   # Run tests in watch mode
-npm run test:coverage # Generate coverage report
+npm run vitest         # Run all tests
+npm run vitest:watch   # Run tests in watch mode
+npm run vitest:coverage # Generate coverage report
 ```
 
 **Vitest Directory Structure**
@@ -365,15 +365,27 @@ Cypress is pre-configured in this project. Feel free to customise the [cypress.c
 
 **Cypress Directory Structure**
 
+**End-to-End (E2E) Testing**: E2E test files are placed in the e2e directory.
+
 **Fixtures**: Contains mock data used in tests (e.g., JSON files for API responses).
+
 **Support**: Contains custom commands and global test setup files.
 
 ```
     cypress/
-      ├── component/   # Component test files (e.g., Input.cy.jsx)
       ├── e2e/         # End-to-end test files (e.g., UserAuth.page.cy.js)
       ├── fixtures/    # Mock data used in tests
       ├── support/     # Custom commands and test setup
+```
+
+**Component Testing**: Component test files are placed in a **tests** folder located within each component’s directory. For example:
+
+```
+    src/
+      ├── components/
+            ├── ui/
+                ├── button/
+                    ├── __tests__/
 ```
 
 **Test Artifacts**
@@ -408,9 +420,9 @@ This project uses GitHub Actions to automate key development and monitoring task
 #### Test Commands
 
 ```bash
-npm run test:full     # Run all tests in CI mode with coverage reporting
-npm run test:watch    # Run tests in watch mode (local dev)
-npm run test:coverage # Run tests with coverage reporting
+npm run vitest          # Run all tests in CI mode
+npm run vitest:watch    # Run tests in watch mode (local dev)
+npm run vitest:coverage # Run tests with coverage reporting
 ```
 
 ### Clone Tracker Workflow
@@ -489,10 +501,10 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 ```
 trip-fotos-react/
-├── cypress/            # Cypress tests
-├── declarations/       # Breaking issue fix when using ESLint V9
-├── public/             # Static assets
-├── rules/              # ESLint configuration rules
+├── cypress/                    # Cypress tests
+├── declarations/               # Breaking issue fix when using ESLint V9
+├── public/                     # Static assets
+├── rules/                      # ESLint configuration rules
 ├── src/
 │   ├── assets/         # Fonts, SVGs, and other static assets
 │   ├── components/     # Reusable React components
