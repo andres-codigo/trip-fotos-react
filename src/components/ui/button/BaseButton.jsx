@@ -40,7 +40,7 @@ const BaseButton = ({
 				</button>
 			) : (
 				<Link
-					to={to}
+					to={isDisabled ? undefined : to}
 					ref={elementRef}
 					className={combinedClassName}
 					data-cy={dataCypress}

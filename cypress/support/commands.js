@@ -8,7 +8,7 @@ import {
 Cypress.Commands.add('login', (email, password) => {
 	cy.get(authenticationFormSelectors.emailInput).type(email)
 	cy.get(authenticationFormSelectors.passwordInput).type(password)
-	cy.get(authenticationFormSelectors.submitButtonLogin).click()
+	cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
 })
 
 //INTERCEPTORS
