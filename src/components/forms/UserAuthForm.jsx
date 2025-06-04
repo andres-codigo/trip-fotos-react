@@ -112,8 +112,10 @@ UserAuthForm.propTypes = {
 		isValid: PropTypes.bool.isRequired,
 		message: PropTypes.string,
 	}),
-	mode: PropTypes.oneOf([API_DATABASE.API_AUTH_LOGIN_MODE, API_DATABASE])
-		.isRequired,
+	mode: PropTypes.oneOf([
+		API_DATABASE.API_AUTH_LOGIN_MODE,
+		API_DATABASE.API_AUTH_SIGNUP_MODE,
+	]).isRequired,
 	onEmailChange: PropTypes.func.isRequired,
 	onPasswordChange: PropTypes.func.isRequired,
 	onSubmit: PropTypes.func.isRequired,
