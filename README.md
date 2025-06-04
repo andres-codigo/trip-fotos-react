@@ -420,7 +420,7 @@ This project uses GitHub Actions to automate key development and monitoring task
 #### Test Commands
 
 ```bash
-npm run vitest:full     # Run all tests in CI mode with coverage reporting
+npm run vitest          # Run all tests in CI mode
 npm run vitest:watch    # Run tests in watch mode (local dev)
 npm run vitest:coverage # Run tests with coverage reporting
 ```
