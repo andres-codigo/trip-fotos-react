@@ -36,8 +36,8 @@ const UserAuthForm = ({
 				message={email.message}
 				disabled={isLoading}
 				required
-				dataCyInput="email-input"
-				dataCyErrorMessage="email"
+				dataCypress="email-input"
+				dataCypressError="email-error-message"
 			/>
 		</div>
 		<div
@@ -55,8 +55,8 @@ const UserAuthForm = ({
 				message={password.message}
 				disabled={isLoading}
 				required
-				dataCyInput="password-input"
-				dataCyErrorMessage="password"
+				dataCypress="password-input"
+				dataCypressError="password-error-message"
 			/>
 		</div>
 		<BaseButton
