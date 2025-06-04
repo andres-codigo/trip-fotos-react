@@ -30,4 +30,4 @@ jobs:
               run: npm install
 
             - name: Run Vitest with Coverage
-              run: npm run test:run
+              run: npm run vitest:run
