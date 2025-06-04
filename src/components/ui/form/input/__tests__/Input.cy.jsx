@@ -14,7 +14,7 @@ describe('<Input />', () => {
 				value="Hello"
 				onChange={() => {}}
 				isValid={true}
-				dataCyInput={INPUT.ID}
+				dataCypress={INPUT.ID}
 			/>,
 		)
 		cy.get('label').should('contain', 'Test Label')
@@ -28,7 +28,7 @@ describe('<Input />', () => {
 				value="No label"
 				onChange={() => {}}
 				isValid={true}
-				dataCyInput={INPUT.ID}
+				dataCypress={INPUT.ID}
 			/>,
 		)
 		cy.get('label').should('not.exist')
@@ -44,7 +44,7 @@ describe('<Input />', () => {
 				onChange={() => {}}
 				isValid={true}
 				className="my-custom-class"
-				dataCyInput={INPUT.ID}
+				dataCypress={INPUT.ID}
 			/>,
 		)
 		cy.get(getByDataCy(INPUT.ID)).should('have.class', 'my-custom-class')
@@ -58,7 +58,7 @@ describe('<Input />', () => {
 				value=""
 				onChange={() => {}}
 				isValid={true}
-				dataCyInput={INPUT.ID}
+				dataCypress={INPUT.ID}
 				required={true}
 			/>,
 		)
@@ -75,7 +75,7 @@ describe('<Input />', () => {
 				value="Can't edit"
 				onChange={() => {}}
 				isValid={true}
-				dataCyInput={INPUT.ID}
+				dataCypress={INPUT.ID}
 				disabled={true}
 			/>,
 		)
@@ -93,7 +93,7 @@ describe('<Input />', () => {
 					onChange={() => {}}
 					isValid={true}
 					type={type}
-					dataCyInput={INPUT.ID}
+					dataCypress={INPUT.ID}
 				/>,
 			)
 			cy.get(getByDataCy(INPUT.ID)).should('have.attr', 'type', type)
@@ -110,7 +110,7 @@ describe('<Input />', () => {
 				value=""
 				onChange={handleChange}
 				isValid={true}
-				dataCyInput={INPUT.ID}
+				dataCypress={INPUT.ID}
 			/>,
 		)
 		cy.get(getByDataCy(INPUT.ID)).type('abc')
@@ -126,8 +126,8 @@ describe('<Input />', () => {
 				onChange={() => {}}
 				isValid={false}
 				message="Error!"
-				dataCyInput={INPUT.ID}
-				dataCyErrorMessage={INPUT.ERROR_ID}
+				dataCypress={INPUT.ID}
+				dataCypressError={INPUT.ERROR_ID}
 			/>,
 		)
 		cy.get(getByDataCy(INPUT.ERROR_ID)).should('contain', 'Error!')

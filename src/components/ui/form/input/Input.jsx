@@ -13,8 +13,8 @@ const Input = ({
 	message = '',
 	disabled = false,
 	required = false,
-	dataCyInput,
-	dataCyErrorMessage,
+	dataCypress,
+	dataCypressError,
 	className = '',
 	...props
 }) => (
@@ -30,13 +30,13 @@ const Input = ({
 			value={value}
 			onChange={onChange}
 			onBlur={onBlur}
-			data-cy={dataCyInput}
+			data-cy={dataCypress}
 			disabled={disabled}
 			required={required}
 			className={className}
 			{...props}
 		/>
-		{!isValid && message && <p data-cy={dataCyErrorMessage}>{message}</p>}
+		{!isValid && message && <p data-cy={dataCypressError}>{message}</p>}
 	</div>
 )
 
@@ -51,8 +51,8 @@ Input.propTypes = {
 	message: PropTypes.string,
 	disabled: PropTypes.bool,
 	required: PropTypes.bool,
-	dataCyInput: PropTypes.string,
-	dataCyErrorMessage: PropTypes.string,
+	dataCypress: PropTypes.string,
+	dataCypressError: PropTypes.string,
 	className: PropTypes.string,
 }
 
