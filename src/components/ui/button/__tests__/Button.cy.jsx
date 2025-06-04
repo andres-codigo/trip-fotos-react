@@ -2,7 +2,7 @@ import { MemoryRouter } from 'react-router-dom'
 
 import { BUTTON } from '@/constants/test/button'
 
-import { getByDataCy } from '../../../../../cypress/support/utils/selectors'
+import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 

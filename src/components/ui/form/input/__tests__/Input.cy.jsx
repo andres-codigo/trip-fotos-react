@@ -1,6 +1,6 @@
 import { INPUT } from '@/constants/test/input'
 
-import { getByDataCy } from '../../../../../../cypress/support/utils/selectors'
+import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 import Input from '@/components/ui/form/input/Input'
 
