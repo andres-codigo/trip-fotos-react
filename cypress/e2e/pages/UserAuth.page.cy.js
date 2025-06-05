@@ -3,7 +3,7 @@ import { FIREBASE_ERROR_TYPES } from '../../../src/constants/firebase-error-type
 import {
 	apiDatabase,
 	apiUrls,
-	errorMessage,
+	errorMessages,
 	baseUrl,
 	urls,
 	user,
@@ -232,7 +232,7 @@ describe('UI error dialog', () => {
 				)
 				cy.get(dialog.textContent).should(
 					'contain.text',
-					errorMessage[messageKey],
+					errorMessages[messageKey],
 				)
 				cy.get('footer > button').should('contain.text', 'Close')
 				cy.get('footer > button').click()

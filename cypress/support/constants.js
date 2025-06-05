@@ -15,7 +15,7 @@ export const apiUrls = {
 	signInWithPassword: `${apiDatabase.apiUrl}signInWithPassword?key=${apiDatabase.apiKey}`,
 }
 
-export const errorMessage = {
+export const errorMessages = {
 	[FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
 		.INVALID_LOGIN_CREDENTIALS]:
 		FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
