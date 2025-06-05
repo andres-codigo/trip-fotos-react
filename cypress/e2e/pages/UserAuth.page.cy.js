@@ -1,7 +1,9 @@
+import { FIREBASE_ERROR_TYPES } from '../../../src/constants/firebase-error-types'
+
 import {
 	apiDatabase,
 	apiUrls,
-	errorMessage,
+	errorMessages,
 	baseUrl,
 	urls,
 	user,
@@ -230,7 +232,7 @@ describe('UI error dialog', () => {
 				)
 				cy.get(dialog.textContent).should(
 					'contain.text',
-					errorMessage[messageKey],
+					errorMessages[messageKey],
 				)
 				cy.get('footer > button').should('contain.text', 'Close')
 				cy.get('footer > button').click()
@@ -250,22 +252,31 @@ describe('UI error dialog', () => {
 	}
 
 	it('shows an invalid login credentials error dialog', () => {
-		logInUsingIntercept('INVALID_LOGIN_CREDENTIALS')
+		logInUsingIntercept(
+			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+				.INVALID_LOGIN_CREDENTIALS,
+		)
 	})
 
 	it('shows too many unsuccessful login attempts error dialog', () => {
-		logInUsingIntercept('TOO_MANY_ATTEMPTS_TRY_LATER')
+		logInUsingIntercept(
+			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+				.TOO_MANY_ATTEMPTS_TRY_LATER,
+		)
 	})
 
 	it('shows the default error dialog', () => {
-		logInUsingIntercept('DEFAULT')
+		logInUsingIntercept(
+			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES.DEFAULT,
+		)
 	})
 
 	it('closes the error dialog when the Escape key is pressed', () => {
 		cy.interceptLoginError(
 			apiDatabase.POST,
 			apiUrls.signInWithPassword,
-			'INVALID_LOGIN_CREDENTIALS',
+			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+				.INVALID_LOGIN_CREDENTIALS,
 		)
 		cy.login(user.validEmail, user.invalidPassword)
 		cy.wait('@loginErrorRequest')
