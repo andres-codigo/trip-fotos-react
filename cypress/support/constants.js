@@ -1,3 +1,7 @@
+import { FIREBASE_ERROR_TYPES } from '../../src/constants/firebase-error-types'
+
+import { getByDataCy } from '../../src/testUtils/cypress/selectors'
+
 export const apiDatabase = {
 	// API
 	apiUrl: Cypress.env('API_URL'),
@@ -12,11 +16,16 @@ export const apiUrls = {
 }
 
 export const errorMessage = {
-	INVALID_LOGIN_CREDENTIALS:
-		'The email or password you entered is incorrect.',
-	TOO_MANY_ATTEMPTS_TRY_LATER:
-		'Too many unsuccessful login attempts. Please try again later.',
-	DEFAULT: 'An unexpected error occurred. Please try again.',
+	[FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+		.INVALID_LOGIN_CREDENTIALS]:
+		FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+			.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+	[FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+		.TOO_MANY_ATTEMPTS_TRY_LATER]:
+		FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+			.TOO_MANY_ATTEMPTS_TRY_LATER_MESSAGE,
+	[FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES.DEFAULT]:
+		FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES.DEFAULT_MESSAGE,
 }
 
 export const baseUrl = Cypress.config('baseUrl')
@@ -58,13 +67,13 @@ export const domAttributeUrls = {
 
 export const dialog = {
 	// Dialog
-	invalidEmailOrPassword: '[data-cy="invalid-email-or-password-dialog"]',
-	loading: '[data-cy="loading-dialog"]',
+	invalidEmailOrPassword: getByDataCy('invalid-email-or-password-dialog'),
+	loading: getByDataCy('loading-dialog'),
 	// Dialog elements
-	title: '[data-cy="title"]',
-	textContent: '[data-cy="text-content"]',
-	spinnerContainer: '[data-cy="base-spinner"]',
-	spinnerImage: '[data-cy="base-spinner-img"]',
+	title: getByDataCy('title'),
+	textContent: getByDataCy('text-content'),
+	spinnerContainer: getByDataCy('base-spinner'),
+	spinnerImage: getByDataCy('base-spinner-img'),
 }
 
 export const dialogMessages = {
@@ -78,35 +87,35 @@ export const dialogMessages = {
 }
 
 export const topNavigationSelectors = {
-	siteHeader: '[data-cy="site-header"]',
-	siteHeaderTitleLink: '[data-cy="site-header-title-link"]',
-	navMenuItemMessages: '[data-cy="nav-menu-item-messages"]',
-	totalMessages: '[data-cy="total-messages"]',
-	navMenuItemTravellers: '[data-cy="nav-menu-item-travellers"]',
-	navMenuItemLogin: '[data-cy="nav-menu-item-login"]',
-	navMenuItemLogout: '[data-cy="nav-menu-item-logout"]',
-	navHamburgerMenu: '[data-cy="hamburger-menu"]',
+	siteHeader: getByDataCy('site-header'),
+	siteHeaderTitleLink: getByDataCy('site-header-title-link'),
+	navMenuItemMessages: getByDataCy('nav-menu-item-messages'),
+	totalMessages: getByDataCy('total-messages'),
+	navMenuItemTravellers: getByDataCy('nav-menu-item-travellers'),
+	navMenuItemLogin: getByDataCy('nav-menu-item-login'),
+	navMenuItemLogout: getByDataCy('nav-menu-item-logout'),
+	navHamburgerMenu: getByDataCy('hamburger-menu'),
 }
 
 export const authenticationFormSelectors = {
 	// Email fields
 	emailLabel: 'E-Mail',
-	emailInput: '[data-cy="email-input"]',
-	emailErrorMessage: '[data-cy="email-error-message"]',
+	emailInput: getByDataCy('email-input'),
+	emailErrorMessage: getByDataCy('email-error-message'),
 	// Password fields
 	passwordLabel: 'Password',
-	passwordInput: '[data-cy="password-input"]',
-	passwordErrorMessage: '[data-cy="password-error-message"]',
+	passwordInput: getByDataCy('password-input'),
+	passwordErrorMessage: getByDataCy('password-error-message'),
 	// Submit buttons
 	submitButtonTextLogin: 'Log in',
 	signupTextSubmitButton: 'Sign up',
-	loginSignupSubmitButton: '[data-cy="login-submit-button"]',
+	loginSignupSubmitButton: getByDataCy('login-submit-button'),
 	// Toggle link for switching between login and signup
-	loginSignupToggleLink: '[data-cy="login-signup-toggle-link"]',
+	loginSignupToggleLink: getByDataCy('login-signup-toggle-link'),
 	loginTextToggleLink: 'Switch to Login',
 	signupTextToggleLink: 'Switch to Signup',
 }
 
 export const pageNotFoundSelectors = {
-	homeLink: '[data-cy="home-link"]',
+	homeLink: getByDataCy('home-link'),
 }
