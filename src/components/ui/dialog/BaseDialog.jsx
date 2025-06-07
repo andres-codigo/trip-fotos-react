@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useId } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import { CSSTransition } from 'react-transition-group'
+
+import { DIALOG } from '@/constants/test/dialog'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 
@@ -19,6 +21,9 @@ const BaseDialog = ({
 	sectionClasses = false,
 	dataCypress,
 }) => {
+	const titleId = useId()
+	const descId = useId()
+
 	const nodeRef = useRef(null)
 	const [isVisible, setIsVisible] = useState(show)
 
@@ -54,7 +59,8 @@ const BaseDialog = ({
 			{show && (
 				<div
 					className={baseDialogStyles.backdrop}
-					onClick={tryClose}></div>
+					onClick={tryClose}
+					data-cy={DIALOG.BACKDROP}></div>
 			)}
 			<CSSTransition
 				in={show}
@@ -74,9 +80,23 @@ const BaseDialog = ({
 					ref={nodeRef}
 					open
 					className={baseDialogStyles.dialog}
-					data-cy={dataCypress}>
+					data-cy={dataCypress}
+					aria-modal="true"
+					role={
+						isError ? DIALOG.ROLE_ALERTDIALOG : DIALOG.ROLE_DIALOG
+					}
+					aria-labelledby={titleId}
+					aria-describedby={descId}>
 					<header className={baseDialogStyles.header}>
-						{header ? header : <h2 data-cy="title">{title}</h2>}
+						{header ? (
+							header
+						) : (
+							<h2
+								id={titleId}
+								data-cy={DIALOG.TITLE}>
+								{title}
+							</h2>
+						)}
 					</header>
 					<main
 						className={
@@ -84,8 +104,8 @@ const BaseDialog = ({
 								? baseDialogStyles.image
 								: baseDialogStyles.general
 						}
-						data-cy="text-content">
-						{children}
+						data-cy={DIALOG.TEXT_CONTENT}>
+						<p id={descId}>{children}</p>
 					</main>
 					{!fixed && (
 						<footer>
