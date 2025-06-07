@@ -38,9 +38,18 @@ const Input = ({
 			disabled={disabled}
 			required={required}
 			className={className}
+			aria-invalid={!isValid}
+			aria-describedby={!isValid && message ? `${id}-error` : undefined}
 			{...props}
 		/>
-		{!isValid && message && <p data-cy={dataCypressError}>{message}</p>}
+		{!isValid && message && (
+			<p
+				id={`${id}-error`}
+				role="alert"
+				data-cy={dataCypressError}>
+				{message}
+			</p>
+		)}
 	</div>
 )
 
