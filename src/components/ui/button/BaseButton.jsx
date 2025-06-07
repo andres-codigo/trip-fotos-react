@@ -35,6 +35,9 @@ const BaseButton = ({
 					className={combinedClassName}
 					data-cy={dataCypress}
 					disabled={isDisabled}
+					{...(typeof children !== 'string'
+						? { 'aria-label': props['ariaLabel'] || 'Button' }
+						: {})}
 					{...props}>
 					{children}
 				</button>
@@ -45,6 +48,10 @@ const BaseButton = ({
 					className={combinedClassName}
 					data-cy={dataCypress}
 					aria-disabled={isDisabled}
+					tabIndex={isDisabled ? -1 : undefined}
+					{...(typeof children !== 'string'
+						? { 'aria-label': props['ariaLabel'] || 'Link' }
+						: {})}
 					{...props}>
 					{children}
 				</Link>
@@ -62,6 +69,7 @@ BaseButton.propTypes = {
 	to: PropTypes.string,
 	className: PropTypes.string,
 	dataCypress: PropTypes.string,
+	ariaLabel: PropTypes.string,
 }
 
 export default BaseButton
