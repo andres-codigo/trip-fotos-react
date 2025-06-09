@@ -10,6 +10,8 @@ import { useHeaderState } from './hooks/useHeaderState'
 import { useLogout } from './hooks/useLogout'
 import { useMobileMenu } from './hooks/useMobileMenu'
 
+import BaseButton from '../../ui/button/BaseButton'
+
 import NavMenuButtonLink from './nav-menu/NavMenuButtonLink'
 import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink'
 
@@ -77,7 +79,9 @@ function Header() {
 		<header
 			className={headerStyles.siteHeader}
 			data-cy="site-header">
-			<nav className={headerStyles.navbar}>
+			<nav
+				className={headerStyles.navbar}
+				aria-label="Top navigation">
 				<h1
 					className="siteHeaderTitleLink"
 					data-cy="site-header-title-link">
@@ -89,11 +93,12 @@ function Header() {
 					</NavMenuButtonLink>
 				</h1>
 				<ul
+					id="nav-menu-items-container"
+					ref={navMenuRef}
 					className={classNames(headerStyles.navMenuItemsContainer, {
 						[headerStyles.active]: isMenuOpen,
 					})}
-					data-cy="nav-menu-items-container"
-					ref={navMenuRef}>
+					data-cy="nav-menu-items-container">
 					{isLoggedIn && (
 						<li className={headerStyles.navMenuItem}>
 							<ul>
@@ -128,29 +133,36 @@ function Header() {
 							className={classNames(
 								headerStyles.navMenuItem,
 								'nav-menu-item-logout',
-							)}
-							onClick={handleLogoutClick}>
+							)}>
 							<NavMenuButtonLink
 								className={
 									navMenuButtonLinkStyles.navMenuButtonLink
 								}
-								data-cy="nav-menu-item-logout">
+								data-cy="nav-menu-item-logout"
+								onClick={handleLogoutClick}>
 								Logout {travellerName}
 							</NavMenuButtonLink>
 						</li>
 					)}
 				</ul>
 				{isLoggedIn && (
-					<div
+					<BaseButton
+						ref={hamburgerRef}
 						className={classNames(headerStyles.hamburger, {
 							[headerStyles.active]: isMenuOpen,
 						})}
 						data-cy="hamburger-menu"
-						ref={hamburgerRef}>
+						aria-controls="nav-menu-items-container"
+						aria-expanded={isMenuOpen}
+						aria-label={
+							isMenuOpen
+								? 'Close navigation menu'
+								: 'Open navigation menu'
+						}>
 						<span className={headerStyles.bar}></span>
 						<span className={headerStyles.bar}></span>
 						<span className={headerStyles.bar}></span>
-					</div>
+					</BaseButton>
 				)}
 			</nav>
 		</header>
