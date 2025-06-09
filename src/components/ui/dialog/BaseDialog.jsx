@@ -105,7 +105,7 @@ const BaseDialog = ({
 								: baseDialogStyles.general
 						}
 						data-cy={DIALOG.TEXT_CONTENT}>
-						<p id={descId}>{children}</p>
+						<div id={descId}>{children}</div>
 					</main>
 					{!fixed && (
 						<footer>
