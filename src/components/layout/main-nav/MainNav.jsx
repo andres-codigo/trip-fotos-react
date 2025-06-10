@@ -79,82 +79,85 @@ function MainNav({
 	)
 
 	return (
-		<nav
-			className={mainNavStyles.navbar}
-			aria-label="Top navigation">
+		<>
 			{isLoggedIn && (
 				<>
-					<BaseButton
-						ref={hamburgerRef}
-						className={classNames(mainNavStyles.hamburger, {
-							[mainNavStyles.active]: isMenuOpen,
-						})}
-						data-cy="hamburger-menu"
-						aria-controls="nav-menu-items-container"
-						aria-expanded={isMenuOpen}
-						aria-label={
-							isMenuOpen
-								? 'Close navigation menu'
-								: 'Open navigation menu'
-						}>
-						<span className={mainNavStyles.bar}></span>
-						<span className={mainNavStyles.bar}></span>
-						<span className={mainNavStyles.bar}></span>
-					</BaseButton>
-					<ul
-						id="nav-menu-items-container"
-						ref={navMenuRef}
-						className={classNames(
-							mainNavStyles.navMenuItemsContainer,
-							{
+					<nav
+						className={mainNavStyles.navbar}
+						data-cy="nav-menu-container"
+						aria-label="Top navigation">
+						<BaseButton
+							ref={hamburgerRef}
+							className={classNames(mainNavStyles.hamburger, {
 								[mainNavStyles.active]: isMenuOpen,
-							},
-						)}
-						data-cy="nav-menu-items-container">
-						<li className={mainNavStyles.navMenuItem}>
-							<ul>
-								{/* {isTraveller && ( */}
-								<NavMenuMessagesLink
+							})}
+							data-cy="hamburger-menu"
+							aria-controls="hamburger-menu-items-container"
+							aria-expanded={isMenuOpen}
+							aria-label={
+								isMenuOpen
+									? 'Close navigation menu'
+									: 'Open navigation menu'
+							}>
+							<span className={mainNavStyles.bar}></span>
+							<span className={mainNavStyles.bar}></span>
+							<span className={mainNavStyles.bar}></span>
+						</BaseButton>
+						<ul
+							id="nav-menu-items-container"
+							ref={navMenuRef}
+							className={classNames(
+								mainNavStyles.navMenuItemsContainer,
+								{
+									[mainNavStyles.active]: isMenuOpen,
+								},
+							)}
+							data-cy="nav-menu-items-container">
+							<li className={mainNavStyles.navMenuItem}>
+								<ul>
+									{/* {isTraveller && ( */}
+									<NavMenuMessagesLink
+										className={
+											navMenuButtonLinkStyles.navMenuButtonLink
+										}
+										to={PATHS.MESSAGES}
+										data-cy="nav-menu-item-messages"
+										totalMessages={totalMessages}
+									/>
+									{/* )} */}
+									<li
+										className="navMenuItemTravellers"
+										data-cy="nav-menu-item-travellers">
+										<NavMenuButtonLink
+											isLink
+											to="/"
+											className={
+												navMenuButtonLinkStyles.navMenuButtonLink
+											}>
+											Travellers
+										</NavMenuButtonLink>
+									</li>
+								</ul>
+							</li>
+							<li
+								className={classNames(
+									mainNavStyles.navMenuItem,
+									'nav-menu-item-logout',
+								)}>
+								<NavMenuButtonLink
 									className={
 										navMenuButtonLinkStyles.navMenuButtonLink
 									}
-									to={PATHS.MESSAGES}
-									data-cy="nav-menu-item-messages"
-									totalMessages={totalMessages}
-								/>
-								{/* )} */}
-								<li
-									className="navMenuItemTravellers"
-									data-cy="nav-menu-item-travellers">
-									<NavMenuButtonLink
-										isLink
-										to="/"
-										className={
-											navMenuButtonLinkStyles.navMenuButtonLink
-										}>
-										Travellers
-									</NavMenuButtonLink>
-								</li>
-							</ul>
-						</li>
-						<li
-							className={classNames(
-								mainNavStyles.navMenuItem,
-								'nav-menu-item-logout',
-							)}>
-							<NavMenuButtonLink
-								className={
-									navMenuButtonLinkStyles.navMenuButtonLink
-								}
-								data-cy="nav-menu-item-logout"
-								onClick={handleLogoutClick}>
-								Logout {travellerName}
-							</NavMenuButtonLink>
-						</li>
-					</ul>
+									data-cy="nav-menu-item-logout"
+									onClick={handleLogoutClick}>
+									Logout {travellerName}
+								</NavMenuButtonLink>
+							</li>
+						</ul>
+					</nav>
 				</>
 			)}
-		</nav>
+		</>
 	)
 }
 
