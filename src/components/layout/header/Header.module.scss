@@ -6,7 +6,18 @@
 	display: flex;
 	height: 5rem;
 	position: fixed;
-	justify-content: center;
+	justify-content: space-between;
 	width: 100%;
 	z-index: 1;
+
+	.siteHeaderTitleLink {
+		font-size: 1.5rem;
+
+		a {
+			color: variables.$color-white;
+			margin: 0;
+			padding: 0.75rem 1.5rem;
+			text-decoration: none;
+		}
+	}
 }
