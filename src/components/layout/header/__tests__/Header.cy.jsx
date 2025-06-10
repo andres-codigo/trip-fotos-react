@@ -13,46 +13,52 @@ import configureStore from 'redux-mock-store'
 
 const mockStore = configureStore([])
 
-function assertHeaderForViewport({
-	viewportFn,
-	expectedHref,
-	navMenuShouldExist,
-	navMenuShouldBeVisible,
-	hamburgerMenuShouldExist = false,
-}) {
-	viewportFn()
+function assertHeaderTitleLink(expectedHref) {
 	cy.get(headerSelectors.siteHeaderTitleLink)
 		.should('exist')
 		.find('a')
 		.should('have.attr', 'href', expectedHref)
 		.and('contain.text', 'Trip Fotos')
+}
 
+function assertNavMenu({ shouldExist, shouldBeVisible }) {
 	const navMenu = cy.get(topNavigationSelectors.navMenuContainer)
-
-	if (navMenuShouldExist) {
+	if (shouldExist) {
 		navMenu.should('exist')
-
 		const navMenuItems = cy.get(
 			topNavigationSelectors.navMenuItemsContainer,
 		)
-
-		if (navMenuShouldBeVisible) {
+		if (shouldBeVisible) {
 			navMenuItems.should('be.visible')
 		} else {
 			navMenuItems.should('not.be.visible')
-
-			const hamburgerMenu = cy.get(
-				topNavigationSelectors.navHamburgerMenu,
-			)
-			if (hamburgerMenuShouldExist) {
-				hamburgerMenu.should('exist')
-			} else {
-				hamburgerMenu.should('not.exist')
-			}
 		}
 	} else {
 		navMenu.should('not.exist')
 	}
+}
+
+function assertHamburgerMenu(shouldExist) {
+	const hamburgerMenu = cy.get(topNavigationSelectors.navHamburgerMenu)
+	if (shouldExist) {
+		hamburgerMenu.should('exist')
+	} else {
+		hamburgerMenu.should('not.exist')
+	}
+}
+
+function headerAssertions(
+	expectedHref,
+	navMenuExists,
+	navMenuVisible,
+	hamburgerMenuExists,
+) {
+	assertHeaderTitleLink(expectedHref)
+	assertNavMenu({
+		shouldExist: navMenuExists,
+		shouldBeVisible: navMenuVisible,
+	})
+	assertHamburgerMenu(hamburgerMenuExists)
 }
 
 describe('<Header />', () => {
@@ -69,26 +75,14 @@ describe('<Header />', () => {
 			</Provider>,
 		)
 
-		// Mobile
-		assertHeaderForViewport({
-			viewportFn: cy.setViewportToMobile,
-			expectedHref: urls.cyAuth,
-			navMenuShouldExist: false,
-		})
+		cy.setViewportToMobile()
+		headerAssertions(urls.cyAuth, false, false, false)
 
-		// Tablet
-		assertHeaderForViewport({
-			viewportFn: cy.setViewportToTablet,
-			expectedHref: urls.cyAuth,
-			navMenuShouldExist: false,
-		})
+		cy.setViewportToTablet()
+		headerAssertions(urls.cyAuth, false, false, false)
 
-		// Desktop
-		assertHeaderForViewport({
-			viewportFn: cy.setViewportToDesktop,
-			expectedHref: urls.cyAuth,
-			navMenuShouldExist: false,
-		})
+		cy.setViewportToDesktop()
+		headerAssertions(urls.cyAuth, false, false, false)
 	})
 
 	it('renders correctly for logged in users on mobile, tablet, and desktop', () => {
@@ -104,31 +98,13 @@ describe('<Header />', () => {
 			</Provider>,
 		)
 
-		// Mobile
-		assertHeaderForViewport({
-			viewportFn: cy.setViewportToMobile,
-			expectedHref: urls.cyTrips,
-			navMenuShouldExist: true,
-			navMenuShouldBeVisible: false,
-			hamburgerMenuShouldExist: true,
-		})
+		cy.setViewportToMobile()
+		headerAssertions(urls.cyTrips, true, false, true)
 
-		// Tablet
-		assertHeaderForViewport({
-			viewportFn: cy.setViewportToTablet,
-			expectedHref: urls.cyTrips,
-			navMenuShouldExist: true,
-			navMenuShouldBeVisible: true,
-			hamburgerMenuShouldExist: false,
-		})
+		cy.setViewportToTablet()
+		headerAssertions(urls.cyTrips, true, true, true)
 
-		// Desktop
-		assertHeaderForViewport({
-			viewportFn: cy.setViewportToDesktop,
-			expectedHref: urls.cyTrips,
-			navMenuShouldExist: true,
-			navMenuShouldBeVisible: true,
-			hamburgerMenuShouldExist: false,
-		})
+		cy.setViewportToDesktop()
+		headerAssertions(urls.cyTrips, true, true, true)
 	})
 })
