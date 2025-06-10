@@ -22,7 +22,7 @@ function Header() {
 					Trip Fotos
 				</Link>
 			</h1>
-			<MainNav />
+			<MainNav isLoggedIn={isLoggedIn} />
 		</header>
 	)
 }

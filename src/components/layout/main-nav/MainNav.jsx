@@ -20,6 +20,7 @@ import navMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss'
 import mainNavStyles from './MainNav.module.scss'
 
 function MainNav({
+	isLoggedIn,
 	useMainNavState = useMainNavStateDefault,
 	useCloseHamburgerMenu = useCloseHamburgerMenuDefault,
 	useMobileMenu = useMobileMenuDefault,
@@ -27,9 +28,6 @@ function MainNav({
 }) {
 	// const navigate = useNavigate();
 
-	const isLoggedIn = useSelector(
-		(state) => state.authentication.token !== null,
-	)
 	// const usersName = useSelector((state) => state.travellers.travellerName);
 	// const isTraveller = useSelector((state) => state.travellers.isTraveller);
 	// const messagesCount = useSelector((state) => state.messages.messagesCount);
@@ -162,6 +160,7 @@ function MainNav({
 }
 
 MainNav.propTypes = {
+	isLoggedIn: PropTypes.bool.isRequired,
 	useMainNavState: PropTypes.func,
 	useCloseHamburgerMenu: PropTypes.func,
 	useMobileMenu: PropTypes.func,
