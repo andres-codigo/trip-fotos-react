@@ -2,13 +2,14 @@ import { useSelector } from 'react-redux'
 import { useRef } from 'react'
 // import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames'
+import PropTypes from 'prop-types'
 
 import { PATHS } from '@/constants/paths'
 
-import { useCloseHamburgerMenu } from './hooks/useCloseHamburgerMenu'
-import { useLogout } from './hooks/useLogout'
-import { useMainNavState } from './hooks/useMainNavState'
-import { useMobileMenu } from './hooks/useMobileMenu'
+import { useCloseHamburgerMenu as useCloseHamburgerMenuDefault } from './hooks/useCloseHamburgerMenu'
+import { useLogout as useLogoutDefault } from './hooks/useLogout'
+import { useMainNavState as useMainNavStateDefault } from './hooks/useMainNavState'
+import { useMobileMenu as useMobileMenuDefault } from './hooks/useMobileMenu'
 
 import BaseButton from '../../ui/button/BaseButton'
 
@@ -18,7 +19,12 @@ import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink'
 import navMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss'
 import mainNavStyles from './MainNav.module.scss'
 
-function MainNav() {
+function MainNav({
+	useMainNavState = useMainNavStateDefault,
+	useCloseHamburgerMenu = useCloseHamburgerMenuDefault,
+	useMobileMenu = useMobileMenuDefault,
+	useLogout = useLogoutDefault,
+}) {
 	// const navigate = useNavigate();
 
 	const isLoggedIn = useSelector(
@@ -79,94 +85,87 @@ function MainNav() {
 		<nav
 			className={mainNavStyles.navbar}
 			aria-label="Top navigation">
-			<h1
-				className="siteHeaderTitleLink"
-				data-cy="site-header-title-link">
-				<NavMenuButtonLink
-					isLink
-					to={isLoggedIn ? PATHS.TRIPS : PATHS.AUTHENTICATION}
-					className={navMenuButtonLinkStyles.navMenuButtonLink}>
-					Trip Fotos
-				</NavMenuButtonLink>
-			</h1>
 			{isLoggedIn && (
-				<BaseButton
-					ref={hamburgerRef}
-					className={classNames(mainNavStyles.hamburger, {
-						[mainNavStyles.active]: isMenuOpen,
-					})}
-					data-cy="hamburger-menu"
-					aria-controls="nav-menu-items-container"
-					aria-expanded={isMenuOpen}
-					aria-label={
-						isMenuOpen
-							? 'Close navigation menu'
-							: 'Open navigation menu'
-					}>
-					<span className={mainNavStyles.bar}></span>
-					<span className={mainNavStyles.bar}></span>
-					<span className={mainNavStyles.bar}></span>
-				</BaseButton>
-			)}
-			<ul
-				id="nav-menu-items-container"
-				ref={navMenuRef}
-				className={classNames(mainNavStyles.navMenuItemsContainer, {
-					[mainNavStyles.active]: isMenuOpen,
-				})}
-				data-cy="nav-menu-items-container">
-				{isMenuOpen && (
-					<>
-						{isLoggedIn && (
-							<li className={mainNavStyles.navMenuItem}>
-								<ul>
-									{/* {isTraveller && ( */}
-									<NavMenuMessagesLink
-										className={
-											navMenuButtonLinkStyles.navMenuButtonLink
-										}
-										to={PATHS.MESSAGES}
-										data-cy="nav-menu-item-messages"
-										totalMessages={totalMessages}
-									/>
-									{/* )} */}
-									<li
-										className="navMenuItemTravellers"
-										data-cy="nav-menu-item-travellers">
-										<NavMenuButtonLink
-											isLink
-											to="/"
-											className={
-												navMenuButtonLinkStyles.navMenuButtonLink
-											}>
-											Travellers
-										</NavMenuButtonLink>
-									</li>
-								</ul>
-							</li>
+				<>
+					<BaseButton
+						ref={hamburgerRef}
+						className={classNames(mainNavStyles.hamburger, {
+							[mainNavStyles.active]: isMenuOpen,
+						})}
+						data-cy="hamburger-menu"
+						aria-controls="nav-menu-items-container"
+						aria-expanded={isMenuOpen}
+						aria-label={
+							isMenuOpen
+								? 'Close navigation menu'
+								: 'Open navigation menu'
+						}>
+						<span className={mainNavStyles.bar}></span>
+						<span className={mainNavStyles.bar}></span>
+						<span className={mainNavStyles.bar}></span>
+					</BaseButton>
+					<ul
+						id="nav-menu-items-container"
+						ref={navMenuRef}
+						className={classNames(
+							mainNavStyles.navMenuItemsContainer,
+							{
+								[mainNavStyles.active]: isMenuOpen,
+							},
 						)}
-						{/* /// TODO: When routing is enabled add !== to 'authentication' url to isLoggedIn condition */}
-						{isLoggedIn && (
-							<li
-								className={classNames(
-									mainNavStyles.navMenuItem,
-									'nav-menu-item-logout',
-								)}>
-								<NavMenuButtonLink
+						data-cy="nav-menu-items-container">
+						<li className={mainNavStyles.navMenuItem}>
+							<ul>
+								{/* {isTraveller && ( */}
+								<NavMenuMessagesLink
 									className={
 										navMenuButtonLinkStyles.navMenuButtonLink
 									}
-									data-cy="nav-menu-item-logout"
-									onClick={handleLogoutClick}>
-									Logout {travellerName}
-								</NavMenuButtonLink>
-							</li>
-						)}
-					</>
-				)}
-			</ul>
+									to={PATHS.MESSAGES}
+									data-cy="nav-menu-item-messages"
+									totalMessages={totalMessages}
+								/>
+								{/* )} */}
+								<li
+									className="navMenuItemTravellers"
+									data-cy="nav-menu-item-travellers">
+									<NavMenuButtonLink
+										isLink
+										to="/"
+										className={
+											navMenuButtonLinkStyles.navMenuButtonLink
+										}>
+										Travellers
+									</NavMenuButtonLink>
+								</li>
+							</ul>
+						</li>
+						<li
+							className={classNames(
+								mainNavStyles.navMenuItem,
+								'nav-menu-item-logout',
+							)}>
+							<NavMenuButtonLink
+								className={
+									navMenuButtonLinkStyles.navMenuButtonLink
+								}
+								data-cy="nav-menu-item-logout"
+								onClick={handleLogoutClick}>
+								Logout {travellerName}
+							</NavMenuButtonLink>
+						</li>
+					</ul>
+				</>
+			)}
 		</nav>
 	)
+}
+
+MainNav.propTypes = {
+	useMainNavState: PropTypes.func,
+	useCloseHamburgerMenu: PropTypes.func,
+	useMobileMenu: PropTypes.func,
+	useLogout: PropTypes.func,
 }
 
 export default MainNav

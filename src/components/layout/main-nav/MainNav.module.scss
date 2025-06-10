@@ -2,21 +2,6 @@
 @use '@/styles/setup/mixins/mixins' as mixins;
 
 .navbar {
-	@include mixins.flex-center;
-	justify-content: space-between;
-	margin: auto;
-	width: 90%;
-
-	h1 {
-		margin: 0;
-
-		a {
-			color: variables.$color-white;
-			margin: 0;
-			text-decoration: none;
-		}
-	}
-
 	.navMenuItemsContainer {
 		@include mixins.flex-center;
 		justify-content: space-between;
