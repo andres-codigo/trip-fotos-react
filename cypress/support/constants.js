@@ -39,17 +39,17 @@ export const urls = {
 }
 
 export const viewports = {
-	desktop: {
-		width: 1280,
-		height: 800,
+	mobile: {
+		width: 375,
+		height: 667,
 	},
 	tablet: {
 		width: 1024,
 		height: 768,
 	},
-	mobile: {
-		width: 375,
-		height: 667,
+	desktop: {
+		width: 1280,
+		height: 800,
 	},
 }
 
@@ -86,15 +86,19 @@ export const dialogMessages = {
 	},
 }
 
-export const topNavigationSelectors = {
+export const headerSelectors = {
 	siteHeader: getByDataCy('site-header'),
 	siteHeaderTitleLink: getByDataCy('site-header-title-link'),
-	navMenuItemMessages: getByDataCy('nav-menu-item-messages'),
+}
+
+export const topNavigationSelectors = {
+	navMenuContainer: getByDataCy('nav-menu-container'),
+	navHamburgerMenu: getByDataCy('hamburger-menu'),
+	navMenuItemsContainer: getByDataCy('nav-menu-items-container'),
 	totalMessages: getByDataCy('total-messages'),
 	navMenuItemTravellers: getByDataCy('nav-menu-item-travellers'),
 	navMenuItemLogin: getByDataCy('nav-menu-item-login'),
 	navMenuItemLogout: getByDataCy('nav-menu-item-logout'),
-	navHamburgerMenu: getByDataCy('hamburger-menu'),
 }
 
 export const authenticationFormSelectors = {

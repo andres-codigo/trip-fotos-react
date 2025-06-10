@@ -1,5 +1,6 @@
 import {
 	viewports,
+	headerSelectors,
 	topNavigationSelectors,
 	authenticationFormSelectors,
 } from './constants'
@@ -39,24 +40,27 @@ Cypress.Commands.add('interceptDelayedLogin', (method, url, time) => {
 })
 
 // VIEWPORTS
-Cypress.Commands.add('setViewportToDesktop', () => {
-	cy.window().then((win) => {
-		cy.viewport(viewports.desktop.width, win.innerHeight)
-	})
-})
-
 Cypress.Commands.add('setViewportToMobile', () => {
 	cy.window().then((win) => {
 		cy.viewport(viewports.mobile.width, win.innerHeight)
 	})
 })
 
+Cypress.Commands.add('setViewportToTablet', () => {
+	cy.window().then((win) => {
+		cy.viewport(viewports.tablet.width, win.innerHeight)
+	})
+})
+
+Cypress.Commands.add('setViewportToDesktop', () => {
+	cy.window().then((win) => {
+		cy.viewport(viewports.desktop.width, win.innerHeight)
+	})
+})
+
 // HEADER
 Cypress.Commands.add('assertHeaderTitleLink', () => {
-	cy.get(topNavigationSelectors.siteHeaderTitleLink).as('siteHeaderTitleLink')
-
-	cy.get('@siteHeaderTitleLink')
-		.should('have.class', 'siteHeaderTitleLink')
+	cy.get(headerSelectors.siteHeaderTitleLink)
 		.find('a')
 		.then(($siteHeaderTitleLink) => {
 			expect($siteHeaderTitleLink.text()).to.equal('Trip Fotos')
