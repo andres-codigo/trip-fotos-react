@@ -30,7 +30,7 @@
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
 		"react-redux": "^9.2.0",
-		"react-router-dom": "^7.6.1",
+		"react-router-dom": "^7.6.2",
 		"react-transition-group": "^4.4.5",
 		"redux-persist": "^6.0.0"
 	},
@@ -44,7 +44,7 @@
 		"@types/react-dom": "^19.1.5",
 		"@vitejs/plugin-react": "^4.5.0",
 		"chokidar-cli": "^3.0.0",
-		"cypress": "^14.4.0",
+		"cypress": "^14.4.1",
 		"depcheck": "^1.4.7",
 		"eslint": "^9.27.0",
 		"eslint-config-prettier": "^10.1.5",
