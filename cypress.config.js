@@ -35,5 +35,6 @@ export default defineConfig({
 			bundler: 'vite',
 			viteConfig,
 		},
+		specPattern: '**/*.cy.{js,jsx,ts,tsx}',
 	},
 })
