@@ -86,6 +86,10 @@ export const dialogMessages = {
 	},
 }
 
+export const testSelectors = {
+	locationDisplay: getByDataCy('location-display'),
+}
+
 export const headerSelectors = {
 	siteHeader: getByDataCy('site-header'),
 	siteHeaderTitleLink: getByDataCy('site-header-title-link'),
@@ -95,6 +99,7 @@ export const topNavigationSelectors = {
 	navMenuContainer: getByDataCy('nav-menu-container'),
 	navHamburgerMenu: getByDataCy('hamburger-menu'),
 	navMenuItemsContainer: getByDataCy('nav-menu-items-container'),
+	navMenuItemMessages: getByDataCy('nav-menu-item-messages'),
 	totalMessages: getByDataCy('total-messages'),
 	navMenuItemTravellers: getByDataCy('nav-menu-item-travellers'),
 	navMenuItemLogin: getByDataCy('nav-menu-item-login'),
