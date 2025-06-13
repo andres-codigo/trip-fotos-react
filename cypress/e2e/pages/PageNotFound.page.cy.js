@@ -3,7 +3,6 @@ import {
 	urls,
 	user,
 	headerSelectors,
-	topNavigationSelectors,
 	pageNotFoundSelectors,
 } from '../../support/constants'
 
