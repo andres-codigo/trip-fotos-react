@@ -14,11 +14,15 @@ function Header() {
 	return (
 		<header
 			className={headerStyles.siteHeader}
-			data-cy="site-header">
+			data-cy="site-header"
+			role="banner"
+			aria-label="Site header">
 			<h1
 				className={headerStyles.siteHeaderTitleLink}
 				data-cy="site-header-title-link">
-				<Link to={isLoggedIn ? PATHS.TRIPS : PATHS.AUTHENTICATION}>
+				<Link
+					to={isLoggedIn ? PATHS.TRIPS : PATHS.AUTHENTICATION}
+					aria-label="Trip Fotos Home">
 					Trip Fotos
 				</Link>
 			</h1>
