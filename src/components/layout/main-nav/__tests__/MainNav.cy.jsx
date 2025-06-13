@@ -68,58 +68,64 @@ describe('<MainNav />', () => {
 			cy.get(topNavigationSelectors.navMenuContainer).should('not.exist')
 		})
 
-		it('renders menu items and hamburger menu on mobile when logged in', () => {
-			mountWithProviders(
-				<TestMainNav
-					isLoggedIn={true}
-					isMenuOpen={true}
-				/>,
-				store,
-			)
-			cy.setViewportToMobile()
-			cy.get(topNavigationSelectors.navMenuContainer)
-				.should('exist')
-				.and('be.visible')
-			cy.get(topNavigationSelectors.navHamburgerMenu)
-				.should('exist')
-				.and('be.visible')
-			assertMenuItems(mockUseMainNavState().travellerName)
+		describe('Mobile', () => {
+			it('renders menu items and hamburger menu when logged in', () => {
+				mountWithProviders(
+					<TestMainNav
+						isLoggedIn={true}
+						isMenuOpen={true}
+					/>,
+					store,
+				)
+				cy.setViewportToMobile()
+				cy.get(topNavigationSelectors.navMenuContainer)
+					.should('exist')
+					.and('be.visible')
+				cy.get(topNavigationSelectors.navHamburgerMenu)
+					.should('exist')
+					.and('be.visible')
+				assertMenuItems(mockUseMainNavState().travellerName)
+			})
 		})
 
-		it('renders menu items but not the hamburger menu on tablet when logged in', () => {
-			mountWithProviders(
-				<TestMainNav
-					isLoggedIn={true}
-					isMenuOpen={true}
-				/>,
-				store,
-			)
-			cy.setViewportToTablet()
-			cy.get(topNavigationSelectors.navMenuContainer)
-				.should('exist')
-				.and('be.visible')
-			cy.get(topNavigationSelectors.navHamburgerMenu).should(
-				'not.be.visible',
-			)
-			assertMenuItems(mockUseMainNavState().travellerName)
+		describe('Tablet', () => {
+			it('renders menu items when logged in', () => {
+				mountWithProviders(
+					<TestMainNav
+						isLoggedIn={true}
+						isMenuOpen={true}
+					/>,
+					store,
+				)
+				cy.setViewportToTablet()
+				cy.get(topNavigationSelectors.navMenuContainer)
+					.should('exist')
+					.and('be.visible')
+				cy.get(topNavigationSelectors.navHamburgerMenu).should(
+					'not.be.visible',
+				)
+				assertMenuItems(mockUseMainNavState().travellerName)
+			})
 		})
 
-		it('renders menu items but not the hamburger menu on desktop when logged in', () => {
-			mountWithProviders(
-				<TestMainNav
-					isLoggedIn={true}
-					isMenuOpen={true}
-				/>,
-				store,
-			)
-			cy.setViewportToTablet()
-			cy.get(topNavigationSelectors.navMenuContainer)
-				.should('exist')
-				.and('be.visible')
-			cy.get(topNavigationSelectors.navHamburgerMenu).should(
-				'not.be.visible',
-			)
-			assertMenuItems(mockUseMainNavState().travellerName)
+		describe('Desktop', () => {
+			it('renders menu items when logged in', () => {
+				mountWithProviders(
+					<TestMainNav
+						isLoggedIn={true}
+						isMenuOpen={true}
+					/>,
+					store,
+				)
+				cy.setViewportToTablet()
+				cy.get(topNavigationSelectors.navMenuContainer)
+					.should('exist')
+					.and('be.visible')
+				cy.get(topNavigationSelectors.navHamburgerMenu).should(
+					'not.be.visible',
+				)
+				assertMenuItems(mockUseMainNavState().travellerName)
+			})
 		})
 	})
 
@@ -169,6 +175,70 @@ describe('<MainNav />', () => {
 				assertMenuItemRedirectWithDefaults(
 					urls.cyAuth,
 					viewports.mobile,
+					topNavigationSelectors.navMenuItemLogout,
+					pageSelectors.authenticationPage,
+					AuthenticationPage,
+				)
+			})
+		})
+
+		describe('Tablet', () => {
+			it('redirects to Messages page when Messages is clicked', () => {
+				assertMenuItemRedirectWithDefaults(
+					urls.cyMessages,
+					viewports.tablet,
+					topNavigationSelectors.navMenuItemMessages,
+					pageSelectors.messagesPage,
+					MessagesPage,
+				)
+			})
+
+			it('redirects to Trips page when Travellers is clicked', () => {
+				assertMenuItemRedirectWithDefaults(
+					urls.cyTrips,
+					viewports.tablet,
+					topNavigationSelectors.navMenuItemTravellers,
+					pageSelectors.tripsPage,
+					TripsPage,
+				)
+			})
+
+			it('redirects to Authentication page when Logout is clicked', () => {
+				assertMenuItemRedirectWithDefaults(
+					urls.cyAuth,
+					viewports.tablet,
+					topNavigationSelectors.navMenuItemLogout,
+					pageSelectors.authenticationPage,
+					AuthenticationPage,
+				)
+			})
+		})
+
+		describe('Desktop', () => {
+			it('redirects to Messages page when Messages is clicked', () => {
+				assertMenuItemRedirectWithDefaults(
+					urls.cyMessages,
+					viewports.desktop,
+					topNavigationSelectors.navMenuItemMessages,
+					pageSelectors.messagesPage,
+					MessagesPage,
+				)
+			})
+
+			it('redirects to Trips page when Travellers is clicked', () => {
+				assertMenuItemRedirectWithDefaults(
+					urls.cyTrips,
+					viewports.desktop,
+					topNavigationSelectors.navMenuItemTravellers,
+					pageSelectors.tripsPage,
+					TripsPage,
+				)
+			})
+
+			it('redirects to Authentication page when Logout is clicked', () => {
+				assertMenuItemRedirectWithDefaults(
+					urls.cyAuth,
+					viewports.desktop,
 					topNavigationSelectors.navMenuItemLogout,
 					pageSelectors.authenticationPage,
 					AuthenticationPage,
