@@ -117,11 +117,12 @@ function MainNav({
 								<ul>
 									{/* {isTraveller && ( */}
 									<NavMenuMessagesLink
+										isLink
 										className={
 											navMenuButtonLinkStyles.navMenuButtonLink
 										}
 										to={PATHS.MESSAGES}
-										data-cy="nav-menu-item-messages"
+										dataCypress="nav-menu-item-messages"
 										totalMessages={totalMessages}
 									/>
 									{/* )} */}
@@ -130,7 +131,7 @@ function MainNav({
 										data-cy="nav-menu-item-travellers">
 										<NavMenuButtonLink
 											isLink
-											to="/"
+											to={PATHS.TRIPS}
 											className={
 												navMenuButtonLinkStyles.navMenuButtonLink
 											}>
@@ -145,6 +146,8 @@ function MainNav({
 									'nav-menu-item-logout',
 								)}>
 								<NavMenuButtonLink
+									isLink
+									to={PATHS.AUTHENTICATION}
 									className={
 										navMenuButtonLinkStyles.navMenuButtonLink
 									}
