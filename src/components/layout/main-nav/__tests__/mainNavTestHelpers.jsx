@@ -1,6 +1,3 @@
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
-
 import {
 	urls,
 	viewports,
@@ -34,13 +31,6 @@ export const assertMenuItems = (travellerName = 'Test User') => {
 		.and('have.text', `Logout ${travellerName}`)
 }
 
-export const mountWithProviders = (ui, store) =>
-	cy.mount(
-		<Provider store={store}>
-			<MemoryRouter initialEntries={['/']}>{ui}</MemoryRouter>
-		</Provider>,
-	)
-
 export const assertMenuItemRedirect = (
 	store,
 	routePath,
@@ -55,7 +45,7 @@ export const assertMenuItemRedirect = (
 	Routes,
 	Route,
 ) => {
-	mountWithProviders(
+	cy.mountWithProviders(
 		// LocationDisplay MUST be outside of <Routes> to be always rendered
 		<>
 			<TestLocationDisplay />
