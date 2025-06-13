@@ -247,7 +247,86 @@ describe('<MainNav />', () => {
 		})
 	})
 
-	describe('Accessibility tests', () => {})
+	describe('Accessibility tests', () => {
+		it('nav has appropriate aria-label', () => {
+			mountWithProviders(
+				<TestMainNav
+					isLoggedIn={true}
+					isMenuOpen={true}
+				/>,
+				store,
+			)
+			cy.get(topNavigationSelectors.navMenuContainer).should(
+				'have.attr',
+				'aria-label',
+				'Top navigation',
+			)
+		})
+
+		it('hamburger menu button has correct aria attributes', () => {
+			mountWithProviders(
+				<TestMainNav
+					isLoggedIn={true}
+					isMenuOpen={true}
+				/>,
+				store,
+			)
+			cy.get(topNavigationSelectors.navHamburgerMenu)
+				.should(
+					'have.attr',
+					'aria-controls',
+					'hamburger-menu-items-container',
+				)
+				.and('have.attr', 'aria-expanded', 'true')
+				.and('have.attr', 'aria-label', 'Close navigation menu')
+		})
+
+		it('menu items container has id and data-cy', () => {
+			mountWithProviders(
+				<TestMainNav
+					isLoggedIn={true}
+					isMenuOpen={true}
+				/>,
+				store,
+			)
+			cy.get(topNavigationSelectors.navMenuItemsContainer).should(
+				'have.attr',
+				'id',
+				'nav-menu-items-container',
+			)
+		})
+
+		it('logout button is accessible by role and label', () => {
+			mountWithProviders(
+				<TestMainNav
+					isLoggedIn={true}
+					isMenuOpen={true}
+				/>,
+				store,
+			)
+			cy.get(topNavigationSelectors.navMenuItemLogout)
+				.should('exist')
+				.and('contain.text', 'Logout')
+		})
+
+		it('all interactive elements are focusable', () => {
+			mountWithProviders(
+				<TestMainNav
+					isLoggedIn={true}
+					isMenuOpen={true}
+				/>,
+				store,
+			)
+			cy.get(topNavigationSelectors.navHamburgerMenu)
+				.focus()
+				.should('have.focus')
+			cy.get(`${topNavigationSelectors.navMenuItemsContainer} a`).each(
+				($el) => {
+					cy.wrap($el).focus().should('have.focus')
+				},
+			)
+		})
+	})
 })
 
 TestMainNav.propTypes = {
