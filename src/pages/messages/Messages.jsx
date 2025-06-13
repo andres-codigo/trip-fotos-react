@@ -1,6 +1,6 @@
 const Messages = () => {
 	return (
-		<main className="mainContainer">
+		<main className="mainContainer messagesPage">
 			<h1>Messages page</h1>
 		</main>
 	)
