@@ -85,7 +85,8 @@ function MainNav({
 					<nav
 						className={mainNavStyles.navbar}
 						data-cy="nav-menu-container"
-						aria-label="Top navigation">
+						aria-label="Top navigation"
+						role="navigation">
 						<BaseButton
 							ref={hamburgerRef}
 							className={classNames(mainNavStyles.hamburger, {
@@ -112,7 +113,8 @@ function MainNav({
 									[mainNavStyles.active]: isMenuOpen,
 								},
 							)}
-							data-cy="nav-menu-items-container">
+							data-cy="nav-menu-items-container"
+							aria-label="Main navigation menu">
 							<li className={mainNavStyles.navMenuItem}>
 								<ul>
 									{/* {isTraveller && ( */}
