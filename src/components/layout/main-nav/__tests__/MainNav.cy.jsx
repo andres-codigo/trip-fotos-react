@@ -248,7 +248,7 @@ describe('<MainNav />', () => {
 	})
 
 	describe('Accessibility tests', () => {
-		it('nav has appropriate aria-label', () => {
+		it('nav has appropriate aria-label and role', () => {
 			mountWithProviders(
 				<TestMainNav
 					isLoggedIn={true}
@@ -256,11 +256,9 @@ describe('<MainNav />', () => {
 				/>,
 				store,
 			)
-			cy.get(topNavigationSelectors.navMenuContainer).should(
-				'have.attr',
-				'aria-label',
-				'Top navigation',
-			)
+			cy.get(topNavigationSelectors.navMenuContainer)
+				.should('have.attr', 'aria-label', 'Top navigation')
+				.and('have.attr', 'role', 'navigation')
 		})
 
 		it('hamburger menu button has correct aria attributes', () => {
@@ -281,7 +279,7 @@ describe('<MainNav />', () => {
 				.and('have.attr', 'aria-label', 'Close navigation menu')
 		})
 
-		it('menu items container has id and data-cy', () => {
+		it('menu items container has id and data-cy, and aria-label', () => {
 			mountWithProviders(
 				<TestMainNav
 					isLoggedIn={true}
@@ -289,11 +287,9 @@ describe('<MainNav />', () => {
 				/>,
 				store,
 			)
-			cy.get(topNavigationSelectors.navMenuItemsContainer).should(
-				'have.attr',
-				'id',
-				'nav-menu-items-container',
-			)
+			cy.get(topNavigationSelectors.navMenuItemsContainer)
+				.should('have.attr', 'id', 'nav-menu-items-container')
+				.and('have.attr', 'aria-label', 'Main navigation menu')
 		})
 
 		it('logout button is accessible by role and label', () => {
