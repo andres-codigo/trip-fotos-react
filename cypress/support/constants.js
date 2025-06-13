@@ -128,3 +128,10 @@ export const authenticationFormSelectors = {
 export const pageNotFoundSelectors = {
 	homeLink: getByDataCy('home-link'),
 }
+
+export const pageSelectors = {
+	tripsPage: getByDataCy('trips-page'),
+	messagesPage: getByDataCy('messages-page'),
+	authenticationPage: getByDataCy('authentication-page'),
+	pageNotFoundPage: getByDataCy('page-not-found-page'),
+}

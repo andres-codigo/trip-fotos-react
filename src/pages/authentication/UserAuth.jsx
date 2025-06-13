@@ -123,7 +123,9 @@ const UserAuth = () => {
 	const handleError = () => setError(null)
 
 	return (
-		<main className="mainContainer authenticationPage">
+		<main
+			className="mainContainer authenticationPage"
+			data-cy="authentication-page">
 			{error && (
 				<BaseDialog
 					show={true}
