@@ -13,7 +13,7 @@ import configureStore from 'redux-mock-store'
 
 const mockStore = configureStore([])
 
-function assertHeaderTitleLink(expectedHref) {
+const assertHeaderTitleLink = (expectedHref) => {
 	cy.get(headerSelectors.siteHeaderTitleLink)
 		.should('exist')
 		.find('a')
@@ -21,7 +21,7 @@ function assertHeaderTitleLink(expectedHref) {
 		.and('contain.text', 'Trip Fotos')
 }
 
-function assertNavMenu({ shouldExist, shouldBeVisible }) {
+const assertNavMenu = ({ shouldExist, shouldBeVisible }) => {
 	const navMenu = cy.get(topNavigationSelectors.navMenuContainer)
 	if (shouldExist) {
 		navMenu.should('exist')
@@ -38,7 +38,7 @@ function assertNavMenu({ shouldExist, shouldBeVisible }) {
 	}
 }
 
-function assertHamburgerMenu(shouldExist) {
+const assertHamburgerMenu = (shouldExist) => {
 	const hamburgerMenu = cy.get(topNavigationSelectors.navHamburgerMenu)
 	if (shouldExist) {
 		hamburgerMenu.should('exist')
@@ -47,12 +47,12 @@ function assertHamburgerMenu(shouldExist) {
 	}
 }
 
-function headerAssertions(
+const headerAssertions = (
 	expectedHref,
 	navMenuExists,
 	navMenuVisible,
 	hamburgerMenuExists,
-) {
+) => {
 	assertHeaderTitleLink(expectedHref)
 	assertNavMenu({
 		shouldExist: navMenuExists,
@@ -62,49 +62,55 @@ function headerAssertions(
 }
 
 describe('<Header />', () => {
-	it('renders correctly for not logged in users on mobile, tablet, and desktop', () => {
-		const store = mockStore({
-			authentication: { token: null },
+	describe('Rendering tests', () => {
+		it('renders correctly for not logged in users on mobile, tablet, and desktop', () => {
+			const store = mockStore({
+				authentication: { token: null },
+			})
+
+			cy.mount(
+				<Provider store={store}>
+					<MemoryRouter>
+						<Header />
+					</MemoryRouter>
+				</Provider>,
+			)
+
+			cy.setViewportToMobile()
+			headerAssertions(urls.cyAuth, false, false, false)
+
+			cy.setViewportToTablet()
+			headerAssertions(urls.cyAuth, false, false, false)
+
+			cy.setViewportToDesktop()
+			headerAssertions(urls.cyAuth, false, false, false)
 		})
 
-		cy.mount(
-			<Provider store={store}>
-				<MemoryRouter>
-					<Header />
-				</MemoryRouter>
-			</Provider>,
-		)
+		it('renders correctly for logged in users on mobile, tablet, and desktop', () => {
+			const store = mockStore({
+				authentication: { token: 'fake-token' },
+			})
 
-		cy.setViewportToMobile()
-		headerAssertions(urls.cyAuth, false, false, false)
+			cy.mount(
+				<Provider store={store}>
+					<MemoryRouter>
+						<Header />
+					</MemoryRouter>
+				</Provider>,
+			)
 
-		cy.setViewportToTablet()
-		headerAssertions(urls.cyAuth, false, false, false)
+			cy.setViewportToMobile()
+			headerAssertions(urls.cyTrips, true, false, true)
 
-		cy.setViewportToDesktop()
-		headerAssertions(urls.cyAuth, false, false, false)
-	})
+			cy.setViewportToTablet()
+			headerAssertions(urls.cyTrips, true, true, true)
 
-	it('renders correctly for logged in users on mobile, tablet, and desktop', () => {
-		const store = mockStore({
-			authentication: { token: 'fake-token' },
+			cy.setViewportToDesktop()
+			headerAssertions(urls.cyTrips, true, true, true)
 		})
-
-		cy.mount(
-			<Provider store={store}>
-				<MemoryRouter>
-					<Header />
-				</MemoryRouter>
-			</Provider>,
-		)
-
-		cy.setViewportToMobile()
-		headerAssertions(urls.cyTrips, true, false, true)
-
-		cy.setViewportToTablet()
-		headerAssertions(urls.cyTrips, true, true, true)
-
-		cy.setViewportToDesktop()
-		headerAssertions(urls.cyTrips, true, true, true)
 	})
+
+	describe('Behaviour tests', () => {})
+
+	describe('Accessibility tests', () => {})
 })
