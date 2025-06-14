@@ -12,7 +12,7 @@ describe('<BaseDialog />', () => {
 					show
 					title="Dialog Title"
 					onClose={cy.stub()}
-					dataCypress={DIALOG.ID}>
+					data-cy={DIALOG.ID}>
 					Dialog content
 				</BaseDialog>,
 			)
@@ -33,7 +33,7 @@ describe('<BaseDialog />', () => {
 					show
 					title="Dialog"
 					onClose={onClose}
-					dataCypress={DIALOG.ID}>
+					data-cy={DIALOG.ID}>
 					Content
 				</BaseDialog>,
 			)
@@ -48,7 +48,7 @@ describe('<BaseDialog />', () => {
 					show
 					title="Dialog"
 					onClose={onClose}
-					dataCypress={DIALOG.ID}>
+					data-cy={DIALOG.ID}>
 					Content
 				</BaseDialog>,
 			)
@@ -64,7 +64,7 @@ describe('<BaseDialog />', () => {
 					show
 					title="Dialog"
 					onClose={cy.stub()}
-					dataCypress={DIALOG.ID}>
+					data-cy={DIALOG.ID}>
 					Content
 				</BaseDialog>,
 			)
@@ -80,7 +80,7 @@ describe('<BaseDialog />', () => {
 					isError
 					title="Error"
 					onClose={cy.stub()}
-					dataCypress={DIALOG.ID}>
+					data-cy={DIALOG.ID}>
 					Error content
 				</BaseDialog>,
 			)
@@ -97,7 +97,7 @@ describe('<BaseDialog />', () => {
 					show
 					title="Dialog"
 					onClose={cy.stub()}
-					dataCypress={DIALOG.ID}>
+					data-cy={DIALOG.ID}>
 					Some content
 				</BaseDialog>,
 			)

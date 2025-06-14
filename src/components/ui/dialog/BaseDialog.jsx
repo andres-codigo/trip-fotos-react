@@ -19,7 +19,7 @@ const BaseDialog = ({
 	onClose,
 	actions,
 	sectionClasses = false,
-	dataCypress,
+	'data-cy': dataCy,
 }) => {
 	const titleId = useId()
 	const descId = useId()
@@ -80,7 +80,7 @@ const BaseDialog = ({
 					ref={nodeRef}
 					open
 					className={baseDialogStyles.dialog}
-					data-cy={dataCypress}
+					data-cy={dataCy}
 					aria-modal="true"
 					role={
 						isError ? DIALOG.ROLE_ALERTDIALOG : DIALOG.ROLE_DIALOG
@@ -137,7 +137,7 @@ BaseDialog.propTypes = {
 	onClose: PropTypes.func.isRequired,
 	actions: PropTypes.node,
 	sectionClasses: PropTypes.bool,
-	dataCypress: PropTypes.string,
+	'data-cy': PropTypes.string,
 }
 
 export default BaseDialog

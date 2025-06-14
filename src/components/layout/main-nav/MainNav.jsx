@@ -124,7 +124,7 @@ function MainNav({
 											navMenuButtonLinkStyles.navMenuButtonLink
 										}
 										to={PATHS.MESSAGES}
-										dataCypress="nav-menu-item-messages"
+										data-cy="nav-menu-item-messages"
 										totalMessages={totalMessages}
 									/>
 									{/* )} */}

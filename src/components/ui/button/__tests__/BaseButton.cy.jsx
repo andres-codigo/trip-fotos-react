@@ -12,7 +12,7 @@ describe('<BaseButton />', () => {
 			cy.mount(
 				<BaseButton
 					modeType={BUTTON.MODE.FLAT}
-					dataCypress={BUTTON.ID}>
+					data-cy={BUTTON.ID}>
 					Click me
 				</BaseButton>,
 			)
@@ -26,7 +26,7 @@ describe('<BaseButton />', () => {
 				<BaseButton
 					isDisabled
 					modeType={BUTTON.MODE.FLAT}
-					dataCypress={BUTTON.ID}>
+					data-cy={BUTTON.ID}>
 					Disabled
 				</BaseButton>,
 			)
@@ -40,7 +40,7 @@ describe('<BaseButton />', () => {
 						isLink
 						to="/test"
 						modeType={BUTTON.MODE.FLAT}
-						dataCypress={BUTTON.LINK_ID}>
+						data-cy={BUTTON.LINK_ID}>
 						Go to Test
 					</BaseButton>
 				</MemoryRouter>,
@@ -57,7 +57,7 @@ describe('<BaseButton />', () => {
 				<BaseButton
 					className="custom-class"
 					modeType={BUTTON.MODE.FLAT}
-					dataCypress={BUTTON.ID}>
+					data-cy={BUTTON.ID}>
 					Styled
 				</BaseButton>,
 			)
@@ -71,7 +71,7 @@ describe('<BaseButton />', () => {
 				<BaseButton
 					isError
 					modeType={BUTTON.MODE.FLAT}
-					dataCypress={BUTTON.ID}>
+					data-cy={BUTTON.ID}>
 					Error
 				</BaseButton>,
 			)
@@ -84,7 +84,7 @@ describe('<BaseButton />', () => {
 			cy.mount(
 				<BaseButton
 					modeType={BUTTON.MODE.FLAT}
-					dataCypress={BUTTON.ID}
+					data-cy={BUTTON.ID}
 					aria-label="Custom label">
 					<span
 						role="img"
@@ -104,7 +104,7 @@ describe('<BaseButton />', () => {
 			cy.mount(
 				<BaseButton
 					modeType={BUTTON.MODE.FLAT}
-					dataCypress={BUTTON.ID}>
+					data-cy={BUTTON.ID}>
 					Click me
 				</BaseButton>,
 			)
@@ -119,7 +119,7 @@ describe('<BaseButton />', () => {
 						to="/test"
 						isDisabled
 						modeType={BUTTON.MODE.FLAT}
-						dataCypress={BUTTON.LINK_ID}>
+						data-cy={BUTTON.LINK_ID}>
 						Go to Test
 					</BaseButton>
 				</MemoryRouter>,

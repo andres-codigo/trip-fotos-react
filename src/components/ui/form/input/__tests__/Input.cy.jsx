@@ -14,7 +14,7 @@ describe('<Input />', () => {
 					value="Hello"
 					onChange={() => {}}
 					isValid={true}
-					dataCypress={INPUT.ID}
+					data-cy={INPUT.ID}
 				/>,
 			)
 			cy.get('label').should('contain', 'Test Label')
@@ -28,7 +28,7 @@ describe('<Input />', () => {
 					value="No label"
 					onChange={() => {}}
 					isValid={true}
-					dataCypress={INPUT.ID}
+					data-cy={INPUT.ID}
 				/>,
 			)
 			cy.get('label').should('not.exist')
@@ -44,7 +44,7 @@ describe('<Input />', () => {
 					onChange={() => {}}
 					isValid={true}
 					className="my-custom-class"
-					dataCypress={INPUT.ID}
+					data-cy={INPUT.ID}
 				/>,
 			)
 			cy.get(getByDataCy(INPUT.ID)).should(
@@ -61,7 +61,7 @@ describe('<Input />', () => {
 					value=""
 					onChange={() => {}}
 					isValid={true}
-					dataCypress={INPUT.ID}
+					data-cy={INPUT.ID}
 					required={true}
 				/>,
 			)
@@ -79,7 +79,7 @@ describe('<Input />', () => {
 					onChange={() => {}}
 					isValid={false}
 					message="Error!"
-					dataCypress={INPUT.ID}
+					data-cy={INPUT.ID}
 					dataCypressError={INPUT.ERROR_ID}
 				/>,
 			)
@@ -99,7 +99,7 @@ describe('<Input />', () => {
 					value="Can't edit"
 					onChange={() => {}}
 					isValid={true}
-					dataCypress={INPUT.ID}
+					data-cy={INPUT.ID}
 					disabled={true}
 				/>,
 			)
@@ -117,7 +117,7 @@ describe('<Input />', () => {
 						onChange={() => {}}
 						isValid={true}
 						type={type}
-						dataCypress={INPUT.ID}
+						data-cy={INPUT.ID}
 					/>,
 				)
 				cy.get(getByDataCy(INPUT.ID)).should('have.attr', 'type', type)
@@ -135,7 +135,7 @@ describe('<Input />', () => {
 					value=""
 					onChange={handleChange}
 					isValid={true}
-					dataCypress={INPUT.ID}
+					data-cy={INPUT.ID}
 				/>,
 			)
 			cy.get(getByDataCy(INPUT.ID)).type('abc')
@@ -151,8 +151,8 @@ describe('<Input />', () => {
 					onChange={() => {}}
 					isValid={false}
 					message="Error!"
-					dataCypress={INPUT.ID}
-					dataCypressError={INPUT.ERROR_ID}
+					data-cy={INPUT.ID}
+					data-cy-error={INPUT.ERROR_ID}
 				/>,
 			)
 			cy.get(getByDataCy(INPUT.ERROR_ID)).should('contain', 'Error!')
@@ -168,7 +168,7 @@ describe('<Input />', () => {
 					value="Hello"
 					onChange={() => {}}
 					isValid={true}
-					dataCypress={INPUT.ID}
+					data-cy={INPUT.ID}
 				/>,
 			)
 			cy.get('label').should('have.attr', 'for', INPUT.ID)
@@ -184,7 +184,7 @@ describe('<Input />', () => {
 					onChange={() => {}}
 					isValid={false}
 					message="Error!"
-					dataCypress={INPUT.ID}
+					data-cy={INPUT.ID}
 					dataCypressError={INPUT.ERROR_ID}
 				/>,
 			)

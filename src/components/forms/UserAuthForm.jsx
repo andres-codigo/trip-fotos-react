@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 
 import { API_DATABASE } from '@/constants/api'
+import { ACCESSIBILITY } from '@/constants/accessibility'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
@@ -15,7 +16,7 @@ const UserAuthForm = ({
 	onPasswordChange,
 	onSubmit,
 	onSwitchMode,
-	isLoading,
+	isLoading = false,
 }) => {
 	const getInputProps = (field) => ({
 		id: field === 'email' ? 'email' : 'password',
@@ -29,8 +30,8 @@ const UserAuthForm = ({
 		disabled: isLoading,
 		required: true,
 		showRequiredMark: true,
-		dataCypress: field === 'email' ? 'email-input' : 'password-input',
-		dataCypressError:
+		'data-cy': field === 'email' ? 'email-input' : 'password-input',
+		'data-cy-error':
 			field === 'email'
 				? 'email-error-message'
 				: 'password-error-message',
@@ -48,8 +49,8 @@ const UserAuthForm = ({
 			noValidate>
 			<div
 				aria-live="polite"
-				style={{ position: 'absolute', left: '-9999px' }}>
-				{isLoading ? 'Submitting, please wait...' : ''}
+				style={ACCESSIBILITY.ARIA_LIVE.POLITE.STYLE}>
+				{isLoading ? ACCESSIBILITY.ARIA_LIVE.POLITE.MESSAGE : ''}
 			</div>
 			<div
 				className={`${userAuthStyles.formControl} ${
@@ -67,7 +68,7 @@ const UserAuthForm = ({
 				id="login-button"
 				type="submit"
 				mode="flat"
-				dataCypress="login-submit-button"
+				data-cy="login-submit-button"
 				isDisabled={isLoading}>
 				{mode === API_DATABASE.API_AUTH_LOGIN_MODE
 					? 'Log in'
@@ -77,7 +78,7 @@ const UserAuthForm = ({
 				id="login-signup-toggle-link"
 				isLink
 				onClick={handleSignUpClick}
-				dataCypress="login-signup-toggle-link"
+				data-cy="login-signup-toggle-link"
 				isDisabled={isLoading}>
 				{mode === API_DATABASE.API_AUTH_LOGIN_MODE
 					? 'Switch to Signup'
@@ -107,10 +108,6 @@ UserAuthForm.propTypes = {
 	onSubmit: PropTypes.func.isRequired,
 	onSwitchMode: PropTypes.func.isRequired,
 	isLoading: PropTypes.bool,
-}
-
-UserAuthForm.defaultProps = {
-	isLoading: false,
 }
 
 export default UserAuthForm

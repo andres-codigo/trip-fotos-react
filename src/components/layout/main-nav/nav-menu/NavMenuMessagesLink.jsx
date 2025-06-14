@@ -10,7 +10,7 @@ const NavMenuMessagesLink = ({
 	to,
 	totalMessages,
 	className,
-	dataCypress,
+	'data-cy': dataCy,
 }) => {
 	const combinedClassName = classNames(className, navMenuButtonLinkStyles)
 
@@ -20,7 +20,7 @@ const NavMenuMessagesLink = ({
 				isLink={isLink}
 				to={to}
 				className={combinedClassName}
-				dataCypress={dataCypress}>
+				data-cy={dataCy}>
 				Messages
 				{!!totalMessages && totalMessages > 0 && (
 					<span
@@ -44,7 +44,7 @@ NavMenuMessagesLink.propTypes = {
 	onClick: PropTypes.func.isRequired,
 	totalMessages: PropTypes.number,
 	className: PropTypes.string,
-	dataCypress: PropTypes.string,
+	'data-cy': PropTypes.string,
 }
 
 export default NavMenuMessagesLink

@@ -132,7 +132,7 @@ const UserAuth = () => {
 					isError={true}
 					title={GLOBAL.ERROR_DIALOG_TITLE}
 					onClose={handleError}
-					dataCypress="invalid-email-or-password-dialog">
+					data-cy="invalid-email-or-password-dialog">
 					{error}
 				</BaseDialog>
 			)}
@@ -141,7 +141,7 @@ const UserAuth = () => {
 					show={true}
 					title="Authenticating"
 					fixed
-					dataCypress="loading-dialog">
+					data-cy="loading-dialog">
 					Authenticating your details, one moment please...
 					<BaseSpinner />
 				</BaseDialog>
