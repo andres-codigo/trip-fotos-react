@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import PropTypes from 'prop-types'
 
 import { API_DATABASE } from '@/constants/api'
@@ -18,17 +17,28 @@ const UserAuthForm = ({
 	onSwitchMode,
 	isLoading,
 }) => {
-	const [requireInputs, setRequireInputs] = useState(true)
-
-	const handleLoginClick = () => {
-		setRequireInputs(true)
-	}
+	const getInputProps = (field) => ({
+		id: field === 'email' ? 'email' : 'password',
+		label: field === 'email' ? 'E-Mail' : 'Password',
+		type: field === 'email' ? 'email' : 'password',
+		value: field === 'email' ? email.value : password.value,
+		onChange: field === 'email' ? onEmailChange : onPasswordChange,
+		onBlur: field === 'email' ? onEmailChange : onPasswordChange,
+		isValid: field === 'email' ? email.isValid : password.isValid,
+		message: field === 'email' ? email.message : password.message,
+		disabled: isLoading,
+		required: true,
+		showRequiredMark: true,
+		dataCypress: field === 'email' ? 'email-input' : 'password-input',
+		dataCypressError:
+			field === 'email'
+				? 'email-error-message'
+				: 'password-error-message',
+	})
 
 	const handleSignUpClick = (e) => {
-		setRequireInputs(false)
-		onSwitchMode(e)
-
 		e.preventDefault()
+		onSwitchMode(e)
 	}
 
 	return (
@@ -37,52 +47,28 @@ const UserAuthForm = ({
 			onSubmit={onSubmit}
 			noValidate>
 			<div
+				aria-live="polite"
+				style={{ position: 'absolute', left: '-9999px' }}>
+				{isLoading ? 'Submitting, please wait...' : ''}
+			</div>
+			<div
 				className={`${userAuthStyles.formControl} ${
 					!email.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
-				<Input
-					id="email"
-					label="E-Mail"
-					type="email"
-					value={email.value}
-					onChange={onEmailChange}
-					onBlur={onEmailChange}
-					isValid={email.isValid}
-					message={email.message}
-					disabled={isLoading}
-					required={requireInputs}
-					showRequiredMark={true}
-					dataCypress="email-input"
-					dataCypressError="email-error-message"
-				/>
+				<Input {...getInputProps('email')} />
 			</div>
 			<div
 				className={`${userAuthStyles.formControl} ${
 					!password.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
-				<Input
-					id="password"
-					label="Password"
-					type="password"
-					value={password.value}
-					onChange={onPasswordChange}
-					onBlur={onPasswordChange}
-					isValid={password.isValid}
-					message={password.message}
-					disabled={isLoading}
-					required={requireInputs}
-					showRequiredMark={true}
-					dataCypress="password-input"
-					dataCypressError="password-error-message"
-				/>
+				<Input {...getInputProps('password')} />
 			</div>
 			<BaseButton
 				id="login-button"
 				type="submit"
 				mode="flat"
 				dataCypress="login-submit-button"
-				isDisabled={isLoading}
-				onClick={handleLoginClick}>
+				isDisabled={isLoading}>
 				{mode === API_DATABASE.API_AUTH_LOGIN_MODE
 					? 'Log in'
 					: 'Sign up'}
@@ -121,6 +107,10 @@ UserAuthForm.propTypes = {
 	onSubmit: PropTypes.func.isRequired,
 	onSwitchMode: PropTypes.func.isRequired,
 	isLoading: PropTypes.bool,
+}
+
+UserAuthForm.defaultProps = {
+	isLoading: false,
 }
 
 export default UserAuthForm
