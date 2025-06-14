@@ -46,7 +46,7 @@ const Input = ({
 			<p
 				id={`${id}-error`}
 				role="alert"
-				data-cy={dataCyError}>
+				data-cy-error={dataCyError}>
 				{message}
 			</p>
 		)}
