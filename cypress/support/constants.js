@@ -1,6 +1,9 @@
 import { FIREBASE_ERROR_TYPES } from '../../src/constants/firebase-error-types'
 
-import { getByDataCy } from '../../src/testUtils/cypress/selectors'
+import {
+	getByDataCy,
+	getByDataCyError,
+} from '../../src/testUtils/cypress/selectors'
 
 export const apiDatabase = {
 	// API
@@ -112,11 +115,11 @@ export const authenticationFormSelectors = {
 	// Email fields
 	emailLabel: 'E-Mail',
 	emailInput: getByDataCy('email-input'),
-	emailErrorMessage: getByDataCy('email-error-message'),
+	emailErrorMessage: getByDataCyError('email-error-message'),
 	// Password fields
 	passwordLabel: 'Password',
 	passwordInput: getByDataCy('password-input'),
-	passwordErrorMessage: getByDataCy('password-error-message'),
+	passwordErrorMessage: getByDataCyError('password-error-message'),
 	// Submit buttons
 	submitButtonTextLogin: 'Log in',
 	signupTextSubmitButton: 'Sign up',
