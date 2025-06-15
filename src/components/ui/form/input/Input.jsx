@@ -38,6 +38,7 @@ const Input = ({
 			disabled={disabled}
 			required={required}
 			className={className}
+			aria-required={required}
 			aria-invalid={!isValid}
 			aria-describedby={!isValid && message ? `${id}-error` : undefined}
 			{...rest}
