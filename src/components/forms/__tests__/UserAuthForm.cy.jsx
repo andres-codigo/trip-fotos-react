@@ -1,5 +1,7 @@
 import { BrowserRouter } from 'react-router-dom'
 
+import { authenticationFormSelectors } from '../../../../cypress/support/constants'
+
 import UserAuthForm from '../UserAuthForm'
 
 describe('<UserAuthForm />', () => {
@@ -49,23 +51,25 @@ describe('<UserAuthForm />', () => {
 	describe('Rendering tests', () => {
 		it('renders the form with correct data-cy attribute', () => {
 			render()
-			cy.get('[data-cy="user-authentication-form"]').should('exist')
+			cy.get(authenticationFormSelectors.authenticationForm).should(
+				'exist',
+			)
 		})
 		it('renders email and password inputs', () => {
 			render()
-			cy.get('[data-cy="email-input"]').should('exist')
-			cy.get('[data-cy="password-input"]').should('exist')
+			cy.get(authenticationFormSelectors.emailInput).should('exist')
+			cy.get(authenticationFormSelectors.passwordInput).should('exist')
 		})
 		it('renders the submit button with correct text', () => {
 			render()
-			cy.get('[data-cy="login-submit-button"]').should(
+			cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
 				'contain',
 				'Log in',
 			)
 		})
 		it('renders the toggle link with correct text', () => {
 			render()
-			cy.get('[data-cy="login-signup-toggle-link"]').should(
+			cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
 				'contain',
 				'Switch to Signup',
 			)
@@ -82,13 +86,17 @@ describe('<UserAuthForm />', () => {
 	describe('Behaviour tests', () => {
 		it('calls onEmailChange at least once when email input changes', () => {
 			render()
-			cy.get('[data-cy="email-input"]').type('test@example.com')
+			cy.get(authenticationFormSelectors.emailInput).type(
+				'test@example.com',
+			)
 			cy.get('@onEmailChange').should('have.been.called')
 		})
 
 		it('calls onPasswordChange at least once when password input changes', () => {
 			render()
-			cy.get('[data-cy="password-input"]').type('password123')
+			cy.get(authenticationFormSelectors.passwordInput).type(
+				'password123',
+			)
 			cy.get('@onPasswordChange').should('have.been.called')
 		})
 
@@ -100,10 +108,14 @@ describe('<UserAuthForm />', () => {
 
 		it('shows loading message and disables inputs/buttons when isLoading is true', () => {
 			render({ isLoading: true })
-			cy.get('[data-cy="email-input"]').should('be.disabled')
-			cy.get('[data-cy="password-input"]').should('be.disabled')
-			cy.get('[data-cy="login-submit-button"]').should('be.disabled')
-			cy.get('[data-cy="login-signup-toggle-link"]').should(
+			cy.get(authenticationFormSelectors.emailInput).should('be.disabled')
+			cy.get(authenticationFormSelectors.passwordInput).should(
+				'be.disabled',
+			)
+			cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
+				'be.disabled',
+			)
+			cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
 				'have.attr',
 				'aria-disabled',
 				'true',
@@ -119,11 +131,11 @@ describe('<UserAuthForm />', () => {
 					message: 'Invalid password',
 				},
 			})
-			cy.get('[data-cy-error="email-error-message"]').should(
+			cy.get(authenticationFormSelectors.emailErrorMessage).should(
 				'contain',
 				'Invalid email',
 			)
-			cy.get('[data-cy-error="password-error-message"]').should(
+			cy.get(authenticationFormSelectors.passwordErrorMessage).should(
 				'contain',
 				'Invalid password',
 			)
@@ -131,21 +143,21 @@ describe('<UserAuthForm />', () => {
 
 		it('toggles button text based on mode', () => {
 			render({ mode: 'login' })
-			cy.get('[data-cy="login-submit-button"]').should(
+			cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
 				'contain',
 				'Log in',
 			)
-			cy.get('[data-cy="login-signup-toggle-link"]').should(
+			cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
 				'contain',
 				'Switch to Signup',
 			)
 
 			render({ mode: 'signup' })
-			cy.get('[data-cy="login-submit-button"]').should(
+			cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
 				'contain',
 				'Sign up',
 			)
-			cy.get('[data-cy="login-signup-toggle-link"]').should(
+			cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
 				'contain',
 				'Switch to Login',
 			)
@@ -153,7 +165,7 @@ describe('<UserAuthForm />', () => {
 
 		it('calls onSwitchMode when toggle link is clicked', () => {
 			render()
-			cy.get('[data-cy="login-signup-toggle-link"]').click()
+			cy.get(authenticationFormSelectors.loginSignupToggleLink).click()
 			cy.get('@onSwitchMode').should('have.been.called')
 		})
 	})
