@@ -5,6 +5,16 @@ import { authenticationFormSelectors } from '../../../../cypress/support/constan
 import UserAuthForm from '../UserAuthForm'
 
 describe('<UserAuthForm />', () => {
+	const EMAIL_ID = 'email'
+	const EMAIL_SELECTOR = `#${EMAIL_ID}`
+	const EMAIL_LABEL_SELECTOR = `label[for="${EMAIL_ID}"]`
+	const INVALID_EMAIL_MESSAGE = 'Invalid email'
+
+	const PASSWORD_ID = 'password'
+	const PASSWORD_SELECTOR = `#${PASSWORD_ID}`
+	const PASSWORD_LABEL_SELECTOR = `label[for="${PASSWORD_ID}"]`
+	const INVALID_PASSWORD_MESSAGE = 'Invalid password'
+
 	const email = {
 		value: '',
 		isValid: true,
@@ -64,14 +74,14 @@ describe('<UserAuthForm />', () => {
 			render()
 			cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
 				'contain',
-				'Log in',
+				authenticationFormSelectors.submitButtonTextLogin,
 			)
 		})
 		it('renders the toggle link with correct text', () => {
 			render()
 			cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
 				'contain',
-				'Switch to Signup',
+				authenticationFormSelectors.signupTextToggleLink,
 			)
 		})
 		it('renders the form controls with correct class', () => {
@@ -124,20 +134,24 @@ describe('<UserAuthForm />', () => {
 
 		it('shows error messages when email or password is invalid', () => {
 			render({
-				email: { value: '', isValid: false, message: 'Invalid email' },
+				email: {
+					value: '',
+					isValid: false,
+					message: INVALID_EMAIL_MESSAGE,
+				},
 				password: {
 					value: '',
 					isValid: false,
-					message: 'Invalid password',
+					message: INVALID_PASSWORD_MESSAGE,
 				},
 			})
 			cy.get(authenticationFormSelectors.emailErrorMessage).should(
 				'contain',
-				'Invalid email',
+				INVALID_EMAIL_MESSAGE,
 			)
 			cy.get(authenticationFormSelectors.passwordErrorMessage).should(
 				'contain',
-				'Invalid password',
+				INVALID_PASSWORD_MESSAGE,
 			)
 		})
 
@@ -145,21 +159,21 @@ describe('<UserAuthForm />', () => {
 			render({ mode: 'login' })
 			cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
 				'contain',
-				'Log in',
+				authenticationFormSelectors.submitButtonTextLogin,
 			)
 			cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
 				'contain',
-				'Switch to Signup',
+				authenticationFormSelectors.signupTextToggleLink,
 			)
 
 			render({ mode: 'signup' })
 			cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
 				'contain',
-				'Sign up',
+				authenticationFormSelectors.signupTextSubmitButton,
 			)
 			cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
 				'contain',
-				'Switch to Login',
+				authenticationFormSelectors.loginTextToggleLink,
 			)
 		})
 
@@ -182,61 +196,81 @@ describe('<UserAuthForm />', () => {
 
 		it('email input is associated with its label', () => {
 			render()
-			cy.get('label[for="email"]').should('exist')
-			cy.get('#email').should('exist')
+			cy.get(EMAIL_LABEL_SELECTOR).should('exist')
+			cy.get(EMAIL_SELECTOR).should('exist')
 		})
 
 		it('password input is associated with its label', () => {
 			render()
-			cy.get('label[for="password"]').should('exist')
-			cy.get('#password').should('exist')
+			cy.get(PASSWORD_LABEL_SELECTOR).should('exist')
+			cy.get(PASSWORD_SELECTOR).should('exist')
 		})
 
 		it('inputs have aria-required and required attributes', () => {
 			render()
-			cy.get('#email').should('have.attr', 'aria-required', 'true')
-			cy.get('#email').should('have.attr', 'required')
-			cy.get('#password').should('have.attr', 'aria-required', 'true')
-			cy.get('#password').should('have.attr', 'required')
+			cy.get(EMAIL_SELECTOR).should('have.attr', 'aria-required', 'true')
+			cy.get(EMAIL_SELECTOR).should('have.attr', 'required')
+			cy.get(PASSWORD_SELECTOR).should(
+				'have.attr',
+				'aria-required',
+				'true',
+			)
+			cy.get(PASSWORD_SELECTOR).should('have.attr', 'required')
 		})
 
 		it('inputs have aria-invalid set to true when invalid', () => {
 			render({
-				email: { value: '', isValid: false, message: 'Invalid email' },
+				email: {
+					value: '',
+					isValid: false,
+					message: INVALID_EMAIL_MESSAGE,
+				},
 				password: {
 					value: '',
 					isValid: false,
-					message: 'Invalid password',
+					message: INVALID_PASSWORD_MESSAGE,
 				},
 			})
-			cy.get('#email').should('have.attr', 'aria-invalid', 'true')
-			cy.get('#password').should('have.attr', 'aria-invalid', 'true')
+			cy.get(EMAIL_SELECTOR).should('have.attr', 'aria-invalid', 'true')
+			cy.get(PASSWORD_SELECTOR).should(
+				'have.attr',
+				'aria-invalid',
+				'true',
+			)
 		})
 
 		it('inputs have aria-describedby referencing error message when invalid', () => {
 			render({
-				email: { value: '', isValid: false, message: 'Invalid email' },
+				email: {
+					value: '',
+					isValid: false,
+					message: INVALID_EMAIL_MESSAGE,
+				},
 				password: {
 					value: '',
 					isValid: false,
-					message: 'Invalid password',
+					message: INVALID_PASSWORD_MESSAGE,
 				},
 			})
-			cy.get('#email')
+			cy.get(EMAIL_SELECTOR)
 				.should('have.attr', 'aria-describedby')
 				.and('eq', 'email-error')
-			cy.get('#password')
+			cy.get(PASSWORD_SELECTOR)
 				.should('have.attr', 'aria-describedby')
 				.and('eq', 'password-error')
 		})
 
 		it('error messages have role="alert"', () => {
 			render({
-				email: { value: '', isValid: false, message: 'Invalid email' },
+				email: {
+					value: '',
+					isValid: false,
+					message: INVALID_EMAIL_MESSAGE,
+				},
 				password: {
 					value: '',
 					isValid: false,
-					message: 'Invalid password',
+					message: INVALID_PASSWORD_MESSAGE,
 				},
 			})
 			cy.get('#email-error').should('have.attr', 'role', 'alert')
