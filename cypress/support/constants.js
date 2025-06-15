@@ -107,6 +107,8 @@ export const topNavigationSelectors = {
 }
 
 export const authenticationFormSelectors = {
+	// Form fields
+	authenticationForm: getByDataCy('user-authentication-form'),
 	// Email fields
 	emailLabel: 'E-Mail',
 	emailInput: getByDataCy('email-input'),
