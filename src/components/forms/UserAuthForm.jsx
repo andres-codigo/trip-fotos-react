@@ -30,6 +30,7 @@ const UserAuthForm = ({
 		disabled: isLoading,
 		required: true,
 		showRequiredMark: true,
+		className: 'formControlInput ',
 		'data-cy': field === 'email' ? 'email-input' : 'password-input',
 		'data-cy-error':
 			field === 'email'
@@ -46,7 +47,27 @@ const UserAuthForm = ({
 		<form
 			className={userAuthStyles.userAuthentication}
 			onSubmit={onSubmit}
-			noValidate>
+			noValidate
+			data-cy="user-authentication-form"
+			aria-busy={isLoading}
+			aria-labelledby="user-auth-form-title">
+			<h2 id="user-auth-form-title">
+				{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? (
+					<>
+						Login{' '}
+						<span className={userAuthStyles.visuallyHidden}>
+							Form
+						</span>
+					</>
+				) : (
+					<>
+						Signup{' '}
+						<span className={userAuthStyles.visuallyHidden}>
+							Form
+						</span>
+					</>
+				)}
+			</h2>
 			<div
 				aria-live="polite"
 				style={ACCESSIBILITY.ARIA_LIVE.POLITE.STYLE}>
@@ -57,12 +78,28 @@ const UserAuthForm = ({
 					!email.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
 				<Input {...getInputProps('email')} />
+				{!email.isValid && email.message && (
+					<span
+						id="email-error-message"
+						role="alert"
+						className={userAuthStyles.visuallyHidden}>
+						{email.message}
+					</span>
+				)}
 			</div>
 			<div
 				className={`${userAuthStyles.formControl} ${
 					!password.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
 				<Input {...getInputProps('password')} />
+				{!password.isValid && password.message && (
+					<span
+						id="password-error-message"
+						role="alert"
+						className={userAuthStyles.visuallyHidden}>
+						{password.message}
+					</span>
+				)}
 			</div>
 			<BaseButton
 				id="login-button"
