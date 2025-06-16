@@ -407,14 +407,14 @@ To debug tests, use the Cypress Test Runner in interactive mode (`npx cypress op
 
 This project uses GitHub Actions to automate key development and monitoring tasks.
 
-### Vitest CI Workflow
+### 1. Vitest Unit Tests
 
-- **Location:** `.github/workflows/vitest.yml`
+- **Workflow File:** `.github/workflows/unit-tests-vitest.yml`
 - **Triggers:**
-    - On **push** to any branch
+    - On **push** to `main` (for changes in `src/**`, `package.json`, or `vitest.config.*`)
     - On **pull requests** to `main`
     - Manually via **Actions → "Run workflow"**
-- **Purpose:** Runs the full test suite to ensure code quality.
+- **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Merge Blocking:** Pull requests must pass this test workflow before merging into `main`.
 
 #### Test Commands
@@ -423,6 +423,40 @@ This project uses GitHub Actions to automate key development and monitoring task
 npm run vitest          # Run all tests in CI mode
 npm run vitest:watch    # Run tests in watch mode (local dev)
 npm run vitest:coverage # Run tests with coverage reporting
+```
+
+---
+
+### 2. Cypress E2E Tests
+
+- **Workflow File:** `.github/workflows/cypress-e2e.yml`
+- **Triggers:**
+    - On **push** to `main` (for changes in `src/**`, `cypress/**`, `package.json`, or `cypress.config.*`)
+    - On **pull requests** to `main`
+    - Manually via **Actions → "Run workflow"**
+- **Purpose:** Runs Cypress end-to-end (E2E) tests against the running application to verify user flows and integration with backend services.
+
+#### E2E Test Command
+
+```bash
+npx cypress run
+```
+
+---
+
+### 3. Cypress Component Tests
+
+- **Workflow File:** `.github/workflows/cypress-component.yml.yml`
+- **Triggers:**
+    - On **push** to `main` (for changes in `src/**/__tests__/**`, `src/**/*.jsx`, `src/**/*.tsx`, `cypress.config.*`, or `package.json`)
+    - On **pull requests** to `main`
+    - Manually via **Actions → "Run workflow"**
+- **Purpose:** Runs Cypress component tests to verify individual React components in isolation.
+
+#### Component Test Command
+
+```bash
+npx cypress run --component
 ```
 
 ### Clone Tracker Workflow
@@ -440,11 +474,25 @@ npm run vitest:coverage # Run tests with coverage reporting
 Some workflows, like the **Vitest test runner**, can be manually executed from the GitHub UI:
 
 1. Navigate to the **Actions** tab of the repository
-2. Select the desired workflow (e.g., **"Run Vitest Tests"**)
+2. Select the desired workflow (e.g., **"Run Unit Tests (Vitest)"**, **"E2E - Run Cypress Page Tests"**, or **"Component - Run Cypress Component Tests"**).
 3. Click the **"Run workflow"** button on the right side
 4. The workflow will be executed immediately (no input needed)
 
 > This is useful for manually re-running workflows after configuration changes or failed automated runs.
+
+---
+
+### 📝 Summary Table
+
+| Workflow Name                           | File                                          | Tests Type       | Triggered On   |
+| --------------------------------------- | --------------------------------------------- | ---------------- | -------------- |
+| Run Unit Tests (Vitest)                 | `.github/workflows/unit-tests-vitest.yml`     | Unit/Integration | Push/PR/Manual |
+| E2E - Run Cypress Page Tests            | `.github/workflows/cypress-e2e.yml`           | E2E              | Push/PR/Manual |
+| Component - Run Cypress Component Tests | `.github/workflows/cypress-component.yml.yml` | Component        | Push/PR/Manual |
+
+---
+
+> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly.
 
 <a id="build"></a>
 
