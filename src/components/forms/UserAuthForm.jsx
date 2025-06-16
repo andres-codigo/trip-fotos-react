@@ -33,7 +33,7 @@ const UserAuthForm = ({
 		disabled: isLoading,
 		required: true,
 		showRequiredMark: true,
-		className: 'formControlInput ',
+		className: 'formControlInput',
 		'data-cy': field === EMAIL_ID ? 'email-input' : 'password-input',
 		'data-cy-error':
 			field === EMAIL_ID
@@ -86,7 +86,7 @@ const UserAuthForm = ({
 				<Input {...getInputProps(EMAIL_ID)} />
 				{!email.isValid && email.message && (
 					<span
-						id="email-error-message"
+						id="email-error"
 						role="alert"
 						className={userAuthStyles.visuallyHidden}>
 						{email.message}
@@ -100,7 +100,7 @@ const UserAuthForm = ({
 				<Input {...getInputProps(PASSWORD_ID)} />
 				{!password.isValid && password.message && (
 					<span
-						id="password-error-message"
+						id="password-error"
 						role="alert"
 						className={userAuthStyles.visuallyHidden}>
 						{password.message}
