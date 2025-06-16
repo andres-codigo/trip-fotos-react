@@ -18,22 +18,25 @@ const UserAuthForm = ({
 	onSwitchMode,
 	isLoading = false,
 }) => {
+	const EMAIL_ID = 'email'
+	const PASSWORD_ID = 'password'
+
 	const getInputProps = (field) => ({
-		id: field === 'email' ? 'email' : 'password',
-		label: field === 'email' ? 'E-Mail' : 'Password',
-		type: field === 'email' ? 'email' : 'password',
-		value: field === 'email' ? email.value : password.value,
-		onChange: field === 'email' ? onEmailChange : onPasswordChange,
-		onBlur: field === 'email' ? onEmailChange : onPasswordChange,
-		isValid: field === 'email' ? email.isValid : password.isValid,
-		message: field === 'email' ? email.message : password.message,
+		id: field === EMAIL_ID ? EMAIL_ID : PASSWORD_ID,
+		label: field === EMAIL_ID ? 'E-Mail' : 'Password',
+		type: field === EMAIL_ID ? EMAIL_ID : PASSWORD_ID,
+		value: field === EMAIL_ID ? email.value : password.value,
+		onChange: field === EMAIL_ID ? onEmailChange : onPasswordChange,
+		onBlur: field === EMAIL_ID ? onEmailChange : onPasswordChange,
+		isValid: field === EMAIL_ID ? email.isValid : password.isValid,
+		message: field === EMAIL_ID ? email.message : password.message,
 		disabled: isLoading,
 		required: true,
 		showRequiredMark: true,
 		className: 'formControlInput ',
-		'data-cy': field === 'email' ? 'email-input' : 'password-input',
+		'data-cy': field === EMAIL_ID ? 'email-input' : 'password-input',
 		'data-cy-error':
-			field === 'email'
+			field === EMAIL_ID
 				? 'email-error-message'
 				: 'password-error-message',
 	})
@@ -80,7 +83,7 @@ const UserAuthForm = ({
 				className={`${userAuthStyles.formControl} ${
 					!email.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
-				<Input {...getInputProps('email')} />
+				<Input {...getInputProps(EMAIL_ID)} />
 				{!email.isValid && email.message && (
 					<span
 						id="email-error-message"
@@ -94,7 +97,7 @@ const UserAuthForm = ({
 				className={`${userAuthStyles.formControl} ${
 					!password.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
-				<Input {...getInputProps('password')} />
+				<Input {...getInputProps(PASSWORD_ID)} />
 				{!password.isValid && password.message && (
 					<span
 						id="password-error-message"
