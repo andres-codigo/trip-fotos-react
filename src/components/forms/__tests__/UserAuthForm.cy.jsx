@@ -4,6 +4,8 @@ import { authenticationFormSelectors } from '../../../../cypress/support/constan
 
 import UserAuthForm from '../UserAuthForm'
 
+import userAuthStyles from '../UserAuthForm.module.scss'
+
 describe('<UserAuthForm />', () => {
 	const EMAIL_ID = 'email'
 	const EMAIL_SELECTOR = `#${EMAIL_ID}`
@@ -63,6 +65,16 @@ describe('<UserAuthForm />', () => {
 			render()
 			cy.get(authenticationFormSelectors.authenticationForm).should(
 				'exist',
+			)
+		})
+		it('renders form title', () => {
+			render()
+			cy.get(authenticationFormSelectors.userAuthenticationTitle).should(
+				'exist',
+			)
+			cy.get(authenticationFormSelectors.userAuthenticationTitle).should(
+				'have.class',
+				userAuthStyles.userAuthenticationTitle,
 			)
 		})
 		it('renders email and password inputs', () => {
