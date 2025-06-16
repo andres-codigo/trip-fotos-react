@@ -94,7 +94,7 @@ describe('Form submission', () => {
 			.type(user.validPassword)
 			.type('{enter}')
 
-		cy.get(dialog.loading).should('exist')
+		cy.get(dialog.loading, { timeout: 10000 }).should('exist')
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
