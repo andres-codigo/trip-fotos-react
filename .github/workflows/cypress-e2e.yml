@@ -1,4 +1,4 @@
-name: Run Cypress Page Tests
+name: E2E - Run Cypress Page Tests
 
 on:
     push:
@@ -31,7 +31,7 @@ jobs:
             - name: Install dependencies
               run: npm install
 
-            - name: Start app & run Cypress tests
+            - name: Start app & run E2E Cypress Page Tests
               uses: cypress-io/github-action@v6
               env:
                   VITE_API_URL: ${{ secrets.VITE_API_URL }}
