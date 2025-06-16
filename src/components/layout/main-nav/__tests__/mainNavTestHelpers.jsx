@@ -1,7 +1,8 @@
 import { urls } from '../../../../../cypress/support/constants/api'
 
+import { viewports } from '../../../../../cypress/support/constants/viewports'
+
 import {
-	viewports,
 	testSelectors,
 	topNavigationSelectors,
 } from '../../../../../cypress/support/constants'

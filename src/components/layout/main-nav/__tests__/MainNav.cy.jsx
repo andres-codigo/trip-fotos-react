@@ -4,8 +4,9 @@ import PropTypes from 'prop-types'
 
 import { urls } from '../../../../../cypress/support/constants/api'
 
+import { viewports } from '../../../../../cypress/support/constants/viewports'
+
 import {
-	viewports,
 	topNavigationSelectors,
 	pageSelectors,
 } from '../../../../../cypress/support/constants'

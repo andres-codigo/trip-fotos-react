@@ -3,8 +3,9 @@ import configureStore from 'redux-mock-store'
 
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 
+import { viewports } from './constants/viewports'
+
 import {
-	viewports,
 	headerSelectors,
 	topNavigationSelectors,
 	authenticationFormSelectors,
