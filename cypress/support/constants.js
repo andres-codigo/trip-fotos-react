@@ -3,10 +3,6 @@ import {
 	getByDataCyError,
 } from '../../src/testUtils/cypress/selectors'
 
-export const domAttributeUrls = {
-	root: Cypress.env('ROOT_URL'),
-}
-
 export const testSelectors = {
 	locationDisplay: getByDataCy('location-display'),
 }
