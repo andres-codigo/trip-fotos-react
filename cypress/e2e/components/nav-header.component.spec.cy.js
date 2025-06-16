@@ -1,6 +1,6 @@
+import { baseUrl, urls } from '../../support/constants/api'
+
 import {
-	baseUrl,
-	urls,
 	user,
 	headerSelectors,
 	topNavigationSelectors,

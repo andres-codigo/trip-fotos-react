@@ -1,4 +1,6 @@
-import { urls, headerSelectors } from '../../../../../cypress/support/constants'
+import { urls } from '../../../../../cypress/support/constants/api'
+
+import { headerSelectors } from '../../../../../cypress/support/constants'
 
 import { PATHS } from '@/constants/paths'
 

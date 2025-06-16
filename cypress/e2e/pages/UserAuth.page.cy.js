@@ -3,9 +3,13 @@ import { FIREBASE_ERROR_TYPES } from '../../../src/constants/firebase-error-type
 import {
 	apiDatabase,
 	apiUrls,
-	errorMessages,
 	baseUrl,
 	urls,
+} from '../../support/constants/api'
+
+import { errorMessages } from '../../support/constants/errorMessages'
+
+import {
 	user,
 	dialog,
 	dialogMessages,

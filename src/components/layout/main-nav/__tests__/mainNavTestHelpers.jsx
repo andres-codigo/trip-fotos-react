@@ -1,5 +1,6 @@
+import { urls } from '../../../../../cypress/support/constants/api'
+
 import {
-	urls,
 	viewports,
 	testSelectors,
 	topNavigationSelectors,
