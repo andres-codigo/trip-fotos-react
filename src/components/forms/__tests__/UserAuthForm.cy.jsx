@@ -1,6 +1,7 @@
 import { BrowserRouter } from 'react-router-dom'
 
 import { authenticationFormSelectors } from '../../../../cypress/support/constants'
+import { accessibilitySelectors } from '../../../../cypress/support/constants/accessibility'
 
 import UserAuthForm from '../UserAuthForm'
 
@@ -200,7 +201,7 @@ describe('<UserAuthForm />', () => {
 		it('associates form with heading via aria-labelledby', () => {
 			render()
 			cy.get('form')
-				.should('have.attr', 'aria-labelledby')
+				.should('have.attr', accessibilitySelectors.ARIA_LABELLEDBY)
 				.then((labelledby) => {
 					cy.get(`#${labelledby}`).should('exist')
 				})
@@ -220,14 +221,24 @@ describe('<UserAuthForm />', () => {
 
 		it('inputs have aria-required and required attributes', () => {
 			render()
-			cy.get(EMAIL_SELECTOR).should('have.attr', 'aria-required', 'true')
-			cy.get(EMAIL_SELECTOR).should('have.attr', 'required')
-			cy.get(PASSWORD_SELECTOR).should(
+			cy.get(EMAIL_SELECTOR).should(
 				'have.attr',
-				'aria-required',
+				accessibilitySelectors.ARIA_REQUIRED,
 				'true',
 			)
-			cy.get(PASSWORD_SELECTOR).should('have.attr', 'required')
+			cy.get(EMAIL_SELECTOR).should(
+				'have.attr',
+				accessibilitySelectors.REQUIRED,
+			)
+			cy.get(PASSWORD_SELECTOR).should(
+				'have.attr',
+				accessibilitySelectors.ARIA_REQUIRED,
+				'true',
+			)
+			cy.get(PASSWORD_SELECTOR).should(
+				'have.attr',
+				accessibilitySelectors.REQUIRED,
+			)
 		})
 
 		it('inputs have aria-invalid set to true when invalid', () => {
@@ -243,10 +254,14 @@ describe('<UserAuthForm />', () => {
 					message: INVALID_PASSWORD_MESSAGE,
 				},
 			})
-			cy.get(EMAIL_SELECTOR).should('have.attr', 'aria-invalid', 'true')
+			cy.get(EMAIL_SELECTOR).should(
+				'have.attr',
+				accessibilitySelectors.ARIA_INVALID,
+				'true',
+			)
 			cy.get(PASSWORD_SELECTOR).should(
 				'have.attr',
-				'aria-invalid',
+				accessibilitySelectors.ARIA_INVALID,
 				'true',
 			)
 		})
@@ -265,10 +280,10 @@ describe('<UserAuthForm />', () => {
 				},
 			})
 			cy.get(EMAIL_SELECTOR)
-				.should('have.attr', 'aria-describedby')
+				.should('have.attr', accessibilitySelectors.ARIA_DESCRIBEDBY)
 				.and('eq', 'email-error')
 			cy.get(PASSWORD_SELECTOR)
-				.should('have.attr', 'aria-describedby')
+				.should('have.attr', accessibilitySelectors.ARIA_DESCRIBEDBY)
 				.and('eq', 'password-error')
 		})
 
@@ -285,13 +300,25 @@ describe('<UserAuthForm />', () => {
 					message: INVALID_PASSWORD_MESSAGE,
 				},
 			})
-			cy.get('#email-error').should('have.attr', 'role', 'alert')
-			cy.get('#password-error').should('have.attr', 'role', 'alert')
+			cy.get('#email-error').should(
+				'have.attr',
+				accessibilitySelectors.ROLE,
+				accessibilitySelectors.ALERT,
+			)
+			cy.get('#password-error').should(
+				'have.attr',
+				accessibilitySelectors.ROLE,
+				accessibilitySelectors.ALERT,
+			)
 		})
 
 		it('form has aria-busy when loading', () => {
 			render({ isLoading: true })
-			cy.get('form').should('have.attr', 'aria-busy', 'true')
+			cy.get('form').should(
+				'have.attr',
+				accessibilitySelectors.ARIA_BUSY,
+				'true',
+			)
 		})
 	})
 })
