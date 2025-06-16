@@ -1,6 +1,6 @@
 import { INPUT } from '@/constants/test/input'
 
-import { getByDataCy } from '@/testUtils/cypress/selectors'
+import { getByDataCy, getByDataCyError } from '@/testUtils/cypress/selectors'
 
 import Input from '@/components/ui/form/input/Input'
 
@@ -155,7 +155,7 @@ describe('<Input />', () => {
 					data-cy-error={INPUT.ERROR_ID}
 				/>,
 			)
-			cy.get(getByDataCy(INPUT.ERROR_ID)).should('contain', 'Error!')
+			cy.get(getByDataCyError(INPUT.ERROR_ID)).should('contain', 'Error!')
 		})
 	})
 
