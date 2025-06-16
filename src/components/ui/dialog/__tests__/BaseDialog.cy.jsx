@@ -52,7 +52,7 @@ describe('<BaseDialog />', () => {
 					Content
 				</BaseDialog>,
 			)
-			cy.get('body').type('{esc}')
+			cy.get(getByDataCy(DIALOG.ID)).focus().type('{esc}')
 			cy.wrap(onClose).should('have.been.called')
 		})
 	})

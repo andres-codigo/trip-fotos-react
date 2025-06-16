@@ -86,7 +86,8 @@ const BaseDialog = ({
 						isError ? DIALOG.ROLE_ALERTDIALOG : DIALOG.ROLE_DIALOG
 					}
 					aria-labelledby={titleId}
-					aria-describedby={descId}>
+					aria-describedby={descId}
+					tabIndex={-1}>
 					<header className={baseDialogStyles.header}>
 						{header ? (
 							header
