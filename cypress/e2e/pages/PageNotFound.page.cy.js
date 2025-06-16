@@ -1,10 +1,9 @@
 import {
-	baseUrl,
-	urls,
-	user,
-	topNavigationSelectors,
+	headerSelectors,
 	pageNotFoundSelectors,
-} from '../../support/constants'
+} from '../../support/constants/selectors'
+import { baseUrl, urls } from '../../support/constants/urls'
+import { user } from '../../support/constants/users'
 
 describe('Logged in > PageNotFound page', () => {
 	const loginUrl = baseUrl + urls.cyAuth
@@ -27,7 +26,7 @@ describe('Logged in > PageNotFound page', () => {
 		)
 
 		// Check App title link is present and has the correct href
-		cy.get(topNavigationSelectors.siteHeaderTitleLink).as('header')
+		cy.get(headerSelectors.siteHeaderTitleLink).as('header')
 		cy.get('@header').find('a').should('have.attr', 'href', urls.cyTrips)
 
 		// Click the back to home link and verify url
@@ -58,7 +57,7 @@ describe('Not logged in > PageNotFound page', () => {
 		)
 
 		// Check App title link is present and has the correct href
-		cy.get(topNavigationSelectors.siteHeaderTitleLink).as('header')
+		cy.get(headerSelectors.siteHeaderTitleLink).as('header')
 		cy.get('@header').find('a').should('have.attr', 'href', urls.cyAuth)
 
 		// Click the back to home link and verify url

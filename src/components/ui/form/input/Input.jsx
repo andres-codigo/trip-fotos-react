@@ -14,10 +14,10 @@ const Input = ({
 	disabled = false,
 	required = false,
 	showRequiredMark = false,
-	dataCypress,
-	dataCypressError,
 	className = '',
-	...props
+	'data-cy': dataCy,
+	'data-cy-error': dataCyError,
+	...rest
 }) => (
 	<div>
 		{label && (
@@ -34,13 +34,23 @@ const Input = ({
 			value={value}
 			onChange={onChange}
 			onBlur={onBlur}
-			data-cy={dataCypress}
+			data-cy={dataCy}
 			disabled={disabled}
 			required={required}
 			className={className}
-			{...props}
+			aria-required={required}
+			aria-invalid={!isValid}
+			aria-describedby={!isValid && message ? `${id}-error` : undefined}
+			{...rest}
 		/>
-		{!isValid && message && <p data-cy={dataCypressError}>{message}</p>}
+		{!isValid && message && (
+			<p
+				id={`${id}-error`}
+				role="alert"
+				data-cy-error={dataCyError}>
+				{message}
+			</p>
+		)}
 	</div>
 )
 
@@ -56,9 +66,9 @@ Input.propTypes = {
 	disabled: PropTypes.bool,
 	required: PropTypes.bool,
 	showRequiredMark: PropTypes.bool,
-	dataCypress: PropTypes.string,
-	dataCypressError: PropTypes.string,
 	className: PropTypes.string,
+	'data-cy': PropTypes.string,
+	'data-cy-error': PropTypes.string,
 }
 
 export default Input

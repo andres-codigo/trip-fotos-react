@@ -14,7 +14,7 @@ const BaseButton = ({
 	modeType,
 	to = '/',
 	className,
-	dataCypress,
+	'data-cy': dataCy,
 	...props
 }) => {
 	const elementRef = useRef()
@@ -33,8 +33,11 @@ const BaseButton = ({
 				<button
 					ref={elementRef}
 					className={combinedClassName}
-					data-cy={dataCypress}
+					data-cy={dataCy}
 					disabled={isDisabled}
+					{...(typeof children !== 'string'
+						? { 'aria-label': props['ariaLabel'] || 'Button' }
+						: {})}
 					{...props}>
 					{children}
 				</button>
@@ -43,8 +46,12 @@ const BaseButton = ({
 					to={isDisabled ? undefined : to}
 					ref={elementRef}
 					className={combinedClassName}
-					data-cy={dataCypress}
+					data-cy={dataCy}
 					aria-disabled={isDisabled}
+					tabIndex={isDisabled ? -1 : undefined}
+					{...(typeof children !== 'string'
+						? { 'aria-label': props['ariaLabel'] || 'Link' }
+						: {})}
 					{...props}>
 					{children}
 				</Link>
@@ -61,7 +68,8 @@ BaseButton.propTypes = {
 	modeType: PropTypes.string,
 	to: PropTypes.string,
 	className: PropTypes.string,
-	dataCypress: PropTypes.string,
+	'data-cy': PropTypes.string,
+	ariaLabel: PropTypes.string,
 }
 
 export default BaseButton

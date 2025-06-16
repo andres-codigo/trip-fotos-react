@@ -1,13 +1,15 @@
-name: Run Vitest Tests
+name: Component - Run Cypress Component Tests
 
 on:
     push:
         branches:
             - main
         paths:
-            - 'src/**'
+            - 'src/**/__tests__/**'
+            - 'src/**/*.jsx'
+            - 'src/**/*.tsx'
+            - 'cypress.config.*'
             - 'package.json'
-            - 'vitest.config.*'
     pull_request:
         branches:
             - main
@@ -21,13 +23,8 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: '20.13.1'
-
             - name: Install dependencies
-              run: npm install
+              run: npm ci
 
-            - name: Run Vitest with Coverage
-              run: npm run vitest:run
+            - name: Run Cypress Component Tests
+              run: npx cypress run --component

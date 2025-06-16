@@ -123,15 +123,17 @@ const UserAuth = () => {
 	const handleError = () => setError(null)
 
 	return (
-		<main className="mainContainer">
+		<main
+			className="mainContainer authenticationPage"
+			data-cy="authentication-page">
 			{error && (
 				<BaseDialog
 					show={true}
 					isError={true}
 					title={GLOBAL.ERROR_DIALOG_TITLE}
 					onClose={handleError}
-					dataCypress="invalid-email-or-password-dialog">
-					<p>{error}</p>
+					data-cy="invalid-email-or-password-dialog">
+					{error}
 				</BaseDialog>
 			)}
 			{isLoading && (
@@ -139,8 +141,8 @@ const UserAuth = () => {
 					show={true}
 					title="Authenticating"
 					fixed
-					dataCypress="loading-dialog">
-					<p>Authenticating your details, one moment please...</p>
+					data-cy="loading-dialog">
+					Authenticating your details, one moment please...
 					<BaseSpinner />
 				</BaseDialog>
 			)}

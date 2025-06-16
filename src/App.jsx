@@ -6,6 +6,8 @@ import {
 	Navigate,
 	useNavigate,
 	useLocation,
+	BrowserRouter,
+	useInRouterContext,
 } from 'react-router-dom'
 
 import { PATHS } from '@/constants/paths'
@@ -18,7 +20,7 @@ import Trips from '@/pages/trips/Trips'
 import Messages from '@/pages/messages/Messages'
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
-function App() {
+function AppRoutes() {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
 	const location = useLocation()
@@ -95,4 +97,14 @@ function App() {
 	)
 }
 
-export default App
+export default function App() {
+	const inRouter = useInRouterContext()
+
+	return inRouter ? (
+		<AppRoutes />
+	) : (
+		<BrowserRouter>
+			<AppRoutes />
+		</BrowserRouter>
+	)
+}

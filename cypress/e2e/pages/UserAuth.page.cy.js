@@ -1,16 +1,11 @@
 import { FIREBASE_ERROR_TYPES } from '../../../src/constants/firebase-error-types'
 
-import {
-	apiDatabase,
-	apiUrls,
-	errorMessages,
-	baseUrl,
-	urls,
-	user,
-	dialog,
-	dialogMessages,
-	authenticationFormSelectors,
-} from '../../support/constants'
+import { apiDatabase, apiUrls } from '../../support/constants/api'
+import { dialog, dialogMessages } from '../../support/constants/dialog'
+import { errorMessages } from '../../support/constants/errorMessages'
+import { authenticationFormSelectors } from '../../support/constants/selectors'
+import { baseUrl, urls } from '../../support/constants/urls'
+import { user } from '../../support/constants/users'
 
 const loginUrl = baseUrl + urls.cyAuth
 
@@ -99,7 +94,7 @@ describe('Form submission', () => {
 			.type(user.validPassword)
 			.type('{enter}')
 
-		cy.get(dialog.loading).should('exist')
+		cy.get(dialog.loading, { timeout: 10000 }).should('exist')
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {

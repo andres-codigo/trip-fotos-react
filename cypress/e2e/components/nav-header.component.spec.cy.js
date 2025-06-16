@@ -1,9 +1,9 @@
 import {
-	baseUrl,
-	urls,
-	user,
+	headerSelectors,
 	topNavigationSelectors,
-} from '../../support/constants'
+} from '../../support/constants/selectors'
+import { baseUrl, urls } from '../../support/constants/urls'
+import { user } from '../../support/constants/users'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
@@ -18,7 +18,7 @@ describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', ()
 	})
 
 	it('Navigates to the "authentication" page when clicking the app title', () => {
-		cy.get(topNavigationSelectors.siteHeaderTitleLink).click()
+		cy.get(headerSelectors.siteHeaderTitleLink).click()
 		cy.url().should('eq', baseUrl + urls.cyAuth)
 	})
 })
@@ -37,14 +37,14 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	})
 
 	it('Navigates to the "trips" page when clicking the app title', () => {
-		cy.get(topNavigationSelectors.siteHeaderTitleLink).click()
+		cy.get(headerSelectors.siteHeaderTitleLink).click()
 		cy.url().should('eq', baseUrl + urls.cyTrips)
 	})
 
 	it('Toggles the hamburger menu open and closed on mobile viewports', () => {
 		cy.setViewportToMobile()
 
-		cy.get(topNavigationSelectors.siteHeader).as('header')
+		cy.get(headerSelectors.siteHeader).as('header')
 		cy.get('@header')
 			.find(topNavigationSelectors.navHamburgerMenu)
 			.as('hamburgerMenu')

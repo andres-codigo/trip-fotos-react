@@ -14,6 +14,7 @@ const NavMenuButtonLink = ({
 	modeType,
 	to = '/',
 	className,
+	'data-cy': dataCy,
 	...props
 }) => {
 	const elementRef = useRef()
@@ -37,6 +38,7 @@ const NavMenuButtonLink = ({
 			to={to}
 			isError={isError}
 			isDisabled={isDisabled}
+			data-cy={dataCy}
 			{...props}>
 			{children}
 		</BaseButton>
@@ -51,6 +53,7 @@ NavMenuButtonLink.propTypes = {
 	modeType: PropTypes.string,
 	to: PropTypes.string,
 	className: PropTypes.string,
+	'data-cy': PropTypes.string,
 }
 
 export default NavMenuButtonLink

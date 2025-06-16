@@ -1,7 +1,7 @@
-import { useState } from 'react'
 import PropTypes from 'prop-types'
 
 import { API_DATABASE } from '@/constants/api'
+import { ACCESSIBILITY } from '@/constants/accessibility'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
@@ -16,73 +16,110 @@ const UserAuthForm = ({
 	onPasswordChange,
 	onSubmit,
 	onSwitchMode,
-	isLoading,
+	isLoading = false,
 }) => {
-	const [requireInputs, setRequireInputs] = useState(true)
+	const EMAIL_ID = 'email'
+	const PASSWORD_ID = 'password'
 
-	const handleLoginClick = () => {
-		setRequireInputs(true)
-	}
+	const getInputProps = (field) => ({
+		id: field === EMAIL_ID ? EMAIL_ID : PASSWORD_ID,
+		label: field === EMAIL_ID ? 'E-Mail' : 'Password',
+		type: field === EMAIL_ID ? EMAIL_ID : PASSWORD_ID,
+		value: field === EMAIL_ID ? email.value : password.value,
+		onChange: field === EMAIL_ID ? onEmailChange : onPasswordChange,
+		onBlur: field === EMAIL_ID ? onEmailChange : onPasswordChange,
+		isValid: field === EMAIL_ID ? email.isValid : password.isValid,
+		message: field === EMAIL_ID ? email.message : password.message,
+		disabled: isLoading,
+		required: true,
+		showRequiredMark: true,
+		className: 'formControlInput',
+		'data-cy': field === EMAIL_ID ? 'email-input' : 'password-input',
+		'data-cy-error':
+			field === EMAIL_ID
+				? 'email-error-message'
+				: 'password-error-message',
+		'aria-describedby':
+			!(field === EMAIL_ID ? email.isValid : password.isValid) &&
+			(field === EMAIL_ID ? email.message : password.message)
+				? field === EMAIL_ID
+					? 'email-error'
+					: 'password-error'
+				: undefined,
+	})
 
 	const handleSignUpClick = (e) => {
-		setRequireInputs(false)
-		onSwitchMode(e)
-
 		e.preventDefault()
+		onSwitchMode(e)
 	}
 
 	return (
 		<form
 			className={userAuthStyles.userAuthentication}
 			onSubmit={onSubmit}
-			noValidate>
+			noValidate
+			data-cy="user-authentication-form"
+			aria-busy={isLoading}
+			aria-labelledby="user-authentication-form-title">
+			<h2
+				id="user-authentication-form-title"
+				className={userAuthStyles.userAuthenticationTitle}
+				data-cy="user-authentication-form-title">
+				{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? (
+					<>
+						Login{' '}
+						<span className={userAuthStyles.visuallyHidden}>
+							Form
+						</span>
+					</>
+				) : (
+					<>
+						Signup{' '}
+						<span className={userAuthStyles.visuallyHidden}>
+							Form
+						</span>
+					</>
+				)}
+			</h2>
+			<div
+				aria-live="polite"
+				style={ACCESSIBILITY.ARIA_LIVE.POLITE.STYLE}>
+				{isLoading ? ACCESSIBILITY.ARIA_LIVE.POLITE.MESSAGE : ''}
+			</div>
 			<div
 				className={`${userAuthStyles.formControl} ${
 					!email.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
-				<Input
-					id="email"
-					label="E-Mail"
-					type="email"
-					value={email.value}
-					onChange={onEmailChange}
-					onBlur={onEmailChange}
-					isValid={email.isValid}
-					message={email.message}
-					disabled={isLoading}
-					required={requireInputs}
-					showRequiredMark={true}
-					dataCypress="email-input"
-					dataCypressError="email-error-message"
-				/>
+				<Input {...getInputProps(EMAIL_ID)} />
+				{!email.isValid && email.message && (
+					<span
+						id="email-error"
+						role="alert"
+						className={userAuthStyles.visuallyHidden}>
+						{email.message}
+					</span>
+				)}
 			</div>
 			<div
 				className={`${userAuthStyles.formControl} ${
 					!password.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
-				<Input
-					id="password"
-					label="Password"
-					type="password"
-					value={password.value}
-					onChange={onPasswordChange}
-					onBlur={onPasswordChange}
-					isValid={password.isValid}
-					message={password.message}
-					disabled={isLoading}
-					required={requireInputs}
-					showRequiredMark={true}
-					dataCypress="password-input"
-					dataCypressError="password-error-message"
-				/>
+				<Input {...getInputProps(PASSWORD_ID)} />
+				{!password.isValid && password.message && (
+					<span
+						id="password-error"
+						role="alert"
+						className={userAuthStyles.visuallyHidden}>
+						{password.message}
+					</span>
+				)}
 			</div>
 			<BaseButton
 				id="login-button"
 				type="submit"
 				mode="flat"
-				dataCypress="login-submit-button"
-				isDisabled={isLoading}
-				onClick={handleLoginClick}>
+				data-cy="login-submit-button"
+				isDisabled={isLoading}>
 				{mode === API_DATABASE.API_AUTH_LOGIN_MODE
 					? 'Log in'
 					: 'Sign up'}
@@ -91,7 +128,7 @@ const UserAuthForm = ({
 				id="login-signup-toggle-link"
 				isLink
 				onClick={handleSignUpClick}
-				dataCypress="login-signup-toggle-link"
+				data-cy="login-signup-toggle-link"
 				isDisabled={isLoading}>
 				{mode === API_DATABASE.API_AUTH_LOGIN_MODE
 					? 'Switch to Signup'

@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useId } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 import { CSSTransition } from 'react-transition-group'
+
+import { DIALOG } from '@/constants/test/dialog'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 
@@ -17,8 +19,11 @@ const BaseDialog = ({
 	onClose,
 	actions,
 	sectionClasses = false,
-	dataCypress,
+	'data-cy': dataCy,
 }) => {
+	const titleId = useId()
+	const descId = useId()
+
 	const nodeRef = useRef(null)
 	const [isVisible, setIsVisible] = useState(show)
 
@@ -54,7 +59,8 @@ const BaseDialog = ({
 			{show && (
 				<div
 					className={baseDialogStyles.backdrop}
-					onClick={tryClose}></div>
+					onClick={tryClose}
+					data-cy={DIALOG.BACKDROP}></div>
 			)}
 			<CSSTransition
 				in={show}
@@ -74,9 +80,24 @@ const BaseDialog = ({
 					ref={nodeRef}
 					open
 					className={baseDialogStyles.dialog}
-					data-cy={dataCypress}>
+					data-cy={dataCy}
+					aria-modal="true"
+					role={
+						isError ? DIALOG.ROLE_ALERTDIALOG : DIALOG.ROLE_DIALOG
+					}
+					aria-labelledby={titleId}
+					aria-describedby={descId}
+					tabIndex={-1}>
 					<header className={baseDialogStyles.header}>
-						{header ? header : <h2 data-cy="title">{title}</h2>}
+						{header ? (
+							header
+						) : (
+							<h2
+								id={titleId}
+								data-cy={DIALOG.TITLE}>
+								{title}
+							</h2>
+						)}
 					</header>
 					<main
 						className={
@@ -84,8 +105,8 @@ const BaseDialog = ({
 								? baseDialogStyles.image
 								: baseDialogStyles.general
 						}
-						data-cy="text-content">
-						{children}
+						data-cy={DIALOG.TEXT_CONTENT}>
+						<div id={descId}>{children}</div>
 					</main>
 					{!fixed && (
 						<footer>
@@ -117,7 +138,7 @@ BaseDialog.propTypes = {
 	onClose: PropTypes.func.isRequired,
 	actions: PropTypes.node,
 	sectionClasses: PropTypes.bool,
-	dataCypress: PropTypes.string,
+	'data-cy': PropTypes.string,
 }
 
 export default BaseDialog
