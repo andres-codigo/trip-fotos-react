@@ -39,6 +39,13 @@ const UserAuthForm = ({
 			field === EMAIL_ID
 				? 'email-error-message'
 				: 'password-error-message',
+		'aria-describedby':
+			!(field === EMAIL_ID ? email.isValid : password.isValid) &&
+			(field === EMAIL_ID ? email.message : password.message)
+				? field === EMAIL_ID
+					? 'email-error'
+					: 'password-error'
+				: undefined,
 	})
 
 	const handleSignUpClick = (e) => {
