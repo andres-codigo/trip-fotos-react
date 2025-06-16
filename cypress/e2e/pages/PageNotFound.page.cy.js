@@ -1,4 +1,4 @@
-import { baseUrl, urls } from '../../support/constants/api'
+import { baseUrl, urls } from '../../support/constants/urls'
 
 import { user } from '../../support/constants/users'
 

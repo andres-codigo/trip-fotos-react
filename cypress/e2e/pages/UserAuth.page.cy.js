@@ -1,21 +1,16 @@
 import { FIREBASE_ERROR_TYPES } from '../../../src/constants/firebase-error-types'
 
-import {
-	apiDatabase,
-	apiUrls,
-	baseUrl,
-	urls,
-} from '../../support/constants/api'
+import { baseUrl, urls } from '../../support/constants/urls'
+
+import { apiDatabase, apiUrls } from '../../support/constants/api'
 
 import { errorMessages } from '../../support/constants/errorMessages'
 
 import { user } from '../../support/constants/users'
 
-import {
-	dialog,
-	dialogMessages,
-	authenticationFormSelectors,
-} from '../../support/constants'
+import { dialog, dialogMessages } from '../../support/constants/dialog'
+
+import { authenticationFormSelectors } from '../../support/constants'
 
 const loginUrl = baseUrl + urls.cyAuth
 
