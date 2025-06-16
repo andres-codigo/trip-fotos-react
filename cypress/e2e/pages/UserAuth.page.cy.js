@@ -9,8 +9,9 @@ import {
 
 import { errorMessages } from '../../support/constants/errorMessages'
 
+import { user } from '../../support/constants/users'
+
 import {
-	user,
 	dialog,
 	dialogMessages,
 	authenticationFormSelectors,

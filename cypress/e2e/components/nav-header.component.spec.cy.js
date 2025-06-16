@@ -1,7 +1,8 @@
 import { baseUrl, urls } from '../../support/constants/api'
 
+import { user } from '../../support/constants/users'
+
 import {
-	user,
 	headerSelectors,
 	topNavigationSelectors,
 } from '../../support/constants'
