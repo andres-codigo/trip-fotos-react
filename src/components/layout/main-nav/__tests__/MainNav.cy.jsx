@@ -2,16 +2,15 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
-import { urls } from '../../../../../cypress/support/constants/urls'
-
-import { viewports } from '../../../../../cypress/support/constants/viewports'
+import '../../../../../cypress/support/commands'
 
 import {
 	pageSelectors,
 	topNavigationSelectors,
 } from '../../../../../cypress/support/constants/selectors'
+import { urls } from '../../../../../cypress/support/constants/urls'
 
-import '../../../../../cypress/support/commands'
+import { viewports } from '../../../../../cypress/support/constants/viewports'
 
 import { TestMainNav } from './mainNavTestUtils'
 import {

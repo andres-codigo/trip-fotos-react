@@ -1,11 +1,9 @@
-import { baseUrl, urls } from '../../support/constants/urls'
-
-import { user } from '../../support/constants/users'
-
 import {
 	headerSelectors,
 	topNavigationSelectors,
 } from '../../support/constants/selectors'
+import { baseUrl, urls } from '../../support/constants/urls'
+import { user } from '../../support/constants/users'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {

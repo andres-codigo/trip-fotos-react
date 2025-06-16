@@ -3,13 +3,12 @@ import configureStore from 'redux-mock-store'
 
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 
-import { viewports } from './constants/viewports'
-
 import {
 	headerSelectors,
 	topNavigationSelectors,
 	authenticationFormSelectors,
 } from './constants/selectors'
+import { viewports } from './constants/viewports'
 
 const mockStore = configureStore([])
 ////
