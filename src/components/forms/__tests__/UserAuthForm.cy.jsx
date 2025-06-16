@@ -1,6 +1,6 @@
 import { BrowserRouter } from 'react-router-dom'
 
-import { authenticationFormSelectors } from '../../../../cypress/support/constants'
+import { authenticationFormSelectors } from '../../../../cypress/support/constants/selectors'
 import { accessibilitySelectors } from '../../../../cypress/support/constants/accessibility'
 
 import UserAuthForm from '../UserAuthForm'

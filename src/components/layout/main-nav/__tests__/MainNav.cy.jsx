@@ -7,9 +7,9 @@ import { urls } from '../../../../../cypress/support/constants/urls'
 import { viewports } from '../../../../../cypress/support/constants/viewports'
 
 import {
-	topNavigationSelectors,
 	pageSelectors,
-} from '../../../../../cypress/support/constants'
+	topNavigationSelectors,
+} from '../../../../../cypress/support/constants/selectors'
 
 import '../../../../../cypress/support/commands'
 

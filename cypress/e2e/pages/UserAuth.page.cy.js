@@ -10,7 +10,7 @@ import { user } from '../../support/constants/users'
 
 import { dialog, dialogMessages } from '../../support/constants/dialog'
 
-import { authenticationFormSelectors } from '../../support/constants'
+import { authenticationFormSelectors } from '../../support/constants/selectors'
 
 const loginUrl = baseUrl + urls.cyAuth
 

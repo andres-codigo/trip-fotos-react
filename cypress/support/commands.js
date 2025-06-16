@@ -9,7 +9,7 @@ import {
 	headerSelectors,
 	topNavigationSelectors,
 	authenticationFormSelectors,
-} from './constants'
+} from './constants/selectors'
 
 const mockStore = configureStore([])
 ////

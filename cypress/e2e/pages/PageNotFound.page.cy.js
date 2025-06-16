@@ -2,7 +2,10 @@ import { baseUrl, urls } from '../../support/constants/urls'
 
 import { user } from '../../support/constants/users'
 
-import { headerSelectors, pageNotFoundSelectors } from '../../support/constants'
+import {
+	headerSelectors,
+	pageNotFoundSelectors,
+} from '../../support/constants/selectors'
 
 describe('Logged in > PageNotFound page', () => {
 	const loginUrl = baseUrl + urls.cyAuth

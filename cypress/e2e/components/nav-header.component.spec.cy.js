@@ -5,7 +5,7 @@ import { user } from '../../support/constants/users'
 import {
 	headerSelectors,
 	topNavigationSelectors,
-} from '../../support/constants'
+} from '../../support/constants/selectors'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
