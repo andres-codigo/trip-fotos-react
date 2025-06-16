@@ -1,45 +1,7 @@
-import { FIREBASE_ERROR_TYPES } from '../../src/constants/firebase-error-types'
-
 import {
 	getByDataCy,
 	getByDataCyError,
 } from '../../src/testUtils/cypress/selectors'
-
-export const apiDatabase = {
-	// API
-	apiUrl: Cypress.env('API_URL'),
-	apiKey: Cypress.env('API_KEY'),
-
-	// DATABASE
-	POST: 'POST',
-}
-
-export const apiUrls = {
-	signInWithPassword: `${apiDatabase.apiUrl}signInWithPassword?key=${apiDatabase.apiKey}`,
-}
-
-export const errorMessages = {
-	[FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-		.INVALID_LOGIN_CREDENTIALS]:
-		FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-			.INVALID_LOGIN_CREDENTIALS_MESSAGE,
-	[FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-		.TOO_MANY_ATTEMPTS_TRY_LATER]:
-		FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-			.TOO_MANY_ATTEMPTS_TRY_LATER_MESSAGE,
-	[FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES.DEFAULT]:
-		FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES.DEFAULT_MESSAGE,
-}
-
-export const baseUrl = Cypress.config('baseUrl')
-
-export const urls = {
-	cyAuth: Cypress.env('AUTHENTICATION_URL'),
-	cyTrips: Cypress.env('TRIPS_URL'),
-	cyMessages: Cypress.env('MESSAGES_URL'),
-	cyPageNotFound: Cypress.env('PAGENOTFOUND_URL'),
-	cyNonExistentPath: Cypress.env('NON_EXISTENT_URL'),
-}
 
 export const viewports = {
 	mobile: {
