@@ -50,8 +50,11 @@ const UserAuthForm = ({
 			noValidate
 			data-cy="user-authentication-form"
 			aria-busy={isLoading}
-			aria-labelledby="user-auth-form-title">
-			<h2 id="user-auth-form-title">
+			aria-labelledby="user-authentication-form-title">
+			<h2
+				id="user-authentication-form-title"
+				className={userAuthStyles.userAuthenticationTitle}
+				data-cy="user-authentication-form-title">
 				{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? (
 					<>
 						Login{' '}
