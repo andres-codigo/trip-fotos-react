@@ -33,6 +33,18 @@ export default defineConfig({
 	optimizeDeps: {
 		force: true,
 	},
+	build: {
+		sourcemap: false,
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					react: ['react', 'react-dom'],
+					redux: ['redux', '@reduxjs/toolkit', 'react-redux'],
+					router: ['react-router-dom'],
+				},
+			},
+		},
+	},
 	test: {
 		globals: true,
 		environment: 'jsdom',
