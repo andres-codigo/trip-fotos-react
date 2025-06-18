@@ -3,7 +3,13 @@ import PropTypes from 'prop-types'
 import baseCardStyles from './BaseCard.module.scss'
 
 const BaseCard = ({ children }) => {
-	return <div className={baseCardStyles.card}>{children}</div>
+	return (
+		<div
+			className={baseCardStyles.card}
+			data-cy="base-card">
+			{children}
+		</div>
+	)
 }
 
 BaseCard.propTypes = {
