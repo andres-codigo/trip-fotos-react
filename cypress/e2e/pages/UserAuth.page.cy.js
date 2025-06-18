@@ -116,7 +116,9 @@ describe('Form submission', () => {
 	})
 
 	it('redirects on successful login', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
+		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword).as(
+			'loginRequest',
+		)
 		cy.login(user.validEmail, user.validPassword)
 		cy.wait('@loginRequest')
 
@@ -162,7 +164,9 @@ describe('UI state and mode switching', () => {
 	})
 
 	it('shows a loading dialog with spinner while authenticating', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
+		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword).as(
+			'loginRequest',
+		)
 		cy.login(user.validEmail, user.validPassword)
 
 		cy.get(dialog.loading)
