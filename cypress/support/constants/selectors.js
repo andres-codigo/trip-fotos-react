@@ -1,5 +1,6 @@
 import {
 	getByDataCy,
+	getByDataCyAlt,
 	getByDataCyError,
 } from '../../../src/testUtils/cypress/selectors'
 
@@ -7,10 +8,10 @@ import {
 /// Page Selectors
 /////
 export const pageSelectors = {
-	tripsPage: getByDataCy('trips-page'),
-	messagesPage: getByDataCy('messages-page'),
-	authenticationPage: getByDataCy('authentication-page'),
-	pageNotFoundPage: getByDataCy('page-not-found-page'),
+	tripsPage: getByDataCyAlt('trips-main-container'),
+	messagesPage: getByDataCyAlt('messages-main-container'),
+	authenticationPage: getByDataCyAlt('authentication-main-container'),
+	pageNotFoundPage: getByDataCyAlt('page-not-found-main-container-page'),
 }
 
 export const pageNotFoundSelectors = {
