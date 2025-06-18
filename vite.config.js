@@ -39,8 +39,16 @@ export default defineConfig({
 			output: {
 				manualChunks: {
 					react: ['react', 'react-dom'],
-					redux: ['redux', '@reduxjs/toolkit', 'react-redux'],
+					redux: [
+						'redux',
+						'@reduxjs/toolkit',
+						'react-redux',
+						'redux-persist',
+					],
 					router: ['react-router-dom'],
+					firebase: ['firebase/app'],
+					analytics: ['@vercel/analytics'],
+					transition: ['react-transition-group'],
 				},
 			},
 		},
