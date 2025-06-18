@@ -8,6 +8,7 @@ import {
 /// Page Selectors
 /////
 export const pageSelectors = {
+	mainContainer: getByDataCy('main-container'),
 	tripsPage: getByDataCyAlt('trips-main-container'),
 	messagesPage: getByDataCyAlt('messages-main-container'),
 	authenticationPage: getByDataCyAlt('authentication-main-container'),
