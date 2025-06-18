@@ -134,6 +134,9 @@ npm run vitest:watch
 # Generate a test coverage report
 npm run vitest:coverage
 
+# Visual Vite bundle analysis
+npm run analyze
+
 # Build the project for production
 npm run build
 
@@ -517,6 +520,18 @@ npm run preview
 ```
 
 ---
+
+### Analyse Bundle Size (Vite Bundle Visualizer)
+
+You can analyse your production bundle to identify large dependencies and optimise performance using [Vite Bundle Visualizer](https://github.com/btd/vite-plugin-visualizer):
+
+```bash
+npm run analyze
+```
+
+This will generate a visual interactive report (usually `stats.html`) showing the size of each module in your bundle. Open the generated file in your browser to explore and identify optimisation opportunities.
+
+> **Tip:** Keeping your bundle size small improves load times and user experience.
 
 <a id="deployment"></a>
 
