@@ -27,6 +27,14 @@ export const testSelectors = {
 }
 
 /////
+/// Common Component Selectors
+/////
+export const commonSelectors = {
+	baseCard: getByDataCy('base-card'),
+	baseSpinner: getByDataCy('base-spinner'),
+}
+
+/////
 /// Component Selectors
 /////
 export const headerSelectors = {
