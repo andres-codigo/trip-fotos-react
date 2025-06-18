@@ -11,7 +11,9 @@ const LoadingFallback = ({ isComponent }) => {
 			<BaseSpinner />
 		</BaseCard>
 	) : (
-		<main className="mainContainer">
+		<main
+			className="loadingFallback"
+			data-cy="main-container">
 			<BaseCard className="loadingFallback">
 				<BaseSpinner />
 			</BaseCard>
