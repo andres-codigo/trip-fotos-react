@@ -20,7 +20,7 @@ import Header from '@/components/layout/header/Header'
 const UserAuth = React.lazy(() => import('@/pages/authentication/UserAuth'))
 const Trips = React.lazy(() => import('@/pages/trips/Trips'))
 const Messages = React.lazy(() => import('@/pages/messages/Messages'))
-import PageNotFound from '@/pages/page-not-found-main-container/PageNotFound'
+import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
 function AppRoutes() {
 	const dispatch = useDispatch()

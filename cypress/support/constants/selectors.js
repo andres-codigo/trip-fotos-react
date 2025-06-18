@@ -12,7 +12,7 @@ export const pageSelectors = {
 	tripsPage: getByDataCyAlt('trips-main-container'),
 	messagesPage: getByDataCyAlt('messages-main-container'),
 	authenticationPage: getByDataCyAlt('authentication-main-container'),
-	pageNotFoundPage: getByDataCyAlt('page-not-found-main-container-page'),
+	pageNotFoundPage: getByDataCyAlt('page-not-found-main-container'),
 }
 
 export const pageNotFoundSelectors = {
