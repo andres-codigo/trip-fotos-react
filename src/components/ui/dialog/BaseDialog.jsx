@@ -1,12 +1,8 @@
-import { useState, useEffect, useRef, useId, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, useId } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 
-const CSSTransition = lazy(() =>
-	import('react-transition-group').then((mod) => ({
-		default: mod.CSSTransition,
-	})),
-)
+import { CSSTransition } from 'react-transition-group'
 
 import { DIALOG } from '@/constants/test/dialog'
 
@@ -67,71 +63,67 @@ const BaseDialog = ({
 					onClick={tryClose}
 					data-cy={DIALOG.BACKDROP}></div>
 			)}
-			<Suspense fallback={null}>
-				<CSSTransition
-					in={show}
-					appear={show}
-					nodeRef={nodeRef}
-					timeout={300}
-					classNames={{
-						appear: baseDialogStyles['dialog-appear'],
-						appearActive: baseDialogStyles['dialog-appear-active'],
-						enter: baseDialogStyles['dialog-enter'],
-						enterActive: baseDialogStyles['dialog-enter-active'],
-						exit: baseDialogStyles['dialog-exit'],
-						exitActive: baseDialogStyles['dialog-exit-active'],
-					}}
-					unmountOnExit>
-					<dialog
-						ref={nodeRef}
-						open
-						className={baseDialogStyles.dialog}
-						data-cy={dataCy}
-						aria-modal="true"
-						role={
-							isError
-								? DIALOG.ROLE_ALERTDIALOG
-								: DIALOG.ROLE_DIALOG
-						}
-						aria-labelledby={titleId}
-						aria-describedby={descId}
-						tabIndex={-1}>
-						<header className={baseDialogStyles.header}>
-							{header ? (
-								header
-							) : (
-								<h2
-									id={titleId}
-									data-cy={DIALOG.TITLE}>
-									{title}
-								</h2>
-							)}
-						</header>
-						<main
-							className={
-								sectionClasses
-									? baseDialogStyles.image
-									: baseDialogStyles.general
-							}
-							data-cy={DIALOG.TEXT_CONTENT}>
-							<div id={descId}>{children}</div>
-						</main>
-						{!fixed && (
-							<footer>
-								{actions ? (
-									actions
-								) : (
-									<BaseButton
-										isError={isError}
-										onClick={tryClose}>
-										Close
-									</BaseButton>
-								)}
-							</footer>
+			<CSSTransition
+				in={show}
+				appear={show}
+				nodeRef={nodeRef}
+				timeout={300}
+				classNames={{
+					appear: baseDialogStyles['dialog-appear'],
+					appearActive: baseDialogStyles['dialog-appear-active'],
+					enter: baseDialogStyles['dialog-enter'],
+					enterActive: baseDialogStyles['dialog-enter-active'],
+					exit: baseDialogStyles['dialog-exit'],
+					exitActive: baseDialogStyles['dialog-exit-active'],
+				}}
+				unmountOnExit>
+				<dialog
+					ref={nodeRef}
+					open
+					className={baseDialogStyles.dialog}
+					data-cy={dataCy}
+					aria-modal="true"
+					role={
+						isError ? DIALOG.ROLE_ALERTDIALOG : DIALOG.ROLE_DIALOG
+					}
+					aria-labelledby={titleId}
+					aria-describedby={descId}
+					tabIndex={-1}>
+					<header className={baseDialogStyles.header}>
+						{header ? (
+							header
+						) : (
+							<h2
+								id={titleId}
+								data-cy={DIALOG.TITLE}>
+								{title}
+							</h2>
 						)}
-					</dialog>
-				</CSSTransition>
-			</Suspense>
+					</header>
+					<main
+						className={
+							sectionClasses
+								? baseDialogStyles.image
+								: baseDialogStyles.general
+						}
+						data-cy={DIALOG.TEXT_CONTENT}>
+						<div id={descId}>{children}</div>
+					</main>
+					{!fixed && (
+						<footer>
+							{actions ? (
+								actions
+							) : (
+								<BaseButton
+									isError={isError}
+									onClick={tryClose}>
+									Close
+								</BaseButton>
+							)}
+						</footer>
+					)}
+				</dialog>
+			</CSSTransition>
 		</>,
 		document.body,
 	)

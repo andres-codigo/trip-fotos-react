@@ -15,8 +15,10 @@ import { validateEmail, validatePassword } from '@/utils/validation'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 
-const BaseDialog = lazy(() => import('@/components/ui/dialog/BaseDialog'))
-const BaseSpinner = lazy(() => import('@/components/ui/spinner/BaseSpinner'))
+import BaseDialog from '@/components/ui/dialog/BaseDialog'
+import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
+
+import LoadingFallback from '@/components/common/LoadingFallback'
 const UserAuthForm = lazy(() => import('@/components/forms/UserAuthForm'))
 
 const UserAuth = () => {
@@ -128,30 +130,28 @@ const UserAuth = () => {
 			className="mainContainer authenticationPage"
 			data-cy="main-container"
 			data-cy-alt="authentication-main-container">
-			<Suspense fallback={null}>
-				{error && (
-					<BaseDialog
-						show={true}
-						isError={true}
-						title={GLOBAL.ERROR_DIALOG_TITLE}
-						onClose={handleError}
-						data-cy="invalid-email-or-password-dialog">
-						{error}
-					</BaseDialog>
-				)}
-				{isLoading && (
-					<BaseDialog
-						show={true}
-						title="Authenticating"
-						fixed
-						data-cy="loading-dialog">
-						Authenticating your details, one moment please...
-						<BaseSpinner />
-					</BaseDialog>
-				)}
-			</Suspense>
+			{error && (
+				<BaseDialog
+					show={true}
+					isError={true}
+					title={GLOBAL.ERROR_DIALOG_TITLE}
+					onClose={handleError}
+					data-cy="invalid-email-or-password-dialog">
+					{error}
+				</BaseDialog>
+			)}
+			{isLoading && (
+				<BaseDialog
+					show={true}
+					title="Authenticating"
+					fixed
+					data-cy="loading-dialog">
+					Authenticating your details, one moment please...
+					<BaseSpinner />
+				</BaseDialog>
+			)}
 			<BaseCard>
-				<Suspense fallback={null}>
+				<Suspense fallback={<LoadingFallback />}>
 					<UserAuthForm
 						email={email}
 						password={password}
