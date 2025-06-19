@@ -1,3 +1,4 @@
+@use '@/styles/setup/variables' as variables;
 @use '@/styles/setup/mixins/mixins' as mixins;
 @use '@/styles/setup/mixins/form/valid/valid' as validForm;
 @use '@/styles/setup/mixins/form/invalid/invalid' as invalidForm;
@@ -35,6 +36,14 @@
 			input {
 				@include invalidForm.invalid-border;
 			}
+		}
+	}
+
+	.toggleLink {
+		color: variables.$color-ripe-plum;
+		padding-left: 0.5rem;
+		&:hover {
+			color: variables.$color-ripe-eggplant;
 		}
 	}
 }

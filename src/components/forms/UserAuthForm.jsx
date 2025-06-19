@@ -128,6 +128,7 @@ const UserAuthForm = ({
 				id="login-signup-toggle-link"
 				isLink
 				onClick={handleSignUpClick}
+				className={userAuthStyles.toggleLink}
 				data-cy="login-signup-toggle-link"
 				isDisabled={isLoading}>
 				{mode === API_DATABASE.API_AUTH_LOGIN_MODE
