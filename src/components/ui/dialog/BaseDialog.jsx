@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useId } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
+
 import { CSSTransition } from 'react-transition-group'
 
 import { DIALOG } from '@/constants/test/dialog'

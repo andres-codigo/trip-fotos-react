@@ -13,10 +13,12 @@ import useFormField from '@/components/forms/hooks/useFormField'
 import { getFirebaseAuthErrorMessage } from '@/utils/getFirebaseAuthErrorMessage'
 import { validateEmail, validatePassword } from '@/utils/validation'
 
-import UserAuthForm from '@/components/forms/UserAuthForm'
-import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseCard from '@/components/ui/card/BaseCard'
+
+import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
+
+import UserAuthForm from '@/components/forms/UserAuthForm'
 
 const UserAuth = () => {
 	const [email, setEmail] = useFormField('')
@@ -125,7 +127,8 @@ const UserAuth = () => {
 	return (
 		<main
 			className="mainContainer authenticationPage"
-			data-cy="authentication-page">
+			data-cy="main-container"
+			data-cy-alt="authentication-main-container">
 			{error && (
 				<BaseDialog
 					show={true}

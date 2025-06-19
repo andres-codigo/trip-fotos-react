@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
 	Routes,
@@ -14,10 +14,12 @@ import { PATHS } from '@/constants/paths'
 
 import { tryLogin } from '@/store/slices/authenticationSlice'
 
+import LoadingFallback from '@/components/common/LoadingFallback'
+
 import Header from '@/components/layout/header/Header'
-import UserAuth from '@/pages/authentication/UserAuth'
-import Trips from '@/pages/trips/Trips'
-import Messages from '@/pages/messages/Messages'
+const UserAuth = lazy(() => import('@/pages/authentication/UserAuth'))
+const Trips = lazy(() => import('@/pages/trips/Trips'))
+const Messages = lazy(() => import('@/pages/messages/Messages'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
 function AppRoutes() {
@@ -62,37 +64,39 @@ function AppRoutes() {
 	return (
 		<>
 			<Header />
-			<Routes>
-				<Route
-					path={PATHS.HOME}
-					element={<Trips />}
-				/>
-				<Route
-					path={PATHS.AUTHENTICATION}
-					element={<UserAuth />}
-				/>
-				<Route
-					path={PATHS.TRIPS}
-					element={<Trips />}
-				/>
-				<Route
-					path={PATHS.MESSAGES}
-					element={<Messages />}
-				/>
-				<Route
-					path={PATHS.PAGENOTFOUND}
-					element={<PageNotFound />}
-				/>
-				<Route
-					path="*"
-					element={
-						<Navigate
-							to={PATHS.PAGENOTFOUND}
-							replace
-						/>
-					}
-				/>
-			</Routes>
+			<Suspense fallback={<LoadingFallback />}>
+				<Routes>
+					<Route
+						path={PATHS.HOME}
+						element={<Trips />}
+					/>
+					<Route
+						path={PATHS.AUTHENTICATION}
+						element={<UserAuth />}
+					/>
+					<Route
+						path={PATHS.TRIPS}
+						element={<Trips />}
+					/>
+					<Route
+						path={PATHS.MESSAGES}
+						element={<Messages />}
+					/>
+					<Route
+						path={PATHS.PAGENOTFOUND}
+						element={<PageNotFound />}
+					/>
+					<Route
+						path="*"
+						element={
+							<Navigate
+								to={PATHS.PAGENOTFOUND}
+								replace
+							/>
+						}
+					/>
+				</Routes>
+			</Suspense>
 		</>
 	)
 }

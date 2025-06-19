@@ -5,6 +5,7 @@ export const apiDatabase = {
 
 	// DATABASE
 	POST: 'POST',
+	GET: 'GET',
 }
 
 export const apiUrls = {

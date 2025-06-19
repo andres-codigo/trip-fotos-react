@@ -18,7 +18,8 @@ const PageNotFound = () => {
 				'mainContainer',
 				pageNotFoundStyles.pageNotFoundContainer,
 			].join(' ')}
-			data-cy="page-not-found">
+			data-cy="main-container"
+			data-cy-alt="page-not-found-main-container">
 			<BaseCard>
 				<h2>This page is not available. Sorry about that.</h2>
 				<p>
