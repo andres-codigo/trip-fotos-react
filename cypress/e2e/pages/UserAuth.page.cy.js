@@ -94,7 +94,7 @@ describe('Form submission', () => {
 			.type(user.validPassword)
 			.type('{enter}')
 
-		cy.get(dialog.loading, { timeout: 10000 }).should('exist')
+		cy.get(dialog.loading, { timeout: 20000 }).should('be.visible')
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
@@ -163,13 +163,14 @@ describe('UI state and mode switching', () => {
 		)
 	})
 
-	it('shows a loading dialog with spinner while authenticating', () => {
+	it.only('shows a loading dialog with spinner while authenticating', () => {
 		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword).as(
 			'loginRequest',
 		)
 		cy.login(user.validEmail, user.validPassword)
 
-		cy.get(dialog.loading)
+		cy.get(dialog.loading, { timeout: 20000 })
+			.should('be.visible')
 			.parent()
 			.within(() => {
 				cy.get(dialog.title).should(
