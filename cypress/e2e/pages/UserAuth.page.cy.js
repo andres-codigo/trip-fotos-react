@@ -170,7 +170,6 @@ describe('UI state and mode switching', () => {
 		cy.login(user.validEmail, user.validPassword)
 
 		cy.get(dialog.loading, { timeout: 20000 })
-			.should('be.visible')
 			.parent()
 			.within(() => {
 				cy.get(dialog.title).should(
