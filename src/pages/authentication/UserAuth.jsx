@@ -151,18 +151,22 @@ const UserAuth = () => {
 				)}
 			</Suspense>
 			<BaseCard>
-				<UserAuthForm
-					email={email}
-					password={password}
-					mode={mode}
-					onEmailChange={(e) => validateEmailHandler(e.target.value)}
-					onPasswordChange={(e) =>
-						validatePasswordHandler(e.target.value)
-					}
-					onSubmit={submitForm}
-					onSwitchMode={switchAuthMode}
-					isLoading={isLoading}
-				/>
+				<Suspense fallback={null}>
+					<UserAuthForm
+						email={email}
+						password={password}
+						mode={mode}
+						onEmailChange={(e) =>
+							validateEmailHandler(e.target.value)
+						}
+						onPasswordChange={(e) =>
+							validatePasswordHandler(e.target.value)
+						}
+						onSubmit={submitForm}
+						onSwitchMode={switchAuthMode}
+						isLoading={isLoading}
+					/>
+				</Suspense>
 			</BaseCard>
 		</main>
 	)
