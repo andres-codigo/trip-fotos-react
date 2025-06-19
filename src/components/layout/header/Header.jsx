@@ -1,9 +1,10 @@
+import { lazy, Suspense } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
 import { PATHS } from '@/constants/paths'
 
-import MainNav from '../main-nav/MainNav'
+const MainNav = lazy(() => import('../main-nav/MainNav'))
 
 import headerStyles from './Header.module.scss'
 
@@ -26,7 +27,9 @@ function Header() {
 					Trip Fotos
 				</Link>
 			</h1>
-			<MainNav isLoggedIn={isLoggedIn} />
+			<Suspense fallback={null}>
+				<MainNav isLoggedIn={isLoggedIn} />
+			</Suspense>
 		</header>
 	)
 }

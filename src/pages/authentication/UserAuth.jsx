@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -13,10 +13,11 @@ import useFormField from '@/components/forms/hooks/useFormField'
 import { getFirebaseAuthErrorMessage } from '@/utils/getFirebaseAuthErrorMessage'
 import { validateEmail, validatePassword } from '@/utils/validation'
 
-import UserAuthForm from '@/components/forms/UserAuthForm'
-import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseCard from '@/components/ui/card/BaseCard'
-import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
+
+const BaseDialog = lazy(() => import('@/components/ui/dialog/BaseDialog'))
+const BaseSpinner = lazy(() => import('@/components/ui/spinner/BaseSpinner'))
+const UserAuthForm = lazy(() => import('@/components/forms/UserAuthForm'))
 
 const UserAuth = () => {
 	const [email, setEmail] = useFormField('')
@@ -127,26 +128,28 @@ const UserAuth = () => {
 			className="mainContainer authenticationPage"
 			data-cy="main-container"
 			data-cy-alt="authentication-main-container">
-			{error && (
-				<BaseDialog
-					show={true}
-					isError={true}
-					title={GLOBAL.ERROR_DIALOG_TITLE}
-					onClose={handleError}
-					data-cy="invalid-email-or-password-dialog">
-					{error}
-				</BaseDialog>
-			)}
-			{isLoading && (
-				<BaseDialog
-					show={true}
-					title="Authenticating"
-					fixed
-					data-cy="loading-dialog">
-					Authenticating your details, one moment please...
-					<BaseSpinner />
-				</BaseDialog>
-			)}
+			<Suspense fallback={null}>
+				{error && (
+					<BaseDialog
+						show={true}
+						isError={true}
+						title={GLOBAL.ERROR_DIALOG_TITLE}
+						onClose={handleError}
+						data-cy="invalid-email-or-password-dialog">
+						{error}
+					</BaseDialog>
+				)}
+				{isLoading && (
+					<BaseDialog
+						show={true}
+						title="Authenticating"
+						fixed
+						data-cy="loading-dialog">
+						Authenticating your details, one moment please...
+						<BaseSpinner />
+					</BaseDialog>
+				)}
+			</Suspense>
 			<BaseCard>
 				<UserAuthForm
 					email={email}

@@ -1,4 +1,4 @@
-import React, { useEffect, Suspense } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
 	Routes,
@@ -17,9 +17,9 @@ import { tryLogin } from '@/store/slices/authenticationSlice'
 import LoadingFallback from '@/components/common/LoadingFallback'
 
 import Header from '@/components/layout/header/Header'
-const UserAuth = React.lazy(() => import('@/pages/authentication/UserAuth'))
-const Trips = React.lazy(() => import('@/pages/trips/Trips'))
-const Messages = React.lazy(() => import('@/pages/messages/Messages'))
+const UserAuth = lazy(() => import('@/pages/authentication/UserAuth'))
+const Trips = lazy(() => import('@/pages/trips/Trips'))
+const Messages = lazy(() => import('@/pages/messages/Messages'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
 function AppRoutes() {
