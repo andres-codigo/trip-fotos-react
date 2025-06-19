@@ -294,3 +294,86 @@ describe('UI error dialog', () => {
 		cy.get(dialog.invalidEmailOrPassword).should('not.exist')
 	})
 })
+
+describe.only('Suspense/Loading Dialog', () => {
+	beforeEach(() => {
+		cy.visit(loginUrl)
+	})
+
+	it('shows a loading dialog with spinner while authenticating (delayed API)', () => {
+		cy.intercept(apiDatabase.POST, apiUrls.signInWithPassword, (req) => {
+			req.on('response', (res) => {
+				res.setDelay(1200)
+			})
+		}).as('delayedLogin')
+
+		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
+		cy.get(authenticationFormSelectors.passwordInput).type(
+			user.invalidPassword,
+		)
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
+
+		cy.get(dialog.loading, { timeout: 10000 }).should('be.visible')
+		cy.get(dialog.loading)
+			.parent()
+			.within(() => {
+				cy.get(dialog.title).should(
+					'contain.text',
+					dialogMessages.loading.title,
+				)
+				cy.get(dialog.textContent).should(
+					'contain.text',
+					dialogMessages.loading.text,
+				)
+				cy.get(dialog.spinnerContainer).should('exist')
+				cy.get(dialog.spinnerImage)
+					.should('exist')
+					.and('have.attr', 'src')
+					.and('match', /^data:image\/svg\+xml/)
+			})
+
+		cy.wait('@delayedLogin')
+	})
+
+	it('shows Suspense fallback loading dialog if dynamic import is slow', () => {
+		cy.intercept(apiDatabase.GET, /\/static\/js\/.*\.chunk\.js$/, (req) => {
+			req.on('response', (res) => {
+				res.setDelay(1500)
+			})
+		}).as('chunk')
+
+		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
+		cy.get(authenticationFormSelectors.passwordInput).type(
+			user.validPassword,
+		)
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
+
+		cy.get(dialog.loading, { timeout: 10000 }).should('be.visible')
+	})
+
+	it('loading dialog disappears after login completes', () => {
+		cy.intercept(apiDatabase.POST, apiUrls.signInWithPassword, (req) => {
+			req.reply({
+				statusCode: 200,
+				body: {
+					idToken: 'fake-token',
+					localId: 'fake-id',
+					displayName: 'Test User',
+					email: user.validEmail,
+					expiresIn: '3600',
+				},
+				delay: 1000,
+			})
+		}).as('loginRequest')
+
+		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
+		cy.get(authenticationFormSelectors.passwordInput).type(
+			user.validPassword,
+		)
+		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
+
+		cy.get(dialog.loading, { timeout: 10000 }).should('be.visible')
+		cy.wait('@loginRequest')
+		cy.get(dialog.loading, { timeout: 10000 }).should('not.exist')
+	})
+})
