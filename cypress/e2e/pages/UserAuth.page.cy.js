@@ -163,7 +163,7 @@ describe('UI state and mode switching', () => {
 		)
 	})
 
-	it.only('shows a loading dialog with spinner while authenticating', () => {
+	it('shows a loading dialog with spinner while authenticating', () => {
 		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword).as(
 			'loginRequest',
 		)
