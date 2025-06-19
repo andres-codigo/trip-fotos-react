@@ -1,4 +1,3 @@
-// import { useState, lazy, Suspense } from 'react'
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
@@ -19,8 +18,6 @@ import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-// import LoadingFallback from '@/components/common/LoadingFallback'
-// const UserAuthForm = lazy(() => import('@/components/forms/UserAuthForm'))
 import UserAuthForm from '@/components/forms/UserAuthForm'
 
 const UserAuth = () => {
@@ -153,7 +150,6 @@ const UserAuth = () => {
 				</BaseDialog>
 			)}
 			<BaseCard>
-				{/* <Suspense fallback={<LoadingFallback />}> */}
 				<UserAuthForm
 					email={email}
 					password={password}
@@ -166,7 +162,6 @@ const UserAuth = () => {
 					onSwitchMode={switchAuthMode}
 					isLoading={isLoading}
 				/>
-				{/* </Suspense> */}
 			</BaseCard>
 		</main>
 	)
