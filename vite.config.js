@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'path'
+import fs from 'fs'
 
 import react from '@vitejs/plugin-react'
 import eslint from 'vite-plugin-eslint2'
@@ -12,10 +13,18 @@ export default defineConfig({
 	server: {
 		port: 3000,
 		open: process.env.VITE_OPEN === 'true',
+		https: {
+			key: fs.readFileSync('./certs/localhost.key'),
+			cert: fs.readFileSync('./certs/localhost.crt'),
+		},
 	},
 	preview: {
 		port: 3001,
 		open: true,
+		https: {
+			key: fs.readFileSync('./certs/localhost.key'),
+			cert: fs.readFileSync('./certs/localhost.crt'),
+		},
 	},
 	plugins: [
 		react(),
