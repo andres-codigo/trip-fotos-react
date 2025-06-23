@@ -13,7 +13,7 @@ describe('Logged in > PageNotFound page', () => {
 		cy.login(user.validEmail, user.validPassword)
 	})
 	it('displays the 404 page and user can navigate to the home page', () => {
-		cy.url().should('eq', baseUrl + urls.cyTrips)
+		cy.url().should('eq', baseUrl + urls.cyHome)
 		// // Visit a non-existent route
 		cy.visit(urls.cyNonExistentPath, { failOnStatusCode: false })
 
@@ -27,7 +27,7 @@ describe('Logged in > PageNotFound page', () => {
 
 		// Check App title link is present and has the correct href
 		cy.get(headerSelectors.siteHeaderTitleLink).as('header')
-		cy.get('@header').find('a').should('have.attr', 'href', urls.cyTrips)
+		cy.get('@header').find('a').should('have.attr', 'href', urls.cyHome)
 
 		// Click the back to home link and verify url
 		cy.get(pageNotFoundSelectors.homeLink).as('homeLink')

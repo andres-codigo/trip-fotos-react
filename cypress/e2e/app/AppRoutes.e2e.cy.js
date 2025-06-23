@@ -16,14 +16,14 @@ describe('App Routing', () => {
 		)
 	})
 
-	it('redirects to trips after successful login', () => {
+	it('redirects to home after successful login', () => {
 		cy.visit(baseUrl + urls.cyAuth)
 		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
 		cy.get(authenticationFormSelectors.passwordInput).type(
 			user.validPassword,
 		)
 		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
-		cy.url({ timeout: 10000 }).should('include', urls.cyTrips)
+		cy.url({ timeout: 10000 }).should('include', urls.cyHome)
 	})
 
 	it('allows access to protected routes after login', () => {
