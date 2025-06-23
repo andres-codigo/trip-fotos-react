@@ -32,3 +32,6 @@ scripts/dependency-check/
 
 # BASH SCRIPTS
 .bash-scripts
+
+# CERTS
+certs/

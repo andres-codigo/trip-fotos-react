@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'path'
+import fs from 'fs'
 
 import react from '@vitejs/plugin-react'
 import eslint from 'vite-plugin-eslint2'
@@ -8,14 +9,25 @@ import eslint from 'vite-plugin-eslint2'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+const isCypress = !!process.env.CYPRESS
+
+const httpsConfig = !isCypress
+	? {
+			key: fs.readFileSync('./certs/localhost.key'),
+			cert: fs.readFileSync('./certs/localhost.crt'),
+		}
+	: undefined
+
 export default defineConfig({
 	server: {
 		port: 3000,
 		open: process.env.VITE_OPEN === 'true',
+		https: httpsConfig,
 	},
 	preview: {
 		port: 3001,
 		open: true,
+		https: httpsConfig,
 	},
 	plugins: [
 		react(),
