@@ -26,7 +26,7 @@ export default defineConfig({
 		VITE_DATABASE_URL: process.env.VITE_BACKEND_BASE_URL,
 	},
 	e2e: {
-		baseUrl: process.env.VITE_ROOT_URL || 'https://localhost:3000',
+		baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',
 	},
 
 	component: {
