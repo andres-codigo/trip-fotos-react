@@ -32,13 +32,13 @@ describe('<Header />', () => {
 					cy.mountWithProviders(<Header />, store)
 
 					cy.setViewportToMobile()
-					headerAssertions(urls.cyRoot, true, false, true)
+					headerAssertions(urls.cyHome, true, false, true)
 
 					cy.setViewportToTablet()
-					headerAssertions(urls.cyRoot, true, true, true)
+					headerAssertions(urls.cyHome, true, true, true)
 
 					cy.setViewportToDesktop()
-					headerAssertions(urls.cyRoot, true, true, true)
+					headerAssertions(urls.cyHome, true, true, true)
 				})
 			})
 		})
