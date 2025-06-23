@@ -1,7 +1,7 @@
 export const baseUrl = Cypress.config('baseUrl')
 
 export const urls = {
-	cyRoot: Cypress.env('ROOT_URL'),
+	cyHome: Cypress.env('HOME_URL'),
 	cyAuth: Cypress.env('AUTHENTICATION_URL'),
 	cyTrips: Cypress.env('TRIPS_URL'),
 	cyMessages: Cypress.env('MESSAGES_URL'),
