@@ -21,6 +21,8 @@ const getHttpsConfig = () => {
 	return undefined
 }
 
+// Checks if Cypress is running to conditionally set HTTPS config
+// If Cypress is not running, it will use the HTTPS configuration if available, otherwise it will fall back to HTTP.
 const isCypress = !!process.env.CYPRESS
 const httpsConfig = !isCypress ? getHttpsConfig() : undefined
 
