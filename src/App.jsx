@@ -19,7 +19,7 @@ import LoadingFallback from '@/components/common/LoadingFallback'
 import Header from '@/components/layout/header/Header'
 const UserAuth = lazy(() => import('@/pages/authentication/UserAuth'))
 const Home = lazy(() => import('@/pages/home/Home'))
-const Trips = lazy(() => import('@/pages/trips/Trips'))
+const Travellers = lazy(() => import('@/pages/travellers/Travellers'))
 const Messages = lazy(() => import('@/pages/messages/Messages'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
@@ -55,7 +55,11 @@ function AppRoutes() {
 
 		if (!isLoggedIn && !isPublic) {
 			// Only redirect if the route is a known protected route
-			const protectedPaths = [PATHS.HOME, PATHS.TRIPS, PATHS.MESSAGES]
+			const protectedPaths = [
+				PATHS.HOME,
+				PATHS.TRAVELLERS,
+				PATHS.MESSAGES,
+			]
 			if (protectedPaths.includes(location.pathname)) {
 				navigate(PATHS.AUTHENTICATION, { replace: true })
 			}
@@ -76,8 +80,8 @@ function AppRoutes() {
 						element={<UserAuth />}
 					/>
 					<Route
-						path={PATHS.TRIPS}
-						element={<Trips />}
+						path={PATHS.TRAVELLERS}
+						element={<Travellers />}
 					/>
 					<Route
 						path={PATHS.MESSAGES}

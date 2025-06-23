@@ -32,7 +32,7 @@ describe('Logged in > PageNotFound page', () => {
 		// Click the back to home link and verify url
 		cy.get(pageNotFoundSelectors.homeLink).as('homeLink')
 		cy.get('@homeLink').click()
-		cy.url().should('eq', baseUrl + urls.cyTrips)
+		cy.url().should('eq', baseUrl + urls.cyTravellers)
 
 		// Revisit a non-existent route
 		cy.visit(urls.cyNonExistentPath, { failOnStatusCode: false })

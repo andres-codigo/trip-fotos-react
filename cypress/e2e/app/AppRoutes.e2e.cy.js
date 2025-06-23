@@ -5,7 +5,7 @@ import { user } from '../../support/constants/users'
 
 describe('App Routing', () => {
 	it('redirects unauthenticated users from protected routes to login', () => {
-		cy.visit(baseUrl + urls.cyTrips)
+		cy.visit(baseUrl + urls.cyTravellers)
 		cy.url().should('include', urls.cyAuth)
 	})
 
