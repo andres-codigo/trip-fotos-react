@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'path'
+import fs from 'fs'
 
 import react from '@vitejs/plugin-react'
 import eslint from 'vite-plugin-eslint2'
@@ -8,14 +9,33 @@ import eslint from 'vite-plugin-eslint2'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
+const getHttpsConfig = () => {
+	const keyPath = './certs/localhost.key'
+	const certPath = './certs/localhost.crt'
+	if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+		return {
+			key: fs.readFileSync(keyPath),
+			cert: fs.readFileSync(certPath),
+		}
+	}
+	return undefined
+}
+
+// Checks if Cypress is running to conditionally set HTTPS config
+// If Cypress is not running, it will use the HTTPS configuration if available, otherwise it will fall back to HTTP.
+const isCypress = !!process.env.CYPRESS
+const httpsConfig = !isCypress ? getHttpsConfig() : undefined
+
 export default defineConfig({
 	server: {
 		port: 3000,
 		open: process.env.VITE_OPEN === 'true',
+		https: httpsConfig,
 	},
 	preview: {
 		port: 3001,
 		open: true,
+		https: httpsConfig,
 	},
 	plugins: [
 		react(),
