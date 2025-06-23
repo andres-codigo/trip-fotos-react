@@ -114,27 +114,30 @@ const UserAuthForm = ({
 					</span>
 				)}
 			</div>
-			<BaseButton
-				id="login-button"
-				type="submit"
-				mode="flat"
-				data-cy="login-submit-button"
-				isDisabled={isLoading}>
-				{mode === API_DATABASE.API_AUTH_LOGIN_MODE
-					? 'Log in'
-					: 'Sign up'}
-			</BaseButton>
-			<BaseButton
-				id="login-signup-toggle-link"
-				isLink
-				onClick={handleSignUpClick}
-				className={userAuthStyles.toggleLink}
-				data-cy="login-signup-toggle-link"
-				isDisabled={isLoading}>
-				{mode === API_DATABASE.API_AUTH_LOGIN_MODE
-					? 'Switch to Signup'
-					: 'Switch to Login'}
-			</BaseButton>
+			<div className={userAuthStyles.formActions}>
+				<BaseButton
+					id="login-button"
+					type="submit"
+					mode="flat"
+					className={userAuthStyles.formSubmitButton}
+					data-cy="login-submit-button"
+					isDisabled={isLoading}>
+					{mode === API_DATABASE.API_AUTH_LOGIN_MODE
+						? 'Log in'
+						: 'Sign up'}
+				</BaseButton>
+				<BaseButton
+					id="login-signup-toggle-link"
+					isLink
+					onClick={handleSignUpClick}
+					className={userAuthStyles.toggleLink}
+					data-cy="login-signup-toggle-link"
+					isDisabled={isLoading}>
+					{mode === API_DATABASE.API_AUTH_LOGIN_MODE
+						? 'Switch to Signup'
+						: 'Switch to Login'}
+				</BaseButton>
+			</div>
 		</form>
 	)
 }
