@@ -9,14 +9,20 @@ import eslint from 'vite-plugin-eslint2'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const isCypress = !!process.env.CYPRESS
-
-const httpsConfig = !isCypress
-	? {
-			key: fs.readFileSync('./certs/localhost.key'),
-			cert: fs.readFileSync('./certs/localhost.crt'),
+const getHttpsConfig = () => {
+	const keyPath = './certs/localhost.key'
+	const certPath = './certs/localhost.crt'
+	if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+		return {
+			key: fs.readFileSync(keyPath),
+			cert: fs.readFileSync(certPath),
 		}
-	: undefined
+	}
+	return undefined
+}
+
+const isCypress = !!process.env.CYPRESS
+const httpsConfig = !isCypress ? getHttpsConfig() : undefined
 
 export default defineConfig({
 	server: {
