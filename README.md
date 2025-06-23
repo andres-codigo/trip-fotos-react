@@ -194,6 +194,66 @@ npm run preview
     - Register your app in the Firebase Console.
     - Copy the Firebase configuration values and add them to your `.env` file.
 
+### HTTPS for Local Development
+
+This project supports running the local development server over **HTTPS** for a more production-like environment.
+
+#### 1. Generate Self-Signed Certificates
+
+You need a self-signed SSL certificate and key for local HTTPS.
+Run the following command in your project root to generate them:
+
+```sh
+openssl req -x509 -out localhost.crt -keyout localhost.key \
+  -newkey rsa:2048 -nodes -sha256 \
+  -subj '/CN=localhost' -extensions EXT -config <( \
+   printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+```
+
+#### 2. Move Certificates to the `certs` Folder
+
+Create a `certs` directory in your project root and move the generated files:
+
+```sh
+mkdir -p certs
+mv localhost.crt certs/
+mv localhost.key certs/
+```
+
+Your project structure should now include:
+
+```
+trip-fotos-react/
+  certs/
+    localhost.crt
+    localhost.key
+  ...
+```
+
+#### 3. Update `.gitignore`
+
+Add the `certs/` folder to your `.gitignore` to prevent committing sensitive certificate files:
+
+```
+certs/
+```
+
+#### 4. Vite HTTPS Configuration
+
+The Vite config is set up to use these certificates for HTTPS **only in local development**.
+If the `certs` folder or files are missing, Vite will fall back to HTTP (as in CI or Vercel deployments).
+
+#### 5. Start the Development Server
+
+```sh
+npm run dev
+```
+
+Visit [https://localhost:3000](https://localhost:3000) in your browser.
+You may see a browser warning about the self-signed certificate—this is expected for local development.
+
+---
+
 ### Environment Variables
 
 Create a `.env` file in the root directory and add the following key-value pairs:
@@ -229,6 +289,11 @@ VITE_ADMIN_ID='' # Firebase authenticated User UID for deletion of users rights
 # CYPRESS TESTING
 CYPRESS_USER_EMAIL=''
 CYPRESS_USER_PASSWORD=''
+
+# HTTPS CONFIGURATION
+HTTPS=true
+SSL_CRT_FILE=./certs/localhost.crt
+SSL_KEY_FILE=./certs/localhost.key
 
 ```
 
@@ -615,4 +680,12 @@ trip-fotos-react/
     - **Solution**: Ensure you have Node.js and npm installed. Check the required versions in the [Node.js](https://nodejs.org/) documentation.
 
 - **Issue**: Firebase environment variables are not working.
+
     - **Solution**: Ensure you have created a [.env](http://_vscodecontentref_/1) file in the root directory with the correct Firebase configuration values.
+
+- **Issue**: `Error: ENOENT: no such file or directory, open './certs/localhost.key'`
+
+    - **Solution**: Make sure you have generated the SSL certificate and key as described above. In CI and production (e.g., Vercel), the build will fall back to HTTP if the certs are missing.
+
+- **Issue**: Browser shows "Your connection is not private" on `https://localhost:3000`
+    - **Solution**: This is normal for self-signed certificates. Click "Advanced" and "Proceed" to continue.
