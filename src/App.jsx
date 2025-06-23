@@ -18,6 +18,7 @@ import LoadingFallback from '@/components/common/LoadingFallback'
 
 import Header from '@/components/layout/header/Header'
 const UserAuth = lazy(() => import('@/pages/authentication/UserAuth'))
+const Home = lazy(() => import('@/pages/home/Home'))
 const Trips = lazy(() => import('@/pages/trips/Trips'))
 const Messages = lazy(() => import('@/pages/messages/Messages'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
@@ -68,7 +69,7 @@ function AppRoutes() {
 				<Routes>
 					<Route
 						path={PATHS.HOME}
-						element={<Trips />}
+						element={<Home />}
 					/>
 					<Route
 						path={PATHS.AUTHENTICATION}
