@@ -1,6 +1,6 @@
 # trip-fotos-react
 
-[![Run Vitest Tests](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/vitest.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/vitest.yml)
+[![Run Unit Tests (Vitest)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/unit-tests-vitest.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/unit-tests-vitest.yml)
 
 ## Contents
 
