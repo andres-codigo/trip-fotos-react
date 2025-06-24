@@ -1,5 +1,7 @@
 # trip-fotos-react
 
+[![Component - Run Cypress Component Tests](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-component.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-component.yml)
+[![E2E - Run Cypress Page Tests](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-e2e.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-e2e.yml)
 [![Run Unit Tests (Vitest)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/unit-tests-vitest.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/unit-tests-vitest.yml)
 
 ## Contents
