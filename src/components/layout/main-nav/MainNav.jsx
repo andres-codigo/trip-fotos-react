@@ -133,7 +133,7 @@ function MainNav({
 										data-cy="nav-menu-item-travellers">
 										<NavMenuButtonLink
 											isLink
-											to={PATHS.TRIPS}
+											to={PATHS.TRAVELLERS}
 											className={
 												navMenuButtonLinkStyles.navMenuButtonLink
 											}>

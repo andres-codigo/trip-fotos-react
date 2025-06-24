@@ -36,9 +36,9 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 		cy.get(topNavigationSelectors.navHamburgerMenu).should('exist')
 	})
 
-	it('Navigates to the "trips" page when clicking the app title', () => {
+	it('Navigates to the "home" page when clicking the app title', () => {
 		cy.get(headerSelectors.siteHeaderTitleLink).click()
-		cy.url().should('eq', baseUrl + urls.cyTrips)
+		cy.url().should('eq', baseUrl + urls.cyHome)
 	})
 
 	it('Toggles the hamburger menu open and closed on mobile viewports', () => {

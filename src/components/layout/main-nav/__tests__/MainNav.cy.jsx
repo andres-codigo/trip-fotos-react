@@ -21,7 +21,7 @@ import {
 import TestLocationDisplay from '../../../../testUtils/cypress/TestLocationDisplay'
 
 import MessagesPage from '../../../../pages/messages/Messages'
-import TripsPage from '../../../../pages/trips/Trips'
+import TravellersPage from '../../../../pages/travellers/Travellers'
 import AuthenticationPage from '../../../../pages/authentication/UserAuth'
 
 import mainNavStyles from '../MainNav.module.scss'
@@ -171,14 +171,14 @@ describe('<MainNav />', () => {
 					})
 				})
 
-				it('redirects to Trips page when Travellers is clicked', () => {
+				it('redirects to Travellers page when Travellers is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyTrips,
+							urls.cyTravellers,
 							viewports.mobile,
 							topNavigationSelectors.navMenuItemTravellers,
-							pageSelectors.tripsPage,
-							TripsPage,
+							pageSelectors.travellersPage,
+							TravellersPage,
 							store,
 						)
 					})
@@ -212,14 +212,14 @@ describe('<MainNav />', () => {
 					})
 				})
 
-				it('redirects to Trips page when Travellers is clicked', () => {
+				it('redirects to Travellers page when Travellers is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyTrips,
+							urls.cyTravellers,
 							viewports.tablet,
 							topNavigationSelectors.navMenuItemTravellers,
-							pageSelectors.tripsPage,
-							TripsPage,
+							pageSelectors.travellersPage,
+							TravellersPage,
 							store,
 						)
 					})
@@ -253,14 +253,14 @@ describe('<MainNav />', () => {
 					})
 				})
 
-				it('redirects to Trips page when Travellers is clicked', () => {
+				it('redirects to Travellers page when Travellers is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyTrips,
+							urls.cyTravellers,
 							viewports.desktop,
 							topNavigationSelectors.navMenuItemTravellers,
-							pageSelectors.tripsPage,
-							TripsPage,
+							pageSelectors.travellersPage,
+							TravellersPage,
 							store,
 						)
 					})

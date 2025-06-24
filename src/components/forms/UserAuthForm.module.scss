@@ -39,11 +39,17 @@
 		}
 	}
 
-	.toggleLink {
-		color: variables.$color-ripe-plum;
-		padding-left: 0.5rem;
-		&:hover {
-			color: variables.$color-ripe-eggplant;
+	.formActions {
+		margin-top: 1.25rem;
+		.formSubmitButton {
+			width: 103px;
+		}
+		.toggleLink {
+			color: variables.$color-ripe-plum;
+			padding-left: 0.5rem;
+			&:hover {
+				color: variables.$color-ripe-eggplant;
+			}
 		}
 	}
 }

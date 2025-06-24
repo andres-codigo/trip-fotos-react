@@ -32,13 +32,13 @@ describe('<Header />', () => {
 					cy.mountWithProviders(<Header />, store)
 
 					cy.setViewportToMobile()
-					headerAssertions(urls.cyTrips, true, false, true)
+					headerAssertions(urls.cyHome, true, false, true)
 
 					cy.setViewportToTablet()
-					headerAssertions(urls.cyTrips, true, true, true)
+					headerAssertions(urls.cyHome, true, true, true)
 
 					cy.setViewportToDesktop()
-					headerAssertions(urls.cyTrips, true, true, true)
+					headerAssertions(urls.cyHome, true, true, true)
 				})
 			})
 		})
@@ -58,11 +58,11 @@ describe('<Header />', () => {
 		})
 
 		describe('Logged in', () => {
-			it('renders the site title link with the "/authentication" href and label', () => {
+			it('renders the site title link with the "/" href and label', () => {
 				cy.createMockStore('fake-token').then((store) => {
 					cy.mountWithProviders(<Header />, store)
 					cy.get(`${headerSelectors.siteHeaderTitleLink} a`)
-						.should('have.attr', 'href', PATHS.TRIPS)
+						.should('have.attr', 'href', PATHS.HOME)
 						.and('have.attr', 'aria-label', 'Trip Fotos Home')
 						.and('contain.text', 'Trip Fotos')
 				})

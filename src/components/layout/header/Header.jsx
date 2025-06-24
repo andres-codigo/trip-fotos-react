@@ -22,7 +22,7 @@ function Header() {
 				className={headerStyles.siteHeaderTitleLink}
 				data-cy="site-header-title-link">
 				<Link
-					to={isLoggedIn ? PATHS.TRIPS : PATHS.AUTHENTICATION}
+					to={isLoggedIn ? PATHS.HOME : PATHS.AUTHENTICATION}
 					aria-label="Trip Fotos Home">
 					Trip Fotos
 				</Link>

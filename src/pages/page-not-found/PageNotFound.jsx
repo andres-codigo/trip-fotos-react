@@ -26,7 +26,9 @@ const PageNotFound = () => {
 					Best return to the
 					<BaseButton
 						isLink
-						to={isLoggedIn ? PATHS.TRIPS : PATHS.AUTHENTICATION}
+						to={
+							isLoggedIn ? PATHS.TRAVELLERS : PATHS.AUTHENTICATION
+						}
 						data-cy="home-link">
 						Trip Fotos
 					</BaseButton>

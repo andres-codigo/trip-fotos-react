@@ -120,7 +120,7 @@ describe('Form submission', () => {
 		cy.login(user.validEmail, user.validPassword)
 		cy.wait('@loginRequest')
 
-		cy.url().should('include', urls.cyTrips)
+		cy.url().should('include', urls.cyHome)
 	})
 })
 

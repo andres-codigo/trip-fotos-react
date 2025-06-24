@@ -162,9 +162,7 @@ npm run preview
 
 2. **Enable Required Firebase Products**
    Navigate to the "Build" dropdown menu in your Firebase project and enable the following:
-
     - **Realtime Database**
-
         - Set the location to **United States (us-central1, us-east1, or us-west1)**.
         - Copy the database URL and add it to your `.env` file under `VITE_BACKEND_BASE_URL`.
         - Update the database rules as follows:
@@ -184,7 +182,6 @@ npm run preview
             ```
 
     - **Authentication**
-
         - Go to "Sign-in Method" and enable **Email/Password**. Ensure **Email link (passwordless sign-in)** is NOT enabled.
 
     - **Cloud Storage**
@@ -676,15 +673,12 @@ trip-fotos-react/
 ## 🧯 Troubleshooting
 
 - **Issue**: `npm install` fails.
-
     - **Solution**: Ensure you have Node.js and npm installed. Check the required versions in the [Node.js](https://nodejs.org/) documentation.
 
 - **Issue**: Firebase environment variables are not working.
-
     - **Solution**: Ensure you have created a [.env](http://_vscodecontentref_/1) file in the root directory with the correct Firebase configuration values.
 
 - **Issue**: `Error: ENOENT: no such file or directory, open './certs/localhost.key'`
-
     - **Solution**: Make sure you have generated the SSL certificate and key as described above. In CI and production (e.g., Vercel), the build will fall back to HTTP if the certs are missing.
 
 - **Issue**: Browser shows "Your connection is not private" on `https://localhost:3000`
