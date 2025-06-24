@@ -9,7 +9,7 @@ import {
 /////
 export const pageSelectors = {
 	mainContainer: getByDataCy('main-container'),
-	homePage: getByDataCyAlt('homes-main-container'),
+	homePage: getByDataCyAlt('home-main-container'),
 	travellersPage: getByDataCyAlt('travellers-main-container'),
 	messagesPage: getByDataCyAlt('messages-main-container'),
 	authenticationPage: getByDataCyAlt('authentication-main-container'),
