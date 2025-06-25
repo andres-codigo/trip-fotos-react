@@ -617,10 +617,10 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
   Users can sign up and log in using Firebase Authentication.
 
 - **Admin Access**
-  Assign admin rights to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`. This allows the admin user to delete other travellers.
+  Assign admin rights to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`. This allows the admin user to delete other travellers when logged in.
 
 - **Traveller Profiles**
-  Registered travellers can add a description of their travel destination, choose where they travelled to, the number of days spent there, as well as upload photos. They are also able to leave contact and send a messages on other traveller against their profile.
+  Registered travellers can add a description of their travel destination, choose where they travelled to, the number of days spent there, as well as upload photos. They are also able to send messages to other registered travellers against their profile.
 
 <a id="folder-structure"></a>
 
