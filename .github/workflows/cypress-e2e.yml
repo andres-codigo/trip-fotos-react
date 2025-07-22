@@ -15,7 +15,30 @@ on:
     workflow_dispatch:
 
 jobs:
-    test:
+    check-dependabot:
+        runs-on: ubuntu-latest
+        outputs:
+            is-dependabot: ${{ steps.check.outputs.is-dependabot }}
+        steps:
+            - name: Check if PR is from Dependabot
+              id: check
+              run: |
+                  if [[ "${{ github.actor }}" == "dependabot[bot]" ]]; then
+                    echo "is-dependabot=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "is-dependabot=false" >> $GITHUB_OUTPUT
+                  fi
+
+    skip-e2e:
+        needs: check-dependabot
+        if: needs.check-dependabot.outputs.is-dependabot == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - run: echo "🟡 Skipping Cypress E2E tests – Dependabot PRs do not have access to secrets."
+
+    run-e2e:
+        needs: check-dependabot
+        if: needs.check-dependabot.outputs.is-dependabot == 'false'
         runs-on: ubuntu-latest
 
         steps:
