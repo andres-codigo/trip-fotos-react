@@ -14,22 +14,21 @@ on:
             - main
     workflow_dispatch:
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     check-dependabot:
         runs-on: ubuntu-latest
         outputs:
-            is-dependabot: ${{ steps.check.outputs.is-dependabot }}
+            is-dependabot: ${{ github.actor == 'dependabot[bot]' }}
         steps:
             - name: Check if PR is from Dependabot
-              id: check
-              run: |
-                  if [[ "${{ github.actor }}" == "dependabot[bot]" ]]; then
-                    echo "is-dependabot=true" >> $GITHUB_OUTPUT
-                  else
-                    echo "is-dependabot=false" >> $GITHUB_OUTPUT
-                  fi
+              run: echo "Checking if actor is Dependabot - ${{ github.actor }}"
 
     skip-e2e:
+        name: Skip E2E Tests (Dependabot)
         needs: check-dependabot
         if: needs.check-dependabot.outputs.is-dependabot == 'true'
         runs-on: ubuntu-latest
@@ -37,9 +36,11 @@ jobs:
             - run: echo "🟡 Skipping Cypress E2E tests – Dependabot PRs do not have access to secrets."
 
     run-e2e:
+        name: Run E2E Tests
         needs: check-dependabot
         if: needs.check-dependabot.outputs.is-dependabot == 'false'
         runs-on: ubuntu-latest
+        timeout-minutes: 15
 
         steps:
             - name: Checkout code
@@ -67,3 +68,19 @@ jobs:
                   wait-on: 'http://localhost:3000'
                   wait-on-timeout: 60
                   browser: chrome
+
+            - name: Upload Cypress screenshots on failure
+              uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: cypress-screenshots
+                  path: cypress/screenshots
+                  retention-days: 7
+
+            - name: Upload Cypress videos on failure
+              uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: cypress-videos
+                  path: cypress/videos
+                  retention-days: 7
