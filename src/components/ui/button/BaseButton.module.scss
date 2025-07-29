@@ -67,9 +67,10 @@ a {
 	}
 }
 
-@media only screen and (max-width: 768px) {
-	button,
-	a {
-		padding: 0.5rem 1rem;
-	}
-}
+// TODO: Uncomment and test UI once further components are implemented
+// @media only screen and (max-width: 768px) {
+// 	button,
+// 	a {
+// 		padding: 0.5rem 1rem;
+// 	}
+// }
