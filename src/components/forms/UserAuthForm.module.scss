@@ -53,3 +53,19 @@
 		}
 	}
 }
+
+@media only screen and (max-width: 1024px) {
+	.userAuthentication {
+		.formActions {
+			margin-top: 1.25rem;
+			.formSubmitButton {
+				width: 100%;
+			}
+			.toggleLink {
+				padding-top: 20px;
+				text-align: center;
+				width: 100%;
+			}
+		}
+	}
+}
