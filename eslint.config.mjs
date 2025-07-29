@@ -11,7 +11,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 
 import pluginCypress from 'eslint-plugin-cypress/flat'
 
-import vitest from 'eslint-plugin-vitest'
+import vitest from '@vitest/eslint-plugin'
 
 import languageOptions from './rules/language-options.js'
 import reactRules from './rules/react.js'
