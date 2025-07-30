@@ -138,26 +138,6 @@ describe('<MainNav />', () => {
 	describe('Behaviour tests', () => {
 		describe('Logged in', () => {
 			describe('Mobile', () => {
-				it('opens and closes the hamburger menu on mobile when clicking outside', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						cy.mountWithProviders(
-							<TestMainNav
-								isLoggedIn={true}
-								isMenuOpen={true}
-							/>,
-							store,
-						)
-						cy.setViewportToMobile()
-						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
-						).should('have.class', mainNavStyles.active)
-						cy.get('body').click(0, 0)
-						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
-						).should('not.have.class', mainNavStyles.active)
-					})
-				})
-
 				it('redirects to Messages page when Messages is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
@@ -184,7 +164,7 @@ describe('<MainNav />', () => {
 					})
 				})
 
-				it('redirects to Authentication page when Logout is clicked', () => {
+				it('redirects to Authentication page and closes menu when Logout is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							urls.cyAuth,
@@ -193,6 +173,93 @@ describe('<MainNav />', () => {
 							pageSelectors.authenticationPage,
 							AuthenticationPage,
 							store,
+						)
+					})
+				})
+
+				it('opens and closes the hamburger menu on mobile when clicking outside', () => {
+					cy.createMockStore('mock-token').then((store) => {
+						cy.mountWithProviders(
+							<TestMainNav
+								isLoggedIn={true}
+								isMenuOpen={true}
+							/>,
+							store,
+						)
+						cy.setViewportToMobile()
+						cy.get(
+							topNavigationSelectors.navMenuItemsContainer,
+						).should('have.class', mainNavStyles.active)
+						cy.get('body').click(0, 0)
+						cy.get(
+							topNavigationSelectors.navMenuItemsContainer,
+						).should('not.have.class', mainNavStyles.active)
+					})
+				})
+
+				it('closes the hamburger menu when Messages link is clicked on mobile', () => {
+					cy.createMockStore('mock-token').then((store) => {
+						cy.mountWithProviders(
+							<TestMainNav
+								isLoggedIn={true}
+								isMenuOpen={true}
+							/>,
+							store,
+						)
+						cy.setViewportToMobile()
+
+						cy.get(
+							topNavigationSelectors.navMenuItemsContainer,
+						).should('have.class', mainNavStyles.active)
+
+						cy.get(
+							topNavigationSelectors.navMenuItemMessages,
+						).click()
+
+						cy.get(
+							topNavigationSelectors.navMenuItemsContainer,
+						).should('not.have.class', mainNavStyles.active)
+					})
+				})
+
+				it('closes the hamburger menu when Travellers link is clicked on mobile', () => {
+					cy.createMockStore('mock-token').then((store) => {
+						cy.mountWithProviders(
+							<TestMainNav
+								isLoggedIn={true}
+								isMenuOpen={true}
+							/>,
+							store,
+						)
+						cy.setViewportToMobile()
+
+						cy.get(
+							topNavigationSelectors.navMenuItemsContainer,
+						).should('have.class', mainNavStyles.active)
+
+						cy.get(topNavigationSelectors.navMenuItemTravellers)
+							.find('a')
+							.click()
+
+						cy.get(
+							topNavigationSelectors.navMenuItemsContainer,
+						).should('not.have.class', mainNavStyles.active)
+					})
+				})
+
+				it('hamburger menu does not exist when user is not logged in', () => {
+					cy.createMockStore('mock-token').then((store) => {
+						cy.mountWithProviders(
+							<TestMainNav isLoggedIn={false} />,
+							store,
+						)
+						cy.setViewportToMobile()
+
+						cy.get(topNavigationSelectors.navMenuContainer).should(
+							'not.exist',
+						)
+						cy.get(topNavigationSelectors.navHamburgerMenu).should(
+							'not.exist',
 						)
 					})
 				})
@@ -282,7 +349,7 @@ describe('<MainNav />', () => {
 		})
 	})
 
-	describe.only('Accessibility tests', () => {
+	describe('Accessibility tests', () => {
 		describe('Logged in', () => {
 			it('nav has appropriate aria-label and role', () => {
 				cy.createMockStore('mock-token').then((store) => {
