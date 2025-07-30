@@ -8,4 +8,11 @@ export const GLOBAL = Object.freeze({
 
 	// IMAGE UPLOAD
 	LOADING_IMAGE: 'loading',
+
+	// BREAKPOINTS
+	BREAKPOINT: {
+		MOBILE: 768,
+		TABLET: 1024,
+		DESKTOP: 1200,
+	},
 })

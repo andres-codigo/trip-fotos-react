@@ -3,6 +3,7 @@ import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
 import BaseButton from '@/components/ui/button/BaseButton'
+import useViewport from '@/utils/useViewport'
 
 import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss'
 
@@ -14,16 +15,28 @@ const NavMenuButtonLink = ({
 	modeType,
 	to = '/',
 	className,
+	onMenuItemClick,
 	'data-cy': dataCy,
 	...props
 }) => {
 	const elementRef = useRef()
+	const { isMobile } = useViewport()
 
 	useEffect(() => {
 		if (isError && elementRef.current) {
 			elementRef.current.focus()
 		}
 	}, [isError])
+
+	const handleClick = (event) => {
+		if (isLink && onMenuItemClick && isMobile) {
+			onMenuItemClick()
+		}
+
+		if (props.onClick) {
+			props.onClick(event)
+		}
+	}
 
 	const combinedClassName = classNames(
 		className,
@@ -38,6 +51,7 @@ const NavMenuButtonLink = ({
 			to={to}
 			isError={isError}
 			isDisabled={isDisabled}
+			onClick={handleClick}
 			data-cy={dataCy}
 			{...props}>
 			{children}
@@ -53,6 +67,8 @@ NavMenuButtonLink.propTypes = {
 	modeType: PropTypes.string,
 	to: PropTypes.string,
 	className: PropTypes.string,
+	onMenuItemClick: PropTypes.func,
+	onClick: PropTypes.func,
 	'data-cy': PropTypes.string,
 }
 
