@@ -18,7 +18,7 @@
 		padding: 0;
 		margin: -1px;
 		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
+		clip-path: inset(0);
 		white-space: nowrap;
 		border: 0;
 	}
@@ -41,12 +41,15 @@
 
 	.formActions {
 		margin-top: 1.25rem;
+
 		.formSubmitButton {
-			width: 103px;
+			width: 6.4375rem;
 		}
+
 		.toggleLink {
 			color: variables.$color-ripe-plum;
 			padding-left: 0.5rem;
+
 			&:hover {
 				color: variables.$color-ripe-eggplant;
 			}
@@ -58,9 +61,11 @@
 	.userAuthentication {
 		.formActions {
 			margin-top: 1.25rem;
+
 			.formSubmitButton {
 				width: 100%;
 			}
+
 			.toggleLink {
 				padding-top: 1.25rem;
 				text-align: center;

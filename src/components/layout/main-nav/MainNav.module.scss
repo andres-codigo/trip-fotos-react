@@ -30,10 +30,10 @@
 	.bar {
 		background-color: variables.$color-white;
 		display: block;
-		height: 3px;
-		margin: 5px auto;
-		width: 25px;
-		@include mixins.transition(all, 0.3s, ease-in-out);
+		height: 0.1875rem;
+		margin: 0.3125rem auto;
+		width: 1.5625rem;
+		@include mixins.transition(background-color, 0.3s, ease-in-out);
 	}
 }
 

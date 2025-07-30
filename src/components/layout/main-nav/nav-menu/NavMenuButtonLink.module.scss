@@ -92,7 +92,7 @@ a.navMenuButtonLink {
 			@include mixins.fadeIn(ease, 2s, 1, forwards);
 
 			.totalMessages {
-				bottom: 1px;
+				bottom: 0.0625rem;
 				display: inline-block;
 				font-size: var(--font-size);
 				position: relative;
