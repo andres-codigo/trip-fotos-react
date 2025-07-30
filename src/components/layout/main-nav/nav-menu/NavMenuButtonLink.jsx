@@ -2,9 +2,8 @@ import { useEffect, useRef } from 'react'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
-import { GLOBAL } from '@/constants/global.js'
-
 import BaseButton from '@/components/ui/button/BaseButton'
+import useViewport from '@/utils/useViewport'
 
 import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss'
 
@@ -21,6 +20,7 @@ const NavMenuButtonLink = ({
 	...props
 }) => {
 	const elementRef = useRef()
+	const { isMobile } = useViewport()
 
 	useEffect(() => {
 		if (isError && elementRef.current) {
@@ -29,11 +29,7 @@ const NavMenuButtonLink = ({
 	}, [isError])
 
 	const handleClick = (event) => {
-		if (
-			isLink &&
-			onMenuItemClick &&
-			document.documentElement.clientWidth <= GLOBAL.BREAKPOINT.MOBILE
-		) {
+		if (isLink && onMenuItemClick && isMobile) {
 			onMenuItemClick()
 		}
 
