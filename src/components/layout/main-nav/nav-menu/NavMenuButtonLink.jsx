@@ -14,6 +14,7 @@ const NavMenuButtonLink = ({
 	modeType,
 	to = '/',
 	className,
+	onMenuItemClick,
 	'data-cy': dataCy,
 	...props
 }) => {
@@ -24,6 +25,20 @@ const NavMenuButtonLink = ({
 			elementRef.current.focus()
 		}
 	}, [isError])
+
+	const handleClick = (event) => {
+		if (
+			isLink &&
+			onMenuItemClick &&
+			document.documentElement.clientWidth <= 768
+		) {
+			onMenuItemClick()
+		}
+
+		if (props.onClick) {
+			props.onClick(event)
+		}
+	}
 
 	const combinedClassName = classNames(
 		className,
@@ -38,6 +53,7 @@ const NavMenuButtonLink = ({
 			to={to}
 			isError={isError}
 			isDisabled={isDisabled}
+			onClick={handleClick}
 			data-cy={dataCy}
 			{...props}>
 			{children}
@@ -53,6 +69,8 @@ NavMenuButtonLink.propTypes = {
 	modeType: PropTypes.string,
 	to: PropTypes.string,
 	className: PropTypes.string,
+	onMenuItemClick: PropTypes.func,
+	onClick: PropTypes.func,
 	'data-cy': PropTypes.string,
 }
 
