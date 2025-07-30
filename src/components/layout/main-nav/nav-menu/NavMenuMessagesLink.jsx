@@ -9,6 +9,7 @@ const NavMenuMessagesLink = ({
 	isLink,
 	to,
 	totalMessages,
+	onMenuItemClick,
 	className,
 	'data-cy': dataCy,
 }) => {
@@ -19,6 +20,7 @@ const NavMenuMessagesLink = ({
 			<NavMenuButtonLink
 				isLink={isLink}
 				to={to}
+				onMenuItemClick={onMenuItemClick}
 				className={combinedClassName}
 				data-cy={dataCy}>
 				Messages
@@ -43,6 +45,7 @@ NavMenuMessagesLink.propTypes = {
 	to: PropTypes.string,
 	onClick: PropTypes.func.isRequired,
 	totalMessages: PropTypes.number,
+	onMenuItemClick: PropTypes.func,
 	className: PropTypes.string,
 	'data-cy': PropTypes.string,
 }
