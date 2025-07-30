@@ -78,6 +78,10 @@ function MainNav({
 		setIsMenuOpen,
 	)
 
+	const handleMenuItemClick = () => {
+		setIsMenuOpen(false)
+	}
+
 	return (
 		<>
 			{isLoggedIn && (
@@ -124,6 +128,7 @@ function MainNav({
 											navMenuButtonLinkStyles.navMenuButtonLink
 										}
 										to={PATHS.MESSAGES}
+										onMenuItemClick={handleMenuItemClick}
 										data-cy="nav-menu-item-messages"
 										totalMessages={totalMessages}
 									/>
@@ -134,6 +139,9 @@ function MainNav({
 										<NavMenuButtonLink
 											isLink
 											to={PATHS.TRAVELLERS}
+											onMenuItemClick={
+												handleMenuItemClick
+											}
 											className={
 												navMenuButtonLinkStyles.navMenuButtonLink
 											}>
