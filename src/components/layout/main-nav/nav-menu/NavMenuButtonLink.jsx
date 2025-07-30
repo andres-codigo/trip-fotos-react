@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
+import { GLOBAL } from '@/constants/global.js'
+
 import BaseButton from '@/components/ui/button/BaseButton'
 
 import navMenuButtonLinkStyles from './NavMenuButtonLink.module.scss'
@@ -30,7 +32,7 @@ const NavMenuButtonLink = ({
 		if (
 			isLink &&
 			onMenuItemClick &&
-			document.documentElement.clientWidth <= 768
+			document.documentElement.clientWidth <= GLOBAL.BREAKPOINT.MOBILE
 		) {
 			onMenuItemClick()
 		}
