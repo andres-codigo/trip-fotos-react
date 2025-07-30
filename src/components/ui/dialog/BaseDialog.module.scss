@@ -13,7 +13,7 @@
 .dialog {
 	background-color: variables.$color-white;
 	border: none;
-	border-radius: 12px;
+	border-radius: 0.75rem;
 	bottom: 0;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
 	left: 0;
@@ -55,7 +55,7 @@
 			display: block;
 			margin: 0 auto;
 			object-fit: cover;
-			padding: 10px;
+			padding: 0.625rem;
 		}
 	}
 
