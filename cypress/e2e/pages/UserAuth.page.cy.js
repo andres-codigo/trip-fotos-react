@@ -205,6 +205,10 @@ describe('UI state and mode switching', () => {
 			'true',
 		)
 
+		// TODO: Investigate proper solution to not force: true on click
+		// Use force: true because the backdrop is covered by content due to CSS positioning,
+		// but clicking the backdrop is the intended functionality we need to test
+		// eslint-disable-next-line cypress/no-force
 		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click({
 			force: true,
 		})
