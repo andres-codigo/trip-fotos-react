@@ -84,7 +84,7 @@ export default [
 	// cypress
 	{
 		plugins: { pluginCypress },
-		files: ['**/*.spec.cy.js'],
+		files: ['**/*.cy.{js,jsx}'],
 		ignores: ['cypress.config.js', '**/*.test.js', '**/*.test.jsx'],
 		languageOptions: {
 			sourceType: 'module',
