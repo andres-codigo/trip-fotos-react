@@ -3,7 +3,7 @@ import { renderHook, act } from '@testing-library/react'
 
 import { GLOBAL } from '@/constants/global.js'
 
-import useViewport from './useViewport'
+import useViewport from '../index'
 
 const TEST_WIDTHS = {
 	MOBILE_SMALL: GLOBAL.BREAKPOINT.MOBILE - 100, // 668px
