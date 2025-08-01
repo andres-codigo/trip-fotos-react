@@ -1,11 +1,11 @@
-export const VALID_EMAILS = [
+export const VALID_EMAILS = Object.freeze([
 	'test@example.com',
 	'user.name@domain.com.au',
 	'user_name@example.org',
 	'user-name@example.net',
 	'simple@test.io',
 	'complex.email+tag@subdomain.example.com',
-]
+])
 
 export const INVALID_EMAILS = Object.freeze([
 	'invalid-email',
