@@ -1,25 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 
-import { GLOBAL } from '@/constants/global.js'
-
 import useViewport from '../index'
 
-const TEST_WIDTHS = {
-	MOBILE_SMALL: GLOBAL.BREAKPOINT.MOBILE - 100, // 668px
-	MOBILE_EDGE: GLOBAL.BREAKPOINT.MOBILE, // 768px
-	TABLET_SMALL: GLOBAL.BREAKPOINT.MOBILE + 1, // 769px
-	TABLET_MID: GLOBAL.BREAKPOINT.MOBILE + 100, // 868px
-	TABLET_EDGE: GLOBAL.BREAKPOINT.TABLET + 1, // 1025px
-	DESKTOP_SMALL: GLOBAL.BREAKPOINT.DESKTOP, // 1200px
-	DESKTOP_LARGE: GLOBAL.BREAKPOINT.DESKTOP + 100, // 1300px
-}
-
-const DEBOUNCE_DELAYS = {
-	SHORT: 200,
-	MEDIUM: 300,
-	LONG: 500,
-}
+import { TEST_WIDTHS, DEBOUNCE_DELAYS } from './viewportTestData.js'
 
 const mockWindow = (width) => {
 	Object.defineProperty(window, 'innerWidth', {
