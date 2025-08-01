@@ -17,3 +17,16 @@ export const INVALID_EMAILS = Object.freeze([
 	'user name@example.com', // spaces
 	'user@domain..com', // double dots in domain
 ])
+
+export const VALID_PASSWORDS = Object.freeze([
+	'123456',
+	'password',
+	'verylongpassword',
+	'P@ssw0rd123',
+])
+
+export const PASSWORD_CHARACTER_DIFFERENCE = Object.freeze([
+	{ password: '', expectedDiff: 6 },
+	{ password: '123', expectedDiff: 3 },
+	{ password: '12345', expectedDiff: 1 },
+])
