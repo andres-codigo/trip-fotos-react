@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { validateEmail } from './validation'
+import { validateEmail } from '../index'
 
 import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
-import { VALID_EMAILS, INVALID_EMAILS } from './testConstants'
+import { VALID_EMAILS, INVALID_EMAILS } from './validationTestData'
 
 describe('validation utils', () => {
 	describe('validateEmail', () => {
