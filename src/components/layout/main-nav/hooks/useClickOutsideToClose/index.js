@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 
-export function useCloseHamburgerMenu(
+import { GLOBAL } from '@/constants/global'
+
+export function useClickOutsideToClose(
 	isMenuOpen,
 	hamburgerRef,
 	navMenuRef,
@@ -9,7 +11,8 @@ export function useCloseHamburgerMenu(
 	useEffect(() => {
 		const handleClickOutside = (event) => {
 			if (
-				document.documentElement.clientWidth <= 768 &&
+				document.documentElement.clientWidth <=
+					GLOBAL.BREAKPOINT.MOBILE &&
 				isMenuOpen &&
 				!hamburgerRef.current.contains(event.target) &&
 				!navMenuRef.current.contains(event.target)

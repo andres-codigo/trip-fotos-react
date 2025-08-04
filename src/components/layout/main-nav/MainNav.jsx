@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 
 import { PATHS } from '@/constants/paths'
 
-import { useCloseHamburgerMenu as useCloseHamburgerMenuDefault } from './hooks/useCloseHamburgerMenu'
+import { useClickOutsideToClose as useClickOutsideToCloseDefault } from './hooks/useClickOutsideToClose'
 import { useLogout as useLogoutDefault } from './hooks/useLogout'
 import { useMainNavState as useMainNavStateDefault } from './hooks/useMainNavState'
 import { useMobileMenu as useMobileMenuDefault } from './hooks/useMobileMenu'
@@ -21,7 +21,7 @@ import mainNavStyles from './MainNav.module.scss'
 function MainNav({
 	isLoggedIn,
 	useMainNavState = useMainNavStateDefault,
-	useCloseHamburgerMenu = useCloseHamburgerMenuDefault,
+	useClickOutsideToClose = useClickOutsideToCloseDefault,
 	useMobileMenu = useMobileMenuDefault,
 	useLogout = useLogoutDefault,
 }) {
@@ -43,7 +43,7 @@ function MainNav({
 	const hamburgerRef = useRef(null)
 	const navMenuRef = useRef(null)
 
-	useCloseHamburgerMenu(isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen)
+	useClickOutsideToClose(isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen)
 	useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn)
 
 	//// START
@@ -177,7 +177,7 @@ function MainNav({
 MainNav.propTypes = {
 	isLoggedIn: PropTypes.bool.isRequired,
 	useMainNavState: PropTypes.func,
-	useCloseHamburgerMenu: PropTypes.func,
+	useClickOutsideToClose: PropTypes.func,
 	useMobileMenu: PropTypes.func,
 	useLogout: PropTypes.func,
 }

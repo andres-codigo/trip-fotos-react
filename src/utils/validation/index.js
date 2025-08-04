@@ -2,7 +2,7 @@ import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
 
 export const validateEmail = (value) => {
 	const isValid =
-		/^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*@[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\.[a-zA-Z]{2,6}$/.test(
+		/^[a-zA-Z0-9]+(?:[._+-][a-zA-Z0-9]+)*@[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*\.[a-zA-Z]{2,6}$/.test(
 			value,
 		)
 
