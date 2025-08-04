@@ -6,7 +6,7 @@ import PropTypes from 'prop-types'
 import { PATHS } from '@/constants/paths'
 
 import { useClickOutsideToClose as useClickOutsideToCloseDefault } from './hooks/useClickOutsideToClose'
-import { useLogout as useLogoutDefault } from './hooks/useLogout/index'
+import { useLogout as useLogoutDefault } from './hooks/useLogout'
 import { useMainNavState as useMainNavStateDefault } from './hooks/useMainNavState'
 import { useMobileMenu as useMobileMenuDefault } from './hooks/useMobileMenu'
 
