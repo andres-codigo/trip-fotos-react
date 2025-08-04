@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useLoggedInTravellerName } from '../index'
 
-// Mock localStorage
 const localStorageMock = {
 	getItem: vi.fn(),
 	setItem: vi.fn(),
@@ -10,7 +9,6 @@ const localStorageMock = {
 	clear: vi.fn(),
 }
 
-// Mock window.addEventListener and removeEventListener
 const addEventListenerSpy = vi.fn()
 const removeEventListenerSpy = vi.fn()
 
@@ -92,10 +90,8 @@ describe('useLoggedInTravellerName', () => {
 
 		const { result } = renderHook(() => useLoggedInTravellerName())
 
-		// Get the storage event handler
 		const storageHandler = addEventListenerSpy.mock.calls[0][1]
 
-		// Simulate storage event
 		act(() => {
 			storageHandler()
 		})
