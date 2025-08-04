@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useLoggedInTravellerName } from './useLoggedInTravellerName/index'
+import { useLoggedInTravellerName } from '../useLoggedInTravellerName/index'
 
 export function useMainNavState() {
 	const [travellerName, setTravellerName] = useLoggedInTravellerName()
