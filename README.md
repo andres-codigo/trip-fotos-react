@@ -637,12 +637,12 @@ trip-fotos-react/
 │   ├── components/     # Reusable React components
 │   ├── constants/      # Global, Firebase, API, paths, and other constants
 │   ├── pages/          # Page components for routing
+|   ├── services/       # External service configurations (Firebase, APIs, etc.)
 │   ├── store/          # Redux store and slices
 │   ├── styles/         # SCSS stylesheets
 │   ├── testUtils/      # Vitest utility functions
 │   ├── utils/          # General utility functions
 │   ├── App.js          # Main application component
-│   ├── firebase.js     # Firebase configuration
 │   ├── index.js        # Root application entry point
 │   └── setupTests.js   # Testing environment configuration
 ├── .env                        # Environment variables (not committed to version control)
