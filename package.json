@@ -12,6 +12,8 @@
 		"check:dependencies": "mkdir -p scripts/dependency-check && depcheck --txt > scripts/dependency-check/depcheck-output.txt",
 		"cy:open:e2e": "cypress open --e2e",
 		"cy:open:ct": "cypress open --component",
+		"cy:run:e2e": "cypress run --e2e",
+		"cy:run:ct": "cypress run --component",
 		"vitest": "vitest",
 		"vitest:watch": "vitest watch",
 		"vitest:run": "vitest run",

@@ -127,6 +127,12 @@ npm run cy:open:e2e
 # Open the Cypress Component Test Runner in interactive mode
 npm run cy:open:ct
 
+# Run Cypress E2E tests in headless mode
+npm run cy:run:e2e
+
+# Run Cypress Component tests in headless mode
+npm run cy:run:ct
+
 # Run all tests using Vitest
 npm run vitest
 
@@ -423,7 +429,11 @@ Cypress is pre-configured in this project. Feel free to customise the [cypress.c
     ```
 - **Run Cypress E2E tests in headless mode:**
     ```bash
-    npx cypress run
+    npm run cy:run:e2e
+    ```
+- **Run Cypress Component tests in headless mode:**
+    ```bash
+    npm run cy:run:ct
     ```
 - **Run a specific test file:**
     ```bash
@@ -513,7 +523,7 @@ npx cypress run
 
 ### 3. Cypress Component Tests
 
-- **Workflow File:** `.github/workflows/cypress-component.yml.yml`
+- **Workflow File:** `.github/workflows/cypress-component.yml`
 - **Triggers:**
     - On **push** to `main` (for changes in `src/**/__tests__/**`, `src/**/*.jsx`, `src/**/*.tsx`, `cypress.config.*`, or `package.json`)
     - On **pull requests** to `main`
@@ -525,16 +535,6 @@ npx cypress run
 ```bash
 npx cypress run --component
 ```
-
-### Clone Tracker Workflow
-
-- **Location:** `.github/workflows/clone-tracker.yml`
-- **Purpose:** Sends a webhook notification (e.g., to Discord) when the repository is cloned.
-- **Use Case:** Useful for monitoring interest and visibility of the project.
-
-> Note: This workflow uses the GitHub [Traffic API](https://docs.github.com/en/rest/metrics/traffic) and requires the appropriate permissions to access clone statistics.
-
----
 
 ### 🛠 Manual Triggers
 
@@ -637,12 +637,12 @@ trip-fotos-react/
 │   ├── components/     # Reusable React components
 │   ├── constants/      # Global, Firebase, API, paths, and other constants
 │   ├── pages/          # Page components for routing
+|   ├── services/       # External service configurations (Firebase, APIs, etc.)
 │   ├── store/          # Redux store and slices
 │   ├── styles/         # SCSS stylesheets
 │   ├── testUtils/      # Vitest utility functions
 │   ├── utils/          # General utility functions
 │   ├── App.js          # Main application component
-│   ├── firebase.js     # Firebase configuration
 │   ├── index.js        # Root application entry point
 │   └── setupTests.js   # Testing environment configuration
 ├── .env                        # Environment variables (not committed to version control)
