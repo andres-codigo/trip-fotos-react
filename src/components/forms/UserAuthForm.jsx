@@ -66,19 +66,9 @@ const UserAuthForm = ({
 				className={userAuthStyles.userAuthenticationTitle}
 				data-cy="user-authentication-form-title">
 				{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? (
-					<>
-						Login{' '}
-						<span className={userAuthStyles.visuallyHidden}>
-							Form
-						</span>
-					</>
+					<>Login</>
 				) : (
-					<>
-						Signup{' '}
-						<span className={userAuthStyles.visuallyHidden}>
-							Form
-						</span>
-					</>
+					<>Signup</>
 				)}
 			</h2>
 			<div
@@ -91,28 +81,12 @@ const UserAuthForm = ({
 					!email.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
 				<Input {...getInputProps(EMAIL_ID)} />
-				{!email.isValid && email.message && (
-					<span
-						id="email-error"
-						role="alert"
-						className={userAuthStyles.visuallyHidden}>
-						{email.message}
-					</span>
-				)}
 			</div>
 			<div
 				className={`${userAuthStyles.formControl} ${
 					!password.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
 				<Input {...getInputProps(PASSWORD_ID)} />
-				{!password.isValid && password.message && (
-					<span
-						id="password-error"
-						role="alert"
-						className={userAuthStyles.visuallyHidden}>
-						{password.message}
-					</span>
-				)}
 			</div>
 			<div className={userAuthStyles.formActions}>
 				<BaseButton
