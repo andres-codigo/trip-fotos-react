@@ -91,12 +91,28 @@ const UserAuthForm = ({
 					!email.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
 				<Input {...getInputProps(EMAIL_ID)} />
+				{!email.isValid && email.message && (
+					<span
+						id="email-error"
+						role="alert"
+						className={userAuthStyles.visuallyHidden}>
+						{email.message}
+					</span>
+				)}
 			</div>
 			<div
 				className={`${userAuthStyles.formControl} ${
 					!password.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
 				<Input {...getInputProps(PASSWORD_ID)} />
+				{!password.isValid && password.message && (
+					<span
+						id="password-error"
+						role="alert"
+						className={userAuthStyles.visuallyHidden}>
+						{password.message}
+					</span>
+				)}
 			</div>
 			<div className={userAuthStyles.formActions}>
 				<BaseButton
