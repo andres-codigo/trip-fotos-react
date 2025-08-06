@@ -33,43 +33,47 @@ describe('Firebase Configuration', () => {
 		vi.resetModules()
 	})
 
-	it('initialises Firebase app with correct configuration', async () => {
-		vi.clearAllMocks()
+	describe('Initialisation tests', () => {
+		it('initialises Firebase app with correct configuration', async () => {
+			vi.clearAllMocks()
 
-		const { firebaseApp } = await import('../firebase.js')
+			const { firebaseApp } = await import('../firebase.js')
 
-		expect(initializeApp).toHaveBeenCalledWith({
-			apiKey: 'test-api-key',
-			authDomain: 'test-auth-domain',
-			databaseURL: 'test-database-url',
-			projectId: 'test-project-id',
-			storageBucket: 'test-storage-bucket',
-			messagingSenderId: 'test-messaging-sender-id',
-			appId: 'test-app-id',
-			measurementId: 'test-measurement-id',
+			expect(initializeApp).toHaveBeenCalledWith({
+				apiKey: 'test-api-key',
+				authDomain: 'test-auth-domain',
+				databaseURL: 'test-database-url',
+				projectId: 'test-project-id',
+				storageBucket: 'test-storage-bucket',
+				messagingSenderId: 'test-messaging-sender-id',
+				appId: 'test-app-id',
+				measurementId: 'test-measurement-id',
+			})
+
+			expect(firebaseApp).toBe(mockApp)
 		})
 
-		expect(firebaseApp).toBe(mockApp)
+		it('exports firebaseApp instance', async () => {
+			const { firebaseApp } = await import('../firebase.js')
+
+			expect(firebaseApp).toBeDefined()
+			expect(firebaseApp).toBe(mockApp)
+		})
 	})
 
-	it('calls initializeApp only once', async () => {
-		vi.clearAllMocks()
+	describe('Module caching tests', () => {
+		it('calls initialiseApp only once', async () => {
+			vi.clearAllMocks()
 
-		// First import
-		// should call initializeApp
-		await import('../firebase.js')
-		expect(initializeApp).toHaveBeenCalledTimes(1)
+			// First import
+			// should call initialiseApp
+			await import('../firebase.js')
+			expect(initializeApp).toHaveBeenCalledTimes(1)
 
-		// Second import
-		// should not call again due to module caching
-		await import('../firebase.js')
-		expect(initializeApp).toHaveBeenCalledTimes(1)
-	})
-
-	it('exports firebaseApp instance', async () => {
-		const { firebaseApp } = await import('../firebase.js')
-
-		expect(firebaseApp).toBeDefined()
-		expect(firebaseApp).toBe(mockApp)
+			// Second import
+			// should not call again due to module caching
+			await import('../firebase.js')
+			expect(initializeApp).toHaveBeenCalledTimes(1)
+		})
 	})
 })
