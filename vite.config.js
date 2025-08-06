@@ -87,6 +87,16 @@ export default defineConfig({
 		coverage: {
 			provider: 'v8',
 			reportsDirectory: './coverage',
+			reporter: ['text', 'html'],
+			exclude: [
+				'node_modules/**',
+				'cypress/**',
+				'declarations/**',
+				'rules/**',
+				'**/*.config.js',
+				'**/*.cy.jsx',
+				'**/*.config.mjs',
+			],
 		},
 	},
 })
