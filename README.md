@@ -429,7 +429,7 @@ Cypress is pre-configured in this project. Feel free to customise the [cypress.c
     ```
 - **Run Cypress E2E tests in headless mode:**
     ```bash
-    npx run cy:run:e2e
+    npm run cy:run:e2e
     ```
 - **Run Cypress Component tests in headless mode:**
     ```bash
