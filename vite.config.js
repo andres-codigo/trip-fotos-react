@@ -96,6 +96,8 @@ export default defineConfig({
 				'**/*.config.js',
 				'**/*.cy.jsx',
 				'**/*.config.mjs',
+				'**/index.jsx',
+				'**/LoadingFallback.jsx',
 			],
 		},
 	},
