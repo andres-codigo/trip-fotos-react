@@ -66,9 +66,19 @@ const UserAuthForm = ({
 				className={userAuthStyles.userAuthenticationTitle}
 				data-cy="user-authentication-form-title">
 				{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? (
-					<>Login</>
+					<>
+						Login{' '}
+						<span className={userAuthStyles.visuallyHidden}>
+							Form
+						</span>
+					</>
 				) : (
-					<>Signup</>
+					<>
+						Signup{' '}
+						<span className={userAuthStyles.visuallyHidden}>
+							Form
+						</span>
+					</>
 				)}
 			</h2>
 			<div

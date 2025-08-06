@@ -66,6 +66,7 @@ vi.mock('../UserAuthForm.module.scss', () => ({
 	default: {
 		userAuthentication: 'userAuthentication',
 		userAuthenticationTitle: 'userAuthenticationTitle',
+		visuallyHidden: 'visuallyHidden',
 		formControl: 'formControl',
 		invalidForm: 'invalidForm',
 		formActions: 'formActions',
