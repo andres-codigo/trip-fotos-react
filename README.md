@@ -127,6 +127,12 @@ npm run cy:open:e2e
 # Open the Cypress Component Test Runner in interactive mode
 npm run cy:open:ct
 
+# Run Cypress E2E tests in headless mode
+npm run cy:run:e2e
+
+# Run Cypress Component tests in headless mode
+npm run cy:run:ct
+
 # Run all tests using Vitest
 npm run vitest
 
@@ -423,7 +429,11 @@ Cypress is pre-configured in this project. Feel free to customise the [cypress.c
     ```
 - **Run Cypress E2E tests in headless mode:**
     ```bash
-    npx cypress run
+    npx run cy:run:e2e
+    ```
+- **Run Cypress Component tests in headless mode:**
+    ```bash
+    npm run cy:run:ct
     ```
 - **Run a specific test file:**
     ```bash
@@ -513,7 +523,7 @@ npx cypress run
 
 ### 3. Cypress Component Tests
 
-- **Workflow File:** `.github/workflows/cypress-component.yml.yml`
+- **Workflow File:** `.github/workflows/cypress-component.yml`
 - **Triggers:**
     - On **push** to `main` (for changes in `src/**/__tests__/**`, `src/**/*.jsx`, `src/**/*.tsx`, `cypress.config.*`, or `package.json`)
     - On **pull requests** to `main`
@@ -525,16 +535,6 @@ npx cypress run
 ```bash
 npx cypress run --component
 ```
-
-### Clone Tracker Workflow
-
-- **Location:** `.github/workflows/clone-tracker.yml`
-- **Purpose:** Sends a webhook notification (e.g., to Discord) when the repository is cloned.
-- **Use Case:** Useful for monitoring interest and visibility of the project.
-
-> Note: This workflow uses the GitHub [Traffic API](https://docs.github.com/en/rest/metrics/traffic) and requires the appropriate permissions to access clone statistics.
-
----
 
 ### 🛠 Manual Triggers
 
