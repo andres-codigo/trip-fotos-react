@@ -10,7 +10,8 @@ import headerStyles from './Header.module.scss'
 
 function Header() {
 	const isLoggedIn = useSelector(
-		(state) => state.authentication.token !== null,
+		// Treat all falsy as false
+		(state) => Boolean(state.authentication.token),
 	)
 	return (
 		<header
