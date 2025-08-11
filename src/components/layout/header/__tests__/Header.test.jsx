@@ -4,9 +4,24 @@ import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 
-import Header from '../Header'
-
 import { PATHS } from '@/constants/paths'
+
+/**
+ * Header Unit Tests
+ *
+ * Mocks:
+ * - Redux Store: Creates mock store with authentication slice containing token state
+ *
+ * Router: Tests wrap component in BrowserRouter since Header uses Link components for navigation
+ *
+ * Test Strategy:
+ * - Tests conditional routing logic based on authentication token state
+ * - Verifies falsy token values route to authentication page
+ * - Verifies truthy token values route to home page
+ * - Uses unmount() between test iterations to prevent DOM conflicts
+ */
+
+import Header from '../Header'
 
 const createMockStore = (token) => {
 	return configureStore({
@@ -27,7 +42,7 @@ const renderWithProviders = (token) => {
 	)
 }
 
-describe('Header', () => {
+describe('<Header />', () => {
 	describe('Behaviour tests', () => {
 		it('routes to authentication page when token is falsy', () => {
 			const falsyValues = [null, undefined, '', false, 0]
