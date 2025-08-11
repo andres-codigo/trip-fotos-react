@@ -16,6 +16,7 @@ const NavMenuButtonLink = ({
 	to = '/',
 	className,
 	onMenuItemClick,
+	onClick,
 	'data-cy': dataCy,
 	...props
 }) => {
@@ -33,8 +34,8 @@ const NavMenuButtonLink = ({
 			onMenuItemClick()
 		}
 
-		if (props.onClick) {
-			props.onClick(event)
+		if (onClick) {
+			onClick(event)
 		}
 	}
 
