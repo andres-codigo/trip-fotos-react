@@ -1,6 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
+import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
+
 /**
  * NavMenuButtonLink Unit Tests
  *
@@ -20,37 +22,37 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import NavMenuButtonLink from '../NavMenuButtonLink'
 
 vi.mock('@/components/ui/button/BaseButton', () => ({
-	default: vi
-		.fn()
-		.mockImplementation(
-			({
-				children,
-				className,
-				onClick,
-				isLink,
-				isError,
-				isDisabled,
-				to,
-				'data-cy': dataCy,
-				...props
-			}) => {
-				const Component = isLink ? 'a' : 'button'
-				return (
-					<Component
-						className={className}
-						onClick={onClick}
-						{...(dataCy && { 'data-cy': dataCy })}
-						{...(isLink && { href: to })}
-						{...(isDisabled && {
-							disabled: !isLink,
-							'aria-disabled': isLink,
-						})}
-						{...props}>
-						{children}
-					</Component>
-				)
-			},
-		),
+	default: vi.fn().mockImplementation(
+		({
+			children,
+			className,
+			onClick,
+			isLink,
+			// isError has been extracted but is not used - this is intentional for prop filtering
+			// eslint-disable-next-line no-unused-vars
+			isError: _isError,
+			isDisabled,
+			to,
+			'data-cy': dataCy,
+			...props
+		}) => {
+			const Component = isLink ? 'a' : 'button'
+			return (
+				<Component
+					className={className}
+					onClick={onClick}
+					{...(dataCy && { 'data-cy': dataCy })}
+					{...(isLink && { href: to })}
+					{...(isDisabled && {
+						disabled: !isLink,
+						'aria-disabled': isLink,
+					})}
+					{...props}>
+					{children}
+				</Component>
+			)
+		},
+	),
 }))
 
 vi.mock('@/utils/useViewport', () => ({
@@ -58,7 +60,7 @@ vi.mock('@/utils/useViewport', () => ({
 }))
 
 vi.mock('classnames', () => ({
-	default: vi.fn((...args) => args.filter(Boolean).join(' ')),
+	default: createClassNamesMock(),
 }))
 
 vi.mock('../NavMenuButtonLink.module.scss', () => ({

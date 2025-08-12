@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
+import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
+
 /**
  * NavMenuMessagesLink Unit Tests
  *
@@ -24,7 +26,16 @@ import NavMenuMessagesLink from '../NavMenuMessagesLink'
 vi.mock('../NavMenuButtonLink', () => ({
 	default: vi.fn(({ children, className, 'data-cy': dataCy, ...props }) => {
 		// Filter out React-specific props that shouldn't appear on DOM elements
-		const { isLink, onMenuItemClick, to, ...domProps } = props
+		const {
+			// isLink, onMenuItemClick, and to are extracted but not used - this is intentional for prop filtering
+			// eslint-disable-next-line no-unused-vars
+			isLink: _isLink,
+			// eslint-disable-next-line no-unused-vars
+			onMenuItemClick: _onMenuItemClick,
+			// eslint-disable-next-line no-unused-vars
+			to: _to,
+			...domProps
+		} = props
 		return (
 			<button
 				className={className}
@@ -38,7 +49,7 @@ vi.mock('../NavMenuButtonLink', () => ({
 }))
 
 vi.mock('classnames', () => ({
-	default: vi.fn((...args) => args.filter(Boolean).join(' ')),
+	default: createClassNamesMock(),
 }))
 
 vi.mock('../NavMenuButtonLink.module.scss', () => ({
