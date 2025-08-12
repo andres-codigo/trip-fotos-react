@@ -1,9 +1,9 @@
 import {
 	testSelectors,
 	topNavigationSelectors,
-} from '../../../../../cypress/support/constants/selectors'
-import { urls } from '../../../../../cypress/support/constants/urls'
-import { viewports } from '../../../../../cypress/support/constants/viewports'
+} from '../../../../../../cypress/support/constants/selectors'
+import { urls } from '../../../../../../cypress/support/constants/urls'
+import { viewports } from '../../../../../../cypress/support/constants/viewports'
 
 // TODO: Remove and import hooks once store slices are implemented
 export const mockUseMainNavState = () => ({

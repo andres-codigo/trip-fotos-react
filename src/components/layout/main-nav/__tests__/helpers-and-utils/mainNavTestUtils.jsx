@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 
-import { useClickOutsideToClose as useCloseHamburgerMenuDefault } from '../hooks/useClickOutsideToClose'
-import { useMobileMenu as useMobileMenuDefault } from '../hooks/useMobileMenu'
+import { useClickOutsideToClose as useCloseHamburgerMenuDefault } from '../../hooks/useClickOutsideToClose'
+import { useMobileMenu as useMobileMenuDefault } from '../../hooks/useMobileMenu'
 
-import MainNav from '../MainNav'
+import MainNav from '../../MainNav'
 
 export const TestMainNav = ({
 	isLoggedIn = true,

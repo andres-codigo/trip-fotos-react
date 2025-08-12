@@ -12,12 +12,12 @@ import { urls } from '../../../../../cypress/support/constants/urls'
 
 import { viewports } from '../../../../../cypress/support/constants/viewports'
 
-import { TestMainNav } from './mainNavTestUtils'
+import { TestMainNav } from './helpers-and-utils/mainNavTestUtils'
 import {
 	mockUseMainNavState,
 	assertMenuItems,
 	assertMenuItemRedirect,
-} from './mainNavTestHelpers'
+} from './helpers-and-utils/mainNavTestHelpers'
 import TestLocationDisplay from '../../../../testUtils/cypress/TestLocationDisplay'
 
 import MessagesPage from '../../../../pages/messages/Messages'
