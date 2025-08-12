@@ -39,7 +39,6 @@ vi.mock('../NavMenuButtonLink', () => ({
 		return (
 			<button
 				className={className}
-				data-testid="nav-menu-button-link"
 				data-cy={dataCy}
 				{...domProps}>
 				{children}
