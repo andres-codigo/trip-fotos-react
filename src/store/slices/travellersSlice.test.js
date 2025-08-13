@@ -15,7 +15,7 @@ import travellersReducer, {
 
 import { handleApiError } from '@/utils/errorHandler'
 
-import { setupMocks } from '@/testUtils/vitest/testSetup'
+import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {

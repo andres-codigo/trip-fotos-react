@@ -18,7 +18,7 @@ import authenticationReducer, {
 	authActions,
 } from './authenticationSlice'
 
-import { setupMocks } from '@/testUtils/vitest/testSetup'
+import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
