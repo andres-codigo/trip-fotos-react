@@ -17,7 +17,8 @@
 		"vitest": "vitest",
 		"vitest:watch": "vitest watch",
 		"vitest:run": "vitest run",
-		"vitest:coverage": "vitest --coverage",
+		"vitest:run:fast": "vitest run --reporter=dot --no-coverage",
+		"vitest:coverage": "COVERAGE=true vitest --coverage",
 		"analyse": "vite-bundle-visualizer",
 		"build": "vite build",
 		"preview": "vite preview"
