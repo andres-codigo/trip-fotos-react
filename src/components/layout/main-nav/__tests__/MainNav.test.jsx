@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 /**
  * MainNav Unit Tests
@@ -47,9 +47,7 @@ vi.mock('../nav-menu/NavMenuButtonLink', () => ({
 			onMenuItemClick,
 			'data-cy': dataCy,
 			// isLink and to are extracted but not used - this is intentional for prop filtering
-			// eslint-disable-next-line no-unused-vars
 			isLink: _isLink,
-			// eslint-disable-next-line no-unused-vars
 			to: _to,
 			children,
 			...props
@@ -73,11 +71,11 @@ vi.mock('../nav-menu/NavMenuMessagesLink', () => ({
 			className,
 			'data-cy': dataCy,
 			// isLink, to, and totalMessages are extracted but not used - this is intentional for prop filtering
-			// eslint-disable-next-line no-unused-vars
+
 			isLink: _isLink,
-			// eslint-disable-next-line no-unused-vars
+
 			to: _to,
-			// eslint-disable-next-line no-unused-vars
+
 			totalMessages: _totalMessages,
 			...props
 		}) => (

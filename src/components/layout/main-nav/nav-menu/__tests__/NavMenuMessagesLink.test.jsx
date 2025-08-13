@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 
@@ -28,11 +28,8 @@ vi.mock('../NavMenuButtonLink', () => ({
 		// Filter out React-specific props that shouldn't appear on DOM elements
 		const {
 			// isLink, onMenuItemClick, and to are extracted but not used - this is intentional for prop filtering
-			// eslint-disable-next-line no-unused-vars
 			isLink: _isLink,
-			// eslint-disable-next-line no-unused-vars
 			onMenuItemClick: _onMenuItemClick,
-			// eslint-disable-next-line no-unused-vars
 			to: _to,
 			...domProps
 		} = props

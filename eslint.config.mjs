@@ -103,6 +103,9 @@ export default [
 		},
 		rules: {
 			...vitest.configs.recommended.rules,
+			'react/display-name': 'off',
+			'react/prop-types': 'off',
+			'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
 		},
 	},
 ]
