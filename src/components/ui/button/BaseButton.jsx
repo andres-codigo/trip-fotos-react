@@ -41,14 +41,25 @@ const BaseButton = ({
 					{...props}>
 					{children}
 				</button>
-			) : (
-				<Link
-					to={isDisabled ? undefined : to}
+			) : isDisabled ? (
+				<span
 					ref={elementRef}
 					className={combinedClassName}
 					data-cy={dataCy}
-					aria-disabled={isDisabled}
-					tabIndex={isDisabled ? -1 : undefined}
+					aria-disabled="true"
+					tabIndex={-1}
+					{...(typeof children !== 'string'
+						? { 'aria-label': props['ariaLabel'] || 'Link' }
+						: {})}
+					{...props}>
+					{children}
+				</span>
+			) : (
+				<Link
+					to={to}
+					ref={elementRef}
+					className={combinedClassName}
+					data-cy={dataCy}
 					{...(typeof children !== 'string'
 						? { 'aria-label': props['ariaLabel'] || 'Link' }
 						: {})}
