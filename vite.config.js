@@ -105,7 +105,7 @@ export default defineConfig({
 		// Improves test isolation - automatically clears and restores mocks between tests
 		clearMocks: true,
 		restoreMocks: true,
-    testTimeout: 10000,
+		testTimeout: 10000,
 		hookTimeout: 10000,
 		coverage: {
 			enabled: process.env.COVERAGE === 'true',
