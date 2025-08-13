@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 
@@ -22,37 +22,35 @@ import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 import NavMenuButtonLink from '../NavMenuButtonLink'
 
 vi.mock('@/components/ui/button/BaseButton', () => ({
-	default: vi.fn().mockImplementation(
-		({
-			children,
-			className,
-			onClick,
-			isLink,
-			// isError has been extracted but is not used - this is intentional for prop filtering
-			// eslint-disable-next-line no-unused-vars
-			isError: _isError,
-			isDisabled,
-			to,
-			'data-cy': dataCy,
-			...props
-		}) => {
-			const Component = isLink ? 'a' : 'button'
-			return (
-				<Component
-					className={className}
-					onClick={onClick}
-					{...(dataCy && { 'data-cy': dataCy })}
-					{...(isLink && { href: to })}
-					{...(isDisabled && {
-						disabled: !isLink,
-						'aria-disabled': isLink,
-					})}
-					{...props}>
-					{children}
-				</Component>
-			)
-		},
-	),
+	default: ({
+		children,
+		isLink,
+		isError: _isError,
+		onClick,
+		isDisabled,
+		modeType: _modeType,
+		onMenuItemClick: _onMenuItemClick,
+		to,
+		className,
+		'data-cy': dataCy,
+		...props
+	}) => {
+		const Component = isLink ? 'a' : 'button'
+		return (
+			<Component
+				className={className}
+				onClick={onClick}
+				data-cy={dataCy}
+				{...(isLink && { href: to })}
+				{...(isDisabled && {
+					disabled: !isLink,
+					'aria-disabled': isLink,
+				})}
+				{...props}>
+				{children}
+			</Component>
+		)
+	},
 }))
 
 vi.mock('@/utils/useViewport', () => ({
@@ -78,15 +76,10 @@ const mockClassNames = vi.mocked(classNames)
 
 describe('<NavMenuButtonLink />', () => {
 	beforeEach(() => {
-		vi.clearAllMocks()
 		mockUseViewport.mockReturnValue({ isMobile: false })
 		mockClassNames.mockImplementation((...args) =>
 			args.filter(Boolean).join(' '),
 		)
-	})
-
-	afterEach(() => {
-		vi.clearAllMocks()
 	})
 
 	const defaultProps = {
