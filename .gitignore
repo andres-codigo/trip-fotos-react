@@ -25,10 +25,11 @@ dist
 coverage
 
 # CYRPESS TESTING
-cypress/downloads/
+cypress/downloads
+cypress/screenshots
 
 # DEPCHECK ANALYSIS FILES
-scripts/dependency-check/
+scripts/dependency-check
 
 # BASH SCRIPTS
 .bash-scripts

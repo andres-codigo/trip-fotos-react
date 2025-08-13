@@ -100,7 +100,6 @@ import { useLogout } from '../hooks/useLogout'
 
 import { PATHS } from '@/constants/paths'
 
-import mainNavStyles from '../MainNav.module.scss'
 import navMenuButtonLinkStyles from '../nav-menu/NavMenuButtonLink.module.scss'
 
 import NavMenuButtonLink from '../nav-menu/NavMenuButtonLink'
