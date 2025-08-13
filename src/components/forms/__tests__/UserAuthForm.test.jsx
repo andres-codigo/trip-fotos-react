@@ -1,6 +1,6 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import { vi } from 'vitest'
 
 import { API_DATABASE } from '@/constants/api'
 import { MOCK_KEYS } from '@/constants/mock-data'
@@ -79,7 +79,8 @@ const renderWithRouter = (component) => {
 	return render(<BrowserRouter>{component}</BrowserRouter>)
 }
 
-const defaultProps = {
+// Create default props factory to avoid object recreation
+const createDefaultProps = () => ({
 	email: {
 		value: MOCK_KEYS.EMAIL,
 		isValid: true,
@@ -96,11 +97,14 @@ const defaultProps = {
 	onSubmit: vi.fn(),
 	onSwitchMode: vi.fn(),
 	isLoading: false,
-}
+})
 
 describe('<UserAuthForm />', () => {
+	let defaultProps
+
 	beforeEach(() => {
-		vi.clearAllMocks()
+		// Create fresh props for each test to avoid cross-test pollution
+		defaultProps = createDefaultProps()
 	})
 
 	describe('Rendering tests', () => {
