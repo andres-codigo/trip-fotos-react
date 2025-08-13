@@ -63,6 +63,71 @@ describe('<BaseButton />', () => {
 			)
 			cy.get(getByDataCy(BUTTON.ID)).should('have.class', 'custom-class')
 		})
+
+		it('renders as span when link is disabled (no href attribute)', () => {
+			cy.mount(
+				<MemoryRouter>
+					<BaseButton
+						isLink
+						isDisabled
+						to="/test"
+						modeType={BUTTON.MODE.FLAT}
+						data-cy={BUTTON.LINK_ID}>
+						Disabled Link
+					</BaseButton>
+				</MemoryRouter>,
+			)
+
+			cy.get(getByDataCy(BUTTON.LINK_ID))
+				.should('match', 'span')
+				.and('have.attr', 'aria-disabled', 'true')
+				.and('have.attr', 'tabindex', '-1')
+				.and('not.have.attr', 'href')
+		})
+
+		it('renders as Link when isLink=true and not disabled', () => {
+			cy.mount(
+				<MemoryRouter>
+					<BaseButton
+						isLink
+						to="/test"
+						modeType={BUTTON.MODE.FLAT}
+						data-cy={BUTTON.LINK_ID}>
+						Enabled Link
+					</BaseButton>
+				</MemoryRouter>,
+			)
+
+			cy.get(getByDataCy(BUTTON.LINK_ID))
+				.should('match', 'a')
+				.and('have.attr', 'href', '/test')
+				.and('not.have.attr', 'aria-disabled')
+		})
+
+		it('renders as button when isLink=false', () => {
+			cy.mount(
+				<BaseButton
+					modeType={BUTTON.MODE.FLAT}
+					data-cy={BUTTON.ID}>
+					Button Text
+				</BaseButton>,
+			)
+			cy.get(getByDataCy(BUTTON.ID)).should('match', 'button')
+		})
+
+		it('defaults to "/" when no to prop is provided for links', () => {
+			cy.mount(
+				<MemoryRouter>
+					<BaseButton
+						isLink
+						modeType={BUTTON.MODE.FLAT}
+						data-cy={BUTTON.LINK_ID}>
+						Default Link
+					</BaseButton>
+				</MemoryRouter>,
+			)
+			cy.get(getByDataCy(BUTTON.LINK_ID)).should('have.attr', 'href', '/')
+		})
 	})
 
 	describe('Behaviour tests', () => {
@@ -127,6 +192,25 @@ describe('<BaseButton />', () => {
 			cy.get(getByDataCy(BUTTON.LINK_ID))
 				.should('have.attr', 'aria-disabled', 'true')
 				.and('have.attr', 'tabindex', '-1')
+		})
+
+		it('sets proper accessibility attributes for disabled links', () => {
+			cy.mount(
+				<MemoryRouter>
+					<BaseButton
+						isLink
+						isDisabled
+						to="/test"
+						modeType={BUTTON.MODE.FLAT}
+						data-cy={BUTTON.LINK_ID}>
+						Disabled Link
+					</BaseButton>
+				</MemoryRouter>,
+			)
+			cy.get(getByDataCy(BUTTON.LINK_ID))
+				.should('have.attr', 'aria-disabled', 'true')
+				.and('have.attr', 'tabindex', '-1')
+				.and('not.have.attr', 'href')
 		})
 	})
 })
