@@ -15,6 +15,7 @@ const BaseButton = ({
 	to = '/',
 	className,
 	'data-cy': dataCy,
+	ariaLabel,
 	...props
 }) => {
 	const elementRef = useRef()
@@ -36,7 +37,7 @@ const BaseButton = ({
 					data-cy={dataCy}
 					disabled={isDisabled}
 					{...(typeof children !== 'string'
-						? { 'aria-label': props['ariaLabel'] || 'Button' }
+						? { 'aria-label': ariaLabel || 'Button' }
 						: {})}
 					{...props}>
 					{children}
@@ -49,7 +50,7 @@ const BaseButton = ({
 					aria-disabled="true"
 					tabIndex={-1}
 					{...(typeof children !== 'string'
-						? { 'aria-label': props['ariaLabel'] || 'Link' }
+						? { 'aria-label': ariaLabel || 'Link' }
 						: {})}
 					{...props}>
 					{children}
@@ -61,7 +62,7 @@ const BaseButton = ({
 					className={combinedClassName}
 					data-cy={dataCy}
 					{...(typeof children !== 'string'
-						? { 'aria-label': props['ariaLabel'] || 'Link' }
+						? { 'aria-label': ariaLabel || 'Link' }
 						: {})}
 					{...props}>
 					{children}
