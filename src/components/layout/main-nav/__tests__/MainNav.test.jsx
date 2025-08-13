@@ -116,8 +116,6 @@ describe('<MainNav />', () => {
 	const mockHandleLogoutClick = vi.fn()
 
 	beforeEach(() => {
-		vi.clearAllMocks()
-
 		// Default hook return values
 		vi.mocked(useMainNavState).mockReturnValue({
 			travellerName: mockTravellerName,
@@ -131,10 +129,6 @@ describe('<MainNav />', () => {
 		vi.mocked(useClickOutsideToClose).mockReturnValue(undefined)
 		vi.mocked(useMobileMenu).mockReturnValue(undefined)
 		vi.mocked(useLogout).mockReturnValue(mockHandleLogoutClick)
-	})
-
-	afterEach(() => {
-		vi.clearAllMocks()
 	})
 
 	const defaultProps = {

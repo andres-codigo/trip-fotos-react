@@ -35,8 +35,6 @@ describe('Firebase Configuration', () => {
 
 	describe('Initialisation tests', () => {
 		it('initialises Firebase app with correct configuration', async () => {
-			vi.clearAllMocks()
-
 			const { firebaseApp } = await import('../firebase.js')
 
 			expect(initializeApp).toHaveBeenCalledWith({
@@ -63,8 +61,6 @@ describe('Firebase Configuration', () => {
 
 	describe('Module caching tests', () => {
 		it('calls initialiseApp only once', async () => {
-			vi.clearAllMocks()
-
 			// First import
 			// should call initialiseApp
 			await import('../firebase.js')

@@ -36,10 +36,6 @@ describe('useMobileMenu', () => {
 		mockSetIsMenuOpen = vi.fn()
 	})
 
-	afterEach(() => {
-		vi.clearAllMocks()
-	})
-
 	it('should not set up event listeners when user is not logged in', () => {
 		renderHook(() =>
 			useMobileMenu(

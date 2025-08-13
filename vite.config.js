@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'path'
 import fs from 'fs'
+import os from 'os'
 
 import react from '@vitejs/plugin-react'
 import eslint from 'vite-plugin-eslint2'
@@ -84,7 +85,28 @@ export default defineConfig({
 		globals: true,
 		environment: 'jsdom',
 		setupFiles: './src/testUtils/vitest/testingLibrarySetup.js',
+		// Performance optimisations - uses worker threads for parallel test execution
+		// Dynamically sets thread count: 2 in CI, half of CPU cores locally (min 1)
+		pool: 'threads',
+		poolOptions: {
+			threads: {
+				singleThread: false,
+				minThreads: 1,
+				maxThreads: process.env.CI
+					? 2
+					: Math.max(1, Math.ceil(os.cpus().length / 2)),
+			},
+		},
+		// Optimises file watching - ignores coverage reports, dependencies, and E2E tests
+		// Faster file watching and change detection
+		watch: {
+			ignored: ['**/coverage/**', '**/node_modules/**', '**/cypress/**'],
+		},
+		// Improves test isolation - automatically clears and restores mocks between tests
+		clearMocks: true,
+		restoreMocks: true,
 		coverage: {
+			enabled: process.env.COVERAGE === 'true',
 			provider: 'v8',
 			reportsDirectory: './coverage',
 			reporter: ['text', 'html'],

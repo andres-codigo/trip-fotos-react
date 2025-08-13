@@ -11,7 +11,6 @@ describe('useMainNavState', () => {
 	const mockSetTravellerName = vi.fn()
 
 	beforeEach(() => {
-		vi.clearAllMocks()
 		useLoggedInTravellerName.mockReturnValue([
 			'John Doe',
 			mockSetTravellerName,

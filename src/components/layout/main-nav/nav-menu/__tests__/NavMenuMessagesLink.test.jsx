@@ -66,7 +66,6 @@ const mockClassNames = vi.mocked(classNames)
 
 describe('<NavMenuMessagesLink />', () => {
 	beforeEach(() => {
-		vi.clearAllMocks()
 		mockClassNames.mockImplementation((...args) => {
 			return args
 				.filter(Boolean)
@@ -79,10 +78,6 @@ describe('<NavMenuMessagesLink />', () => {
 				})
 				.join(' ')
 		})
-	})
-
-	afterEach(() => {
-		vi.clearAllMocks()
 	})
 
 	const defaultProps = {

@@ -22,7 +22,6 @@ describe('useLogout', () => {
 	}
 
 	beforeEach(() => {
-		vi.clearAllMocks()
 		useDispatch.mockReturnValue(mockDispatch)
 	})
 

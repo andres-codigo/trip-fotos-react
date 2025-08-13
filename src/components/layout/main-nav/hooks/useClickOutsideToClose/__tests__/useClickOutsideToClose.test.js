@@ -44,12 +44,6 @@ describe('useClickOutsideToClose', () => {
 			value: GLOBAL.BREAKPOINT.MOBILE,
 			writable: true,
 		})
-
-		vi.clearAllMocks()
-	})
-
-	afterEach(() => {
-		vi.clearAllMocks()
 	})
 
 	it('should add click event listener on mount', () => {

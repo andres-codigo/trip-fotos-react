@@ -20,7 +20,6 @@ describe('useViewport', () => {
 
 	afterEach(() => {
 		vi.useRealTimers()
-		vi.restoreAllMocks()
 	})
 
 	it('should return mobile viewport for small screens', () => {

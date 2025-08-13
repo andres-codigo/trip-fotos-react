@@ -25,14 +25,6 @@ Object.defineProperty(window, 'removeEventListener', {
 })
 
 describe('useLoggedInTravellerName', () => {
-	beforeEach(() => {
-		vi.clearAllMocks()
-	})
-
-	afterEach(() => {
-		vi.restoreAllMocks()
-	})
-
 	it('should initialize with localStorage value when available', () => {
 		localStorageMock.getItem.mockReturnValue('John Doe')
 

@@ -40,19 +40,11 @@ const initializeStore = () => {
 	})
 }
 
-const resetMocks = () => {
-	fetch.mockReset()
-	localStorage.setItem.mockClear()
-	localStorage.getItem.mockClear()
-	localStorage.removeItem.mockClear()
-}
-
 setupMocks()
 
 describe('authenticationSlice', () => {
 	beforeEach(() => {
 		initializeStore()
-		resetMocks()
 	})
 
 	describe('reducers', () => {

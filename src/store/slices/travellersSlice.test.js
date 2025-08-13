@@ -43,15 +43,8 @@ const initializeStore = () => {
 	})
 }
 
-const resetMocks = () => {
-	fetch.mockReset()
-	localStorage.setItem.mockClear()
-	handleApiError.mockClear()
-}
-
 beforeEach(() => {
 	initializeStore()
-	resetMocks()
 })
 
 setupMocks()
