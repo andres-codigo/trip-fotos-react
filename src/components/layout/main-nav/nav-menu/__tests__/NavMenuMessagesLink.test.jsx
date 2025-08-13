@@ -24,24 +24,26 @@ import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 import NavMenuMessagesLink from '../NavMenuMessagesLink'
 
 vi.mock('../NavMenuButtonLink', () => ({
-	default: vi.fn(({ children, className, 'data-cy': dataCy, ...props }) => {
-		// Filter out React-specific props that shouldn't appear on DOM elements
-		const {
-			// isLink, onMenuItemClick, and to are extracted but not used - this is intentional for prop filtering
+	default: vi.fn(
+		({
+			children,
 			isLink: _isLink,
-			onMenuItemClick: _onMenuItemClick,
 			to: _to,
-			...domProps
-		} = props
-		return (
-			<button
-				className={className}
-				data-cy={dataCy}
-				{...domProps}>
-				{children}
-			</button>
-		)
-	}),
+			'data-cy': dataCy,
+			onMenuItemClick: _onMenuItemClick,
+			className,
+			...props
+		}) => {
+			return (
+				<button
+					className={className}
+					data-cy={dataCy}
+					{...props}>
+					{children}
+				</button>
+			)
+		},
+	),
 }))
 
 vi.mock('classnames', () => ({
