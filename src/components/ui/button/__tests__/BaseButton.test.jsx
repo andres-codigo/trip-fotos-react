@@ -1,4 +1,4 @@
-import { vi, describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
@@ -40,6 +40,10 @@ const renderWithRouter = (component) => {
 }
 
 describe('<BaseButton />', () => {
+	afterEach(() => {
+		vi.resetModules()
+	})
+
 	describe('Rendering tests', () => {
 		it('combines className with modeType styles using classNames utility', () => {
 			render(

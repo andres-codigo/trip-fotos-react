@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 
@@ -24,27 +24,26 @@ import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 import NavMenuMessagesLink from '../NavMenuMessagesLink'
 
 vi.mock('../NavMenuButtonLink', () => ({
-	default: vi.fn(({ children, className, 'data-cy': dataCy, ...props }) => {
-		// Filter out React-specific props that shouldn't appear on DOM elements
-		const {
-			// isLink, onMenuItemClick, and to are extracted but not used - this is intentional for prop filtering
-			// eslint-disable-next-line no-unused-vars
+	default: vi.fn(
+		({
+			children,
 			isLink: _isLink,
-			// eslint-disable-next-line no-unused-vars
-			onMenuItemClick: _onMenuItemClick,
-			// eslint-disable-next-line no-unused-vars
 			to: _to,
-			...domProps
-		} = props
-		return (
-			<button
-				className={className}
-				data-cy={dataCy}
-				{...domProps}>
-				{children}
-			</button>
-		)
-	}),
+			'data-cy': dataCy,
+			onMenuItemClick: _onMenuItemClick,
+			className,
+			...props
+		}) => {
+			return (
+				<button
+					className={className}
+					data-cy={dataCy}
+					{...props}>
+					{children}
+				</button>
+			)
+		},
+	),
 }))
 
 vi.mock('classnames', () => ({
@@ -66,7 +65,6 @@ const mockClassNames = vi.mocked(classNames)
 
 describe('<NavMenuMessagesLink />', () => {
 	beforeEach(() => {
-		vi.clearAllMocks()
 		mockClassNames.mockImplementation((...args) => {
 			return args
 				.filter(Boolean)
@@ -79,10 +77,6 @@ describe('<NavMenuMessagesLink />', () => {
 				})
 				.join(' ')
 		})
-	})
-
-	afterEach(() => {
-		vi.clearAllMocks()
 	})
 
 	const defaultProps = {

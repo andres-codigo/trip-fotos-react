@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
@@ -43,6 +43,9 @@ const renderWithProviders = (token) => {
 }
 
 describe('<Header />', () => {
+	afterEach(() => {
+		vi.resetModules()
+	})
 	describe('Behaviour tests', () => {
 		it('routes to authentication page when token is falsy', () => {
 			const falsyValues = [null, undefined, '', false, 0]

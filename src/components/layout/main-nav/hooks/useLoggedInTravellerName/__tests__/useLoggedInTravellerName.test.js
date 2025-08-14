@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useLoggedInTravellerName } from '../index'
 
@@ -25,14 +25,6 @@ Object.defineProperty(window, 'removeEventListener', {
 })
 
 describe('useLoggedInTravellerName', () => {
-	beforeEach(() => {
-		vi.clearAllMocks()
-	})
-
-	afterEach(() => {
-		vi.restoreAllMocks()
-	})
-
 	it('should initialize with localStorage value when available', () => {
 		localStorageMock.getItem.mockReturnValue('John Doe')
 

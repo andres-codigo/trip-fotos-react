@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 
 import { GLOBAL } from '@/constants/global'
@@ -44,12 +44,6 @@ describe('useClickOutsideToClose', () => {
 			value: GLOBAL.BREAKPOINT.MOBILE,
 			writable: true,
 		})
-
-		vi.clearAllMocks()
-	})
-
-	afterEach(() => {
-		vi.clearAllMocks()
 	})
 
 	it('should add click event listener on mount', () => {

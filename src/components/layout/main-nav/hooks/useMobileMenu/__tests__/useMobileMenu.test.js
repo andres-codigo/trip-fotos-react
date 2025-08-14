@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { useMobileMenu } from '../index'
 
@@ -34,10 +34,6 @@ describe('useMobileMenu', () => {
 		}
 
 		mockSetIsMenuOpen = vi.fn()
-	})
-
-	afterEach(() => {
-		vi.clearAllMocks()
 	})
 
 	it('should not set up event listeners when user is not logged in', () => {
