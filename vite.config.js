@@ -122,6 +122,9 @@ export default defineConfig({
 				'**/index.jsx',
 				'**/LoadingFallback.jsx',
 				'**/testUtils/**',
+				// Exclude Cypress test helpers from coverage
+				'**/constants/**',
+				'**/__tests__/**/test-utilities/**',
 			],
 		},
 	},
