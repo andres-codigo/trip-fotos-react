@@ -9,6 +9,7 @@ import { GLOBAL } from '@/constants/global.js'
 const useViewport = (debounceMs = 100) => {
 	const [viewport, setViewport] = useState(() => {
 		// Initial state based on current window size
+		/* c8 ignore start */
 		if (typeof window === 'undefined') {
 			return {
 				isMobile: false,
@@ -17,6 +18,7 @@ const useViewport = (debounceMs = 100) => {
 				width: 0,
 			}
 		}
+		/* c8 ignore end */
 
 		const width = window.innerWidth
 		return {

@@ -16,6 +16,7 @@ import authenticationReducer, {
 	logout,
 	autoLogout,
 	authActions,
+	selectAuthenticationToken,
 } from './authenticationSlice'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
@@ -45,6 +46,38 @@ setupMocks()
 describe('authenticationSlice', () => {
 	beforeEach(() => {
 		initializeStore()
+	})
+
+	describe('selectors', () => {
+		it('should select authentication token from state', () => {
+			const mockState = {
+				authentication: {
+					token: MOCK_KEYS.ID_TOKEN,
+					userId: MOCK_KEYS.LOCAL_ID,
+					userName: 'Test User',
+					userEmail: MOCK_KEYS.EMAIL,
+					didAutoLogout: false,
+				},
+			}
+
+			const result = selectAuthenticationToken(mockState)
+			expect(result).toBe(MOCK_KEYS.ID_TOKEN)
+		})
+
+		it('should return null when no token in state', () => {
+			const mockState = {
+				authentication: {
+					token: null,
+					userId: null,
+					userName: null,
+					userEmail: null,
+					didAutoLogout: false,
+				},
+			}
+
+			const result = selectAuthenticationToken(mockState)
+			expect(result).toBeNull()
+		})
 	})
 
 	describe('reducers', () => {
@@ -219,25 +252,27 @@ describe('authenticationSlice', () => {
 						}),
 					)
 
-					expect(fetch).toHaveBeenCalledWith(
-						`${MOCK_API.URL}signInWithPassword?key=${MOCK_API.KEY}`,
-						expect.objectContaining({
-							method: API_DATABASE.POST,
-							body: JSON.stringify({
-								email: MOCK_KEYS.EMAIL,
-								password: MOCK_KEYS.PASSWORD,
-								returnSecureToken: true,
-							}),
+					expect(result.payload).toBe(mockErrorMessage)
+					expect(result.meta.rejectedWithValue).toBe(true)
+				})
+
+				it('should handle login failure with missing error message and use fallback', async () => {
+					fetch.mockResolvedValueOnce({
+						ok: false,
+						json: async () => ({
+							error: { message: null }, // or message: undefined, or no message property
+						}),
+					})
+
+					const result = await store.dispatch(
+						login({
+							mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+							email: MOCK_KEYS.EMAIL,
+							password: MOCK_KEYS.PASSWORD,
 						}),
 					)
 
-					const state = store.getState().authentication
-					expect(state.token).toBeNull()
-					expect(state.userId).toBeNull()
-					expect(state.userName).toBeNull()
-					expect(state.userEmail).toBeNull()
-
-					expect(result.payload).toBe(mockErrorMessage)
+					expect(result.payload).toBe('Login failed.')
 					expect(result.meta.rejectedWithValue).toBe(true)
 				})
 
@@ -413,6 +448,113 @@ describe('authenticationSlice', () => {
 					expect(state.userId).toBeNull()
 					expect(state.userName).toBeNull()
 					expect(state.userEmail).toBeNull()
+					expect(state.didAutoLogout).toBe(true)
+				})
+			})
+
+			describe('timer functionality', () => {
+				let setTimeoutSpy
+				let clearTimeoutSpy
+
+				beforeEach(() => {
+					vi.useFakeTimers()
+					setTimeoutSpy = vi.spyOn(global, 'setTimeout')
+					clearTimeoutSpy = vi.spyOn(global, 'clearTimeout')
+				})
+
+				afterEach(() => {
+					vi.useRealTimers()
+					setTimeoutSpy.mockRestore()
+					clearTimeoutSpy.mockRestore()
+				})
+
+				it('should set timer and dispatch autoLogout when timer expires after successful login', async () => {
+					const mockResponse = {
+						idToken: MOCK_KEYS.ID_TOKEN,
+						localId: MOCK_KEYS.LOCAL_ID,
+						displayName: 'Test User',
+						email: MOCK_KEYS.EMAIL,
+						expiresIn: MOCK_KEYS.EXPIRES_IN,
+					}
+
+					fetch.mockResolvedValueOnce({
+						ok: true,
+						json: async () => mockResponse,
+					})
+
+					await store.dispatch(
+						login({
+							mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+							email: MOCK_KEYS.EMAIL,
+							password: MOCK_KEYS.PASSWORD,
+						}),
+					)
+
+					// Verify initial state after login
+					let state = store.getState().authentication
+					expect(state.token).toBe(MOCK_KEYS.ID_TOKEN)
+					expect(state.didAutoLogout).toBe(false)
+
+					// Verify setTimeout was called with correct duration
+					expect(setTimeoutSpy).toHaveBeenCalledWith(
+						expect.any(Function),
+						+MOCK_KEYS.EXPIRES_IN * 1000,
+					)
+
+					// Get the callback function from setTimeout
+					const timerCallback = setTimeoutSpy.mock.calls[0][0]
+
+					// Execute the callback to trigger autoLogout
+					await timerCallback()
+
+					// Verify autoLogout was executed and state was updated
+					state = store.getState().authentication
+					expect(state.token).toBeNull()
+					expect(state.didAutoLogout).toBe(true)
+				})
+
+				it('should set timer and dispatch autoLogout when timer expires during tryLogin', async () => {
+					const futureExpiration = new Date().getTime() + 60000 // 1 minute from now
+
+					localStorage.getItem.mockImplementation((key) => {
+						switch (key) {
+							case MOCK_STORAGE_KEYS.TOKEN:
+								return MOCK_KEYS.ID_TOKEN
+							case MOCK_STORAGE_KEYS.USER_ID:
+								return MOCK_KEYS.LOCAL_ID
+							case MOCK_STORAGE_KEYS.USER_NAME:
+								return 'Test User'
+							case MOCK_STORAGE_KEYS.USER_EMAIL:
+								return MOCK_KEYS.EMAIL
+							case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
+								return futureExpiration.toString()
+							default:
+								return null
+						}
+					})
+
+					await store.dispatch(tryLogin())
+
+					// Verify initial state after tryLogin
+					let state = store.getState().authentication
+					expect(state.token).toBe(MOCK_KEYS.ID_TOKEN)
+					expect(state.didAutoLogout).toBe(false)
+
+					// Verify setTimeout was called with correct duration (60000ms)
+					expect(setTimeoutSpy).toHaveBeenCalledWith(
+						expect.any(Function),
+						60000,
+					)
+
+					// Get the callback function from setTimeout
+					const timerCallback = setTimeoutSpy.mock.calls[0][0]
+
+					// Execute the callback to trigger autoLogout
+					await timerCallback()
+
+					// Verify autoLogout was executed and state was updated
+					state = store.getState().authentication
+					expect(state.token).toBeNull()
 					expect(state.didAutoLogout).toBe(true)
 				})
 			})

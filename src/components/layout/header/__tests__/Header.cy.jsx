@@ -3,7 +3,7 @@ import { urls } from '../../../../../cypress/support/constants/urls'
 
 import { PATHS } from '@/constants/paths'
 
-import { headerAssertions } from './headerTestHelpers'
+import { headerAssertions } from './test-utilities/headerTestHelpers'
 
 import Header from '../Header'
 

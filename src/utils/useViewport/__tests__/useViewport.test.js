@@ -20,6 +20,7 @@ describe('useViewport', () => {
 
 	afterEach(() => {
 		vi.useRealTimers()
+		vi.unstubAllGlobals()
 	})
 
 	it('should return mobile viewport for small screens', () => {
