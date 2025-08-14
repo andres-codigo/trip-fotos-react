@@ -133,13 +133,13 @@ npm run cy:run:e2e
 # Run Cypress Component tests in headless mode
 npm run cy:run:ct
 
-# Run all tests using Vitest
-npm run vitest
+# Run all tests in CI mode (single run)
+npm run vitest:run
 
-# Run tests in watch mode
-npm run vitest:watch
+# Run tests quickly without coverage using dot reporter
+npm run vitest:run:fast
 
-# Generate a test coverage report
+# # Run tests with coverage reporting enabled
 npm run vitest:coverage
 
 # Visual Vite bundle analysis
@@ -355,21 +355,41 @@ npm install vitest --save-dev
 Refer to the [Scripts](#scripts) section for commands to run tests, such as:
 
 ```bash
-npm run vitest         # Run all tests
-npm run vitest:watch   # Run tests in watch mode
+npm run vitest:run      # Run all tests
+npm run vitest:watch    # Run tests in watch mode
 npm run vitest:coverage # Generate coverage report
 ```
 
 **Vitest Directory Structure**
 
-Vitest test files are located alongside the source files they test, following the convention `*.test.js`.
+Vitest test files are located alongside the source files they test, following these conventions:
+
+- For store logic: `*.test.js` files are placed next to the source file.
+- For components and utility files: tests are typically placed in a `__tests__` folder within the component/utility directory.
 
 ```
 src/
-    ├── store/
-    │   ├── slices/
-    │   │   ├── <test-file>.js
-    │   │   ├── <test-file>.test.js
+  ├── components/
+  │   ├── forms/
+  │   │   ├── __tests__/
+  │   │   │   ├── UserAuthForm.test.jsx
+  │   │   │   └── ...
+  │   │   ├── FormComponent.jsx
+  │   ├── ui/
+  │   │   ├── __tests__/
+  │   │   │   ├── Button.test.jsx
+  │   │   │   └── ...
+  │   │   ├── Button.jsx
+  ├── store/
+  │   ├── slices/
+  │   │   ├── <slice-file>.js
+  │   │   ├── <test-file>.test.js
+  ├── utlis/
+  │   ├── errorHandler/
+  │   │   ├── __tests__/
+  │   │   │   ├── errorHandler.test.js
+  │   │   │   └── ...
+  │   │   ├── index.js
 ```
 
 **Writing Tests**
@@ -458,11 +478,18 @@ Cypress is pre-configured in this project. Feel free to customise the [cypress.c
 **Component Testing**: Component test files are placed in a **tests** folder located within each component’s directory. For example:
 
 ```
-    src/
-      ├── components/
-            ├── ui/
-                ├── button/
-                    ├── __tests__/
+src/
+  ├── components/
+  │   ├── forms/
+  │   │   ├── __tests__/
+  │   │   │   ├── UserAuthForm.cy.jsx
+  │   │   │   └── ...
+  │   │   ├── FormComponent.jsx
+  │   ├── ui/
+  │   │   ├── __tests__/
+  │   │   │   ├── Button.cy.jsx
+  │   │   │   └── ...
+  │   │   ├── Button.jsx
 ```
 
 **Test Artifacts**
@@ -497,7 +524,7 @@ This project uses GitHub Actions to automate key development and monitoring task
 #### Test Commands
 
 ```bash
-npm run vitest          # Run all tests in CI mode
+npm run vitest:run      # Run all tests in CI mode
 npm run vitest:watch    # Run tests in watch mode (local dev)
 npm run vitest:coverage # Run tests with coverage reporting
 ```
@@ -551,11 +578,11 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 ### 📝 Summary Table
 
-| Workflow Name                           | File                                          | Tests Type       | Triggered On   |
-| --------------------------------------- | --------------------------------------------- | ---------------- | -------------- |
-| Run Unit Tests (Vitest)                 | `.github/workflows/unit-tests-vitest.yml`     | Unit/Integration | Push/PR/Manual |
-| E2E - Run Cypress Page Tests            | `.github/workflows/cypress-e2e.yml`           | E2E              | Push/PR/Manual |
-| Component - Run Cypress Component Tests | `.github/workflows/cypress-component.yml.yml` | Component        | Push/PR/Manual |
+| Workflow Name                           | File                                      | Tests Type       | Triggered On   |
+| --------------------------------------- | ----------------------------------------- | ---------------- | -------------- |
+| Run Unit Tests (Vitest)                 | `.github/workflows/unit-tests-vitest.yml` | Unit/Integration | Push/PR/Manual |
+| E2E - Run Cypress Page Tests            | `.github/workflows/cypress-e2e.yml`       | E2E              | Push/PR/Manual |
+| Component - Run Cypress Component Tests | `.github/workflows/cypress-component.yml` | Component        | Push/PR/Manual |
 
 ---
 
@@ -628,6 +655,8 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 ```
 trip-fotos-react/
+├── .github/
+│   └── workflows/              # GitHub Actions workflow files for CI/CD automation
 ├── cypress/                    # Cypress tests
 ├── declarations/               # Breaking issue fix when using ESLint V9
 ├── public/                     # Static assets
@@ -640,35 +669,40 @@ trip-fotos-react/
 |   ├── services/       # External service configurations (Firebase, APIs, etc.)
 │   ├── store/          # Redux store and slices
 │   ├── styles/         # SCSS stylesheets
-│   ├── testUtils/      # Vitest utility functions
+│   ├── testUtils/      # Testing environment configuration and Cypress and Vitest utility functions
 │   ├── utils/          # General utility functions
 │   ├── App.js          # Main application component
-│   ├── index.js        # Root application entry point
-│   └── setupTests.js   # Testing environment configuration
+│   └── index.js        # Root application entry point
 ├── .env                        # Environment variables (not committed to version control)
 ├── .firebaserc                 # Firebase project configuration
 ├── .gitignore                  # Git ignore rules
+├── .npmrc                      # Configuration file for custom npm settings and registry options
+├── .nvmrc                      # Specifies the Node.js version for Node Version Manager (nvm)
 ├── .prettierignore             # Prettier ignore rules
 ├── .prettierrc.json            # Prettier configuration
 ├── cypress.config.js           # Cypress testing configuration
 ├── eslint.config.mjs           # ESLint configuration
-├── jsconfig.json               # JS configuration
+├── jsconfig.json               # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
 ├── package.json                # Project dependencies and scripts
 ├── README.md                   # Project documentation
 ├── vercel.json                 # Vercel deployment configuration
 └── vite.config.js              # Vite build tool configuration
 ```
 
-### Explanation of Additional Files:
+### Explanation of Key Project Files and Folders:
 
-1. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
-2. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).
-3. **`.prettierignore`**: Specifies files and directories to be ignored by Prettier for formatting.
-4. **`.prettierrc.json`**: Configuration file for Prettier to enforce consistent code formatting.
-5. **`cypress.config.js`**: Configuration file for Cypress end-to-end testing.
-6. **`eslint.config.mjs`**: ESLint configuration file for linting JavaScript/TypeScript code.
-7. **`vercel.json`**: Configuration file for deploying the project to Vercel.
-8. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
+1. **`.github/workflows/`**: Contains GitHub Actions workflow YAML files that automate CI/CD tasks such as running tests, linting, and deployments on push or pull request events.
+2. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
+3. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).
+4. **`.npmrc`**: Configuration file for custom npm settings and registry options.
+5. **`.nvmrc`**: Specifies the Node.js version for Node Version Manager (nvm).
+6. **`.prettierignore`**: Specifies files and directories to be ignored by Prettier for formatting.
+7. **`.prettierrc.json`**: Configuration file for Prettier to enforce consistent code formatting.
+8. **`cypress.config.js`**: Configuration file for Cypress end-to-end testing.
+9. **`eslint.config.mjs`**: ESLint configuration file for linting JavaScript/TypeScript code.
+10. **`jsconfig.json`**: JavaScript project configuration file that provides editor support for features like path aliases, module resolution, and improved IntelliSense in VS Code and other compatible editors.
+11. **`vercel.json`**: Configuration file for deploying the project to Vercel.
+12. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
 
 <a id="troubleshooting"></a>
 
