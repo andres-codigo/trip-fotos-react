@@ -26,11 +26,18 @@ const BaseDialog = ({
 	const descId = useId()
 
 	const nodeRef = useRef(null)
-	const [isVisible, setIsVisible] = useState(show)
+
+	/**
+	 * shouldRender is used to keep the dialog mounted in the DOM
+	 * after show becomes false, allowing exit animations to play.
+	 * It is set to true when show is true, and only unmounts when
+	 * both shouldRender and show are false.
+	 */
+	const [shouldRender, setShouldRender] = useState(show)
 
 	useEffect(() => {
 		if (show) {
-			setIsVisible(true)
+			setShouldRender(true)
 		}
 	}, [show])
 
@@ -53,7 +60,7 @@ const BaseDialog = ({
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [show, onClose])
 
-	if (!isVisible && !show) return null
+	if (!shouldRender && !show) return null
 
 	return ReactDOM.createPortal(
 		<>
