@@ -138,8 +138,7 @@ const BaseDialog = ({
 }
 
 BaseDialog.propTypes = {
-	children: PropTypes.node,
-	isError: PropTypes.bool,
+	container: PropTypes.instanceOf(Element),
 	show: PropTypes.bool.isRequired,
 	header: PropTypes.node,
 	title: PropTypes.string,
@@ -147,7 +146,9 @@ BaseDialog.propTypes = {
 	onClose: PropTypes.func.isRequired,
 	actions: PropTypes.node,
 	sectionClasses: PropTypes.bool,
+	isError: PropTypes.bool,
 	'data-cy': PropTypes.string,
+	children: PropTypes.node,
 }
 
 export default BaseDialog
