@@ -11,8 +11,7 @@ import BaseButton from '@/components/ui/button/BaseButton'
 import baseDialogStyles from './BaseDialog.module.scss'
 
 const BaseDialog = ({
-	children,
-	isError = false,
+	container = document.body,
 	show,
 	header,
 	title = null,
@@ -20,7 +19,9 @@ const BaseDialog = ({
 	onClose,
 	actions,
 	sectionClasses = false,
+	isError = false,
 	'data-cy': dataCy,
+	children,
 }) => {
 	const titleId = useId()
 	const descId = useId()
@@ -132,7 +133,7 @@ const BaseDialog = ({
 				</dialog>
 			</CSSTransition>
 		</>,
-		document.body,
+		container,
 	)
 }
 
