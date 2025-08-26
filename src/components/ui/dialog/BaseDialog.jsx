@@ -11,8 +11,7 @@ import BaseButton from '@/components/ui/button/BaseButton'
 import baseDialogStyles from './BaseDialog.module.scss'
 
 const BaseDialog = ({
-	children,
-	isError = false,
+	container = document.body,
 	show,
 	header,
 	title = null,
@@ -20,17 +19,26 @@ const BaseDialog = ({
 	onClose,
 	actions,
 	sectionClasses = false,
+	isError = false,
 	'data-cy': dataCy,
+	children,
 }) => {
 	const titleId = useId()
 	const descId = useId()
 
 	const nodeRef = useRef(null)
-	const [isVisible, setIsVisible] = useState(show)
+
+	/**
+	 * shouldRender is used to keep the dialog mounted in the DOM
+	 * after show becomes false, allowing exit animations to play.
+	 * It is set to true when show is true, and only unmounts when
+	 * both shouldRender and show are false.
+	 */
+	const [shouldRender, setShouldRender] = useState(show)
 
 	useEffect(() => {
 		if (show) {
-			setIsVisible(true)
+			setShouldRender(true)
 		}
 	}, [show])
 
@@ -53,7 +61,7 @@ const BaseDialog = ({
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [show, onClose])
 
-	if (!isVisible && !show) return null
+	if (!shouldRender && !show) return null
 
 	return ReactDOM.createPortal(
 		<>
@@ -125,13 +133,12 @@ const BaseDialog = ({
 				</dialog>
 			</CSSTransition>
 		</>,
-		document.body,
+		container,
 	)
 }
 
 BaseDialog.propTypes = {
-	children: PropTypes.node,
-	isError: PropTypes.bool,
+	container: PropTypes.instanceOf(Element),
 	show: PropTypes.bool.isRequired,
 	header: PropTypes.node,
 	title: PropTypes.string,
@@ -139,7 +146,9 @@ BaseDialog.propTypes = {
 	onClose: PropTypes.func.isRequired,
 	actions: PropTypes.node,
 	sectionClasses: PropTypes.bool,
+	isError: PropTypes.bool,
 	'data-cy': PropTypes.string,
+	children: PropTypes.node,
 }
 
 export default BaseDialog
