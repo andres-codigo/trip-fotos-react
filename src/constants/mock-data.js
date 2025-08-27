@@ -1,3 +1,5 @@
+import { API_DATABASE } from './api'
+
 export const MOCK_API = Object.freeze({
 	URL: 'https://mock-api-url.com/',
 	KEY: 'mock-api-key',
@@ -36,4 +38,25 @@ export const MOCK_MESSAGES = Object.freeze({
 	FAILED_TO_UPDATE_TRAVELLER: 'Failed to update traveller ',
 	INVALID_PASSWORD: 'INVALID_PASSWORD',
 	NETWORK_ERROR: 'Network Error',
+})
+
+export const MOCK_LOGIN_PAYLOAD = Object.freeze({
+	mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+	email: MOCK_KEYS.EMAIL,
+	password: MOCK_KEYS.PASSWORD,
+})
+
+export const MOCK_SIGNUP_ACTION = Object.freeze({
+	type: API_DATABASE.API_AUTH_SIGNUP_MODE,
+	payload: {
+		mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+		email: MOCK_KEYS.EMAIL,
+		password: MOCK_KEYS.PASSWORD,
+	},
+})
+
+export const MOCK_INVALID_LOGIN_ERROR = Object.freeze({
+	code: 'INVALID_LOGIN',
+	message: 'The email or password is incorrect.',
+	status: 401,
 })
