@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import {
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+	renderHook,
+	act,
+} from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 
@@ -12,6 +19,9 @@ import {
 	MOCK_INVALID_LOGIN_ERROR,
 } from '@/constants/mock-data'
 import { PATHS } from '@/constants/paths'
+import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
+
+import { validateEmail, validatePassword } from '@/utils/validation'
 
 import { login } from '@/store/slices/authenticationSlice'
 
@@ -27,6 +37,17 @@ vi.mock('@/utils/getFirebaseAuthErrorMessage', () => ({
 			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
 				.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 	),
+}))
+
+vi.mock('@/utils/validation', () => ({
+	validateEmail: vi.fn((v) => ({
+		isValid: !!v,
+		message: v ? '' : VALIDATION_MESSAGES.EMAIL_REQUIRED,
+	})),
+	validatePassword: vi.fn((v) => ({
+		isValid: !!v,
+		message: v ? '' : VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+	})),
 }))
 
 const mockNavigate = vi.fn()
@@ -59,6 +80,80 @@ describe('<UserAuth />', () => {
 	})
 
 	describe('Behaviour tests', () => {
+		it('validateEmailHandler sets email state and returns validity', async () => {
+			const { result } = renderHook(() => {
+				const [email, setEmail] = [{ value: '' }, vi.fn()]
+
+				const handler = async (value) => {
+					const { isValid, message } = validateEmail(value)
+					setEmail(value, isValid, message)
+					return isValid
+				}
+				return { setEmail, handler }
+			})
+
+			validateEmail.mockReturnValueOnce({
+				isValid: true,
+				message: '',
+			})
+
+			const isValid = await result.current.handler(MOCK_KEYS.EMAIL)
+			expect(result.current.setEmail).toHaveBeenCalledWith(
+				MOCK_KEYS.EMAIL,
+				true,
+				'',
+			)
+			expect(isValid).toBe(true)
+
+			validateEmail.mockReturnValueOnce({
+				isValid: false,
+				message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
+			})
+			const isValid2 = await result.current.handler('')
+			expect(result.current.setEmail).toHaveBeenCalledWith(
+				'',
+				false,
+				VALIDATION_MESSAGES.EMAIL_REQUIRED,
+			)
+			expect(isValid2).toBe(false)
+		})
+
+		it('validatePasswordHandler sets password state and returns validity', async () => {
+			const { result } = renderHook(() => {
+				const [password, setPassword] = [{ value: '' }, vi.fn()]
+				const handler = async (value) => {
+					const { isValid, message } = validatePassword(value)
+					setPassword(value, isValid, message)
+					return isValid
+				}
+				return { setPassword, handler }
+			})
+
+			validatePassword.mockReturnValueOnce({
+				isValid: true,
+				message: '',
+			})
+			const isValid = await result.current.handler(MOCK_KEYS.PASSWORD)
+			expect(result.current.setPassword).toHaveBeenCalledWith(
+				MOCK_KEYS.PASSWORD,
+				true,
+				'',
+			)
+			expect(isValid).toBe(true)
+
+			validatePassword.mockReturnValueOnce({
+				isValid: false,
+				message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+			})
+			const isValid2 = await result.current.handler('')
+			expect(result.current.setPassword).toHaveBeenCalledWith(
+				'',
+				false,
+				VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+			)
+			expect(isValid2).toBe(false)
+		})
+
 		it('dispatches login action with correct payload', async () => {
 			renderWithProviders(<UserAuth />)
 
