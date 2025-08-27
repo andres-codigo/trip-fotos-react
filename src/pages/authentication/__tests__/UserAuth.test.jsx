@@ -209,6 +209,26 @@ describe('<UserAuth />', () => {
 			})
 		})
 
+		it('redirects to home after successful login', async () => {
+			mockDispatch.mockResolvedValueOnce({
+				meta: {},
+			})
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				expect(mockNavigate).toHaveBeenCalledWith(PATHS.HOME)
+			})
+		})
+
 		it('dispatches signup action when in signup mode and form is submitted', async () => {
 			renderWithProviders(<UserAuth />)
 
@@ -256,26 +276,6 @@ describe('<UserAuth />', () => {
 						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 				),
 			).toBeInTheDocument()
-		})
-
-		it('redirects to home after successful login', async () => {
-			mockDispatch.mockResolvedValueOnce({
-				meta: {},
-			})
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				expect(mockNavigate).toHaveBeenCalledWith(PATHS.HOME)
-			})
 		})
 	})
 })
