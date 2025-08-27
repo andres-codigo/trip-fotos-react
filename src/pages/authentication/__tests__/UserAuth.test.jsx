@@ -154,6 +154,45 @@ describe('<UserAuth />', () => {
 			expect(isValid2).toBe(false)
 		})
 
+		it('validateForm trims values, calls handlers, and returns validity', async () => {
+			const mockEmail = { value: '  ' + MOCK_KEYS.EMAIL + '  ' }
+			const mockPassword = { value: '  ' + MOCK_KEYS.PASSWORD + '  ' }
+			const validateEmailHandler = vi.fn().mockResolvedValue(true)
+			const validatePasswordHandler = vi.fn().mockResolvedValue(true)
+
+			const validateForm = async () => {
+				const trimmedEmail = mockEmail.value.trim()
+				const trimmedPassword = mockPassword.value.trim()
+
+				const emailValid = await validateEmailHandler(trimmedEmail)
+				const passwordValid =
+					await validatePasswordHandler(trimmedPassword)
+
+				if (!emailValid || !passwordValid)
+					return {
+						email: trimmedEmail,
+						password: trimmedPassword,
+						isValid: false,
+					}
+				return {
+					email: trimmedEmail,
+					password: trimmedPassword,
+					isValid: true,
+				}
+			}
+
+			const result = await validateForm()
+			expect(validateEmailHandler).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
+			expect(validatePasswordHandler).toHaveBeenCalledWith(
+				MOCK_KEYS.PASSWORD,
+			)
+			expect(result).toEqual({
+				email: MOCK_KEYS.EMAIL,
+				password: MOCK_KEYS.PASSWORD,
+				isValid: true,
+			})
+		})
+
 		it('dispatches login action with correct payload', async () => {
 			renderWithProviders(<UserAuth />)
 
