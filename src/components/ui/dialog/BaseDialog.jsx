@@ -124,7 +124,8 @@ const BaseDialog = ({
 							) : (
 								<BaseButton
 									isError={isError}
-									onClick={tryClose}>
+									onClick={tryClose}
+									data-cy={DIALOG.BUTTON}>
 									Close
 								</BaseButton>
 							)}

@@ -277,5 +277,39 @@ describe('<UserAuth />', () => {
 				),
 			).toBeInTheDocument()
 		})
+
+		it('closes the error dialog when the close button is clicked', async () => {
+			// Render with error state set
+			const errorMessage = 'Some error'
+			const TestWrapper = () => {
+				const [error, setError] = useState(errorMessage)
+				return <UserAuth />
+			}
+
+			renderWithProviders(<UserAuth />)
+
+			mockDispatch.mockResolvedValueOnce({
+				meta: { rejectedWithValue: true },
+				payload: MOCK_INVALID_LOGIN_ERROR,
+			})
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await screen.findByRole(DIALOG.ROLE_ALERTDIALOG)
+
+			fireEvent.click(screen.getByTestId(DIALOG.BUTTON))
+
+			await waitFor(() =>
+				expect(
+					screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
+				).not.toBeInTheDocument(),
+			)
+		})
 	})
 })
