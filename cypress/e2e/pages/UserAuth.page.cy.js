@@ -180,7 +180,7 @@ describe('UI state and mode switching', () => {
 				cy.get(dialog.spinnerImage)
 					.should('exist')
 					.and('have.attr', 'src')
-					.and('match', /^data:image\/svg\+xml/)
+					.and('include', 'loading-spinner.svg')
 			})
 
 		cy.wait('@loginRequest')
