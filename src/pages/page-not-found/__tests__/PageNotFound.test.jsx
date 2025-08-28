@@ -38,7 +38,7 @@ vi.mock('@/components/ui/card/BaseCard', () => ({
 
 vi.mock('@/components/ui/button/BaseButton', () => ({
 	__esModule: true,
-	default: ({ children, _isLink, to, ...props }) => (
+	default: ({ children, isLink, to, ...props }) => (
 		<a
 			href={to}
 			data-cy="base-button"
