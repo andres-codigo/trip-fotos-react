@@ -1,12 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
 	render,
 	screen,
 	fireEvent,
 	waitFor,
 	renderHook,
-	act,
 } from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 
@@ -26,6 +25,19 @@ import { validateEmail, validatePassword } from '@/utils/validation'
 import { login } from '@/store/slices/authenticationSlice'
 
 import UserAuth from '../UserAuth'
+
+/**
+ * UserAuth Unit Tests
+ *
+ * Test Strategy:
+ * - Focuses on form validation, authentication flow, and error handling logic
+ * - Complements Cypress tests which cover E2E user interaction and navigation
+ * - Tests validation handlers for email and password fields
+ * - Verifies form submission for login and signup modes
+ * - Ensures correct Redux actions are dispatched and navigation occurs
+ * - Tests error dialog rendering and closing logic
+ * - Uses mocks for Redux, routing, validation, and Firebase error utilities to isolate logic
+ */
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
 	login: vi.fn(() => Promise.resolve({})),
@@ -82,7 +94,7 @@ describe('<UserAuth />', () => {
 	describe('Behaviour tests', () => {
 		it('validateEmailHandler sets email state and returns validity', async () => {
 			const { result } = renderHook(() => {
-				const [email, setEmail] = [{ value: '' }, vi.fn()]
+				const [, setEmail] = [{ value: '' }, vi.fn()]
 
 				const handler = async (value) => {
 					const { isValid, message } = validateEmail(value)
@@ -120,7 +132,7 @@ describe('<UserAuth />', () => {
 
 		it('validatePasswordHandler sets password state and returns validity', async () => {
 			const { result } = renderHook(() => {
-				const [password, setPassword] = [{ value: '' }, vi.fn()]
+				const [, setPassword] = [{ value: '' }, vi.fn()]
 				const handler = async (value) => {
 					const { isValid, message } = validatePassword(value)
 					setPassword(value, isValid, message)
@@ -279,13 +291,6 @@ describe('<UserAuth />', () => {
 		})
 
 		it('closes the error dialog when the close button is clicked', async () => {
-			// Render with error state set
-			const errorMessage = 'Some error'
-			const TestWrapper = () => {
-				const [error, setError] = useState(errorMessage)
-				return <UserAuth />
-			}
-
 			renderWithProviders(<UserAuth />)
 
 			mockDispatch.mockResolvedValueOnce({

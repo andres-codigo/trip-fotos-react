@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import { getFirebaseAuthErrorMessage } from '../index'
 import { FIREBASE_ERROR_TYPES } from '@/constants/firebase-error-types'
 

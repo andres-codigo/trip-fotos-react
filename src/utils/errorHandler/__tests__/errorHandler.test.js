@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import { handleApiError } from '../index'
 import { ERROR_MESSAGES, ERROR_OBJECTS, JS_ERROR } from './errorHandlerTestData'
 

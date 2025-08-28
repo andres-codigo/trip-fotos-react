@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+
 import { useMobileMenu } from '../index'
 
 describe('useMobileMenu', () => {
