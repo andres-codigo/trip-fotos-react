@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useDispatch } from 'react-redux'
+
 import { useLogout } from '../index'
 import { logout } from '@/store/slices/authenticationSlice'
 

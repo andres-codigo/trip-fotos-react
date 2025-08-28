@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { BrowserRouter } from 'react-router-dom'
 
 import { API_DATABASE } from '@/constants/api'

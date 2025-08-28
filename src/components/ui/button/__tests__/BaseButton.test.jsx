@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 
 import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
@@ -19,7 +19,6 @@ import BaseButton from '@/components/ui/button/BaseButton'
  * - Verifies prop spreading and className handling
  */
 
-// Mock the CSS module and classNames
 vi.mock('classnames', () => ({
 	default: createClassNamesMock(),
 }))

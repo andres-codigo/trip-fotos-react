@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import { validateEmail, validatePassword } from '../index'
 
 import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
