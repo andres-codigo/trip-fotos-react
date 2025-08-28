@@ -166,6 +166,7 @@ describe('UI state and mode switching', () => {
 		cy.login(user.validEmail, user.validPassword)
 
 		cy.get(dialog.loading)
+			.should('exist')
 			.parent()
 			.within(() => {
 				cy.get(dialog.title).should(
