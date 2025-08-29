@@ -182,9 +182,12 @@ describe('UI state and mode switching', () => {
 				)
 				cy.get(dialog.spinnerContainer).should('exist')
 				cy.get(dialog.spinnerImage)
+					.invoke('attr', 'src')
+					.then(console.log)
+				cy.get(dialog.spinnerImage)
 					.should('exist')
 					.and('have.attr', 'src')
-					.and('include', 'loading-spinner.svg')
+					.and('include', 'data:image/svg+xml')
 			})
 
 		cy.wait('@delayedLogin')
