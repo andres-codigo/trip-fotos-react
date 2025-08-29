@@ -171,7 +171,6 @@ describe('UI state and mode switching', () => {
 
 		cy.get(dialog.loading)
 			.should('exist')
-			.parent()
 			.within(() => {
 				cy.get(dialog.title).should(
 					'contain.text',
