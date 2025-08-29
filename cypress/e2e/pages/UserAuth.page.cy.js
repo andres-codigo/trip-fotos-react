@@ -98,9 +98,7 @@ describe('Form submission', () => {
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword).as(
-			'loginRequest',
-		)
+		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
 
 		const emailWithSpaces = `   ${user.validEmail}   `
 		const passwordWithSpaces = `   ${user.validPassword}   `
@@ -162,11 +160,7 @@ describe('UI state and mode switching', () => {
 	})
 
 	it('shows a loading dialog with spinner while authenticating', () => {
-		cy.interceptDelayedLogin(
-			apiDatabase.POST,
-			apiUrls.signInWithPassword,
-			1500,
-		)
+		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
 		cy.login(user.validEmail, user.validPassword)
 
 		cy.get(dialog.loading)
@@ -182,15 +176,12 @@ describe('UI state and mode switching', () => {
 				)
 				cy.get(dialog.spinnerContainer).should('exist')
 				cy.get(dialog.spinnerImage)
-					.invoke('attr', 'src')
-					.then(console.log)
-				cy.get(dialog.spinnerImage)
 					.should('exist')
 					.and('have.attr', 'src')
 					.and('include', 'data:image/svg+xml')
 			})
 
-		cy.wait('@delayedLogin')
+		cy.wait('@loginRequest')
 	})
 
 	it('disables form fields and buttons while the loading dialog displayed', () => {
