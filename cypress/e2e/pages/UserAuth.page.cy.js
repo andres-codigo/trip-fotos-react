@@ -162,7 +162,11 @@ describe('UI state and mode switching', () => {
 	})
 
 	it('shows a loading dialog with spinner while authenticating', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
+		cy.interceptDelayedLogin(
+			apiDatabase.POST,
+			apiUrls.signInWithPassword,
+			1500,
+		)
 		cy.login(user.validEmail, user.validPassword)
 
 		cy.get(dialog.loading)
@@ -184,7 +188,7 @@ describe('UI state and mode switching', () => {
 					.and('include', 'loading-spinner.svg')
 			})
 
-		cy.wait('@loginRequest')
+		cy.wait('@delayedLogin')
 	})
 
 	it('disables form fields and buttons while the loading dialog displayed', () => {
