@@ -181,8 +181,9 @@ describe('UI state and mode switching', () => {
 					dialogMessages.loading.text,
 				)
 				cy.get(dialog.spinnerContainer).should('exist')
-				cy.get(dialog.spinnerImage).should('exist')
-				// .and('have.attr', 'src')
+				cy.get(dialog.spinnerImage)
+					.should('exist')
+					.and('have.attr', 'src')
 				// .and('include', 'loading-spinner.svg')
 			})
 
