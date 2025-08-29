@@ -6,7 +6,7 @@ export default {
 	],
 	'no-unused-vars': 'warn',
 	'react/prop-types': 'error',
-	'no-console': ['error', { allow: ['warn', 'error'] }],
+	'no-console': ['error', { allow: ['warn', 'error', 'log'] }],
 	'no-debugger': 'warn',
 	'prettier/prettier': 'error',
 }

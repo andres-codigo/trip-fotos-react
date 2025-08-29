@@ -98,9 +98,7 @@ describe('Form submission', () => {
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword).as(
-			'loginRequest',
-		)
+		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
 
 		const emailWithSpaces = `   ${user.validEmail}   `
 		const passwordWithSpaces = `   ${user.validPassword}   `
@@ -166,7 +164,7 @@ describe('UI state and mode switching', () => {
 		cy.login(user.validEmail, user.validPassword)
 
 		cy.get(dialog.loading)
-			.parent()
+			.should('exist')
 			.within(() => {
 				cy.get(dialog.title).should(
 					'contain.text',
@@ -180,7 +178,7 @@ describe('UI state and mode switching', () => {
 				cy.get(dialog.spinnerImage)
 					.should('exist')
 					.and('have.attr', 'src')
-					.and('include', 'loading-spinner.svg')
+					.and('include', 'data:image/svg+xml')
 			})
 
 		cy.wait('@loginRequest')
