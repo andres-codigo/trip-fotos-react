@@ -1,4 +1,4 @@
-name: Run Unit Tests (Vitest)
+name: Vitest - Run Unit Tests
 
 on:
     push:
@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
     test:
-        name: Run Unit Tests
+        name: Run Vitest Unit Tests
         runs-on: ubuntu-latest
         timeout-minutes: 10
 
@@ -36,9 +36,9 @@ jobs:
                   cache: 'npm'
 
             - name: Install dependencies
-              run: npm install
+              run: npm ci
 
-            - name: Run Unit Tests
+            - name: Run Vitest Unit Tests
               run: npm run vitest:run
               timeout-minutes: 3
 
