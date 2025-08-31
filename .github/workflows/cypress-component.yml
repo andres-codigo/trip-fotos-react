@@ -16,7 +16,8 @@ on:
     workflow_dispatch:
 
 jobs:
-    test:
+    run-component-tests:
+        name: Run Cypress Component Tests
         runs-on: ubuntu-latest
 
         steps:
@@ -30,9 +31,25 @@ jobs:
                   cache: 'npm'
 
             - name: Install dependencies
-              run: npm install
+              run: npm ci
 
             - name: Run Cypress Component Tests
               uses: cypress-io/github-action@v6
               with:
                   component: true
+
+            - name: Upload Cypress screenshots on failure
+              uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: cypress-screenshots
+                  path: cypress/screenshots
+                  retention-days: 7
+
+            - name: Upload Cypress videos on failure
+              uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: cypress-videos
+                  path: cypress/videos
+                  retention-days: 7

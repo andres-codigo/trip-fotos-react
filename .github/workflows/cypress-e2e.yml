@@ -7,8 +7,8 @@ on:
         paths:
             - 'src/**'
             - 'cypress/**'
-            - 'package.json'
             - 'cypress.config.*'
+            - 'package.json'
     pull_request:
         branches:
             - main
@@ -27,15 +27,15 @@ jobs:
             - name: Check if PR is from Dependabot
               run: echo "Checking if actor is Dependabot - ${{ github.actor }}"
 
-    skip-e2e:
-        name: Skip CypressE2E Tests (Dependabot)
+    skip-e2e-tests:
+        name: Skip Cypress E2E Tests (Dependabot)
         needs: check-dependabot
         if: needs.check-dependabot.outputs.is-dependabot == 'true'
         runs-on: ubuntu-latest
         steps:
             - run: echo "🟡 Skipping Cypress E2E tests – Dependabot PRs do not have access to secrets."
 
-    run-e2e:
+    run-e2e-tests:
         name: Run Cypress E2E Tests
         needs: check-dependabot
         if: needs.check-dependabot.outputs.is-dependabot == 'false'
@@ -53,7 +53,7 @@ jobs:
                   cache: 'npm'
 
             - name: Install dependencies
-              run: npm install
+              run: npm ci
 
             - name: Start app & run Cypress E2E Page Tests
               uses: cypress-io/github-action@v6
