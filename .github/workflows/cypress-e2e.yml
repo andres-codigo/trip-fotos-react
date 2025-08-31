@@ -1,4 +1,4 @@
-name: E2E - Run Cypress Page Tests
+name: Cypress - Run E2E Page Tests
 
 on:
     push:
@@ -28,7 +28,7 @@ jobs:
               run: echo "Checking if actor is Dependabot - ${{ github.actor }}"
 
     skip-e2e:
-        name: Skip E2E Tests (Dependabot)
+        name: Skip CypressE2E Tests (Dependabot)
         needs: check-dependabot
         if: needs.check-dependabot.outputs.is-dependabot == 'true'
         runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
             - run: echo "🟡 Skipping Cypress E2E tests – Dependabot PRs do not have access to secrets."
 
     run-e2e:
-        name: Run E2E Tests
+        name: Run Cypress E2E Tests
         needs: check-dependabot
         if: needs.check-dependabot.outputs.is-dependabot == 'false'
         runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
             - name: Install dependencies
               run: npm install
 
-            - name: Start app & run E2E Cypress Page Tests
+            - name: Start app & run Cypress E2E Page Tests
               uses: cypress-io/github-action@v6
               env:
                   VITE_API_URL: ${{ secrets.VITE_API_URL }}
