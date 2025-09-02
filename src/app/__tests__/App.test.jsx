@@ -1,0 +1,190 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+
+import * as redux from 'react-redux'
+import * as router from 'react-router-dom'
+
+import { AUTHENTICATION_ACTION_TYPES } from '@/constants/action-types'
+import { PATHS } from '@/constants/paths'
+
+import App from '../App'
+
+vi.mock('react-redux', () => ({
+	useDispatch: () => vi.fn(),
+	useSelector: vi.fn(),
+}))
+
+vi.mock('react-router-dom', async () => {
+	const actual = await vi.importActual('react-router-dom')
+	return {
+		...actual,
+		useNavigate: () => vi.fn(),
+		useLocation: () => ({ pathname: PATHS.HOME }),
+		useInRouterContext: () => false,
+	}
+})
+
+vi.mock('@/constants/paths', () => ({
+	PATHS: {
+		HOME: '/home',
+		AUTHENTICATION: '/authentication',
+		TRAVELLERS: '/travellers',
+		MESSAGES: '/messages',
+		PAGENOTFOUND: '/404',
+	},
+}))
+
+vi.mock('@/store/slices/authenticationSlice', () => ({
+	tryLogin: () => ({ type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN }),
+}))
+
+vi.mock('@/components/common/LoadingFallback', () => ({
+	default: () => <div>Loading...</div>,
+}))
+
+vi.mock('@/components/layout/header/Header', () => ({
+	default: () => <div>Header</div>,
+}))
+vi.mock('@/pages/authentication/UserAuth', () => ({
+	default: () => <div>UserAuthPage</div>,
+}))
+vi.mock('@/pages/home/Home', () => ({
+	default: () => <div>HomePage</div>,
+}))
+vi.mock('@/pages/travellers/Travellers', () => ({
+	default: () => <div>TravellersPage</div>,
+}))
+vi.mock('@/pages/messages/Messages', () => ({
+	default: () => <div>MessagesPage</div>,
+}))
+vi.mock('@/pages/page-not-found/PageNotFound', () => ({
+	default: () => <div>NotFoundPage</div>,
+}))
+
+function renderWithRoute(route) {
+	return render(
+		<router.MemoryRouter initialEntries={[route]}>
+			<App />
+		</router.MemoryRouter>,
+	)
+}
+
+describe('App', () => {
+	let useSelectorMock
+	let useDispatchMock
+	let navigateMock
+
+	function setAuthState(token = null, didAutoLogout = false) {
+		useSelectorMock.mockImplementation((fn) =>
+			fn({ authentication: { token, didAutoLogout } }),
+		)
+	}
+
+	beforeEach(() => {
+		useSelectorMock = vi.spyOn(redux, 'useSelector')
+		useDispatchMock = vi.spyOn(redux, 'useDispatch')
+		navigateMock = vi.fn()
+		vi.spyOn(router, 'useNavigate').mockReturnValue(navigateMock)
+		vi.spyOn(router, 'useInRouterContext').mockReturnValue(true)
+	})
+
+	afterEach(() => {
+		vi.clearAllMocks()
+	})
+
+	describe('Rendering tests', () => {
+		it('renders Header and HomePage when logged in and on /home', async () => {
+			setAuthState('token', false)
+
+			renderWithRoute(PATHS.HOME)
+
+			expect(screen.getByText('Header')).toBeInTheDocument()
+			await waitFor(() => {
+				expect(screen.getByText('HomePage')).toBeInTheDocument()
+			})
+		})
+
+		it('does not redirect if not logged in and on public route', async () => {
+			setAuthState(null, false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTHENTICATION,
+			})
+
+			renderWithRoute(PATHS.AUTHENTICATION)
+
+			expect(navigateMock).not.toHaveBeenCalled()
+			await waitFor(() => {
+				expect(screen.getByText('UserAuthPage')).toBeInTheDocument()
+			})
+		})
+
+		it('renders NotFoundPage for unknown route', async () => {
+			setAuthState('token', false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: '/unknown',
+			})
+			vi.spyOn(router, 'useInRouterContext').mockReturnValue(false)
+
+			render(<App />)
+			await waitFor(() => {
+				expect(screen.getByText('NotFoundPage')).toBeInTheDocument()
+			})
+		})
+	})
+
+	describe('Behaviour tests', () => {
+		it('redirects to /authentication if not logged in and on protected route', async () => {
+			setAuthState(null, false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.HOME,
+			})
+			vi.spyOn(router, 'useInRouterContext').mockReturnValue(true)
+
+			renderWithRoute(PATHS.HOME)
+
+			await waitFor(() => {
+				expect(navigateMock).toHaveBeenCalledWith(
+					PATHS.AUTHENTICATION,
+					{
+						replace: true,
+					},
+				)
+			})
+		})
+
+		it('redirects to /authentication on auto logout', async () => {
+			setAuthState('token', true)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.HOME,
+			})
+			vi.spyOn(router, 'useInRouterContext').mockReturnValue(true)
+
+			renderWithRoute(PATHS.HOME)
+
+			await waitFor(() => {
+				expect(navigateMock).toHaveBeenCalledWith(PATHS.AUTHENTICATION)
+			})
+		})
+
+		it('dispatches tryLogin on mount', async () => {
+			const dispatch = vi.fn()
+			useDispatchMock.mockReturnValue(dispatch)
+			setAuthState('token', false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.HOME,
+			})
+			vi.spyOn(router, 'useInRouterContext').mockReturnValue(true)
+
+			renderWithRoute(PATHS.HOME)
+
+			await waitFor(() => {
+				expect(dispatch).toHaveBeenCalled()
+			})
+		})
+	})
+})

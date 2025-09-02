@@ -662,6 +662,7 @@ trip-fotos-react/
 ├── public/                     # Static assets
 ├── rules/                      # ESLint configuration rules
 ├── src/
+│   ├── app/            # Main application component
 │   ├── assets/         # Fonts, SVGs, and other static assets
 │   ├── components/     # Reusable React components
 │   ├── constants/      # Global, Firebase, API, paths, and other constants
@@ -671,7 +672,6 @@ trip-fotos-react/
 │   ├── styles/         # SCSS stylesheets
 │   ├── testUtils/      # Testing environment configuration and Cypress and Vitest utility functions
 │   ├── utils/          # General utility functions
-│   ├── App.js          # Main application component
 │   └── index.js        # Root application entry point
 ├── .env                        # Environment variables (not committed to version control)
 ├── .firebaserc                 # Firebase project configuration
