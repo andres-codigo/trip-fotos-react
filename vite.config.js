@@ -76,6 +76,7 @@ export default defineConfig({
 					router: ['react-router-dom'],
 					firebase: ['firebase/app'],
 					analytics: ['@vercel/analytics'],
+					speedInsights: ['@vercel/speed-insights'],
 					transition: ['react-transition-group'],
 				},
 			},
