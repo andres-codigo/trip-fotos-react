@@ -9,6 +9,8 @@
 'dependencies':
     - 'package.json'
     - 'package-lock.json'
+    - '.npmrc'
+    - '.nvmrc'
 
 'testing':
     - 'src/**/*.test.*'
@@ -44,6 +46,7 @@
 
 'firebase':
     - 'src/services/firebase/**/*'
+    - '.firebaserc'
 
 'assets':
     - 'src/assets/**/*'
