@@ -1,0 +1,56 @@
+'feature':
+    - 'src/components/**/*'
+    - 'src/pages/**/*'
+
+'documentation':
+    - '**/*.md'
+    - '**/README*'
+
+'dependencies':
+    - 'package.json'
+    - 'package-lock.json'
+
+'testing':
+    - 'src/**/*.test.*'
+    - 'src/**/*.spec.*'
+    - 'cypress/**/*'
+    - '__tests__/**/*'
+    - 'src/testUtils/**/*'
+    - 'vitest.config.*'
+    - 'cypress.config.*'
+
+'styling':
+    - '**/*.css'
+    - '**/*.scss'
+    - 'src/styles/**/*'
+
+'redux/state':
+    - 'src/store/**/*'
+
+'config':
+    - 'vite.config.*'
+    - 'eslint.config.*'
+    - '.eslintrc*'
+    - 'prettier.config.*'
+    - '.prettierrc*'
+    - 'tsconfig.*'
+    - 'vercel.json'
+
+'constants':
+    - 'src/constants/**/*'
+
+'utilities':
+    - 'src/utils/**/*'
+
+'firebase':
+    - 'src/services/firebase/**/*'
+
+'assets':
+    - 'src/assets/**/*'
+    - 'public/**/*'
+    - '**/*.{png,jpg,jpeg,gif,svg,ico}'
+
+'build/deployment':
+    - '.github/workflows/**/*'
+    - 'scripts/**/*'
+    - 'vercel.json'
