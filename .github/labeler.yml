@@ -21,7 +21,7 @@ styling:
     - '**/*.css'
     - '**/*.scss'
     - src/styles/**/*
-redux/state:
+'redux/state':
     - src/store/**/*
 config:
     - vite.config.*
@@ -42,7 +42,7 @@ assets:
     - src/assets/**/*
     - public/**/*
     - '**/*.{png,jpg,jpeg,gif,svg,ico}'
-build/deployment:
+'build/deployment':
     - .github/workflows/**/*
     - scripts/**/*
     - vercel.json
