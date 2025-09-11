@@ -563,6 +563,48 @@ npx cypress run
 npx cypress run --component
 ```
 
+---
+
+### 4. GitHub Auto Label Pull Requests
+
+- **Workflow File:** `.github/workflows/github-auto-label-prs.yml`
+- **Triggers:**
+    - On **pull request** events (`opened`, `synchronize`, `reopened`)
+- **Purpose:** Automatically applies relevant labels to pull requests based on the files changed, using the configuration defined in `.github/labeler.yml`.
+- **Labels Applied:**
+    - `feature` - Changes to components or pages
+    - `documentation` - Changes to markdown files
+    - `dependencies` - Changes to package.json or npm config files
+    - `testing` - Changes to test files or testing configuration
+    - `styling` - Changes to CSS/SCSS files
+    - `redux/state` - Changes to Redux store files
+    - `config` - Changes to configuration files
+    - `constants` - Changes to constants files
+    - `utilities` - Changes to utility functions
+    - `firebase` - Changes to Firebase-related files
+    - `assets` - Changes to images or static assets
+    - `build/deployment` - Changes to workflows or deployment config
+
+#### Label Configuration
+
+The labeling rules are defined in `.github/labeler.yml`. To modify which files trigger which labels:
+
+1. Edit `.github/labeler.yml`
+2. Use glob patterns to match file paths
+3. Labels will be automatically applied on the next pull request
+
+Example labeler configuration:
+
+```yaml
+'feature':
+    - 'src/components/**/*'
+    - 'src/pages/**/*'
+
+'documentation':
+    - '**/*.md'
+    - '**/README*'
+```
+
 ### 🛠 Manual Triggers
 
 Some workflows, like the **Vitest test runner**, can be manually executed from the GitHub UI:
@@ -578,11 +620,12 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 ### 📝 Summary Table
 
-| Workflow Name                           | File                                      | Tests Type       | Triggered On   |
-| --------------------------------------- | ----------------------------------------- | ---------------- | -------------- |
-| Run Unit Tests (Vitest)                 | `.github/workflows/unit-tests-vitest.yml` | Unit/Integration | Push/PR/Manual |
-| E2E - Run Cypress Page Tests            | `.github/workflows/cypress-e2e.yml`       | E2E              | Push/PR/Manual |
-| Component - Run Cypress Component Tests | `.github/workflows/cypress-component.yml` | Component        | Push/PR/Manual |
+| Workflow Name                           | File                                          | Tests Type       | Triggered On   |
+| --------------------------------------- | --------------------------------------------- | ---------------- | -------------- |
+| Run Unit Tests (Vitest)                 | `.github/workflows/unit-tests-vitest.yml`     | Unit/Integration | Push/PR/Manual |
+| E2E - Run Cypress Page Tests            | `.github/workflows/cypress-e2e.yml`           | E2E              | Push/PR/Manual |
+| Component - Run Cypress Component Tests | `.github/workflows/cypress-component.yml`     | Component        | Push/PR/Manual |
+| GitHub - Auto Label Pull Requests       | `.github/workflows/github-auto-label-prs.yml` | Automation       | PR Events      |
 
 ---
 
