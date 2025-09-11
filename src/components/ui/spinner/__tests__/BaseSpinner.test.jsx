@@ -4,7 +4,6 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { GLOBAL } from '@/constants/global'
 
 import BaseSpinner from '../BaseSpinner'
-import baseSpinnerStyles from '../BaseSpinner.module.scss'
 
 /**
  * BaseSpinner Unit Tests
