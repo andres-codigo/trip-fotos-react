@@ -1,59 +1,48 @@
-'feature':
-    - 'src/components/**/*'
-    - 'src/pages/**/*'
-
-'documentation':
+feature:
+    - src/components/**/*
+    - src/pages/**/*
+documentation:
     - '**/*.md'
     - '**/README*'
-
-'dependencies':
-    - 'package.json'
-    - 'package-lock.json'
-    - '.npmrc'
-    - '.nvmrc'
-
-'testing':
-    - 'src/**/*.test.*'
-    - 'src/**/*.spec.*'
-    - 'cypress/**/*'
-    - '__tests__/**/*'
-    - 'src/testUtils/**/*'
-    - 'vitest.config.*'
-    - 'cypress.config.*'
-
-'styling':
+dependencies:
+    - package.json
+    - package-lock.json
+    - .npmrc
+    - .nvmrc
+testing:
+    - src/**/*.test.*
+    - src/**/*.spec.*
+    - cypress/**/*
+    - __tests__/**/*
+    - src/testUtils/**/*
+    - vitest.config.*
+    - cypress.config.*
+styling:
     - '**/*.css'
     - '**/*.scss'
-    - 'src/styles/**/*'
-
-'redux/state':
-    - 'src/store/**/*'
-
-'config':
-    - 'vite.config.*'
-    - 'eslint.config.*'
-    - '.eslintrc*'
-    - 'prettier.config.*'
-    - '.prettierrc*'
-    - 'tsconfig.*'
-    - 'vercel.json'
-
-'constants':
-    - 'src/constants/**/*'
-
-'utilities':
-    - 'src/utils/**/*'
-
-'firebase':
-    - 'src/services/firebase/**/*'
-    - '.firebaserc'
-
-'assets':
-    - 'src/assets/**/*'
-    - 'public/**/*'
+    - src/styles/**/*
+redux/state:
+    - src/store/**/*
+config:
+    - vite.config.*
+    - eslint.config.*
+    - .eslintrc*
+    - prettier.config.*
+    - .prettierrc*
+    - tsconfig.*
+    - vercel.json
+constants:
+    - src/constants/**/*
+utilities:
+    - src/utils/**/*
+firebase:
+    - src/services/firebase/**/*
+    - .firebaserc
+assets:
+    - src/assets/**/*
+    - public/**/*
     - '**/*.{png,jpg,jpeg,gif,svg,ico}'
-
-'build/deployment':
-    - '.github/workflows/**/*'
-    - 'scripts/**/*'
-    - 'vercel.json'
+build/deployment:
+    - .github/workflows/**/*
+    - scripts/**/*
+    - vercel.json
