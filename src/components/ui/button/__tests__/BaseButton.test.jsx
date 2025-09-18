@@ -145,11 +145,55 @@ describe('<BaseButton />', () => {
 			const link = screen.getByTestId('icon-link')
 			expect(link).toHaveAttribute('aria-label', 'Link')
 		})
+
+		it('focuses element when isError is true', () => {
+			render(
+				<BaseButton
+					isError
+					modeType={BUTTON.MODE.FLAT}
+					data-cy="error-button">
+					Error Button
+				</BaseButton>,
+			)
+
+			const button = screen.getByTestId('error-button')
+			expect(button).toHaveFocus()
+		})
+
+		it('focuses link element when isError is true', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					isError
+					modeType={BUTTON.MODE.FLAT}
+					data-cy="error-link">
+					Error Link
+				</BaseButton>,
+			)
+
+			const link = screen.getByTestId('error-link')
+			expect(link).toHaveFocus()
+		})
+
+		it('focuses disabled link (span) when isError is true', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					isDisabled
+					isError
+					modeType={BUTTON.MODE.FLAT}
+					data-cy="error-disabled-link">
+					Error Disabled Link
+				</BaseButton>,
+			)
+
+			const span = screen.getByTestId('error-disabled-link')
+			expect(span).toHaveFocus()
+		})
 	})
 
 	describe('Accessibility tests', () => {
-		it('applies correct aria-label based on element type and children', () => {
-			// Test button with custom aria-label
+		it('applies correct custom aria-label based on element type and children', () => {
 			const { unmount } = render(
 				<BaseButton
 					modeType={BUTTON.MODE.FLAT}
@@ -163,7 +207,6 @@ describe('<BaseButton />', () => {
 			expect(button).toHaveAttribute('aria-label', 'Custom Button')
 			unmount()
 
-			// Test link with custom aria-label
 			renderWithRouter(
 				<BaseButton
 					isLink
@@ -202,6 +245,52 @@ describe('<BaseButton />', () => {
 
 			const link = screen.getByTestId('text-link')
 			expect(link).not.toHaveAttribute('aria-label')
+		})
+
+		it('applies default "Link" aria-label to disabled link with non-string children', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					isDisabled
+					modeType={BUTTON.MODE.FLAT}
+					data-cy="disabled-icon-link">
+					<span>🔗</span>
+				</BaseButton>,
+			)
+
+			const span = screen.getByTestId('disabled-icon-link')
+			expect(span).toHaveAttribute('aria-label', 'Link')
+		})
+
+		it('applies custom aria-label to disabled link with non-string children', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					isDisabled
+					modeType={BUTTON.MODE.FLAT}
+					data-cy="disabled-custom-icon-link"
+					ariaLabel="Custom Disabled Link">
+					<span>🔗</span>
+				</BaseButton>,
+			)
+
+			const span = screen.getByTestId('disabled-custom-icon-link')
+			expect(span).toHaveAttribute('aria-label', 'Custom Disabled Link')
+		})
+
+		it('does not apply aria-label to disabled link with string children', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					isDisabled
+					modeType={BUTTON.MODE.FLAT}
+					data-cy="disabled-text-link">
+					Disabled Link Text
+				</BaseButton>,
+			)
+
+			const span = screen.getByTestId('disabled-text-link')
+			expect(span).not.toHaveAttribute('aria-label')
 		})
 	})
 })
