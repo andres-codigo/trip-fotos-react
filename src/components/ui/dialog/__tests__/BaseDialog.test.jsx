@@ -14,6 +14,14 @@ import { DIALOG } from '@/constants/test/dialog'
  * - Ensures prop spreading and custom class handling via sectionClasses
  */
 
+// Mock CSS Modules
+vi.mock('@/components/ui/dialog/BaseDialog.module.scss', () => ({
+	default: {
+		image: 'image',
+		general: 'general',
+	},
+}))
+
 // Mock react-dom before importing the component
 vi.mock('react-dom', async () => {
 	const actual = await vi.importActual('react-dom')
@@ -105,6 +113,24 @@ describe('<BaseDialog />', () => {
 			renderDialog()
 			fireEvent.keyDown(window, { key: 'Escape' })
 			expect(defaultProps.onClose).toHaveBeenCalled()
+		})
+
+		it('applies image class when sectionClasses is true', () => {
+			renderDialog({ sectionClasses: true })
+			const mainElement = screen.getByTestId(DIALOG.TEXT_CONTENT)
+			expect(mainElement).toHaveClass('image')
+		})
+
+		it('applies general class when sectionClasses is false', () => {
+			renderDialog({ sectionClasses: false })
+			const mainElement = screen.getByTestId(DIALOG.TEXT_CONTENT)
+			expect(mainElement).toHaveClass('general')
+		})
+
+		it('applies general class when sectionClasses is not provided (default)', () => {
+			renderDialog()
+			const mainElement = screen.getByTestId(DIALOG.TEXT_CONTENT)
+			expect(mainElement).toHaveClass('general')
 		})
 	})
 
