@@ -148,8 +148,7 @@ describe('<BaseButton />', () => {
 	})
 
 	describe('Accessibility tests', () => {
-		it('applies correct aria-label based on element type and children', () => {
-			// Test button with custom aria-label
+		it('applies correct custom aria-label based on element type and children', () => {
 			const { unmount } = render(
 				<BaseButton
 					modeType={BUTTON.MODE.FLAT}
@@ -163,7 +162,6 @@ describe('<BaseButton />', () => {
 			expect(button).toHaveAttribute('aria-label', 'Custom Button')
 			unmount()
 
-			// Test link with custom aria-label
 			renderWithRouter(
 				<BaseButton
 					isLink
@@ -202,6 +200,52 @@ describe('<BaseButton />', () => {
 
 			const link = screen.getByTestId('text-link')
 			expect(link).not.toHaveAttribute('aria-label')
+		})
+
+		it('applies default "Link" aria-label to disabled link with non-string children', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					isDisabled
+					modeType={BUTTON.MODE.FLAT}
+					data-cy="disabled-icon-link">
+					<span>🔗</span>
+				</BaseButton>,
+			)
+
+			const span = screen.getByTestId('disabled-icon-link')
+			expect(span).toHaveAttribute('aria-label', 'Link')
+		})
+
+		it('applies custom aria-label to disabled link with non-string children', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					isDisabled
+					modeType={BUTTON.MODE.FLAT}
+					data-cy="disabled-custom-icon-link"
+					ariaLabel="Custom Disabled Link">
+					<span>🔗</span>
+				</BaseButton>,
+			)
+
+			const span = screen.getByTestId('disabled-custom-icon-link')
+			expect(span).toHaveAttribute('aria-label', 'Custom Disabled Link')
+		})
+
+		it('does not apply aria-label to disabled link with string children', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					isDisabled
+					modeType={BUTTON.MODE.FLAT}
+					data-cy="disabled-text-link">
+					Disabled Link Text
+				</BaseButton>,
+			)
+
+			const span = screen.getByTestId('disabled-text-link')
+			expect(span).not.toHaveAttribute('aria-label')
 		})
 	})
 })
