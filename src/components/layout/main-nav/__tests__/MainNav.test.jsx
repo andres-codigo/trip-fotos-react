@@ -257,4 +257,43 @@ describe('<MainNav />', () => {
 			)
 		})
 	})
+
+	describe('Accessibility tests', () => {
+		it('should set correct aria-label and aria-expanded when menu is closed', () => {
+			render(<MainNav {...defaultProps} />)
+
+			const hamburgerButton = screen.getByTestId('hamburger-menu')
+			expect(hamburgerButton).toHaveAttribute(
+				'aria-label',
+				'Open navigation menu',
+			)
+			expect(hamburgerButton).toHaveAttribute('aria-expanded', 'false')
+		})
+
+		it('should set correct aria-label and aria-expanded when menu is open', () => {
+			vi.mocked(useMainNavState).mockReturnValueOnce({
+				...vi.mocked(useMainNavState).getMockImplementation()(),
+				isMenuOpen: true,
+			})
+
+			render(<MainNav {...defaultProps} />)
+
+			const hamburgerButton = screen.getByTestId('hamburger-menu')
+			expect(hamburgerButton).toHaveAttribute(
+				'aria-label',
+				'Close navigation menu',
+			)
+			expect(hamburgerButton).toHaveAttribute('aria-expanded', 'true')
+		})
+
+		it('should set aria-controls attribute on hamburger button', () => {
+			render(<MainNav {...defaultProps} />)
+
+			const hamburgerButton = screen.getByTestId('hamburger-menu')
+			expect(hamburgerButton).toHaveAttribute(
+				'aria-controls',
+				'hamburger-menu-items-container',
+			)
+		})
+	})
 })
