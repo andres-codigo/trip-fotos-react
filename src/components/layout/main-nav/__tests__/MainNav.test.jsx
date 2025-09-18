@@ -133,6 +133,53 @@ describe('<MainNav />', () => {
 		isLoggedIn: true,
 	}
 
+	describe('Behaviour tests', () => {
+		it('should call setIsMenuOpen with false when handleMenuItemClick is invoked', () => {
+			render(<MainNav {...defaultProps} />)
+
+			const messagesLinkCall =
+				vi.mocked(NavMenuMessagesLink).mock.calls[0][0]
+			const handleMenuItemClick = messagesLinkCall.onMenuItemClick
+
+			handleMenuItemClick()
+
+			expect(mockSetIsMenuOpen).toHaveBeenCalledWith(false)
+		})
+
+		it('should call setIsMenuOpen with false when Travellers menu item is clicked', () => {
+			render(<MainNav {...defaultProps} />)
+
+			const travellersLinkCall = vi
+				.mocked(NavMenuButtonLink)
+				.mock.calls.find((call) => call[0].children === 'Travellers')
+			const handleMenuItemClick = travellersLinkCall[0].onMenuItemClick
+
+			handleMenuItemClick()
+
+			expect(mockSetIsMenuOpen).toHaveBeenCalledWith(false)
+		})
+
+		it('should pass handleMenuItemClick to both navigation menu items', () => {
+			render(<MainNav {...defaultProps} />)
+
+			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
+				expect.objectContaining({
+					onMenuItemClick: expect.any(Function),
+				}),
+				undefined,
+			)
+
+			const travellersCall = vi
+				.mocked(NavMenuButtonLink)
+				.mock.calls.find((call) => call[0].children === 'Travellers')
+			expect(travellersCall[0]).toEqual(
+				expect.objectContaining({
+					onMenuItemClick: expect.any(Function),
+				}),
+			)
+		})
+	})
+
 	describe('Rendering tests', () => {
 		it('should not render MainNav when isLoggedIn is false', () => {
 			render(<MainNav isLoggedIn={false} />)
@@ -207,52 +254,6 @@ describe('<MainNav />', () => {
 					children: ['Logout ', mockTravellerName],
 				}),
 				undefined,
-			)
-		})
-	})
-	describe('handleMenuItemClick functionality', () => {
-		it('should call setIsMenuOpen with false when handleMenuItemClick is invoked', () => {
-			render(<MainNav {...defaultProps} />)
-
-			const messagesLinkCall =
-				vi.mocked(NavMenuMessagesLink).mock.calls[0][0]
-			const handleMenuItemClick = messagesLinkCall.onMenuItemClick
-
-			handleMenuItemClick()
-
-			expect(mockSetIsMenuOpen).toHaveBeenCalledWith(false)
-		})
-
-		it('should call setIsMenuOpen with false when Travellers menu item is clicked', () => {
-			render(<MainNav {...defaultProps} />)
-
-			const travellersLinkCall = vi
-				.mocked(NavMenuButtonLink)
-				.mock.calls.find((call) => call[0].children === 'Travellers')
-			const handleMenuItemClick = travellersLinkCall[0].onMenuItemClick
-
-			handleMenuItemClick()
-
-			expect(mockSetIsMenuOpen).toHaveBeenCalledWith(false)
-		})
-
-		it('should pass handleMenuItemClick to both navigation menu items', () => {
-			render(<MainNav {...defaultProps} />)
-
-			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
-				expect.objectContaining({
-					onMenuItemClick: expect.any(Function),
-				}),
-				undefined,
-			)
-
-			const travellersCall = vi
-				.mocked(NavMenuButtonLink)
-				.mock.calls.find((call) => call[0].children === 'Travellers')
-			expect(travellersCall[0]).toEqual(
-				expect.objectContaining({
-					onMenuItemClick: expect.any(Function),
-				}),
 			)
 		})
 	})
