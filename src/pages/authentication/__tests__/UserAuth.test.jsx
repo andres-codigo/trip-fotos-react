@@ -86,6 +86,61 @@ const renderWithProviders = (ui) =>
 		</Provider>,
 	)
 
+const fillLoginForm = (
+	email = MOCK_KEYS.EMAIL,
+	password = MOCK_KEYS.PASSWORD,
+) => {
+	fireEvent.change(screen.getByTestId('email-input'), {
+		target: { value: email },
+	})
+	fireEvent.change(screen.getByTestId('password-input'), {
+		target: { value: password },
+	})
+}
+
+const submitLoginForm = () => {
+	fireEvent.click(screen.getByTestId('login-submit-button'))
+}
+
+const fillAndSubmitLoginForm = (email, password) => {
+	fillLoginForm(email, password)
+	submitLoginForm()
+}
+
+const expectErrorDialog = async (expectedMessage) => {
+	await waitFor(() =>
+		expect(screen.getByRole(DIALOG.ROLE_ALERTDIALOG)).toBeInTheDocument(),
+	)
+	expect(screen.getByText(expectedMessage)).toBeInTheDocument()
+}
+
+const expectNoErrorDialog = async () => {
+	await waitFor(() =>
+		expect(
+			screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
+		).not.toBeInTheDocument(),
+	)
+}
+
+const setupFirebaseErrorMock = async (
+	firstReturn = null,
+	secondReturn = FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+		.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+) => {
+	const { getFirebaseAuthErrorMessage } = await import(
+		'@/utils/getFirebaseAuthErrorMessage'
+	)
+
+	if (firstReturn !== undefined) {
+		getFirebaseAuthErrorMessage.mockReturnValueOnce(firstReturn)
+	}
+	if (secondReturn !== undefined) {
+		getFirebaseAuthErrorMessage.mockReturnValueOnce(secondReturn)
+	}
+
+	return getFirebaseAuthErrorMessage
+}
+
 describe('<UserAuth />', () => {
 	beforeEach(() => {
 		mockDispatch.mockClear()
@@ -500,26 +555,12 @@ describe('<UserAuth />', () => {
 				})
 
 				renderWithProviders(<UserAuth />)
+				fillAndSubmitLoginForm()
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
-				fireEvent.click(screen.getByTestId('login-submit-button'))
-
-				await waitFor(() =>
-					expect(
-						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-					).toBeInTheDocument(),
+				await expectErrorDialog(
+					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 				)
-				expect(
-					screen.getByText(
-						FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-							.INVALID_LOGIN_CREDENTIALS_MESSAGE,
-					),
-				).toBeInTheDocument()
 			})
 
 			it('closes the error dialog when the close button is clicked', async () => {
@@ -530,35 +571,20 @@ describe('<UserAuth />', () => {
 					payload: MOCK_INVALID_LOGIN_ERROR,
 				})
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
-				fireEvent.click(screen.getByTestId('login-submit-button'))
-
+				fillAndSubmitLoginForm()
 				await screen.findByRole(DIALOG.ROLE_ALERTDIALOG)
 
 				fireEvent.click(screen.getByTestId(DIALOG.BUTTON))
-
-				await waitFor(() =>
-					expect(
-						screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
-					).not.toBeInTheDocument(),
-				)
+				await expectNoErrorDialog()
 			})
 
 			it('throws error with fallback message when getFirebaseAuthErrorMessage returns null', async () => {
-				const { getFirebaseAuthErrorMessage } = await import(
-					'@/utils/getFirebaseAuthErrorMessage'
-				)
-
-				getFirebaseAuthErrorMessage.mockReturnValueOnce(null)
-				getFirebaseAuthErrorMessage.mockReturnValueOnce(
-					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
-				)
+				const getFirebaseAuthErrorMessage =
+					await setupFirebaseErrorMock(
+						null,
+						FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+							.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+					)
 
 				mockDispatch.mockResolvedValueOnce({
 					meta: { rejectedWithValue: true },
@@ -566,14 +592,7 @@ describe('<UserAuth />', () => {
 				})
 
 				renderWithProviders(<UserAuth />)
-
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fillAndSubmitLoginForm()
 
 				await waitFor(() => {
 					expect(getFirebaseAuthErrorMessage).toHaveBeenCalledTimes(2)
@@ -583,15 +602,10 @@ describe('<UserAuth />', () => {
 					expect(getFirebaseAuthErrorMessage).toHaveBeenCalledWith()
 				})
 
-				expect(
-					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-				).toBeInTheDocument()
-				expect(
-					screen.getByText(
-						FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-							.INVALID_LOGIN_CREDENTIALS_MESSAGE,
-					),
-				).toBeInTheDocument()
+				await expectErrorDialog(
+					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+				)
 			})
 
 			it('handles errors thrown during form submission and sets error state', async () => {
@@ -599,23 +613,9 @@ describe('<UserAuth />', () => {
 				mockDispatch.mockRejectedValueOnce(testError)
 
 				renderWithProviders(<UserAuth />)
+				fillAndSubmitLoginForm()
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
-				fireEvent.click(screen.getByTestId('login-submit-button'))
-
-				await waitFor(() => {
-					expect(
-						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-					).toBeInTheDocument()
-					expect(
-						screen.getByText(MOCK_MESSAGES.TEST_ERROR),
-					).toBeInTheDocument()
-				})
+				await expectErrorDialog(MOCK_MESSAGES.TEST_ERROR)
 			})
 
 			it('sets error with fallback message when caught error has no message', async () => {
