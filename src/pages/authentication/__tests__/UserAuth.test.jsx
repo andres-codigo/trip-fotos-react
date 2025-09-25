@@ -468,7 +468,7 @@ describe('<UserAuth />', () => {
 		})
 
 		describe('Loading state management', () => {
-			it('shows loading dialog when isLoading is true during form submission', async () => {
+			it('displays loading dialog during authentication process', async () => {
 				// Mock dispatch to never resolve, keeping loading state active
 				mockDispatch.mockImplementation(() => new Promise(() => {}))
 
@@ -499,7 +499,7 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('hides loading dialog when authentication completes successfully', async () => {
+			it('hides loading dialog when authentication completes', async () => {
 				// Create controllable promise to simulate async authentication
 				let resolveAuth
 				const authPromise = new Promise((resolve) => {
