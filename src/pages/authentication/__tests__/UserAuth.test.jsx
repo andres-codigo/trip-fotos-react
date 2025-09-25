@@ -31,13 +31,13 @@ import UserAuth from '../UserAuth'
  * UserAuth Unit Tests
  *
  * Test Strategy:
- * - Focuses on form validation, authentication flow, and error handling logic
- * - Complements Cypress tests which cover E2E user interaction and navigation
- * - Tests validation handlers for email and password fields
- * - Verifies form submission for login and signup modes
- * - Ensures correct Redux actions are dispatched and navigation occurs
- * - Tests error dialog rendering and closing logic
- * - Uses mocks for Redux, routing, validation, and Firebase error utilities to isolate logic
+ * - Focuses on form validation, authentication flow, and error handling
+ * - Complements E2E Cypress tests for user interaction and navigation flows
+ * - Tests isolated validation handlers for email and password fields
+ * - Verifies form submission behavior for both login and signup modes
+ * - Ensures correct Redux actions are dispatched with proper payloads
+ * - Validates loading states and error dialog rendering/interaction
+ * - Uses comprehensive mocks for Redux, routing, validation, and Firebase utilities
  */
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
@@ -86,6 +86,11 @@ const renderWithProviders = (ui) =>
 		</Provider>,
 	)
 
+/**
+ * Helper function to fill login form inputs
+ * @param {string} email - Email value (defaults to mock email)
+ * @param {string} password - Password value (defaults to mock password)
+ */
 const fillLoginForm = (
 	email = MOCK_KEYS.EMAIL,
 	password = MOCK_KEYS.PASSWORD,
@@ -98,15 +103,27 @@ const fillLoginForm = (
 	})
 }
 
+/**
+ * Helper function to submit the login form
+ */
 const submitLoginForm = () => {
 	fireEvent.click(screen.getByTestId('login-submit-button'))
 }
 
+/**
+ * Helper function to fill and submit login form in one action
+ * @param {string} email - Email value
+ * @param {string} password - Password value
+ */
 const fillAndSubmitLoginForm = (email, password) => {
 	fillLoginForm(email, password)
 	submitLoginForm()
 }
 
+/**
+ * Helper function to assert error dialog presence and message
+ * @param {string} expectedMessage - Expected error message text
+ */
 const expectErrorDialog = async (expectedMessage) => {
 	await waitFor(() =>
 		expect(screen.getByRole(DIALOG.ROLE_ALERTDIALOG)).toBeInTheDocument(),
@@ -114,6 +131,9 @@ const expectErrorDialog = async (expectedMessage) => {
 	expect(screen.getByText(expectedMessage)).toBeInTheDocument()
 }
 
+/**
+ * Helper function to assert error dialog is not present
+ */
 const expectNoErrorDialog = async () => {
 	await waitFor(() =>
 		expect(
@@ -122,6 +142,12 @@ const expectNoErrorDialog = async () => {
 	)
 }
 
+/**
+ * Helper function to setup Firebase error message mocks
+ * @param {string|null} firstReturn - First mock return value
+ * @param {string} secondReturn - Second mock return value (fallback)
+ * @returns {Function} Mock function reference
+ */
 const setupFirebaseErrorMock = async (
 	firstReturn = null,
 	secondReturn = FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
@@ -443,7 +469,8 @@ describe('<UserAuth />', () => {
 
 		describe('Loading state management', () => {
 			it('shows loading dialog when isLoading is true during form submission', async () => {
-				mockDispatch.mockImplementation(() => new Promise(() => {})) // Never resolves to keep loading state
+				// Mock dispatch to never resolve, keeping loading state active
+				mockDispatch.mockImplementation(() => new Promise(() => {}))
 
 				renderWithProviders(<UserAuth />)
 
@@ -473,7 +500,7 @@ describe('<UserAuth />', () => {
 			})
 
 			it('hides loading dialog when authentication completes successfully', async () => {
-				// Use a Promise that we can control to simulate loading state
+				// Create controllable promise to simulate async authentication
 				let resolveAuth
 				const authPromise = new Promise((resolve) => {
 					resolveAuth = resolve
@@ -499,7 +526,7 @@ describe('<UserAuth />', () => {
 					).toBeInTheDocument()
 				})
 
-				// Resolve the authentication
+				// Simulate successful authentication completion
 				resolveAuth({
 					meta: {},
 				})
@@ -512,8 +539,9 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('loading dialog has fixed property and correct structure', async () => {
-				mockDispatch.mockImplementation(() => new Promise(() => {})) // Never resolves
+			it('renders loading dialog with correct structure and properties', async () => {
+				// Mock dispatch to never resolve for persistent loading state
+				mockDispatch.mockImplementation(() => new Promise(() => {}))
 
 				renderWithProviders(<UserAuth />)
 
