@@ -93,535 +93,496 @@ describe('<UserAuth />', () => {
 	})
 
 	describe('Behaviour tests', () => {
-		it('validateEmailHandler sets email state and returns validity', async () => {
-			const { result } = renderHook(() => {
-				const [, setEmail] = [{ value: '' }, vi.fn()]
+		describe('Form validation handlers', () => {
+			it('validateEmailHandler sets email state and returns validity', async () => {
+				const { result } = renderHook(() => {
+					const [, setEmail] = [{ value: '' }, vi.fn()]
 
-				const handler = async (value) => {
-					const { isValid, message } = validateEmail(value)
-					setEmail(value, isValid, message)
-					return isValid
-				}
-				return { setEmail, handler }
+					const handler = async (value) => {
+						const { isValid, message } = validateEmail(value)
+						setEmail(value, isValid, message)
+						return isValid
+					}
+					return { setEmail, handler }
+				})
+
+				validateEmail.mockReturnValueOnce({
+					isValid: true,
+					message: '',
+				})
+
+				const isValid = await result.current.handler(MOCK_KEYS.EMAIL)
+				expect(result.current.setEmail).toHaveBeenCalledWith(
+					MOCK_KEYS.EMAIL,
+					true,
+					'',
+				)
+				expect(isValid).toBe(true)
+
+				validateEmail.mockReturnValueOnce({
+					isValid: false,
+					message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
+				})
+				const isValid2 = await result.current.handler('')
+				expect(result.current.setEmail).toHaveBeenCalledWith(
+					'',
+					false,
+					VALIDATION_MESSAGES.EMAIL_REQUIRED,
+				)
+				expect(isValid2).toBe(false)
 			})
 
-			validateEmail.mockReturnValueOnce({
-				isValid: true,
-				message: '',
+			it('validatePasswordHandler sets password state and returns validity', async () => {
+				const { result } = renderHook(() => {
+					const [, setPassword] = [{ value: '' }, vi.fn()]
+					const handler = async (value) => {
+						const { isValid, message } = validatePassword(value)
+						setPassword(value, isValid, message)
+						return isValid
+					}
+					return { setPassword, handler }
+				})
+
+				validatePassword.mockReturnValueOnce({
+					isValid: true,
+					message: '',
+				})
+				const isValid = await result.current.handler(MOCK_KEYS.PASSWORD)
+				expect(result.current.setPassword).toHaveBeenCalledWith(
+					MOCK_KEYS.PASSWORD,
+					true,
+					'',
+				)
+				expect(isValid).toBe(true)
+
+				validatePassword.mockReturnValueOnce({
+					isValid: false,
+					message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+				})
+				const isValid2 = await result.current.handler('')
+				expect(result.current.setPassword).toHaveBeenCalledWith(
+					'',
+					false,
+					VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+				)
+				expect(isValid2).toBe(false)
 			})
 
-			const isValid = await result.current.handler(MOCK_KEYS.EMAIL)
-			expect(result.current.setEmail).toHaveBeenCalledWith(
-				MOCK_KEYS.EMAIL,
-				true,
-				'',
-			)
-			expect(isValid).toBe(true)
+			it('validateForm trims values, calls handlers, and returns validity', async () => {
+				const mockEmail = { value: '  ' + MOCK_KEYS.EMAIL + '  ' }
+				const mockPassword = { value: '  ' + MOCK_KEYS.PASSWORD + '  ' }
+				const validateEmailHandler = vi.fn().mockResolvedValue(true)
+				const validatePasswordHandler = vi.fn().mockResolvedValue(true)
 
-			validateEmail.mockReturnValueOnce({
-				isValid: false,
-				message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
-			})
-			const isValid2 = await result.current.handler('')
-			expect(result.current.setEmail).toHaveBeenCalledWith(
-				'',
-				false,
-				VALIDATION_MESSAGES.EMAIL_REQUIRED,
-			)
-			expect(isValid2).toBe(false)
-		})
+				const validateForm = async () => {
+					const trimmedEmail = mockEmail.value.trim()
+					const trimmedPassword = mockPassword.value.trim()
 
-		it('validatePasswordHandler sets password state and returns validity', async () => {
-			const { result } = renderHook(() => {
-				const [, setPassword] = [{ value: '' }, vi.fn()]
-				const handler = async (value) => {
-					const { isValid, message } = validatePassword(value)
-					setPassword(value, isValid, message)
-					return isValid
-				}
-				return { setPassword, handler }
-			})
+					const emailValid = await validateEmailHandler(trimmedEmail)
+					const passwordValid =
+						await validatePasswordHandler(trimmedPassword)
 
-			validatePassword.mockReturnValueOnce({
-				isValid: true,
-				message: '',
-			})
-			const isValid = await result.current.handler(MOCK_KEYS.PASSWORD)
-			expect(result.current.setPassword).toHaveBeenCalledWith(
-				MOCK_KEYS.PASSWORD,
-				true,
-				'',
-			)
-			expect(isValid).toBe(true)
-
-			validatePassword.mockReturnValueOnce({
-				isValid: false,
-				message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
-			})
-			const isValid2 = await result.current.handler('')
-			expect(result.current.setPassword).toHaveBeenCalledWith(
-				'',
-				false,
-				VALIDATION_MESSAGES.PASSWORD_REQUIRED,
-			)
-			expect(isValid2).toBe(false)
-		})
-
-		it('validateForm trims values, calls handlers, and returns validity', async () => {
-			const mockEmail = { value: '  ' + MOCK_KEYS.EMAIL + '  ' }
-			const mockPassword = { value: '  ' + MOCK_KEYS.PASSWORD + '  ' }
-			const validateEmailHandler = vi.fn().mockResolvedValue(true)
-			const validatePasswordHandler = vi.fn().mockResolvedValue(true)
-
-			const validateForm = async () => {
-				const trimmedEmail = mockEmail.value.trim()
-				const trimmedPassword = mockPassword.value.trim()
-
-				const emailValid = await validateEmailHandler(trimmedEmail)
-				const passwordValid =
-					await validatePasswordHandler(trimmedPassword)
-
-				if (!emailValid || !passwordValid)
+					if (!emailValid || !passwordValid)
+						return {
+							email: trimmedEmail,
+							password: trimmedPassword,
+							isValid: false,
+						}
 					return {
 						email: trimmedEmail,
 						password: trimmedPassword,
-						isValid: false,
+						isValid: true,
 					}
-				return {
-					email: trimmedEmail,
-					password: trimmedPassword,
-					isValid: true,
 				}
-			}
 
-			const result = await validateForm()
-			expect(validateEmailHandler).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
-			expect(validatePasswordHandler).toHaveBeenCalledWith(
-				MOCK_KEYS.PASSWORD,
-			)
-			expect(result).toEqual({
-				email: MOCK_KEYS.EMAIL,
-				password: MOCK_KEYS.PASSWORD,
-				isValid: true,
-			})
-		})
-
-		it('validateForm returns isValid false when email or password validation fails', async () => {
-			validateEmail.mockReturnValueOnce({
-				isValid: false,
-				message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
-			})
-			validatePassword.mockReturnValueOnce({
-				isValid: true,
-				message: '',
-			})
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL_INVALID },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				expect(login).not.toHaveBeenCalled()
-			})
-		})
-
-		it('validateForm returns correct structure when validation fails', async () => {
-			validateEmail.mockReturnValueOnce({
-				isValid: false,
-				message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
-			})
-			validatePassword.mockReturnValueOnce({
-				isValid: true,
-				message: '',
-			})
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL_INVALID },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				expect(login).not.toHaveBeenCalled()
-
-				expect(validateEmail).toHaveBeenCalledWith(
-					MOCK_KEYS.EMAIL_INVALID,
+				const result = await validateForm()
+				expect(validateEmailHandler).toHaveBeenCalledWith(
+					MOCK_KEYS.EMAIL,
 				)
-				expect(validatePassword).toHaveBeenCalledWith(
+				expect(validatePasswordHandler).toHaveBeenCalledWith(
 					MOCK_KEYS.PASSWORD,
 				)
+				expect(result).toEqual({
+					email: MOCK_KEYS.EMAIL,
+					password: MOCK_KEYS.PASSWORD,
+					isValid: true,
+				})
+			})
+
+			it('validateForm returns isValid false when email or password validation fails', async () => {
+				validateEmail.mockReturnValueOnce({
+					isValid: false,
+					message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
+				})
+				validatePassword.mockReturnValueOnce({
+					isValid: true,
+					message: '',
+				})
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL_INVALID },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					expect(login).not.toHaveBeenCalled()
+				})
+			})
+
+			it('validateForm returns correct structure when validation fails', async () => {
+				validateEmail.mockReturnValueOnce({
+					isValid: false,
+					message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
+				})
+				validatePassword.mockReturnValueOnce({
+					isValid: true,
+					message: '',
+				})
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL_INVALID },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					expect(login).not.toHaveBeenCalled()
+
+					expect(validateEmail).toHaveBeenCalledWith(
+						MOCK_KEYS.EMAIL_INVALID,
+					)
+					expect(validatePassword).toHaveBeenCalledWith(
+						MOCK_KEYS.PASSWORD,
+					)
+				})
+			})
+
+			it('validateForm trims whitespace from input values before validation', async () => {
+				validateEmail.mockReturnValueOnce({
+					isValid: true,
+					message: '',
+				})
+				validatePassword.mockReturnValueOnce({
+					isValid: true,
+					message: '',
+				})
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: '  ' + MOCK_KEYS.EMAIL + '  ' },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: '  ' + MOCK_KEYS.PASSWORD + '  ' },
+				})
+
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					expect(validateEmail).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
+					expect(validatePassword).toHaveBeenCalledWith(
+						MOCK_KEYS.PASSWORD,
+					)
+				})
+			})
+
+			it('validateForm handles password validation failure correctly', async () => {
+				validateEmail.mockReturnValueOnce({
+					isValid: true,
+					message: '',
+				})
+				validatePassword.mockReturnValueOnce({
+					isValid: false,
+					message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+				})
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: '' },
+				})
+
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					expect(login).not.toHaveBeenCalled()
+					expect(validateEmail).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
+					expect(validatePassword).toHaveBeenCalledWith('')
+				})
 			})
 		})
 
-		it('validateForm trims whitespace from input values before validation', async () => {
-			validateEmail.mockReturnValueOnce({
-				isValid: true,
-				message: '',
-			})
-			validatePassword.mockReturnValueOnce({
-				isValid: true,
-				message: '',
-			})
+		describe('Authentication flow', () => {
+			it('dispatches login action with correct payload', async () => {
+				renderWithProviders(<UserAuth />)
 
-			renderWithProviders(<UserAuth />)
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+				fireEvent.click(screen.getByTestId('login-submit-button'))
 
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: '  ' + MOCK_KEYS.EMAIL + '  ' },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: '  ' + MOCK_KEYS.PASSWORD + '  ' },
+				await waitFor(() => {
+					expect(login).toHaveBeenCalledWith(MOCK_LOGIN_PAYLOAD)
+				})
 			})
 
-			fireEvent.click(screen.getByTestId('login-submit-button'))
+			it('dispatches signup action when in signup mode and form is submitted', async () => {
+				renderWithProviders(<UserAuth />)
 
-			await waitFor(() => {
-				expect(validateEmail).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
-				expect(validatePassword).toHaveBeenCalledWith(
-					MOCK_KEYS.PASSWORD,
+				const switchBtn = screen.getByTestId('login-signup-toggle-link')
+
+				fireEvent.click(switchBtn)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					expect(mockDispatch).toHaveBeenCalledWith(
+						MOCK_SIGNUP_ACTION,
+					)
+				})
+			})
+
+			it('redirects to home after successful login', async () => {
+				mockDispatch.mockResolvedValueOnce({
+					meta: {},
+				})
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					expect(mockNavigate).toHaveBeenCalledWith(PATHS.HOME)
+				})
+			})
+		})
+
+		describe('Loading state management', () => {
+			it('shows loading dialog when isLoading is true during form submission', async () => {
+				mockDispatch.mockImplementation(() => new Promise(() => {})) // Never resolves to keep loading state
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					expect(
+						screen.getByTestId('loading-dialog'),
+					).toBeInTheDocument()
+					expect(
+						screen.getByText('Authenticating'),
+					).toBeInTheDocument()
+					expect(
+						screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
+					).toBeInTheDocument()
+					expect(
+						screen.getByTestId('base-spinner'),
+					).toBeInTheDocument()
+				})
+			})
+
+			it('hides loading dialog when authentication completes successfully', async () => {
+				// Use a Promise that we can control to simulate loading state
+				let resolveAuth
+				const authPromise = new Promise((resolve) => {
+					resolveAuth = resolve
+				})
+
+				mockDispatch.mockReturnValueOnce(authPromise)
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				// Loading dialog
+				await waitFor(() => {
+					expect(
+						screen.getByTestId('loading-dialog'),
+					).toBeInTheDocument()
+				})
+
+				// Resolve the authentication
+				resolveAuth({
+					meta: {},
+				})
+
+				// Loading dialog should disappear after completion
+				await waitFor(() => {
+					expect(
+						screen.queryByTestId('loading-dialog'),
+					).not.toBeInTheDocument()
+				})
+			})
+
+			it('loading dialog has fixed property and correct structure', async () => {
+				mockDispatch.mockImplementation(() => new Promise(() => {})) // Never resolves
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					const loadingDialog = screen.getByTestId('loading-dialog')
+					expect(loadingDialog).toBeInTheDocument()
+					expect(loadingDialog).toHaveAttribute(
+						'data-cy',
+						'loading-dialog',
+					)
+
+					expect(
+						screen.getByText(MOCK_MESSAGES.AUTHENTICATING_TITLE),
+					).toBeInTheDocument()
+					expect(
+						screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
+					).toBeInTheDocument()
+					expect(
+						screen.getByTestId('base-spinner'),
+					).toBeInTheDocument()
+				})
+			})
+		})
+
+		describe('Error handling', () => {
+			it('shows error dialog when error occurs (internal logic)', async () => {
+				mockDispatch.mockResolvedValueOnce({
+					meta: { rejectedWithValue: true },
+					payload: MOCK_INVALID_LOGIN_ERROR,
+				})
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() =>
+					expect(
+						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+					).toBeInTheDocument(),
+				)
+				expect(
+					screen.getByText(
+						FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+							.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+					),
+				).toBeInTheDocument()
+			})
+
+			it('closes the error dialog when the close button is clicked', async () => {
+				renderWithProviders(<UserAuth />)
+
+				mockDispatch.mockResolvedValueOnce({
+					meta: { rejectedWithValue: true },
+					payload: MOCK_INVALID_LOGIN_ERROR,
+				})
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await screen.findByRole(DIALOG.ROLE_ALERTDIALOG)
+
+				fireEvent.click(screen.getByTestId(DIALOG.BUTTON))
+
+				await waitFor(() =>
+					expect(
+						screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
+					).not.toBeInTheDocument(),
 				)
 			})
-		})
 
-		it('validateForm handles password validation failure correctly', async () => {
-			validateEmail.mockReturnValueOnce({
-				isValid: true,
-				message: '',
-			})
-			validatePassword.mockReturnValueOnce({
-				isValid: false,
-				message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
-			})
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: '' },
-			})
-
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				expect(login).not.toHaveBeenCalled()
-				expect(validateEmail).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
-				expect(validatePassword).toHaveBeenCalledWith('')
-			})
-		})
-
-		it('dispatches login action with correct payload', async () => {
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				expect(login).toHaveBeenCalledWith(MOCK_LOGIN_PAYLOAD)
-			})
-		})
-
-		it('shows loading dialog when isLoading is true during form submission', async () => {
-			mockDispatch.mockImplementation(() => new Promise(() => {})) // Never resolves to keep loading state
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				expect(screen.getByTestId('loading-dialog')).toBeInTheDocument()
-				expect(screen.getByText('Authenticating')).toBeInTheDocument()
-				expect(
-					screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
-				).toBeInTheDocument()
-				expect(screen.getByTestId('base-spinner')).toBeInTheDocument()
-			})
-		})
-
-		it('hides loading dialog when authentication completes successfully', async () => {
-			// Use a Promise that we can control to simulate loading state
-			let resolveAuth
-			const authPromise = new Promise((resolve) => {
-				resolveAuth = resolve
-			})
-
-			mockDispatch.mockReturnValueOnce(authPromise)
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			// Loading dialog
-			await waitFor(() => {
-				expect(screen.getByTestId('loading-dialog')).toBeInTheDocument()
-			})
-
-			// Resolve the authentication
-			resolveAuth({
-				meta: {},
-			})
-
-			// Loading dialog should disappear after completion
-			await waitFor(() => {
-				expect(
-					screen.queryByTestId('loading-dialog'),
-				).not.toBeInTheDocument()
-			})
-		})
-
-		it('loading dialog has fixed property and correct structure', async () => {
-			mockDispatch.mockImplementation(() => new Promise(() => {})) // Never resolves
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				const loadingDialog = screen.getByTestId('loading-dialog')
-				expect(loadingDialog).toBeInTheDocument()
-				expect(loadingDialog).toHaveAttribute(
-					'data-cy',
-					'loading-dialog',
+			it('throws error with fallback message when getFirebaseAuthErrorMessage returns null', async () => {
+				const { getFirebaseAuthErrorMessage } = await import(
+					'@/utils/getFirebaseAuthErrorMessage'
 				)
 
-				expect(
-					screen.getByText(MOCK_MESSAGES.AUTHENTICATING_TITLE),
-				).toBeInTheDocument()
-				expect(
-					screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
-				).toBeInTheDocument()
-				expect(screen.getByTestId('base-spinner')).toBeInTheDocument()
-			})
-		})
-
-		it('redirects to home after successful login', async () => {
-			mockDispatch.mockResolvedValueOnce({
-				meta: {},
-			})
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				expect(mockNavigate).toHaveBeenCalledWith(PATHS.HOME)
-			})
-		})
-
-		it('dispatches signup action when in signup mode and form is submitted', async () => {
-			renderWithProviders(<UserAuth />)
-
-			const switchBtn = screen.getByTestId('login-signup-toggle-link')
-
-			fireEvent.click(switchBtn)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				expect(mockDispatch).toHaveBeenCalledWith(MOCK_SIGNUP_ACTION)
-			})
-		})
-
-		it('shows error dialog when error occurs (internal logic)', async () => {
-			mockDispatch.mockResolvedValueOnce({
-				meta: { rejectedWithValue: true },
-				payload: MOCK_INVALID_LOGIN_ERROR,
-			})
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() =>
-				expect(
-					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-				).toBeInTheDocument(),
-			)
-			expect(
-				screen.getByText(
+				getFirebaseAuthErrorMessage.mockReturnValueOnce(null)
+				getFirebaseAuthErrorMessage.mockReturnValueOnce(
 					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
 						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
-				),
-			).toBeInTheDocument()
-		})
-
-		it('closes the error dialog when the close button is clicked', async () => {
-			renderWithProviders(<UserAuth />)
-
-			mockDispatch.mockResolvedValueOnce({
-				meta: { rejectedWithValue: true },
-				payload: MOCK_INVALID_LOGIN_ERROR,
-			})
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await screen.findByRole(DIALOG.ROLE_ALERTDIALOG)
-
-			fireEvent.click(screen.getByTestId(DIALOG.BUTTON))
-
-			await waitFor(() =>
-				expect(
-					screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
-				).not.toBeInTheDocument(),
-			)
-		})
-
-		it('throws error with fallback message when getFirebaseAuthErrorMessage returns null', async () => {
-			const { getFirebaseAuthErrorMessage } = await import(
-				'@/utils/getFirebaseAuthErrorMessage'
-			)
-
-			getFirebaseAuthErrorMessage.mockReturnValueOnce(null)
-			getFirebaseAuthErrorMessage.mockReturnValueOnce(
-				FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-					.INVALID_LOGIN_CREDENTIALS_MESSAGE,
-			)
-
-			mockDispatch.mockResolvedValueOnce({
-				meta: { rejectedWithValue: true },
-				payload: MOCK_INVALID_LOGIN_ERROR,
-			})
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
-				expect(getFirebaseAuthErrorMessage).toHaveBeenCalledTimes(2)
-				expect(getFirebaseAuthErrorMessage).toHaveBeenCalledWith(
-					MOCK_INVALID_LOGIN_ERROR,
 				)
-				expect(getFirebaseAuthErrorMessage).toHaveBeenCalledWith()
-			})
 
-			expect(
-				screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-			).toBeInTheDocument()
-			expect(
-				screen.getByText(
-					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
-				),
-			).toBeInTheDocument()
-		})
+				mockDispatch.mockResolvedValueOnce({
+					meta: { rejectedWithValue: true },
+					payload: MOCK_INVALID_LOGIN_ERROR,
+				})
 
-		it('handles errors thrown during form submission and sets error state', async () => {
-			const testError = new Error(MOCK_MESSAGES.TEST_ERROR)
-			mockDispatch.mockRejectedValueOnce(testError)
+				renderWithProviders(<UserAuth />)
 
-			renderWithProviders(<UserAuth />)
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+				fireEvent.click(screen.getByTestId('login-submit-button'))
 
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-			fireEvent.click(screen.getByTestId('login-submit-button'))
+				await waitFor(() => {
+					expect(getFirebaseAuthErrorMessage).toHaveBeenCalledTimes(2)
+					expect(getFirebaseAuthErrorMessage).toHaveBeenCalledWith(
+						MOCK_INVALID_LOGIN_ERROR,
+					)
+					expect(getFirebaseAuthErrorMessage).toHaveBeenCalledWith()
+				})
 
-			await waitFor(() => {
-				expect(
-					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-				).toBeInTheDocument()
-				expect(
-					screen.getByText(MOCK_MESSAGES.TEST_ERROR),
-				).toBeInTheDocument()
-			})
-		})
-
-		it('sets error with fallback message when caught error has no message', async () => {
-			const { getFirebaseAuthErrorMessage } = await import(
-				'@/utils/getFirebaseAuthErrorMessage'
-			)
-
-			getFirebaseAuthErrorMessage.mockReturnValue(
-				FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
-					.INVALID_LOGIN_CREDENTIALS_MESSAGE,
-			)
-
-			const errorWithoutMessage = new Error()
-			errorWithoutMessage.message = ''
-			mockDispatch.mockRejectedValueOnce(errorWithoutMessage)
-
-			renderWithProviders(<UserAuth />)
-
-			fireEvent.change(screen.getByTestId('email-input'), {
-				target: { value: MOCK_KEYS.EMAIL },
-			})
-			fireEvent.change(screen.getByTestId('password-input'), {
-				target: { value: MOCK_KEYS.PASSWORD },
-			})
-			fireEvent.click(screen.getByTestId('login-submit-button'))
-
-			await waitFor(() => {
 				expect(
 					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
 				).toBeInTheDocument()
@@ -631,6 +592,67 @@ describe('<UserAuth />', () => {
 							.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 					),
 				).toBeInTheDocument()
+			})
+
+			it('handles errors thrown during form submission and sets error state', async () => {
+				const testError = new Error(MOCK_MESSAGES.TEST_ERROR)
+				mockDispatch.mockRejectedValueOnce(testError)
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					expect(
+						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+					).toBeInTheDocument()
+					expect(
+						screen.getByText(MOCK_MESSAGES.TEST_ERROR),
+					).toBeInTheDocument()
+				})
+			})
+
+			it('sets error with fallback message when caught error has no message', async () => {
+				const { getFirebaseAuthErrorMessage } = await import(
+					'@/utils/getFirebaseAuthErrorMessage'
+				)
+
+				getFirebaseAuthErrorMessage.mockReturnValue(
+					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+				)
+
+				const errorWithoutMessage = new Error()
+				errorWithoutMessage.message = ''
+				mockDispatch.mockRejectedValueOnce(errorWithoutMessage)
+
+				renderWithProviders(<UserAuth />)
+
+				fireEvent.change(screen.getByTestId('email-input'), {
+					target: { value: MOCK_KEYS.EMAIL },
+				})
+				fireEvent.change(screen.getByTestId('password-input'), {
+					target: { value: MOCK_KEYS.PASSWORD },
+				})
+				fireEvent.click(screen.getByTestId('login-submit-button'))
+
+				await waitFor(() => {
+					expect(
+						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+					).toBeInTheDocument()
+					expect(
+						screen.getByText(
+							FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+								.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+						),
+					).toBeInTheDocument()
+				})
 			})
 		})
 	})
