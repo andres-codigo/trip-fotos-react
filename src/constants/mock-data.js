@@ -26,6 +26,7 @@ export const MOCK_STORAGE_KEYS = Object.freeze({
 
 export const MOCK_KEYS = Object.freeze({
 	EMAIL: 'test@example.com',
+	EMAIL_INVALID: 'test@example',
 	PASSWORD: 'password123',
 	ID_TOKEN: 'mock-id-token',
 	LOCAL_ID: 'mock-local-id',
@@ -38,6 +39,9 @@ export const MOCK_MESSAGES = Object.freeze({
 	FAILED_TO_UPDATE_TRAVELLER: 'Failed to update traveller ',
 	INVALID_PASSWORD: 'INVALID_PASSWORD',
 	NETWORK_ERROR: 'Network Error',
+	AUTHENTICATING_TITLE: 'Authenticating',
+	AUTHENTICATING_DETAILS: 'Authenticating your details, one moment please...',
+	TEST_ERROR: 'Test error message',
 })
 
 export const MOCK_LOGIN_PAYLOAD = Object.freeze({
