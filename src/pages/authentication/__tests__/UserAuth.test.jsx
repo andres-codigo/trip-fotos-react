@@ -408,7 +408,7 @@ describe('<UserAuth />', () => {
 		})
 
 		describe('Authentication flow', () => {
-			it('dispatches login action with correct payload', async () => {
+			it('dispatches login action with correct payload on form submission', async () => {
 				renderWithProviders(<UserAuth />)
 
 				fireEvent.change(screen.getByTestId('email-input'), {
@@ -424,7 +424,7 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('dispatches signup action when in signup mode and form is submitted', async () => {
+			it('dispatches signup action when component is in signup mode', async () => {
 				renderWithProviders(<UserAuth />)
 
 				const switchBtn = screen.getByTestId('login-signup-toggle-link')
@@ -446,7 +446,7 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('redirects to home after successful login', async () => {
+			it('navigates to home page after successful authentication', async () => {
 				mockDispatch.mockResolvedValueOnce({
 					meta: {},
 				})
