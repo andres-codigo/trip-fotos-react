@@ -175,7 +175,7 @@ describe('<UserAuth />', () => {
 
 	describe('Behaviour tests', () => {
 		describe('Form validation handlers', () => {
-			it('validateEmailHandler sets email state and returns validity', async () => {
+			it('validates email input and updates state accordingly', async () => {
 				const { result } = renderHook(() => {
 					const [, setEmail] = [{ value: '' }, vi.fn()]
 
@@ -213,7 +213,7 @@ describe('<UserAuth />', () => {
 				expect(isValid2).toBe(false)
 			})
 
-			it('validatePasswordHandler sets password state and returns validity', async () => {
+			it('validates password input and updates state accordingly', async () => {
 				const { result } = renderHook(() => {
 					const [, setPassword] = [{ value: '' }, vi.fn()]
 					const handler = async (value) => {
@@ -249,7 +249,7 @@ describe('<UserAuth />', () => {
 				expect(isValid2).toBe(false)
 			})
 
-			it('validateForm trims values, calls handlers, and returns validity', async () => {
+			it('validates complete form with trimmed values', async () => {
 				const mockEmail = { value: '  ' + MOCK_KEYS.EMAIL + '  ' }
 				const mockPassword = { value: '  ' + MOCK_KEYS.PASSWORD + '  ' }
 				const validateEmailHandler = vi.fn().mockResolvedValue(true)
@@ -290,7 +290,7 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('validateForm returns isValid false when email or password validation fails', async () => {
+			it('prevents form submission when email validation fails', async () => {
 				validateEmail.mockReturnValueOnce({
 					isValid: false,
 					message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
@@ -316,7 +316,7 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('validateForm returns correct structure when validation fails', async () => {
+			it('validates form structure when validation fails', async () => {
 				validateEmail.mockReturnValueOnce({
 					isValid: false,
 					message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
@@ -349,7 +349,7 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('validateForm trims whitespace from input values before validation', async () => {
+			it('trims whitespace from inputs before validation', async () => {
 				validateEmail.mockReturnValueOnce({
 					isValid: true,
 					message: '',
@@ -378,7 +378,7 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('validateForm handles password validation failure correctly', async () => {
+			it('prevents form submission when password validation fails', async () => {
 				validateEmail.mockReturnValueOnce({
 					isValid: true,
 					message: '',
