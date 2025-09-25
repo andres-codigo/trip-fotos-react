@@ -576,7 +576,7 @@ describe('<UserAuth />', () => {
 		})
 
 		describe('Error handling', () => {
-			it('shows error dialog when error occurs (internal logic)', async () => {
+			it('displays error dialog when authentication fails)', async () => {
 				mockDispatch.mockResolvedValueOnce({
 					meta: { rejectedWithValue: true },
 					payload: MOCK_INVALID_LOGIN_ERROR,
@@ -591,7 +591,7 @@ describe('<UserAuth />', () => {
 				)
 			})
 
-			it('closes the error dialog when the close button is clicked', async () => {
+			it('closes error dialog when close button is clicked', async () => {
 				renderWithProviders(<UserAuth />)
 
 				mockDispatch.mockResolvedValueOnce({
@@ -606,7 +606,7 @@ describe('<UserAuth />', () => {
 				await expectNoErrorDialog()
 			})
 
-			it('throws error with fallback message when getFirebaseAuthErrorMessage returns null', async () => {
+			it('displays fallback error message when Firebase error handler returns null', async () => {
 				const getFirebaseAuthErrorMessage =
 					await setupFirebaseErrorMock(
 						null,
@@ -636,7 +636,7 @@ describe('<UserAuth />', () => {
 				)
 			})
 
-			it('handles errors thrown during form submission and sets error state', async () => {
+			it('handles and displays errors thrown during form submission', async () => {
 				const testError = new Error(MOCK_MESSAGES.TEST_ERROR)
 				mockDispatch.mockRejectedValueOnce(testError)
 
@@ -646,7 +646,7 @@ describe('<UserAuth />', () => {
 				await expectErrorDialog(MOCK_MESSAGES.TEST_ERROR)
 			})
 
-			it('sets error with fallback message when caught error has no message', async () => {
+			it('displays fallback message when error object has no message', async () => {
 				const { getFirebaseAuthErrorMessage } = await import(
 					'@/utils/getFirebaseAuthErrorMessage'
 				)
