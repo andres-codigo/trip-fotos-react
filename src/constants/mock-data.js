@@ -26,6 +26,7 @@ export const MOCK_STORAGE_KEYS = Object.freeze({
 
 export const MOCK_KEYS = Object.freeze({
 	EMAIL: 'test@example.com',
+	EMAIL_INVALID: 'test@example',
 	PASSWORD: 'password123',
 	ID_TOKEN: 'mock-id-token',
 	LOCAL_ID: 'mock-local-id',

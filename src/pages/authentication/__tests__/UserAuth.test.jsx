@@ -205,6 +205,122 @@ describe('<UserAuth />', () => {
 			})
 		})
 
+		it('validateForm returns isValid false when email or password validation fails', async () => {
+			validateEmail.mockReturnValueOnce({
+				isValid: false,
+				message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
+			})
+			validatePassword.mockReturnValueOnce({
+				isValid: true,
+				message: '',
+			})
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL_INVALID },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				expect(login).not.toHaveBeenCalled()
+			})
+		})
+
+		it('validateForm returns correct structure when validation fails', async () => {
+			validateEmail.mockReturnValueOnce({
+				isValid: false,
+				message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
+			})
+			validatePassword.mockReturnValueOnce({
+				isValid: true,
+				message: '',
+			})
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL_INVALID },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				expect(login).not.toHaveBeenCalled()
+
+				expect(validateEmail).toHaveBeenCalledWith(
+					MOCK_KEYS.EMAIL_INVALID,
+				)
+				expect(validatePassword).toHaveBeenCalledWith(
+					MOCK_KEYS.PASSWORD,
+				)
+			})
+		})
+
+		it('validateForm trims whitespace from input values before validation', async () => {
+			validateEmail.mockReturnValueOnce({
+				isValid: true,
+				message: '',
+			})
+			validatePassword.mockReturnValueOnce({
+				isValid: true,
+				message: '',
+			})
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: '  ' + MOCK_KEYS.EMAIL + '  ' },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: '  ' + MOCK_KEYS.PASSWORD + '  ' },
+			})
+
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				expect(validateEmail).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
+				expect(validatePassword).toHaveBeenCalledWith(
+					MOCK_KEYS.PASSWORD,
+				)
+			})
+		})
+
+		it('validateForm handles password validation failure correctly', async () => {
+			validateEmail.mockReturnValueOnce({
+				isValid: true,
+				message: '',
+			})
+			validatePassword.mockReturnValueOnce({
+				isValid: false,
+				message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+			})
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: '' },
+			})
+
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				expect(login).not.toHaveBeenCalled()
+				expect(validateEmail).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
+				expect(validatePassword).toHaveBeenCalledWith('')
+			})
+		})
+
 		it('dispatches login action with correct payload', async () => {
 			renderWithProviders(<UserAuth />)
 
