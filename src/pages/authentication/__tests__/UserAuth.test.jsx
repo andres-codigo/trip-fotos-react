@@ -432,5 +432,111 @@ describe('<UserAuth />', () => {
 				).not.toBeInTheDocument(),
 			)
 		})
+
+		it('throws error with fallback message when getFirebaseAuthErrorMessage returns null', async () => {
+			const { getFirebaseAuthErrorMessage } = await import(
+				'@/utils/getFirebaseAuthErrorMessage'
+			)
+
+			getFirebaseAuthErrorMessage.mockReturnValueOnce(null)
+			getFirebaseAuthErrorMessage.mockReturnValueOnce(
+				FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+					.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+			)
+
+			mockDispatch.mockResolvedValueOnce({
+				meta: { rejectedWithValue: true },
+				payload: MOCK_INVALID_LOGIN_ERROR,
+			})
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				expect(getFirebaseAuthErrorMessage).toHaveBeenCalledTimes(2)
+				expect(getFirebaseAuthErrorMessage).toHaveBeenCalledWith(
+					MOCK_INVALID_LOGIN_ERROR,
+				)
+				expect(getFirebaseAuthErrorMessage).toHaveBeenCalledWith()
+			})
+
+			expect(
+				screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+			).toBeInTheDocument()
+			expect(
+				screen.getByText(
+					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+				),
+			).toBeInTheDocument()
+		})
+
+		it('handles errors thrown during form submission and sets error state', async () => {
+			const testError = new Error('Test error message')
+			mockDispatch.mockRejectedValueOnce(testError)
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				expect(
+					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+				).toBeInTheDocument()
+				expect(
+					screen.getByText('Test error message'),
+				).toBeInTheDocument()
+			})
+		})
+
+		it('sets error with fallback message when caught error has no message', async () => {
+			const { getFirebaseAuthErrorMessage } = await import(
+				'@/utils/getFirebaseAuthErrorMessage'
+			)
+
+			getFirebaseAuthErrorMessage.mockReturnValue(
+				FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+					.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+			)
+
+			const errorWithoutMessage = new Error()
+			errorWithoutMessage.message = ''
+			mockDispatch.mockRejectedValueOnce(errorWithoutMessage)
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				expect(
+					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+				).toBeInTheDocument()
+				expect(
+					screen.getByText(
+						FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+							.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+					),
+				).toBeInTheDocument()
+			})
+		})
 	})
 })
