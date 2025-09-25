@@ -39,6 +39,9 @@ export const MOCK_MESSAGES = Object.freeze({
 	FAILED_TO_UPDATE_TRAVELLER: 'Failed to update traveller ',
 	INVALID_PASSWORD: 'INVALID_PASSWORD',
 	NETWORK_ERROR: 'Network Error',
+	AUTHENTICATING_TITLE: 'Authenticating',
+	AUTHENTICATING_DETAILS: 'Authenticating your details, one moment please...',
+	TEST_ERROR: 'Test error message',
 })
 
 export const MOCK_LOGIN_PAYLOAD = Object.freeze({

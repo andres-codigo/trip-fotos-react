@@ -16,6 +16,7 @@ import {
 	MOCK_LOGIN_PAYLOAD,
 	MOCK_SIGNUP_ACTION,
 	MOCK_INVALID_LOGIN_ERROR,
+	MOCK_MESSAGES,
 } from '@/constants/mock-data'
 import { PATHS } from '@/constants/paths'
 import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
@@ -337,6 +338,100 @@ describe('<UserAuth />', () => {
 			})
 		})
 
+		it('shows loading dialog when isLoading is true during form submission', async () => {
+			mockDispatch.mockImplementation(() => new Promise(() => {})) // Never resolves to keep loading state
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				expect(screen.getByTestId('loading-dialog')).toBeInTheDocument()
+				expect(screen.getByText('Authenticating')).toBeInTheDocument()
+				expect(
+					screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
+				).toBeInTheDocument()
+				expect(screen.getByTestId('base-spinner')).toBeInTheDocument()
+			})
+		})
+
+		it('hides loading dialog when authentication completes successfully', async () => {
+			// Use a Promise that we can control to simulate loading state
+			let resolveAuth
+			const authPromise = new Promise((resolve) => {
+				resolveAuth = resolve
+			})
+
+			mockDispatch.mockReturnValueOnce(authPromise)
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			// Loading dialog
+			await waitFor(() => {
+				expect(screen.getByTestId('loading-dialog')).toBeInTheDocument()
+			})
+
+			// Resolve the authentication
+			resolveAuth({
+				meta: {},
+			})
+
+			// Loading dialog should disappear after completion
+			await waitFor(() => {
+				expect(
+					screen.queryByTestId('loading-dialog'),
+				).not.toBeInTheDocument()
+			})
+		})
+
+		it('loading dialog has fixed property and correct structure', async () => {
+			mockDispatch.mockImplementation(() => new Promise(() => {})) // Never resolves
+
+			renderWithProviders(<UserAuth />)
+
+			fireEvent.change(screen.getByTestId('email-input'), {
+				target: { value: MOCK_KEYS.EMAIL },
+			})
+			fireEvent.change(screen.getByTestId('password-input'), {
+				target: { value: MOCK_KEYS.PASSWORD },
+			})
+
+			fireEvent.click(screen.getByTestId('login-submit-button'))
+
+			await waitFor(() => {
+				const loadingDialog = screen.getByTestId('loading-dialog')
+				expect(loadingDialog).toBeInTheDocument()
+				expect(loadingDialog).toHaveAttribute(
+					'data-cy',
+					'loading-dialog',
+				)
+
+				expect(
+					screen.getByText(MOCK_MESSAGES.AUTHENTICATING_TITLE),
+				).toBeInTheDocument()
+				expect(
+					screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
+				).toBeInTheDocument()
+				expect(screen.getByTestId('base-spinner')).toBeInTheDocument()
+			})
+		})
+
 		it('redirects to home after successful login', async () => {
 			mockDispatch.mockResolvedValueOnce({
 				meta: {},
@@ -479,7 +574,7 @@ describe('<UserAuth />', () => {
 		})
 
 		it('handles errors thrown during form submission and sets error state', async () => {
-			const testError = new Error('Test error message')
+			const testError = new Error(MOCK_MESSAGES.TEST_ERROR)
 			mockDispatch.mockRejectedValueOnce(testError)
 
 			renderWithProviders(<UserAuth />)
@@ -497,7 +592,7 @@ describe('<UserAuth />', () => {
 					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
 				).toBeInTheDocument()
 				expect(
-					screen.getByText('Test error message'),
+					screen.getByText(MOCK_MESSAGES.TEST_ERROR),
 				).toBeInTheDocument()
 			})
 		})
