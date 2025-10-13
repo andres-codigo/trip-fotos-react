@@ -18,7 +18,8 @@ import LoadingFallback from '@/components/common/LoadingFallback'
 
 import Header from '@/components/layout/header/Header'
 const UserAuth = lazy(() => import('@/pages/authentication/UserAuth'))
-const Home = lazy(() => import('@/pages/home/Home'))
+// TODO: Review requirement for Home page at a later stage
+// const Home = lazy(() => import('@/pages/home/Home'))
 const Travellers = lazy(() => import('@/pages/travellers/Travellers'))
 const Messages = lazy(() => import('@/pages/messages/Messages'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
@@ -73,7 +74,7 @@ function AppRoutes() {
 				<Routes>
 					<Route
 						path={PATHS.HOME}
-						element={<Home />}
+						element={<Travellers />}
 					/>
 					<Route
 						path={PATHS.AUTHENTICATION}
