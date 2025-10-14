@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 
 import { DIALOG } from '@/constants/test/dialog'
 import { GLOBAL } from '@/constants/global'
@@ -60,12 +60,6 @@ vi.mock('@/components/ui/card/BaseCard', () => ({
 		</div>
 	),
 }))
-
-const TEST_DATA = {
-	ERROR_MESSAGE: 'Test error message',
-	CLOSEABLE_ERROR: 'Closeable error',
-	FALSY_VALUES: [null, undefined, '', false, 0],
-}
 
 const renderTravellersList = (props = {}) => {
 	const defaultProps = {
