@@ -42,6 +42,7 @@ export const MOCK_MESSAGES = Object.freeze({
 	AUTHENTICATING_TITLE: 'Authenticating',
 	AUTHENTICATING_DETAILS: 'Authenticating your details, one moment please...',
 	TEST_ERROR: 'Test error message',
+	CLOSEABLE_ERROR: 'Closeable error',
 })
 
 export const MOCK_LOGIN_PAYLOAD = Object.freeze({
@@ -63,4 +64,9 @@ export const MOCK_INVALID_LOGIN_ERROR = Object.freeze({
 	code: 'INVALID_LOGIN',
 	message: 'The email or password is incorrect.',
 	status: 401,
+})
+
+export const MOCK_TEST_VALUES = Object.freeze({
+	FALSY_VALUES: [null, undefined, '', false, 0],
+	TRUTHY_VALUES: ['text', 1, true, {}, []],
 })
