@@ -93,14 +93,14 @@ describe('App', () => {
 	})
 
 	describe('Rendering tests', () => {
-		it('renders Header and HomePage when logged in and on /home', async () => {
+		it('renders Header and TravellersPage when logged in and on /home', async () => {
 			setAuthState('token', false)
 
 			renderWithRoute(PATHS.HOME)
 
 			expect(screen.getByText('Header')).toBeInTheDocument()
 			await waitFor(() => {
-				expect(screen.getByText('HomePage')).toBeInTheDocument()
+				expect(screen.getByText('TravellersPage')).toBeInTheDocument()
 			})
 		})
 
