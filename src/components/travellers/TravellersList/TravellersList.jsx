@@ -1,23 +1,29 @@
 import { useState } from 'react'
+import PropTypes from 'prop-types'
+
+import { GLOBAL } from '@/constants/global'
 
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 
-const TravellersList = () => {
-	const [error, setError] = useState(false)
+const TravellersList = ({ initialError = false }) => {
+	const [error, setError] = useState(initialError)
 
 	const handleError = () => setError(null)
 
 	return (
 		<section className="pageSection travellerListContainer">
-			<BaseDialog
-				show={!!error}
-				isError={!!error}
-				title="An error occurred!"
-				onClose={handleError}>
-				<p>{error}</p>
-			</BaseDialog>
+			{error && (
+				<BaseDialog
+					show={true}
+					isError={true}
+					title={GLOBAL.ERROR_DIALOG_TITLE}
+					onClose={handleError}
+					data-cy="travellers-list-error-dialog">
+					{error}
+				</BaseDialog>
+			)}
 			<section>
 				<BaseCard>
 					<div className="controls"></div>
@@ -25,6 +31,10 @@ const TravellersList = () => {
 			</section>
 		</section>
 	)
+}
+
+TravellersList.propTypes = {
+	initialError: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
 }
 
 export default TravellersList
