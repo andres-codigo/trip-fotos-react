@@ -1,0 +1,15 @@
+.travellerListContainer {
+	.controls {
+		display: flex;
+		justify-content: space-between;
+		.hide {
+			display: none;
+		}
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	.travellerListContainer {
+		display: inline-block;
+	}
+}
