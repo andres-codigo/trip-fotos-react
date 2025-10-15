@@ -7,6 +7,8 @@ import { authenticationFormSelectors } from '../../support/constants/selectors'
 import { baseUrl, urls } from '../../support/constants/urls'
 import { user } from '../../support/constants/users'
 
+import { performLogin } from '../../support/utils/authHelpers'
+
 const loginUrl = baseUrl + urls.cyAuth
 
 describe('Form rendering and validation', () => {
@@ -114,11 +116,7 @@ describe('Form submission', () => {
 	})
 
 	it('redirects on successful login', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
-		cy.login(user.validEmail, user.validPassword)
-		cy.wait('@loginRequest')
-
-		cy.url().should('include', urls.cyHome)
+		performLogin()
 	})
 })
 
