@@ -13,7 +13,9 @@ const TravellersList = ({ initialError = false }) => {
 	const handleError = () => setError(null)
 
 	return (
-		<section className="pageSection travellerListContainer">
+		<section
+			className="pageSection travellerListContainer"
+			data-cy="travellers-list-container">
 			{error && (
 				<BaseDialog
 					show={true}

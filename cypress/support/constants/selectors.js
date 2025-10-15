@@ -75,3 +75,7 @@ export const authenticationFormSelectors = {
 	loginTextToggleLink: 'Switch to Login',
 	signupTextToggleLink: 'Switch to Signup',
 }
+
+export const travellersListSelectors = {
+	travellersListContainer: getByDataCy('travellers-list-container'),
+}
