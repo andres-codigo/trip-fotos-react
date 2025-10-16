@@ -1,4 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { Provider } from 'react-redux'
+import { BrowserRouter } from 'react-router-dom'
+import { configureStore } from '@reduxjs/toolkit'
 import { describe, it, expect, afterEach, vi } from 'vitest'
 
 import { DIALOG } from '@/constants/test/dialog'
@@ -13,6 +16,9 @@ import TravellersList from '../TravellersList'
  * Mocks:
  * - BaseDialog: Mock component for error dialog testing with proper role and interaction handling
  * - BaseCard: Mock component for card container testing
+ * - BaseButton: Mock component for button/link testing
+ * - Redux Store: Mock store with authentication and travellers state
+ * - Router: BrowserRouter for React Router context
  *
  * Test Coverage:
  * - Rendering: Component structure, conditional error dialog, prop handling
@@ -61,16 +67,59 @@ vi.mock('@/components/ui/card/BaseCard', () => ({
 	),
 }))
 
-const renderTravellersList = (props = {}) => {
+vi.mock('@/components/ui/button/BaseButton', () => ({
+	__esModule: true,
+	default: ({ children, isLink, to, ...props }) =>
+		isLink ? (
+			<a
+				href={to}
+				{...props}>
+				{children}
+			</a>
+		) : (
+			<button {...props}>{children}</button>
+		),
+}))
+
+// Create mock store
+const createMockStore = (initialState = {}) => {
+	return configureStore({
+		reducer: {
+			authentication: () => ({
+				token: null,
+				userId: null,
+				userName: null,
+				userEmail: null,
+				didAutoLogout: false,
+				...initialState.authentication,
+			}),
+			travellers: () => ({
+				travellerName: '',
+				isTraveller: false,
+				status: 'idle',
+				error: null,
+				...initialState.travellers,
+			}),
+		},
+	})
+}
+
+const renderTravellersList = (props = {}, storeState = {}) => {
 	const defaultProps = {
 		initialError: false,
 	}
 
+	const store = createMockStore(storeState)
+
 	return render(
-		<TravellersList
-			{...defaultProps}
-			{...props}
-		/>,
+		<BrowserRouter>
+			<Provider store={store}>
+				<TravellersList
+					{...defaultProps}
+					{...props}
+				/>
+			</Provider>
+		</BrowserRouter>,
 	)
 }
 
@@ -122,6 +171,62 @@ describe('<TravellersList />', () => {
 				).not.toBeInTheDocument()
 			},
 		)
+
+		it('renders Register as Traveller button when user is logged in but not a traveller', () => {
+			renderTravellersList(
+				{},
+				{
+					authentication: { token: 'mock-token' },
+					travellers: { isTraveller: false },
+				},
+			)
+
+			expect(
+				screen.getByText('Register as a Traveller'),
+			).toBeInTheDocument()
+		})
+
+		it('does not render Register as Traveller button when user is not logged in', () => {
+			renderTravellersList(
+				{},
+				{
+					authentication: { token: null },
+					travellers: { isTraveller: false },
+				},
+			)
+
+			expect(
+				screen.queryByText('Register as a Traveller'),
+			).not.toBeInTheDocument()
+		})
+
+		it('does not render Register as Traveller button when user is already a traveller', () => {
+			renderTravellersList(
+				{},
+				{
+					authentication: { token: 'mock-token' },
+					travellers: { isTraveller: true },
+				},
+			)
+
+			expect(
+				screen.queryByText('Register as a Traveller'),
+			).not.toBeInTheDocument()
+		})
+
+		it('does not render Register as Traveller button when isLoading is true', () => {
+			renderTravellersList(
+				{ isLoading: true },
+				{
+					authentication: { token: 'mock-token' },
+					travellers: { isTraveller: false },
+				},
+			)
+
+			expect(
+				screen.queryByText('Register as a Traveller'),
+			).not.toBeInTheDocument()
+		})
 	})
 
 	describe('Behaviour tests', () => {

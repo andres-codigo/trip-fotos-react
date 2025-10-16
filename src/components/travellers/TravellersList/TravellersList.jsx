@@ -1,14 +1,24 @@
 import { useState } from 'react'
+import { useSelector } from 'react-redux'
 import PropTypes from 'prop-types'
 
 import { GLOBAL } from '@/constants/global'
+import { PATHS } from '@/constants/paths'
 
+import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
+
+import BaseButton from '@/components/ui/button/BaseButton'
+import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 
-import BaseCard from '@/components/ui/card/BaseCard'
-
-const TravellersList = ({ initialError = false }) => {
+const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const [error, setError] = useState(initialError)
+
+	const isLoggedIn = useSelector(selectIsAuthenticated)
+
+	const isTraveller = useSelector(
+		(state) => state.travellers?.isTraveller || false,
+	)
 
 	const handleError = () => setError(null)
 
@@ -28,7 +38,15 @@ const TravellersList = ({ initialError = false }) => {
 			)}
 			<section>
 				<BaseCard>
-					<div className="controls"></div>
+					<div className="controls">
+						{isLoggedIn && !isTraveller && !isLoading && (
+							<BaseButton
+								isLink
+								to={PATHS.REGISTER}>
+								Register as a Traveller
+							</BaseButton>
+						)}
+					</div>
 				</BaseCard>
 			</section>
 		</section>
@@ -37,6 +55,7 @@ const TravellersList = ({ initialError = false }) => {
 
 TravellersList.propTypes = {
 	initialError: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+	isLoading: PropTypes.bool,
 }
 
 export default TravellersList
