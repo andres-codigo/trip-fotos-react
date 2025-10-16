@@ -56,6 +56,7 @@ describe('travellersSlice', () => {
 				const initialState = store.getState().travellers
 				expect(initialState).toEqual({
 					travellerName: '',
+					isTraveller: false,
 					status: 'idle',
 					error: null,
 				})

@@ -56,12 +56,16 @@ const travellersSlice = createSlice({
 	name: 'travellers',
 	initialState: {
 		travellerName: '',
+		isTraveller: false,
 		status: 'idle',
 		error: null,
 	},
 	reducers: {
 		setTravellerName(state, action) {
 			state.travellerName = action.payload
+		},
+		setIsTraveller(state, action) {
+			state.isTraveller = action.payload
 		},
 	},
 	extraReducers: (builder) => {
@@ -80,5 +84,7 @@ const travellersSlice = createSlice({
 	},
 })
 
-export const { setTravellerName } = travellersSlice.actions
+export const selectIsTraveller = (state) => state.travellers.isTraveller
+
+export const { setTravellerName, setIsTraveller } = travellersSlice.actions
 export default travellersSlice.reducer
