@@ -7,6 +7,8 @@ let timer
 
 export const selectAuthenticationToken = (state) => state.authentication.token
 
+export const selectIsAuthenticated = (state) => !!state.authentication.token
+
 export const login = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.LOGIN,
 	async (payload, { dispatch, rejectWithValue }) => {
