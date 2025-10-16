@@ -446,7 +446,7 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('navigates to home page after successful authentication', async () => {
+			it('navigates to travellers page after successful authentication', async () => {
 				mockDispatch.mockResolvedValueOnce({
 					meta: {},
 				})
@@ -462,7 +462,7 @@ describe('<UserAuth />', () => {
 				fireEvent.click(screen.getByTestId('login-submit-button'))
 
 				await waitFor(() => {
-					expect(mockNavigate).toHaveBeenCalledWith(PATHS.HOME)
+					expect(mockNavigate).toHaveBeenCalledWith(PATHS.TRAVELLERS)
 				})
 			})
 		})

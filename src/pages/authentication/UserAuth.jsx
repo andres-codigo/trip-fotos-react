@@ -104,7 +104,7 @@ const UserAuth = () => {
 
 			const redirectUrl =
 				new URLSearchParams(location.search).get('redirect') ||
-				PATHS.HOME
+				PATHS.TRAVELLERS
 
 			navigate(redirectUrl)
 		} catch (error) {
