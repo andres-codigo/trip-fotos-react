@@ -12,8 +12,8 @@ describe('Logged in > PageNotFound page', () => {
 		cy.visit(loginUrl)
 		cy.login(user.validEmail, user.validPassword)
 	})
-	it('displays the 404 page and user can navigate to the home page', () => {
-		cy.url().should('eq', baseUrl + urls.cyHome)
+	it('displays the 404 page and user can navigate to the travellers page', () => {
+		cy.url().should('eq', baseUrl + urls.cyTravellers)
 		// // Visit a non-existent route
 		cy.visit(urls.cyNonExistentPath, { failOnStatusCode: false })
 
