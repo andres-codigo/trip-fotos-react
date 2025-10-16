@@ -81,6 +81,10 @@ vi.mock('@/components/ui/button/BaseButton', () => ({
 		),
 }))
 
+vi.mock('@/assets/loading-spinner.svg', () => ({
+	default: 'mock-spinner.svg',
+}))
+
 // Create mock store
 const createMockStore = (initialState = {}) => {
 	return configureStore({
@@ -226,6 +230,35 @@ describe('<TravellersList />', () => {
 			expect(
 				screen.queryByText('Register as a Traveller'),
 			).not.toBeInTheDocument()
+		})
+
+		it('renders spinner when isLoading is true', () => {
+			renderTravellersList({ isLoading: true })
+
+			const spinner = screen.getByRole('status')
+			const loadingImage = screen.getByAltText(GLOBAL.LOADING_SPINNER_ALT)
+
+			expect(screen.getByTestId('base-spinner')).toBeInTheDocument()
+			expect(spinner).toBeInTheDocument()
+			expect(loadingImage).toBeInTheDocument()
+			expect(loadingImage).toHaveAttribute('src', 'mock-spinner.svg')
+		})
+
+		it('does not render spinner when isLoading is false', () => {
+			renderTravellersList({ isLoading: false })
+
+			expect(screen.queryByTestId('base-spinner')).not.toBeInTheDocument()
+			expect(screen.queryByRole('status')).not.toBeInTheDocument()
+		})
+
+		it('renders spinner container with correct styling when loading', () => {
+			renderTravellersList({ isLoading: true })
+
+			const spinnerContainer = document.querySelector('.spinnerContainer')
+			expect(spinnerContainer).toBeInTheDocument()
+			expect(spinnerContainer).toContainElement(
+				screen.getByTestId('base-spinner'),
+			)
 		})
 	})
 

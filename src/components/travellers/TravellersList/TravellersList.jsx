@@ -7,9 +7,12 @@ import { PATHS } from '@/constants/paths'
 
 import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
 
-import BaseButton from '@/components/ui/button/BaseButton'
 import BaseCard from '@/components/ui/card/BaseCard'
+
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
+import BaseButton from '@/components/ui/button/BaseButton'
+
+import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const [error, setError] = useState(initialError)
@@ -47,6 +50,11 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 							</BaseButton>
 						)}
 					</div>
+					{isLoading && (
+						<div className="spinnerContainer">
+							<BaseSpinner />
+						</div>
+					)}
 				</BaseCard>
 			</section>
 		</section>
