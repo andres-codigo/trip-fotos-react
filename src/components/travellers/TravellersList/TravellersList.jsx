@@ -78,25 +78,23 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 						data-cy="controls">
 						<BaseButton
 							mode={
-								!hasTravellers && !isLoading
+								!hasTravellers && !loading
 									? // 	||
 										// (filteredTravellers &&
 										// 	filteredTravellers.length === 0)
 										'disabled'
 									: 'outline'
 							}
-							disabled={
-								!isLoading && !hasTravellers ? true : false
-							}
+							disabled={!loading && !hasTravellers ? true : false}
 							className={
-								!hasTravellers && !isLoading
+								!hasTravellers && !loading
 									? travellersListStyles.hide
 									: ''
 							}
 							onClick={() => loadTravellersHandler(true)}>
 							Refresh
 						</BaseButton>
-						{isLoggedIn && !isTraveller && !isLoading && (
+						{isLoggedIn && !isTraveller && !loading && (
 							<BaseButton
 								isLink
 								to={PATHS.REGISTER}
@@ -117,7 +115,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 							<li data-cy="traveller-item">Trip Item</li>
 						</ul>
 					)}
-					{!isLoading && !hasTravellers && (
+					{!loading && !hasTravellers && (
 						<div
 							className={
 								travellersListStyles.noTravellersContainer

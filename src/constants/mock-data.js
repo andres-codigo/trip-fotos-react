@@ -42,6 +42,8 @@ export const MOCK_MESSAGES = Object.freeze({
 	AUTHENTICATING_TITLE: 'Authenticating',
 	AUTHENTICATING_DETAILS: 'Authenticating your details, one moment please...',
 	TEST_ERROR: 'Test error message',
+	LOAD_FAILED: 'Load failed',
+	SOMETHING_WENT_WRONG: 'Something went wrong!',
 	CLOSEABLE_ERROR: 'Closeable error',
 })
 

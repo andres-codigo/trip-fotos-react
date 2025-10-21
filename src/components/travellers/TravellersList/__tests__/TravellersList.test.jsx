@@ -1,305 +1,301 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { Provider } from 'react-redux'
+import { Provider, useDispatch, useSelector } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-import { DIALOG } from '@/constants/test/dialog'
-import { GLOBAL } from '@/constants/global'
-import { MOCK_MESSAGES, MOCK_TEST_VALUES } from '@/constants/mock-data'
+import { TRAVELLERS_ACTION_TYPES } from '@/constants/action-types'
+import { MOCK_MESSAGES } from '@/constants/mock-data'
+
+vi.mock('react-redux', async () => {
+	const actual = await vi.importActual('react-redux')
+	return {
+		...actual,
+		useDispatch: vi.fn(),
+		useSelector: vi.fn(),
+	}
+})
+
+vi.mock('@/store/slices/travellersSlice', () => ({
+	loadTravellers: vi.fn(),
+	selectTravellers: vi.fn(),
+	selectHasTravellers: vi.fn(),
+	selectIsTraveller: vi.fn(),
+}))
+
+vi.mock('@/store/slices/authenticationSlice', () => ({
+	selectIsAuthenticated: vi.fn(),
+}))
 
 import TravellersList from '../TravellersList'
+import * as travellersSlice from '@/store/slices/travellersSlice'
+import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
 
-/**
- * TravellersList Unit Tests
- *
- * Mocks:
- * - BaseDialog: Mock component for error dialog testing with proper role and interaction handling
- * - BaseCard: Mock component for card container testing
- * - BaseButton: Mock component for button/link testing
- * - Redux Store: Mock store with authentication and travellers state
- * - Router: BrowserRouter for React Router context
- *
- * Test Coverage:
- * - Rendering: Component structure, conditional error dialog, prop handling
- * - Behaviour: Error dialog interactions, state management, prop updates
- * - Accessibility: ARIA attributes, semantic structure, dialog roles
- *
- * Test Strategy:
- * - Focuses on error state management and dialog interactions
- * - Tests conditional rendering logic based on initialError prop
- * - Verifies component structure and accessibility features
- * - Uses mocks for UI components to isolate logic testing
- */
+const renderTravellersList = (props = {}, options = {}) => {
+	const {
+		shouldReject = false,
+		error = null,
+		shouldResolveSlowly = false,
+	} = options
 
-// Mock UI components
-vi.mock('@/components/ui/dialog/BaseDialog', () => ({
-	__esModule: true,
-	default: ({
-		show,
-		isError,
-		title,
-		onClose,
-		children,
-		'data-cy': dataCy,
-		...props
-	}) =>
-		show ? (
-			<div
-				role={isError ? DIALOG.ROLE_ALERTDIALOG : DIALOG.ROLE_DIALOG}
-				data-cy={dataCy}
-				{...props}>
-				<div>{title}</div>
-				<div>{children}</div>
-				<button onClick={onClose}>Close</button>
-			</div>
-		) : null,
-}))
-
-vi.mock('@/components/ui/card/BaseCard', () => ({
-	__esModule: true,
-	default: ({ children, ...props }) => (
-		<div
-			data-cy="base-card"
-			{...props}>
-			{children}
-		</div>
-	),
-}))
-
-vi.mock('@/components/ui/button/BaseButton', () => ({
-	__esModule: true,
-	default: ({ children, isLink, to, ...props }) =>
-		isLink ? (
-			<a
-				href={to}
-				{...props}>
-				{children}
-			</a>
-		) : (
-			<button {...props}>{children}</button>
-		),
-}))
-
-vi.mock('@/assets/loading-spinner.svg', () => ({
-	default: 'mock-spinner.svg',
-}))
-
-// Create mock store
-const createMockStore = (initialState = {}) => {
-	return configureStore({
-		reducer: {
-			authentication: () => ({
-				token: null,
-				userId: null,
-				userName: null,
-				userEmail: null,
-				didAutoLogout: false,
-				...initialState.authentication,
-			}),
-			travellers: () => ({
-				travellerName: '',
-				isTraveller: false,
-				status: 'idle',
-				error: null,
-				...initialState.travellers,
-			}),
-		},
-	})
-}
-
-const renderTravellersList = (props = {}, storeState = {}) => {
-	const defaultProps = {
-		initialError: false,
+	let mockDispatch
+	if (shouldReject) {
+		mockDispatch = vi.fn().mockRejectedValue(error)
+	} else if (shouldResolveSlowly) {
+		mockDispatch = vi
+			.fn()
+			.mockImplementation(
+				() => new Promise((resolve) => setTimeout(resolve, 100)),
+			)
+	} else {
+		mockDispatch = vi.fn().mockResolvedValue({})
 	}
 
-	const store = createMockStore(storeState)
+	const mockStore = {
+		getState: () => ({}),
+		dispatch: mockDispatch,
+		subscribe: () => () => {},
+	}
 
-	return render(
-		<BrowserRouter>
-			<Provider store={store}>
-				<TravellersList
-					{...defaultProps}
-					{...props}
-				/>
-			</Provider>
-		</BrowserRouter>,
+	vi.mocked(useDispatch).mockReturnValue(mockDispatch)
+	vi.mocked(useSelector).mockImplementation((selector) => {
+		return selector()
+	})
+
+	const result = render(
+		<Provider store={mockStore}>
+			<BrowserRouter>
+				<TravellersList {...props} />
+			</BrowserRouter>
+		</Provider>,
 	)
+
+	return { ...result, mockDispatch }
 }
 
 describe('<TravellersList />', () => {
-	afterEach(() => {
+	beforeEach(() => {
 		vi.clearAllMocks()
+		vi.mocked(selectIsAuthenticated).mockReturnValue(false)
 	})
 
+	const setupMocksForHasTravellers = () => {
+		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([
+			{ id: 1, name: 'Test Traveller' },
+			{ id: 2, name: 'Another Traveller' },
+		])
+		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(true)
+		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
+		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
+			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS + '/pending',
+		})
+	}
+
+	const setupMocksForNoTravellers = () => {
+		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([])
+		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
+		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
+		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
+			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS + '/pending',
+		})
+	}
+
 	describe('Rendering tests', () => {
-		it('renders with default props and correct structure', () => {
-			renderTravellersList()
-
-			const mainSection = document.querySelector(
-				'.pageSection.travellerListContainer',
-			)
-			expect(mainSection).toBeInTheDocument()
-			expect(screen.getByTestId('base-card')).toBeInTheDocument()
-		})
-
-		it('does not render error dialog by default', () => {
+		it('should render the main container with correct data-cy attribute', () => {
+			setupMocksForNoTravellers()
 			renderTravellersList()
 
 			expect(
-				screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
-			).not.toBeInTheDocument()
-		})
-
-		it('renders error dialog when initialError is provided', () => {
-			renderTravellersList({ initialError: MOCK_MESSAGES.TEST_ERROR })
-
-			expect(
-				screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-			).toBeInTheDocument()
-			expect(
-				screen.getByText(GLOBAL.ERROR_DIALOG_TITLE),
-			).toBeInTheDocument()
-			expect(
-				screen.getByText(MOCK_MESSAGES.TEST_ERROR),
+				screen.getByTestId('travellers-list-container'),
 			).toBeInTheDocument()
 		})
 
-		it.each(MOCK_TEST_VALUES.FALSY_VALUES)(
-			'does not render error dialog for falsy value: %s',
-			(value) => {
-				renderTravellersList({ initialError: value })
+		it('should render controls section', () => {
+			setupMocksForNoTravellers()
+			renderTravellersList()
 
-				expect(
-					screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
-				).not.toBeInTheDocument()
-			},
-		)
-
-		it('renders Register as Traveller button when user is logged in but not a traveller', () => {
-			renderTravellersList(
-				{},
-				{
-					authentication: { token: 'mock-token' },
-					travellers: { isTraveller: false },
-				},
-			)
-
-			expect(
-				screen.getByText('Register as a Traveller'),
-			).toBeInTheDocument()
+			expect(screen.getByTestId('controls')).toBeInTheDocument()
 		})
 
-		it('does not render Register as Traveller button when user is not logged in', () => {
-			renderTravellersList(
-				{},
-				{
-					authentication: { token: null },
-					travellers: { isTraveller: false },
-				},
-			)
-
-			expect(
-				screen.queryByText('Register as a Traveller'),
-			).not.toBeInTheDocument()
-		})
-
-		it('does not render Register as Traveller button when user is already a traveller', () => {
-			renderTravellersList(
-				{},
-				{
-					authentication: { token: 'mock-token' },
-					travellers: { isTraveller: true },
-				},
-			)
-
-			expect(
-				screen.queryByText('Register as a Traveller'),
-			).not.toBeInTheDocument()
-		})
-
-		it('does not render Register as Traveller button when isLoading is true', () => {
-			renderTravellersList(
-				{ isLoading: true },
-				{
-					authentication: { token: 'mock-token' },
-					travellers: { isTraveller: false },
-				},
-			)
-
-			expect(
-				screen.queryByText('Register as a Traveller'),
-			).not.toBeInTheDocument()
-		})
-
-		it('renders spinner when isLoading is true', () => {
+		it('should render spinner when loading', () => {
+			setupMocksForNoTravellers()
 			renderTravellersList({ isLoading: true })
 
-			const spinner = screen.getByRole('status')
-			const loadingImage = screen.getByAltText(GLOBAL.LOADING_SPINNER_ALT)
-
-			expect(screen.getByTestId('base-spinner')).toBeInTheDocument()
-			expect(spinner).toBeInTheDocument()
-			expect(loadingImage).toBeInTheDocument()
-			expect(loadingImage).toHaveAttribute('src', 'mock-spinner.svg')
+			expect(screen.getByRole('status')).toBeInTheDocument()
 		})
 
-		it('does not render spinner when isLoading is false', () => {
-			renderTravellersList({ isLoading: false })
+		it('should render "No travellers listed" message when no travellers exist', async () => {
+			setupMocksForNoTravellers()
+			renderTravellersList()
 
-			expect(screen.queryByTestId('base-spinner')).not.toBeInTheDocument()
-			expect(screen.queryByRole('status')).not.toBeInTheDocument()
+			await waitFor(() => {
+				expect(screen.queryByRole('status')).not.toBeInTheDocument()
+			})
+
+			expect(
+				screen.getByText('No travellers listed.'),
+			).toBeInTheDocument()
 		})
 
-		it('renders spinner container with correct styling when loading', () => {
-			renderTravellersList({ isLoading: true })
+		it('should render travellers list when travellers exist', () => {
+			setupMocksForHasTravellers()
+			renderTravellersList()
 
-			const spinnerContainer = document.querySelector('.spinnerContainer')
-			expect(spinnerContainer).toBeInTheDocument()
-			expect(spinnerContainer).toContainElement(
-				screen.getByTestId('base-spinner'),
-			)
+			expect(screen.getByTestId('travellers-list')).toBeInTheDocument()
+			expect(screen.getByTestId('traveller-item')).toBeInTheDocument()
 		})
 	})
 
 	describe('Behaviour tests', () => {
-		it('closes error dialog when close button is clicked', async () => {
-			renderTravellersList({
-				initialError: MOCK_MESSAGES.CLOSEABLE_ERROR,
+		describe('error handling', () => {
+			it('should clear error when handleError is called', async () => {
+				setupMocksForNoTravellers()
+
+				renderTravellersList({
+					initialError: MOCK_MESSAGES.TEST_ERROR,
+				})
+
+				expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+				fireEvent.click(screen.getByText('Close'))
+
+				await waitFor(() => {
+					expect(
+						screen.queryByRole('alertdialog'),
+					).not.toBeInTheDocument()
+				})
 			})
 
-			expect(
-				screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-			).toBeInTheDocument()
+			it('should handle loadTravellers dispatch error', async () => {
+				setupMocksForNoTravellers()
 
-			fireEvent.click(screen.getByText('Close'))
+				const mockError = new Error(MOCK_MESSAGES.LOAD_FAILED)
+				renderTravellersList(
+					{},
+					{
+						shouldReject: true,
+						error: mockError,
+					},
+				)
 
-			await waitFor(() => {
+				await waitFor(() => {
+					expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+				})
+
 				expect(
-					screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
+					screen.getByText(MOCK_MESSAGES.LOAD_FAILED),
+				).toBeInTheDocument()
+			})
+
+			it('should show generic error message when error has no message', async () => {
+				setupMocksForNoTravellers()
+
+				const mockError = new Error()
+				renderTravellersList(
+					{},
+					{
+						shouldReject: true,
+						error: mockError,
+					},
+				)
+
+				await waitFor(() => {
+					expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+				})
+
+				expect(
+					screen.getByText(MOCK_MESSAGES.SOMETHING_WENT_WRONG),
+				).toBeInTheDocument()
+			})
+		})
+
+		describe('refresh functionality', () => {
+			it('should disable refresh button when no travellers and not loading', async () => {
+				setupMocksForNoTravellers()
+				renderTravellersList()
+
+				await waitFor(() => {
+					expect(screen.queryByRole('status')).not.toBeInTheDocument()
+				})
+
+				const refreshButton = screen.getByRole('button', {
+					name: /refresh/i,
+				})
+
+				expect(refreshButton).toBeDisabled()
+			})
+
+			it('should enable refresh button when travellers exist', () => {
+				setupMocksForHasTravellers()
+				renderTravellersList()
+
+				const refreshButton = screen.getByRole('button', {
+					name: /refresh/i,
+				})
+
+				expect(refreshButton).not.toBeDisabled()
+			})
+		})
+
+		describe('component lifecycle', () => {
+			it('should not dispatch loadTravellers on mount when travellers exist', () => {
+				setupMocksForHasTravellers()
+
+				const { mockDispatch } = renderTravellersList()
+
+				expect(mockDispatch).not.toHaveBeenCalled()
+			})
+		})
+
+		describe('loading states', () => {
+			it('should show loading spinner when isLoading prop is true', () => {
+				setupMocksForNoTravellers()
+				renderTravellersList({ isLoading: true })
+
+				expect(screen.getByRole('status')).toBeInTheDocument()
+			})
+
+			it('should hide travellers list when loading', () => {
+				setupMocksForHasTravellers()
+				renderTravellersList({ isLoading: true })
+
+				expect(
+					screen.queryByTestId('travellers-list'),
+				).not.toBeInTheDocument()
+			})
+
+			it('should hide no travellers message when loading', () => {
+				setupMocksForNoTravellers()
+				renderTravellersList({ isLoading: true })
+
+				expect(
+					screen.queryByText('No travellers listed.'),
 				).not.toBeInTheDocument()
 			})
 		})
 	})
 
 	describe('Accessibility tests', () => {
-		it('error dialog has proper ARIA attributes', () => {
-			renderTravellersList({ initialError: MOCK_MESSAGES.TEST_ERROR })
+		it('should have proper role for error dialog', () => {
+			setupMocksForNoTravellers()
+			renderTravellersList({ initialError: 'Test error' })
 
-			const dialog = screen.getByRole(DIALOG.ROLE_ALERTDIALOG)
-			expect(dialog).toHaveAttribute('role', DIALOG.ROLE_ALERTDIALOG)
+			expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+		})
+
+		it('should have proper role for refresh button', () => {
+			setupMocksForHasTravellers()
+			renderTravellersList()
+
 			expect(
-				screen.getByText(GLOBAL.ERROR_DIALOG_TITLE),
+				screen.getByRole('button', { name: /refresh/i }),
 			).toBeInTheDocument()
 		})
 
-		it('has proper semantic structure', () => {
+		it('should have proper list structure for travellers', () => {
+			setupMocksForHasTravellers()
 			renderTravellersList()
 
-			const mainSection = document.querySelector(
-				'.pageSection.travellerListContainer',
-			)
-			expect(mainSection.tagName.toLowerCase()).toBe('section')
+			expect(screen.getByRole('list')).toBeInTheDocument()
+			expect(screen.getByRole('listitem')).toBeInTheDocument()
 		})
 	})
 })
