@@ -78,4 +78,8 @@ export const authenticationFormSelectors = {
 
 export const travellersListSelectors = {
 	travellersListContainer: getByDataCy('travellers-list-container'),
+	travellersList: getByDataCy('travellers-list'),
+	travellerItem: getByDataCy('traveller-item'),
+	registerButton: getByDataCy('register-link'),
+	controls: getByDataCy('controls'),
 }
