@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { Provider, useDispatch, useSelector } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -24,11 +24,17 @@ vi.mock('@/store/slices/travellersSlice', () => ({
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
 	selectIsAuthenticated: vi.fn(),
+	selectAuthenticationToken: vi.fn(),
+	selectUserId: vi.fn(),
+	selectUserName: vi.fn(),
+	selectUserEmail: vi.fn(),
+	selectUserProfile: vi.fn(),
+	selectDidAutoLogout: vi.fn(),
 }))
 
 import TravellersList from '../TravellersList'
 import * as travellersSlice from '@/store/slices/travellersSlice'
-import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
+import * as authenticationSlice from '@/store/slices/authenticationSlice'
 
 const renderTravellersList = (props = {}, options = {}) => {
 	const {
@@ -75,7 +81,15 @@ const renderTravellersList = (props = {}, options = {}) => {
 describe('<TravellersList />', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
-		vi.mocked(selectIsAuthenticated).mockReturnValue(false)
+		vi.mocked(authenticationSlice.selectIsAuthenticated).mockReturnValue(
+			false,
+		)
+		vi.mocked(
+			authenticationSlice.selectAuthenticationToken,
+		).mockReturnValue(null)
+		vi.mocked(authenticationSlice.selectUserId).mockReturnValue(null)
+		vi.mocked(authenticationSlice.selectUserName).mockReturnValue(null)
+		vi.mocked(authenticationSlice.selectUserEmail).mockReturnValue(null)
 	})
 
 	const setupMocksForHasTravellers = () => {
@@ -99,33 +113,126 @@ describe('<TravellersList />', () => {
 		})
 	}
 
-	describe('Rendering tests', () => {
-		it('should render the main container with correct data-cy attribute', () => {
+	const setupMocksForLoggedInUser = () => {
+		vi.mocked(authenticationSlice.selectIsAuthenticated).mockReturnValue(
+			true,
+		)
+		vi.mocked(
+			authenticationSlice.selectAuthenticationToken,
+		).mockReturnValue('mock-token')
+		vi.mocked(authenticationSlice.selectUserId).mockReturnValue('user123')
+		vi.mocked(authenticationSlice.selectUserName).mockReturnValue(
+			'Test User',
+		)
+		vi.mocked(authenticationSlice.selectUserEmail).mockReturnValue(
+			'test@example.com',
+		)
+	}
+
+	const setupMocksForLoadingState = () => {
+		// Return non-empty array to prevent useEffect, but keep loading true via props
+		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([
+			{ id: 'temp' },
+		])
+		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
+		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
+		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
+			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS + '/pending',
+		})
+	}
+
+	describe('Authentication-dependent rendering', () => {
+		it('should show register button when user is logged in and not a traveller', async () => {
 			setupMocksForNoTravellers()
-			renderTravellersList()
+			setupMocksForLoggedInUser()
+			vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
+
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			await waitFor(() => {
+				expect(screen.queryByRole('status')).not.toBeInTheDocument()
+			})
+
+			expect(screen.getByTestId('register-link')).toBeInTheDocument()
+			expect(
+				screen.getByText('Register as a Traveller'),
+			).toBeInTheDocument()
+		})
+
+		it('should not show register button when user is not logged in', async () => {
+			setupMocksForNoTravellers()
+			vi.mocked(
+				authenticationSlice.selectIsAuthenticated,
+			).mockReturnValue(false)
+
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			await waitFor(() => {
+				expect(screen.queryByRole('status')).not.toBeInTheDocument()
+			})
+
+			expect(
+				screen.queryByTestId('register-link'),
+			).not.toBeInTheDocument()
+		})
+
+		it('should not show register button when user is logged in and is a traveller', async () => {
+			setupMocksForHasTravellers()
+			setupMocksForLoggedInUser()
+			vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(true)
+
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			expect(
+				screen.queryByTestId('register-link'),
+			).not.toBeInTheDocument()
+		})
+	})
+
+	describe('Rendering tests', () => {
+		it('should render the main container with correct data-cy attribute', async () => {
+			setupMocksForNoTravellers()
+
+			await act(async () => {
+				renderTravellersList()
+			})
 
 			expect(
 				screen.getByTestId('travellers-list-container'),
 			).toBeInTheDocument()
 		})
 
-		it('should render controls section', () => {
+		it('should render controls section', async () => {
 			setupMocksForNoTravellers()
-			renderTravellersList()
 
+			await act(async () => {
+				renderTravellersList()
+			})
 			expect(screen.getByTestId('controls')).toBeInTheDocument()
 		})
 
-		it('should render spinner when loading', () => {
-			setupMocksForNoTravellers()
-			renderTravellersList({ isLoading: true })
+		it('should render spinner when loading', async () => {
+			setupMocksForLoadingState()
+
+			await act(async () => {
+				renderTravellersList({ isLoading: true })
+			})
 
 			expect(screen.getByRole('status')).toBeInTheDocument()
 		})
 
 		it('should render "No travellers listed" message when no travellers exist', async () => {
 			setupMocksForNoTravellers()
-			renderTravellersList()
+
+			await act(async () => {
+				renderTravellersList()
+			})
 
 			await waitFor(() => {
 				expect(screen.queryByRole('status')).not.toBeInTheDocument()
@@ -136,9 +243,12 @@ describe('<TravellersList />', () => {
 			).toBeInTheDocument()
 		})
 
-		it('should render travellers list when travellers exist', () => {
+		it('should render travellers list when travellers exist', async () => {
 			setupMocksForHasTravellers()
-			renderTravellersList()
+
+			await act(async () => {
+				renderTravellersList()
+			})
 
 			expect(screen.getByTestId('travellers-list')).toBeInTheDocument()
 			expect(screen.getByTestId('traveller-item')).toBeInTheDocument()

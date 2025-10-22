@@ -1,13 +1,9 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 
 import { AUTHENTICATION_ACTION_TYPES } from '@/constants/action-types'
 import { API_DATABASE } from '@/constants/api'
 
 let timer
-
-export const selectAuthenticationToken = (state) => state.authentication.token
-
-export const selectIsAuthenticated = (state) => !!state.authentication.token
 
 export const login = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.LOGIN,
@@ -160,6 +156,48 @@ const authSlice = createSlice({
 			})
 	},
 })
+
+export const selectAuthenticationState = (state) => state.authentication
+
+// Memoized selectors using createSelector
+export const selectAuthenticationToken = createSelector(
+	[selectAuthenticationState],
+	(authState) => authState.token,
+)
+
+export const selectIsAuthenticated = createSelector(
+	[selectAuthenticationToken],
+	(token) => !!token,
+)
+
+export const selectUserId = createSelector(
+	[selectAuthenticationState],
+	(authState) => authState.userId,
+)
+
+export const selectUserName = createSelector(
+	[selectAuthenticationState],
+	(authState) => authState.userName,
+)
+
+export const selectUserEmail = createSelector(
+	[selectAuthenticationState],
+	(authState) => authState.userEmail,
+)
+
+export const selectDidAutoLogout = createSelector(
+	[selectAuthenticationState],
+	(authState) => authState.didAutoLogout,
+)
+
+export const selectUserProfile = createSelector(
+	[selectUserId, selectUserName, selectUserEmail],
+	(userId, userName, userEmail) => ({
+		userId,
+		userName,
+		userEmail,
+	}),
+)
 
 export const authActions = authSlice.actions
 export default authSlice.reducer
