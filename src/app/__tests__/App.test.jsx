@@ -35,7 +35,9 @@ vi.mock('@/constants/paths', () => ({
 }))
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
-	tryLogin: () => ({ type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN }),
+	tryLogin: () => ({
+		type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN_ASYNC.PENDING,
+	}),
 }))
 
 vi.mock('@/components/common/LoadingFallback', () => ({

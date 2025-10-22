@@ -124,6 +124,8 @@ const authSlice = createSlice({
 		userName: null,
 		userEmail: null,
 		didAutoLogout: false,
+		status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+		error: null,
 	},
 	reducers: {
 		clearUser(state) {
@@ -132,6 +134,8 @@ const authSlice = createSlice({
 			state.userName = null
 			state.userEmail = null
 			state.didAutoLogout = false
+			state.status = 'idle'
+			state.error = null
 		},
 		setAutoLogout(state, action) {
 			state.didAutoLogout = action.payload ?? true
@@ -139,20 +143,67 @@ const authSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
+			// LOGIN async thunk handlers
+			.addCase(login.pending, (state) => {
+				state.status = 'loading'
+				state.error = null
+			})
 			.addCase(login.fulfilled, (state, action) => {
+				state.status = 'succeeded'
 				state.token = action.payload.token
 				state.userId = action.payload.userId
 				state.userName = action.payload.userName
 				state.userEmail = action.payload.userEmail
 				state.didAutoLogout = false
+				state.error = null
+			})
+			.addCase(login.rejected, (state, action) => {
+				state.status = 'failed'
+				state.error = action.payload
+			})
+
+			// TRY_LOGIN async thunk handlers
+			.addCase(tryLogin.pending, (state) => {
+				state.status = 'loading'
 			})
 			.addCase(tryLogin.fulfilled, (state, action) => {
+				state.status = 'succeeded'
 				if (action.payload) {
 					state.token = action.payload.token
 					state.userId = action.payload.userId
 					state.userName = action.payload.userName
 					state.userEmail = action.payload.userEmail
 				}
+			})
+			.addCase(tryLogin.rejected, (state, action) => {
+				state.status = 'failed'
+				state.error = action.payload
+			})
+
+			// LOGOUT async thunk handlers
+			.addCase(logout.pending, (state) => {
+				state.status = 'loading'
+			})
+			.addCase(logout.fulfilled, (state) => {
+				state.status = 'succeeded'
+				// User data is cleared by the clearUser action called within logout thunk
+			})
+			.addCase(logout.rejected, (state, action) => {
+				state.status = 'failed'
+				state.error = action.payload
+			})
+
+			// AUTO_LOGOUT async thunk handlers
+			.addCase(autoLogout.pending, (state) => {
+				state.status = 'loading'
+			})
+			.addCase(autoLogout.fulfilled, (state) => {
+				state.status = 'succeeded'
+				// User data is cleared by actions called within autoLogout thunk
+			})
+			.addCase(autoLogout.rejected, (state, action) => {
+				state.status = 'failed'
+				state.error = action.payload
 			})
 	},
 })
@@ -197,6 +248,21 @@ export const selectUserProfile = createSelector(
 		userName,
 		userEmail,
 	}),
+)
+
+export const selectAuthenticationStatus = createSelector(
+	[selectAuthenticationState],
+	(authState) => authState.status,
+)
+
+export const selectAuthenticationError = createSelector(
+	[selectAuthenticationState],
+	(authState) => authState.error,
+)
+
+export const selectIsAuthLoading = createSelector(
+	[selectAuthenticationStatus],
+	(status) => status === 'loading',
 )
 
 export const authActions = authSlice.actions

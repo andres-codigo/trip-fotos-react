@@ -57,6 +57,8 @@ describe('authenticationSlice', () => {
 					userName: 'Test User',
 					userEmail: MOCK_KEYS.EMAIL,
 					didAutoLogout: false,
+					status: 'succeeded',
+					error: null,
 				},
 			}
 
@@ -72,6 +74,8 @@ describe('authenticationSlice', () => {
 					userName: null,
 					userEmail: null,
 					didAutoLogout: false,
+					status: 'idle',
+					error: null,
 				},
 			}
 
@@ -88,6 +92,8 @@ describe('authenticationSlice', () => {
 				userName: null,
 				userEmail: null,
 				didAutoLogout: false,
+				status: 'idle',
+				error: null,
 			}
 
 			const state = authenticationReducer(undefined, { type: undefined })
@@ -101,6 +107,8 @@ describe('authenticationSlice', () => {
 				userName: MOCK_USER.USER_NAME,
 				userEmail: MOCK_USER.USER_EMAIL,
 				didAutoLogout: false,
+				status: 'succeeded',
+				error: 'some error',
 			}
 
 			const state = authenticationReducer(
@@ -113,6 +121,8 @@ describe('authenticationSlice', () => {
 				userName: null,
 				userEmail: null,
 				didAutoLogout: false,
+				status: 'idle',
+				error: null,
 			})
 		})
 
@@ -123,6 +133,8 @@ describe('authenticationSlice', () => {
 				userName: MOCK_USER.USER_NAME,
 				userEmail: MOCK_USER.USER_EMAIL,
 				didAutoLogout: false,
+				status: 'succeeded',
+				error: null,
 			}
 
 			const state = authenticationReducer(
@@ -135,6 +147,8 @@ describe('authenticationSlice', () => {
 				userName: MOCK_USER.USER_NAME,
 				userEmail: MOCK_USER.USER_EMAIL,
 				didAutoLogout: true,
+				status: 'succeeded',
+				error: null,
 			})
 		})
 	})

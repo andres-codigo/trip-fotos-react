@@ -107,7 +107,7 @@ describe('<TravellersList />', () => {
 		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(true)
 		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
 		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
-			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS + '/pending',
+			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,
 		})
 	}
 
@@ -116,7 +116,7 @@ describe('<TravellersList />', () => {
 		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
 		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
 		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
-			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS + '/pending',
+			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,
 		})
 	}
 
@@ -146,7 +146,7 @@ describe('<TravellersList />', () => {
 		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
 		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
 		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
-			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS + '/pending',
+			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,
 		})
 	}
 
