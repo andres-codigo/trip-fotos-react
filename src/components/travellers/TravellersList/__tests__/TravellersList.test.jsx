@@ -141,60 +141,6 @@ describe('<TravellersList />', () => {
 		})
 	}
 
-	describe('Authentication-dependent rendering', () => {
-		it('should show register button when user is logged in and not a traveller', async () => {
-			setupMocksForNoTravellers()
-			setupMocksForLoggedInUser()
-			vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
-
-			await act(async () => {
-				renderTravellersList()
-			})
-
-			await waitFor(() => {
-				expect(screen.queryByRole('status')).not.toBeInTheDocument()
-			})
-
-			expect(screen.getByTestId('register-link')).toBeInTheDocument()
-			expect(
-				screen.getByText('Register as a Traveller'),
-			).toBeInTheDocument()
-		})
-
-		it('should not show register button when user is not logged in', async () => {
-			setupMocksForNoTravellers()
-			vi.mocked(
-				authenticationSlice.selectIsAuthenticated,
-			).mockReturnValue(false)
-
-			await act(async () => {
-				renderTravellersList()
-			})
-
-			await waitFor(() => {
-				expect(screen.queryByRole('status')).not.toBeInTheDocument()
-			})
-
-			expect(
-				screen.queryByTestId('register-link'),
-			).not.toBeInTheDocument()
-		})
-
-		it('should not show register button when user is logged in and is a traveller', async () => {
-			setupMocksForHasTravellers()
-			setupMocksForLoggedInUser()
-			vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(true)
-
-			await act(async () => {
-				renderTravellersList()
-			})
-
-			expect(
-				screen.queryByTestId('register-link'),
-			).not.toBeInTheDocument()
-		})
-	})
-
 	describe('Rendering tests', () => {
 		it('should render the main container with correct data-cy attribute', async () => {
 			setupMocksForNoTravellers()
@@ -256,6 +202,64 @@ describe('<TravellersList />', () => {
 	})
 
 	describe('Behaviour tests', () => {
+		describe('authentication-dependent rendering', () => {
+			it('should show register button when user is logged in and not a traveller', async () => {
+				setupMocksForNoTravellers()
+				setupMocksForLoggedInUser()
+				vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(
+					false,
+				)
+
+				await act(async () => {
+					renderTravellersList()
+				})
+
+				await waitFor(() => {
+					expect(screen.queryByRole('status')).not.toBeInTheDocument()
+				})
+
+				expect(screen.getByTestId('register-link')).toBeInTheDocument()
+				expect(
+					screen.getByText('Register as a Traveller'),
+				).toBeInTheDocument()
+			})
+
+			it('should not show register button when user is not logged in', async () => {
+				setupMocksForNoTravellers()
+				vi.mocked(
+					authenticationSlice.selectIsAuthenticated,
+				).mockReturnValue(false)
+
+				await act(async () => {
+					renderTravellersList()
+				})
+
+				await waitFor(() => {
+					expect(screen.queryByRole('status')).not.toBeInTheDocument()
+				})
+
+				expect(
+					screen.queryByTestId('register-link'),
+				).not.toBeInTheDocument()
+			})
+
+			it('should not show register button when user is logged in and is a traveller', async () => {
+				setupMocksForHasTravellers()
+				setupMocksForLoggedInUser()
+				vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(
+					true,
+				)
+
+				await act(async () => {
+					renderTravellersList()
+				})
+
+				expect(
+					screen.queryByTestId('register-link'),
+				).not.toBeInTheDocument()
+			})
+		})
+
 		describe('error handling', () => {
 			it('should clear error when handleError is called', async () => {
 				setupMocksForNoTravellers()
