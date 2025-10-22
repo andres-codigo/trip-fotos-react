@@ -8,7 +8,7 @@ import {
 	MOCK_MESSAGES,
 	MOCK_TRAVELLERS,
 	MOCK_USER,
-} from '@/constants/mock-data'
+} from '@/constants/test/mock-data'
 import { DIALOG } from '@/constants/test/dialog'
 import { TEST_IDS } from '@/constants/test/selectors'
 import { SPINNER } from '@/constants/test/spinner'

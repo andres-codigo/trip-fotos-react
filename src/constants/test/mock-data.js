@@ -1,4 +1,4 @@
-import { API_DATABASE } from './api'
+import { API_DATABASE } from '../api'
 
 export const MOCK_API = Object.freeze({
 	URL: 'https://mock-api-url.com/',

@@ -144,7 +144,7 @@ const UserAuth = () => {
 					show={true}
 					title="Authenticating"
 					fixed
-					data-cy="loading-dialog">
+					data-cy="authenticating-dialog">
 					Authenticating your details, one moment please...
 					<BaseSpinner />
 				</BaseDialog>

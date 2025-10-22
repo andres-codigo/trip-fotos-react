@@ -6,7 +6,7 @@ import {
 	MOCK_USER,
 	MOCK_STORAGE_KEYS,
 	MOCK_MESSAGES,
-} from '@/constants/mock-data'
+} from '@/constants/test/mock-data'
 
 import travellersReducer, {
 	travellerName,

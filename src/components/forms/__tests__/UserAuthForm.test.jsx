@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { BrowserRouter } from 'react-router-dom'
 
 import { API_DATABASE } from '@/constants/api'
-import { MOCK_KEYS } from '@/constants/mock-data'
+import { MOCK_KEYS } from '@/constants/test/mock-data'
 
 /**
  * UserAuthForm Unit Tests
