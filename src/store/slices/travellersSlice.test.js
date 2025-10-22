@@ -57,6 +57,9 @@ describe('travellersSlice', () => {
 				expect(initialState).toEqual({
 					travellerName: '',
 					isTraveller: false,
+					hasTravellers: false,
+					travellers: [],
+					lastFetch: null,
 					status: 'idle',
 					error: null,
 				})
