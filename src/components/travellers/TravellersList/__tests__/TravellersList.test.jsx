@@ -9,7 +9,9 @@ import {
 	MOCK_TRAVELLERS,
 	MOCK_USER,
 } from '@/constants/mock-data'
+import { DIALOG } from '@/constants/test/dialog'
 import { TEST_IDS } from '@/constants/test/selectors'
+import { SPINNER } from '@/constants/test/spinner'
 import { UI_TEXT } from '@/constants/test/ui-text'
 
 vi.mock('react-redux', async () => {
@@ -228,7 +230,9 @@ describe('<TravellersList />', () => {
 				})
 
 				await waitFor(() => {
-					expect(screen.queryByRole('status')).not.toBeInTheDocument()
+					expect(
+						screen.queryByRole(SPINNER.ROLE_STATUS),
+					).not.toBeInTheDocument()
 				})
 
 				expect(
@@ -250,7 +254,9 @@ describe('<TravellersList />', () => {
 				})
 
 				await waitFor(() => {
-					expect(screen.queryByRole('status')).not.toBeInTheDocument()
+					expect(
+						screen.queryByRole(SPINNER.ROLE_STATUS),
+					).not.toBeInTheDocument()
 				})
 
 				expect(
@@ -287,12 +293,14 @@ describe('<TravellersList />', () => {
 					initialError: MOCK_MESSAGES.TEST_ERROR,
 				})
 
-				expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+				expect(
+					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+				).toBeInTheDocument()
 				fireEvent.click(screen.getByText(UI_TEXT.BUTTONS.CLOSE))
 
 				await waitFor(() => {
 					expect(
-						screen.queryByRole('alertdialog'),
+						screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
 					).not.toBeInTheDocument()
 				})
 			})
@@ -310,7 +318,9 @@ describe('<TravellersList />', () => {
 				)
 
 				await waitFor(() => {
-					expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+					expect(
+						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+					).toBeInTheDocument()
 				})
 
 				expect(
@@ -331,7 +341,9 @@ describe('<TravellersList />', () => {
 				)
 
 				await waitFor(() => {
-					expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+					expect(
+						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+					).toBeInTheDocument()
 				})
 
 				expect(
@@ -346,7 +358,9 @@ describe('<TravellersList />', () => {
 				renderTravellersList()
 
 				await waitFor(() => {
-					expect(screen.queryByRole('status')).not.toBeInTheDocument()
+					expect(
+						screen.queryByRole(SPINNER.ROLE_STATUS),
+					).not.toBeInTheDocument()
 				})
 
 				const refreshButton = screen.getByRole('button', {
@@ -383,7 +397,9 @@ describe('<TravellersList />', () => {
 				setupMocksForNoTravellers()
 				renderTravellersList({ isLoading: true })
 
-				expect(screen.getByRole('status')).toBeInTheDocument()
+				expect(
+					screen.getByRole(SPINNER.ROLE_STATUS),
+				).toBeInTheDocument()
 			})
 
 			it('should hide travellers list when loading', () => {
@@ -413,7 +429,9 @@ describe('<TravellersList />', () => {
 			setupMocksForNoTravellers()
 			renderTravellersList({ initialError: MOCK_MESSAGES.TEST_ERROR })
 
-			expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+			expect(
+				screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+			).toBeInTheDocument()
 		})
 
 		it('should have proper role for refresh button', () => {
