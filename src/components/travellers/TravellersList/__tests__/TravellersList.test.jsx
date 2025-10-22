@@ -4,7 +4,13 @@ import { BrowserRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/action-types'
-import { MOCK_MESSAGES } from '@/constants/mock-data'
+import {
+	MOCK_MESSAGES,
+	MOCK_TRAVELLERS,
+	MOCK_USER,
+} from '@/constants/mock-data'
+import { TEST_IDS } from '@/constants/test/selectors'
+import { UI_TEXT } from '@/constants/test/ui-text'
 
 vi.mock('react-redux', async () => {
 	const actual = await vi.importActual('react-redux')
@@ -93,10 +99,9 @@ describe('<TravellersList />', () => {
 	})
 
 	const setupMocksForHasTravellers = () => {
-		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([
-			{ id: 1, name: 'Test Traveller' },
-			{ id: 2, name: 'Another Traveller' },
-		])
+		vi.mocked(travellersSlice.selectTravellers).mockReturnValue(
+			MOCK_TRAVELLERS.SAMPLE_TRAVELLERS,
+		)
 		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(true)
 		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
 		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
@@ -119,13 +124,15 @@ describe('<TravellersList />', () => {
 		)
 		vi.mocked(
 			authenticationSlice.selectAuthenticationToken,
-		).mockReturnValue('mock-token')
-		vi.mocked(authenticationSlice.selectUserId).mockReturnValue('user123')
+		).mockReturnValue(MOCK_USER.TOKEN)
+		vi.mocked(authenticationSlice.selectUserId).mockReturnValue(
+			MOCK_USER.ID,
+		)
 		vi.mocked(authenticationSlice.selectUserName).mockReturnValue(
-			'Test User',
+			MOCK_USER.NAME,
 		)
 		vi.mocked(authenticationSlice.selectUserEmail).mockReturnValue(
-			'test@example.com',
+			MOCK_USER.EMAIL,
 		)
 	}
 
@@ -150,7 +157,7 @@ describe('<TravellersList />', () => {
 			})
 
 			expect(
-				screen.getByTestId('travellers-list-container'),
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.CONTAINER),
 			).toBeInTheDocument()
 		})
 
@@ -160,7 +167,9 @@ describe('<TravellersList />', () => {
 			await act(async () => {
 				renderTravellersList()
 			})
-			expect(screen.getByTestId('controls')).toBeInTheDocument()
+			expect(
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.CONTROLS),
+			).toBeInTheDocument()
 		})
 
 		it('should render spinner when loading', async () => {
@@ -196,8 +205,12 @@ describe('<TravellersList />', () => {
 				renderTravellersList()
 			})
 
-			expect(screen.getByTestId('travellers-list')).toBeInTheDocument()
-			expect(screen.getByTestId('traveller-item')).toBeInTheDocument()
+			expect(
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
+			).toBeInTheDocument()
+			expect(
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
+			).toBeInTheDocument()
 		})
 	})
 
@@ -218,9 +231,11 @@ describe('<TravellersList />', () => {
 					expect(screen.queryByRole('status')).not.toBeInTheDocument()
 				})
 
-				expect(screen.getByTestId('register-link')).toBeInTheDocument()
 				expect(
-					screen.getByText('Register as a Traveller'),
+					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK),
+				).toBeInTheDocument()
+				expect(
+					screen.getByText(UI_TEXT.TRAVELLERS.REGISTER_AS_TRAVELLER),
 				).toBeInTheDocument()
 			})
 
@@ -239,7 +254,9 @@ describe('<TravellersList />', () => {
 				})
 
 				expect(
-					screen.queryByTestId('register-link'),
+					screen.queryByTestId(
+						TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK,
+					),
 				).not.toBeInTheDocument()
 			})
 
@@ -255,7 +272,9 @@ describe('<TravellersList />', () => {
 				})
 
 				expect(
-					screen.queryByTestId('register-link'),
+					screen.queryByTestId(
+						TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK,
+					),
 				).not.toBeInTheDocument()
 			})
 		})
@@ -269,7 +288,7 @@ describe('<TravellersList />', () => {
 				})
 
 				expect(screen.getByRole('alertdialog')).toBeInTheDocument()
-				fireEvent.click(screen.getByText('Close'))
+				fireEvent.click(screen.getByText(UI_TEXT.BUTTONS.CLOSE))
 
 				await waitFor(() => {
 					expect(
@@ -372,7 +391,7 @@ describe('<TravellersList />', () => {
 				renderTravellersList({ isLoading: true })
 
 				expect(
-					screen.queryByTestId('travellers-list'),
+					screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 				).not.toBeInTheDocument()
 			})
 
@@ -381,7 +400,9 @@ describe('<TravellersList />', () => {
 				renderTravellersList({ isLoading: true })
 
 				expect(
-					screen.queryByText('No travellers listed.'),
+					screen.queryByText(
+						UI_TEXT.TRAVELLERS.NO_TRAVELLERS_MESSAGE,
+					),
 				).not.toBeInTheDocument()
 			})
 		})
@@ -390,7 +411,7 @@ describe('<TravellersList />', () => {
 	describe('Accessibility tests', () => {
 		it('should have proper role for error dialog', () => {
 			setupMocksForNoTravellers()
-			renderTravellersList({ initialError: 'Test error' })
+			renderTravellersList({ initialError: MOCK_MESSAGES.TEST_ERROR })
 
 			expect(screen.getByRole('alertdialog')).toBeInTheDocument()
 		})

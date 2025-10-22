@@ -72,3 +72,11 @@ export const MOCK_TEST_VALUES = Object.freeze({
 	FALSY_VALUES: [null, undefined, '', false, 0],
 	TRUTHY_VALUES: ['text', 1, true, {}, []],
 })
+
+export const MOCK_TRAVELLERS = {
+	SAMPLE_TRAVELLERS: [
+		{ id: 1, name: 'Test Traveller' },
+		{ id: 2, name: 'Another Traveller' },
+	],
+	TEMP_TRAVELLER: { id: 'temp' },
+}
