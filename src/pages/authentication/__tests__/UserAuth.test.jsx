@@ -9,17 +9,19 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 
-import { DIALOG } from '@/constants/test/dialog'
+import { DIALOG } from '@/constants/test'
 import { FIREBASE_ERROR_TYPES } from '@/constants/firebase-error-types'
+
 import {
 	MOCK_KEYS,
 	MOCK_LOGIN_PAYLOAD,
 	MOCK_SIGNUP_ACTION,
 	MOCK_INVALID_LOGIN_ERROR,
 	MOCK_MESSAGES,
-} from '@/constants/test/mock-data'
+	TEST_IDS,
+} from '@/constants/test'
+
 import { PATHS } from '@/constants/paths'
-import { TEST_IDS } from '@/constants/test/selectors'
 import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
 
 import { validateEmail, validatePassword } from '@/utils/validation'

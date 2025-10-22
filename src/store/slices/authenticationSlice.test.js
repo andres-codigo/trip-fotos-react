@@ -8,7 +8,7 @@ import {
 	MOCK_STORAGE_KEYS,
 	MOCK_KEYS,
 	MOCK_MESSAGES,
-} from '@/constants/test/mock-data'
+} from '@/constants/test'
 
 import authenticationReducer, {
 	login,

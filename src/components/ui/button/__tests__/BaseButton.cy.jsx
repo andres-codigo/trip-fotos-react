@@ -1,6 +1,6 @@
 import { MemoryRouter } from 'react-router-dom'
 
-import { BUTTON } from '@/constants/test/button'
+import { BUTTON } from '@/constants/test'
 
 import { getByDataCy } from '@/testUtils/cypress/selectors'
 

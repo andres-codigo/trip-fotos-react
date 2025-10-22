@@ -9,7 +9,7 @@ import {
 	MOCK_TRAVELLERS,
 	MOCK_TIME,
 	MOCK_API_RESPONSES,
-} from '@/constants/test/mock-data'
+} from '@/constants/test'
 
 import travellersReducer, {
 	travellerName,

@@ -8,11 +8,11 @@ import {
 	MOCK_MESSAGES,
 	MOCK_TRAVELLERS,
 	MOCK_USER,
-} from '@/constants/test/mock-data'
-import { DIALOG } from '@/constants/test/dialog'
-import { TEST_IDS } from '@/constants/test/selectors'
-import { SPINNER } from '@/constants/test/spinner'
-import { UI_TEXT } from '@/constants/test/ui-text'
+	DIALOG,
+	TEST_IDS,
+	SPINNER,
+	UI_TEXT,
+} from '@/constants/test'
 
 vi.mock('react-redux', async () => {
 	const actual = await vi.importActual('react-redux')

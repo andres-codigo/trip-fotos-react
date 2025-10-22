@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 
 import { CSSTransition } from 'react-transition-group'
 
-import { DIALOG } from '@/constants/test/dialog'
+import { DIALOG } from '@/constants/test'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 

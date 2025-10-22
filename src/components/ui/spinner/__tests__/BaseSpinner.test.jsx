@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, afterEach, vi } from 'vitest'
 
 import { GLOBAL } from '@/constants/global'
-import { SPINNER } from '@/constants/test/spinner'
+import { SPINNER } from '@/constants/test'
 
 import BaseSpinner from '../BaseSpinner'
 
