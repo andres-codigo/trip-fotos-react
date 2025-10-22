@@ -1,11 +1,5 @@
 import { API_DATABASE } from '../api'
 
-export const MOCK_API = Object.freeze({
-	URL: 'https://mock-api-url.com/',
-	KEY: 'mock-api-key',
-	METHOD: 'POST',
-})
-
 export const MOCK_USER = Object.freeze({
 	TOKEN: 'mock-token',
 	USER_ID: 'mock-user-id',
@@ -15,6 +9,43 @@ export const MOCK_USER = Object.freeze({
 	LAST_NAME: 'Doe',
 	FULL_NAME: 'John Doe',
 })
+
+export const MOCK_API = Object.freeze({
+	URL: 'https://mock-api-url.com/',
+	KEY: 'mock-api-key',
+	METHOD_POST: 'POST',
+})
+
+export const MOCK_API_RESPONSES = {
+	DISPLAY_NAME_SUCCESS: { displayName: MOCK_USER.FULL_NAME },
+	GENERIC_ERROR: { error: 'Error' },
+	TRAVELLERS_RESPONSE: {
+		user1: {
+			firstName: 'John',
+			lastName: 'Doe',
+			description: 'Test description',
+			daysInCity: 5,
+			areas: ['Area1'],
+			files: [],
+			registered: '2023-01-01',
+		},
+	},
+}
+
+export const MOCK_STATUS = {
+	IDLE: 'idle',
+	LOADING: 'loading',
+	SUCCEEDED: 'succeeded',
+	FAILED: 'failed',
+}
+
+export const MOCK_STATE_VALUES = {
+	EMPTY_STRING: '',
+	NULL: null,
+	TRUE: true,
+	FALSE: false,
+	EMPTY_ARRAY: [],
+}
 
 export const MOCK_STORAGE_KEYS = Object.freeze({
 	TOKEN: 'token',
@@ -74,9 +105,29 @@ export const MOCK_TEST_VALUES = Object.freeze({
 })
 
 export const MOCK_TRAVELLERS = {
+	SAMPLE_TRAVELLER: {
+		id: 'user1',
+		firstName: 'John',
+		lastName: 'Doe',
+		description: 'Test description',
+		daysInCity: 5,
+		areas: ['Area1'],
+		files: [],
+		registered: '2023-01-01',
+	},
 	SAMPLE_TRAVELLERS: [
 		{ id: 1, name: 'Test Traveller' },
 		{ id: 2, name: 'Another Traveller' },
 	],
+	TEST_TRAVELLER: {
+		id: '1',
+		name: 'Test Traveller',
+	},
 	TEMP_TRAVELLER: { id: 'temp' },
+	TEST_NAME: 'Test Name',
+}
+
+export const MOCK_TIME = {
+	SEVENTY_SECONDS_AGO: 70000,
+	THIRTY_SECONDS_AGO: 30000,
 }
