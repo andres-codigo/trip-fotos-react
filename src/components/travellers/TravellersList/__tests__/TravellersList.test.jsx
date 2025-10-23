@@ -3,7 +3,7 @@ import { Provider, useDispatch, useSelector } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-import { TRAVELLERS_ACTION_TYPES } from '@/constants/action-types'
+import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import {
 	MOCK_TRAVELLERS,
 	MOCK_USER,

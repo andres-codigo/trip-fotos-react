@@ -4,7 +4,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import * as redux from 'react-redux'
 import * as router from 'react-router-dom'
 
-import { AUTHENTICATION_ACTION_TYPES } from '@/constants/action-types'
+import { AUTHENTICATION_ACTION_TYPES } from '@/constants/redux'
 import { PATHS } from '@/constants/paths'
 
 import App from '../App'
