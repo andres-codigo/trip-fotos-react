@@ -30,6 +30,9 @@ vi.mock('@/constants/api', () => ({
 		AUTH_LOGIN_MODE: 'login',
 		AUTH_SIGNUP_MODE: 'signup',
 	},
+	COMMON_HEADERS: {
+		'Content-Type': 'application/json',
+	},
 }))
 
 let store

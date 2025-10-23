@@ -1,10 +1,12 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
-import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
-import { ERROR_MESSAGES } from '@/constants/errors'
-import { ERROR_TYPES } from '@/constants/errors'
-import { COMMON_HEADERS } from '@/constants/api'
+import {
+	API_DATABASE,
+	API_ERROR_MESSAGE,
+	COMMON_HEADERS,
+} from '@/constants/api'
+import { ERROR_MESSAGES, ERROR_TYPES } from '@/constants/errors'
 
 import { selectAuthenticationToken } from './authenticationSlice'
 

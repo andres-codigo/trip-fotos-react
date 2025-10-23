@@ -1,9 +1,8 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 
 import { AUTHENTICATION_ACTION_TYPES } from '@/constants/redux'
-import { API_DATABASE } from '@/constants/api'
+import { API_DATABASE, COMMON_HEADERS } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
-import { COMMON_HEADERS } from '@/constants/api'
 
 let timer
 
