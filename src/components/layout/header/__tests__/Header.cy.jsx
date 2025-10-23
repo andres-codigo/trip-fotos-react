@@ -1,7 +1,7 @@
 import { headerSelectors } from '../../../../../cypress/support/constants/selectors'
 import { urls } from '../../../../../cypress/support/constants/urls'
 
-import { PATHS } from '@/constants/paths'
+import { PATHS } from '@/constants/ui'
 
 import { headerAssertions } from './test-utilities/headerTestHelpers'
 

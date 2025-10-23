@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import { API_DATABASE } from '@/constants/api'
-import { ACCESSIBILITY } from '@/constants/accessibility'
+import { ACCESSIBILITY } from '@/constants/ui'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'

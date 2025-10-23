@@ -3,8 +3,8 @@ import { useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { API_DATABASE } from '@/constants/api'
-import { GLOBAL } from '@/constants/global'
-import { PATHS } from '@/constants/paths'
+import { GLOBAL } from '@/constants/ui'
+import { PATHS } from '@/constants/ui'
 
 import { login } from '@/store/slices/authenticationSlice'
 

@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 
-import { PATHS } from '@/constants/paths'
+import { PATHS } from '@/constants/ui'
 
 const MainNav = lazy(() => import('../main-nav/MainNav'))
 

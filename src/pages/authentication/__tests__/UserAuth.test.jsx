@@ -21,7 +21,7 @@ import {
 	TEST_IDS,
 } from '@/constants/test'
 
-import { PATHS } from '@/constants/paths'
+import { PATHS } from '@/constants/ui'
 import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
 
 import { validateEmail, validatePassword } from '@/utils/validation'

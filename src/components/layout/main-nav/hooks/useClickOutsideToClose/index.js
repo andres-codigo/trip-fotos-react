@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-import { GLOBAL } from '@/constants/global'
+import { GLOBAL } from '@/constants/ui'
 
 export function useClickOutsideToClose(
 	isMenuOpen,

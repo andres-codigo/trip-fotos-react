@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { GLOBAL } from '@/constants/global.js'
+import { GLOBAL } from '@/constants/ui'
 
 /**
  * Custom hook to detect viewport size with debouncing to prevent layout thrashing
