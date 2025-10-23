@@ -1,4 +1,4 @@
-import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 export const validateEmail = (value) => {
 	const isValid =

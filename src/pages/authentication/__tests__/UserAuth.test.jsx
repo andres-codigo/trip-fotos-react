@@ -22,7 +22,7 @@ import {
 } from '@/constants/test'
 
 import { PATHS } from '@/constants/ui'
-import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import { validateEmail, validatePassword } from '@/utils/validation'
 
