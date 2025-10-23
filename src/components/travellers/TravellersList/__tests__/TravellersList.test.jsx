@@ -5,7 +5,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/action-types'
 import {
-	MOCK_MESSAGES,
 	MOCK_TRAVELLERS,
 	MOCK_USER,
 	DIALOG,

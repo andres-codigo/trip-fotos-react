@@ -5,7 +5,6 @@ import { API_DATABASE } from '@/constants/api'
 import {
 	MOCK_API,
 	MOCK_KEYS,
-	MOCK_MESSAGES,
 	MOCK_STORAGE_KEYS,
 	MOCK_USER,
 } from '@/constants/test'
