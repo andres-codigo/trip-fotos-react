@@ -16,10 +16,13 @@ export const ERROR_MESSAGES = Object.freeze({
 	UNEXPECTED_ERROR:
 		'An unexpected error occurred while loading travellers. Please try again.',
 	REFRESH_ERROR: 'Failed to load travellers. Please try refreshing the page.',
+	SOMETHING_WENT_WRONG: 'Something went wrong!',
+	NETWORK_ERROR: 'Network Error',
 
 	// Authentication errors
 	LOGIN_FAILED: 'Login failed. Please check your credentials and try again.',
 	LOGIN_FAILED_FALLBACK: 'Login failed.',
+	INVALID_PASSWORD: 'INVALID_PASSWORD',
 
 	// Default fallback
 	UNKNOWN_ERROR: 'An unknown error occurred.',
