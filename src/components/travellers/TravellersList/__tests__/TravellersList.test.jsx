@@ -13,7 +13,7 @@ import {
 	UI_TEXT,
 } from '@/constants/test'
 
-import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { ERROR_MESSAGES } from '@/constants/errors'
 
 vi.mock('react-redux', async () => {
 	const actual = await vi.importActual('react-redux')

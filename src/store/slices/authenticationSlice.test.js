@@ -9,7 +9,7 @@ import {
 	MOCK_USER,
 } from '@/constants/test'
 
-import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { ERROR_MESSAGES } from '@/constants/errors'
 
 import authenticationReducer, {
 	login,

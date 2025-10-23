@@ -8,7 +8,7 @@ import {
 	MOCK_API_RESPONSES,
 } from '@/constants/test'
 
-import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { ERROR_MESSAGES } from '@/constants/errors'
 
 import travellersReducer, {
 	travellerName,

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import PropTypes from 'prop-types'
 
 import { GLOBAL } from '@/constants/global'
-import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { ERROR_MESSAGES } from '@/constants/errors'
 import { PATHS } from '@/constants/paths'
 
 import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
