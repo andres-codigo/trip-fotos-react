@@ -14,6 +14,8 @@ import {
 	UI_TEXT,
 } from '@/constants/test'
 
+import { ERROR_MESSAGES } from '@/constants/error-messages'
+
 vi.mock('react-redux', async () => {
 	const actual = await vi.importActual('react-redux')
 	return {
@@ -144,6 +146,18 @@ describe('<TravellersList />', () => {
 			{ id: 'temp' },
 		])
 		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
+		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
+		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
+			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,
+		})
+	}
+
+	const setupMocksForErrorState = () => {
+		// Setup mocks to prevent useEffect from triggering loadTravellersHandler
+		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([
+			{ id: 'mock-traveller' }, // Non-empty to prevent loading
+		])
+		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false) // But no actual travellers to display
 		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
 		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
 			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,
@@ -287,15 +301,17 @@ describe('<TravellersList />', () => {
 
 		describe('error handling', () => {
 			it('should clear error when handleError is called', async () => {
-				setupMocksForNoTravellers()
+				setupMocksForErrorState()
 
 				renderTravellersList({
-					initialError: MOCK_MESSAGES.TEST_ERROR,
+					initialError: 'Test error message',
+					isLoading: false, // Explicitly set loading to false
 				})
 
 				expect(
 					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
 				).toBeInTheDocument()
+
 				fireEvent.click(screen.getByText(UI_TEXT.BUTTONS.CLOSE))
 
 				await waitFor(() => {
@@ -308,7 +324,7 @@ describe('<TravellersList />', () => {
 			it('should handle loadTravellers dispatch error', async () => {
 				setupMocksForNoTravellers()
 
-				const mockError = new Error(MOCK_MESSAGES.LOAD_FAILED)
+				const mockError = new Error('Load failed')
 				renderTravellersList(
 					{},
 					{
@@ -323,9 +339,7 @@ describe('<TravellersList />', () => {
 					).toBeInTheDocument()
 				})
 
-				expect(
-					screen.getByText(MOCK_MESSAGES.LOAD_FAILED),
-				).toBeInTheDocument()
+				expect(screen.getByText('Load failed')).toBeInTheDocument()
 			})
 
 			it('should show generic error message when error has no message', async () => {
@@ -347,7 +361,7 @@ describe('<TravellersList />', () => {
 				})
 
 				expect(
-					screen.getByText(MOCK_MESSAGES.SOMETHING_WENT_WRONG),
+					screen.getByText(ERROR_MESSAGES.SOMETHING_WENT_WRONG),
 				).toBeInTheDocument()
 			})
 		})
@@ -426,8 +440,12 @@ describe('<TravellersList />', () => {
 
 	describe('Accessibility tests', () => {
 		it('should have proper role for error dialog', () => {
-			setupMocksForNoTravellers()
-			renderTravellersList({ initialError: MOCK_MESSAGES.TEST_ERROR })
+			setupMocksForErrorState() // Use this instead of setupMocksForNoTravellers
+
+			renderTravellersList({
+				initialError: 'Test error message',
+				isLoading: false,
+			})
 
 			expect(
 				screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
