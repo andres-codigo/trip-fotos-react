@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 
 import { AUTHENTICATION_ACTION_TYPES } from '@/constants/action-types'
 import { API_DATABASE } from '@/constants/api'
+import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { COMMON_HEADERS } from '@/constants/headers'
 
 let timer
 
@@ -21,15 +23,15 @@ export const login = createAsyncThunk(
 					password: payload.password,
 					returnSecureToken: true,
 				}),
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				headers: COMMON_HEADERS.JSON,
 			})
 
 			const data = await response.json()
 
 			if (!response.ok) {
-				throw new Error(data.error.message || 'Login failed.')
+				throw new Error(
+					data.error.message || ERROR_MESSAGES.LOGIN_FAILED_FALLBACK,
+				)
 			}
 
 			const expiresIn = +data.expiresIn * 1000

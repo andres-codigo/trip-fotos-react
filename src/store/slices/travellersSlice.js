@@ -3,6 +3,9 @@ import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/action-types'
 import { API_ERROR_MESSAGE } from '@/constants/api-messages'
 import { API_DATABASE } from '@/constants/api'
+import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { ERROR_TYPES } from '@/constants/error-types'
+import { COMMON_HEADERS } from '@/constants/headers'
 
 import { selectAuthenticationToken } from './authenticationSlice'
 
@@ -29,9 +32,7 @@ export const travellerName = createAsyncThunk(
 				`${API_DATABASE.API_URL}update?key=${API_DATABASE.API_KEY}`,
 				{
 					method: API_DATABASE.POST,
-					headers: {
-						'Content-Type': 'application/json',
-					},
+					headers: COMMON_HEADERS.JSON,
 					body: JSON.stringify({
 						idToken: token,
 						displayName: fullName,
@@ -69,17 +70,34 @@ export const updateTravellers = createAsyncThunk(
 				`${API_DATABASE.BASE_URL}/travellers.json`,
 				{
 					method: API_DATABASE.GET,
-					headers: {
-						'Content-Type': 'application/json',
-					},
+					headers: COMMON_HEADERS.JSON,
 				},
 			)
 
 			if (!response.ok) {
-				return rejectWithValue(API_ERROR_MESSAGE.UPDATE_TRAVELLERS)
+				if (response.status === 500) {
+					return rejectWithValue(ERROR_MESSAGES.SERVER_ERROR)
+				} else if (response.status === 404) {
+					return rejectWithValue(ERROR_MESSAGES.DATA_NOT_FOUND)
+				} else if (response.status >= 400 && response.status < 500) {
+					return rejectWithValue(ERROR_MESSAGES.REQUEST_ERROR)
+				} else {
+					return rejectWithValue(ERROR_MESSAGES.CONNECTION_ERROR)
+				}
 			}
 
 			const responseData = await response.json()
+
+			if (!responseData || responseData === null) {
+				return []
+			}
+
+			if (
+				typeof responseData === 'object' &&
+				Object.keys(responseData).length === 0
+			) {
+				return []
+			}
 
 			const travellers = Object.keys(responseData).map((key) => ({
 				id: key,
@@ -113,12 +131,14 @@ export const updateTravellers = createAsyncThunk(
 				return travellers
 			}
 		} catch (error) {
-			return rejectWithValue(
-				handleApiError(
-					error,
-					API_ERROR_MESSAGE.UPDATE_TRAVELLERS_CATCH,
-				),
-			)
+			if (
+				error.name === ERROR_TYPES.TYPE_ERROR &&
+				error.message.includes(ERROR_MESSAGES.FAILED_TO_FETCH)
+			) {
+				return rejectWithValue(ERROR_MESSAGES.NETWORK_CONNECTION_ERROR)
+			}
+
+			return rejectWithValue(ERROR_MESSAGES.UNEXPECTED_ERROR)
 		}
 	},
 )
@@ -141,9 +161,7 @@ export const loadTravellers = createAsyncThunk(
 			dispatch(setFetchTimestamp())
 			return travellers
 		} catch (error) {
-			return rejectWithValue(
-				handleApiError(error, API_ERROR_MESSAGE.LOAD_TRAVELLERS_CATCH),
-			)
+			return rejectWithValue(error || ERROR_MESSAGES.REFRESH_ERROR)
 		}
 	},
 )
@@ -176,6 +194,7 @@ const travellersSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
+			// TRAVELLER_NAME async thunk handlers
 			.addCase(travellerName.pending, (state) => {
 				state.status = 'loading'
 			})
@@ -187,6 +206,8 @@ const travellersSlice = createSlice({
 				state.status = 'failed'
 				state.error = action.payload
 			})
+
+			// UPDATE_TRAVELLERS async thunk handlers
 			.addCase(updateTravellers.pending, (state) => {
 				state.status = 'loading'
 			})
@@ -199,6 +220,8 @@ const travellersSlice = createSlice({
 				state.status = 'failed'
 				state.error = action.payload
 			})
+
+			// LOAD_TRAVELLERS async thunk handlers
 			.addCase(loadTravellers.pending, (state) => {
 				state.status = 'loading'
 			})
