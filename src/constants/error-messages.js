@@ -24,6 +24,10 @@ export const ERROR_MESSAGES = Object.freeze({
 	LOGIN_FAILED_FALLBACK: 'Login failed.',
 	INVALID_PASSWORD: 'INVALID_PASSWORD',
 
+	// Traveller-specific errors
+	ERROR_UPDATING_TRAVELLER: 'An error occurred while updating traveller ',
+	FAILED_TO_UPDATE_TRAVELLER: 'Failed to update traveller ',
+
 	// Default fallback
 	UNKNOWN_ERROR: 'An unknown error occurred.',
 })

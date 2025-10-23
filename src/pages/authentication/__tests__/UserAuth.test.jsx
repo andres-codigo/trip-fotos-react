@@ -749,13 +749,13 @@ describe('<UserAuth />', () => {
 			})
 
 			it('handles and displays errors thrown during form submission', async () => {
-				const testError = new Error(MOCK_MESSAGES.TEST_ERROR)
+				const testError = new Error('Test error message')
 				mockDispatch.mockRejectedValueOnce(testError)
 
 				renderWithProviders(<UserAuth />)
 				fillAndSubmitLoginForm()
 
-				await expectErrorDialog(MOCK_MESSAGES.TEST_ERROR)
+				await expectErrorDialog('Test error message')
 			})
 
 			it('displays fallback message when error object has no message', async () => {
