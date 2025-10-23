@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/action-types'
-import { API_ERROR_MESSAGE } from '@/constants/api-messages'
-import { API_DATABASE } from '@/constants/api'
+import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/error-messages'
 import { ERROR_TYPES } from '@/constants/error-types'
 import { COMMON_HEADERS } from '@/constants/headers'
@@ -29,7 +28,7 @@ export const travellerName = createAsyncThunk(
 			const token = selectAuthenticationToken(getState())
 
 			const response = await fetch(
-				`${API_DATABASE.API_URL}update?key=${API_DATABASE.API_KEY}`,
+				`${API_DATABASE.URL}update?key=${API_DATABASE.KEY}`,
 				{
 					method: API_DATABASE.POST,
 					headers: COMMON_HEADERS.JSON,

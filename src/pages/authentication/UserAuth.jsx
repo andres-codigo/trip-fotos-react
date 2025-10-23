@@ -24,7 +24,7 @@ const UserAuth = () => {
 	const [email, setEmail] = useFormField('')
 	const [password, setPassword] = useFormField('')
 
-	const [mode, setMode] = useState(API_DATABASE.API_AUTH_LOGIN_MODE)
+	const [mode, setMode] = useState(API_DATABASE.AUTH_LOGIN_MODE)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState(false)
 
@@ -75,17 +75,17 @@ const UserAuth = () => {
 			setIsLoading(true)
 
 			const actionPayload = {
-				mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+				mode: API_DATABASE.AUTH_LOGIN_MODE,
 				email: trimmedEmail,
 				password: trimmedPassword,
 			}
 
 			let result
-			if (mode === API_DATABASE.API_AUTH_LOGIN_MODE) {
+			if (mode === API_DATABASE.AUTH_LOGIN_MODE) {
 				result = await dispatch(login(actionPayload))
 			} else {
 				result = await dispatch({
-					type: API_DATABASE.API_AUTH_SIGNUP_MODE,
+					type: API_DATABASE.AUTH_SIGNUP_MODE,
 					payload: actionPayload,
 				})
 			}
@@ -116,9 +116,9 @@ const UserAuth = () => {
 
 	const switchAuthMode = () => {
 		setMode((prevMode) =>
-			prevMode === API_DATABASE.API_AUTH_LOGIN_MODE
-				? API_DATABASE.API_AUTH_SIGNUP_MODE
-				: API_DATABASE.API_AUTH_LOGIN_MODE,
+			prevMode === API_DATABASE.AUTH_LOGIN_MODE
+				? API_DATABASE.AUTH_SIGNUP_MODE
+				: API_DATABASE.AUTH_LOGIN_MODE,
 		)
 	}
 

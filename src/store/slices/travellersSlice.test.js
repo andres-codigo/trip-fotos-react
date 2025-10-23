@@ -28,10 +28,10 @@ import { handleApiError } from '@/utils/errorHandler'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
-vi.mock('@/constants/api', () => ({
+vi.mock('@/constants/endpoints', () => ({
 	API_DATABASE: {
-		API_URL: 'https://mock-api-url.com/',
-		API_KEY: 'mock-api-key',
+		URL: 'https://mock-api-url.com/',
+		KEY: 'mock-api-key',
 		POST: 'POST',
 	},
 }))

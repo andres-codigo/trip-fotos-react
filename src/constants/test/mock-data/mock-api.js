@@ -24,15 +24,15 @@ export const MOCK_API_RESPONSES = {
 }
 
 export const MOCK_LOGIN_PAYLOAD = Object.freeze({
-	mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+	mode: API_DATABASE.AUTH_LOGIN_MODE,
 	email: MOCK_KEYS.EMAIL,
 	password: MOCK_KEYS.PASSWORD,
 })
 
 export const MOCK_SIGNUP_ACTION = Object.freeze({
-	type: API_DATABASE.API_AUTH_SIGNUP_MODE,
+	type: API_DATABASE.AUTH_SIGNUP_MODE,
 	payload: {
-		mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+		mode: API_DATABASE.AUTH_LOGIN_MODE,
 		email: MOCK_KEYS.EMAIL,
 		password: MOCK_KEYS.PASSWORD,
 	},

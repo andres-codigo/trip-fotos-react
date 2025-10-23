@@ -91,7 +91,7 @@ const createDefaultProps = () => ({
 		isValid: true,
 		message: '',
 	},
-	mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+	mode: API_DATABASE.AUTH_LOGIN_MODE,
 	onEmailChange: vi.fn(),
 	onPasswordChange: vi.fn(),
 	onSubmit: vi.fn(),
@@ -123,7 +123,7 @@ describe('<UserAuthForm />', () => {
 			renderWithRouter(
 				<UserAuthForm
 					{...defaultProps}
-					mode={API_DATABASE.API_AUTH_LOGIN_MODE}
+					mode={API_DATABASE.AUTH_LOGIN_MODE}
 				/>,
 			)
 
@@ -136,7 +136,7 @@ describe('<UserAuthForm />', () => {
 			renderWithRouter(
 				<UserAuthForm
 					{...defaultProps}
-					mode={API_DATABASE.API_AUTH_SIGNUP_MODE}
+					mode={API_DATABASE.AUTH_SIGNUP_MODE}
 				/>,
 			)
 

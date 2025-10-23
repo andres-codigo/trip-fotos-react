@@ -24,11 +24,11 @@ import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
-		API_URL: 'https://mock-api-url.com/',
-		API_KEY: 'mock-api-key',
+		URL: 'https://mock-api-url.com/',
+		KEY: 'mock-api-key',
 		POST: 'POST',
-		API_AUTH_LOGIN_MODE: 'login',
-		API_AUTH_SIGNUP_MODE: 'signup',
+		AUTH_LOGIN_MODE: 'login',
+		AUTH_SIGNUP_MODE: 'signup',
 	},
 }))
 
@@ -161,22 +161,22 @@ describe('authenticationSlice', () => {
 					{
 						description: 'empty string',
 						displayName: '',
-						mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+						mode: API_DATABASE.AUTH_LOGIN_MODE,
 					},
 					{
 						description: 'non-empty string',
 						displayName: 'Test User',
-						mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+						mode: API_DATABASE.AUTH_LOGIN_MODE,
 					},
 					{
 						description: 'empty string (signup)',
 						displayName: '',
-						mode: API_DATABASE.API_AUTH_SIGNUP_MODE,
+						mode: API_DATABASE.AUTH_SIGNUP_MODE,
 					},
 					{
 						description: 'non-empty string (signup)',
 						displayName: 'Test User',
-						mode: API_DATABASE.API_AUTH_SIGNUP_MODE,
+						mode: API_DATABASE.AUTH_SIGNUP_MODE,
 					},
 				]
 
@@ -206,7 +206,7 @@ describe('authenticationSlice', () => {
 							)
 
 							const expectedUrl =
-								mode === API_DATABASE.API_AUTH_SIGNUP_MODE
+								mode === API_DATABASE.AUTH_SIGNUP_MODE
 									? `${MOCK_API.URL}signUp?key=${MOCK_API.KEY}`
 									: `${MOCK_API.URL}signInWithPassword?key=${MOCK_API.KEY}`
 
@@ -261,7 +261,7 @@ describe('authenticationSlice', () => {
 
 					const result = await store.dispatch(
 						login({
-							mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+							mode: API_DATABASE.AUTH_LOGIN_MODE,
 							email: MOCK_KEYS.EMAIL,
 							password: MOCK_KEYS.PASSWORD,
 						}),
@@ -281,7 +281,7 @@ describe('authenticationSlice', () => {
 
 					const result = await store.dispatch(
 						login({
-							mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+							mode: API_DATABASE.AUTH_LOGIN_MODE,
 							email: MOCK_KEYS.EMAIL,
 							password: MOCK_KEYS.PASSWORD,
 						}),
@@ -299,7 +299,7 @@ describe('authenticationSlice', () => {
 
 					const result = await store.dispatch(
 						login({
-							mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+							mode: API_DATABASE.AUTH_LOGIN_MODE,
 							email: MOCK_KEYS.EMAIL,
 							password: MOCK_KEYS.PASSWORD,
 						}),
@@ -501,7 +501,7 @@ describe('authenticationSlice', () => {
 
 					await store.dispatch(
 						login({
-							mode: API_DATABASE.API_AUTH_LOGIN_MODE,
+							mode: API_DATABASE.AUTH_LOGIN_MODE,
 							email: MOCK_KEYS.EMAIL,
 							password: MOCK_KEYS.PASSWORD,
 						}),

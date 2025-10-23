@@ -11,9 +11,9 @@ export const login = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.LOGIN,
 	async (payload, { dispatch, rejectWithValue }) => {
 		const url =
-			payload.mode === API_DATABASE.API_AUTH_SIGNUP_MODE
-				? `${API_DATABASE.API_URL}signUp?key=${API_DATABASE.API_KEY}`
-				: `${API_DATABASE.API_URL}signInWithPassword?key=${API_DATABASE.API_KEY}`
+			payload.mode === API_DATABASE.AUTH_SIGNUP_MODE
+				? `${API_DATABASE.URL}signUp?key=${API_DATABASE.KEY}`
+				: `${API_DATABASE.URL}signInWithPassword?key=${API_DATABASE.KEY}`
 
 		try {
 			const response = await fetch(url, {
