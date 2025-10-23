@@ -88,13 +88,11 @@ export const updateTravellers = createAsyncThunk(
 
 			const responseData = await response.json()
 
-			if (!responseData || responseData === null) {
-				return []
-			}
-
+			// If responseData is falsy (null/undefined) or an empty object, return an empty array.
 			if (
-				typeof responseData === 'object' &&
-				Object.keys(responseData).length === 0
+				!responseData ||
+				(typeof responseData === 'object' &&
+					Object.keys(responseData).length === 0)
 			) {
 				return []
 			}
