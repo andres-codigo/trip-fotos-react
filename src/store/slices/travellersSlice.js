@@ -3,7 +3,7 @@ import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
-import { ERROR_TYPES } from '@/constants/error-types'
+import { ERROR_TYPES } from '@/constants/errors'
 import { COMMON_HEADERS } from '@/constants/headers'
 
 import { selectAuthenticationToken } from './authenticationSlice'
