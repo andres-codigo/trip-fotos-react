@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 
 import { getFirebaseAuthErrorMessage } from '../index'
-import { FIREBASE_ERROR_TYPES } from '@/constants/firebase-error-types'
+import { FIREBASE_ERRORS } from '@/constants/auth'
 
-const { AUTHENTICATION_ACTION_TYPES: authTypes } = FIREBASE_ERROR_TYPES
+const { AUTHENTICATION_ACTION_TYPES: authTypes } = FIREBASE_ERRORS
 
 describe('getFirebaseAuthErrorMessage', () => {
 	it('should return correct message for invalid login credentials', () => {

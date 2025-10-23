@@ -1,4 +1,4 @@
-import { FIREBASE_ERROR_TYPES } from '../../../src/constants/firebase-error-types'
+import { FIREBASE_ERRORS } from '../../../src/constants/auth'
 
 import { apiDatabase, apiUrls } from '../../support/constants/api'
 import { dialog, dialogMessages } from '../../support/constants/dialog'
@@ -248,29 +248,27 @@ describe('UI error dialog', () => {
 
 	it('shows an invalid login credentials error dialog', () => {
 		logInUsingIntercept(
-			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.INVALID_LOGIN_CREDENTIALS,
 		)
 	})
 
 	it('shows too many unsuccessful login attempts error dialog', () => {
 		logInUsingIntercept(
-			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.TOO_MANY_ATTEMPTS_TRY_LATER,
 		)
 	})
 
 	it('shows the default error dialog', () => {
-		logInUsingIntercept(
-			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES.DEFAULT,
-		)
+		logInUsingIntercept(FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.DEFAULT)
 	})
 
 	it('closes the error dialog when the Escape key is pressed', () => {
 		cy.interceptLoginError(
 			apiDatabase.POST,
 			apiUrls.signInWithPassword,
-			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.INVALID_LOGIN_CREDENTIALS,
 		)
 		cy.login(user.validEmail, user.invalidPassword)
