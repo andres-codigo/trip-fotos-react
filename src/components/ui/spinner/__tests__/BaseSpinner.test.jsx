@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, afterEach, vi } from 'vitest'
 
 import { GLOBAL } from '@/constants/global'
+import { SPINNER } from '@/constants/test'
 
 import BaseSpinner from '../BaseSpinner'
 
@@ -17,7 +18,7 @@ import BaseSpinner from '../BaseSpinner'
  */
 
 vi.mock('@/assets/loading-spinner.svg', () => ({
-	default: 'mock-spinner.svg',
+	default: SPINNER.MOCK_SVG,
 }))
 
 describe('BaseSpinner', () => {
@@ -29,12 +30,12 @@ describe('BaseSpinner', () => {
 		it('should render spinner with loading image', () => {
 			render(<BaseSpinner />)
 
-			const spinner = screen.getByRole('status')
+			const spinner = screen.getByRole(SPINNER.ROLE_STATUS)
 			const loadingImage = screen.getByAltText(GLOBAL.LOADING_SPINNER_ALT)
 
 			expect(spinner).toBeInTheDocument()
 			expect(loadingImage).toBeInTheDocument()
-			expect(loadingImage).toHaveAttribute('src', 'mock-spinner.svg')
+			expect(loadingImage).toHaveAttribute('src', SPINNER.MOCK_SVG)
 		})
 	})
 
@@ -42,7 +43,7 @@ describe('BaseSpinner', () => {
 		it('should have proper aria attributes for screen readers', () => {
 			render(<BaseSpinner />)
 
-			const spinner = screen.getByRole('status')
+			const spinner = screen.getByRole(SPINNER.ROLE_STATUS)
 
 			expect(spinner).toHaveAttribute('aria-live', 'polite')
 			expect(spinner).toHaveAttribute('aria-busy', 'true')

@@ -23,6 +23,16 @@
 		margin: 0 0.5rem;
 	}
 
+	.active {
+		border: 1px solid variables.$color-white;
+		color: variables.$color-white;
+
+		&:hover {
+			border: 1px solid variables.$color-lavender-magenta;
+			color: variables.$color-lavender-magenta;
+		}
+	}
+
 	.hamburger {
 		display: none;
 	}

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 // import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
@@ -25,6 +26,7 @@ function MainNav({
 	useMobileMenu = useMobileMenuDefault,
 	useLogout = useLogoutDefault,
 }) {
+	const location = useLocation()
 	// const navigate = useNavigate();
 
 	// const usersName = useSelector((state) => state.travellers.travellerName);
@@ -124,27 +126,36 @@ function MainNav({
 									{/* {isTraveller && ( */}
 									<NavMenuMessagesLink
 										isLink
-										className={
-											navMenuButtonLinkStyles.navMenuButtonLink
-										}
 										to={PATHS.MESSAGES}
+										className={classNames(
+											navMenuButtonLinkStyles.navMenuButtonLink,
+											{
+												[mainNavStyles.active]:
+													location.pathname ===
+													PATHS.MESSAGES,
+											},
+										)}
 										onMenuItemClick={handleMenuItemClick}
 										data-cy="nav-menu-item-messages"
 										totalMessages={totalMessages}
 									/>
 									{/* )} */}
-									<li
-										className="navMenuItemTravellers"
-										data-cy="nav-menu-item-travellers">
+									<li className="navMenuItemTravellers">
 										<NavMenuButtonLink
 											isLink
 											to={PATHS.TRAVELLERS}
 											onMenuItemClick={
 												handleMenuItemClick
 											}
-											className={
-												navMenuButtonLinkStyles.navMenuButtonLink
-											}>
+											className={classNames(
+												navMenuButtonLinkStyles.navMenuButtonLink,
+												{
+													[mainNavStyles.active]:
+														location.pathname ===
+														PATHS.TRAVELLERS,
+												},
+											)}
+											data-cy="nav-menu-item-travellers">
 											Travellers
 										</NavMenuButtonLink>
 									</li>

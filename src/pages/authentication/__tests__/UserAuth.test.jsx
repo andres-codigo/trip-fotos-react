@@ -9,15 +9,18 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 
-import { DIALOG } from '@/constants/test/dialog'
+import { DIALOG } from '@/constants/test'
 import { FIREBASE_ERROR_TYPES } from '@/constants/firebase-error-types'
+
 import {
 	MOCK_KEYS,
 	MOCK_LOGIN_PAYLOAD,
 	MOCK_SIGNUP_ACTION,
 	MOCK_INVALID_LOGIN_ERROR,
 	MOCK_MESSAGES,
-} from '@/constants/mock-data'
+	TEST_IDS,
+} from '@/constants/test'
+
 import { PATHS } from '@/constants/paths'
 import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
 
@@ -95,19 +98,24 @@ const fillLoginForm = (
 	email = MOCK_KEYS.EMAIL,
 	password = MOCK_KEYS.PASSWORD,
 ) => {
-	fireEvent.change(screen.getByTestId('email-input'), {
+	fireEvent.change(screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT), {
 		target: { value: email },
 	})
-	fireEvent.change(screen.getByTestId('password-input'), {
-		target: { value: password },
-	})
+	fireEvent.change(
+		screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+		{
+			target: { value: password },
+		},
+	)
 }
 
 /**
  * Helper function to submit the login form
  */
 const submitLoginForm = () => {
-	fireEvent.click(screen.getByTestId('login-submit-button'))
+	fireEvent.click(
+		screen.getByTestId(TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON),
+	)
 }
 
 /**
@@ -302,14 +310,24 @@ describe('<UserAuth />', () => {
 
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL_INVALID },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL_INVALID },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: MOCK_KEYS.PASSWORD },
+					},
+				)
 
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
 					expect(login).not.toHaveBeenCalled()
@@ -328,14 +346,24 @@ describe('<UserAuth />', () => {
 
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL_INVALID },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL_INVALID },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: MOCK_KEYS.PASSWORD },
+					},
+				)
 
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
 					expect(login).not.toHaveBeenCalled()
@@ -361,14 +389,24 @@ describe('<UserAuth />', () => {
 
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: '  ' + MOCK_KEYS.EMAIL + '  ' },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: '  ' + MOCK_KEYS.PASSWORD + '  ' },
-				})
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: '  ' + MOCK_KEYS.EMAIL + '  ' },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: '  ' + MOCK_KEYS.PASSWORD + '  ' },
+					},
+				)
 
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
 					expect(validateEmail).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
@@ -390,14 +428,24 @@ describe('<UserAuth />', () => {
 
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: '' },
-				})
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: '' },
+					},
+				)
 
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
 					expect(login).not.toHaveBeenCalled()
@@ -411,13 +459,23 @@ describe('<UserAuth />', () => {
 			it('dispatches login action with correct payload on form submission', async () => {
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: MOCK_KEYS.PASSWORD },
+					},
+				)
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
 					expect(login).toHaveBeenCalledWith(MOCK_LOGIN_PAYLOAD)
@@ -427,17 +485,29 @@ describe('<UserAuth />', () => {
 			it('dispatches signup action when component is in signup mode', async () => {
 				renderWithProviders(<UserAuth />)
 
-				const switchBtn = screen.getByTestId('login-signup-toggle-link')
+				const switchBtn = screen.getByTestId(
+					TEST_IDS.USER_AUTH_FORM.LOGIN_SIGNUP_TOGGLE_LINK,
+				)
 
 				fireEvent.click(switchBtn)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: MOCK_KEYS.PASSWORD },
+					},
+				)
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
 					expect(mockDispatch).toHaveBeenCalledWith(
@@ -446,23 +516,33 @@ describe('<UserAuth />', () => {
 				})
 			})
 
-			it('navigates to home page after successful authentication', async () => {
+			it('navigates to travellers page after successful authentication', async () => {
 				mockDispatch.mockResolvedValueOnce({
 					meta: {},
 				})
 
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: MOCK_KEYS.PASSWORD },
+					},
+				)
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
-					expect(mockNavigate).toHaveBeenCalledWith(PATHS.HOME)
+					expect(mockNavigate).toHaveBeenCalledWith(PATHS.TRAVELLERS)
 				})
 			})
 		})
@@ -474,18 +554,28 @@ describe('<UserAuth />', () => {
 
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: MOCK_KEYS.PASSWORD },
+					},
+				)
 
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
 					expect(
-						screen.getByTestId('loading-dialog'),
+						screen.getByTestId(TEST_IDS.DIALOG.AUTHENTICATING),
 					).toBeInTheDocument()
 					expect(
 						screen.getByText('Authenticating'),
@@ -494,7 +584,7 @@ describe('<UserAuth />', () => {
 						screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
 					).toBeInTheDocument()
 					expect(
-						screen.getByTestId('base-spinner'),
+						screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
 					).toBeInTheDocument()
 				})
 			})
@@ -510,19 +600,29 @@ describe('<UserAuth />', () => {
 
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: MOCK_KEYS.PASSWORD },
+					},
+				)
 
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				// Loading dialog
 				await waitFor(() => {
 					expect(
-						screen.getByTestId('loading-dialog'),
+						screen.getByTestId(TEST_IDS.DIALOG.AUTHENTICATING),
 					).toBeInTheDocument()
 				})
 
@@ -534,7 +634,7 @@ describe('<UserAuth />', () => {
 				// Loading dialog should disappear after completion
 				await waitFor(() => {
 					expect(
-						screen.queryByTestId('loading-dialog'),
+						screen.queryByTestId(TEST_IDS.DIALOG.AUTHENTICATING),
 					).not.toBeInTheDocument()
 				})
 			})
@@ -545,21 +645,33 @@ describe('<UserAuth />', () => {
 
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: MOCK_KEYS.PASSWORD },
+					},
+				)
 
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
-					const loadingDialog = screen.getByTestId('loading-dialog')
+					const loadingDialog = screen.getByTestId(
+						TEST_IDS.DIALOG.AUTHENTICATING,
+					)
 					expect(loadingDialog).toBeInTheDocument()
 					expect(loadingDialog).toHaveAttribute(
 						'data-cy',
-						'loading-dialog',
+						TEST_IDS.DIALOG.AUTHENTICATING,
 					)
 
 					expect(
@@ -569,7 +681,7 @@ describe('<UserAuth />', () => {
 						screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
 					).toBeInTheDocument()
 					expect(
-						screen.getByTestId('base-spinner'),
+						screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
 					).toBeInTheDocument()
 				})
 			})
@@ -637,13 +749,13 @@ describe('<UserAuth />', () => {
 			})
 
 			it('handles and displays errors thrown during form submission', async () => {
-				const testError = new Error(MOCK_MESSAGES.TEST_ERROR)
+				const testError = new Error('Test error message')
 				mockDispatch.mockRejectedValueOnce(testError)
 
 				renderWithProviders(<UserAuth />)
 				fillAndSubmitLoginForm()
 
-				await expectErrorDialog(MOCK_MESSAGES.TEST_ERROR)
+				await expectErrorDialog('Test error message')
 			})
 
 			it('displays fallback message when error object has no message', async () => {
@@ -662,13 +774,23 @@ describe('<UserAuth />', () => {
 
 				renderWithProviders(<UserAuth />)
 
-				fireEvent.change(screen.getByTestId('email-input'), {
-					target: { value: MOCK_KEYS.EMAIL },
-				})
-				fireEvent.change(screen.getByTestId('password-input'), {
-					target: { value: MOCK_KEYS.PASSWORD },
-				})
-				fireEvent.click(screen.getByTestId('login-submit-button'))
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+					{
+						target: { value: MOCK_KEYS.EMAIL },
+					},
+				)
+				fireEvent.change(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+					{
+						target: { value: MOCK_KEYS.PASSWORD },
+					},
+				)
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+					),
+				)
 
 				await waitFor(() => {
 					expect(

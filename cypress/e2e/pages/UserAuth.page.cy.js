@@ -7,6 +7,8 @@ import { authenticationFormSelectors } from '../../support/constants/selectors'
 import { baseUrl, urls } from '../../support/constants/urls'
 import { user } from '../../support/constants/users'
 
+import { performLogin } from '../../support/utils/authHelpers'
+
 const loginUrl = baseUrl + urls.cyAuth
 
 describe('Form rendering and validation', () => {
@@ -94,7 +96,7 @@ describe('Form submission', () => {
 			.type(user.validPassword)
 			.type('{enter}')
 
-		cy.get(dialog.loading).should('exist')
+		cy.get(dialog.authenticating).should('exist')
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
@@ -114,11 +116,7 @@ describe('Form submission', () => {
 	})
 
 	it('redirects on successful login', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
-		cy.login(user.validEmail, user.validPassword)
-		cy.wait('@loginRequest')
-
-		cy.url().should('include', urls.cyHome)
+		performLogin()
 	})
 })
 
@@ -163,7 +161,7 @@ describe('UI state and mode switching', () => {
 		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
 		cy.login(user.validEmail, user.validPassword)
 
-		cy.get(dialog.loading)
+		cy.get(dialog.authenticating)
 			.should('exist')
 			.within(() => {
 				cy.get(dialog.title).should(

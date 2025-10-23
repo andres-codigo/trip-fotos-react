@@ -22,7 +22,6 @@ export const assertMenuItems = (travellerName = 'Test User') => {
 	cy.get(topNavigationSelectors.navMenuItemTravellers)
 		.should('exist')
 		.and('be.visible')
-		.find('a')
 		.should('have.attr', 'href', urls.cyTravellers)
 		.and('have.text', 'Travellers')
 	cy.get(topNavigationSelectors.navMenuItemLogout)

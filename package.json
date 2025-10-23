@@ -14,6 +14,8 @@
 		"cy:open:ct": "cypress open --component",
 		"cy:run:e2e": "cypress run --e2e",
 		"cy:run:ct": "cypress run --component",
+		"cy:run:one": "cypress run --spec",
+		"cy:watch": "chokidar 'cypress/e2e/**/*.cy.{js,ts}' -c 'npm run cy:run:one -- {path}'",
 		"vitest:run": "vitest run",
 		"vitest:watch": "vitest watch",
 		"vitest:run:fast": "vitest run --reporter=dot --no-coverage",

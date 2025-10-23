@@ -1,4 +1,4 @@
-import { DIALOG } from '@/constants/test/dialog'
+import { DIALOG } from '@/constants/test'
 
 import { getByDataCy } from '@/testUtils/cypress/selectors'
 

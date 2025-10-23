@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-import { DIALOG } from '@/constants/test/dialog'
+import { DIALOG } from '@/constants/test'
 
 /**
  * BaseDialog Unit Tests

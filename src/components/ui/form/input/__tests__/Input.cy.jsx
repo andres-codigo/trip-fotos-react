@@ -1,4 +1,4 @@
-import { INPUT } from '@/constants/test/input'
+import { INPUT } from '@/constants/test'
 
 import { getByDataCy, getByDataCyError } from '@/testUtils/cypress/selectors'
 

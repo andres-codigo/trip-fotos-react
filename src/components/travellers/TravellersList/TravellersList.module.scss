@@ -1,0 +1,37 @@
+.travellerListContainer {
+	.controls {
+		display: flex;
+		justify-content: space-between;
+		.hide {
+			display: none;
+		}
+	}
+
+	h3 {
+		text-align: center;
+	}
+
+	.spinnerContainer,
+	.noTravellersContainer {
+		margin: 5rem 0;
+		min-height: 60px;
+	}
+
+	.noTravellersContainer {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.travellersList {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	.travellerListContainer {
+		display: inline-block;
+	}
+}

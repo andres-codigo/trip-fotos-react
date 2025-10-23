@@ -14,10 +14,17 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
  * - Rendering: Hook integration, prop forwarding, conditional rendering based on isLoggedIn
  * - Component Integration: Verification that child components receive correct props
  * - Hook Parameters: Ensures hooks are called with proper arguments and dependencies
+ * - Active Class: Tests that active class is applied when location matches path
  * - Accessibility: N/A (covered in MainNav.cy.jsx)
  *
  * Note: User interactions, DOM events, and accessibility are covered in MainNav.cy.jsx
  */
+
+const mockUseLocation = vi.fn()
+
+vi.mock('react-router-dom', () => ({
+	useLocation: () => mockUseLocation(),
+}))
 
 import MainNav from '../MainNav'
 
@@ -99,6 +106,7 @@ import { useLogout } from '../hooks/useLogout'
 import { PATHS } from '@/constants/paths'
 
 import navMenuButtonLinkStyles from '../nav-menu/NavMenuButtonLink.module.scss'
+import mainNavStyles from '../MainNav.module.scss'
 
 import NavMenuButtonLink from '../nav-menu/NavMenuButtonLink'
 import NavMenuMessagesLink from '../nav-menu/NavMenuMessagesLink'
@@ -114,6 +122,11 @@ describe('<MainNav />', () => {
 	const mockHandleLogoutClick = vi.fn()
 
 	beforeEach(() => {
+		// Default location mock
+		mockUseLocation.mockReturnValue({
+			pathname: '/current-path',
+		})
+
 		// Default hook return values
 		vi.mocked(useMainNavState).mockReturnValue({
 			travellerName: mockTravellerName,
@@ -178,6 +191,72 @@ describe('<MainNav />', () => {
 				}),
 			)
 		})
+
+		it('should apply active class to Messages link when location matches PATHS.MESSAGES', () => {
+			mockUseLocation.mockReturnValue({
+				pathname: PATHS.MESSAGES,
+			})
+
+			render(<MainNav {...defaultProps} />)
+
+			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
+				expect.objectContaining({
+					className: `${navMenuButtonLinkStyles.navMenuButtonLink} ${mainNavStyles.active}`,
+				}),
+				undefined,
+			)
+		})
+
+		it('should not apply active class to Messages link when location does not match PATHS.MESSAGES', () => {
+			mockUseLocation.mockReturnValue({
+				pathname: '/other-path',
+			})
+
+			render(<MainNav {...defaultProps} />)
+
+			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
+				expect.objectContaining({
+					className: navMenuButtonLinkStyles.navMenuButtonLink,
+				}),
+				undefined,
+			)
+		})
+
+		it('should apply active class to Travellers link when location matches PATHS.TRAVELLERS', () => {
+			mockUseLocation.mockReturnValue({
+				pathname: PATHS.TRAVELLERS,
+			})
+
+			render(<MainNav {...defaultProps} />)
+
+			const travellersCall = vi
+				.mocked(NavMenuButtonLink)
+				.mock.calls.find((call) => call[0].children === 'Travellers')
+
+			expect(travellersCall[0]).toEqual(
+				expect.objectContaining({
+					className: `${navMenuButtonLinkStyles.navMenuButtonLink} ${mainNavStyles.active}`,
+				}),
+			)
+		})
+
+		it('should not apply active class to Travellers link when location does not match PATHS.TRAVELLERS', () => {
+			mockUseLocation.mockReturnValue({
+				pathname: '/other-path',
+			})
+
+			render(<MainNav {...defaultProps} />)
+
+			const travellersCall = vi
+				.mocked(NavMenuButtonLink)
+				.mock.calls.find((call) => call[0].children === 'Travellers')
+
+			expect(travellersCall[0]).toEqual(
+				expect.objectContaining({
+					className: navMenuButtonLinkStyles.navMenuButtonLink,
+				}),
+			)
+		})
 	})
 
 	describe('Rendering tests', () => {
@@ -232,9 +311,10 @@ describe('<MainNav />', () => {
 			expect(vi.mocked(NavMenuButtonLink)).toHaveBeenCalledWith(
 				{
 					isLink: true,
+					className: navMenuButtonLinkStyles.navMenuButtonLink,
 					to: PATHS.TRAVELLERS,
 					onMenuItemClick: expect.any(Function),
-					className: navMenuButtonLinkStyles.navMenuButtonLink,
+					'data-cy': 'nav-menu-item-travellers',
 					children: 'Travellers',
 				},
 				undefined,

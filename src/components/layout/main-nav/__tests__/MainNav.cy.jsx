@@ -237,9 +237,9 @@ describe('<MainNav />', () => {
 							topNavigationSelectors.navMenuItemsContainer,
 						).should('have.class', mainNavStyles.active)
 
-						cy.get(topNavigationSelectors.navMenuItemTravellers)
-							.find('a')
-							.click()
+						cy.get(
+							topNavigationSelectors.navMenuItemTravellers,
+						).click()
 
 						cy.get(
 							topNavigationSelectors.navMenuItemsContainer,

@@ -35,7 +35,9 @@ vi.mock('@/constants/paths', () => ({
 }))
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
-	tryLogin: () => ({ type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN }),
+	tryLogin: () => ({
+		type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN_ASYNC.PENDING,
+	}),
 }))
 
 vi.mock('@/components/common/LoadingFallback', () => ({
@@ -93,14 +95,14 @@ describe('App', () => {
 	})
 
 	describe('Rendering tests', () => {
-		it('renders Header and HomePage when logged in and on /home', async () => {
+		it('renders Header and TravellersPage when logged in and on /home', async () => {
 			setAuthState('token', false)
 
 			renderWithRoute(PATHS.HOME)
 
 			expect(screen.getByText('Header')).toBeInTheDocument()
 			await waitFor(() => {
-				expect(screen.getByText('HomePage')).toBeInTheDocument()
+				expect(screen.getByText('TravellersPage')).toBeInTheDocument()
 			})
 		})
 

@@ -106,6 +106,16 @@ export default [
 			'react/display-name': 'off',
 			'react/prop-types': 'off',
 			'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+			'vitest/expect-expect': [
+				'error',
+				{
+					assertFunctionNames: [
+						'expect',
+						'expectErrorDialog',
+						'expectNoErrorDialog',
+					],
+				},
+			],
 		},
 	},
 ]

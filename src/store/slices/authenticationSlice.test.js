@@ -4,11 +4,12 @@ import { configureStore } from '@reduxjs/toolkit'
 import { API_DATABASE } from '@/constants/api'
 import {
 	MOCK_API,
-	MOCK_USER,
-	MOCK_STORAGE_KEYS,
 	MOCK_KEYS,
-	MOCK_MESSAGES,
-} from '@/constants/mock-data'
+	MOCK_STORAGE_KEYS,
+	MOCK_USER,
+} from '@/constants/test'
+
+import { ERROR_MESSAGES } from '@/constants/error-messages'
 
 import authenticationReducer, {
 	login,
@@ -54,9 +55,11 @@ describe('authenticationSlice', () => {
 				authentication: {
 					token: MOCK_KEYS.ID_TOKEN,
 					userId: MOCK_KEYS.LOCAL_ID,
-					userName: 'Test User',
+					userName: MOCK_USER.FULL_NAME,
 					userEmail: MOCK_KEYS.EMAIL,
 					didAutoLogout: false,
+					status: 'succeeded',
+					error: null,
 				},
 			}
 
@@ -72,6 +75,8 @@ describe('authenticationSlice', () => {
 					userName: null,
 					userEmail: null,
 					didAutoLogout: false,
+					status: 'idle',
+					error: null,
 				},
 			}
 
@@ -88,6 +93,8 @@ describe('authenticationSlice', () => {
 				userName: null,
 				userEmail: null,
 				didAutoLogout: false,
+				status: 'idle',
+				error: null,
 			}
 
 			const state = authenticationReducer(undefined, { type: undefined })
@@ -101,6 +108,8 @@ describe('authenticationSlice', () => {
 				userName: MOCK_USER.USER_NAME,
 				userEmail: MOCK_USER.USER_EMAIL,
 				didAutoLogout: false,
+				status: 'succeeded',
+				error: 'Test error message',
 			}
 
 			const state = authenticationReducer(
@@ -113,6 +122,8 @@ describe('authenticationSlice', () => {
 				userName: null,
 				userEmail: null,
 				didAutoLogout: false,
+				status: 'idle',
+				error: null,
 			})
 		})
 
@@ -123,6 +134,8 @@ describe('authenticationSlice', () => {
 				userName: MOCK_USER.USER_NAME,
 				userEmail: MOCK_USER.USER_EMAIL,
 				didAutoLogout: false,
+				status: 'succeeded',
+				error: null,
 			}
 
 			const state = authenticationReducer(
@@ -135,6 +148,8 @@ describe('authenticationSlice', () => {
 				userName: MOCK_USER.USER_NAME,
 				userEmail: MOCK_USER.USER_EMAIL,
 				didAutoLogout: true,
+				status: 'succeeded',
+				error: null,
 			})
 		})
 	})
@@ -236,7 +251,7 @@ describe('authenticationSlice', () => {
 
 			describe('failure scenarios', () => {
 				it('should handle login failure and return error message', async () => {
-					const mockErrorMessage = MOCK_MESSAGES.INVALID_PASSWORD
+					const mockErrorMessage = ERROR_MESSAGES.INVALID_PASSWORD
 					fetch.mockResolvedValueOnce({
 						ok: false,
 						json: async () => ({
@@ -272,12 +287,14 @@ describe('authenticationSlice', () => {
 						}),
 					)
 
-					expect(result.payload).toBe('Login failed.')
+					expect(result.payload).toBe(
+						ERROR_MESSAGES.LOGIN_FAILED_FALLBACK,
+					)
 					expect(result.meta.rejectedWithValue).toBe(true)
 				})
 
 				it('should handle network errors', async () => {
-					const mockError = new Error(MOCK_MESSAGES.NETWORK_ERROR)
+					const mockError = new Error(ERROR_MESSAGES.NETWORK_ERROR)
 					fetch.mockRejectedValueOnce(mockError)
 
 					const result = await store.dispatch(
@@ -472,7 +489,7 @@ describe('authenticationSlice', () => {
 					const mockResponse = {
 						idToken: MOCK_KEYS.ID_TOKEN,
 						localId: MOCK_KEYS.LOCAL_ID,
-						displayName: 'Test User',
+						displayName: MOCK_USER.FULL_NAME,
 						email: MOCK_KEYS.EMAIL,
 						expiresIn: MOCK_KEYS.EXPIRES_IN,
 					}
@@ -523,7 +540,7 @@ describe('authenticationSlice', () => {
 							case MOCK_STORAGE_KEYS.USER_ID:
 								return MOCK_KEYS.LOCAL_ID
 							case MOCK_STORAGE_KEYS.USER_NAME:
-								return 'Test User'
+								return MOCK_USER.FULL_NAME
 							case MOCK_STORAGE_KEYS.USER_EMAIL:
 								return MOCK_KEYS.EMAIL
 							case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:

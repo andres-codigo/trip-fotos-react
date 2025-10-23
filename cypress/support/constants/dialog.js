@@ -3,7 +3,7 @@ import { getByDataCy } from '../../../src/testUtils/cypress/selectors'
 export const dialog = {
 	// Dialog
 	invalidEmailOrPassword: getByDataCy('invalid-email-or-password-dialog'),
-	loading: getByDataCy('loading-dialog'),
+	authenticating: getByDataCy('authenticating-dialog'),
 	// Dialog elements
 	title: getByDataCy('title'),
 	textContent: getByDataCy('text-content'),

@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 
 import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 
-import { BUTTON } from '@/constants/test/button'
+import { BUTTON } from '@/constants/test'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 
