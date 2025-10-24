@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import '../../../../../cypress/support/commands'
 
 import { PAGE_SELECTORS } from '../../../../../cypress/support/constants/selectors/pages'
-import { topNavigationSelectors } from '../../../../../cypress/support/constants/selectors/components'
+import { TOP_NAVIGATION_SELECTORS } from '../../../../../cypress/support/constants/selectors/components'
 import { APP_URLS } from '../../../../../cypress/support/constants/api/urls'
 
 import { viewports } from '../../../../../cypress/support/constants/viewports'
@@ -57,7 +57,7 @@ describe('<MainNav />', () => {
 						<TestMainNav isLoggedIn={false} />,
 						store,
 					)
-					cy.get(topNavigationSelectors.navMenuContainer).should(
+					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER).should(
 						'not.exist',
 					)
 				})
@@ -76,10 +76,10 @@ describe('<MainNav />', () => {
 							store,
 						)
 						cy.setViewportToMobile()
-						cy.get(topNavigationSelectors.navMenuContainer)
+						cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 							.should('exist')
 							.and('be.visible')
-						cy.get(topNavigationSelectors.navHamburgerMenu)
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 							.should('exist')
 							.and('be.visible')
 						assertMenuItems(mockUseMainNavState().travellerName)
@@ -98,10 +98,10 @@ describe('<MainNav />', () => {
 							store,
 						)
 						cy.setViewportToTablet()
-						cy.get(topNavigationSelectors.navMenuContainer)
+						cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 							.should('exist')
 							.and('be.visible')
-						cy.get(topNavigationSelectors.navHamburgerMenu).should(
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
 							'not.be.visible',
 						)
 						assertMenuItems(mockUseMainNavState().travellerName)
@@ -120,10 +120,10 @@ describe('<MainNav />', () => {
 							store,
 						)
 						cy.setViewportToTablet()
-						cy.get(topNavigationSelectors.navMenuContainer)
+						cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 							.should('exist')
 							.and('be.visible')
-						cy.get(topNavigationSelectors.navHamburgerMenu).should(
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
 							'not.be.visible',
 						)
 						assertMenuItems(mockUseMainNavState().travellerName)
@@ -141,7 +141,7 @@ describe('<MainNav />', () => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_MESSAGES,
 							viewports.mobile,
-							topNavigationSelectors.navMenuItemMessages,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
@@ -154,7 +154,7 @@ describe('<MainNav />', () => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_TRAVELLERS,
 							viewports.mobile,
-							topNavigationSelectors.navMenuItemTravellers,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
 							store,
@@ -167,7 +167,7 @@ describe('<MainNav />', () => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_AUTHENTICATION,
 							viewports.mobile,
-							topNavigationSelectors.navMenuItemLogout,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
 							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
 							store,
@@ -186,11 +186,11 @@ describe('<MainNav />', () => {
 						)
 						cy.setViewportToMobile()
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('have.class', mainNavStyles.active)
 						cy.get('body').click(0, 0)
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('not.have.class', mainNavStyles.active)
 					})
 				})
@@ -207,15 +207,15 @@ describe('<MainNav />', () => {
 						cy.setViewportToMobile()
 
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('have.class', mainNavStyles.active)
 
 						cy.get(
-							topNavigationSelectors.navMenuItemMessages,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 						).click()
 
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('not.have.class', mainNavStyles.active)
 					})
 				})
@@ -232,15 +232,15 @@ describe('<MainNav />', () => {
 						cy.setViewportToMobile()
 
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('have.class', mainNavStyles.active)
 
 						cy.get(
-							topNavigationSelectors.navMenuItemTravellers,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 						).click()
 
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('not.have.class', mainNavStyles.active)
 					})
 				})
@@ -253,10 +253,10 @@ describe('<MainNav />', () => {
 						)
 						cy.setViewportToMobile()
 
-						cy.get(topNavigationSelectors.navMenuContainer).should(
-							'not.exist',
-						)
-						cy.get(topNavigationSelectors.navHamburgerMenu).should(
+						cy.get(
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER,
+						).should('not.exist')
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
 							'not.exist',
 						)
 					})
@@ -269,7 +269,7 @@ describe('<MainNav />', () => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_MESSAGES,
 							viewports.tablet,
-							topNavigationSelectors.navMenuItemMessages,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
@@ -282,7 +282,7 @@ describe('<MainNav />', () => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_TRAVELLERS,
 							viewports.tablet,
-							topNavigationSelectors.navMenuItemTravellers,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
 							store,
@@ -295,7 +295,7 @@ describe('<MainNav />', () => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_AUTHENTICATION,
 							viewports.tablet,
-							topNavigationSelectors.navMenuItemLogout,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
 							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
 							store,
@@ -310,7 +310,7 @@ describe('<MainNav />', () => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_MESSAGES,
 							viewports.desktop,
-							topNavigationSelectors.navMenuItemMessages,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
@@ -323,7 +323,7 @@ describe('<MainNav />', () => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_TRAVELLERS,
 							viewports.desktop,
-							topNavigationSelectors.navMenuItemTravellers,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
 							store,
@@ -336,7 +336,7 @@ describe('<MainNav />', () => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_AUTHENTICATION,
 							viewports.desktop,
-							topNavigationSelectors.navMenuItemLogout,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
 							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
 							store,
@@ -358,7 +358,7 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navMenuContainer)
+					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 						.should('have.attr', 'aria-label', 'Top navigation')
 						.and('have.attr', 'role', 'navigation')
 				})
@@ -373,7 +373,7 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navHamburgerMenu)
+					cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 						.should(
 							'have.attr',
 							'aria-controls',
@@ -393,7 +393,7 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navMenuItemsContainer)
+					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER)
 						.should('have.attr', 'id', 'nav-menu-items-container')
 						.and('have.attr', 'aria-label', 'Main navigation menu')
 				})
@@ -408,7 +408,7 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navMenuItemLogout)
+					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT)
 						.should('exist')
 						.and('contain.text', 'Logout')
 				})
@@ -423,11 +423,11 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navHamburgerMenu)
+					cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 						.focus()
 						.should('have.focus')
 					cy.get(
-						`${topNavigationSelectors.navMenuItemsContainer} a`,
+						`${TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER} a`,
 					).each(($el) => {
 						cy.wrap($el).focus().should('have.focus')
 					})

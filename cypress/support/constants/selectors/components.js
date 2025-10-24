@@ -19,15 +19,15 @@ export const HEADER_SELECTORS = {
 	SITE_HEADER_TITLE_LINK: getByDataCy('site-header-title-link'),
 }
 
-export const topNavigationSelectors = {
-	navMenuContainer: getByDataCy('nav-menu-container'),
-	navHamburgerMenu: getByDataCy('hamburger-menu'),
-	navMenuItemsContainer: getByDataCy('nav-menu-items-container'),
-	navMenuItemMessages: getByDataCy('nav-menu-item-messages'),
-	totalMessages: getByDataCy('total-messages'),
-	navMenuItemTravellers: getByDataCy('nav-menu-item-travellers'),
-	navMenuItemLogin: getByDataCy('nav-menu-item-login'),
-	navMenuItemLogout: getByDataCy('nav-menu-item-logout'),
+export const TOP_NAVIGATION_SELECTORS = {
+	NAV_MENU_CONTAINER: getByDataCy('nav-menu-container'),
+	HAMBURGER_MENU: getByDataCy('hamburger-menu'),
+	NAV_MENU_ITEMS_CONTAINER: getByDataCy('nav-menu-items-container'),
+	NAV_MENU_ITEM_MESSAGES: getByDataCy('nav-menu-item-messages'),
+	TOTAL_MESSAGES: getByDataCy('total-messages'),
+	NAV_MENU_ITEM_TRAVELLERS: getByDataCy('nav-menu-item-travellers'),
+	NAV_MENU_ITEM_LOGIN: getByDataCy('nav-menu-item-login'),
+	NAV_MENU_ITEM_LOGOUT: getByDataCy('nav-menu-item-logout'),
 }
 
 export const authenticationFormSelectors = {

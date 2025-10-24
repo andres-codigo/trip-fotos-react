@@ -1,6 +1,6 @@
 import {
 	HEADER_SELECTORS,
-	topNavigationSelectors,
+	TOP_NAVIGATION_SELECTORS,
 } from '../../support/constants/selectors/components'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 import { user } from '../../support/constants/users'
@@ -14,7 +14,7 @@ describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', ()
 		cy.setViewportToDesktop()
 		cy.assertHeaderTitleLink()
 
-		cy.get(topNavigationSelectors.navHamburgerMenu).should('not.exist')
+		cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should('not.exist')
 	})
 
 	it('Navigates to the "authentication" page when clicking the app title', () => {
@@ -33,7 +33,7 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 		cy.setViewportToMobile()
 		cy.assertHeaderTitleLink()
 
-		cy.get(topNavigationSelectors.navHamburgerMenu).should('exist')
+		cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should('exist')
 	})
 
 	it('Navigates to the "home" page when clicking the app title', () => {
@@ -46,7 +46,7 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 
 		cy.get(HEADER_SELECTORS.SITE_HEADER).as('header')
 		cy.get('@header')
-			.find(topNavigationSelectors.navHamburgerMenu)
+			.find(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 			.as('hamburgerMenu')
 
 		// Ensure the menu is initially closed

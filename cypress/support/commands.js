@@ -5,7 +5,7 @@ import { mountWithProviders } from './commands-support-files/mountWithProviders'
 
 import {
 	HEADER_SELECTORS,
-	topNavigationSelectors,
+	TOP_NAVIGATION_SELECTORS,
 	authenticationFormSelectors,
 } from './constants/selectors/components'
 import { user } from './constants/users'
@@ -115,7 +115,7 @@ Cypress.Commands.add('assertHeaderTitleLink', () => {
 // TOP NAVIGATION HAMBURGER MENU
 ////
 Cypress.Commands.add('assertHamburgerMenuState', (isActive) => {
-	cy.get(topNavigationSelectors.navHamburgerMenu)
+	cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 		.invoke('attr', 'class')
 		.should(isActive ? 'contain' : 'not.contain', '_active_')
 })
