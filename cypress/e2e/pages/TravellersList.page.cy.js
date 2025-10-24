@@ -1,6 +1,6 @@
 import { DATABASE } from '../../support/constants/api/database'
 import { dialog } from '../../support/constants/dialog'
-import { pageSelectors } from '../../support/constants/selectors/pages'
+import { PAGE_SELECTORS } from '../../support/constants/selectors/pages'
 import { travellersListSelectors } from '../../support/constants/selectors'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 
@@ -17,8 +17,8 @@ describe('Travellers Page - WIP', () => {
 		it('should display the travellers page', () => {
 			performLogin()
 
-			cy.get(pageSelectors.mainContainer).should('be.visible')
-			cy.get(pageSelectors.travellersPage).should('exist')
+			cy.get(PAGE_SELECTORS.MAIN_CONTAINER).should('be.visible')
+			cy.get(PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER).should('exist')
 		})
 
 		it('should render the travellers list component', () => {

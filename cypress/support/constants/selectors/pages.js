@@ -6,15 +6,19 @@ import {
 /////
 /// Page Selectors
 /////
-export const pageSelectors = {
-	mainContainer: getByDataCy('main-container'),
-	homePage: getByDataCyAlt('home-main-container'),
-	travellersPage: getByDataCyAlt('travellers-main-container'),
-	messagesPage: getByDataCyAlt('messages-main-container'),
-	authenticationPage: getByDataCyAlt('authentication-main-container'),
-	pageNotFoundPage: getByDataCyAlt('page-not-found-main-container'),
+export const PAGE_SELECTORS = {
+	MAIN_CONTAINER: getByDataCy('main-container'),
+	HOME_MAIN_CONTAINER: getByDataCyAlt('home-main-container'),
+	TRAVELLERS_MAIN_CONTAINER: getByDataCyAlt('travellers-main-container'),
+	MESSAGES_MAIN_CONTAINER: getByDataCyAlt('messages-main-container'),
+	AUTHENTICATION_MAIN_CONTAINER: getByDataCyAlt(
+		'authentication-main-container',
+	),
+	PAGE_NOT_FOUND_MAIN_CONTAINER: getByDataCyAlt(
+		'page-not-found-main-container',
+	),
 }
 
-export const pageNotFoundSelectors = {
-	homeLink: getByDataCy('home-link'),
+export const PAGE_NOT_FOUND_SELECTORS = {
+	HOME_LINK: getByDataCy('home-link'),
 }

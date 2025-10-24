@@ -1,4 +1,4 @@
-import { pageNotFoundSelectors } from '../../support/constants/selectors/pages'
+import { PAGE_NOT_FOUND_SELECTORS } from '../../support/constants/selectors/pages'
 import { headerSelectors } from '../../support/constants/selectors'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 import { user } from '../../support/constants/users'
@@ -30,7 +30,7 @@ describe('Logged in > PageNotFound page', () => {
 			.should('have.attr', 'href', APP_URLS.CY_HOME)
 
 		// Click the back to home link and verify url
-		cy.get(pageNotFoundSelectors.homeLink).as('homeLink')
+		cy.get(PAGE_NOT_FOUND_SELECTORS.HOME_LINK).as('homeLink')
 		cy.get('@homeLink').click()
 		cy.url().should('eq', BASE_URL + APP_URLS.CY_TRAVELLERS)
 
@@ -63,7 +63,7 @@ describe('Not logged in > PageNotFound page', () => {
 			.should('have.attr', 'href', APP_URLS.CY_AUTHENTICATION)
 
 		// Click the back to home link and verify url
-		cy.get(pageNotFoundSelectors.homeLink).as('homeLink')
+		cy.get(PAGE_NOT_FOUND_SELECTORS.HOME_LINK).as('homeLink')
 		cy.get('@homeLink').click()
 		cy.url().should('eq', loginUrl)
 

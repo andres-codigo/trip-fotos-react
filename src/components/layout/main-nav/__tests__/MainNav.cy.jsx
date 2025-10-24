@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 
 import '../../../../../cypress/support/commands'
 
-import { pageSelectors } from '../../../../../cypress/support/constants/selectors/pages'
+import { PAGE_SELECTORS } from '../../../../../cypress/support/constants/selectors/pages'
 import { topNavigationSelectors } from '../../../../../cypress/support/constants/selectors'
 import { APP_URLS } from '../../../../../cypress/support/constants/api/urls'
 
@@ -142,7 +142,7 @@ describe('<MainNav />', () => {
 							APP_URLS.CY_MESSAGES,
 							viewports.mobile,
 							topNavigationSelectors.navMenuItemMessages,
-							pageSelectors.messagesPage,
+							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
 						)
@@ -155,7 +155,7 @@ describe('<MainNav />', () => {
 							APP_URLS.CY_TRAVELLERS,
 							viewports.mobile,
 							topNavigationSelectors.navMenuItemTravellers,
-							pageSelectors.travellersPage,
+							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
 							store,
 						)
@@ -168,7 +168,7 @@ describe('<MainNav />', () => {
 							APP_URLS.CY_AUTHENTICATION,
 							viewports.mobile,
 							topNavigationSelectors.navMenuItemLogout,
-							pageSelectors.authenticationPage,
+							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
 							store,
 						)
@@ -270,7 +270,7 @@ describe('<MainNav />', () => {
 							APP_URLS.CY_MESSAGES,
 							viewports.tablet,
 							topNavigationSelectors.navMenuItemMessages,
-							pageSelectors.messagesPage,
+							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
 						)
@@ -283,7 +283,7 @@ describe('<MainNav />', () => {
 							APP_URLS.CY_TRAVELLERS,
 							viewports.tablet,
 							topNavigationSelectors.navMenuItemTravellers,
-							pageSelectors.travellersPage,
+							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
 							store,
 						)
@@ -296,7 +296,7 @@ describe('<MainNav />', () => {
 							APP_URLS.CY_AUTHENTICATION,
 							viewports.tablet,
 							topNavigationSelectors.navMenuItemLogout,
-							pageSelectors.authenticationPage,
+							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
 							store,
 						)
@@ -311,7 +311,7 @@ describe('<MainNav />', () => {
 							APP_URLS.CY_MESSAGES,
 							viewports.desktop,
 							topNavigationSelectors.navMenuItemMessages,
-							pageSelectors.messagesPage,
+							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
 						)
@@ -324,7 +324,7 @@ describe('<MainNav />', () => {
 							APP_URLS.CY_TRAVELLERS,
 							viewports.desktop,
 							topNavigationSelectors.navMenuItemTravellers,
-							pageSelectors.travellersPage,
+							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
 							store,
 						)
@@ -337,7 +337,7 @@ describe('<MainNav />', () => {
 							APP_URLS.CY_AUTHENTICATION,
 							viewports.desktop,
 							topNavigationSelectors.navMenuItemLogout,
-							pageSelectors.authenticationPage,
+							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
 							store,
 						)
