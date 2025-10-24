@@ -1,4 +1,4 @@
-import { GLOBAL } from '@/constants/global.js'
+import { GLOBAL } from '@/constants/ui'
 
 export const TEST_WIDTHS = {
 	MOBILE_SMALL: GLOBAL.BREAKPOINT.MOBILE - 100, // 668px

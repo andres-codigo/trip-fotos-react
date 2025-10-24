@@ -1,4 +1,4 @@
-export const FIREBASE_ERROR_TYPES = Object.freeze({
+export const FIREBASE_ERRORS = Object.freeze({
 	// FIREBASE ERROR MESSAGES
 	AUTHENTICATION_ACTION_TYPES: {
 		DEFAULT: 'DEFAULT',

@@ -10,7 +10,7 @@ import {
 	useInRouterContext,
 } from 'react-router-dom'
 
-import { PATHS } from '@/constants/paths'
+import { PATHS } from '@/constants/ui'
 
 import { tryLogin } from '@/store/slices/authenticationSlice'
 

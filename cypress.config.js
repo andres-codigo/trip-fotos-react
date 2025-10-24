@@ -1,7 +1,7 @@
 import { defineConfig } from 'cypress'
 import viteConfig from './vite.config.js'
 
-import { PATHS } from './src/constants/paths'
+import { PATHS } from './src/constants/ui/paths.js'
 
 import dotenv from 'dotenv'
 dotenv.config()

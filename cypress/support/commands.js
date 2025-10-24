@@ -4,12 +4,12 @@ import configureStore from 'redux-mock-store'
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 
 import {
-	headerSelectors,
-	topNavigationSelectors,
-	authenticationFormSelectors,
-} from './constants/selectors'
-import { user } from './constants/users'
-import { viewports } from './constants/viewports'
+	HEADER_SELECTORS,
+	TOP_NAVIGATION_SELECTORS,
+	AUTHENTICATION_FORM_SELECTORS,
+} from './constants/selectors/components'
+import { TEST_USER } from './constants/env/test-users'
+import { VIEWPORTS } from './constants/env/viewports'
 
 const mockStore = configureStore([])
 ////
@@ -19,9 +19,9 @@ Cypress.Commands.add('createMockStore', (authToken = null) => {
 	return mockStore({
 		authentication: {
 			token: authToken,
-			userId: user.mockUserId,
-			userName: user.mockName,
-			userEmail: user.validEmail,
+			userId: TEST_USER.MOCK_USER_ID,
+			userName: TEST_USER.MOCK_NAME,
+			userEmail: TEST_USER.VALID_EMAIL,
 			didAutoLogout: false,
 		},
 		travellers: {
@@ -44,9 +44,9 @@ Cypress.Commands.add('mountWithProviders', (ui, store) => {
 // LOGIN
 ////
 Cypress.Commands.add('login', (email, password) => {
-	cy.get(authenticationFormSelectors.emailInput).type(email)
-	cy.get(authenticationFormSelectors.passwordInput).type(password)
-	cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
+	cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(email)
+	cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(password)
+	cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
 })
 
 ////
@@ -84,19 +84,19 @@ Cypress.Commands.add('interceptDelayedLogin', (method, url, time) => {
 ////
 Cypress.Commands.add('setViewportToMobile', () => {
 	cy.window().then((win) => {
-		cy.viewport(viewports.mobile.width, win.innerHeight)
+		cy.viewport(VIEWPORTS.MOBILE.WIDTH, win.innerHeight)
 	})
 })
 
 Cypress.Commands.add('setViewportToTablet', () => {
 	cy.window().then((win) => {
-		cy.viewport(viewports.tablet.width, win.innerHeight)
+		cy.viewport(VIEWPORTS.TABLET.WIDTH, win.innerHeight)
 	})
 })
 
 Cypress.Commands.add('setViewportToDesktop', () => {
 	cy.window().then((win) => {
-		cy.viewport(viewports.desktop.width, win.innerHeight)
+		cy.viewport(VIEWPORTS.DESKTOP.WIDTH, win.innerHeight)
 	})
 })
 
@@ -104,7 +104,7 @@ Cypress.Commands.add('setViewportToDesktop', () => {
 // HEADER
 ////
 Cypress.Commands.add('assertHeaderTitleLink', () => {
-	cy.get(headerSelectors.siteHeaderTitleLink)
+	cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK)
 		.find('a')
 		.then(($siteHeaderTitleLink) => {
 			expect($siteHeaderTitleLink.text()).to.equal('Trip Fotos')
@@ -115,7 +115,7 @@ Cypress.Commands.add('assertHeaderTitleLink', () => {
 // TOP NAVIGATION HAMBURGER MENU
 ////
 Cypress.Commands.add('assertHamburgerMenuState', (isActive) => {
-	cy.get(topNavigationSelectors.navHamburgerMenu)
+	cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 		.invoke('attr', 'class')
 		.should(isActive ? 'contain' : 'not.contain', '_active_')
 })

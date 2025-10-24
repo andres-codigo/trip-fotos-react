@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
-import { PATHS } from '@/constants/paths'
+import { PATHS } from '@/constants/ui'
 
 import { useClickOutsideToClose as useClickOutsideToCloseDefault } from './hooks/useClickOutsideToClose'
 import { useLogout as useLogoutDefault } from './hooks/useLogout'

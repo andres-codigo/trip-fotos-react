@@ -4,13 +4,11 @@ import PropTypes from 'prop-types'
 
 import '../../../../../cypress/support/commands'
 
-import {
-	pageSelectors,
-	topNavigationSelectors,
-} from '../../../../../cypress/support/constants/selectors'
-import { urls } from '../../../../../cypress/support/constants/urls'
+import { PAGE_SELECTORS } from '../../../../../cypress/support/constants/selectors/pages'
+import { TOP_NAVIGATION_SELECTORS } from '../../../../../cypress/support/constants/selectors/components'
+import { APP_URLS } from '../../../../../cypress/support/constants/api/urls'
 
-import { viewports } from '../../../../../cypress/support/constants/viewports'
+import { VIEWPORTS } from '../../../../../cypress/support/constants/env/viewports'
 
 import { TestMainNav } from './test-utilities/mainNavTestUtils'
 import {
@@ -59,7 +57,7 @@ describe('<MainNav />', () => {
 						<TestMainNav isLoggedIn={false} />,
 						store,
 					)
-					cy.get(topNavigationSelectors.navMenuContainer).should(
+					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER).should(
 						'not.exist',
 					)
 				})
@@ -78,10 +76,10 @@ describe('<MainNav />', () => {
 							store,
 						)
 						cy.setViewportToMobile()
-						cy.get(topNavigationSelectors.navMenuContainer)
+						cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 							.should('exist')
 							.and('be.visible')
-						cy.get(topNavigationSelectors.navHamburgerMenu)
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 							.should('exist')
 							.and('be.visible')
 						assertMenuItems(mockUseMainNavState().travellerName)
@@ -100,10 +98,10 @@ describe('<MainNav />', () => {
 							store,
 						)
 						cy.setViewportToTablet()
-						cy.get(topNavigationSelectors.navMenuContainer)
+						cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 							.should('exist')
 							.and('be.visible')
-						cy.get(topNavigationSelectors.navHamburgerMenu).should(
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
 							'not.be.visible',
 						)
 						assertMenuItems(mockUseMainNavState().travellerName)
@@ -122,10 +120,10 @@ describe('<MainNav />', () => {
 							store,
 						)
 						cy.setViewportToTablet()
-						cy.get(topNavigationSelectors.navMenuContainer)
+						cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 							.should('exist')
 							.and('be.visible')
-						cy.get(topNavigationSelectors.navHamburgerMenu).should(
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
 							'not.be.visible',
 						)
 						assertMenuItems(mockUseMainNavState().travellerName)
@@ -141,10 +139,10 @@ describe('<MainNav />', () => {
 				it('redirects to Messages page when Messages is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyMessages,
-							viewports.mobile,
-							topNavigationSelectors.navMenuItemMessages,
-							pageSelectors.messagesPage,
+							APP_URLS.CY_MESSAGES,
+							VIEWPORTS.MOBILE,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
+							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
 						)
@@ -154,10 +152,10 @@ describe('<MainNav />', () => {
 				it('redirects to Travellers page when Travellers is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyTravellers,
-							viewports.mobile,
-							topNavigationSelectors.navMenuItemTravellers,
-							pageSelectors.travellersPage,
+							APP_URLS.CY_TRAVELLERS,
+							VIEWPORTS.MOBILE,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
+							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
 							store,
 						)
@@ -167,10 +165,10 @@ describe('<MainNav />', () => {
 				it('redirects to Authentication page and closes menu when Logout is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyAuth,
-							viewports.mobile,
-							topNavigationSelectors.navMenuItemLogout,
-							pageSelectors.authenticationPage,
+							APP_URLS.CY_AUTHENTICATION,
+							VIEWPORTS.MOBILE,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
+							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
 							store,
 						)
@@ -188,11 +186,11 @@ describe('<MainNav />', () => {
 						)
 						cy.setViewportToMobile()
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('have.class', mainNavStyles.active)
 						cy.get('body').click(0, 0)
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('not.have.class', mainNavStyles.active)
 					})
 				})
@@ -209,15 +207,15 @@ describe('<MainNav />', () => {
 						cy.setViewportToMobile()
 
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('have.class', mainNavStyles.active)
 
 						cy.get(
-							topNavigationSelectors.navMenuItemMessages,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 						).click()
 
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('not.have.class', mainNavStyles.active)
 					})
 				})
@@ -234,15 +232,15 @@ describe('<MainNav />', () => {
 						cy.setViewportToMobile()
 
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('have.class', mainNavStyles.active)
 
 						cy.get(
-							topNavigationSelectors.navMenuItemTravellers,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 						).click()
 
 						cy.get(
-							topNavigationSelectors.navMenuItemsContainer,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 						).should('not.have.class', mainNavStyles.active)
 					})
 				})
@@ -255,10 +253,10 @@ describe('<MainNav />', () => {
 						)
 						cy.setViewportToMobile()
 
-						cy.get(topNavigationSelectors.navMenuContainer).should(
-							'not.exist',
-						)
-						cy.get(topNavigationSelectors.navHamburgerMenu).should(
+						cy.get(
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER,
+						).should('not.exist')
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
 							'not.exist',
 						)
 					})
@@ -269,10 +267,10 @@ describe('<MainNav />', () => {
 				it('redirects to Messages page when Messages is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyMessages,
-							viewports.tablet,
-							topNavigationSelectors.navMenuItemMessages,
-							pageSelectors.messagesPage,
+							APP_URLS.CY_MESSAGES,
+							VIEWPORTS.TABLET,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
+							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
 						)
@@ -282,10 +280,10 @@ describe('<MainNav />', () => {
 				it('redirects to Travellers page when Travellers is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyTravellers,
-							viewports.tablet,
-							topNavigationSelectors.navMenuItemTravellers,
-							pageSelectors.travellersPage,
+							APP_URLS.CY_TRAVELLERS,
+							VIEWPORTS.TABLET,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
+							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
 							store,
 						)
@@ -295,10 +293,10 @@ describe('<MainNav />', () => {
 				it('redirects to Authentication page when Logout is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyAuth,
-							viewports.tablet,
-							topNavigationSelectors.navMenuItemLogout,
-							pageSelectors.authenticationPage,
+							APP_URLS.CY_AUTHENTICATION,
+							VIEWPORTS.tablet,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
+							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
 							store,
 						)
@@ -310,10 +308,10 @@ describe('<MainNav />', () => {
 				it('redirects to Messages page when Messages is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyMessages,
-							viewports.desktop,
-							topNavigationSelectors.navMenuItemMessages,
-							pageSelectors.messagesPage,
+							APP_URLS.CY_MESSAGES,
+							VIEWPORTS.DESKTOP,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
+							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
 						)
@@ -323,10 +321,10 @@ describe('<MainNav />', () => {
 				it('redirects to Travellers page when Travellers is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyTravellers,
-							viewports.desktop,
-							topNavigationSelectors.navMenuItemTravellers,
-							pageSelectors.travellersPage,
+							APP_URLS.CY_TRAVELLERS,
+							VIEWPORTS.DESKTOP,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
+							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
 							store,
 						)
@@ -336,10 +334,10 @@ describe('<MainNav />', () => {
 				it('redirects to Authentication page when Logout is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							urls.cyAuth,
-							viewports.desktop,
-							topNavigationSelectors.navMenuItemLogout,
-							pageSelectors.authenticationPage,
+							APP_URLS.CY_AUTHENTICATION,
+							VIEWPORTS.DESKTOP,
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
+							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
 							store,
 						)
@@ -360,7 +358,7 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navMenuContainer)
+					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 						.should('have.attr', 'aria-label', 'Top navigation')
 						.and('have.attr', 'role', 'navigation')
 				})
@@ -375,7 +373,7 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navHamburgerMenu)
+					cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 						.should(
 							'have.attr',
 							'aria-controls',
@@ -395,7 +393,7 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navMenuItemsContainer)
+					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER)
 						.should('have.attr', 'id', 'nav-menu-items-container')
 						.and('have.attr', 'aria-label', 'Main navigation menu')
 				})
@@ -410,7 +408,7 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navMenuItemLogout)
+					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT)
 						.should('exist')
 						.and('contain.text', 'Logout')
 				})
@@ -425,11 +423,11 @@ describe('<MainNav />', () => {
 						/>,
 						store,
 					)
-					cy.get(topNavigationSelectors.navHamburgerMenu)
+					cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 						.focus()
 						.should('have.focus')
 					cy.get(
-						`${topNavigationSelectors.navMenuItemsContainer} a`,
+						`${TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER} a`,
 					).each(($el) => {
 						cy.wrap($el).focus().should('have.focus')
 					})

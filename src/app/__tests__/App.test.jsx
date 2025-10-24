@@ -4,8 +4,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import * as redux from 'react-redux'
 import * as router from 'react-router-dom'
 
-import { AUTHENTICATION_ACTION_TYPES } from '@/constants/action-types'
-import { PATHS } from '@/constants/paths'
+import { AUTHENTICATION_ACTION_TYPES } from '@/constants/redux'
+import { PATHS } from '@/constants/ui'
 
 import App from '../App'
 
@@ -24,7 +24,7 @@ vi.mock('react-router-dom', async () => {
 	}
 })
 
-vi.mock('@/constants/paths', () => ({
+vi.mock('@/constants/ui', () => ({
 	PATHS: {
 		HOME: '/home',
 		AUTHENTICATION: '/authentication',

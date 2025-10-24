@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-import { GLOBAL } from '@/constants/global'
+import { GLOBAL } from '@/constants/ui'
 
 import { useClickOutsideToClose } from '../index'
 

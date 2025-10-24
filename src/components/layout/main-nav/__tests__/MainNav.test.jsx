@@ -103,7 +103,7 @@ import { useClickOutsideToClose } from '../hooks/useClickOutsideToClose'
 import { useMobileMenu } from '../hooks/useMobileMenu'
 import { useLogout } from '../hooks/useLogout'
 
-import { PATHS } from '@/constants/paths'
+import { PATHS } from '@/constants/ui'
 
 import navMenuButtonLinkStyles from '../nav-menu/NavMenuButtonLink.module.scss'
 import mainNavStyles from '../MainNav.module.scss'

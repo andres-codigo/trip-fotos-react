@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import { GLOBAL } from '@/constants/global'
-import { ERROR_MESSAGES } from '@/constants/error-messages'
-import { PATHS } from '@/constants/paths'
+import { GLOBAL } from '@/constants/ui'
+import { ERROR_MESSAGES } from '@/constants/errors'
+import { PATHS } from '@/constants/ui'
 
 import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
 

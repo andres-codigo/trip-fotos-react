@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux'
 
-import { PATHS } from '@/constants/paths'
+import { PATHS } from '@/constants/ui'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 import BaseButton from '@/components/ui/button/BaseButton'

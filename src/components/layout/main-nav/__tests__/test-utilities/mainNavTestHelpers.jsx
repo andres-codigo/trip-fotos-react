@@ -1,9 +1,7 @@
-import {
-	testSelectors,
-	topNavigationSelectors,
-} from '../../../../../../cypress/support/constants/selectors'
-import { urls } from '../../../../../../cypress/support/constants/urls'
-import { viewports } from '../../../../../../cypress/support/constants/viewports'
+import { TOP_NAVIGATION_SELECTORS } from '../../../../../../cypress/support/constants/selectors/components'
+import { TEST_SELECTORS } from '../../../../../../cypress/support/constants/selectors/test-utilities'
+import { APP_URLS } from '../../../../../../cypress/support/constants/api/urls'
+import { VIEWPORTS } from '../../../../../../cypress/support/constants/env/viewports'
 
 // TODO: Remove and import hooks once store slices are implemented
 export const mockUseMainNavState = () => ({
@@ -14,17 +12,17 @@ export const mockUseMainNavState = () => ({
 })
 
 export const assertMenuItems = (travellerName = 'Test User') => {
-	cy.get(topNavigationSelectors.navMenuItemMessages)
+	cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES)
 		.should('exist')
 		.and('be.visible')
-		.should('have.attr', 'href', urls.cyMessages)
+		.should('have.attr', 'href', APP_URLS.CY_MESSAGES)
 		.and('have.text', 'Messages')
-	cy.get(topNavigationSelectors.navMenuItemTravellers)
+	cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS)
 		.should('exist')
 		.and('be.visible')
-		.should('have.attr', 'href', urls.cyTravellers)
+		.should('have.attr', 'href', APP_URLS.CY_TRAVELLERS)
 		.and('have.text', 'Travellers')
-	cy.get(topNavigationSelectors.navMenuItemLogout)
+	cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT)
 		.should('exist')
 		.and('be.visible')
 		.and('have.text', `Logout ${travellerName}`)
@@ -67,15 +65,15 @@ export const assertMenuItemRedirect = (
 		store,
 	)
 
-	if (viewportType === viewports.mobile) {
+	if (viewportType === VIEWPORTS.MOBILE) {
 		cy.setViewportToMobile()
-	} else if (viewportType === viewports.tablet) {
+	} else if (viewportType === VIEWPORTS.TABLET) {
 		cy.setViewportToTablet()
 	} else {
 		cy.setViewportToDesktop()
 	}
 
 	cy.get(navMenuItem).click()
-	cy.get(testSelectors.locationDisplay).should('have.text', routePath)
+	cy.get(TEST_SELECTORS.LOCATION_DISPLAY).should('have.text', routePath)
 	cy.get(locationPageClassName).should('exist')
 }

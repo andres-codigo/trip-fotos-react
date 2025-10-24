@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { useSelector } from 'react-redux'
 
-import { PATHS } from '@/constants/paths'
+import { PATHS } from '@/constants/ui'
 
 import PageNotFound from '../PageNotFound'
 
@@ -24,7 +24,7 @@ vi.mock('react-redux', () => ({
 	useSelector: vi.fn(),
 }))
 
-vi.mock('@/constants/paths', () => ({
+vi.mock('@/constants/ui', () => ({
 	PATHS: {
 		TRAVELLERS: '/travellers',
 		AUTHENTICATION: '/authentication',

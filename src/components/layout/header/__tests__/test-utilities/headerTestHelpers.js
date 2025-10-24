@@ -1,10 +1,10 @@
 import {
-	headerSelectors,
-	topNavigationSelectors,
-} from '../../../../../../cypress/support/constants/selectors'
+	HEADER_SELECTORS,
+	TOP_NAVIGATION_SELECTORS,
+} from '../../../../../../cypress/support/constants/selectors/components'
 
 export const assertHeaderTitleLink = (expectedHref) => {
-	cy.get(headerSelectors.siteHeaderTitleLink)
+	cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK)
 		.should('exist')
 		.find('a')
 		.should('have.attr', 'href', expectedHref)
@@ -12,11 +12,11 @@ export const assertHeaderTitleLink = (expectedHref) => {
 }
 
 export const assertNavMenu = ({ shouldExist, shouldBeVisible }) => {
-	const navMenu = cy.get(topNavigationSelectors.navMenuContainer)
+	const navMenu = cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 	if (shouldExist) {
 		navMenu.should('exist')
 		const navMenuItems = cy.get(
-			topNavigationSelectors.navMenuItemsContainer,
+			TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
 		)
 		if (shouldBeVisible) {
 			navMenuItems.should('be.visible')
@@ -29,7 +29,7 @@ export const assertNavMenu = ({ shouldExist, shouldBeVisible }) => {
 }
 
 export const assertHamburgerMenu = (shouldExist) => {
-	const hamburgerMenu = cy.get(topNavigationSelectors.navHamburgerMenu)
+	const hamburgerMenu = cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 	if (shouldExist) {
 		hamburgerMenu.should('exist')
 	} else {

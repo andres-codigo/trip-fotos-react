@@ -10,7 +10,7 @@ import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 
 import { DIALOG } from '@/constants/test'
-import { FIREBASE_ERROR_TYPES } from '@/constants/firebase-error-types'
+import { FIREBASE_ERRORS } from '@/constants/auth'
 
 import {
 	MOCK_KEYS,
@@ -21,8 +21,8 @@ import {
 	TEST_IDS,
 } from '@/constants/test'
 
-import { PATHS } from '@/constants/paths'
-import { VALIDATION_MESSAGES } from '@/constants/validation-messages'
+import { PATHS } from '@/constants/ui'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import { validateEmail, validatePassword } from '@/utils/validation'
 
@@ -50,7 +50,7 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 vi.mock('@/utils/getFirebaseAuthErrorMessage', () => ({
 	getFirebaseAuthErrorMessage: vi.fn(
 		() =>
-			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 	),
 }))
@@ -158,7 +158,7 @@ const expectNoErrorDialog = async () => {
  */
 const setupFirebaseErrorMock = async (
 	firstReturn = null,
-	secondReturn = FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+	secondReturn = FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 		.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 ) => {
 	const { getFirebaseAuthErrorMessage } = await import(
@@ -698,7 +698,7 @@ describe('<UserAuth />', () => {
 				fillAndSubmitLoginForm()
 
 				await expectErrorDialog(
-					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+					FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 				)
 			})
@@ -722,7 +722,7 @@ describe('<UserAuth />', () => {
 				const getFirebaseAuthErrorMessage =
 					await setupFirebaseErrorMock(
 						null,
-						FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+						FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 							.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 					)
 
@@ -743,7 +743,7 @@ describe('<UserAuth />', () => {
 				})
 
 				await expectErrorDialog(
-					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+					FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 				)
 			})
@@ -764,7 +764,7 @@ describe('<UserAuth />', () => {
 				)
 
 				getFirebaseAuthErrorMessage.mockReturnValue(
-					FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+					FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 				)
 
@@ -798,7 +798,7 @@ describe('<UserAuth />', () => {
 					).toBeInTheDocument()
 					expect(
 						screen.getByText(
-							FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+							FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 								.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 						),
 					).toBeInTheDocument()

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 
 import { API_DATABASE } from '@/constants/api'
-import { ACCESSIBILITY } from '@/constants/accessibility'
+import { ACCESSIBILITY } from '@/constants/ui'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
@@ -65,7 +65,7 @@ const UserAuthForm = ({
 				id="user-authentication-form-title"
 				className={userAuthStyles.userAuthenticationTitle}
 				data-cy="user-authentication-form-title">
-				{mode === API_DATABASE.API_AUTH_LOGIN_MODE ? (
+				{mode === API_DATABASE.AUTH_LOGIN_MODE ? (
 					<>
 						Login{' '}
 						<span className={userAuthStyles.visuallyHidden}>
@@ -122,7 +122,7 @@ const UserAuthForm = ({
 					className={userAuthStyles.formSubmitButton}
 					data-cy="login-submit-button"
 					isDisabled={isLoading}>
-					{mode === API_DATABASE.API_AUTH_LOGIN_MODE
+					{mode === API_DATABASE.AUTH_LOGIN_MODE
 						? 'Log in'
 						: 'Sign up'}
 				</BaseButton>
@@ -133,7 +133,7 @@ const UserAuthForm = ({
 					className={userAuthStyles.toggleLink}
 					data-cy="login-signup-toggle-link"
 					isDisabled={isLoading}>
-					{mode === API_DATABASE.API_AUTH_LOGIN_MODE
+					{mode === API_DATABASE.AUTH_LOGIN_MODE
 						? 'Switch to Signup'
 						: 'Switch to Login'}
 				</BaseButton>
@@ -154,8 +154,8 @@ UserAuthForm.propTypes = {
 		message: PropTypes.string,
 	}),
 	mode: PropTypes.oneOf([
-		API_DATABASE.API_AUTH_LOGIN_MODE,
-		API_DATABASE.API_AUTH_SIGNUP_MODE,
+		API_DATABASE.AUTH_LOGIN_MODE,
+		API_DATABASE.AUTH_SIGNUP_MODE,
 	]).isRequired,
 	onEmailChange: PropTypes.func.isRequired,
 	onPasswordChange: PropTypes.func.isRequired,

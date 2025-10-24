@@ -3,7 +3,7 @@ import { Provider, useDispatch, useSelector } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-import { TRAVELLERS_ACTION_TYPES } from '@/constants/action-types'
+import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import {
 	MOCK_TRAVELLERS,
 	MOCK_USER,
@@ -13,7 +13,7 @@ import {
 	UI_TEXT,
 } from '@/constants/test'
 
-import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { ERROR_MESSAGES } from '@/constants/errors'
 
 vi.mock('react-redux', async () => {
 	const actual = await vi.importActual('react-redux')

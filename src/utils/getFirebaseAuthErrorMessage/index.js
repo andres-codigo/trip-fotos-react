@@ -1,6 +1,6 @@
-import { FIREBASE_ERROR_TYPES } from '@/constants/firebase-error-types'
+import { FIREBASE_ERRORS } from '@/constants/auth'
 
-const { AUTHENTICATION_ACTION_TYPES: authTypes } = FIREBASE_ERROR_TYPES
+const { AUTHENTICATION_ACTION_TYPES: authTypes } = FIREBASE_ERRORS
 
 export const getFirebaseAuthErrorMessage = (error) => {
 	const messages = {

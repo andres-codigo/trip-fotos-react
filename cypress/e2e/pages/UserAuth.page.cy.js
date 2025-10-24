@@ -1,15 +1,22 @@
-import { FIREBASE_ERROR_TYPES } from '../../../src/constants/firebase-error-types'
+import { FIREBASE_ERRORS } from '../../../src/constants/auth'
 
-import { apiDatabase, apiUrls } from '../../support/constants/api'
-import { dialog, dialogMessages } from '../../support/constants/dialog'
-import { errorMessages } from '../../support/constants/errorMessages'
-import { authenticationFormSelectors } from '../../support/constants/selectors'
-import { baseUrl, urls } from '../../support/constants/urls'
-import { user } from '../../support/constants/users'
+import { API_DATABASE } from '../../support/constants/api/endpoints'
+import {
+	DIALOG_SELECTORS,
+	DIALOG_MESSAGES,
+} from '../../support/constants/ui/dialog'
+import { ERROR_MESSAGES } from '../../support/constants/ui/error-messages'
+import { AUTHENTICATION_FORM_SELECTORS } from '../../support/constants/selectors/components'
+import {
+	BASE_URL,
+	APP_URLS,
+	SDK_METHOD_TYPE_URLS,
+} from '../../support/constants/api/urls'
+import { TEST_USER } from '../../support/constants/env/test-users'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
-const loginUrl = baseUrl + urls.cyAuth
+const loginUrl = BASE_URL + APP_URLS.CY_AUTHENTICATION
 
 describe('Form rendering and validation', () => {
 	beforeEach(() => {
@@ -17,71 +24,87 @@ describe('Form rendering and validation', () => {
 	})
 
 	it('renders login form', () => {
-		cy.get(authenticationFormSelectors.emailInput)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT)
 			.parent()
 			.within(() => {
 				cy.get('label[for="email"]').should(
 					'contain.text',
-					authenticationFormSelectors.emailLabel,
+					AUTHENTICATION_FORM_SELECTORS.EMAIL_LABEL,
 				)
-				cy.get(authenticationFormSelectors.emailInput).should('exist')
-			})
-
-		cy.get(authenticationFormSelectors.passwordInput)
-			.parent()
-			.within(() => {
-				cy.get('label[for="password"]').should(
-					'contain.text',
-					authenticationFormSelectors.passwordLabel,
-				)
-				cy.get(authenticationFormSelectors.passwordInput).should(
+				cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).should(
 					'exist',
 				)
 			})
 
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT)
+			.parent()
+			.within(() => {
+				cy.get('label[for="password"]').should(
+					'contain.text',
+					AUTHENTICATION_FORM_SELECTORS.PASSWORD_LABEL,
+				)
+				cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).should(
+					'exist',
+				)
+			})
+
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON)
 			.should('exist')
 			.and(
 				'contain.text',
-				authenticationFormSelectors.submitButtonTextLogin,
+				AUTHENTICATION_FORM_SELECTORS.SUBMIT_BUTTON_TEXT_LOGIN,
 			)
 
-		cy.get(authenticationFormSelectors.loginSignupToggleLink)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK)
 			.should('exist')
 			.and(
 				'contain.text',
-				authenticationFormSelectors.signupTextToggleLink,
+				AUTHENTICATION_FORM_SELECTORS.SIGNUP_TEXT_TOGGLE_LINK,
 			)
 	})
 
 	it('shows validation errors for empty fields', () => {
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
-		cy.get(authenticationFormSelectors.emailErrorMessage).should('exist')
-		cy.get(authenticationFormSelectors.passwordErrorMessage).should('exist')
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_ERROR_MESSAGE).should(
+			'exist',
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_ERROR_MESSAGE).should(
+			'exist',
+		)
 	})
 
 	it('shows validation error for invalid email', () => {
-		cy.get(authenticationFormSelectors.emailInput).type(user.invalidEmail)
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
-		cy.get(authenticationFormSelectors.emailErrorMessage).should('exist')
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USER.INVALID_EMAIL,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_ERROR_MESSAGE).should(
+			'exist',
+		)
 	})
 
 	it('shows validation error for invalid password that is less than 6 characters long', () => {
-		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
-		cy.get(authenticationFormSelectors.passwordInput).type(
-			user.invalidPasswordTooShort,
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USER.VALID_EMAIL,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
+			TEST_USER.INVALID_PASSWORD_TOO_SHORT,
 		)
 
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
-		cy.get(authenticationFormSelectors.passwordErrorMessage).should('exist')
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_ERROR_MESSAGE).should(
+			'exist',
+		)
 	})
 
 	it('shows validation error for invalid password when Enter is pressed in the email field and password field is empty', () => {
-		cy.get(authenticationFormSelectors.emailInput).type(
-			user.validEmail + '{enter}',
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USER.VALID_EMAIL + '{enter}',
 		)
 
-		cy.get(authenticationFormSelectors.passwordErrorMessage).should('exist')
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_ERROR_MESSAGE).should(
+			'exist',
+		)
 	})
 })
 
@@ -91,27 +114,32 @@ describe('Form submission', () => {
 	})
 
 	it('submits the form when the Enter key is pressed in the password field', () => {
-		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
-		cy.get(authenticationFormSelectors.passwordInput)
-			.type(user.validPassword)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USER.VALID_EMAIL,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT)
+			.type(TEST_USER.VALID_PASSWORD)
 			.type('{enter}')
 
-		cy.get(dialog.authenticating).should('exist')
+		cy.get(DIALOG_SELECTORS.AUTHENTICATING).should('exist')
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
+		cy.interceptLogin(
+			API_DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+		)
 
-		const emailWithSpaces = `   ${user.validEmail}   `
-		const passwordWithSpaces = `   ${user.validPassword}   `
+		const emailWithSpaces = `   ${TEST_USER.VALID_EMAIL}   `
+		const passwordWithSpaces = `   ${TEST_USER.VALID_PASSWORD}   `
 
 		cy.login(emailWithSpaces, passwordWithSpaces)
 
 		cy.wait('@loginRequest')
 			.its('request.body')
 			.should((body) => {
-				expect(body.email).to.eq(user.validEmail)
-				expect(body.password).to.eq(user.validPassword)
+				expect(body.email).to.eq(TEST_USER.VALID_EMAIL)
+				expect(body.password).to.eq(TEST_USER.VALID_PASSWORD)
 			})
 	})
 
@@ -126,54 +154,57 @@ describe('UI state and mode switching', () => {
 	})
 
 	it('switches between login and signup modes', () => {
-		cy.get(authenticationFormSelectors.loginSignupToggleLink)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK)
 			.should('exist')
 			.and(
 				'contain.text',
-				authenticationFormSelectors.signupTextToggleLink,
+				AUTHENTICATION_FORM_SELECTORS.SIGNUP_TEXT_TOGGLE_LINK,
 			)
 			.click()
 
-		cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK).should(
 			'contain.text',
-			authenticationFormSelectors.loginTextToggleLink,
+			AUTHENTICATION_FORM_SELECTORS.LOGIN_TEXT_TOGGLE_LINK,
 		)
 
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).should(
 			'contain.text',
-			authenticationFormSelectors.signupTextSubmitButton,
+			AUTHENTICATION_FORM_SELECTORS.SIGNUP_TEXT_SUBMIT_BUTTON,
 		)
 
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
 
-		cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK).should(
 			'contain.text',
-			authenticationFormSelectors.loginTextToggleLink,
+			AUTHENTICATION_FORM_SELECTORS.LOGIN_TEXT_TOGGLE_LINK,
 		)
 
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).should(
 			'contain.text',
-			authenticationFormSelectors.signupTextSubmitButton,
+			AUTHENTICATION_FORM_SELECTORS.SIGNUP_TEXT_SUBMIT_BUTTON,
 		)
 	})
 
 	it('shows a loading dialog with spinner while authenticating', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
-		cy.login(user.validEmail, user.validPassword)
+		cy.interceptLogin(
+			API_DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+		)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)
 
-		cy.get(dialog.authenticating)
+		cy.get(DIALOG_SELECTORS.AUTHENTICATING)
 			.should('exist')
 			.within(() => {
-				cy.get(dialog.title).should(
+				cy.get(DIALOG_SELECTORS.TITLE).should(
 					'contain.text',
-					dialogMessages.loading.title,
+					DIALOG_MESSAGES.LOADING.TITLE,
 				)
-				cy.get(dialog.textContent).should(
+				cy.get(DIALOG_SELECTORS.TEXT_CONTENT).should(
 					'contain.text',
-					dialogMessages.loading.text,
+					DIALOG_MESSAGES.LOADING.TEXT,
 				)
-				cy.get(dialog.spinnerContainer).should('exist')
-				cy.get(dialog.spinnerImage)
+				cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('exist')
+				cy.get(DIALOG_SELECTORS.SPINNER_IMAGE)
 					.should('exist')
 					.and('have.attr', 'src')
 					.and('include', 'data:image/svg+xml')
@@ -184,18 +215,20 @@ describe('UI state and mode switching', () => {
 
 	it('disables form fields and buttons while the loading dialog displayed', () => {
 		cy.interceptDelayedLogin(
-			apiDatabase.POST,
-			apiUrls.signInWithPassword,
+			API_DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			1000,
 		)
-		cy.login(user.validEmail, user.validPassword)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)
 
-		cy.get(authenticationFormSelectors.emailInput).should('be.disabled')
-		cy.get(authenticationFormSelectors.passwordInput).should('be.disabled')
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).should('be.disabled')
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).should(
 			'be.disabled',
 		)
-		cy.get(authenticationFormSelectors.loginSignupToggleLink).should(
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).should(
+			'be.disabled',
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK).should(
 			'have.attr',
 			'aria-disabled',
 			'true',
@@ -205,7 +238,7 @@ describe('UI state and mode switching', () => {
 		// Use force: true because the backdrop is covered by content due to CSS positioning,
 		// but clicking the backdrop is the intended functionality we need to test
 		// eslint-disable-next-line cypress/no-force
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click({
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click({
 			force: true,
 		})
 		cy.wait('@delayedLogin')
@@ -218,16 +251,16 @@ describe('UI error dialog', () => {
 	})
 
 	function assertErrorDialog(messageKey) {
-		cy.get(dialog.invalidEmailOrPassword)
+		cy.get(DIALOG_SELECTORS.INVALID_EMAIL_OR_PASSWORD)
 			.parent()
 			.within(() => {
-				cy.get(dialog.title).should(
+				cy.get(DIALOG_SELECTORS.TITLE).should(
 					'contain.text',
-					dialogMessages.error.title,
+					DIALOG_MESSAGES.ERROR.TITLE,
 				)
-				cy.get(dialog.textContent).should(
+				cy.get(DIALOG_SELECTORS.TEXT_CONTENT).should(
 					'contain.text',
-					errorMessages[messageKey],
+					ERROR_MESSAGES[messageKey],
 				)
 				cy.get('footer > button').should('contain.text', 'Close')
 				cy.get('footer > button').click()
@@ -236,11 +269,11 @@ describe('UI error dialog', () => {
 
 	function logInUsingIntercept(errorKey) {
 		cy.interceptLoginError(
-			apiDatabase.POST,
-			apiUrls.signInWithPassword,
+			API_DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			errorKey,
 		)
-		cy.login(user.validEmail, user.invalidPassword)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.INVALID_PASSWORD)
 		cy.wait('@loginErrorRequest')
 
 		assertErrorDialog(errorKey)
@@ -248,38 +281,36 @@ describe('UI error dialog', () => {
 
 	it('shows an invalid login credentials error dialog', () => {
 		logInUsingIntercept(
-			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.INVALID_LOGIN_CREDENTIALS,
 		)
 	})
 
 	it('shows too many unsuccessful login attempts error dialog', () => {
 		logInUsingIntercept(
-			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.TOO_MANY_ATTEMPTS_TRY_LATER,
 		)
 	})
 
 	it('shows the default error dialog', () => {
-		logInUsingIntercept(
-			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES.DEFAULT,
-		)
+		logInUsingIntercept(FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.DEFAULT)
 	})
 
 	it('closes the error dialog when the Escape key is pressed', () => {
 		cy.interceptLoginError(
-			apiDatabase.POST,
-			apiUrls.signInWithPassword,
-			FIREBASE_ERROR_TYPES.AUTHENTICATION_ACTION_TYPES
+			API_DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.INVALID_LOGIN_CREDENTIALS,
 		)
-		cy.login(user.validEmail, user.invalidPassword)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.INVALID_PASSWORD)
 		cy.wait('@loginErrorRequest')
 
-		cy.get(dialog.invalidEmailOrPassword).should('exist')
+		cy.get(DIALOG_SELECTORS.INVALID_EMAIL_OR_PASSWORD).should('exist')
 
 		cy.get('body').type('{esc}')
 
-		cy.get(dialog.invalidEmailOrPassword).should('not.exist')
+		cy.get(DIALOG_SELECTORS.INVALID_EMAIL_OR_PASSWORD).should('not.exist')
 	})
 })

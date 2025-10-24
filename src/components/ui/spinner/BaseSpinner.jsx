@@ -1,4 +1,4 @@
-import { GLOBAL } from '@/constants/global'
+import { GLOBAL } from '@/constants/ui'
 
 import baseSpinnerStyles from './BaseSpinner.module.scss'
 import loadingSpinner from '@/assets/loading-spinner.svg'
