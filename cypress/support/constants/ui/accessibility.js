@@ -1,4 +1,4 @@
-export const accessibilitySelectors = {
+export const ACCESSIBILITY_SELECTORS = {
 	ARIA_LABELLEDBY: 'aria-labelledby',
 	ARIA_REQUIRED: 'aria-required',
 	ARIA_INVALID: 'aria-invalid',
