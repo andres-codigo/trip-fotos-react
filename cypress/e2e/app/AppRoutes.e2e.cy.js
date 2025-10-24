@@ -4,7 +4,7 @@ import {
 	APP_URLS,
 	SDK_METHOD_TYPE_URLS,
 } from '../../support/constants/api/urls'
-import { authenticationFormSelectors } from '../../support/constants/selectors'
+import { authenticationFormSelectors } from '../../support/constants/selectors/components'
 import { user } from '../../support/constants/users'
 
 describe('App Routing', () => {

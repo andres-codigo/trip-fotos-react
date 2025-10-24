@@ -1,5 +1,5 @@
 import { PAGE_SELECTORS } from '../../../../cypress/support/constants/selectors/pages'
-import { commonSelectors } from '../../../../cypress/support/constants/selectors'
+import { commonSelectors } from '../../../../cypress/support/constants/selectors/components'
 
 import LoadingFallback from '@/components/common/LoadingFallback'
 

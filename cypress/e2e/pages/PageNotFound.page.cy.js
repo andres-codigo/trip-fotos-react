@@ -1,5 +1,5 @@
 import { PAGE_NOT_FOUND_SELECTORS } from '../../support/constants/selectors/pages'
-import { headerSelectors } from '../../support/constants/selectors'
+import { headerSelectors } from '../../support/constants/selectors/components'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 import { user } from '../../support/constants/users'
 

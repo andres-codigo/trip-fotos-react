@@ -3,7 +3,7 @@ import { FIREBASE_ERRORS } from '../../../src/constants/auth'
 import { DATABASE } from '../../support/constants/api/database'
 import { dialog, dialogMessages } from '../../support/constants/dialog'
 import { errorMessages } from '../../support/constants/errorMessages'
-import { authenticationFormSelectors } from '../../support/constants/selectors'
+import { authenticationFormSelectors } from '../../support/constants/selectors/components'
 import {
 	BASE_URL,
 	APP_URLS,

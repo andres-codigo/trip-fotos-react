@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import '../../../../../cypress/support/commands'
 
 import { PAGE_SELECTORS } from '../../../../../cypress/support/constants/selectors/pages'
-import { topNavigationSelectors } from '../../../../../cypress/support/constants/selectors'
+import { topNavigationSelectors } from '../../../../../cypress/support/constants/selectors/components'
 import { APP_URLS } from '../../../../../cypress/support/constants/api/urls'
 
 import { viewports } from '../../../../../cypress/support/constants/viewports'

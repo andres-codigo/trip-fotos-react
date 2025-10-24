@@ -7,7 +7,7 @@ import {
 	headerSelectors,
 	topNavigationSelectors,
 	authenticationFormSelectors,
-} from './constants/selectors'
+} from './constants/selectors/components'
 import { user } from './constants/users'
 import { viewports } from './constants/viewports'
 

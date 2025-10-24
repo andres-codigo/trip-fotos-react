@@ -1,4 +1,4 @@
-import { headerSelectors } from '../../../../../cypress/support/constants/selectors'
+import { headerSelectors } from '../../../../../cypress/support/constants/selectors/components'
 import { APP_URLS } from '../../../../../cypress/support/constants/api/urls'
 
 import { PATHS } from '@/constants/ui'

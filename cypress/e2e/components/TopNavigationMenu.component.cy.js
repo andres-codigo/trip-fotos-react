@@ -1,7 +1,7 @@
 import {
 	headerSelectors,
 	topNavigationSelectors,
-} from '../../support/constants/selectors'
+} from '../../support/constants/selectors/components'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 import { user } from '../../support/constants/users'
 

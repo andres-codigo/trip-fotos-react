@@ -1,14 +1,7 @@
 import {
 	getByDataCy,
 	getByDataCyError,
-} from '../../../src/testUtils/cypress/selectors'
-
-/////
-/// Location Selectors
-/////
-export const testSelectors = {
-	locationDisplay: getByDataCy('location-display'),
-}
+} from '../../../../src/testUtils/cypress/selectors'
 
 /////
 /// Common Component Selectors
