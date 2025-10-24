@@ -1,7 +1,10 @@
 import { FIREBASE_ERRORS } from '../../../src/constants/auth'
 
 import { DATABASE } from '../../support/constants/api/database'
-import { dialog, dialogMessages } from '../../support/constants/dialog'
+import {
+	DIALOG_SELECTORS,
+	DIALOG_MESSAGES,
+} from '../../support/constants/ui/dialog'
 import { errorMessages } from '../../support/constants/errorMessages'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../support/constants/selectors/components'
 import {
@@ -114,7 +117,7 @@ describe('Form submission', () => {
 			.type(user.validPassword)
 			.type('{enter}')
 
-		cy.get(dialog.authenticating).should('exist')
+		cy.get(DIALOG_SELECTORS.AUTHENTICATING).should('exist')
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
@@ -185,19 +188,19 @@ describe('UI state and mode switching', () => {
 		)
 		cy.login(user.validEmail, user.validPassword)
 
-		cy.get(dialog.authenticating)
+		cy.get(DIALOG_SELECTORS.AUTHENTICATING)
 			.should('exist')
 			.within(() => {
-				cy.get(dialog.title).should(
+				cy.get(DIALOG_SELECTORS.TITLE).should(
 					'contain.text',
-					dialogMessages.loading.title,
+					DIALOG_MESSAGES.LOADING.TITLE,
 				)
-				cy.get(dialog.textContent).should(
+				cy.get(DIALOG_SELECTORS.TEXT_CONTENT).should(
 					'contain.text',
-					dialogMessages.loading.text,
+					DIALOG_MESSAGES.LOADING.TEXT,
 				)
-				cy.get(dialog.spinnerContainer).should('exist')
-				cy.get(dialog.spinnerImage)
+				cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('exist')
+				cy.get(DIALOG_SELECTORS.SPINNER_IMAGE)
 					.should('exist')
 					.and('have.attr', 'src')
 					.and('include', 'data:image/svg+xml')
@@ -244,14 +247,14 @@ describe('UI error dialog', () => {
 	})
 
 	function assertErrorDialog(messageKey) {
-		cy.get(dialog.invalidEmailOrPassword)
+		cy.get(DIALOG_SELECTORS.INVALID_EMAIL_OR_PASSWORD)
 			.parent()
 			.within(() => {
-				cy.get(dialog.title).should(
+				cy.get(DIALOG_SELECTORS.TITLE).should(
 					'contain.text',
-					dialogMessages.error.title,
+					DIALOG_MESSAGES.ERROR.TITLE,
 				)
-				cy.get(dialog.textContent).should(
+				cy.get(DIALOG_SELECTORS.TEXT_CONTENT).should(
 					'contain.text',
 					errorMessages[messageKey],
 				)
@@ -300,10 +303,10 @@ describe('UI error dialog', () => {
 		cy.login(user.validEmail, user.invalidPassword)
 		cy.wait('@loginErrorRequest')
 
-		cy.get(dialog.invalidEmailOrPassword).should('exist')
+		cy.get(DIALOG_SELECTORS.INVALID_EMAIL_OR_PASSWORD).should('exist')
 
 		cy.get('body').type('{esc}')
 
-		cy.get(dialog.invalidEmailOrPassword).should('not.exist')
+		cy.get(DIALOG_SELECTORS.INVALID_EMAIL_OR_PASSWORD).should('not.exist')
 	})
 })

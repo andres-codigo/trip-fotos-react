@@ -1,5 +1,5 @@
 import { DATABASE } from '../../support/constants/api/database'
-import { dialog } from '../../support/constants/dialog'
+import { DIALOG_SELECTORS } from '../../support/constants/ui/dialog'
 import { PAGE_SELECTORS } from '../../support/constants/selectors/pages'
 import { TRAVELLERS_LIST_SELECTORS } from '../../support/constants/selectors/components'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
@@ -66,10 +66,10 @@ describe('Travellers Page - WIP', () => {
 			performLogin()
 
 			// Should show loading state initially
-			cy.get(dialog.spinnerContainer).should('be.visible')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
 
 			// Wait for loading to complete
-			cy.get(dialog.spinnerContainer).should('not.exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 
 			// Should show either travellers list or no travellers message
 			cy.get('body').then(($body) => {
@@ -90,7 +90,7 @@ describe('Travellers Page - WIP', () => {
 			performLogin()
 
 			// Wait for initial load
-			cy.get(dialog.spinnerContainer).should('not.exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 
 			// Click refresh if button is available
 			cy.get('body').then(($body) => {
@@ -102,10 +102,14 @@ describe('Travellers Page - WIP', () => {
 					cy.wrap(refreshButton).click()
 
 					// Should show loading again
-					cy.get(dialog.spinnerContainer).should('be.visible')
+					cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should(
+						'be.visible',
+					)
 
 					// Wait for refresh to complete
-					cy.get(dialog.spinnerContainer).should('not.exist')
+					cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should(
+						'not.exist',
+					)
 				}
 			})
 		})
@@ -114,7 +118,7 @@ describe('Travellers Page - WIP', () => {
 			performLogin()
 
 			// Wait for loading to complete
-			cy.get(dialog.spinnerContainer).should('not.exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 
 			// If no travellers message is shown, refresh button should be disabled
 			cy.get('body').then(($body) => {
@@ -352,9 +356,9 @@ describe('Travellers Page - WIP', () => {
 			performLogin()
 			cy.visit('/travellers')
 
-			cy.get(dialog.spinnerContainer).should('be.visible')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
 			cy.wait('@getTravellersWithDelay')
-			cy.get(dialog.spinnerContainer).should('not.exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 		})
 
 		it('should hide content while loading', () => {
@@ -366,14 +370,14 @@ describe('Travellers Page - WIP', () => {
 			performLogin()
 			cy.visit('/travellers')
 
-			cy.get(dialog.spinnerContainer).should('be.visible')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'not.exist',
 			)
 			cy.contains('No travellers listed.').should('not.exist')
 
 			cy.wait('@getTravellersWithDelay')
-			cy.get(dialog.spinnerContainer).should('not.exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 		})
 	})
 
