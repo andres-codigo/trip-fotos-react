@@ -25,7 +25,7 @@ import { pageSelectors } from '../constants/selectors/pages'
 
 ```
 cypress/support/constants/
-├── index.js                    # Root aggregator
+├── index.js                   # Root aggregator
 ├── api/
 │   ├── index.js               # Re-exports endpoints.js, urls.js
 │   ├── endpoints.js
