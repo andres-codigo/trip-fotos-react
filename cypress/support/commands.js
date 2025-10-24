@@ -9,7 +9,7 @@ import {
 	AUTHENTICATION_FORM_SELECTORS,
 } from './constants/selectors/components'
 import { TEST_USER } from './constants/env/users'
-import { viewports } from './constants/viewports'
+import { VIEWPORTS } from './constants/env/viewports'
 
 const mockStore = configureStore([])
 ////
@@ -84,19 +84,19 @@ Cypress.Commands.add('interceptDelayedLogin', (method, url, time) => {
 ////
 Cypress.Commands.add('setViewportToMobile', () => {
 	cy.window().then((win) => {
-		cy.viewport(viewports.mobile.width, win.innerHeight)
+		cy.viewport(VIEWPORTS.MOBILE.WIDTH, win.innerHeight)
 	})
 })
 
 Cypress.Commands.add('setViewportToTablet', () => {
 	cy.window().then((win) => {
-		cy.viewport(viewports.tablet.width, win.innerHeight)
+		cy.viewport(VIEWPORTS.TABLET.WIDTH, win.innerHeight)
 	})
 })
 
 Cypress.Commands.add('setViewportToDesktop', () => {
 	cy.window().then((win) => {
-		cy.viewport(viewports.desktop.width, win.innerHeight)
+		cy.viewport(VIEWPORTS.DESKTOP.WIDTH, win.innerHeight)
 	})
 })
 

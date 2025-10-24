@@ -1,7 +1,7 @@
 import { TOP_NAVIGATION_SELECTORS } from '../../../../../../cypress/support/constants/selectors/components'
 import { TEST_SELECTORS } from '../../../../../../cypress/support/constants/selectors/test-utilities'
 import { APP_URLS } from '../../../../../../cypress/support/constants/api/urls'
-import { viewports } from '../../../../../../cypress/support/constants/viewports'
+import { VIEWPORTS } from '../../../../../../cypress/support/constants/env/viewports'
 
 // TODO: Remove and import hooks once store slices are implemented
 export const mockUseMainNavState = () => ({
@@ -65,9 +65,9 @@ export const assertMenuItemRedirect = (
 		store,
 	)
 
-	if (viewportType === viewports.mobile) {
+	if (viewportType === VIEWPORTS.MOBILE) {
 		cy.setViewportToMobile()
-	} else if (viewportType === viewports.tablet) {
+	} else if (viewportType === VIEWPORTS.TABLET) {
 		cy.setViewportToTablet()
 	} else {
 		cy.setViewportToDesktop()

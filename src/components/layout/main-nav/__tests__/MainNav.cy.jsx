@@ -8,7 +8,7 @@ import { PAGE_SELECTORS } from '../../../../../cypress/support/constants/selecto
 import { TOP_NAVIGATION_SELECTORS } from '../../../../../cypress/support/constants/selectors/components'
 import { APP_URLS } from '../../../../../cypress/support/constants/api/urls'
 
-import { viewports } from '../../../../../cypress/support/constants/viewports'
+import { VIEWPORTS } from '../../../../../cypress/support/constants/env/viewports'
 
 import { TestMainNav } from './test-utilities/mainNavTestUtils'
 import {
@@ -140,7 +140,7 @@ describe('<MainNav />', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_MESSAGES,
-							viewports.mobile,
+							VIEWPORTS.MOBILE,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
@@ -153,7 +153,7 @@ describe('<MainNav />', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_TRAVELLERS,
-							viewports.mobile,
+							VIEWPORTS.MOBILE,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
@@ -166,7 +166,7 @@ describe('<MainNav />', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_AUTHENTICATION,
-							viewports.mobile,
+							VIEWPORTS.MOBILE,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
 							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
@@ -268,7 +268,7 @@ describe('<MainNav />', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_MESSAGES,
-							viewports.tablet,
+							VIEWPORTS.TABLET,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
@@ -281,7 +281,7 @@ describe('<MainNav />', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_TRAVELLERS,
-							viewports.tablet,
+							VIEWPORTS.TABLET,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
@@ -294,7 +294,7 @@ describe('<MainNav />', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_AUTHENTICATION,
-							viewports.tablet,
+							VIEWPORTS.tablet,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
 							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
@@ -309,7 +309,7 @@ describe('<MainNav />', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_MESSAGES,
-							viewports.desktop,
+							VIEWPORTS.DESKTOP,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
@@ -322,7 +322,7 @@ describe('<MainNav />', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_TRAVELLERS,
-							viewports.desktop,
+							VIEWPORTS.DESKTOP,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
 							TravellersPage,
@@ -335,7 +335,7 @@ describe('<MainNav />', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
 							APP_URLS.CY_AUTHENTICATION,
-							viewports.desktop,
+							VIEWPORTS.DESKTOP,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
 							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
 							AuthenticationPage,
