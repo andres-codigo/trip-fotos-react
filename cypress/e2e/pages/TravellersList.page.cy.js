@@ -1,9 +1,7 @@
 import { DATABASE } from '../../support/constants/api/database'
 import { dialog } from '../../support/constants/dialog'
-import {
-	pageSelectors,
-	travellersListSelectors,
-} from '../../support/constants/selectors'
+import { pageSelectors } from '../../support/constants/selectors/pages'
+import { travellersListSelectors } from '../../support/constants/selectors'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 
 import { performLogin } from '../../support/utils/authHelpers'
