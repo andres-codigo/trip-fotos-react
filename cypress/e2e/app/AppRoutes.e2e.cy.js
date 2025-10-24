@@ -5,7 +5,7 @@ import {
 	SDK_METHOD_TYPE_URLS,
 } from '../../support/constants/api/urls'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../support/constants/selectors/components'
-import { user } from '../../support/constants/users'
+import { TEST_USER } from '../../support/constants/env/users'
 
 describe('App Routing', () => {
 	it('redirects unauthenticated users from protected routes to login', () => {
@@ -22,9 +22,11 @@ describe('App Routing', () => {
 
 	it('redirects to home after successful login', () => {
 		cy.visit(BASE_URL + APP_URLS.CY_AUTHENTICATION)
-		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(user.validEmail)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USER.VALID_EMAIL,
+		)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
-			user.validPassword,
+			TEST_USER.VALID_PASSWORD,
 		)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
 		cy.url({ timeout: 10000 }).should('include', APP_URLS.CY_HOME)
@@ -36,7 +38,7 @@ describe('App Routing', () => {
 			DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 		).as('loginRequest')
-		cy.login(user.validEmail, user.validPassword)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)
 
 		cy.wait('@loginRequest')
 		cy.visit(BASE_URL + APP_URLS.CY_MESSAGES)

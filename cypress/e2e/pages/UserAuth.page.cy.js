@@ -12,7 +12,7 @@ import {
 	APP_URLS,
 	SDK_METHOD_TYPE_URLS,
 } from '../../support/constants/api/urls'
-import { user } from '../../support/constants/users'
+import { TEST_USER } from '../../support/constants/env/users'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
@@ -75,7 +75,7 @@ describe('Form rendering and validation', () => {
 
 	it('shows validation error for invalid email', () => {
 		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
-			user.invalidEmail,
+			TEST_USER.INVALID_EMAIL,
 		)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
 		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_ERROR_MESSAGE).should(
@@ -84,9 +84,11 @@ describe('Form rendering and validation', () => {
 	})
 
 	it('shows validation error for invalid password that is less than 6 characters long', () => {
-		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(user.validEmail)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USER.VALID_EMAIL,
+		)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
-			user.invalidPasswordTooShort,
+			TEST_USER.INVALID_PASSWORD_TOO_SHORT,
 		)
 
 		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
@@ -97,7 +99,7 @@ describe('Form rendering and validation', () => {
 
 	it('shows validation error for invalid password when Enter is pressed in the email field and password field is empty', () => {
 		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
-			user.validEmail + '{enter}',
+			TEST_USER.VALID_EMAIL + '{enter}',
 		)
 
 		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_ERROR_MESSAGE).should(
@@ -112,9 +114,11 @@ describe('Form submission', () => {
 	})
 
 	it('submits the form when the Enter key is pressed in the password field', () => {
-		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(user.validEmail)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USER.VALID_EMAIL,
+		)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT)
-			.type(user.validPassword)
+			.type(TEST_USER.VALID_PASSWORD)
 			.type('{enter}')
 
 		cy.get(DIALOG_SELECTORS.AUTHENTICATING).should('exist')
@@ -126,16 +130,16 @@ describe('Form submission', () => {
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 		)
 
-		const emailWithSpaces = `   ${user.validEmail}   `
-		const passwordWithSpaces = `   ${user.validPassword}   `
+		const emailWithSpaces = `   ${TEST_USER.VALID_EMAIL}   `
+		const passwordWithSpaces = `   ${TEST_USER.VALID_PASSWORD}   `
 
 		cy.login(emailWithSpaces, passwordWithSpaces)
 
 		cy.wait('@loginRequest')
 			.its('request.body')
 			.should((body) => {
-				expect(body.email).to.eq(user.validEmail)
-				expect(body.password).to.eq(user.validPassword)
+				expect(body.email).to.eq(TEST_USER.VALID_EMAIL)
+				expect(body.password).to.eq(TEST_USER.VALID_PASSWORD)
 			})
 	})
 
@@ -186,7 +190,7 @@ describe('UI state and mode switching', () => {
 			DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 		)
-		cy.login(user.validEmail, user.validPassword)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)
 
 		cy.get(DIALOG_SELECTORS.AUTHENTICATING)
 			.should('exist')
@@ -215,7 +219,7 @@ describe('UI state and mode switching', () => {
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			1000,
 		)
-		cy.login(user.validEmail, user.validPassword)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)
 
 		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).should('be.disabled')
 		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).should(
@@ -269,7 +273,7 @@ describe('UI error dialog', () => {
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			errorKey,
 		)
-		cy.login(user.validEmail, user.invalidPassword)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.INVALID_PASSWORD)
 		cy.wait('@loginErrorRequest')
 
 		assertErrorDialog(errorKey)
@@ -300,7 +304,7 @@ describe('UI error dialog', () => {
 			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.INVALID_LOGIN_CREDENTIALS,
 		)
-		cy.login(user.validEmail, user.invalidPassword)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.INVALID_PASSWORD)
 		cy.wait('@loginErrorRequest')
 
 		cy.get(DIALOG_SELECTORS.INVALID_EMAIL_OR_PASSWORD).should('exist')

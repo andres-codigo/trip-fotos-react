@@ -3,7 +3,7 @@ import {
 	TOP_NAVIGATION_SELECTORS,
 } from '../../support/constants/selectors/components'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
-import { user } from '../../support/constants/users'
+import { TEST_USER } from '../../support/constants/env/users'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
@@ -26,7 +26,7 @@ describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', ()
 describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
 		cy.visit(BASE_URL + APP_URLS.CY_AUTHENTICATION)
-		cy.login(user.validEmail, user.validPassword)
+		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)
 	})
 
 	it('Displays the title as a link and renders the hamburger menu', () => {
