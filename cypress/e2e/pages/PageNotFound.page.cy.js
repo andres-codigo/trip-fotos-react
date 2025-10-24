@@ -1,5 +1,5 @@
 import { PAGE_NOT_FOUND_SELECTORS } from '../../support/constants/selectors/pages'
-import { headerSelectors } from '../../support/constants/selectors/components'
+import { HEADER_SELECTORS } from '../../support/constants/selectors/components'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 import { user } from '../../support/constants/users'
 
@@ -24,7 +24,7 @@ describe('Logged in > PageNotFound page', () => {
 		)
 
 		// Check App title link is present and has the correct href
-		cy.get(headerSelectors.siteHeaderTitleLink).as('header')
+		cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK).as('header')
 		cy.get('@header')
 			.find('a')
 			.should('have.attr', 'href', APP_URLS.CY_HOME)
@@ -57,7 +57,7 @@ describe('Not logged in > PageNotFound page', () => {
 		)
 
 		// Check App title link is present and has the correct href
-		cy.get(headerSelectors.siteHeaderTitleLink).as('header')
+		cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK).as('header')
 		cy.get('@header')
 			.find('a')
 			.should('have.attr', 'href', APP_URLS.CY_AUTHENTICATION)

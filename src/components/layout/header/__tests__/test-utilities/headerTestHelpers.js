@@ -1,10 +1,10 @@
 import {
-	headerSelectors,
+	HEADER_SELECTORS,
 	topNavigationSelectors,
 } from '../../../../../../cypress/support/constants/selectors/components'
 
 export const assertHeaderTitleLink = (expectedHref) => {
-	cy.get(headerSelectors.siteHeaderTitleLink)
+	cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK)
 		.should('exist')
 		.find('a')
 		.should('have.attr', 'href', expectedHref)

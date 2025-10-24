@@ -4,7 +4,7 @@ import configureStore from 'redux-mock-store'
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 
 import {
-	headerSelectors,
+	HEADER_SELECTORS,
 	topNavigationSelectors,
 	authenticationFormSelectors,
 } from './constants/selectors/components'
@@ -104,7 +104,7 @@ Cypress.Commands.add('setViewportToDesktop', () => {
 // HEADER
 ////
 Cypress.Commands.add('assertHeaderTitleLink', () => {
-	cy.get(headerSelectors.siteHeaderTitleLink)
+	cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK)
 		.find('a')
 		.then(($siteHeaderTitleLink) => {
 			expect($siteHeaderTitleLink.text()).to.equal('Trip Fotos')

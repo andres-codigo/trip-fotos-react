@@ -6,17 +6,17 @@ import {
 /////
 /// Common Component Selectors
 /////
-export const commonSelectors = {
-	baseCard: getByDataCy('base-card'),
-	baseSpinner: getByDataCy('base-spinner'),
+export const COMMON_SELECTORS = {
+	BASE_CARD: getByDataCy('base-card'),
+	BASE_SPINNER: getByDataCy('base-spinner'),
 }
 
 /////
 /// Component Selectors
 /////
-export const headerSelectors = {
-	siteHeader: getByDataCy('site-header'),
-	siteHeaderTitleLink: getByDataCy('site-header-title-link'),
+export const HEADER_SELECTORS = {
+	SITE_HEADER: getByDataCy('site-header'),
+	SITE_HEADER_TITLE_LINK: getByDataCy('site-header-title-link'),
 }
 
 export const topNavigationSelectors = {
