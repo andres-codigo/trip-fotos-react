@@ -3,7 +3,7 @@ import {
 	TOP_NAVIGATION_SELECTORS,
 } from '../../support/constants/selectors/components'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
-import { TEST_USER } from '../../support/constants/env/users'
+import { TEST_USER } from '../../support/constants/env/test-users'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {

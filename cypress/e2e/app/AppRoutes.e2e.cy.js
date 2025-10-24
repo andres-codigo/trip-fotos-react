@@ -5,7 +5,7 @@ import {
 	SDK_METHOD_TYPE_URLS,
 } from '../../support/constants/api/urls'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../support/constants/selectors/components'
-import { TEST_USER } from '../../support/constants/env/users'
+import { TEST_USER } from '../../support/constants/env/test-users'
 
 describe('App Routing', () => {
 	it('redirects unauthenticated users from protected routes to login', () => {

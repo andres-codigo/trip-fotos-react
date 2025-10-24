@@ -1,6 +1,6 @@
 import { DATABASE } from '../constants/api/database'
 import { APP_URLS, SDK_METHOD_TYPE_URLS } from '../constants/api/urls'
-import { TEST_USER } from '../constants/env/users'
+import { TEST_USER } from '../constants/env/test-users'
 
 /**
  * Performs login flow and waits for successful authentication

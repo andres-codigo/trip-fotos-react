@@ -1,7 +1,7 @@
 import { PAGE_NOT_FOUND_SELECTORS } from '../../support/constants/selectors/pages'
 import { HEADER_SELECTORS } from '../../support/constants/selectors/components'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
-import { TEST_USER } from '../../support/constants/env/users'
+import { TEST_USER } from '../../support/constants/env/test-users'
 
 describe('Logged in > PageNotFound page', () => {
 	const loginUrl = BASE_URL + APP_URLS.CY_AUTHENTICATION

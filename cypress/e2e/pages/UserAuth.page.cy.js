@@ -12,7 +12,7 @@ import {
 	APP_URLS,
 	SDK_METHOD_TYPE_URLS,
 } from '../../support/constants/api/urls'
-import { TEST_USER } from '../../support/constants/env/users'
+import { TEST_USER } from '../../support/constants/env/test-users'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
