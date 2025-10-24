@@ -1,2 +1,2 @@
-export * from './database'
+export * from './endpoints'
 export * from './urls'

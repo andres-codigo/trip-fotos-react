@@ -1,4 +1,4 @@
-import { DATABASE } from '../../support/constants/api/database'
+import { API_DATABASE } from '../../support/constants/api/endpoints'
 import {
 	BASE_URL,
 	APP_URLS,
@@ -35,7 +35,7 @@ describe('App Routing', () => {
 	it('allows access to protected routes after login', () => {
 		cy.visit(BASE_URL + APP_URLS.CY_AUTHENTICATION)
 		cy.interceptLogin(
-			DATABASE.POST,
+			API_DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 		).as('loginRequest')
 		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)

@@ -1,6 +1,6 @@
 import { FIREBASE_ERRORS } from '../../../src/constants/auth'
 
-import { DATABASE } from '../../support/constants/api/database'
+import { API_DATABASE } from '../../support/constants/api/endpoints'
 import {
 	DIALOG_SELECTORS,
 	DIALOG_MESSAGES,
@@ -126,7 +126,7 @@ describe('Form submission', () => {
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
 		cy.interceptLogin(
-			DATABASE.POST,
+			API_DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 		)
 
@@ -187,7 +187,7 @@ describe('UI state and mode switching', () => {
 
 	it('shows a loading dialog with spinner while authenticating', () => {
 		cy.interceptLogin(
-			DATABASE.POST,
+			API_DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 		)
 		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)
@@ -215,7 +215,7 @@ describe('UI state and mode switching', () => {
 
 	it('disables form fields and buttons while the loading dialog displayed', () => {
 		cy.interceptDelayedLogin(
-			DATABASE.POST,
+			API_DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			1000,
 		)
@@ -269,7 +269,7 @@ describe('UI error dialog', () => {
 
 	function logInUsingIntercept(errorKey) {
 		cy.interceptLoginError(
-			DATABASE.POST,
+			API_DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			errorKey,
 		)
@@ -299,7 +299,7 @@ describe('UI error dialog', () => {
 
 	it('closes the error dialog when the Escape key is pressed', () => {
 		cy.interceptLoginError(
-			DATABASE.POST,
+			API_DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.INVALID_LOGIN_CREDENTIALS,

@@ -1,4 +1,4 @@
-import { DATABASE } from '../constants/api/database'
+import { API_DATABASE } from '../constants/api/endpoints'
 import { APP_URLS, SDK_METHOD_TYPE_URLS } from '../constants/api/urls'
 import { TEST_USER } from '../constants/env/test-users'
 
@@ -13,7 +13,10 @@ export const performLogin = (
 	password = TEST_USER.VALID_PASSWORD,
 	expectedRedirectUrl = APP_URLS.CY_HOME,
 ) => {
-	cy.interceptLogin(DATABASE.POST, SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD)
+	cy.interceptLogin(
+		API_DATABASE.POST,
+		SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+	)
 	cy.login(email, password)
 	cy.wait('@loginRequest')
 	cy.url().should('include', expectedRedirectUrl)

@@ -1,4 +1,4 @@
-import { DATABASE } from '../../support/constants/api/database'
+import { API_DATABASE } from '../../support/constants/api/endpoints'
 import { DIALOG_SELECTORS } from '../../support/constants/ui/dialog'
 import { PAGE_SELECTORS } from '../../support/constants/selectors/pages'
 import { TRAVELLERS_LIST_SELECTORS } from '../../support/constants/selectors/components'
@@ -383,7 +383,7 @@ describe('Travellers Page - WIP', () => {
 
 	describe('Content Display', () => {
 		it('should display travellers list when travellers exist', () => {
-			cy.intercept(DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
 				fixture: 'travellers.json',
 			}).as('getTravellersSuccess')
 
@@ -398,7 +398,7 @@ describe('Travellers Page - WIP', () => {
 		})
 
 		it('should display no travellers message when list is empty', () => {
-			cy.intercept(DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
 				statusCode: 200,
 				body: {},
 			}).as('getTravellersEmpty')

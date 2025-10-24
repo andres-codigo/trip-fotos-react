@@ -1,4 +1,4 @@
-import { DATABASE } from './database'
+import { API_DATABASE } from './endpoints'
 
 export const BASE_URL = Cypress.config('baseUrl')
 
@@ -12,5 +12,5 @@ export const APP_URLS = {
 }
 
 export const SDK_METHOD_TYPE_URLS = {
-	SIGN_IN_WITH_PASSWORD: `${DATABASE.URL}signInWithPassword?key=${DATABASE.KEY}`,
+	SIGN_IN_WITH_PASSWORD: `${API_DATABASE.URL}signInWithPassword?key=${API_DATABASE.KEY}`,
 }
