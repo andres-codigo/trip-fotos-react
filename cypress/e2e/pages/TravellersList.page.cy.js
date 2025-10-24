@@ -1,7 +1,7 @@
 import { DATABASE } from '../../support/constants/api/database'
 import { dialog } from '../../support/constants/dialog'
 import { PAGE_SELECTORS } from '../../support/constants/selectors/pages'
-import { travellersListSelectors } from '../../support/constants/selectors/components'
+import { TRAVELLERS_LIST_SELECTORS } from '../../support/constants/selectors/components'
 import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 
 import { performLogin } from '../../support/utils/authHelpers'
@@ -24,14 +24,14 @@ describe('Travellers Page - WIP', () => {
 		it('should render the travellers list component', () => {
 			performLogin()
 
-			cy.get(travellersListSelectors.travellersListContainer).should(
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST_CONTAINER).should(
 				'be.visible',
 			)
 
-			cy.get(travellersListSelectors.travellersListContainer).within(
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST_CONTAINER).within(
 				() => {
 					cy.get('section').should('exist')
-					cy.get(travellersListSelectors.controls).should('exist')
+					cy.get(TRAVELLERS_LIST_SELECTORS.CONTROLS).should('exist')
 				},
 			)
 		})
@@ -41,8 +41,10 @@ describe('Travellers Page - WIP', () => {
 		it('should show register button when user is logged in and not a traveller', () => {
 			performLogin()
 
-			cy.get(travellersListSelectors.registerButton).should('be.visible')
-			cy.get(travellersListSelectors.registerButton).should(
+			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_BUTTON).should(
+				'be.visible',
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_BUTTON).should(
 				'contain',
 				'Register as a Traveller',
 			)
@@ -54,7 +56,7 @@ describe('Travellers Page - WIP', () => {
 		it('should navigate to register page when register button is clicked', () => {
 			performLogin()
 
-			cy.get(travellersListSelectors.registerButton).click()
+			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_BUTTON).click()
 			cy.url().should('include', '/register')
 		})
 	})
@@ -72,10 +74,10 @@ describe('Travellers Page - WIP', () => {
 			// Should show either travellers list or no travellers message
 			cy.get('body').then(($body) => {
 				if (
-					$body.find(travellersListSelectors.travellersList).length >
-					0
+					$body.find(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST)
+						.length > 0
 				) {
-					cy.get(travellersListSelectors.travellersList).should(
+					cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 						'be.visible',
 					)
 				} else {
@@ -280,7 +282,9 @@ describe('Travellers Page - WIP', () => {
 
 			// Verify refresh button is enabled and travellers are displayed
 			cy.get('button').contains('Refresh').should('not.be.disabled')
-			cy.get(travellersListSelectors.travellersList).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
+				'be.visible',
+			)
 
 			// Simulate error on manual refresh
 			cy.intercept('GET', '**/travellers.json', {
@@ -312,7 +316,9 @@ describe('Travellers Page - WIP', () => {
 			cy.get('[data-cy="travellers-list-error-dialog"]').should(
 				'not.exist',
 			)
-			cy.get(travellersListSelectors.travellersList).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
+				'be.visible',
+			)
 		})
 
 		it('should handle timeout errors appropriately', () => {
@@ -361,7 +367,9 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 
 			cy.get(dialog.spinnerContainer).should('be.visible')
-			cy.get(travellersListSelectors.travellersList).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
+				'not.exist',
+			)
 			cy.contains('No travellers listed.').should('not.exist')
 
 			cy.wait('@getTravellersWithDelay')
@@ -379,8 +387,10 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 			cy.wait('@getTravellersSuccess')
 
-			cy.get(travellersListSelectors.travellersList).should('be.visible')
-			cy.get(travellersListSelectors.travellerItem).should('exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
+				'be.visible',
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
 		})
 
 		it('should display no travellers message when list is empty', () => {
@@ -394,7 +404,9 @@ describe('Travellers Page - WIP', () => {
 			cy.wait('@getTravellersEmpty')
 
 			cy.contains('No travellers listed.').should('be.visible')
-			cy.get(travellersListSelectors.travellersList).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
+				'not.exist',
+			)
 		})
 	})
 })

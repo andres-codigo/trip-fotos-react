@@ -52,10 +52,10 @@ export const AUTHENTICATION_FORM_SELECTORS = {
 	SIGNUP_TEXT_TOGGLE_LINK: 'Switch to Signup',
 }
 
-export const travellersListSelectors = {
-	travellersListContainer: getByDataCy('travellers-list-container'),
-	travellersList: getByDataCy('travellers-list'),
-	travellerItem: getByDataCy('traveller-item'),
-	registerButton: getByDataCy('register-link'),
-	controls: getByDataCy('controls'),
+export const TRAVELLERS_LIST_SELECTORS = {
+	TRAVELLERS_LIST_CONTAINER: getByDataCy('travellers-list-container'),
+	TRAVELLERS_LIST: getByDataCy('travellers-list'),
+	TRAVELLER_ITEM: getByDataCy('traveller-item'),
+	REGISTER_BUTTON: getByDataCy('register-link'),
+	CONTROLS: getByDataCy('controls'),
 }
