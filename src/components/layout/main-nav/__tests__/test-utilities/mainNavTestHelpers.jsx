@@ -2,7 +2,7 @@ import {
 	testSelectors,
 	topNavigationSelectors,
 } from '../../../../../../cypress/support/constants/selectors'
-import { urls } from '../../../../../../cypress/support/constants/urls'
+import { APP_URLS } from '../../../../../../cypress/support/constants/api/urls'
 import { viewports } from '../../../../../../cypress/support/constants/viewports'
 
 // TODO: Remove and import hooks once store slices are implemented
@@ -17,12 +17,12 @@ export const assertMenuItems = (travellerName = 'Test User') => {
 	cy.get(topNavigationSelectors.navMenuItemMessages)
 		.should('exist')
 		.and('be.visible')
-		.should('have.attr', 'href', urls.cyMessages)
+		.should('have.attr', 'href', APP_URLS.CY_MESSAGES)
 		.and('have.text', 'Messages')
 	cy.get(topNavigationSelectors.navMenuItemTravellers)
 		.should('exist')
 		.and('be.visible')
-		.should('have.attr', 'href', urls.cyTravellers)
+		.should('have.attr', 'href', APP_URLS.CY_TRAVELLERS)
 		.and('have.text', 'Travellers')
 	cy.get(topNavigationSelectors.navMenuItemLogout)
 		.should('exist')

@@ -1,15 +1,19 @@
 import { FIREBASE_ERRORS } from '../../../src/constants/auth'
 
-import { apiDatabase, apiUrls } from '../../support/constants/api'
+import { DATABASE } from '../../support/constants/api/database'
 import { dialog, dialogMessages } from '../../support/constants/dialog'
 import { errorMessages } from '../../support/constants/errorMessages'
 import { authenticationFormSelectors } from '../../support/constants/selectors'
-import { baseUrl, urls } from '../../support/constants/urls'
+import {
+	BASE_URL,
+	APP_URLS,
+	SDK_METHOD_TYPE_URLS,
+} from '../../support/constants/api/urls'
 import { user } from '../../support/constants/users'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
-const loginUrl = baseUrl + urls.cyAuth
+const loginUrl = BASE_URL + APP_URLS.CY_AUTHENTICATION
 
 describe('Form rendering and validation', () => {
 	beforeEach(() => {
@@ -100,7 +104,10 @@ describe('Form submission', () => {
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
+		cy.interceptLogin(
+			DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+		)
 
 		const emailWithSpaces = `   ${user.validEmail}   `
 		const passwordWithSpaces = `   ${user.validPassword}   `
@@ -158,7 +165,10 @@ describe('UI state and mode switching', () => {
 	})
 
 	it('shows a loading dialog with spinner while authenticating', () => {
-		cy.interceptLogin(apiDatabase.POST, apiUrls.signInWithPassword)
+		cy.interceptLogin(
+			DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+		)
 		cy.login(user.validEmail, user.validPassword)
 
 		cy.get(dialog.authenticating)
@@ -184,8 +194,8 @@ describe('UI state and mode switching', () => {
 
 	it('disables form fields and buttons while the loading dialog displayed', () => {
 		cy.interceptDelayedLogin(
-			apiDatabase.POST,
-			apiUrls.signInWithPassword,
+			DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			1000,
 		)
 		cy.login(user.validEmail, user.validPassword)
@@ -236,8 +246,8 @@ describe('UI error dialog', () => {
 
 	function logInUsingIntercept(errorKey) {
 		cy.interceptLoginError(
-			apiDatabase.POST,
-			apiUrls.signInWithPassword,
+			DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			errorKey,
 		)
 		cy.login(user.validEmail, user.invalidPassword)
@@ -266,8 +276,8 @@ describe('UI error dialog', () => {
 
 	it('closes the error dialog when the Escape key is pressed', () => {
 		cy.interceptLoginError(
-			apiDatabase.POST,
-			apiUrls.signInWithPassword,
+			DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 				.INVALID_LOGIN_CREDENTIALS,
 		)

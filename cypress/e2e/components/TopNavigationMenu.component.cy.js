@@ -2,12 +2,12 @@ import {
 	headerSelectors,
 	topNavigationSelectors,
 } from '../../support/constants/selectors'
-import { baseUrl, urls } from '../../support/constants/urls'
+import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 import { user } from '../../support/constants/users'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
-		cy.visit(baseUrl + urls.cyAuth)
+		cy.visit(BASE_URL + APP_URLS.CY_AUTHENTICATION)
 	})
 
 	it('Displays the title as a link and does not render the hamburger menu', () => {
@@ -19,13 +19,13 @@ describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', ()
 
 	it('Navigates to the "authentication" page when clicking the app title', () => {
 		cy.get(headerSelectors.siteHeaderTitleLink).click()
-		cy.url().should('eq', baseUrl + urls.cyAuth)
+		cy.url().should('eq', BASE_URL + APP_URLS.CY_AUTHENTICATION)
 	})
 })
 
 describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
-		cy.visit(baseUrl + urls.cyAuth)
+		cy.visit(BASE_URL + APP_URLS.CY_AUTHENTICATION)
 		cy.login(user.validEmail, user.validPassword)
 	})
 
@@ -38,7 +38,7 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 
 	it('Navigates to the "home" page when clicking the app title', () => {
 		cy.get(headerSelectors.siteHeaderTitleLink).click()
-		cy.url().should('eq', baseUrl + urls.cyHome)
+		cy.url().should('eq', BASE_URL + APP_URLS.CY_HOME)
 	})
 
 	it('Toggles the hamburger menu open and closed on mobile viewports', () => {

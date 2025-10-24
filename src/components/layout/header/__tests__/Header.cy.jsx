@@ -1,5 +1,5 @@
 import { headerSelectors } from '../../../../../cypress/support/constants/selectors'
-import { urls } from '../../../../../cypress/support/constants/urls'
+import { APP_URLS } from '../../../../../cypress/support/constants/api/urls'
 
 import { PATHS } from '@/constants/ui'
 
@@ -15,13 +15,28 @@ describe('<Header />', () => {
 					cy.mountWithProviders(<Header />, store)
 
 					cy.setViewportToMobile()
-					headerAssertions(urls.cyAuth, false, false, false)
+					headerAssertions(
+						APP_URLS.CY_AUTHENTICATION,
+						false,
+						false,
+						false,
+					)
 
 					cy.setViewportToTablet()
-					headerAssertions(urls.cyAuth, false, false, false)
+					headerAssertions(
+						APP_URLS.CY_AUTHENTICATION,
+						false,
+						false,
+						false,
+					)
 
 					cy.setViewportToDesktop()
-					headerAssertions(urls.cyAuth, false, false, false)
+					headerAssertions(
+						APP_URLS.CY_AUTHENTICATION,
+						false,
+						false,
+						false,
+					)
 				})
 			})
 		})
@@ -32,13 +47,13 @@ describe('<Header />', () => {
 					cy.mountWithProviders(<Header />, store)
 
 					cy.setViewportToMobile()
-					headerAssertions(urls.cyHome, true, false, true)
+					headerAssertions(APP_URLS.CY_HOME, true, false, true)
 
 					cy.setViewportToTablet()
-					headerAssertions(urls.cyHome, true, true, true)
+					headerAssertions(APP_URLS.CY_HOME, true, true, true)
 
 					cy.setViewportToDesktop()
-					headerAssertions(urls.cyHome, true, true, true)
+					headerAssertions(APP_URLS.CY_HOME, true, true, true)
 				})
 			})
 		})

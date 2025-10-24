@@ -1,14 +1,14 @@
-import { apiDatabase } from '../../support/constants/api'
+import { DATABASE } from '../../support/constants/api/database'
 import { dialog } from '../../support/constants/dialog'
 import {
 	pageSelectors,
 	travellersListSelectors,
 } from '../../support/constants/selectors'
-import { baseUrl, urls } from '../../support/constants/urls'
+import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
-const loginUrl = baseUrl + urls.cyAuth
+const loginUrl = BASE_URL + APP_URLS.CY_AUTHENTICATION
 
 describe('Travellers Page - WIP', () => {
 	beforeEach(() => {
@@ -373,7 +373,7 @@ describe('Travellers Page - WIP', () => {
 
 	describe('Content Display', () => {
 		it('should display travellers list when travellers exist', () => {
-			cy.intercept(apiDatabase.GET, '**/travellers.json', {
+			cy.intercept(DATABASE.GET, '**/travellers.json', {
 				fixture: 'travellers.json',
 			}).as('getTravellersSuccess')
 
@@ -386,7 +386,7 @@ describe('Travellers Page - WIP', () => {
 		})
 
 		it('should display no travellers message when list is empty', () => {
-			cy.intercept(apiDatabase.GET, '**/travellers.json', {
+			cy.intercept(DATABASE.GET, '**/travellers.json', {
 				statusCode: 200,
 				body: {},
 			}).as('getTravellersEmpty')
