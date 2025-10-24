@@ -4,7 +4,7 @@ import {
 	APP_URLS,
 	SDK_METHOD_TYPE_URLS,
 } from '../../support/constants/api/urls'
-import { authenticationFormSelectors } from '../../support/constants/selectors/components'
+import { AUTHENTICATION_FORM_SELECTORS } from '../../support/constants/selectors/components'
 import { user } from '../../support/constants/users'
 
 describe('App Routing', () => {
@@ -15,18 +15,18 @@ describe('App Routing', () => {
 
 	it('allows access to the authentication page', () => {
 		cy.visit(BASE_URL + APP_URLS.CY_AUTHENTICATION)
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).should(
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).should(
 			'exist',
 		)
 	})
 
 	it('redirects to home after successful login', () => {
 		cy.visit(BASE_URL + APP_URLS.CY_AUTHENTICATION)
-		cy.get(authenticationFormSelectors.emailInput).type(user.validEmail)
-		cy.get(authenticationFormSelectors.passwordInput).type(
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(user.validEmail)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
 			user.validPassword,
 		)
-		cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
 		cy.url({ timeout: 10000 }).should('include', APP_URLS.CY_HOME)
 	})
 

@@ -6,7 +6,7 @@ import { mountWithProviders } from './commands-support-files/mountWithProviders'
 import {
 	HEADER_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
-	authenticationFormSelectors,
+	AUTHENTICATION_FORM_SELECTORS,
 } from './constants/selectors/components'
 import { user } from './constants/users'
 import { viewports } from './constants/viewports'
@@ -44,9 +44,9 @@ Cypress.Commands.add('mountWithProviders', (ui, store) => {
 // LOGIN
 ////
 Cypress.Commands.add('login', (email, password) => {
-	cy.get(authenticationFormSelectors.emailInput).type(email)
-	cy.get(authenticationFormSelectors.passwordInput).type(password)
-	cy.get(authenticationFormSelectors.loginSignupSubmitButton).click()
+	cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(email)
+	cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(password)
+	cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
 })
 
 ////

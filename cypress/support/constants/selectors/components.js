@@ -30,26 +30,26 @@ export const TOP_NAVIGATION_SELECTORS = {
 	NAV_MENU_ITEM_LOGOUT: getByDataCy('nav-menu-item-logout'),
 }
 
-export const authenticationFormSelectors = {
+export const AUTHENTICATION_FORM_SELECTORS = {
 	// Form fields
-	authenticationForm: getByDataCy('user-authentication-form'),
-	userAuthenticationTitle: getByDataCy('user-authentication-form-title'),
+	AUTHENTICATION_FORM: getByDataCy('user-authentication-form'),
+	USER_AUTHENTICATION_TITLE: getByDataCy('user-authentication-form-title'),
 	// Email fields
-	emailLabel: 'E-Mail',
-	emailInput: getByDataCy('email-input'),
-	emailErrorMessage: getByDataCyError('email-error-message'),
+	EMAIL_LABEL: 'E-Mail',
+	EMAIL_INPUT: getByDataCy('email-input'),
+	EMAIL_ERROR_MESSAGE: getByDataCyError('email-error-message'),
 	// Password fields
-	passwordLabel: 'Password',
-	passwordInput: getByDataCy('password-input'),
-	passwordErrorMessage: getByDataCyError('password-error-message'),
+	PASSWORD_LABEL: 'Password',
+	PASSWORD_INPUT: getByDataCy('password-input'),
+	PASSWORD_ERROR_MESSAGE: getByDataCyError('password-error-message'),
 	// Submit buttons
-	submitButtonTextLogin: 'Log in',
-	signupTextSubmitButton: 'Sign up',
-	loginSignupSubmitButton: getByDataCy('login-submit-button'),
+	SUBMIT_BUTTON_TEXT_LOGIN: 'Log in',
+	SIGNUP_TEXT_SUBMIT_BUTTON: 'Sign up',
+	LOGIN_SIGNUP_SUBMIT_BUTTON: getByDataCy('login-submit-button'),
 	// Toggle link for switching between login and signup
-	loginSignupToggleLink: getByDataCy('login-signup-toggle-link'),
-	loginTextToggleLink: 'Switch to Login',
-	signupTextToggleLink: 'Switch to Signup',
+	LOGIN_SIGNUP_TOGGLE_LINK: getByDataCy('login-signup-toggle-link'),
+	LOGIN_TEXT_TOGGLE_LINK: 'Switch to Login',
+	SIGNUP_TEXT_TOGGLE_LINK: 'Switch to Signup',
 }
 
 export const travellersListSelectors = {
