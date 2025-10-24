@@ -5,7 +5,7 @@ import {
 	DIALOG_SELECTORS,
 	DIALOG_MESSAGES,
 } from '../../support/constants/ui/dialog'
-import { errorMessages } from '../../support/constants/errorMessages'
+import { ERROR_MESSAGES } from '../../support/constants/ui/error-messages'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../support/constants/selectors/components'
 import {
 	BASE_URL,
@@ -256,7 +256,7 @@ describe('UI error dialog', () => {
 				)
 				cy.get(DIALOG_SELECTORS.TEXT_CONTENT).should(
 					'contain.text',
-					errorMessages[messageKey],
+					ERROR_MESSAGES[messageKey],
 				)
 				cy.get('footer > button').should('contain.text', 'Close')
 				cy.get('footer > button').click()

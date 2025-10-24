@@ -1,6 +1,6 @@
-import { FIREBASE_ERRORS } from '../../../src/constants/auth'
+import { FIREBASE_ERRORS } from '../../../../src/constants/auth'
 
-export const errorMessages = {
+export const ERROR_MESSAGES = {
 	[FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.INVALID_LOGIN_CREDENTIALS]:
 		FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 			.INVALID_LOGIN_CREDENTIALS_MESSAGE,
