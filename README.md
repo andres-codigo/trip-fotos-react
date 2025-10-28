@@ -133,6 +133,15 @@ npm run cy:run:e2e
 # Run Cypress Component tests in headless mode
 npm run cy:run:ct
 
+# Run a specific test file (E2E or component based on path)
+npm run cy:run:one
+
+# Smart test runner - automatically detects component vs E2E tests
+npm run cy:run:auto [file-path]
+
+# File watcher - automatically runs tests when files change
+npm run cy:watch
+
 # Run all tests in CI mode (single run)
 npm run vitest:run
 
@@ -350,15 +359,24 @@ To get started:
 npm install vitest --save-dev
 ```
 
-**Run Tests**
+**Run Vitest Tests**
 
-Refer to the [Scripts](#scripts) section for commands to run tests, such as:
-
-```bash
-npm run vitest:run      # Run all tests
-npm run vitest:watch    # Run tests in watch mode
-npm run vitest:coverage # Generate coverage report
-```
+- **Run tests in CI mode (local development):**
+    ```bash
+    npm run vitest:run
+    ```
+- **Run tests in watch mode (local development):**
+    ```bash
+    npm run vitest:watch
+    ```
+- **Run tests quickly without coverage using dot reporter:**
+    ```bash
+    npm run vitest:run:fast
+    ```
+- **Run tests with coverage reporting enabled:**
+    ```bash
+    npm run vitest:coverage
+    ```
 
 **Vitest Directory Structure**
 
@@ -390,18 +408,6 @@ src/
   │   │   │   ├── errorHandler.test.js
   │   │   │   └── ...
   │   │   ├── index.js
-```
-
-**Writing Tests**
-
-```javascript
-import { describe, it, expect } from 'vitest'
-
-describe('Example Test Suite', () => {
-	it('should pass this test', () => {
-		expect(1 + 1).toBe(2)
-	})
-})
 ```
 
 ### Vitest Test Utilities
@@ -455,9 +461,17 @@ Cypress is pre-configured in this project. Feel free to customise the [cypress.c
     ```bash
     npm run cy:run:ct
     ```
-- **Run a specific test file:**
+- **Run a specific test file (E2E or component based on path):**
     ```bash
-    npx cypress run --spec "cypress/e2e/<test-file>.cy.js"
+    npm run cy:run:one
+    ```
+- **Smart test runner - automatically detects component vs E2E tests:**
+    ```bash
+    npm run cy:run:auto [file-path]
+    ```
+- **File watcher - automatically runs tests when files change:**
+    ```bash
+    npm run cy:watch
     ```
 
 **Cypress Directory Structure**
@@ -620,12 +634,12 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 ### 📝 Summary Table
 
-| Workflow Name                           | File                                          | Tests Type       | Triggered On   |
-| --------------------------------------- | --------------------------------------------- | ---------------- | -------------- |
-| Run Unit Tests (Vitest)                 | `.github/workflows/unit-tests-vitest.yml`     | Unit/Integration | Push/PR/Manual |
-| E2E - Run Cypress Page Tests            | `.github/workflows/cypress-e2e.yml`           | E2E              | Push/PR/Manual |
-| Component - Run Cypress Component Tests | `.github/workflows/cypress-component.yml`     | Component        | Push/PR/Manual |
-| GitHub - Auto Label Pull Requests       | `.github/workflows/github-auto-label-prs.yml` | Automation       | PR Events      |
+| Workflow Name                     | File                                          | Tests Type       | Triggered On   |
+| --------------------------------- | --------------------------------------------- | ---------------- | -------------- |
+| Vitest - Run Unit Tests           | `.github/workflows/unit-tests-vitest.yml`     | Unit/Integration | Push/PR/Manual |
+| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml`           | E2E              | Push/PR/Manual |
+| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`     | Component        | Push/PR/Manual |
+| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml` | Automation       | PR Events      |
 
 ---
 
