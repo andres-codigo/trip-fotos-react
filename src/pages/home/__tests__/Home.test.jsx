@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, afterEach, vi } from 'vitest'
-import { useSelector } from 'react-redux'
 
 import { TEST_IDS } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
