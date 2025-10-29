@@ -51,8 +51,7 @@ describe('PageNotFound', () => {
 		it('renders the <main> element', () => {
 			render(<PageNotFound />)
 
-			const main = screen.getByRole('main')
-			expect(main).toBeInTheDocument()
+			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
 		it('applies both mainContainer and pageNotFoundContainer classes to <main>', () => {

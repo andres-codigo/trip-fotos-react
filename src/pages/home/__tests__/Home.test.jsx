@@ -28,8 +28,7 @@ describe('Home', () => {
 		it('renders the <main> element', () => {
 			render(<Home />)
 
-			const main = screen.getByRole('main')
-			expect(main).toBeInTheDocument()
+			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
 		it('applies both mainContainer and homeContainer classes to <main>', () => {

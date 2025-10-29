@@ -28,8 +28,7 @@ describe('Messages', () => {
 		it('renders the <main> element', () => {
 			render(<Messages />)
 
-			const main = screen.getByRole('main')
-			expect(main).toBeInTheDocument()
+			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
 		it('applies both mainContainer and messagesContainer classes to <main>', () => {
