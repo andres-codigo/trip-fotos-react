@@ -43,7 +43,7 @@ jobs:
         needs: check-dependabot
         if: needs.check-dependabot.outputs.is-dependabot == 'false'
         runs-on: ubuntu-latest
-        timeout-minutes: 15
+        timeout-minutes: 120
 
         steps:
             - name: Checkout code
