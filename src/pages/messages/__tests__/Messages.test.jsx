@@ -25,6 +25,13 @@ describe('Messages', () => {
 	})
 
 	describe('Rendering tests', () => {
+		it('renders the <main> element', () => {
+			render(<Messages />)
+
+			const main = screen.getByRole('main')
+			expect(main).toBeInTheDocument()
+		})
+
 		it('applies both mainContainer and messagesContainer classes to <main>', () => {
 			render(<Messages />)
 

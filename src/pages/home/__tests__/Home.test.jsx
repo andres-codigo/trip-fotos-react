@@ -25,6 +25,13 @@ describe('Home', () => {
 	})
 
 	describe('Rendering tests', () => {
+		it('renders the <main> element', () => {
+			render(<Home />)
+
+			const main = screen.getByRole('main')
+			expect(main).toBeInTheDocument()
+		})
+
 		it('applies both mainContainer and homeContainer classes to <main>', () => {
 			render(<Home />)
 

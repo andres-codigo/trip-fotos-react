@@ -48,6 +48,13 @@ describe('PageNotFound', () => {
 	})
 
 	describe('Rendering tests', () => {
+		it('renders the <main> element', () => {
+			render(<PageNotFound />)
+
+			const main = screen.getByRole('main')
+			expect(main).toBeInTheDocument()
+		})
+
 		it('applies both mainContainer and pageNotFoundContainer classes to <main>', () => {
 			useSelector.mockImplementation((fn) =>
 				fn({ authentication: { token: 'abc' } }),
