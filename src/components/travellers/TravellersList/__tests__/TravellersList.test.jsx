@@ -16,6 +16,17 @@ import {
 	UI_TEXT,
 } from '@/constants/test'
 
+/**
+ * TravellersList Unit Tests
+ *
+ * Test Strategy:
+ * - Focuses on prop defaults, edge cases, and implementation details
+ * - Complements Cypress tests which cover rendering, behavior, and accessibility scenarios
+ * - Tests conditional rendering logic (list, spinner, error dialog, register button)
+ * - Tests authentication-dependent UI and error handling flows
+ * - Verifies prop spreading, accessibility roles, and test IDs
+ */
+
 vi.mock('react-redux', async () => {
 	const actual = await vi.importActual('react-redux')
 	return {
