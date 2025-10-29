@@ -1,8 +1,10 @@
 export const TEST_IDS = {
+	MAIN_CONTAINER: 'main-container',
 	SPINNER: {
 		CONTAINER: 'base-spinner',
 		IMAGE: 'base-spinner-img',
 	},
+	BASE_CARD: 'base-card',
 	DIALOG: {
 		AUTHENTICATING: 'authenticating-dialog',
 	},
@@ -19,5 +21,8 @@ export const TEST_IDS = {
 		ITEM: 'traveller-item',
 		REFRESH_BUTTON: 'refresh-button',
 		REGISTER_LINK: 'register-link',
+	},
+	PAGE_NOT_FOUND: {
+		HOME_LINK: 'home-link',
 	},
 }

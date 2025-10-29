@@ -2,7 +2,8 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { useSelector } from 'react-redux'
 
-import { PATHS } from '@/constants/ui'
+import { TEST_IDS } from '@/constants/test'
+import { GLOBAL, PATHS } from '@/constants/ui'
 
 import PageNotFound from '../PageNotFound'
 
@@ -22,13 +23,6 @@ import pageNotFoundStyles from '../pageNotFound.module.scss'
 
 vi.mock('react-redux', () => ({
 	useSelector: vi.fn(),
-}))
-
-vi.mock('@/constants/ui', () => ({
-	PATHS: {
-		TRAVELLERS: '/travellers',
-		AUTHENTICATION: '/authentication',
-	},
 }))
 
 vi.mock('@/components/ui/card/BaseCard', () => ({
@@ -61,9 +55,9 @@ describe('PageNotFound', () => {
 
 			render(<PageNotFound />)
 
-			const main = screen.getByTestId('main-container')
+			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
 
-			expect(main.className).toMatch(/mainContainer/)
+			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
 			expect(main.className).toMatch(
 				new RegExp(pageNotFoundStyles.pageNotFoundContainer),
 			)
@@ -76,7 +70,7 @@ describe('PageNotFound', () => {
 
 			const { container } = render(<PageNotFound />)
 
-			expect(screen.getByTestId('base-card')).toBeInTheDocument()
+			expect(screen.getByTestId(TEST_IDS.BASE_CARD)).toBeInTheDocument()
 
 			expect(
 				screen.getByRole('heading', { level: 2 }),
@@ -92,7 +86,9 @@ describe('PageNotFound', () => {
 
 			render(<PageNotFound />)
 
-			const baseButton = screen.getByTestId('home-link')
+			const baseButton = screen.getByTestId(
+				TEST_IDS.PAGE_NOT_FOUND.HOME_LINK,
+			)
 
 			expect(baseButton).toBeInTheDocument()
 			expect(baseButton.tagName).toBe('A')
@@ -107,7 +103,7 @@ describe('PageNotFound', () => {
 			)
 			render(<PageNotFound />)
 
-			const button = screen.getByTestId('home-link')
+			const button = screen.getByTestId(TEST_IDS.PAGE_NOT_FOUND.HOME_LINK)
 			expect(button.getAttribute('href')).toBe(PATHS.TRAVELLERS)
 		})
 
@@ -117,7 +113,7 @@ describe('PageNotFound', () => {
 			)
 			render(<PageNotFound />)
 
-			const button = screen.getByTestId('home-link')
+			const button = screen.getByTestId(TEST_IDS.PAGE_NOT_FOUND.HOME_LINK)
 			expect(button.getAttribute('href')).toBe(PATHS.AUTHENTICATION)
 		})
 	})
