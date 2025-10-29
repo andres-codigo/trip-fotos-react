@@ -102,6 +102,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 									? travellersListStyles.hide
 									: ''
 							}
+							data-cy="refresh-button"
 							onClick={() => loadTravellersHandler(true)}>
 							Refresh
 						</BaseButton>

@@ -17,6 +17,7 @@ export const TEST_IDS = {
 		CONTROLS: 'controls',
 		LIST: 'travellers-list',
 		ITEM: 'traveller-item',
+		REFRESH_BUTTON: 'refresh-button',
 		REGISTER_LINK: 'register-link',
 	},
 }

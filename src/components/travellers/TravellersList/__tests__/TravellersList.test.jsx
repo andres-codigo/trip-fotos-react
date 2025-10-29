@@ -3,8 +3,11 @@ import { Provider, useDispatch, useSelector } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+import { ERROR_MESSAGES } from '@/constants/errors'
+import { GLOBAL } from '@/constants/ui'
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import {
+	MOCK_ERROR_MESSAGES,
 	MOCK_TRAVELLERS,
 	MOCK_USER,
 	DIALOG,
@@ -12,8 +15,6 @@ import {
 	SPINNER,
 	UI_TEXT,
 } from '@/constants/test'
-
-import { ERROR_MESSAGES } from '@/constants/errors'
 
 vi.mock('react-redux', async () => {
 	const actual = await vi.importActual('react-redux')
@@ -194,7 +195,9 @@ describe('<TravellersList />', () => {
 				renderTravellersList({ isLoading: true })
 			})
 
-			expect(screen.getByRole('status')).toBeInTheDocument()
+			expect(
+				screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
+			).toBeInTheDocument()
 		})
 
 		it('should render "No travellers listed" message when no travellers exist', async () => {
@@ -205,11 +208,13 @@ describe('<TravellersList />', () => {
 			})
 
 			await waitFor(() => {
-				expect(screen.queryByRole('status')).not.toBeInTheDocument()
+				expect(
+					screen.queryByTestId(TEST_IDS.SPINNER.CONTAINER),
+				).not.toBeInTheDocument()
 			})
 
 			expect(
-				screen.getByText('No travellers listed.'),
+				screen.getByText(UI_TEXT.TRAVELLERS.NO_TRAVELLERS_MESSAGE),
 			).toBeInTheDocument()
 		})
 
@@ -303,8 +308,8 @@ describe('<TravellersList />', () => {
 				setupMocksForErrorState()
 
 				renderTravellersList({
-					initialError: 'Test error message',
-					isLoading: false, // Explicitly set loading to false
+					initialError: MOCK_ERROR_MESSAGES.INITIAL_ERROR,
+					isLoading: false,
 				})
 
 				expect(
@@ -323,7 +328,7 @@ describe('<TravellersList />', () => {
 			it('should handle loadTravellers dispatch error', async () => {
 				setupMocksForNoTravellers()
 
-				const mockError = new Error('Load failed')
+				const mockError = new Error(MOCK_ERROR_MESSAGES.LOAD_FAILED)
 				renderTravellersList(
 					{},
 					{
@@ -338,7 +343,9 @@ describe('<TravellersList />', () => {
 					).toBeInTheDocument()
 				})
 
-				expect(screen.getByText('Load failed')).toBeInTheDocument()
+				expect(
+					screen.getByText(MOCK_ERROR_MESSAGES.LOAD_FAILED),
+				).toBeInTheDocument()
 			})
 
 			it('should show generic error message when error has no message', async () => {
@@ -363,6 +370,41 @@ describe('<TravellersList />', () => {
 					screen.getByText(ERROR_MESSAGES.SOMETHING_WENT_WRONG),
 				).toBeInTheDocument()
 			})
+
+			it('should handle loadTravellers rejection with payload', async () => {
+				setupMocksForNoTravellers()
+
+				const rejectedResult = {
+					type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC
+						.REJECTED,
+					payload: GLOBAL.ERROR_DIALOG_TITLE,
+				}
+
+				vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
+					type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,
+				})
+
+				vi.mocked(travellersSlice.loadTravellers).rejected = {
+					match: vi.fn().mockReturnValue(true),
+				}
+
+				const mockDispatch = vi.fn().mockResolvedValue(rejectedResult)
+				vi.mocked(useDispatch).mockReturnValue(mockDispatch)
+
+				await act(async () => {
+					renderTravellersList()
+				})
+
+				await waitFor(() => {
+					expect(
+						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
+					).toBeInTheDocument()
+				})
+
+				expect(
+					screen.getByText(GLOBAL.ERROR_DIALOG_TITLE),
+				).toBeInTheDocument()
+			})
 		})
 
 		describe('refresh functionality', () => {
@@ -376,22 +418,40 @@ describe('<TravellersList />', () => {
 					).not.toBeInTheDocument()
 				})
 
-				const refreshButton = screen.getByRole('button', {
-					name: /refresh/i,
-				})
-
-				expect(refreshButton).toBeDisabled()
+				expect(
+					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
+				).toBeDisabled()
 			})
 
 			it('should enable refresh button when travellers exist', () => {
 				setupMocksForHasTravellers()
 				renderTravellersList()
 
-				const refreshButton = screen.getByRole('button', {
-					name: /refresh/i,
+				expect(
+					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
+				).not.toBeDisabled()
+			})
+
+			it('should call loadTravellersHandler with true when refresh button is clicked', async () => {
+				setupMocksForHasTravellers()
+
+				const mockDispatch = vi.fn().mockResolvedValue({})
+				vi.mocked(useDispatch).mockReturnValue(mockDispatch)
+
+				await act(async () => {
+					renderTravellersList()
 				})
 
-				expect(refreshButton).not.toBeDisabled()
+				const refreshButton = screen.getByTestId(
+					TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON,
+				)
+				fireEvent.click(refreshButton)
+
+				await waitFor(() => {
+					expect(travellersSlice.loadTravellers).toHaveBeenCalledWith(
+						expect.objectContaining({ forceRefresh: true }),
+					)
+				})
 			})
 		})
 
@@ -439,10 +499,10 @@ describe('<TravellersList />', () => {
 
 	describe('Accessibility tests', () => {
 		it('should have proper role for error dialog', () => {
-			setupMocksForErrorState() // Use this instead of setupMocksForNoTravellers
+			setupMocksForErrorState()
 
 			renderTravellersList({
-				initialError: 'Test error message',
+				initialError: MOCK_ERROR_MESSAGES.INITIAL_ERROR,
 				isLoading: false,
 			})
 
@@ -456,7 +516,7 @@ describe('<TravellersList />', () => {
 			renderTravellersList()
 
 			expect(
-				screen.getByRole('button', { name: /refresh/i }),
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
 			).toBeInTheDocument()
 		})
 
@@ -464,8 +524,12 @@ describe('<TravellersList />', () => {
 			setupMocksForHasTravellers()
 			renderTravellersList()
 
-			expect(screen.getByRole('list')).toBeInTheDocument()
-			expect(screen.getByRole('listitem')).toBeInTheDocument()
+			expect(
+				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
+			).toBeInTheDocument()
+			expect(
+				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
+			).toBeInTheDocument()
 		})
 	})
 })
