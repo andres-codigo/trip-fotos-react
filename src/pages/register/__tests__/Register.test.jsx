@@ -42,6 +42,17 @@ describe('Register', () => {
 			)
 		})
 
+		it('<main> element has correct data attributes', () => {
+			render(<Register />)
+
+			const main = screen.getByRole('main')
+			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
+			expect(main).toHaveAttribute(
+				'data-cy-alt',
+				TEST_IDS.REGISTER.CONTAINER,
+			)
+		})
+
 		it('renders <h1> with correct value', () => {
 			render(<Register />)
 

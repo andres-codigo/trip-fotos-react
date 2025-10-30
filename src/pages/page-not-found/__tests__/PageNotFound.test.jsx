@@ -69,6 +69,16 @@ describe('PageNotFound', () => {
 			)
 		})
 
+		it('<main> element has correct data attributes', () => {
+			render(<PageNotFound />)
+			const main = screen.getByRole('main')
+			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
+			expect(main).toHaveAttribute(
+				'data-cy-alt',
+				TEST_IDS.PAGE_NOT_FOUND.CONTAINER,
+			)
+		})
+
 		it('renders BaseCard as a wrapper for the content', () => {
 			useSelector.mockImplementation((fn) =>
 				fn({ authentication: { token: 'abc' } }),
