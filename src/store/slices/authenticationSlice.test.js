@@ -7,6 +7,7 @@ import {
 	MOCK_KEYS,
 	MOCK_STORAGE_KEYS,
 	MOCK_USER,
+	MOCK_ERROR_MESSAGES,
 } from '@/constants/test'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
@@ -424,6 +425,23 @@ describe('authenticationSlice', () => {
 					expect(state.didAutoLogout).toBe(true)
 				})
 			})
+
+			describe('failure scenarios', () => {
+				it('should handle tryLogin failure and set error state', async () => {
+					localStorage.getItem.mockImplementation(() => {
+						throw new Error(MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR)
+					})
+
+					const result = await store.dispatch(tryLogin())
+
+					const state = store.getState().authentication
+					expect(state.status).toBe('failed')
+					expect(state.error).toBe(
+						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR,
+					)
+					expect(result.meta.rejectedWithValue).toBe(true)
+				})
+			})
 		})
 
 		describe('logout', () => {
@@ -453,6 +471,23 @@ describe('authenticationSlice', () => {
 					expect(localStorage.removeItem).toHaveBeenCalledWith(
 						MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
 					)
+				})
+			})
+
+			describe('failure scenarios', () => {
+				it('should handle logout failure and set error state', async () => {
+					localStorage.removeItem.mockImplementation(() => {
+						throw new Error(MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR)
+					})
+
+					const result = await store.dispatch(logout())
+
+					const state = store.getState().authentication
+					expect(state.status).toBe('failed')
+					expect(state.error).toBe(
+						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR,
+					)
+					expect(result.meta.rejectedWithValue).toBe(true)
 				})
 			})
 		})

@@ -6,6 +6,7 @@ export const MOCK_MESSAGES = Object.freeze({
 export const MOCK_ERROR_MESSAGES = Object.freeze({
 	INITIAL_ERROR: 'Test error message',
 	LOAD_FAILED: 'Load failed',
+	LOCAL_STORAGE_ERROR: 'Local storage error',
 })
 
 export const MOCK_TEST_VALUES = Object.freeze({
