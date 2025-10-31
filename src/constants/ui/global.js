@@ -18,4 +18,9 @@ export const GLOBAL = Object.freeze({
 		TABLET: 1024,
 		DESKTOP: 1200,
 	},
+
+	// CLASSES
+	CLASS_NAMES: {
+		MAIN_CONTAINER: 'mainContainer',
+	},
 })
