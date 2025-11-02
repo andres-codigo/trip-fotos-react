@@ -1,11 +1,21 @@
 export const MOCK_TRAVELLERS = {
-	SAMPLE_TRAVELLER: {
+	SAMPLE_TRAVELLER_ONE: {
 		id: 'user1',
 		firstName: 'John',
 		lastName: 'Doe',
 		description: 'Test description',
 		daysInCity: 5,
 		areas: ['Area1'],
+		files: [],
+		registered: '2023-01-01',
+	},
+	SAMPLE_TRAVELLER_TWO: {
+		id: 'user2',
+		firstName: 'Jane',
+		lastName: 'Smith',
+		description: 'Another test description',
+		daysInCity: 5,
+		areas: ['Area2'],
 		files: [],
 		registered: '2023-01-01',
 	},

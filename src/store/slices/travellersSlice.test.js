@@ -187,8 +187,36 @@ describe('travellersSlice', () => {
 				const result = await store.dispatch(updateTravellers())
 
 				expect(result.payload).toEqual([
-					MOCK_TRAVELLERS.SAMPLE_TRAVELLER,
+					MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE,
 				])
+			})
+
+			it('should unshift logged-in traveller and dispatch setTravellerName', async () => {
+				const userId = 'user1'
+				const loggedInTraveller = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE
+				const otherTraveller = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO
+				const responseData = {
+					[userId]: loggedInTraveller,
+					['user2']: otherTraveller,
+				}
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => responseData,
+				})
+
+				const originalGetItem = global.localStorage.getItem
+				global.localStorage.getItem = vi.fn((key) => {
+					if (key === 'userId') return userId
+					return null
+				})
+
+				const result = await store.dispatch(updateTravellers())
+				expect(result.payload[0]).toEqual(loggedInTraveller)
+
+				const state = store.getState().travellers
+				expect(state.travellerName).toBe(MOCK_USER.FULL_NAME)
+
+				global.localStorage.getItem = originalGetItem
 			})
 
 			it('should return empty array when response is null', async () => {
