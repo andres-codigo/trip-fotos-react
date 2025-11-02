@@ -56,6 +56,11 @@ const initializeStore = () => {
 
 beforeEach(() => {
 	initializeStore()
+	vi.clearAllMocks()
+	// Re-establish fetch as a mock after clearing
+	if (!vi.isMockFunction(global.fetch)) {
+		global.fetch = vi.fn()
+	}
 })
 
 setupMocks()
@@ -316,12 +321,103 @@ describe('travellersSlice', () => {
 	})
 
 	describe('loadTravellers', () => {
+		describe('success scenarios', () => {
+			it('should return cached travellers when shouldUpdate returns false', async () => {
+				const recentTimestamp =
+					new Date().getTime() - MOCK_TIME.THIRTY_SECONDS_AGO
+				const cachedTravellers = [MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE]
+
+				store = configureStore({
+					reducer: {
+						travellers: travellersReducer,
+					},
+					preloadedState: {
+						travellers: {
+							travellerName: '',
+							isTraveller: false,
+							hasTravellers: true,
+							travellers: cachedTravellers,
+							lastFetch: recentTimestamp,
+							status: 'idle',
+							error: null,
+						},
+					},
+				})
+
+				const fetchSpy = vi.spyOn(global, 'fetch')
+
+				const result = await store.dispatch(
+					loadTravellers({ forceRefresh: false }),
+				)
+
+				expect(result.payload).toEqual(cachedTravellers)
+				expect(fetchSpy).not.toHaveBeenCalled()
+
+				fetchSpy.mockRestore()
+			})
+
+			it('should fetch fresh data when forceRefresh is true', async () => {
+				const recentTimestamp =
+					new Date().getTime() - MOCK_TIME.THIRTY_SECONDS_AGO
+				const cachedTravellers = [MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE]
+
+				const testStore = configureStore({
+					reducer: {
+						travellers: travellersReducer,
+					},
+					preloadedState: {
+						travellers: {
+							travellerName: '',
+							isTraveller: false,
+							hasTravellers: true,
+							travellers: cachedTravellers,
+							lastFetch: recentTimestamp,
+							status: 'idle',
+							error: null,
+						},
+					},
+				})
+
+				const freshTravellers = [MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO]
+				global.fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({
+						user2: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO,
+					}),
+				})
+
+				const result = await testStore.dispatch(
+					loadTravellers({ forceRefresh: true }),
+				)
+
+				expect(result.payload).toEqual(freshTravellers)
+				expect(global.fetch).toHaveBeenCalled()
+			})
+
+			it('should update lastFetch timestamp after successful fetch', async () => {
+				const beforeFetch = new Date().getTime()
+
+				global.fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => MOCK_API_RESPONSES.TRAVELLERS_RESPONSE,
+				})
+
+				await store.dispatch(loadTravellers({ forceRefresh: true }))
+
+				const afterFetch = new Date().getTime()
+				const state = store.getState().travellers
+
+				expect(state.lastFetch).toBeGreaterThanOrEqual(beforeFetch)
+				expect(state.lastFetch).toBeLessThanOrEqual(afterFetch)
+			})
+		})
+
 		describe('error scenarios', () => {
 			it('should pass through user-friendly error messages', async () => {
 				const userFriendlyError = ERROR_MESSAGES.SERVER_ERROR
 
 				// Mock updateTravellers to reject with user-friendly error
-				fetch.mockResolvedValueOnce({
+				global.fetch.mockResolvedValueOnce({
 					ok: false,
 					status: 500,
 				})
@@ -335,7 +431,9 @@ describe('travellersSlice', () => {
 
 			it('should provide fallback message for short/generic errors', async () => {
 				// Mock updateTravellers to reject with a short error
-				fetch.mockRejectedValueOnce(new Error('Error'))
+				global.fetch.mockRejectedValueOnce(
+					new Error(ERROR_MESSAGES.NETWORK_ERROR),
+				)
 
 				const result = await store.dispatch(
 					loadTravellers({ forceRefresh: true }),
