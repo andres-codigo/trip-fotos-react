@@ -1,5 +1,27 @@
 import { describe, it, expect, afterEach, vi } from 'vitest'
 
+/**
+ * Store Configuration Unit Tests
+ *
+ * Tests Redux store configuration, persistence setup, and slice integration.
+ *
+ * Mocks:
+ * - redux-persist: Mock persist store and reducer to isolate store configuration
+ * - redux-persist/lib/storage: Mock localStorage adapter for persistence
+ *
+ * Store Features:
+ * - Multi-slice structure: authentication and travellers slices
+ * - Redux Persist integration: Automatic state persistence to localStorage
+ * - Persist actions: Handles FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER
+ * - Middleware: Configured to ignore serialization warnings for persist actions
+ *
+ * Test Coverage:
+ * - Store initialization with correct state structure
+ * - Persistor configuration and instantiation
+ * - Persist action handling without errors
+ * - Slice registration and availability
+ */
+
 // Mock redux-persist before importing store
 vi.mock('redux-persist', () => ({
 	persistStore: vi.fn(() => ({ dispatch: vi.fn() })),
@@ -25,7 +47,7 @@ describe('Store Configuration', () => {
 	})
 
 	it('should configure persistor', () => {
-		// Since persistStore is called during module initialization,
+		// Since persistStore is called during module initialisation,
 		// we verify the persistor was created successfully
 		expect(persistor).toBeDefined()
 		expect(persistor).toHaveProperty('dispatch')
