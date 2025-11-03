@@ -477,27 +477,36 @@ describe('<TravellersList />', () => {
 		})
 
 		describe('loading states', () => {
-			it('should show loading spinner when isLoading prop is true', () => {
-				setupMocksForNoTravellers()
-				renderTravellersList({ isLoading: true })
+			it('should show loading spinner when isLoading prop is true', async () => {
+				setupMocksForLoadingState()
+
+				await act(async () => {
+					renderTravellersList({ isLoading: true })
+				})
 
 				expect(
 					screen.getByRole(SPINNER.ROLE_STATUS),
 				).toBeInTheDocument()
 			})
 
-			it('should hide travellers list when loading', () => {
+			it('should hide travellers list when loading', async () => {
 				setupMocksForHasTravellers()
-				renderTravellersList({ isLoading: true })
+
+				await act(async () => {
+					renderTravellersList({ isLoading: true })
+				})
 
 				expect(
 					screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 				).not.toBeInTheDocument()
 			})
 
-			it('should hide no travellers message when loading', () => {
-				setupMocksForNoTravellers()
-				renderTravellersList({ isLoading: true })
+			it('should hide no travellers message when loading', async () => {
+				setupMocksForLoadingState()
+
+				await act(async () => {
+					renderTravellersList({ isLoading: true })
+				})
 
 				expect(
 					screen.queryByText(
