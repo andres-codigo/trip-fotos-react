@@ -60,51 +60,59 @@ export const login = createAsyncThunk(
 
 export const tryLogin = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.TRY_LOGIN,
-	async (_, { dispatch }) => {
-		const token = localStorage.getItem('token')
-		const userId = localStorage.getItem('userId')
-		const userName = localStorage.getItem('userName')
-		const userEmail = localStorage.getItem('userEmail')
-		const tokenExpiration = localStorage.getItem('tokenExpiration')
+	async (_, { dispatch, rejectWithValue }) => {
+		try {
+			const token = localStorage.getItem('token')
+			const userId = localStorage.getItem('userId')
+			const userName = localStorage.getItem('userName')
+			const userEmail = localStorage.getItem('userEmail')
+			const tokenExpiration = localStorage.getItem('tokenExpiration')
 
-		if (
-			!token ||
-			!tokenExpiration ||
-			new Date().getTime() > +tokenExpiration
-		) {
-			dispatch(authActions.clearUser())
+			if (
+				!token ||
+				!tokenExpiration ||
+				new Date().getTime() > +tokenExpiration
+			) {
+				dispatch(authActions.clearUser())
+				dispatch(authActions.setAutoLogout(false))
+				return null
+			}
+
+			const expiresIn = +tokenExpiration - new Date().getTime()
+			timer = setTimeout(() => {
+				dispatch(autoLogout())
+			}, expiresIn)
+
 			dispatch(authActions.setAutoLogout(false))
-			return null
-		}
 
-		const expiresIn = +tokenExpiration - new Date().getTime()
-		timer = setTimeout(() => {
-			dispatch(autoLogout())
-		}, expiresIn)
-
-		dispatch(authActions.setAutoLogout(false))
-
-		return {
-			token,
-			userId,
-			userName,
-			userEmail,
+			return {
+				token,
+				userId,
+				userName,
+				userEmail,
+			}
+		} catch (error) {
+			return rejectWithValue(error.message)
 		}
 	},
 )
 
 export const logout = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.LOGOUT,
-	async (_, { dispatch }) => {
-		localStorage.removeItem('token')
-		localStorage.removeItem('userId')
-		localStorage.removeItem('userName')
-		localStorage.removeItem('userEmail')
-		localStorage.removeItem('tokenExpiration')
+	async (_, { dispatch, rejectWithValue }) => {
+		try {
+			localStorage.removeItem('token')
+			localStorage.removeItem('userId')
+			localStorage.removeItem('userName')
+			localStorage.removeItem('userEmail')
+			localStorage.removeItem('tokenExpiration')
 
-		clearTimeout(timer)
+			clearTimeout(timer)
 
-		dispatch(authActions.clearUser())
+			dispatch(authActions.clearUser())
+		} catch (error) {
+			return rejectWithValue(error.message)
+		}
 	},
 )
 

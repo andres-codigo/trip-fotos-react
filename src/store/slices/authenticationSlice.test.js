@@ -7,6 +7,7 @@ import {
 	MOCK_KEYS,
 	MOCK_STORAGE_KEYS,
 	MOCK_USER,
+	MOCK_ERROR_MESSAGES,
 } from '@/constants/test'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
@@ -18,9 +19,39 @@ import authenticationReducer, {
 	autoLogout,
 	authActions,
 	selectAuthenticationToken,
+	selectUserProfile,
 } from './authenticationSlice'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
+
+/**
+ * authenticationSlice Unit Tests
+ *
+ * Tests Redux slice managing user authentication state and lifecycle.
+ *
+ * Mocks:
+ * - API_DATABASE: Mock Firebase authentication API configuration
+ * - COMMON_HEADERS: Mock HTTP headers for API requests
+ * - global.fetch: Mock fetch API for authentication requests
+ * - localStorage: Mock storage for session persistence
+ * - timers: Fake timers for testing auto-logout functionality
+ *
+ * Slice Features:
+ * - Async thunks: login, tryLogin (auto-restore session), logout, autoLogout
+ * - Synchronous actions: clearUser, setAutoLogout
+ * - Selectors: selectAuthenticationToken, selectUserProfile
+ * - Session management: Token expiration timer, localStorage persistence
+ * - Multi-mode support: Login and signup modes
+ *
+ * Test Coverage:
+ * - Initial state and reducers
+ * - Login/signup success and failure scenarios
+ * - Session restoration from localStorage (tryLogin)
+ * - Token expiration and auto-logout timer
+ * - Logout and cleanup operations
+ * - Error handling for network and localStorage failures
+ * - Selector functions for state access
+ */
 
 vi.mock('@/constants/api', () => ({
 	API_DATABASE: {
@@ -85,6 +116,26 @@ describe('authenticationSlice', () => {
 
 			const result = selectAuthenticationToken(mockState)
 			expect(result).toBeNull()
+		})
+
+		it('should select user profile from state', () => {
+			const mockState = {
+				authentication: {
+					token: MOCK_KEYS.ID_TOKEN,
+					userId: MOCK_KEYS.LOCAL_ID,
+					userName: MOCK_USER.FULL_NAME,
+					userEmail: MOCK_KEYS.EMAIL,
+					didAutoLogout: false,
+					status: 'succeeded',
+					error: null,
+				},
+			}
+			const result = selectUserProfile(mockState)
+			expect(result).toEqual({
+				userId: MOCK_KEYS.LOCAL_ID,
+				userName: MOCK_USER.FULL_NAME,
+				userEmail: MOCK_KEYS.EMAIL,
+			})
 		})
 	})
 
@@ -273,6 +324,27 @@ describe('authenticationSlice', () => {
 					expect(result.payload).toBe(mockErrorMessage)
 					expect(result.meta.rejectedWithValue).toBe(true)
 				})
+				it('should handle autoLogout.rejected and set error state', async () => {
+					const mockErrorMessage =
+						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR
+
+					const action = {
+						type: autoLogout.rejected.type,
+						payload: mockErrorMessage,
+					}
+					const previousState = {
+						token: MOCK_USER.TOKEN,
+						userId: MOCK_USER.USER_ID,
+						userName: MOCK_USER.USER_NAME,
+						userEmail: MOCK_USER.USER_EMAIL,
+						didAutoLogout: false,
+						status: 'succeeded',
+						error: null,
+					}
+					const state = authenticationReducer(previousState, action)
+					expect(state.status).toBe('failed')
+					expect(state.error).toBe(mockErrorMessage)
+				})
 
 				it('should handle login failure with missing error message and use fallback', async () => {
 					fetch.mockResolvedValueOnce({
@@ -424,6 +496,23 @@ describe('authenticationSlice', () => {
 					expect(state.didAutoLogout).toBe(true)
 				})
 			})
+
+			describe('failure scenarios', () => {
+				it('should handle tryLogin failure and set error state', async () => {
+					localStorage.getItem.mockImplementation(() => {
+						throw new Error(MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR)
+					})
+
+					const result = await store.dispatch(tryLogin())
+
+					const state = store.getState().authentication
+					expect(state.status).toBe('failed')
+					expect(state.error).toBe(
+						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR,
+					)
+					expect(result.meta.rejectedWithValue).toBe(true)
+				})
+			})
 		})
 
 		describe('logout', () => {
@@ -453,6 +542,23 @@ describe('authenticationSlice', () => {
 					expect(localStorage.removeItem).toHaveBeenCalledWith(
 						MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
 					)
+				})
+			})
+
+			describe('failure scenarios', () => {
+				it('should handle logout failure and set error state', async () => {
+					localStorage.removeItem.mockImplementation(() => {
+						throw new Error(MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR)
+					})
+
+					const result = await store.dispatch(logout())
+
+					const state = store.getState().authentication
+					expect(state.status).toBe('failed')
+					expect(state.error).toBe(
+						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR,
+					)
+					expect(result.meta.rejectedWithValue).toBe(true)
 				})
 			})
 		})

@@ -126,7 +126,7 @@ const UserAuth = () => {
 
 	return (
 		<main
-			className="mainContainer authenticationPage"
+			className="mainContainer authenticationContainer"
 			data-cy="main-container"
 			data-cy-alt="authentication-main-container">
 			{error && (

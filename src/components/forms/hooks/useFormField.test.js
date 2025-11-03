@@ -2,6 +2,25 @@ import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import useFormField from './useFormField'
 
+/**
+ * useFormField Hook Unit Tests
+ *
+ * Tests the custom hook that manages form field state including value, validation status, and messages.
+ *
+ * Hook Behavior:
+ * - Initialises with default values (empty string, valid state, no message)
+ * - Accepts optional initial value parameter
+ * - Returns array with [field, updateField] similar to useState pattern
+ * - updateField function accepts (value, isValid, message) with default parameters
+ *
+ * Test Coverage:
+ * - Initialisation with default and custom values
+ * - Field updates with valid/invalid states and messages
+ * - Sequential updates to verify state persistence
+ * - Edge cases: empty strings, special characters, whitespace
+ * - Return value structure validation
+ */
+
 describe('useFormField', () => {
 	it('should initialise with default values when no initial value provided', () => {
 		const { result } = renderHook(() => useFormField())

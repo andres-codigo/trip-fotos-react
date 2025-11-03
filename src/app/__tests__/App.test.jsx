@@ -9,6 +9,28 @@ import { PATHS } from '@/constants/ui'
 
 import App from '../App'
 
+/**
+ * App Component Unit Tests
+ *
+ * Tests the main application component including routing, authentication, and navigation logic.
+ *
+ * Mocks:
+ * - react-redux: useDispatch and useSelector for Redux state management
+ * - react-router-dom: Router hooks (useNavigate, useLocation, useInRouterContext)
+ * - All page components: Simplified versions returning identifying text
+ * - Layout components: Header and LoadingFallback simplified for testing
+ * - Authentication slice: tryLogin action mocked
+ * - UI constants: PATHS object with route definitions
+ *
+ * Router: Uses MemoryRouter to test routing behavior without browser dependency
+ *
+ * Test Coverage:
+ * - Rendering: Correct page display based on route and auth state
+ * - Navigation: Redirects for protected routes and auto-logout scenarios
+ * - Authentication: Token validation, auto-login attempt on mount
+ * - Authorisation: Public vs protected route access control
+ */
+
 vi.mock('react-redux', () => ({
 	useDispatch: () => vi.fn(),
 	useSelector: vi.fn(),

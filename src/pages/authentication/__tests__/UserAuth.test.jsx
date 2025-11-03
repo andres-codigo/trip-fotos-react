@@ -9,10 +9,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 
-import { DIALOG } from '@/constants/test'
 import { FIREBASE_ERRORS } from '@/constants/auth'
 
+import { GLOBAL } from '@/constants/ui'
 import {
+	DIALOG,
 	MOCK_KEYS,
 	MOCK_LOGIN_PAYLOAD,
 	MOCK_SIGNUP_ACTION,
@@ -179,6 +180,43 @@ describe('<UserAuth />', () => {
 	beforeEach(() => {
 		mockDispatch.mockClear()
 		mockNavigate.mockClear()
+	})
+
+	describe('Rendering tests', () => {
+		it('renders the <main> element', () => {
+			renderWithProviders(<UserAuth />)
+
+			expect(screen.getByRole('main')).toBeInTheDocument()
+		})
+
+		it('applies both mainContainer and authenticationContainer classes to <main>', () => {
+			renderWithProviders(<UserAuth />)
+
+			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
+
+			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
+			expect(main.className).toMatch(
+				new RegExp('authenticationContainer'),
+			)
+		})
+
+		it('<main> element has correct data attributes', () => {
+			renderWithProviders(<UserAuth />)
+
+			const main = screen.getByRole('main')
+			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
+			expect(main).toHaveAttribute(
+				'data-cy-alt',
+				TEST_IDS.USER_AUTH.CONTAINER,
+			)
+		})
+
+		it('renders the UserAuthForm component', () => {
+			renderWithProviders(<UserAuth />)
+
+			const form = screen.getByTestId(TEST_IDS.USER_AUTH_FORM.FORM)
+			expect(form).toBeInTheDocument()
+		})
 	})
 
 	describe('Behaviour tests', () => {
@@ -480,6 +518,22 @@ describe('<UserAuth />', () => {
 				await waitFor(() => {
 					expect(login).toHaveBeenCalledWith(MOCK_LOGIN_PAYLOAD)
 				})
+			})
+
+			it('toggles between login and signup modes when switch button is clicked', async () => {
+				renderWithProviders(<UserAuth />)
+
+				const switchBtn = screen.getByTestId(
+					TEST_IDS.USER_AUTH_FORM.LOGIN_SIGNUP_TOGGLE_LINK,
+				)
+
+				expect(screen.getByText(/log in/i)).toBeInTheDocument()
+
+				fireEvent.click(switchBtn)
+				expect(screen.getByText(/sign up/i)).toBeInTheDocument()
+
+				fireEvent.click(switchBtn)
+				expect(screen.getByText(/log in/i)).toBeInTheDocument()
 			})
 
 			it('dispatches signup action when component is in signup mode', async () => {
