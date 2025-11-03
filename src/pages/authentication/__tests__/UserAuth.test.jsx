@@ -520,6 +520,22 @@ describe('<UserAuth />', () => {
 				})
 			})
 
+			it('toggles between login and signup modes when switch button is clicked', async () => {
+				renderWithProviders(<UserAuth />)
+
+				const switchBtn = screen.getByTestId(
+					TEST_IDS.USER_AUTH_FORM.LOGIN_SIGNUP_TOGGLE_LINK,
+				)
+
+				expect(screen.getByText(/log in/i)).toBeInTheDocument()
+
+				fireEvent.click(switchBtn)
+				expect(screen.getByText(/sign up/i)).toBeInTheDocument()
+
+				fireEvent.click(switchBtn)
+				expect(screen.getByText(/log in/i)).toBeInTheDocument()
+			})
+
 			it('dispatches signup action when component is in signup mode', async () => {
 				renderWithProviders(<UserAuth />)
 
