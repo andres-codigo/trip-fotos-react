@@ -28,6 +28,34 @@ import { handleApiError } from '@/utils/errorHandler'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
+/**
+ * travellersSlice Unit Tests
+ *
+ * Tests Redux slice managing traveller data including fetching, caching, and state updates.
+ *
+ * Mocks:
+ * - API_DATABASE: Mock endpoint configuration for API calls
+ * - errorHandler: Mock error handling utility
+ * - authenticationSlice: Mock token selector for authenticated requests
+ * - global.fetch: Mock fetch API for simulating network requests
+ * - localStorage: Mock storage for user data persistence
+ *
+ * Slice Features:
+ * - Async thunks: travellerName, updateTravellers, loadTravellers
+ * - Synchronous actions: setTravellerName, setIsTraveller, setTravellers
+ * - Selectors: Select traveller data, validation flags, and cache state
+ * - Cache management: 60-second cache with force refresh option
+ *
+ * Test Coverage:
+ * - Initial state verification
+ * - Synchronous action reducers
+ * - Async thunk success and failure scenarios
+ * - API error handling (network, server, client errors)
+ * - Cache logic (shouldUpdate helper)
+ * - Data transformation and user prioritization
+ * - Selectors for state access
+ */
+
 vi.mock('@/constants/endpoints', () => ({
 	API_DATABASE: {
 		URL: 'https://mock-api-url.com/',
