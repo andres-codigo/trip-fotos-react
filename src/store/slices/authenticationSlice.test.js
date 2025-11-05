@@ -68,7 +68,7 @@ vi.mock('@/constants/api', () => ({
 
 let store
 
-const initializeStore = () => {
+const initialiseStore = () => {
 	store = configureStore({
 		reducer: {
 			authentication: authenticationReducer,
@@ -80,7 +80,7 @@ setupMocks()
 
 describe('authenticationSlice', () => {
 	beforeEach(() => {
-		initializeStore()
+		initialiseStore()
 	})
 
 	describe('selectors', () => {
