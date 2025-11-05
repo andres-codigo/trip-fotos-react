@@ -74,7 +74,7 @@ vi.mock('./authenticationSlice', () => ({
 
 let store
 
-const initializeStore = () => {
+const initialiseStore = () => {
 	store = configureStore({
 		reducer: {
 			travellers: travellersReducer,
@@ -83,7 +83,7 @@ const initializeStore = () => {
 }
 
 beforeEach(() => {
-	initializeStore()
+	initialiseStore()
 	vi.clearAllMocks()
 	// Re-establish fetch as a mock after clearing
 	if (!vi.isMockFunction(global.fetch)) {
@@ -96,7 +96,7 @@ setupMocks()
 describe('travellersSlice', () => {
 	describe('initial state', () => {
 		describe('success scenarios', () => {
-			it('should initialize with default state', () => {
+			it('should initialise with default state', () => {
 				const initialState = store.getState().travellers
 				expect(initialState).toEqual({
 					travellerName: '',
