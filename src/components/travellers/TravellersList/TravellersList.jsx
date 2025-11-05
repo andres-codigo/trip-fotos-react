@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import PropTypes from 'prop-types'
 
@@ -25,6 +25,7 @@ import travellersListStyles from './TravellersList.module.scss'
 const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const [error, setError] = useState(initialError)
 	const [loading, setLoading] = useState(isLoading)
+	const hasInitialisedRef = useRef(false)
 
 	const dispatch = useDispatch()
 	const isLoggedIn = useSelector(selectIsAuthenticated)
@@ -57,14 +58,20 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 		[dispatch],
 	)
 
+	// Load travellers on mount if not already cached in Redux
 	useEffect(() => {
-		if (
+		// Check travellers at time of mount, not reactive to changes
+		const shouldLoad =
 			!travellers ||
 			(Array.isArray(travellers) && travellers.length === 0)
-		) {
+
+		if (shouldLoad && !hasInitialisedRef.current) {
+			hasInitialisedRef.current = true
 			loadTravellersHandler()
 		}
-	}, [travellers, loadTravellersHandler])
+		// Intentionally only run on mount
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
 
 	const handleError = () => setError(null)
 

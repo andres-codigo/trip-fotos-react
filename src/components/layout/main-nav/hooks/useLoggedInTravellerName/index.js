@@ -11,8 +11,8 @@ export function useLoggedInTravellerName() {
 	}, [])
 
 	useEffect(() => {
-		syncTravellerName()
-
+		// Only sync when storage changes in another tab/window
+		// Initial value is already set via lazy initializer
 		window.addEventListener('storage', syncTravellerName)
 
 		return () => {

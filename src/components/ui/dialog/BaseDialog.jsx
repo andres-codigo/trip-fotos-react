@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useId } from 'react'
+import { useEffect, useRef, useId } from 'react'
 import ReactDOM from 'react-dom'
 import PropTypes from 'prop-types'
 
@@ -28,20 +28,6 @@ const BaseDialog = ({
 
 	const nodeRef = useRef(null)
 
-	/**
-	 * shouldRender is used to keep the dialog mounted in the DOM
-	 * after show becomes false, allowing exit animations to play.
-	 * It is set to true when show is true, and only unmounts when
-	 * both shouldRender and show are false.
-	 */
-	const [shouldRender, setShouldRender] = useState(show)
-
-	useEffect(() => {
-		if (show) {
-			setShouldRender(true)
-		}
-	}, [show])
-
 	const tryClose = () => {
 		if (!fixed) {
 			onClose()
@@ -60,8 +46,6 @@ const BaseDialog = ({
 		window.addEventListener('keydown', handleKeyDown)
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [show, onClose])
-
-	if (!shouldRender && !show) return null
 
 	return ReactDOM.createPortal(
 		<>

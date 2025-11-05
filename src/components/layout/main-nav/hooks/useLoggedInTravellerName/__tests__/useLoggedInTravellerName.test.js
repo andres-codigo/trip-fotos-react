@@ -26,7 +26,7 @@ Object.defineProperty(window, 'removeEventListener', {
 })
 
 describe('useLoggedInTravellerName', () => {
-	it('should initialize with localStorage value when available', () => {
+	it('should initialise with localStorage value when available', () => {
 		localStorageMock.getItem.mockReturnValue('John Doe')
 
 		const { result } = renderHook(() => useLoggedInTravellerName())
@@ -35,7 +35,7 @@ describe('useLoggedInTravellerName', () => {
 		expect(localStorageMock.getItem).toHaveBeenCalledWith('userName')
 	})
 
-	it('should initialize with empty string when localStorage is empty', () => {
+	it('should initialise with empty string when localStorage is empty', () => {
 		localStorageMock.getItem.mockReturnValue(null)
 
 		const { result } = renderHook(() => useLoggedInTravellerName())
@@ -44,15 +44,15 @@ describe('useLoggedInTravellerName', () => {
 		expect(localStorageMock.getItem).toHaveBeenCalledWith('userName')
 	})
 
-	it('should sync traveller name from localStorage on mount', () => {
-		localStorageMock.getItem
-			.mockReturnValueOnce('Initial')
-			.mockReturnValueOnce('Updated')
+	it('should initialise with localStorage value only once on mount', () => {
+		localStorageMock.getItem.mockReturnValue('Initial Value')
 
 		const { result } = renderHook(() => useLoggedInTravellerName())
 
-		expect(result.current[0]).toBe('Updated')
-		expect(localStorageMock.getItem).toHaveBeenCalledTimes(2)
+		expect(result.current[0]).toBe('Initial Value')
+		// Should only call getItem once during initialization
+		expect(localStorageMock.getItem).toHaveBeenCalledTimes(1)
+		expect(localStorageMock.getItem).toHaveBeenCalledWith('userName')
 	})
 
 	it('should add storage event listener on mount', () => {
@@ -78,7 +78,6 @@ describe('useLoggedInTravellerName', () => {
 	it('should update traveller name when storage event is triggered', () => {
 		localStorageMock.getItem
 			.mockReturnValueOnce('Initial')
-			.mockReturnValueOnce('Initial')
 			.mockReturnValueOnce('Updated from storage')
 
 		const { result } = renderHook(() => useLoggedInTravellerName())
@@ -94,7 +93,6 @@ describe('useLoggedInTravellerName', () => {
 
 	it('should handle null localStorage value in storage event', () => {
 		localStorageMock.getItem
-			.mockReturnValueOnce('Initial')
 			.mockReturnValueOnce('Initial')
 			.mockReturnValueOnce(null)
 
