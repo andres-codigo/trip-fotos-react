@@ -1,7 +1,16 @@
 .travellerListContainer {
 	.controls {
+		align-items: center;
 		display: flex;
-		justify-content: space-between;
+		height: 2.5rem;
+		justify-content: flex-start;
+
+		/* Ensure the last control (Register link) is pushed to the right */
+		& > :last-child {
+			margin-left: auto;
+			margin-right: 0.5rem;
+		}
+
 		.hide {
 			display: none;
 		}
