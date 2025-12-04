@@ -21,6 +21,7 @@ import mainNavStyles from './MainNav.module.scss'
 
 function MainNav({
 	isLoggedIn,
+	isTraveller: isTravellerProp,
 	useMainNavState = useMainNavStateDefault,
 	useClickOutsideToClose = useClickOutsideToCloseDefault,
 	useMobileMenu = useMobileMenuDefault,
@@ -29,7 +30,10 @@ function MainNav({
 	const location = useLocation()
 
 	const usersName = useSelector((state) => state.travellers.travellerName)
-	const isTraveller = useSelector((state) => state.travellers.isTraveller)
+	const isTravellerFromStore = useSelector(
+		(state) => state.travellers.isTraveller,
+	)
+	const isTraveller = isTravellerProp ?? isTravellerFromStore
 	// const messagesCount = useSelector((state) => state.messages.messagesCount);
 
 	const {
@@ -189,6 +193,7 @@ function MainNav({
 
 MainNav.propTypes = {
 	isLoggedIn: PropTypes.bool.isRequired,
+	isTraveller: PropTypes.bool,
 	useMainNavState: PropTypes.func,
 	useClickOutsideToClose: PropTypes.func,
 	useMobileMenu: PropTypes.func,
