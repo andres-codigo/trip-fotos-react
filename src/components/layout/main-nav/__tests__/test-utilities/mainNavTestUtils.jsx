@@ -8,6 +8,7 @@ import MainNav from '../../MainNav'
 
 export const TestMainNav = ({
 	isLoggedIn = true,
+	isTraveller = false,
 	isMenuOpen: initialMenuOpen = true,
 }) => {
 	const [isMenuOpen, setIsMenuOpen] = useState(initialMenuOpen)
@@ -15,6 +16,7 @@ export const TestMainNav = ({
 	return (
 		<MainNav
 			isLoggedIn={isLoggedIn}
+			isTraveller={isTraveller}
 			useMainNavState={() => ({
 				travellerName: 'Test User',
 				setTravellerName: () => {},
@@ -31,5 +33,6 @@ export const TestMainNav = ({
 
 TestMainNav.propTypes = {
 	isLoggedIn: PropTypes.bool,
+	isTraveller: PropTypes.bool,
 	isMenuOpen: PropTypes.bool,
 }

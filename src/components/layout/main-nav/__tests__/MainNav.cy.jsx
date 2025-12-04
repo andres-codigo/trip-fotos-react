@@ -31,6 +31,7 @@ const assertMenuItemRedirectWithDefaults = (
 	locationPageClassName,
 	PageComponent,
 	store,
+	isTraveller = false,
 ) => {
 	assertMenuItemRedirect(
 		store,
@@ -45,6 +46,7 @@ const assertMenuItemRedirectWithDefaults = (
 		MemoryRouter,
 		Routes,
 		Route,
+		isTraveller,
 	)
 }
 
@@ -71,6 +73,7 @@ describe('<MainNav />', () => {
 						cy.mountWithProviders(
 							<TestMainNav
 								isLoggedIn={true}
+								isTraveller={true}
 								isMenuOpen={true}
 							/>,
 							store,
@@ -93,6 +96,7 @@ describe('<MainNav />', () => {
 						cy.mountWithProviders(
 							<TestMainNav
 								isLoggedIn={true}
+								isTraveller={true}
 								isMenuOpen={true}
 							/>,
 							store,
@@ -115,6 +119,7 @@ describe('<MainNav />', () => {
 						cy.mountWithProviders(
 							<TestMainNav
 								isLoggedIn={true}
+								isTraveller={true}
 								isMenuOpen={true}
 							/>,
 							store,
@@ -145,6 +150,7 @@ describe('<MainNav />', () => {
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
+							true,
 						)
 					})
 				})
@@ -200,6 +206,7 @@ describe('<MainNav />', () => {
 						cy.mountWithProviders(
 							<TestMainNav
 								isLoggedIn={true}
+								isTraveller={true}
 								isMenuOpen={true}
 							/>,
 							store,
@@ -273,6 +280,7 @@ describe('<MainNav />', () => {
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
+							true,
 						)
 					})
 				})
@@ -314,6 +322,7 @@ describe('<MainNav />', () => {
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
+							true,
 						)
 					})
 				})
@@ -439,5 +448,6 @@ describe('<MainNav />', () => {
 
 TestMainNav.propTypes = {
 	isLoggedIn: PropTypes.bool,
+	isTraveller: PropTypes.bool,
 	isMenuOpen: PropTypes.bool,
 }

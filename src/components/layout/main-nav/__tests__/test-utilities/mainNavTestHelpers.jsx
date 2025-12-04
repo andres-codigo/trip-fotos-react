@@ -11,12 +11,17 @@ export const mockUseMainNavState = () => ({
 	useLogout: () => {},
 })
 
-export const assertMenuItems = (travellerName = 'Test User') => {
-	cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES)
-		.should('exist')
-		.and('be.visible')
-		.should('have.attr', 'href', APP_URLS.CY_MESSAGES)
-		.and('have.text', 'Messages')
+export const assertMenuItems = (
+	travellerName = 'Test User',
+	isTraveller = false,
+) => {
+	if (isTraveller) {
+		cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES)
+			.should('exist')
+			.and('be.visible')
+			.should('have.attr', 'href', APP_URLS.CY_MESSAGES)
+			.and('have.text', 'Messages')
+	}
 	cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS)
 		.should('exist')
 		.and('be.visible')
@@ -41,6 +46,7 @@ export const assertMenuItemRedirect = (
 	MemoryRouter,
 	Routes,
 	Route,
+	isTraveller = false,
 ) => {
 	cy.mountWithProviders(
 		// LocationDisplay MUST be outside of <Routes> to be always rendered
@@ -53,6 +59,7 @@ export const assertMenuItemRedirect = (
 						<TestMainNav
 							isLoggedIn={true}
 							isMenuOpen={true}
+							isTraveller={isTraveller}
 						/>
 					}
 				/>
