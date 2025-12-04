@@ -30,7 +30,6 @@ describe('Travellers Page - WIP', () => {
 
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST_CONTAINER).within(
 				() => {
-					cy.get('section').should('exist')
 					cy.get(TRAVELLERS_LIST_SELECTORS.CONTROLS).should('exist')
 				},
 			)
