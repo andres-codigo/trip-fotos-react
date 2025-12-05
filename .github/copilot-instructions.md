@@ -25,7 +25,7 @@
     - Use default exports.
 - **Services**: Firebase initialization in `src/services/firebase`.
 - **Constants**:
-    - **Strictly** use centralized constants from `src/constants` (e.g., `PATHS`, `API_ENDPOINTS`).
+    - **Strictly** use centralized constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`).
     - Do not hardcode strings for paths, API URLs, or error messages.
 - **Utils**:
     - **Validation**: Use `src/utils/validation` for common checks (email, password).
