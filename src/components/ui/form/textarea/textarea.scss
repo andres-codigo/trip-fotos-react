@@ -1,0 +1,18 @@
+@use '@/styles/setup/variables' as variables;
+@use '@/styles/setup/mixins/form/valid/valid' as valid;
+
+@include valid.label;
+
+textarea {
+	@include valid.default-styles;
+
+	&:focus {
+		border-color: variables.$color-pigment-indigo;
+		background-color: variables.$color-magnolia;
+		outline: none;
+	}
+}
+
+.input-required {
+	color: variables.$color-red;
+}
