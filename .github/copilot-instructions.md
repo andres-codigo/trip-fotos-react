@@ -23,6 +23,7 @@
         - If a component has specific hooks, place them in a `hooks` subfolder within the component's folder (e.g., `src/components/forms/user-auth/hooks/useUserAuth.js`).
     - Use functional components with hooks.
     - Use default exports.
+    - **Reusability**: When creating or recreating components, check `src/components/ui` or `src/components/common` for existing reusable components (e.g., `Input`, `Button`) and use them. If a reusable pattern emerges, create a new reusable component in the appropriate folder.
 - **Services**: Firebase initialization in `src/services/firebase`.
 - **Constants**:
     - **Strictly** use centralized constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`).
@@ -65,7 +66,9 @@
     - Hooks/Utils: camelCase (`useViewport.js`).
     - Constants: UPPER_SNAKE_CASE.
 - **Type Safety**: Use `prop-types` for all component props.
-- **Styling**: Use SCSS modules for component-specific styles. Import as `styles` (e.g., `import styles from './Component.module.scss'`).
+- **Styling**:
+    - Use SCSS modules for component-specific styles. Import as `styles` (e.g., `import styles from './Component.module.scss'`).
+    - **Variables & Mixins**: When creating a new SCSS file, always review `src/styles` for available variables and mixins to ensure consistency.
 
 ## Key Files
 
