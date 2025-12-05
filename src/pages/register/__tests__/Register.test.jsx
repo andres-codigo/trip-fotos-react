@@ -4,9 +4,18 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { TEST_IDS } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 
+import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../../cypress/support/constants/selectors/components'
+
 import Register from '../Register'
 
 import registerStyles from '../register.module.scss'
+
+vi.mock(
+	'@/components/forms/traveller-registration/TravellerRegistrationForm',
+	() => ({
+		default: () => <div data-cy="traveller-registration-form" />,
+	}),
+)
 
 /**
  * Register Unit Tests
@@ -59,7 +68,16 @@ describe('Register', () => {
 			const heading = screen.getByRole('heading', { level: 1 })
 
 			expect(heading).toBeInTheDocument()
-			expect(heading).toHaveTextContent('Register page')
+			expect(heading).toHaveTextContent('Register')
+		})
+
+		it('renders the TravellerRegistrationForm', () => {
+			const { container } = render(<Register />)
+			expect(
+				container.querySelector(
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM,
+				),
+			).toBeInTheDocument()
 		})
 	})
 })

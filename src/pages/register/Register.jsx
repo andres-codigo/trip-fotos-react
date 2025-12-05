@@ -1,3 +1,4 @@
+import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
 import registerStyles from './register.module.scss'
 
 const Register = () => {
@@ -6,7 +7,8 @@ const Register = () => {
 			className={`mainContainer ${registerStyles.registerContainer}`}
 			data-cy="main-container"
 			data-cy-alt="register-main-container">
-			<h1>Register page</h1>
+			<h1>Register</h1>
+			<TravellerRegistrationForm />
 		</main>
 	)
 }
