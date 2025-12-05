@@ -126,6 +126,24 @@ describe('<Input />', () => {
 	})
 
 	describe('Behaviour tests', () => {
+		it('calls onChange when checkbox is clicked', () => {
+			const onChangeSpy = cy.spy().as('onChangeSpy')
+			cy.mount(
+				<Input
+					id={INPUT.ID}
+					label="Checkbox Label"
+					type={INPUT.TYPES[4]} // 'checkbox'
+					checked={false}
+					onChange={onChangeSpy}
+					data-cy={INPUT.ID}
+				/>,
+			)
+			cy.get(`input[type=${INPUT.TYPES[4]}]`).should('exist')
+			cy.get('label').should('contain', 'Checkbox Label')
+			cy.get(getByDataCy(INPUT.ID)).click()
+			cy.get('@onChangeSpy').should('have.been.called')
+		})
+
 		it('calls onChange when typing', () => {
 			const handleChange = cy.stub().as('onChange')
 			cy.mount(
