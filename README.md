@@ -339,6 +339,14 @@ npm run dev
 
 Refer to the [Scripts](#scripts) section for commands to run ESLint, fix linting issues, and format files using Prettier.
 
+### AI Assistance
+
+This project includes a configuration file for GitHub Copilot to ensure generated code adheres to project standards.
+
+- **File**: `.github/copilot-instructions.md`
+- **Purpose**: Provides context to AI agents about architecture, testing strategies, naming conventions, and tech stack.
+- **Usage**: Copilot automatically references this file. Developers can also refer to it for a quick summary of project guidelines.
+
 ---
 
 <a id="testing"></a>
@@ -713,7 +721,8 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 ```
 trip-fotos-react/
 ├── .github/
-│   └── workflows/              # GitHub Actions workflow files for CI/CD automation
+│   ├── workflows/              # GitHub Actions workflow files for CI/CD automation
+│   └── copilot-instructions.md # Context and guidelines for GitHub Copilot
 ├── cypress/                    # Cypress tests
 ├── declarations/               # Breaking issue fix when using ESLint V9
 ├── public/                     # Static assets
