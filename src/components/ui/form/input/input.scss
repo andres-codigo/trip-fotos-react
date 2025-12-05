@@ -3,19 +3,3 @@
 .input-required {
 	color: variables.$color-red;
 }
-
-.checkbox-container {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-
-	label {
-		margin: 0;
-		font-weight: normal;
-	}
-
-	input {
-		width: auto;
-		display: inline-block;
-	}
-}
