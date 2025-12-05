@@ -23,7 +23,11 @@
         - If a component has specific hooks, place them in a `hooks` subfolder within the component's folder (e.g., `src/components/forms/user-auth/hooks/useUserAuth.js`).
     - Use functional components with hooks.
     - Use default exports.
-    - **Reusability**: When creating or recreating components, check `src/components/ui` or `src/components/common` for existing reusable components (e.g., `Input`, `Button`) and use them. If a reusable pattern emerges, create a new reusable component in the appropriate folder.
+    - **Reusability**:
+        - When creating or recreating components, check `src/components/ui` or `src/components/common` for existing reusable components (e.g., `Input`, `Button`) and use them.
+        - If a reusable pattern emerges, create a new reusable component in the appropriate folder.
+        - **Immediate Refactoring**: When a new reusable component is created, immediately refactor existing code to utilize it.
+        - **Consistency**: Maintain API consistency (prop names, validation patterns) when creating similar UI components.
 - **Services**: Firebase initialization in `src/services/firebase`.
 - **Constants**:
     - **Strictly** use centralized constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`).
@@ -53,7 +57,9 @@
     - Run: `npm run cy:run:auto {path/to/component}`.
 - **E2E Tests**: Use Cypress (`cypress/e2e`).
     - Run: `npm run cy:open:e2e` or `npm run cy:run:e2e`.
-    - **Constants**: Strictly use `cypress/support/constants` for selectors, URLs, and test data in E2E tests.
+    - **Constants**:
+        - Strictly use `cypress/support/constants` for selectors, URLs, and test data in E2E tests.
+        - Define reusable test constants (IDs, labels, error messages) in `src/constants/test` for component tests.
 - **Unit/Integration**: Use Vitest (`*.test.js`).
     - Run: `npm run vitest:run` or `npm run vitest:watch`.
 - **Mocking**: Use `src/testUtils` and `src/constants/test` for mocks and selectors.
@@ -66,9 +72,12 @@
     - Hooks/Utils: camelCase (`useViewport.js`).
     - Constants: UPPER_SNAKE_CASE.
 - **Type Safety**: Use `prop-types` for all component props.
+- **Accessibility**: Ensure form components handle accessibility attributes (`aria-*`, `role`) for validation states.
 - **Styling**:
     - Use SCSS modules for component-specific styles. Import as `styles` (e.g., `import styles from './Component.module.scss'`).
-    - **Variables & Mixins**: When creating a new SCSS file, always review `src/styles` for available variables and mixins to ensure consistency.
+    - **Variables & Mixins**:
+        - When creating a new SCSS file, always review `src/styles` for available variables and mixins to ensure consistency.
+        - New colour variables should follow the existing naming convention (e.g., using "Name that Colour" tool).
 
 ## Key Files
 
