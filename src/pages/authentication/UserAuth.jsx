@@ -8,7 +8,7 @@ import { PATHS } from '@/constants/ui'
 
 import { login } from '@/store/slices/authenticationSlice'
 
-import useFormField from '@/components/forms/hooks/useFormField'
+import useFormField from '@/components/forms/user-auth/hooks/useFormField'
 
 import { getFirebaseAuthErrorMessage } from '@/utils/getFirebaseAuthErrorMessage'
 import { validateEmail, validatePassword } from '@/utils/validation'
@@ -18,7 +18,7 @@ import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-import UserAuthForm from '@/components/forms/UserAuthForm'
+import UserAuthForm from '@/components/forms/user-auth/UserAuthForm'
 
 const UserAuth = () => {
 	const [email, setEmail] = useFormField('')
