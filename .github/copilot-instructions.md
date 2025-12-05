@@ -22,7 +22,7 @@
         - Each component folder must contain a `__tests__` directory.
         - If a component has specific hooks, place them in a `hooks` subfolder within the component's folder (e.g., `src/components/forms/user-auth/hooks/useUserAuth.js`).
     - Use functional components with hooks.
-    - Prefer named exports.
+    - Use default exports.
 - **Services**: Firebase initialization in `src/services/firebase`.
 - **Constants**:
     - **Strictly** use centralized constants from `src/constants` (e.g., `PATHS`, `API_ENDPOINTS`).
