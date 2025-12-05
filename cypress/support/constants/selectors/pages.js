@@ -14,6 +14,7 @@ export const PAGE_SELECTORS = {
 	AUTHENTICATION_MAIN_CONTAINER: getByDataCyAlt(
 		'authentication-main-container',
 	),
+	REGISTER_MAIN_CONTAINER: getByDataCyAlt('register-main-container'),
 	PAGE_NOT_FOUND_MAIN_CONTAINER: getByDataCyAlt(
 		'page-not-found-main-container',
 	),
