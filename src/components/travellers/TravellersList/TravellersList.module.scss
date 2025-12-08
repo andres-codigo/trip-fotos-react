@@ -6,7 +6,7 @@
 		justify-content: flex-start;
 
 		/* Ensure the last control (Register link) is pushed to the right */
-		& > :last-child {
+		& > :nth-child(2) {
 			margin-left: auto;
 			margin-right: 0.5rem;
 		}

@@ -93,27 +93,13 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				<div
 					className={travellersListStyles.controls}
 					data-cy="controls">
-					{hasTravellers && (
-						<BaseButton
-							mode={
-								!hasTravellers && !loading
-									? // 	||
-										// (filteredTravellers &&
-										// 	filteredTravellers.length === 0)
-										'disabled'
-									: 'outline'
-							}
-							disabled={!loading && !hasTravellers ? true : false}
-							className={
-								!hasTravellers && !loading
-									? travellersListStyles.hide
-									: ''
-							}
-							data-cy="refresh-button"
-							onClick={() => loadTravellersHandler(true)}>
-							Refresh
-						</BaseButton>
-					)}
+					<BaseButton
+						mode="outline"
+						disabled={loading}
+						data-cy="refresh-button"
+						onClick={() => loadTravellersHandler(true)}>
+						Refresh
+					</BaseButton>
 					{isLoggedIn && !isTraveller && !loading && (
 						<BaseButton
 							isLink

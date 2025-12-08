@@ -113,19 +113,21 @@ describe('Travellers Page - WIP', () => {
 			})
 		})
 
-		it('should disable refresh button when no travellers exist', () => {
+		it('should show refresh button when no travellers exist', () => {
 			performLogin()
 
 			// Wait for loading to complete
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 
-			// If no travellers message is shown, refresh button should be disabled
+			// If no travellers message is shown, refresh button should exist and be enabled
 			cy.get('body').then(($body) => {
 				if (
 					$body.find('h3:contains("No travellers listed.")').length >
 					0
 				) {
-					cy.get('button:contains("Refresh")').should('be.disabled')
+					cy.get('button:contains("Refresh")')
+						.should('exist')
+						.and('not.be.disabled')
 				}
 			})
 		})

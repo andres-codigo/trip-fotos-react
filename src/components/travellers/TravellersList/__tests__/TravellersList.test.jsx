@@ -419,7 +419,7 @@ describe('<TravellersList />', () => {
 		})
 
 		describe('refresh functionality', () => {
-			it('should disable refresh button when no travellers and not loading', async () => {
+			it('should render refresh button when no travellers', async () => {
 				setupMocksForNoTravellers()
 				renderTravellersList()
 
@@ -431,7 +431,10 @@ describe('<TravellersList />', () => {
 
 				expect(
 					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
-				).toBeDisabled()
+				).toBeInTheDocument()
+				expect(
+					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
+				).not.toBeDisabled()
 			})
 
 			it('should enable refresh button when travellers exist', () => {
