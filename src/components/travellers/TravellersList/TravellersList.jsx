@@ -90,6 +90,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				</BaseDialog>
 			)}
 			<BaseCard>
+				<h1>Travellers</h1>
 				<div
 					className={travellersListStyles.controls}
 					data-cy="controls">
@@ -106,7 +107,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 							to={PATHS.REGISTER}
 							isDisabled={loading}
 							data-cy="register-link">
-							Register as a Traveller
+							Register
 						</BaseButton>
 					)}
 				</div>
