@@ -100,10 +100,11 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 						onClick={() => loadTravellersHandler(true)}>
 						Refresh
 					</BaseButton>
-					{isLoggedIn && !isTraveller && !loading && (
+					{isLoggedIn && !isTraveller && (
 						<BaseButton
 							isLink
 							to={PATHS.REGISTER}
+							isDisabled={loading}
 							data-cy="register-link">
 							Register as a Traveller
 						</BaseButton>

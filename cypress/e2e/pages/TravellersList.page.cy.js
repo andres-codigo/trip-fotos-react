@@ -61,6 +61,18 @@ describe('Travellers Page - WIP', () => {
 	})
 
 	describe('Data Loading & API Integration', () => {
+		it('should disable register button when loading', () => {
+			performLogin()
+
+			// Should show loading state initially
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
+
+			// Register button should be visible but disabled (aria-disabled="true")
+			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_BUTTON)
+				.should('be.visible')
+				.and('have.attr', 'aria-disabled', 'true')
+		})
+
 		it('should load travellers on initial page visit', () => {
 			performLogin()
 
