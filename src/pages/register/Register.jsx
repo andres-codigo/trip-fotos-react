@@ -7,7 +7,6 @@ const Register = () => {
 			className={`mainContainer ${registerStyles.registerContainer}`}
 			data-cy="main-container"
 			data-cy-alt="register-main-container">
-			<h1>Register</h1>
 			<TravellerRegistrationForm />
 		</main>
 	)

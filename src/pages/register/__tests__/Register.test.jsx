@@ -62,15 +62,6 @@ describe('Register', () => {
 			)
 		})
 
-		it('renders <h1> with correct value', () => {
-			render(<Register />)
-
-			const heading = screen.getByRole('heading', { level: 1 })
-
-			expect(heading).toBeInTheDocument()
-			expect(heading).toHaveTextContent('Register')
-		})
-
 		it('renders the TravellerRegistrationForm', () => {
 			const { container } = render(<Register />)
 			expect(
