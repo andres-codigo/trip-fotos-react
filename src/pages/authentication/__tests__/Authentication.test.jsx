@@ -29,10 +29,10 @@ import { validateEmail, validatePassword } from '@/utils/validation'
 
 import { login } from '@/store/slices/authenticationSlice'
 
-import UserAuth from '../UserAuth'
+import Authentication from '../Authentication'
 
 /**
- * UserAuth Unit Tests
+ * Authentication Unit Tests
  *
  * Test Strategy:
  * - Focuses on form validation, authentication flow, and error handling
@@ -176,7 +176,7 @@ const setupFirebaseErrorMock = async (
 	return getFirebaseAuthErrorMessage
 }
 
-describe('<UserAuth />', () => {
+describe('<Authentication />', () => {
 	beforeEach(() => {
 		mockDispatch.mockClear()
 		mockNavigate.mockClear()
@@ -184,13 +184,13 @@ describe('<UserAuth />', () => {
 
 	describe('Rendering tests', () => {
 		it('renders the <main> element', () => {
-			renderWithProviders(<UserAuth />)
+			renderWithProviders(<Authentication />)
 
 			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
 		it('applies both mainContainer and authenticationContainer classes to <main>', () => {
-			renderWithProviders(<UserAuth />)
+			renderWithProviders(<Authentication />)
 
 			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
 
@@ -201,7 +201,7 @@ describe('<UserAuth />', () => {
 		})
 
 		it('<main> element has correct data attributes', () => {
-			renderWithProviders(<UserAuth />)
+			renderWithProviders(<Authentication />)
 
 			const main = screen.getByRole('main')
 			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
@@ -212,7 +212,7 @@ describe('<UserAuth />', () => {
 		})
 
 		it('renders the UserAuthForm component', () => {
-			renderWithProviders(<UserAuth />)
+			renderWithProviders(<Authentication />)
 
 			const form = screen.getByTestId(TEST_IDS.USER_AUTH_FORM.FORM)
 			expect(form).toBeInTheDocument()
@@ -346,7 +346,7 @@ describe('<UserAuth />', () => {
 					message: '',
 				})
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
@@ -382,7 +382,7 @@ describe('<UserAuth />', () => {
 					message: '',
 				})
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
@@ -425,7 +425,7 @@ describe('<UserAuth />', () => {
 					message: '',
 				})
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
@@ -464,7 +464,7 @@ describe('<UserAuth />', () => {
 					message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
 				})
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
@@ -495,7 +495,7 @@ describe('<UserAuth />', () => {
 
 		describe('Authentication flow', () => {
 			it('dispatches login action with correct payload on form submission', async () => {
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
@@ -521,7 +521,7 @@ describe('<UserAuth />', () => {
 			})
 
 			it('toggles between login and signup modes when switch button is clicked', async () => {
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				const switchBtn = screen.getByTestId(
 					TEST_IDS.USER_AUTH_FORM.LOGIN_SIGNUP_TOGGLE_LINK,
@@ -537,7 +537,7 @@ describe('<UserAuth />', () => {
 			})
 
 			it('dispatches signup action when component is in signup mode', async () => {
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				const switchBtn = screen.getByTestId(
 					TEST_IDS.USER_AUTH_FORM.LOGIN_SIGNUP_TOGGLE_LINK,
@@ -575,7 +575,7 @@ describe('<UserAuth />', () => {
 					meta: {},
 				})
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
@@ -606,7 +606,7 @@ describe('<UserAuth />', () => {
 				// Mock dispatch to never resolve, keeping loading state active
 				mockDispatch.mockImplementation(() => new Promise(() => {}))
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
@@ -652,7 +652,7 @@ describe('<UserAuth />', () => {
 
 				mockDispatch.mockReturnValueOnce(authPromise)
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
@@ -697,7 +697,7 @@ describe('<UserAuth />', () => {
 				// Mock dispatch to never resolve for persistent loading state
 				mockDispatch.mockImplementation(() => new Promise(() => {}))
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
@@ -748,7 +748,7 @@ describe('<UserAuth />', () => {
 					payload: MOCK_INVALID_LOGIN_ERROR,
 				})
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 				fillAndSubmitLoginForm()
 
 				await expectErrorDialog(
@@ -758,7 +758,7 @@ describe('<UserAuth />', () => {
 			})
 
 			it('closes error dialog when close button is clicked', async () => {
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				mockDispatch.mockResolvedValueOnce({
 					meta: { rejectedWithValue: true },
@@ -785,7 +785,7 @@ describe('<UserAuth />', () => {
 					payload: MOCK_INVALID_LOGIN_ERROR,
 				})
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 				fillAndSubmitLoginForm()
 
 				await waitFor(() => {
@@ -806,7 +806,7 @@ describe('<UserAuth />', () => {
 				const testError = new Error('Test error message')
 				mockDispatch.mockRejectedValueOnce(testError)
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 				fillAndSubmitLoginForm()
 
 				await expectErrorDialog('Test error message')
@@ -826,7 +826,7 @@ describe('<UserAuth />', () => {
 				errorWithoutMessage.message = ''
 				mockDispatch.mockRejectedValueOnce(errorWithoutMessage)
 
-				renderWithProviders(<UserAuth />)
+				renderWithProviders(<Authentication />)
 
 				fireEvent.change(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),

@@ -20,7 +20,7 @@ import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 import UserAuthForm from '@/components/forms/user-auth/UserAuthForm'
 
-const UserAuth = () => {
+const Authentication = () => {
 	const [email, setEmail] = useFormField('')
 	const [password, setPassword] = useFormField('')
 
@@ -171,4 +171,4 @@ const UserAuth = () => {
 	)
 }
 
-export default UserAuth
+export default Authentication

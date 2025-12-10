@@ -20,7 +20,7 @@ import TestLocationDisplay from '../../../../testUtils/cypress/TestLocationDispl
 
 import MessagesPage from '../../../../pages/messages/Messages'
 import TravellersPage from '../../../../pages/travellers/Travellers'
-import AuthenticationPage from '../../../../pages/authentication/UserAuth'
+import AuthenticationPage from '../../../../pages/authentication/Authentication'
 
 import mainNavStyles from '../MainNav.module.scss'
 

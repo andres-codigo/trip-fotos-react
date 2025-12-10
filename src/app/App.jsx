@@ -17,7 +17,9 @@ import { tryLogin } from '@/store/slices/authenticationSlice'
 import LoadingFallback from '@/components/common/LoadingFallback'
 
 import Header from '@/components/layout/header/Header'
-const UserAuth = lazy(() => import('@/pages/authentication/UserAuth'))
+const Authentication = lazy(
+	() => import('@/pages/authentication/Authentication'),
+)
 // TODO: Review requirement for Home page at a later stage
 // const Home = lazy(() => import('@/pages/home/Home'))
 const Register = lazy(() => import('@/pages/register/Register'))
@@ -79,7 +81,7 @@ function AppRoutes() {
 					/>
 					<Route
 						path={PATHS.AUTHENTICATION}
-						element={<UserAuth />}
+						element={<Authentication />}
 					/>
 					<Route
 						path={PATHS.REGISTER}
