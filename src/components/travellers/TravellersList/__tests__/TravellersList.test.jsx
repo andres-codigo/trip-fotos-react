@@ -176,18 +176,6 @@ describe('<TravellersList />', () => {
 	}
 
 	describe('Rendering tests', () => {
-		it('should render the main container with correct data-cy attribute', async () => {
-			setupMocksForNoTravellers()
-
-			await act(async () => {
-				renderTravellersList()
-			})
-
-			expect(
-				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.CONTAINER),
-			).toBeInTheDocument()
-		})
-
 		it('should render controls section', async () => {
 			setupMocksForNoTravellers()
 

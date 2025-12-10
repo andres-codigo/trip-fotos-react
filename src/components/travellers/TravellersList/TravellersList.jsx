@@ -15,7 +15,6 @@ import {
 	selectIsTraveller,
 } from '@/store/slices/travellersSlice'
 
-import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
@@ -76,9 +75,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const handleError = () => setError(null)
 
 	return (
-		<section
-			className={`pageSection ${travellersListStyles.travellerListContainer}`}
-			data-cy="travellers-list-container">
+		<>
 			{error && (
 				<BaseDialog
 					show={true}
@@ -89,47 +86,47 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					{error}
 				</BaseDialog>
 			)}
-			<BaseCard>
-				<h1>Travellers</h1>
-				<div
-					className={travellersListStyles.controls}
-					data-cy="controls">
+			<h1>Travellers</h1>
+			<div
+				className={travellersListStyles.controls}
+				data-cy="controls">
+				<BaseButton
+					mode="outline"
+					disabled={loading}
+					data-cy="refresh-button"
+					onClick={() => loadTravellersHandler(true)}>
+					Refresh
+				</BaseButton>
+				{isLoggedIn && !isTraveller && (
 					<BaseButton
-						mode="outline"
-						disabled={loading}
-						data-cy="refresh-button"
-						onClick={() => loadTravellersHandler(true)}>
-						Refresh
+						isLink
+						to={PATHS.REGISTER}
+						isDisabled={loading}
+						data-cy="register-link">
+						Register
 					</BaseButton>
-					{isLoggedIn && !isTraveller && (
-						<BaseButton
-							isLink
-							to={PATHS.REGISTER}
-							isDisabled={loading}
-							data-cy="register-link">
-							Register
-						</BaseButton>
-					)}
+				)}
+			</div>
+			{loading && (
+				<div className={travellersListStyles.spinnerContainer}>
+					<BaseSpinner />
 				</div>
-				{loading && (
-					<div className={travellersListStyles.spinnerContainer}>
-						<BaseSpinner />
-					</div>
-				)}
-				{!loading && hasTravellers && (
-					<ul
-						className={travellersListStyles.travellersList}
-						data-cy="travellers-list">
-						<li data-cy="traveller-item">Trip Item</li>
-					</ul>
-				)}
-				{!loading && !hasTravellers && (
-					<div className={travellersListStyles.noTravellersContainer}>
-						<h3>No travellers listed.</h3>
-					</div>
-				)}
-			</BaseCard>
-		</section>
+			)}
+			{!loading && hasTravellers && (
+				<ul
+					className={travellersListStyles.travellersList}
+					data-cy="travellers-list">
+					<li data-cy="traveller-item">Trip Item</li>
+				</ul>
+			)}
+			{!loading && !hasTravellers && (
+				<div
+					className={travellersListStyles.noTravellersContainer}
+					data-cy="no-travellers-list">
+					<h3>No travellers listed.</h3>
+				</div>
+			)}
+		</>
 	)
 }
 

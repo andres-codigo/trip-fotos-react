@@ -25,8 +25,8 @@ export const TEST_IDS = {
 		CONTAINER: 'travellers-main-container',
 	},
 	TRAVELLERS_LIST: {
-		CONTAINER: 'travellers-list-container',
 		CONTROLS: 'controls',
+		NO_LIST: 'no-travellers-list',
 		LIST: 'travellers-list',
 		ITEM: 'traveller-item',
 		REFRESH_BUTTON: 'refresh-button',

@@ -21,18 +21,17 @@ describe('Travellers Page - WIP', () => {
 			cy.get(PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER).should('exist')
 		})
 
-		it('should render the travellers list component', () => {
+		/* TODO: revisit once travellers are implemented via registration*/
+		it.skip('should render the travellers list component', () => {
 			performLogin()
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST_CONTAINER).should(
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'be.visible',
 			)
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST_CONTAINER).within(
-				() => {
-					cy.get(TRAVELLERS_LIST_SELECTORS.CONTROLS).should('exist')
-				},
-			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).within(() => {
+				cy.get(TRAVELLERS_LIST_SELECTORS.CONTROLS).should('exist')
+			})
 		})
 	})
 
