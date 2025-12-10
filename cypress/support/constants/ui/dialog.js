@@ -4,6 +4,7 @@ export const DIALOG_SELECTORS = {
 	// Dialog
 	INVALID_EMAIL_OR_PASSWORD: getByDataCy('invalid-email-or-password-dialog'),
 	AUTHENTICATING: getByDataCy('authenticating-dialog'),
+	TRAVELLERS_LIST_ERROR: getByDataCy('travellers-list-error-dialog'),
 	// Dialog elements
 	TITLE: getByDataCy('title'),
 	TEXT_CONTENT: getByDataCy('text-content'),

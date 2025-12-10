@@ -71,5 +71,4 @@ export const TRAVELLERS_LIST_SELECTORS = {
 	TRAVELLER_ITEM: getByDataCy('traveller-item'),
 	REGISTER_BUTTON: getByDataCy('register-link'),
 	CONTROLS: getByDataCy('controls'),
-	ERROR_DIALOG: getByDataCy('travellers-list-error-dialog'),
 }

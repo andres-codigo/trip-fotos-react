@@ -165,8 +165,8 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 			cy.wait('@getTravellers500Error')
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should(
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
 				'The server is currently experiencing issues. Please try again later.',
 			)
@@ -182,8 +182,8 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 			cy.wait('@getTravellers404Error')
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should(
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
 				'Travellers data not found. Please contact support.',
 			)
@@ -199,8 +199,8 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 			cy.wait('@getTravellers403Error')
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should(
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
 				'There was a problem with your request. Please try again.',
 			)
@@ -216,8 +216,8 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 			cy.wait('@getTravellers502Error')
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should(
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
 				'Unable to load travellers. Please check your connection and try again.',
 			)
@@ -232,8 +232,8 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 			cy.wait('@getTravellersNetworkError')
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should(
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
 				'Unable to connect to the server. Please check your internet connection.',
 			)
@@ -253,8 +253,8 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 			cy.wait('@getTravellersInvalidJSON')
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should(
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
 				'An unexpected error occurred while loading travellers. Please try again.',
 			)
@@ -270,14 +270,14 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 			cy.wait('@getTravellersError')
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('be.visible')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 
 			// Click the close button (you may need to adjust the selector based on your BaseDialog implementation)
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).within(() => {
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).within(() => {
 				cy.get('button').contains('Close').click()
 			})
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('not.exist')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('not.exist')
 		})
 
 		it('should allow retry after error by clicking refresh button', () => {
@@ -306,8 +306,8 @@ describe('Travellers Page - WIP', () => {
 			cy.wait('@getTravellersRefreshError')
 
 			// Close error dialog
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).within(() => {
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).within(() => {
 				cy.get('button').contains('Close').click()
 			})
 
@@ -321,7 +321,7 @@ describe('Travellers Page - WIP', () => {
 			cy.get('button').contains('Refresh').click()
 			cy.wait('@getTravellersRetrySuccess')
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('not.exist')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('not.exist')
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'be.visible',
 			)
@@ -338,8 +338,8 @@ describe('Travellers Page - WIP', () => {
 			cy.visit('/travellers')
 			cy.wait('@getTravellersTimeout')
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.ERROR_DIALOG).should(
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
 				'Unable to load travellers. Please check your connection and try again.',
 			)
