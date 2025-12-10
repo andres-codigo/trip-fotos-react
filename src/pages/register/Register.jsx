@@ -1,15 +1,21 @@
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
-import registerStyles from './register.module.scss'
+
+import BaseCard from '@/components/ui/card/BaseCard'
+
+import styles from './register.module.scss'
 
 const Register = () => {
 	return (
 		<main
-			className={`mainContainer ${registerStyles.registerContainer}`}
+			className={`mainContainer ${styles.registerContainer}`}
 			data-cy="main-container"
 			data-cy-alt="register-main-container">
-			<TravellerRegistrationForm />
+			<section>
+				<BaseCard>
+					<TravellerRegistrationForm />
+				</BaseCard>
+			</section>
 		</main>
 	)
 }
-
 export default Register

@@ -13,7 +13,7 @@ describe('Register Page', () => {
 	it('renders the register page container', () => {
 		cy.get(PAGE_SELECTORS.REGISTER_MAIN_CONTAINER).should('be.visible')
 		cy.get(PAGE_SELECTORS.REGISTER_MAIN_CONTAINER).within(() => {
-			cy.get('h1').should('contain', 'Register')
+			cy.get('h2').should('contain', 'Register')
 		})
 	})
 
