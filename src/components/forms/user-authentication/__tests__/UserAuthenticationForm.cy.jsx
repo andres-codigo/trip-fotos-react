@@ -3,11 +3,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { ACCESSIBILITY_SELECTORS } from '../../../../../cypress/support/constants/ui/accessibility'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../../../../cypress/support/constants/selectors/components'
 
-import UserAuthForm from '../UserAuthForm'
+import UserAuthenticationForm from '../UserAuthenticationForm'
 
-import userAuthStyles from '../UserAuthForm.module.scss'
+import userAuthStyles from '../UserAuthenticationForm.module.scss'
 
-describe('<UserAuthForm />', () => {
+describe('<UserAuthenticationForm />', () => {
 	const EMAIL_ID = 'email'
 	const EMAIL_SELECTOR = `#${EMAIL_ID}`
 	const EMAIL_LABEL_SELECTOR = `label[for="${EMAIL_ID}"]`
@@ -37,7 +37,7 @@ describe('<UserAuthForm />', () => {
 	const render = (props = {}) => {
 		cy.mount(
 			<BrowserRouter>
-				<UserAuthForm
+				<UserAuthenticationForm
 					email={email}
 					password={password}
 					mode="login"

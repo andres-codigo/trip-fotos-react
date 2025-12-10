@@ -17,10 +17,10 @@
     - Persisted state configuration in `src/store/store.js`.
 - **Components**:
     - Located in `src/components`, categorized by type (`common`, `forms`, `layout`, `ui`, `travellers`).
-    - **Folder Structure**: Each component must reside in its own contextual folder (e.g., `src/components/forms/user-auth/UserAuthForm.jsx`).
+    - **Folder Structure**: Each component must reside in its own contextual folder (e.g., `src/components/forms/user-authentication/UserAuthenticationForm.jsx`).
         - If adding to a folder with flat components, refactor existing components into their own folders first.
         - Each component folder must contain a `__tests__` directory.
-        - If a component has specific hooks, place them in a `hooks` subfolder within the component's folder (e.g., `src/components/forms/user-auth/hooks/useUserAuth.js`).
+        - If a component has specific hooks, place them in a `hooks` subfolder within the component's folder (e.g., `src/components/forms/user-authentication/hooks/useUserAuthentication.js`).
     - Use functional components with hooks.
     - Use default exports.
     - **Reusability**:
@@ -68,7 +68,7 @@
 
 - **Imports**: Use `@` alias for `src` (e.g., `import { ... } from '@/components/...'`).
 - **Naming**:
-    - Components: PascalCase (`UserAuthForm.jsx`). Use descriptive suffixes (e.g., `Form`, `List`, `Card`) to avoid conflicts with page names or other components.
+    - Components: PascalCase (`UserAuthenticationForm.jsx`). Use descriptive suffixes (e.g., `Form`, `List`, `Card`) to avoid conflicts with page names or other components.
     - Hooks/Utils: camelCase (`useViewport.js`).
     - Constants: UPPER_SNAKE_CASE.
 - **Type Safety**: Use `prop-types` for all component props.

@@ -6,16 +6,16 @@ import { API_DATABASE } from '@/constants/api'
 import { MOCK_KEYS } from '@/constants/test'
 
 /**
- * UserAuthForm Unit Tests
+ * UserAuthenticationForm Unit Tests
  *
  * Mocks:
  * - Input: Simplified version that handles custom props (isValid, message, showRequiredMark)
  * - BaseButton: Handles isDisabled/isLink props and converts them to standard DOM attributes
  * - CSS Module: Provides stable class names to prevent import errors in test environment
  *
- * Router: Tests wrap components in BrowserRouter since UserAuthForm uses Router components
+ * Router: Tests wrap components in BrowserRouter since UserAuthenticationForm uses Router components
  */
-import UserAuthForm from '../UserAuthForm'
+import UserAuthenticationForm from '../UserAuthenticationForm'
 
 vi.mock('@/components/ui/form/input/Input', () => ({
 	default: ({ label, isValid, message, showRequiredMark, ...props }) => {
@@ -62,7 +62,7 @@ vi.mock('@/components/ui/button/BaseButton', () => ({
 	},
 }))
 
-vi.mock('../UserAuthForm.module.scss', () => ({
+vi.mock('../UserAuthenticationForm.module.scss', () => ({
 	default: {
 		userAuthentication: 'userAuthentication',
 		userAuthenticationTitle: 'userAuthenticationTitle',
@@ -99,7 +99,7 @@ const createDefaultProps = () => ({
 	isLoading: false,
 })
 
-describe('<UserAuthForm />', () => {
+describe('<UserAuthenticationForm />', () => {
 	let defaultProps
 
 	beforeEach(() => {
@@ -109,7 +109,7 @@ describe('<UserAuthForm />', () => {
 
 	describe('Rendering tests', () => {
 		it('should have button type="button" for toggle link to prevent form submission', () => {
-			renderWithRouter(<UserAuthForm {...defaultProps} />)
+			renderWithRouter(<UserAuthenticationForm {...defaultProps} />)
 
 			const toggleButton = screen.getByRole('button', {
 				name: /switch to signup/i,
@@ -121,7 +121,7 @@ describe('<UserAuthForm />', () => {
 
 		it('should render login mode correctly', () => {
 			renderWithRouter(
-				<UserAuthForm
+				<UserAuthenticationForm
 					{...defaultProps}
 					mode={API_DATABASE.AUTH_LOGIN_MODE}
 				/>,
@@ -134,7 +134,7 @@ describe('<UserAuthForm />', () => {
 
 		it('should render signup mode correctly', () => {
 			renderWithRouter(
-				<UserAuthForm
+				<UserAuthenticationForm
 					{...defaultProps}
 					mode={API_DATABASE.AUTH_SIGNUP_MODE}
 				/>,
@@ -151,7 +151,7 @@ describe('<UserAuthForm />', () => {
 			const mockOnSwitchMode = vi.fn()
 
 			renderWithRouter(
-				<UserAuthForm
+				<UserAuthenticationForm
 					{...defaultProps}
 					onSwitchMode={mockOnSwitchMode}
 				/>,
@@ -167,7 +167,7 @@ describe('<UserAuthForm />', () => {
 
 		it('should be disabled when isLoading is true', () => {
 			renderWithRouter(
-				<UserAuthForm
+				<UserAuthenticationForm
 					{...defaultProps}
 					isLoading={true}
 				/>,
@@ -193,7 +193,7 @@ describe('<UserAuthForm />', () => {
 			}
 
 			const { getByLabelText } = renderWithRouter(
-				<UserAuthForm {...props} />,
+				<UserAuthenticationForm {...props} />,
 			)
 			const emailInput = getByLabelText(/E-Mail/i)
 
@@ -219,7 +219,7 @@ describe('<UserAuthForm />', () => {
 			}
 
 			const { getByLabelText } = renderWithRouter(
-				<UserAuthForm {...props} />,
+				<UserAuthenticationForm {...props} />,
 			)
 			const passwordInput = getByLabelText(/Password/i)
 
@@ -245,7 +245,7 @@ describe('<UserAuthForm />', () => {
 			}
 
 			const { getByLabelText } = renderWithRouter(
-				<UserAuthForm {...props} />,
+				<UserAuthenticationForm {...props} />,
 			)
 			const emailInput = getByLabelText(/E-Mail/i)
 			const passwordInput = getByLabelText(/Password/i)
@@ -262,7 +262,7 @@ describe('<UserAuthForm />', () => {
 			}
 
 			const { getByLabelText } = renderWithRouter(
-				<UserAuthForm {...props} />,
+				<UserAuthenticationForm {...props} />,
 			)
 			const emailInput = getByLabelText(/E-Mail/i)
 			const passwordInput = getByLabelText(/Password/i)

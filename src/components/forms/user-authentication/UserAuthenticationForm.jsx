@@ -6,9 +6,9 @@ import { ACCESSIBILITY } from '@/constants/ui'
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
 
-import userAuthStyles from './UserAuthForm.module.scss'
+import userAuthStyles from './UserAuthenticationForm.module.scss'
 
-const UserAuthForm = ({
+const UserAuthenticationForm = ({
 	email,
 	password,
 	mode,
@@ -142,7 +142,7 @@ const UserAuthForm = ({
 	)
 }
 
-UserAuthForm.propTypes = {
+UserAuthenticationForm.propTypes = {
 	email: PropTypes.shape({
 		value: PropTypes.string.isRequired,
 		isValid: PropTypes.bool.isRequired,
@@ -164,4 +164,4 @@ UserAuthForm.propTypes = {
 	isLoading: PropTypes.bool,
 }
 
-export default UserAuthForm
+export default UserAuthenticationForm

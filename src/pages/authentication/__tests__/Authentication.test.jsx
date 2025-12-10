@@ -211,7 +211,7 @@ describe('<Authentication />', () => {
 			)
 		})
 
-		it('renders the UserAuthForm component', () => {
+		it('renders the UserAuthenticationForm component', () => {
 			renderWithProviders(<Authentication />)
 
 			const form = screen.getByTestId(TEST_IDS.USER_AUTH_FORM.FORM)

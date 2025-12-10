@@ -398,7 +398,7 @@ src/
   ├── components/
   │   ├── forms/
   │   │   ├── __tests__/
-  │   │   │   ├── UserAuthForm.test.jsx
+  │   │   │   ├── UserAuthenticationForm.test.jsx
   │   │   │   └── ...
   │   │   ├── FormComponent.jsx
   │   ├── ui/
@@ -504,7 +504,7 @@ src/
   ├── components/
   │   ├── forms/
   │   │   ├── __tests__/
-  │   │   │   ├── UserAuthForm.cy.jsx
+  │   │   │   ├── UserAuthenticationForm.cy.jsx
   │   │   │   └── ...
   │   │   ├── FormComponent.jsx
   │   ├── ui/
