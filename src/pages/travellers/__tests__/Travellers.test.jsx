@@ -86,10 +86,12 @@ describe('Travellers', () => {
 		vi.mocked(travellersSlice.selectTravellers).mockReturnValue(
 			MOCK_TRAVELLERS.SAMPLE_TRAVELLERS,
 		)
+		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(true)
 	}
 
 	const setupMocksForNoTravellers = () => {
 		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([])
+		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
 	}
 
 	describe('Rendering tests', () => {
@@ -132,8 +134,7 @@ describe('Travellers', () => {
 			)
 		})
 
-		/* TODO: revisit once travellers are implemented via registration*/
-		it.skip('renders the TravellersList component', async () => {
+		it('renders the TravellersList component', async () => {
 			setupMocksForHasTravellers()
 
 			await act(async () => {
@@ -145,8 +146,7 @@ describe('Travellers', () => {
 			).toBeInTheDocument()
 		})
 
-		/* TODO: revisit once travellers are implemented via registration*/
-		it.skip('renders the TravellersList component if there are no travellers', async () => {
+		it('renders the TravellersList component if there are no travellers', async () => {
 			setupMocksForNoTravellers()
 
 			await act(async () => {
