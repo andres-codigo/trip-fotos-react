@@ -2,12 +2,12 @@ import TravellerRegistrationForm from '@/components/forms/traveller-registration
 
 import BaseCard from '@/components/ui/card/BaseCard'
 
-import styles from './register.module.scss'
+import registerStyles from './register.module.scss'
 
 const Register = () => {
 	return (
 		<main
-			className={`mainContainer ${styles.registerContainer}`}
+			className={`mainContainer ${registerStyles.registerContainer}`}
 			data-cy="main-container"
 			data-cy-alt="register-main-container">
 			<section>

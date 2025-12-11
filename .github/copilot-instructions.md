@@ -74,7 +74,7 @@
 - **Type Safety**: Use `prop-types` for all component props.
 - **Accessibility**: Ensure form components handle accessibility attributes (`aria-*`, `role`) for validation states.
 - **Styling**:
-    - Use SCSS modules for component-specific styles. Import as `styles` (e.g., `import styles from './Component.module.scss'`).
+    - Use SCSS modules for component-specific styles. Import as `[componentName]Styles` (e.g., `import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'`).
     - **Variables & Mixins**:
         - When creating a new SCSS file, always review `src/styles` for available variables and mixins to ensure consistency.
         - New colour variables should follow the existing naming convention (e.g., using "Name that Colour" tool).

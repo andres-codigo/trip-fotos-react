@@ -2,12 +2,12 @@ import TravellersList from '@/components/travellers/TravellersList/TravellersLis
 
 import BaseCard from '@/components/ui/card/BaseCard'
 
-import styles from './travellers.module.scss'
+import travellersStyles from './travellers.module.scss'
 
 const Travellers = () => {
 	return (
 		<main
-			className={`mainContainer ${styles.travellersContainer}`}
+			className={`mainContainer ${travellersStyles.travellersContainer}`}
 			data-cy="main-container"
 			data-cy-alt="travellers-main-container">
 			<section>

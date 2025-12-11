@@ -8,7 +8,7 @@ import BaseButton from '@/components/ui/button/BaseButton'
 
 import { useTravellerRegistration } from './hooks/useTravellerRegistration'
 
-import styles from './TravellerRegistrationForm.module.scss'
+import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'
 
 const TravellerRegistrationForm = () => {
 	const {
@@ -21,12 +21,12 @@ const TravellerRegistrationForm = () => {
 
 	return (
 		<form
-			className={styles.form}
+			className={travellerRegistrationFormStyles.form}
 			onSubmit={submitHandler}
 			data-cy="traveller-registration-form">
 			<h2>Register as a Traveller</h2>
 			<div
-				className={`${styles.formControl} ${!formData.firstName.isValid ? styles.invalid : ''}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.firstName.isValid ? travellerRegistrationFormStyles.invalid : ''}`}>
 				<Input
 					id="firstName"
 					label="First name"
@@ -39,7 +39,7 @@ const TravellerRegistrationForm = () => {
 			</div>
 
 			<div
-				className={`${styles.formControl} ${!formData.lastName.isValid ? styles.invalid : ''}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.lastName.isValid ? travellerRegistrationFormStyles.invalid : ''}`}>
 				<Input
 					id="lastName"
 					label="Last name"
@@ -52,7 +52,7 @@ const TravellerRegistrationForm = () => {
 			</div>
 
 			<div
-				className={`${styles.formControl} ${!formData.description.isValid ? styles.invalid : ''}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.description.isValid ? travellerRegistrationFormStyles.invalid : ''}`}>
 				<Textarea
 					id="description"
 					label="Description"
@@ -66,7 +66,7 @@ const TravellerRegistrationForm = () => {
 			</div>
 
 			<div
-				className={`${styles.formControl} ${!formData.days.isValid ? styles.invalid : ''}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.days.isValid ? travellerRegistrationFormStyles.invalid : ''}`}>
 				<Input
 					id="days"
 					label="Number of days spent in the city?"
@@ -80,12 +80,17 @@ const TravellerRegistrationForm = () => {
 			</div>
 
 			<fieldset
-				className={`${styles.formControl} ${!formData.areas.isValid ? styles.invalid : ''} ${styles.fieldset}`}>
-				<legend className={styles.checkboxLabel}>Cities visited</legend>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.areas.isValid ? travellerRegistrationFormStyles.invalid : ''} ${travellerRegistrationFormStyles.fieldset}`}>
+				<legend
+					className={travellerRegistrationFormStyles.checkboxLabel}>
+					Cities visited
+				</legend>
 				{TRAVELLER_REGISTRATION_AREAS.map((area) => (
 					<div
 						key={area.id}
-						className={styles.checkboxGroup}>
+						className={
+							travellerRegistrationFormStyles.checkboxGroup
+						}>
 						<Checkbox
 							id={area.id}
 							label={area.label}
@@ -105,13 +110,13 @@ const TravellerRegistrationForm = () => {
 
 			{!formIsValid && (
 				<p
-					className={styles.invalidForm}
+					className={travellerRegistrationFormStyles.invalidForm}
 					role="alert">
 					Please fix the above errors and submit again.
 				</p>
 			)}
 
-			<div className={styles.actions}>
+			<div className={travellerRegistrationFormStyles.actions}>
 				<BaseButton
 					type="submit"
 					data-cy="submit-button">
