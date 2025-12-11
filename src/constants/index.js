@@ -22,6 +22,8 @@ export * from './test-utilities/selectors'
 export * from './test/ui-constants/spinner'
 export * from './test/ui-constants/ui-text'
 
+export * from './travellers'
+
 export * from './ui/accessibility'
 export * from './ui/global'
 export * from './ui/paths'

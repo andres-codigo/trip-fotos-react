@@ -57,6 +57,12 @@ h2 {
 	}
 }
 
+.fieldset {
+	border: none;
+	padding: 0;
+	margin: 0.5rem 0;
+}
+
 .invalidForm {
 	color: variables.$color-red;
 }

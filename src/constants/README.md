@@ -66,6 +66,9 @@ src/constants/
 │   └── test-utilities/
 │       ├── index.js           # Re-exports selectors.js
 │       └── selectors.js
+├── travellers/
+│   ├── index.js               # Re-exports registration.js
+│   └── registration.js
 ├── ui/
 │   ├── index.js               # Re-exports accessibility.js, global.js, paths.js
 │   ├── accessibility.js
