@@ -1,4 +1,4 @@
-import { API_DATABASE } from '../constants/api/endpoints'
+import { API_DATABASE } from '../../../src/constants/api'
 import { APP_URLS, SDK_METHOD_TYPE_URLS } from '../constants/api/urls'
 import { TEST_USER } from '../constants/env/test-users'
 

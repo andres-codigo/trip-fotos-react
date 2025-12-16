@@ -1,4 +1,4 @@
-import { API_DATABASE } from '../../support/constants/api/endpoints'
+import { API_DATABASE } from '../../../src/constants/api'
 import {
 	BASE_URL,
 	APP_URLS,

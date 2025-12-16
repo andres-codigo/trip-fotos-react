@@ -1,6 +1,6 @@
 import { FIREBASE_ERRORS } from '../../../src/constants/auth'
 
-import { API_DATABASE } from '../../support/constants/api/endpoints'
+import { API_DATABASE } from '../../../src/constants/api'
 import {
 	DIALOG_SELECTORS,
 	DIALOG_MESSAGES,

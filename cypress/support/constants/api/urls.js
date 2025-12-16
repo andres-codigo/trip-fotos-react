@@ -1,4 +1,4 @@
-import { API_DATABASE } from './endpoints'
+import { API_DATABASE } from '../../../../src/constants/api'
 
 export const BASE_URL = Cypress.config('baseUrl')
 
