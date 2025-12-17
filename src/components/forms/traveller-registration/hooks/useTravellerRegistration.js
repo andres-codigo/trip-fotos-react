@@ -67,20 +67,22 @@ export const useTravellerRegistration = () => {
 
 	const submitHandler = (e) => {
 		e.preventDefault()
-		if (validateForm()) {
-			const dataToSubmit = {
-				first: formData.firstName.val,
-				last: formData.lastName.val,
-				desc: formData.description.val,
-				days: formData.days.val,
-				areas: formData.areas.val,
-				// files: [], // TODO: Implement file upload
-			}
-			console.log('Form Submitted', dataToSubmit)
-			// TODO: Emit/Dispatch event
-			return dataToSubmit
+
+		const isValid = validateForm()
+		if (!isValid) {
+			return
 		}
-		return null
+
+		const dataToSubmit = {
+			first: formData.firstName.val,
+			last: formData.lastName.val,
+			desc: formData.description.val,
+			days: formData.days.val,
+			areas: formData.areas.val,
+			// files: [], // TODO: Implement file upload
+		}
+		console.log('Form Submitted', dataToSubmit)
+		// TODO: Emit/Dispatch event
 	}
 
 	return {
