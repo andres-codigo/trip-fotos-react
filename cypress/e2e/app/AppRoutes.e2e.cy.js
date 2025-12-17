@@ -1,6 +1,5 @@
-import { API_DATABASE } from '../../../src/constants/api'
+import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
-import { SDK_METHOD_TYPE_URLS } from '../../support/constants/api/urls'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { TEST_USERS } from '../../../src/constants/config/users'
 

@@ -1,4 +1,4 @@
-import { API_DATABASE } from '../../../src/constants/api'
+import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
 import { FIREBASE_ERRORS } from '../../../src/constants/auth'
 import {
 	AUTHENTICATION_FORM_SELECTORS,
@@ -7,7 +7,6 @@ import {
 
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 
-import { SDK_METHOD_TYPE_URLS } from '../../support/constants/api/urls'
 import { TEST_USERS, AUTH_TEST_DATA } from '../../../src/constants/config/users'
 
 import { performLogin } from '../../support/utils/authHelpers'

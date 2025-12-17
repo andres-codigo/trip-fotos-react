@@ -1,6 +1,5 @@
-import { API_DATABASE } from '../../../src/constants/api'
+import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
 import { PATHS } from '../../../src/constants/ui/paths'
-import { SDK_METHOD_TYPE_URLS } from '../constants/api/urls'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
 /**
