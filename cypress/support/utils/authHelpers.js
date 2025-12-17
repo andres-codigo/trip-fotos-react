@@ -1,7 +1,7 @@
 import { API_DATABASE } from '../../../src/constants/api'
 import { PATHS } from '../../../src/constants/ui/paths'
 import { SDK_METHOD_TYPE_URLS } from '../constants/api/urls'
-import { TEST_USER } from '../constants/env/test-users'
+import { TEST_USER } from '../../../src/constants/config/users'
 
 /**
  * Performs login flow and waits for successful authentication

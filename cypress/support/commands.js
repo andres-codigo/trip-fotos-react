@@ -8,8 +8,8 @@ import {
 	TOP_NAVIGATION_SELECTORS,
 	AUTHENTICATION_FORM_SELECTORS,
 } from '../../src/constants/test/selectors/components'
-import { TEST_USER } from './constants/env/test-users'
-import { VIEWPORTS } from './constants/env/viewports'
+import { TEST_USER } from '../../src/constants/config/users'
+import { VIEWPORTS } from '../../src/constants/config/viewports'
 
 const mockStore = configureStore([])
 ////

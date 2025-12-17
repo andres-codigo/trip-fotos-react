@@ -3,7 +3,7 @@ import {
 	TOP_NAVIGATION_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
-import { TEST_USER } from '../../support/constants/env/test-users'
+import { TEST_USER } from '../../../src/constants/config/users'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {

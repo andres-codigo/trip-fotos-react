@@ -1,7 +1,7 @@
 import { PAGE_NOT_FOUND_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { HEADER_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
-import { TEST_USER } from '../../support/constants/env/test-users'
+import { TEST_USER } from '../../../src/constants/config/users'
 
 describe('Logged in > PageNotFound page', () => {
 	const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION

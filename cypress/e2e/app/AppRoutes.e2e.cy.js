@@ -2,7 +2,7 @@ import { API_DATABASE } from '../../../src/constants/api'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { SDK_METHOD_TYPE_URLS } from '../../support/constants/api/urls'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
-import { TEST_USER } from '../../support/constants/env/test-users'
+import { TEST_USER } from '../../../src/constants/config/users'
 
 describe('App Routing', () => {
 	it('redirects unauthenticated users from protected routes to login', () => {

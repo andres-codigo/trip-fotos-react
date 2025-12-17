@@ -1,2 +1,2 @@
-export * from './test-users'
-export * from './viewports'
+export * from '../../../../src/constants/config/users'
+export * from '../../../../src/constants/config/viewports'

@@ -1,6 +1,6 @@
 import { TOP_NAVIGATION_SELECTORS } from '../../../../../constants/test/selectors/components'
 import { TEST_UTILITIES } from '../../../../../constants/test/utilities/selectors'
-import { VIEWPORTS } from '../../../../../../cypress/support/constants/env/viewports'
+import { VIEWPORTS } from '../../../../../constants/config/viewports'
 
 import { PATHS } from '@/constants/ui'
 

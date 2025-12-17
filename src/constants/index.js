@@ -4,6 +4,9 @@ export * from './api/messages'
 
 export * from './api/firebase-errors'
 
+export * from './config/users'
+export * from './config/viewports'
+
 export * from './errors/messages'
 export * from './errors/types'
 

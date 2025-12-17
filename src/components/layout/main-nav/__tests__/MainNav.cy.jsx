@@ -7,7 +7,7 @@ import '../../../../../cypress/support/commands'
 import { PAGE_SELECTORS } from '../../../../constants/test/selectors/pages'
 import { TOP_NAVIGATION_SELECTORS } from '../../../../constants/test/selectors/components'
 
-import { VIEWPORTS } from '../../../../../cypress/support/constants/env/viewports'
+import { VIEWPORTS } from '../../../../constants/config/viewports'
 
 import { PATHS } from '@/constants/ui'
 
