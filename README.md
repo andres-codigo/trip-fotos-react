@@ -398,7 +398,7 @@ src/
   ├── components/
   │   ├── forms/
   │   │   ├── __tests__/
-  │   │   │   ├── UserAuthForm.test.jsx
+  │   │   │   ├── UserAuthenticationForm.test.jsx
   │   │   │   └── ...
   │   │   ├── FormComponent.jsx
   │   ├── ui/
@@ -492,7 +492,7 @@ Cypress is pre-configured in this project. Feel free to customise the [cypress.c
 
 ```
     cypress/
-      ├── e2e/         # End-to-end test files (e.g., UserAuth.page.cy.js)
+      ├── e2e/         # End-to-end test files (e.g., Authentication.page.cy.js)
       ├── fixtures/    # Mock data used in tests
       ├── support/     # Custom commands and test setup
 ```
@@ -504,7 +504,7 @@ src/
   ├── components/
   │   ├── forms/
   │   │   ├── __tests__/
-  │   │   │   ├── UserAuthForm.cy.jsx
+  │   │   │   ├── UserAuthenticationForm.cy.jsx
   │   │   │   └── ...
   │   │   ├── FormComponent.jsx
   │   ├── ui/

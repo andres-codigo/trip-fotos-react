@@ -1,6 +1,6 @@
-import { API_DATABASE } from '../constants/api/endpoints'
-import { APP_URLS, SDK_METHOD_TYPE_URLS } from '../constants/api/urls'
-import { TEST_USER } from '../constants/env/test-users'
+import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
+import { PATHS } from '../../../src/constants/ui/paths'
+import { TEST_USERS } from '../../../src/constants/config/users'
 
 /**
  * Performs login flow and waits for successful authentication
@@ -9,9 +9,9 @@ import { TEST_USER } from '../constants/env/test-users'
  * @param {string} expectedRedirectUrl - Expected URL after login (defaults to home)
  */
 export const performLogin = (
-	email = TEST_USER.VALID_EMAIL,
-	password = TEST_USER.VALID_PASSWORD,
-	expectedRedirectUrl = APP_URLS.CY_HOME,
+	email = TEST_USERS.STANDARD.EMAIL,
+	password = TEST_USERS.STANDARD.PASSWORD,
+	expectedRedirectUrl = PATHS.HOME,
 ) => {
 	cy.interceptLogin(
 		API_DATABASE.POST,
@@ -28,9 +28,9 @@ export const performLogin = (
  * @param {string} password - User password (defaults to valid user password)
  */
 export const loginAndNavigateToHome = (
-	email = TEST_USER.VALID_EMAIL,
-	password = TEST_USER.VALID_PASSWORD,
+	email = TEST_USERS.STANDARD.EMAIL,
+	password = TEST_USERS.STANDARD.PASSWORD,
 ) => {
-	cy.visit(APP_URLS.CY_AUTHENTICATION) // Assuming auth route exists
+	cy.visit(PATHS.AUTHENTICATION) // Assuming auth route exists
 	performLogin(email, password)
 }

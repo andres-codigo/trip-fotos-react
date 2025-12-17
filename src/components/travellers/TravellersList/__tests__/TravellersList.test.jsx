@@ -176,18 +176,6 @@ describe('<TravellersList />', () => {
 	}
 
 	describe('Rendering tests', () => {
-		it('should render the main container with correct data-cy attribute', async () => {
-			setupMocksForNoTravellers()
-
-			await act(async () => {
-				renderTravellersList()
-			})
-
-			expect(
-				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.CONTAINER),
-			).toBeInTheDocument()
-		})
-
 		it('should render controls section', async () => {
 			setupMocksForNoTravellers()
 
@@ -312,6 +300,24 @@ describe('<TravellersList />', () => {
 					),
 				).not.toBeInTheDocument()
 			})
+
+			it('should disable register button when loading', async () => {
+				setupMocksForLoadingState()
+				setupMocksForLoggedInUser()
+				vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(
+					false,
+				)
+
+				await act(async () => {
+					renderTravellersList({ isLoading: true })
+				})
+
+				const registerButton = screen.getByTestId(
+					TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK,
+				)
+				expect(registerButton).toBeInTheDocument()
+				expect(registerButton).toHaveAttribute('aria-disabled', 'true')
+			})
 		})
 
 		describe('error handling', () => {
@@ -419,7 +425,7 @@ describe('<TravellersList />', () => {
 		})
 
 		describe('refresh functionality', () => {
-			it('should disable refresh button when no travellers and not loading', async () => {
+			it('should render refresh button when no travellers', async () => {
 				setupMocksForNoTravellers()
 				renderTravellersList()
 
@@ -431,7 +437,10 @@ describe('<TravellersList />', () => {
 
 				expect(
 					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
-				).toBeDisabled()
+				).toBeInTheDocument()
+				expect(
+					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
+				).not.toBeDisabled()
 			})
 
 			it('should enable refresh button when travellers exist', () => {

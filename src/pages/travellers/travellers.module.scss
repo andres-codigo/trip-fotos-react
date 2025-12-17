@@ -1,3 +1,9 @@
 .travellersContainer {
-	text-align: center;
+	text-align: left;
+}
+
+@media only screen and (max-width: 768px) {
+	.travellersContainer {
+		display: inline-block;
+	}
 }

@@ -4,11 +4,12 @@ import PropTypes from 'prop-types'
 
 import '../../../../../cypress/support/commands'
 
-import { PAGE_SELECTORS } from '../../../../../cypress/support/constants/selectors/pages'
-import { TOP_NAVIGATION_SELECTORS } from '../../../../../cypress/support/constants/selectors/components'
-import { APP_URLS } from '../../../../../cypress/support/constants/api/urls'
+import { PAGE_SELECTORS } from '../../../../constants/test/selectors/pages'
+import { TOP_NAVIGATION_SELECTORS } from '../../../../constants/test/selectors/components'
 
-import { VIEWPORTS } from '../../../../../cypress/support/constants/env/viewports'
+import { VIEWPORTS } from '../../../../constants/config/viewports'
+
+import { PATHS } from '@/constants/ui'
 
 import { TestMainNav } from './test-utilities/mainNavTestUtils'
 import {
@@ -20,7 +21,7 @@ import TestLocationDisplay from '../../../../testUtils/cypress/TestLocationDispl
 
 import MessagesPage from '../../../../pages/messages/Messages'
 import TravellersPage from '../../../../pages/travellers/Travellers'
-import AuthenticationPage from '../../../../pages/authentication/UserAuth'
+import AuthenticationPage from '../../../../pages/authentication/Authentication'
 
 import mainNavStyles from '../MainNav.module.scss'
 
@@ -31,6 +32,7 @@ const assertMenuItemRedirectWithDefaults = (
 	locationPageClassName,
 	PageComponent,
 	store,
+	isTraveller = false,
 ) => {
 	assertMenuItemRedirect(
 		store,
@@ -45,6 +47,7 @@ const assertMenuItemRedirectWithDefaults = (
 		MemoryRouter,
 		Routes,
 		Route,
+		isTraveller,
 	)
 }
 
@@ -71,6 +74,7 @@ describe('<MainNav />', () => {
 						cy.mountWithProviders(
 							<TestMainNav
 								isLoggedIn={true}
+								isTraveller={true}
 								isMenuOpen={true}
 							/>,
 							store,
@@ -93,6 +97,7 @@ describe('<MainNav />', () => {
 						cy.mountWithProviders(
 							<TestMainNav
 								isLoggedIn={true}
+								isTraveller={true}
 								isMenuOpen={true}
 							/>,
 							store,
@@ -115,6 +120,7 @@ describe('<MainNav />', () => {
 						cy.mountWithProviders(
 							<TestMainNav
 								isLoggedIn={true}
+								isTraveller={true}
 								isMenuOpen={true}
 							/>,
 							store,
@@ -139,12 +145,13 @@ describe('<MainNav />', () => {
 				it('redirects to Messages page when Messages is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							APP_URLS.CY_MESSAGES,
+							PATHS.MESSAGES,
 							VIEWPORTS.MOBILE,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
+							true,
 						)
 					})
 				})
@@ -152,7 +159,7 @@ describe('<MainNav />', () => {
 				it('redirects to Travellers page when Travellers is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							APP_URLS.CY_TRAVELLERS,
+							PATHS.TRAVELLERS,
 							VIEWPORTS.MOBILE,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
@@ -165,7 +172,7 @@ describe('<MainNav />', () => {
 				it('redirects to Authentication page and closes menu when Logout is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							APP_URLS.CY_AUTHENTICATION,
+							PATHS.AUTHENTICATION,
 							VIEWPORTS.MOBILE,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
 							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
@@ -200,6 +207,7 @@ describe('<MainNav />', () => {
 						cy.mountWithProviders(
 							<TestMainNav
 								isLoggedIn={true}
+								isTraveller={true}
 								isMenuOpen={true}
 							/>,
 							store,
@@ -267,12 +275,13 @@ describe('<MainNav />', () => {
 				it('redirects to Messages page when Messages is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							APP_URLS.CY_MESSAGES,
+							PATHS.MESSAGES,
 							VIEWPORTS.TABLET,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
+							true,
 						)
 					})
 				})
@@ -280,7 +289,7 @@ describe('<MainNav />', () => {
 				it('redirects to Travellers page when Travellers is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							APP_URLS.CY_TRAVELLERS,
+							PATHS.TRAVELLERS,
 							VIEWPORTS.TABLET,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
@@ -293,7 +302,7 @@ describe('<MainNav />', () => {
 				it('redirects to Authentication page when Logout is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							APP_URLS.CY_AUTHENTICATION,
+							PATHS.AUTHENTICATION,
 							VIEWPORTS.tablet,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
 							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
@@ -308,12 +317,13 @@ describe('<MainNav />', () => {
 				it('redirects to Messages page when Messages is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							APP_URLS.CY_MESSAGES,
+							PATHS.MESSAGES,
 							VIEWPORTS.DESKTOP,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
 							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
 							MessagesPage,
 							store,
+							true,
 						)
 					})
 				})
@@ -321,7 +331,7 @@ describe('<MainNav />', () => {
 				it('redirects to Travellers page when Travellers is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							APP_URLS.CY_TRAVELLERS,
+							PATHS.TRAVELLERS,
 							VIEWPORTS.DESKTOP,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
 							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
@@ -334,7 +344,7 @@ describe('<MainNav />', () => {
 				it('redirects to Authentication page when Logout is clicked', () => {
 					cy.createMockStore('mock-token').then((store) => {
 						assertMenuItemRedirectWithDefaults(
-							APP_URLS.CY_AUTHENTICATION,
+							PATHS.AUTHENTICATION,
 							VIEWPORTS.DESKTOP,
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
 							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
@@ -439,5 +449,6 @@ describe('<MainNav />', () => {
 
 TestMainNav.propTypes = {
 	isLoggedIn: PropTypes.bool,
+	isTraveller: PropTypes.bool,
 	isMenuOpen: PropTypes.bool,
 }

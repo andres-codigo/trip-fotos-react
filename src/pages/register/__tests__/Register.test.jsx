@@ -4,9 +4,18 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { TEST_IDS } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 
+import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../constants/test/selectors/components'
+
 import Register from '../Register'
 
 import registerStyles from '../register.module.scss'
+
+vi.mock(
+	'@/components/forms/traveller-registration/TravellerRegistrationForm',
+	() => ({
+		default: () => <div data-cy="traveller-registration-form" />,
+	}),
+)
 
 /**
  * Register Unit Tests
@@ -31,7 +40,7 @@ describe('Register', () => {
 			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
-		it('applies both mainContainer and messagesContainer classes to <main>', () => {
+		it('applies both mainContainer and registerContainer classes to <main>', () => {
 			render(<Register />)
 
 			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
@@ -53,13 +62,13 @@ describe('Register', () => {
 			)
 		})
 
-		it('renders <h1> with correct value', () => {
-			render(<Register />)
-
-			const heading = screen.getByRole('heading', { level: 1 })
-
-			expect(heading).toBeInTheDocument()
-			expect(heading).toHaveTextContent('Register page')
+		it('renders the TravellerRegistrationForm', () => {
+			const { container } = render(<Register />)
+			expect(
+				container.querySelector(
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM,
+				),
+			).toBeInTheDocument()
 		})
 	})
 })

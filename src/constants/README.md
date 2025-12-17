@@ -66,6 +66,9 @@ src/constants/
 │   └── test-utilities/
 │       ├── index.js           # Re-exports selectors.js
 │       └── selectors.js
+├── travellers/
+│   ├── index.js               # Re-exports registration.js
+│   └── registration.js
 ├── ui/
 │   ├── index.js               # Re-exports accessibility.js, global.js, paths.js
 │   ├── accessibility.js
@@ -92,7 +95,7 @@ import { API_ENDPOINTS, API_HEADERS } from '../../constants/api'
 
 ```javascript
 // Test utilities
-import { TEST_SELECTORS } from '../../constants/test/test-utilities'
+import { TEST_UTILITIES } from '../../constants/test/test-utilities'
 
 // Mock data for tests
 import {

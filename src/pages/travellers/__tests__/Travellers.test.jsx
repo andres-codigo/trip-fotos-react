@@ -86,10 +86,12 @@ describe('Travellers', () => {
 		vi.mocked(travellersSlice.selectTravellers).mockReturnValue(
 			MOCK_TRAVELLERS.SAMPLE_TRAVELLERS,
 		)
+		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(true)
 	}
 
 	const setupMocksForNoTravellers = () => {
 		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([])
+		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
 	}
 
 	describe('Rendering tests', () => {
@@ -140,7 +142,7 @@ describe('Travellers', () => {
 			})
 
 			expect(
-				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.CONTAINER),
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 			).toBeInTheDocument()
 		})
 
@@ -152,7 +154,7 @@ describe('Travellers', () => {
 			})
 
 			expect(
-				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.CONTAINER),
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.NO_LIST),
 			).toBeInTheDocument()
 		})
 	})

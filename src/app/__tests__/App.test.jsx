@@ -52,7 +52,7 @@ vi.mock('@/constants/ui', () => ({
 		AUTHENTICATION: '/authentication',
 		TRAVELLERS: '/travellers',
 		MESSAGES: '/messages',
-		PAGENOTFOUND: '/404',
+		PAGE_NOT_FOUND: '/404',
 	},
 }))
 
@@ -69,7 +69,7 @@ vi.mock('@/components/common/LoadingFallback', () => ({
 vi.mock('@/components/layout/header/Header', () => ({
 	default: () => <div>Header</div>,
 }))
-vi.mock('@/pages/authentication/UserAuth', () => ({
+vi.mock('@/pages/authentication/Authentication', () => ({
 	default: () => <div>UserAuthPage</div>,
 }))
 vi.mock('@/pages/home/Home', () => ({

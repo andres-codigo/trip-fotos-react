@@ -1,5 +1,5 @@
-import { useRef } from 'react'
-// import { useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react'
+import { useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
@@ -21,16 +21,19 @@ import mainNavStyles from './MainNav.module.scss'
 
 function MainNav({
 	isLoggedIn,
+	isTraveller: isTravellerProp,
 	useMainNavState = useMainNavStateDefault,
 	useClickOutsideToClose = useClickOutsideToCloseDefault,
 	useMobileMenu = useMobileMenuDefault,
 	useLogout = useLogoutDefault,
 }) {
 	const location = useLocation()
-	// const navigate = useNavigate();
 
-	// const usersName = useSelector((state) => state.travellers.travellerName);
-	// const isTraveller = useSelector((state) => state.travellers.isTraveller);
+	const usersName = useSelector((state) => state.travellers.travellerName)
+	const isTravellerFromStore = useSelector(
+		(state) => state.travellers.isTraveller,
+	)
+	const isTraveller = isTravellerProp ?? isTravellerFromStore
 	// const messagesCount = useSelector((state) => state.messages.messagesCount);
 
 	const {
@@ -51,20 +54,21 @@ function MainNav({
 	//// START
 
 	/// TODO: ENSURE THIS IS WORKING CORRECTLY ONCE TRAVELLERS AND MESSAGES STORE IS ADDED
-	/// UPDATE IMPORT LINE 1: import { useEffect, useState, useRef } from 'react';
 
 	// useEffect(() => {
 	// 	setTotalMessages(messagesCount);
 	// }, [messagesCount]);
 
-	// useEffect(() => {
-	// 	if (isLoggedIn) {
-	// 		setTravellerName(usersName);
-	// 		if (totalMessages === null) {
-	// 			setMessageCount();
-	// 		}
-	// 	}
-	// }, [isLoggedIn, totalMessages, setTravellerName]);
+	useEffect(() => {
+		if (isLoggedIn) {
+			setTravellerName(usersName)
+			// if (totalMessages === null) {
+			// 	setMessageCount();
+			// }
+		}
+		// add totalMessages to dependency array if using setMessageCount
+		// }, [isLoggedIn, totalMessages, usersName, setTravellerName]);
+	}, [isLoggedIn, usersName, setTravellerName])
 
 	// const setMessageCount = () => {
 	// 	dispatch({ type: 'messages/loadMessages' }).then(() => {
@@ -123,23 +127,25 @@ function MainNav({
 							aria-label="Main navigation menu">
 							<li className={mainNavStyles.navMenuItem}>
 								<ul>
-									{/* {isTraveller && ( */}
-									<NavMenuMessagesLink
-										isLink
-										to={PATHS.MESSAGES}
-										className={classNames(
-											navMenuButtonLinkStyles.navMenuButtonLink,
-											{
-												[mainNavStyles.active]:
-													location.pathname ===
-													PATHS.MESSAGES,
-											},
-										)}
-										onMenuItemClick={handleMenuItemClick}
-										data-cy="nav-menu-item-messages"
-										totalMessages={totalMessages}
-									/>
-									{/* )} */}
+									{isTraveller && (
+										<NavMenuMessagesLink
+											isLink
+											to={PATHS.MESSAGES}
+											className={classNames(
+												navMenuButtonLinkStyles.navMenuButtonLink,
+												{
+													[mainNavStyles.active]:
+														location.pathname ===
+														PATHS.MESSAGES,
+												},
+											)}
+											onMenuItemClick={
+												handleMenuItemClick
+											}
+											data-cy="nav-menu-item-messages"
+											totalMessages={totalMessages}
+										/>
+									)}
 									<li className="navMenuItemTravellers">
 										<NavMenuButtonLink
 											isLink
@@ -187,6 +193,7 @@ function MainNav({
 
 MainNav.propTypes = {
 	isLoggedIn: PropTypes.bool.isRequired,
+	isTraveller: PropTypes.bool,
 	useMainNavState: PropTypes.func,
 	useClickOutsideToClose: PropTypes.func,
 	useMobileMenu: PropTypes.func,

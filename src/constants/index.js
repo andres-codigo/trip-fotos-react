@@ -4,6 +4,9 @@ export * from './api/messages'
 
 export * from './api/firebase-errors'
 
+export * from './config/users'
+export * from './config/viewports'
+
 export * from './errors/messages'
 export * from './errors/types'
 
@@ -15,14 +18,23 @@ export * from './test/mock-data/mock-user'
 export * from './test/mock-data/mock-api'
 export * from './test/mock-data/mock-travellers'
 export * from './test/mock-data/mock-common'
+
+export * from './test/selectors/_ids'
+export * from './test/selectors/components'
+export * from './test/selectors/pages'
+
+export * from './test/utilities/selectors'
+
 export * from './test/ui-constants/button'
 export * from './test/ui-constants/dialog'
 export * from './test/ui-constants/input'
-export * from './test-utilities/selectors'
 export * from './test/ui-constants/spinner'
 export * from './test/ui-constants/ui-text'
 
+export * from './travellers'
+
 export * from './ui/accessibility'
+export * from './ui/attributes'
 export * from './ui/global'
 export * from './ui/paths'
 

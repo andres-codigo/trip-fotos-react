@@ -17,7 +17,9 @@ import { tryLogin } from '@/store/slices/authenticationSlice'
 import LoadingFallback from '@/components/common/LoadingFallback'
 
 import Header from '@/components/layout/header/Header'
-const UserAuth = lazy(() => import('@/pages/authentication/UserAuth'))
+const Authentication = lazy(
+	() => import('@/pages/authentication/Authentication'),
+)
 // TODO: Review requirement for Home page at a later stage
 // const Home = lazy(() => import('@/pages/home/Home'))
 const Register = lazy(() => import('@/pages/register/Register'))
@@ -52,7 +54,7 @@ function AppRoutes() {
 
 	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
 	useEffect(() => {
-		const publicPaths = [PATHS.AUTHENTICATION, PATHS.PAGENOTFOUND]
+		const publicPaths = [PATHS.AUTHENTICATION, PATHS.PAGE_NOT_FOUND]
 		const isPublic = publicPaths.includes(location.pathname)
 
 		if (!isLoggedIn && !isPublic) {
@@ -79,7 +81,7 @@ function AppRoutes() {
 					/>
 					<Route
 						path={PATHS.AUTHENTICATION}
-						element={<UserAuth />}
+						element={<Authentication />}
 					/>
 					<Route
 						path={PATHS.REGISTER}
@@ -94,14 +96,14 @@ function AppRoutes() {
 						element={<Messages />}
 					/>
 					<Route
-						path={PATHS.PAGENOTFOUND}
+						path={PATHS.PAGE_NOT_FOUND}
 						element={<PageNotFound />}
 					/>
 					<Route
 						path="*"
 						element={
 							<Navigate
-								to={PATHS.PAGENOTFOUND}
+								to={PATHS.PAGE_NOT_FOUND}
 								replace
 							/>
 						}

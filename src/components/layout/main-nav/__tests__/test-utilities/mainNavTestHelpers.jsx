@@ -1,7 +1,8 @@
-import { TOP_NAVIGATION_SELECTORS } from '../../../../../../cypress/support/constants/selectors/components'
-import { TEST_SELECTORS } from '../../../../../../cypress/support/constants/selectors/test-utilities'
-import { APP_URLS } from '../../../../../../cypress/support/constants/api/urls'
-import { VIEWPORTS } from '../../../../../../cypress/support/constants/env/viewports'
+import { TOP_NAVIGATION_SELECTORS } from '../../../../../constants/test/selectors/components'
+import { TEST_UTILITIES } from '../../../../../constants/test/utilities/selectors'
+import { VIEWPORTS } from '../../../../../constants/config/viewports'
+
+import { PATHS } from '@/constants/ui'
 
 // TODO: Remove and import hooks once store slices are implemented
 export const mockUseMainNavState = () => ({
@@ -11,16 +12,21 @@ export const mockUseMainNavState = () => ({
 	useLogout: () => {},
 })
 
-export const assertMenuItems = (travellerName = 'Test User') => {
-	cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES)
-		.should('exist')
-		.and('be.visible')
-		.should('have.attr', 'href', APP_URLS.CY_MESSAGES)
-		.and('have.text', 'Messages')
+export const assertMenuItems = (
+	travellerName = 'Test User',
+	isTraveller = false,
+) => {
+	if (isTraveller) {
+		cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES)
+			.should('exist')
+			.and('be.visible')
+			.should('have.attr', 'href', PATHS.MESSAGES)
+			.and('have.text', 'Messages')
+	}
 	cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS)
 		.should('exist')
 		.and('be.visible')
-		.should('have.attr', 'href', APP_URLS.CY_TRAVELLERS)
+		.should('have.attr', 'href', PATHS.TRAVELLERS)
 		.and('have.text', 'Travellers')
 	cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT)
 		.should('exist')
@@ -41,6 +47,7 @@ export const assertMenuItemRedirect = (
 	MemoryRouter,
 	Routes,
 	Route,
+	isTraveller = false,
 ) => {
 	cy.mountWithProviders(
 		// LocationDisplay MUST be outside of <Routes> to be always rendered
@@ -53,6 +60,7 @@ export const assertMenuItemRedirect = (
 						<TestMainNav
 							isLoggedIn={true}
 							isMenuOpen={true}
+							isTraveller={isTraveller}
 						/>
 					}
 				/>
@@ -74,6 +82,6 @@ export const assertMenuItemRedirect = (
 	}
 
 	cy.get(navMenuItem).click()
-	cy.get(TEST_SELECTORS.LOCATION_DISPLAY).should('have.text', routePath)
+	cy.get(TEST_UTILITIES.ROUTE_PATH).should('have.text', routePath)
 	cy.get(locationPageClassName).should('exist')
 }

@@ -1,0 +1,32 @@
+@use '@/styles/setup/variables' as variables;
+
+.checkbox-container {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+
+	label {
+		margin: 0;
+		font-weight: normal;
+		cursor: pointer;
+	}
+
+	input {
+		width: auto;
+		display: inline-block;
+		cursor: pointer;
+	}
+
+	.input-required {
+		color: variables.$color-red;
+		margin-left: 0.25rem;
+	}
+
+	.checkbox-error {
+		width: 100%;
+		color: variables.$color-red;
+		font-size: 0.875rem;
+		margin-top: 0.25rem;
+	}
+}

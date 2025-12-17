@@ -21,9 +21,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
  */
 
 const mockUseLocation = vi.fn()
+const mockUseSelector = vi.fn()
 
 vi.mock('react-router-dom', () => ({
 	useLocation: () => mockUseLocation(),
+}))
+
+vi.mock('react-redux', () => ({
+	useSelector: (selector) => mockUseSelector(selector),
 }))
 
 import MainNav from '../MainNav'
@@ -126,6 +131,16 @@ describe('<MainNav />', () => {
 		mockUseLocation.mockReturnValue({
 			pathname: '/current-path',
 		})
+
+		// Default selector mock
+		mockUseSelector.mockImplementation((selector) =>
+			selector({
+				travellers: {
+					travellerName: mockTravellerName,
+					isTraveller: true,
+				},
+			}),
+		)
 
 		// Default hook return values
 		vi.mocked(useMainNavState).mockReturnValue({

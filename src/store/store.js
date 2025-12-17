@@ -23,7 +23,8 @@ const store = configureStore({
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({
 			serializableCheck: {
-				ignoreActions: [
+				warnAfter: 128,
+				ignoredActions: [
 					'persist/FLUSH',
 					'persist/REHYDRATE',
 					'persist/PAUSE',

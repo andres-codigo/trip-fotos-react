@@ -58,7 +58,7 @@ Input.propTypes = {
 	id: PropTypes.string.isRequired,
 	label: PropTypes.string,
 	type: PropTypes.string,
-	value: PropTypes.string.isRequired,
+	value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 	onChange: PropTypes.func.isRequired,
 	onBlur: PropTypes.func,
 	isValid: PropTypes.bool,
