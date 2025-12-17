@@ -1,14 +1,14 @@
 import { PAGE_NOT_FOUND_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { HEADER_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
-import { TEST_USER } from '../../../src/constants/config/users'
+import { TEST_USERS } from '../../../src/constants/config/users'
 
 describe('Logged in > PageNotFound page', () => {
 	const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 
 	beforeEach(() => {
 		cy.visit(loginUrl)
-		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)
+		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
 	})
 	it('displays the 404 page and user can navigate to the travellers page', () => {
 		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.TRAVELLERS)

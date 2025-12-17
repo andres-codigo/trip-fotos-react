@@ -8,7 +8,7 @@ import {
 	TOP_NAVIGATION_SELECTORS,
 	AUTHENTICATION_FORM_SELECTORS,
 } from '../../src/constants/test/selectors/components'
-import { TEST_USER } from '../../src/constants/config/users'
+import { TEST_USERS } from '../../src/constants/config/users'
 import { VIEWPORTS } from '../../src/constants/config/viewports'
 
 const mockStore = configureStore([])
@@ -19,9 +19,9 @@ Cypress.Commands.add('createMockStore', (authToken = null) => {
 	return mockStore({
 		authentication: {
 			token: authToken,
-			userId: TEST_USER.MOCK_USER_ID,
-			userName: TEST_USER.MOCK_NAME,
-			userEmail: TEST_USER.VALID_EMAIL,
+			userId: TEST_USERS.STANDARD.ID,
+			userName: TEST_USERS.STANDARD.NAME,
+			userEmail: TEST_USERS.STANDARD.EMAIL,
 			didAutoLogout: false,
 		},
 		travellers: {
