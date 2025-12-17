@@ -2,12 +2,12 @@ import {
 	HEADER_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
 } from '../../support/constants/selectors/components'
-import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
+import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { TEST_USER } from '../../support/constants/env/test-users'
 
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
-		cy.visit(BASE_URL + APP_URLS.CY_AUTHENTICATION)
+		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
 	})
 
 	it('Displays the title as a link and does not render the hamburger menu', () => {
@@ -19,13 +19,13 @@ describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', ()
 
 	it('Navigates to the "authentication" page when clicking the app title', () => {
 		cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK).click()
-		cy.url().should('eq', BASE_URL + APP_URLS.CY_AUTHENTICATION)
+		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
 	})
 })
 
 describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
-		cy.visit(BASE_URL + APP_URLS.CY_AUTHENTICATION)
+		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
 		cy.login(TEST_USER.VALID_EMAIL, TEST_USER.VALID_PASSWORD)
 	})
 
@@ -38,7 +38,7 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 
 	it('Navigates to the "home" page when clicking the app title', () => {
 		cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK).click()
-		cy.url().should('eq', BASE_URL + APP_URLS.CY_HOME)
+		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.HOME)
 	})
 
 	it('Toggles the hamburger menu open and closed on mobile viewports', () => {

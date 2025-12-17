@@ -54,7 +54,7 @@ function AppRoutes() {
 
 	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
 	useEffect(() => {
-		const publicPaths = [PATHS.AUTHENTICATION, PATHS.PAGENOTFOUND]
+		const publicPaths = [PATHS.AUTHENTICATION, PATHS.PAGE_NOT_FOUND]
 		const isPublic = publicPaths.includes(location.pathname)
 
 		if (!isLoggedIn && !isPublic) {
@@ -96,14 +96,14 @@ function AppRoutes() {
 						element={<Messages />}
 					/>
 					<Route
-						path={PATHS.PAGENOTFOUND}
+						path={PATHS.PAGE_NOT_FOUND}
 						element={<PageNotFound />}
 					/>
 					<Route
 						path="*"
 						element={
 							<Navigate
-								to={PATHS.PAGENOTFOUND}
+								to={PATHS.PAGE_NOT_FOUND}
 								replace
 							/>
 						}

@@ -1,5 +1,6 @@
 import { API_DATABASE } from '../../../src/constants/api'
-import { APP_URLS, SDK_METHOD_TYPE_URLS } from '../constants/api/urls'
+import { PATHS } from '../../../src/constants/ui/paths'
+import { SDK_METHOD_TYPE_URLS } from '../constants/api/urls'
 import { TEST_USER } from '../constants/env/test-users'
 
 /**
@@ -11,7 +12,7 @@ import { TEST_USER } from '../constants/env/test-users'
 export const performLogin = (
 	email = TEST_USER.VALID_EMAIL,
 	password = TEST_USER.VALID_PASSWORD,
-	expectedRedirectUrl = APP_URLS.CY_HOME,
+	expectedRedirectUrl = PATHS.HOME,
 ) => {
 	cy.interceptLogin(
 		API_DATABASE.POST,
@@ -31,6 +32,6 @@ export const loginAndNavigateToHome = (
 	email = TEST_USER.VALID_EMAIL,
 	password = TEST_USER.VALID_PASSWORD,
 ) => {
-	cy.visit(APP_URLS.CY_AUTHENTICATION) // Assuming auth route exists
+	cy.visit(PATHS.AUTHENTICATION) // Assuming auth route exists
 	performLogin(email, password)
 }

@@ -1,9 +1,9 @@
 import { PAGE_SELECTORS } from '../../support/constants/selectors/pages'
 import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../support/constants/selectors/components'
-import { BASE_URL, APP_URLS } from '../../support/constants/api/urls'
+import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation/messages'
 
-const registerUrl = BASE_URL + APP_URLS.CY_REGISTER
+const registerUrl = BASE_URL_CYPRESS + PATHS.REGISTER
 
 describe('Register Page', () => {
 	beforeEach(() => {

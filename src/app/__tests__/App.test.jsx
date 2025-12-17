@@ -52,7 +52,7 @@ vi.mock('@/constants/ui', () => ({
 		AUTHENTICATION: '/authentication',
 		TRAVELLERS: '/travellers',
 		MESSAGES: '/messages',
-		PAGENOTFOUND: '/404',
+		PAGE_NOT_FOUND: '/404',
 	},
 }))
 
