@@ -60,7 +60,7 @@ function MainNav({
 	// }, [messagesCount]);
 
 	useEffect(() => {
-		if (isLoggedIn) {
+		if (isLoggedIn && usersName) {
 			setTravellerName(usersName)
 			// if (totalMessages === null) {
 			// 	setMessageCount();
