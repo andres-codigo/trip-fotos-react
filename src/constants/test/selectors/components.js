@@ -12,7 +12,7 @@ export const COMMON_SELECTORS = {
 }
 
 /////
-/// Component Selectors
+/// Layout Selectors
 /////
 export const HEADER_SELECTORS = {
 	SITE_HEADER: getByDataCy('site-header'),
@@ -30,6 +30,9 @@ export const TOP_NAVIGATION_SELECTORS = {
 	NAV_MENU_ITEM_LOGOUT: getByDataCy('nav-menu-item-logout'),
 }
 
+/////
+/// Form Selectors
+/////
 export const AUTHENTICATION_FORM_SELECTORS = {
 	// Form fields
 	AUTHENTICATION_FORM: getByDataCy('user-authentication-form'),
@@ -65,10 +68,39 @@ export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	SUBMIT_BUTTON: getByDataCy('submit-button'),
 }
 
+/////
+/// Traveller Selectors
+/////
 export const TRAVELLERS_LIST_SELECTORS = {
 	TRAVELLERS_LIST_CONTAINER: getByDataCy('travellers-list-container'),
 	TRAVELLERS_LIST: getByDataCy('travellers-list'),
 	TRAVELLER_ITEM: getByDataCy('traveller-item'),
 	REGISTER_BUTTON: getByDataCy('register-link'),
 	CONTROLS: getByDataCy('controls'),
+}
+
+/////
+/// UI Selectors
+/////
+export const DIALOG_SELECTORS = {
+	// Dialog
+	INVALID_EMAIL_OR_PASSWORD: getByDataCy('invalid-email-or-password-dialog'),
+	AUTHENTICATING: getByDataCy('authenticating-dialog'),
+	TRAVELLERS_LIST_ERROR: getByDataCy('travellers-list-error-dialog'),
+	// Dialog elements
+	TITLE: getByDataCy('title'),
+	TEXT_CONTENT: getByDataCy('text-content'),
+	SPINNER_CONTAINER: getByDataCy('base-spinner'),
+	SPINNER_IMAGE: getByDataCy('base-spinner-img'),
+
+	// Messages
+	MESSAGES: {
+		LOADING: {
+			TITLE: 'Authenticating',
+			TEXT: 'Authenticating your details, one moment please...',
+		},
+		ERROR: {
+			TITLE: 'An error occurred',
+		},
+	},
 }

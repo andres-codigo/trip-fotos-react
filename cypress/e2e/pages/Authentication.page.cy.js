@@ -1,14 +1,14 @@
-import { FIREBASE_ERRORS } from '../../../src/constants/auth'
-
 import { API_DATABASE } from '../../../src/constants/api'
+import { FIREBASE_ERRORS } from '../../../src/constants/auth'
 import {
+	AUTHENTICATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
-	DIALOG_MESSAGES,
-} from '../../support/constants/ui/dialog'
-import { ERROR_MESSAGES } from '../../support/constants/ui/error-messages'
-import { AUTHENTICATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
+} from '../../../src/constants/test/selectors/components'
+
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
+
 import { SDK_METHOD_TYPE_URLS } from '../../support/constants/api/urls'
+import { ERROR_MESSAGES } from '../../support/constants/ui/error-messages'
 import { TEST_USER } from '../../support/constants/env/test-users'
 
 import { performLogin } from '../../support/utils/authHelpers'
@@ -194,11 +194,11 @@ describe('UI state and mode switching', () => {
 			.within(() => {
 				cy.get(DIALOG_SELECTORS.TITLE).should(
 					'contain.text',
-					DIALOG_MESSAGES.LOADING.TITLE,
+					DIALOG_SELECTORS.MESSAGES.LOADING.TITLE,
 				)
 				cy.get(DIALOG_SELECTORS.TEXT_CONTENT).should(
 					'contain.text',
-					DIALOG_MESSAGES.LOADING.TEXT,
+					DIALOG_SELECTORS.MESSAGES.LOADING.TEXT,
 				)
 				cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('exist')
 				cy.get(DIALOG_SELECTORS.SPINNER_IMAGE)
@@ -253,7 +253,7 @@ describe('UI error dialog', () => {
 			.within(() => {
 				cy.get(DIALOG_SELECTORS.TITLE).should(
 					'contain.text',
-					DIALOG_MESSAGES.ERROR.TITLE,
+					DIALOG_SELECTORS.MESSAGES.ERROR.TITLE,
 				)
 				cy.get(DIALOG_SELECTORS.TEXT_CONTENT).should(
 					'contain.text',
