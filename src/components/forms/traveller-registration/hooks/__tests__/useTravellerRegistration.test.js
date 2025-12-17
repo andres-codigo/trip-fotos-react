@@ -315,7 +315,7 @@ describe('useTravellerRegistration', () => {
 	it('should validate successfully with all valid data', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 		const mockEvent = { preventDefault: vi.fn() }
-		const consoleSpy = vi.spyOn(console, 'log')
+		const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
 		act(() => {
 			result.current.handleInputChange({
@@ -357,12 +357,14 @@ describe('useTravellerRegistration', () => {
 	})
 
 	it('should not return a value from submitHandler', () => {
+		const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 		const { result } = renderHook(() => useTravellerRegistration())
 		const mockEvent = { preventDefault: vi.fn() }
 
 		// Test with invalid form
-		const invalidResult = act(() => {
-			return result.current.submitHandler(mockEvent)
+		let invalidResult
+		act(() => {
+			invalidResult = result.current.submitHandler(mockEvent)
 		})
 		expect(invalidResult).toBeUndefined()
 
@@ -385,10 +387,12 @@ describe('useTravellerRegistration', () => {
 			})
 		})
 
-		const validResult = act(() => {
-			return result.current.submitHandler(mockEvent)
+		let validResult
+		act(() => {
+			validResult = result.current.submitHandler(mockEvent)
 		})
 		expect(validResult).toBeUndefined()
+		consoleSpy.mockRestore()
 	})
 
 	it('should trim whitespace when validating text fields', () => {

@@ -67,7 +67,7 @@ export const useTravellerRegistration = () => {
 
 	const submitHandler = (e) => {
 		e.preventDefault()
-		
+
 		const isValid = validateForm()
 		if (!isValid) {
 			return
