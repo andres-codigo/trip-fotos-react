@@ -8,7 +8,6 @@ import {
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 
 import { SDK_METHOD_TYPE_URLS } from '../../support/constants/api/urls'
-import { ERROR_MESSAGES } from '../../support/constants/ui/error-messages'
 import { TEST_USER } from '../../support/constants/env/test-users'
 
 import { performLogin } from '../../support/utils/authHelpers'
@@ -257,7 +256,7 @@ describe('UI error dialog', () => {
 				)
 				cy.get(DIALOG_SELECTORS.TEXT_CONTENT).should(
 					'contain.text',
-					ERROR_MESSAGES[messageKey],
+					DIALOG_SELECTORS.MESSAGES.AUTHENTICATION_ERRORS[messageKey],
 				)
 				cy.get('footer > button').should('contain.text', 'Close')
 				cy.get('footer > button').click()
