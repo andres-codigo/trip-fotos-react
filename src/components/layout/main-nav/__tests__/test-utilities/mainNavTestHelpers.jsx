@@ -1,5 +1,5 @@
-import { TOP_NAVIGATION_SELECTORS } from '../../../../../../cypress/support/constants/selectors/components'
-import { TEST_SELECTORS } from '../../../../../../cypress/support/constants/selectors/test-utilities'
+import { TOP_NAVIGATION_SELECTORS } from '../../../../../constants/test/selectors/components'
+import { TEST_UTILITIES } from '../../../../../constants/test/utilities/selectors'
 import { VIEWPORTS } from '../../../../../../cypress/support/constants/env/viewports'
 
 import { PATHS } from '@/constants/ui'
@@ -82,6 +82,6 @@ export const assertMenuItemRedirect = (
 	}
 
 	cy.get(navMenuItem).click()
-	cy.get(TEST_SELECTORS.LOCATION_DISPLAY).should('have.text', routePath)
+	cy.get(TEST_UTILITIES.ROUTE_PATH).should('have.text', routePath)
 	cy.get(locationPageClassName).should('exist')
 }

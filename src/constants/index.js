@@ -15,10 +15,16 @@ export * from './test/mock-data/mock-user'
 export * from './test/mock-data/mock-api'
 export * from './test/mock-data/mock-travellers'
 export * from './test/mock-data/mock-common'
+
+export * from './test/selectors/_ids'
+export * from './test/selectors/components'
+export * from './test/selectors/pages'
+
+export * from './test/utilities/selectors'
+
 export * from './test/ui-constants/button'
 export * from './test/ui-constants/dialog'
 export * from './test/ui-constants/input'
-export * from './test-utilities/selectors'
 export * from './test/ui-constants/spinner'
 export * from './test/ui-constants/ui-text'
 

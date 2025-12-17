@@ -1,7 +1,7 @@
 import {
 	HEADER_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
-} from '../../../../../../cypress/support/constants/selectors/components'
+} from '../../../../../constants/test/selectors/components'
 
 export const assertHeaderTitleLink = (expectedHref) => {
 	cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK)

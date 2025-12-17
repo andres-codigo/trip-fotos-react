@@ -1,4 +1,4 @@
-import { HEADER_SELECTORS } from '../../../../../cypress/support/constants/selectors/components'
+import { HEADER_SELECTORS } from '../../../../constants/test/selectors/components'
 
 import { PATHS } from '@/constants/ui'
 

@@ -4,7 +4,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { TEST_IDS } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 
-import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../../cypress/support/constants/selectors/components'
+import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../constants/test/selectors/components'
 
 import Register from '../Register'
 

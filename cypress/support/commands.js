@@ -7,7 +7,7 @@ import {
 	HEADER_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
 	AUTHENTICATION_FORM_SELECTORS,
-} from './constants/selectors/components'
+} from '../../src/constants/test/selectors/components'
 import { TEST_USER } from './constants/env/test-users'
 import { VIEWPORTS } from './constants/env/viewports'
 

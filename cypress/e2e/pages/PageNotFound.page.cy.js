@@ -1,5 +1,5 @@
-import { PAGE_NOT_FOUND_SELECTORS } from '../../support/constants/selectors/pages'
-import { HEADER_SELECTORS } from '../../support/constants/selectors/components'
+import { PAGE_NOT_FOUND_SELECTORS } from '../../../src/constants/test/selectors/pages'
+import { HEADER_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { TEST_USER } from '../../support/constants/env/test-users'
 

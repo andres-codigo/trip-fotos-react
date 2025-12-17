@@ -1,7 +1,7 @@
 import {
 	HEADER_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
-} from '../../support/constants/selectors/components'
+} from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { TEST_USER } from '../../support/constants/env/test-users'
 

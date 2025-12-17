@@ -95,7 +95,7 @@ import { API_ENDPOINTS, API_HEADERS } from '../../constants/api'
 
 ```javascript
 // Test utilities
-import { TEST_SELECTORS } from '../../constants/test/test-utilities'
+import { TEST_UTILITIES } from '../../constants/test/test-utilities'
 
 // Mock data for tests
 import {

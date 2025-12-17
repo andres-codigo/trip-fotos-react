@@ -1,7 +1,7 @@
 import {
 	getByDataCy,
 	getByDataCyError,
-} from '../../../../src/testUtils/cypress/selectors'
+} from '../../../testUtils/cypress/selectors'
 
 /////
 /// Common Component Selectors

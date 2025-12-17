@@ -1,7 +1,7 @@
 import { API_DATABASE } from '../../../src/constants/api'
 import { DIALOG_SELECTORS } from '../../support/constants/ui/dialog'
-import { PAGE_SELECTORS } from '../../support/constants/selectors/pages'
-import { TRAVELLERS_LIST_SELECTORS } from '../../support/constants/selectors/components'
+import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
+import { TRAVELLERS_LIST_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 
 import { performLogin } from '../../support/utils/authHelpers'

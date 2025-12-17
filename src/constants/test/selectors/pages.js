@@ -1,7 +1,7 @@
 import {
 	getByDataCy,
 	getByDataCyAlt,
-} from '../../../../src/testUtils/cypress/selectors'
+} from '../../../testUtils/cypress/selectors'
 
 /////
 /// Page Selectors

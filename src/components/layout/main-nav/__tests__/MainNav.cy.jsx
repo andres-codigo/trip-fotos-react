@@ -4,8 +4,8 @@ import PropTypes from 'prop-types'
 
 import '../../../../../cypress/support/commands'
 
-import { PAGE_SELECTORS } from '../../../../../cypress/support/constants/selectors/pages'
-import { TOP_NAVIGATION_SELECTORS } from '../../../../../cypress/support/constants/selectors/components'
+import { PAGE_SELECTORS } from '../../../../constants/test/selectors/pages'
+import { TOP_NAVIGATION_SELECTORS } from '../../../../constants/test/selectors/components'
 
 import { VIEWPORTS } from '../../../../../cypress/support/constants/env/viewports'
 

@@ -1,5 +1,5 @@
-import { PAGE_SELECTORS } from '../../support/constants/selectors/pages'
-import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../support/constants/selectors/components'
+import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
+import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation/messages'
 

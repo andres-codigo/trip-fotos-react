@@ -4,9 +4,9 @@ export * from './api/urls'
 export * from './env/users'
 export * from './env/viewports'
 
-export * from './selectors/components'
-export * from './selectors/pages'
-export * from './selectors/test-utilities'
+export * from '../../../src/constants/test/selectors/components'
+export * from '../../../src/constants/test/selectors/pages'
+export * from '../../../src/constants/test/utilities/selectors'
 
 export * from './ui/accessibility'
 export * from './ui/dialog'

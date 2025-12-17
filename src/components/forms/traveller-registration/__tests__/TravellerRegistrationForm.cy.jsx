@@ -1,5 +1,5 @@
 import TravellerRegistrationForm from '../TravellerRegistrationForm'
-import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../../../cypress/support/constants/selectors/components'
+import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../../constants/test/selectors/components'
 import { VALIDATION_MESSAGES } from '@/constants/validation/messages'
 
 describe('<TravellerRegistrationForm />', () => {
