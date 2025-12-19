@@ -162,9 +162,8 @@ const setupFirebaseErrorMock = async (
 	secondReturn = FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 		.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 ) => {
-	const { getFirebaseAuthErrorMessage } = await import(
-		'@/utils/getFirebaseAuthErrorMessage'
-	)
+	const { getFirebaseAuthErrorMessage } =
+		await import('@/utils/getFirebaseAuthErrorMessage')
 
 	if (firstReturn !== undefined) {
 		getFirebaseAuthErrorMessage.mockReturnValueOnce(firstReturn)
@@ -813,9 +812,8 @@ describe('<Authentication />', () => {
 			})
 
 			it('displays fallback message when error object has no message', async () => {
-				const { getFirebaseAuthErrorMessage } = await import(
-					'@/utils/getFirebaseAuthErrorMessage'
-				)
+				const { getFirebaseAuthErrorMessage } =
+					await import('@/utils/getFirebaseAuthErrorMessage')
 
 				getFirebaseAuthErrorMessage.mockReturnValue(
 					FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
