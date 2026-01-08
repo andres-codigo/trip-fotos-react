@@ -41,17 +41,19 @@ export default defineConfig({
 	},
 	plugins: [
 		react(),
-		eslint({
-			include: ['src/**/*.js', 'src/**/*.jsx'],
-			exclude: ['node_modules', 'dist'],
-		}),
-		visualizer({
-			open: true,
-			filename: 'stats.html',
-			gzipSize: true,
-			brotliSize: true,
-		}),
-	],
+		!process.env.VITEST &&
+			eslint({
+				include: ['src/**/*.js', 'src/**/*.jsx'],
+				exclude: ['node_modules', 'dist'],
+			}),
+		!process.env.VITEST &&
+			visualizer({
+				open: true,
+				filename: 'stats.html',
+				gzipSize: true,
+				brotliSize: true,
+			}),
+	].filter(Boolean),
 	resolve: {
 		alias: {
 			'@': resolve(__dirname, 'src'),
@@ -89,15 +91,9 @@ export default defineConfig({
 		// Performance optimisations - uses worker threads for parallel test execution
 		// Dynamically sets thread count: 2 in CI, half of CPU cores locally (min 1)
 		pool: 'threads',
-		poolOptions: {
-			threads: {
-				singleThread: false,
-				minThreads: 1,
-				maxThreads: process.env.CI
-					? 2
-					: Math.max(1, Math.ceil(os.cpus().length / 2)),
-			},
-		},
+		maxWorkers: process.env.CI
+			? 2
+			: Math.max(1, Math.ceil(os.cpus().length / 2)),
 		// Optimises file watching - ignores coverage reports, dependencies, and E2E tests
 		// Faster file watching and change detection
 		watch: {
