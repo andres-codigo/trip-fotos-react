@@ -5,7 +5,7 @@
 	label {
 		display: block;
 		font-family: 'Roboto', sans-serif;
-		font-weight: 500;
+		font-weight: 600;
 		margin-bottom: 0.5rem;
 	}
 }
@@ -59,7 +59,7 @@
 			font-family: 'Roboto', sans-serif;
 			font-weight: 400;
 			line-height: 1.25rem;
-			padding-left: 30px;
+			padding-left: 1.875rem;
 			position: relative;
 			@include mixins.user-select(none);
 

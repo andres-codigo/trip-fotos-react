@@ -81,10 +81,7 @@ const TravellerRegistrationForm = () => {
 
 			<fieldset
 				className={`${travellerRegistrationFormStyles.formControl} ${!formData.areas.isValid ? travellerRegistrationFormStyles.invalid : ''} ${travellerRegistrationFormStyles.fieldset}`}>
-				<legend
-					className={travellerRegistrationFormStyles.checkboxLabel}>
-					Cities visited
-				</legend>
+				<legend>Cities visited</legend>
 				{TRAVELLER_REGISTRATION_AREAS.map((area) => (
 					<div
 						key={area.id}

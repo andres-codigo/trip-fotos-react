@@ -34,7 +34,7 @@
 			}
 
 			input {
-				@include invalidForm.invalid-border;
+				@include invalidForm.invalid-border-and-background;
 			}
 		}
 	}
