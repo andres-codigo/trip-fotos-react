@@ -63,6 +63,7 @@ function AppRoutes() {
 				PATHS.HOME,
 				PATHS.TRAVELLERS,
 				PATHS.MESSAGES,
+				PATHS.REGISTER,
 			]
 			if (protectedPaths.includes(location.pathname)) {
 				navigate(PATHS.AUTHENTICATION, { replace: true })
