@@ -59,10 +59,10 @@ export const AUTHENTICATION_FORM_SELECTORS = {
 
 export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	FORM: getByDataCy('traveller-registration-form'),
-	FIRST_NAME_INPUT: getByDataCy('input-first-name'),
-	LAST_NAME_INPUT: getByDataCy('input-last-name'),
-	DESCRIPTION_INPUT: getByDataCy('input-description'),
-	DAYS_INPUT: getByDataCy('input-days'),
+	FIRST_NAME_INPUT: getByDataCy('first-name-input'),
+	LAST_NAME_INPUT: getByDataCy('last-name-input'),
+	DESCRIPTION_INPUT: getByDataCy('description-input'),
+	DAYS_INPUT: getByDataCy('days-input'),
 	CHECKBOX_TOKYO: getByDataCy('checkbox-tokyo'),
 	CHECKBOX_PRAGUE: getByDataCy('checkbox-prague'),
 	CHECKBOX_SYDNEY: getByDataCy('checkbox-sydney'),
