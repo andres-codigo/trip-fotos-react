@@ -1,5 +1,9 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
+
+import { MOCK_TRAVELLERS } from '@/constants/test/mock-data/mock-travellers'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
+
 import { useTravellerRegistration } from '../useTravellerRegistration'
 
 /**
@@ -31,12 +35,15 @@ describe('useTravellerRegistration', () => {
 
 		act(() => {
 			result.current.handleInputChange({
-				target: { id: 'firstName', value: 'John' },
+				target: {
+					id: 'firstName',
+					value: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+				},
 			})
 		})
 
 		expect(result.current.formData.firstName).toEqual({
-			value: 'John',
+			value: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
 			message: '',
 			isValid: true,
 		})
@@ -47,12 +54,15 @@ describe('useTravellerRegistration', () => {
 
 		act(() => {
 			result.current.handleInputChange({
-				target: { id: 'days', value: '5' },
+				target: {
+					id: 'days',
+					value: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString(),
+				},
 			})
 		})
 
 		expect(result.current.formData.days).toEqual({
-			value: '5',
+			value: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString(),
 			message: '',
 			isValid: true,
 		})
@@ -60,42 +70,45 @@ describe('useTravellerRegistration', () => {
 
 	it('should add area when checkbox is checked', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
+		const area = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.areas[0]
 
 		act(() => {
 			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
+				target: { value: area, checked: true },
 			})
 		})
 
-		expect(result.current.formData.areas.value).toEqual(['north'])
+		expect(result.current.formData.areas.value).toEqual([area])
 		expect(result.current.formData.areas.isValid).toBe(true)
 	})
 
 	it('should remove area when checkbox is unchecked', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
+		const area1 = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.areas[0]
+		const area2 = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.areas[0]
 
 		// First add two areas
 		act(() => {
 			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
+				target: { value: area1, checked: true },
 			})
 		})
 		act(() => {
 			result.current.handleCheckboxChange({
-				target: { value: 'south', checked: true },
+				target: { value: area2, checked: true },
 			})
 		})
 
-		expect(result.current.formData.areas.value).toEqual(['north', 'south'])
+		expect(result.current.formData.areas.value).toEqual([area1, area2])
 
 		// Then remove one
 		act(() => {
 			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: false },
+				target: { value: area1, checked: false },
 			})
 		})
 
-		expect(result.current.formData.areas.value).toEqual(['south'])
+		expect(result.current.formData.areas.value).toEqual([area2])
 	})
 
 	it('should prevent default on form submission', () => {
@@ -123,7 +136,9 @@ describe('useTravellerRegistration', () => {
 		})
 
 		expect(result.current.formData.firstName.isValid).toBe(false)
-		expect(result.current.formData.firstName.message).toBeTruthy()
+		expect(result.current.formData.firstName.message).toBe(
+			VALIDATION_MESSAGES.FIRST_NAME_REQUIRED,
+		)
 		expect(result.current.formData.lastName.isValid).toBe(false)
 		expect(result.current.formData.description.isValid).toBe(false)
 		expect(result.current.formData.days.isValid).toBe(false)
@@ -137,21 +152,24 @@ describe('useTravellerRegistration', () => {
 		const mockOnSuccess = vi.fn()
 		const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
+		const { firstName, lastName, description, daysInCity, areas } =
+			MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE
+
 		act(() => {
 			result.current.handleInputChange({
-				target: { id: 'firstName', value: 'John' },
+				target: { id: 'firstName', value: firstName },
 			})
 			result.current.handleInputChange({
-				target: { id: 'lastName', value: 'Doe' },
+				target: { id: 'lastName', value: lastName },
 			})
 			result.current.handleInputChange({
-				target: { id: 'description', value: 'I love travelling!' },
+				target: { id: 'description', value: description },
 			})
 			result.current.handleInputChange({
-				target: { id: 'days', value: '5' },
+				target: { id: 'days', value: daysInCity.toString() },
 			})
 			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
+				target: { value: areas[0], checked: true },
 			})
 		})
 
@@ -161,11 +179,11 @@ describe('useTravellerRegistration', () => {
 
 		expect(result.current.formData.firstName.isValid).toBe(true)
 		expect(mockOnSuccess).toHaveBeenCalledWith({
-			firstName: 'John',
-			lastName: 'Doe',
-			description: 'I love travelling!',
-			daysInCity: '5',
-			areas: ['north'],
+			firstName,
+			lastName,
+			description,
+			daysInCity: daysInCity.toString(),
+			areas,
 		})
 		expect(consoleSpy).toHaveBeenCalled()
 
@@ -182,7 +200,9 @@ describe('useTravellerRegistration', () => {
 		})
 
 		expect(result.current.formData.firstName.isValid).toBe(false)
-		expect(result.current.formData.firstName.message).toBeTruthy()
+		expect(result.current.formData.firstName.message).toBe(
+			VALIDATION_MESSAGES.FIRST_NAME_REQUIRED,
+		)
 
 		// Change to whitespace only
 		act(() => {
@@ -209,7 +229,10 @@ describe('useTravellerRegistration', () => {
 		// User corrects input
 		act(() => {
 			result.current.handleInputChange({
-				target: { id: 'firstName', value: 'John' },
+				target: {
+					id: 'firstName',
+					value: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+				},
 			})
 		})
 
