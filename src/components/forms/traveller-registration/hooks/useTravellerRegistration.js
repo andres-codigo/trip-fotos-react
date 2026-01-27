@@ -1,71 +1,90 @@
 import { useState } from 'react'
 
+import { VALIDATION_MESSAGES } from '@/constants/validation'
+
 export const useTravellerRegistration = () => {
 	const [formData, setFormData] = useState({
-		firstName: { val: '', isValid: true },
-		lastName: { val: '', isValid: true },
-		description: { val: '', isValid: true },
-		days: { val: '', isValid: true },
-		areas: { val: [], isValid: true },
+		firstName: { value: '', message: '', isValid: true },
+		lastName: { value: '', message: '', isValid: true },
+		description: { value: '', message: '', isValid: true },
+		days: { value: '', message: '', isValid: true },
+		areas: { value: [], message: '', isValid: true },
 	})
-	const [formIsValid, setFormIsValid] = useState(true)
+
+	const validateField = (id, value) => {
+		let isValid = true
+		let message = ''
+
+		if (id === 'firstName' && value.trim() === '') {
+			isValid = false
+			message = VALIDATION_MESSAGES.FIRST_NAME_REQUIRED
+		} else if (id === 'lastName' && value.trim() === '') {
+			isValid = false
+			message = VALIDATION_MESSAGES.LAST_NAME_REQUIRED
+		} else if (id === 'description' && value.trim() === '') {
+			isValid = false
+			message = VALIDATION_MESSAGES.DESCRIPTION_REQUIRED
+		} else if (id === 'days' && (!value || Number(value) <= 0)) {
+			isValid = false
+			message = VALIDATION_MESSAGES.DAYS_REQUIRED
+		} else if (id === 'areas' && value.length === 0) {
+			isValid = false
+			message = VALIDATION_MESSAGES.CITIES_REQUIRED
+		}
+
+		return { isValid, message }
+	}
 
 	const handleInputChange = (e) => {
 		const { id, value } = e.target
+		const { isValid, message } = validateField(id, value)
+
 		setFormData((prev) => ({
 			...prev,
-			[id]: { ...prev[id], val: value, isValid: true },
+			[id]: { ...prev[id], value, isValid, message },
 		}))
 	}
 
 	const handleCheckboxChange = (e) => {
 		const { value, checked } = e.target
 		setFormData((prev) => {
-			const currentAreas = prev.areas.val
+			const currentAreas = prev.areas.value
 			let newAreas
 			if (checked) {
 				newAreas = [...currentAreas, value]
 			} else {
 				newAreas = currentAreas.filter((area) => area !== value)
 			}
+
+			const isValid = newAreas.length > 0
+			const message = isValid ? '' : VALIDATION_MESSAGES.CITIES_REQUIRED
+
 			return {
 				...prev,
-				areas: { ...prev.areas, val: newAreas, isValid: true },
+				areas: { ...prev.areas, value: newAreas, isValid, message },
 			}
 		})
 	}
 
 	const validateForm = () => {
-		let isValid = true
+		let isFormValid = true
 		const newFormData = { ...formData }
 
-		if (newFormData.firstName.val.trim() === '') {
-			newFormData.firstName.isValid = false
-			isValid = false
-		}
-		if (newFormData.lastName.val.trim() === '') {
-			newFormData.lastName.isValid = false
-			isValid = false
-		}
-		if (newFormData.description.val.trim() === '') {
-			newFormData.description.isValid = false
-			isValid = false
-		}
-		if (!newFormData.days.val || Number(newFormData.days.val) <= 0) {
-			newFormData.days.isValid = false
-			isValid = false
-		}
-		if (newFormData.areas.val.length === 0) {
-			newFormData.areas.isValid = false
-			isValid = false
-		}
+		Object.keys(newFormData).forEach((key) => {
+			const { value } = newFormData[key]
+			const { isValid, message } = validateField(key, value)
+
+			if (!isValid) {
+				isFormValid = false
+				newFormData[key] = { ...newFormData[key], isValid, message }
+			}
+		})
 
 		setFormData(newFormData)
-		setFormIsValid(isValid)
-		return isValid
+		return isFormValid
 	}
 
-	const submitHandler = (e) => {
+	const submitHandler = (onSubmitSuccess) => (e) => {
 		e.preventDefault()
 
 		const isValid = validateForm()
@@ -74,20 +93,22 @@ export const useTravellerRegistration = () => {
 		}
 
 		const dataToSubmit = {
-			first: formData.firstName.val,
-			last: formData.lastName.val,
-			desc: formData.description.val,
-			days: formData.days.val,
-			areas: formData.areas.val,
+			firstName: formData.firstName.value,
+			lastName: formData.lastName.value,
+			description: formData.description.value,
+			daysInCity: formData.days.value,
+			areas: formData.areas.value,
 			// files: [], // TODO: Implement file upload
 		}
 		console.log('Form Submitted', dataToSubmit)
 		// TODO: Emit/Dispatch event
+		if (onSubmitSuccess) {
+			onSubmitSuccess(dataToSubmit)
+		}
 	}
 
 	return {
 		formData,
-		formIsValid,
 		handleInputChange,
 		handleCheckboxChange,
 		submitHandler,

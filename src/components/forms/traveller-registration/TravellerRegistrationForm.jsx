@@ -1,5 +1,8 @@
-import { VALIDATION_MESSAGES } from '@/constants/validation/messages'
+import PropTypes from 'prop-types'
+
 import { TRAVELLER_REGISTRATION_AREAS } from '@/constants/travellers/registration'
+import { ACCESSIBILITY } from '@/constants/ui'
+import { VALIDATION_MESSAGES } from '@/constants/validation/messages'
 
 import Input from '@/components/ui/form/input/Input'
 import Textarea from '@/components/ui/form/textarea/Textarea'
@@ -10,78 +13,144 @@ import { useTravellerRegistration } from './hooks/useTravellerRegistration'
 
 import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'
 
-const TravellerRegistrationForm = () => {
-	const {
-		formData,
-		formIsValid,
-		handleInputChange,
-		handleCheckboxChange,
-		submitHandler,
-	} = useTravellerRegistration()
+const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
+	const { formData, handleInputChange, handleCheckboxChange, submitHandler } =
+		useTravellerRegistration()
+
+	const FIRST_NAME = 'firstName'
+	const LAST_NAME = 'lastName'
+	const DESCRIPTION = 'description'
+	const DAYS = 'days'
+	// const AREAS = 'areas'
+
+	const fieldConfig = {
+		[FIRST_NAME]: { label: 'First name', testId: 'first-name-input' },
+		[LAST_NAME]: { label: 'Last name', testId: 'last-name-input' },
+		[DESCRIPTION]: { label: 'Description', testId: 'description-input' },
+		[DAYS]: { label: 'Days', testId: 'days-input' },
+	}
+
+	const getInputProps = (field) => {
+		const config = fieldConfig[field]
+		const fieldState = formData[field]
+
+		if (!config || !fieldState) return {}
+
+		return {
+			id: field,
+			label: config.label,
+			value: fieldState.value,
+			onChange: handleInputChange,
+			onBlur: handleInputChange,
+			isValid: fieldState.isValid,
+			message: fieldState.message,
+			disabled: isLoading,
+			required: true,
+			showRequiredMark: true,
+			className: 'formControlInput',
+			'data-cy': config.testId,
+		}
+	}
 
 	return (
 		<form
-			className={travellerRegistrationFormStyles.form}
-			onSubmit={submitHandler}
-			data-cy="traveller-registration-form">
-			<h2>Register as a Traveller</h2>
+			className={travellerRegistrationFormStyles.travellerRegistration}
+			onSubmit={submitHandler(onSubmit)}
+			noValidate
+			data-cy="traveller-registration-form"
+			aria-busy={isLoading}
+			aria-labelledby="traveller-registration-title">
+			<h2
+				id="traveller-registration-title"
+				className={
+					travellerRegistrationFormStyles.travellerRegistrationTitle
+				}
+				data-cy="traveller-registration-form-title">
+				Register as a Traveller
+			</h2>
 			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.firstName.isValid ? travellerRegistrationFormStyles.invalid : ''}`}>
-				<Input
-					id="firstName"
-					label="First name"
-					value={formData.firstName.val}
-					onChange={handleInputChange}
-					isValid={formData.firstName.isValid}
-					message={VALIDATION_MESSAGES.FIRST_NAME_REQUIRED}
-					data-cy="input-first-name"
-				/>
+				aria-live="polite"
+				style={ACCESSIBILITY.ARIA_LIVE.POLITE.STYLE}>
+				{isLoading ? ACCESSIBILITY.ARIA_LIVE.POLITE.MESSAGE : ''}
+			</div>
+			<div
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.firstName.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+				<Input {...getInputProps('firstName')} />
+				{!formData.firstName.isValid && formData.firstName.message && (
+					<span
+						id="first-name-error"
+						role="alert"
+						className={
+							travellerRegistrationFormStyles.visuallyHidden
+						}>
+						{formData.firstName.message}
+					</span>
+				)}
 			</div>
 
 			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.lastName.isValid ? travellerRegistrationFormStyles.invalid : ''}`}>
-				<Input
-					id="lastName"
-					label="Last name"
-					value={formData.lastName.val}
-					onChange={handleInputChange}
-					isValid={formData.lastName.isValid}
-					message={VALIDATION_MESSAGES.LAST_NAME_REQUIRED}
-					data-cy="input-last-name"
-				/>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.lastName.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+				<Input {...getInputProps('lastName')} />
+				{!formData.lastName.isValid && formData.lastName.message && (
+					<span
+						id="last-name-error"
+						role="alert"
+						className={
+							travellerRegistrationFormStyles.visuallyHidden
+						}>
+						{formData.lastName.message}
+					</span>
+				)}
 			</div>
 
 			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.description.isValid ? travellerRegistrationFormStyles.invalid : ''}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.description.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
 				<Textarea
-					id="description"
-					label="Description"
 					rows={5}
-					value={formData.description.val}
-					onChange={handleInputChange}
-					isValid={formData.description.isValid}
-					message={VALIDATION_MESSAGES.DESCRIPTION_REQUIRED}
-					data-cy="input-description"
+					{...getInputProps('description')}
 				/>
+				{!formData.description.isValid &&
+					formData.description.message && (
+						<span
+							id="description-error"
+							role="alert"
+							className={
+								travellerRegistrationFormStyles.visuallyHidden
+							}>
+							{formData.description.message}
+						</span>
+					)}
 			</div>
 
 			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.days.isValid ? travellerRegistrationFormStyles.invalid : ''}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.days.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
 				<Input
-					id="days"
-					label="Number of days spent in the city?"
 					type="number"
-					value={formData.days.val}
-					onChange={handleInputChange}
-					isValid={formData.days.isValid}
-					message={VALIDATION_MESSAGES.DAYS_REQUIRED}
-					data-cy="input-days"
+					{...getInputProps('days')}
 				/>
+				{!formData.days.isValid && formData.days.message && (
+					<span
+						id="days-error"
+						role="alert"
+						className={
+							travellerRegistrationFormStyles.visuallyHidden
+						}>
+						{formData.days.message}
+					</span>
+				)}
 			</div>
 
 			<fieldset
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.areas.isValid ? travellerRegistrationFormStyles.invalid : ''} ${travellerRegistrationFormStyles.fieldset}`}>
-				<legend>Cities visited</legend>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.areas.isValid ? travellerRegistrationFormStyles.invalidForm : ''} ${travellerRegistrationFormStyles.fieldset}`}>
+				<legend>
+					Cities visited{' '}
+					<span
+						className={
+							travellerRegistrationFormStyles.checkboxRequired
+						}>
+						*
+					</span>
+				</legend>
 				{TRAVELLER_REGISTRATION_AREAS.map((area) => (
 					<div
 						key={area.id}
@@ -92,36 +161,43 @@ const TravellerRegistrationForm = () => {
 							id={area.id}
 							label={area.label}
 							value={area.id}
-							checked={formData.areas.val.includes(area.id)}
+							checked={formData.areas.value.includes(area.id)}
 							onChange={handleCheckboxChange}
 							data-cy={`checkbox-${area.id}`}
 						/>
 					</div>
 				))}
 				{!formData.areas.isValid && (
-					<p role="alert">{VALIDATION_MESSAGES.CITIES_REQUIRED}</p>
+					<span
+						id="areas-error"
+						role="alert"
+						className={
+							travellerRegistrationFormStyles.visuallyHidden
+						}>
+						{VALIDATION_MESSAGES.CITIES_REQUIRED}
+					</span>
 				)}
 			</fieldset>
 
 			{/* TODO: AddFile component */}
 
-			{!formIsValid && (
-				<p
-					className={travellerRegistrationFormStyles.invalidForm}
-					role="alert">
-					Please fix the above errors and submit again.
-				</p>
-			)}
-
 			<div className={travellerRegistrationFormStyles.actions}>
 				<BaseButton
+					id="register-button"
 					type="submit"
-					data-cy="submit-button">
+					mode="flat"
+					data-cy="register-button"
+					isDisabled={isLoading}>
 					Register
 				</BaseButton>
 			</div>
 		</form>
 	)
+}
+
+TravellerRegistrationForm.propTypes = {
+	isLoading: PropTypes.bool,
+	onSubmit: PropTypes.func.isRequired,
 }
 
 export default TravellerRegistrationForm
