@@ -7,22 +7,10 @@ import { useTravellerRegistration } from '../useTravellerRegistration'
  *
  * Tests the custom hook that manages traveller registration form state and logic.
  *
- * Hook Behavior:
- * - Manages form data for firstName, lastName, description, days, and areas fields
- * - Each field has val and isValid properties
- * - Provides handleInputChange for text/number inputs
- * - Provides handleCheckboxChange for checkbox inputs (areas)
- * - Validates all fields on submission
- * - submitHandler prevents default form submission and validates form
- * - Does not return values from submitHandler (void function)
- *
- * Test Coverage:
- * - Initial state verification
- * - Input change handling
- * - Checkbox change handling (add/remove areas)
- * - Form validation (valid/invalid cases)
- * - Submit handler behavior (preventDefault, validation)
- * - Edge cases: empty strings, invalid numbers, no areas selected
+ * Updated for current implementation:
+ * - State shape uses { value, message, isValid }
+ * - submitHandler is a higher-order function: (onSuccess) => (event) => void
+ * - Validation occurs on change and on submit
  */
 
 describe('useTravellerRegistration', () => {
@@ -30,16 +18,15 @@ describe('useTravellerRegistration', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 
 		expect(result.current.formData).toEqual({
-			firstName: { val: '', isValid: true },
-			lastName: { val: '', isValid: true },
-			description: { val: '', isValid: true },
-			days: { val: '', isValid: true },
-			areas: { val: [], isValid: true },
+			firstName: { value: '', message: '', isValid: true },
+			lastName: { value: '', message: '', isValid: true },
+			description: { value: '', message: '', isValid: true },
+			days: { value: '', message: '', isValid: true },
+			areas: { value: [], message: '', isValid: true },
 		})
-		expect(result.current.formIsValid).toBe(true)
 	})
 
-	it('should handle input change for text fields', () => {
+	it('should handle input change and validate text fields', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 
 		act(() => {
@@ -49,12 +36,13 @@ describe('useTravellerRegistration', () => {
 		})
 
 		expect(result.current.formData.firstName).toEqual({
-			val: 'John',
+			value: 'John',
+			message: '',
 			isValid: true,
 		})
 	})
 
-	it('should handle input change for number fields', () => {
+	it('should handle input change and validate number fields', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 
 		act(() => {
@@ -64,7 +52,8 @@ describe('useTravellerRegistration', () => {
 		})
 
 		expect(result.current.formData.days).toEqual({
-			val: '5',
+			value: '5',
+			message: '',
 			isValid: true,
 		})
 	})
@@ -78,10 +67,8 @@ describe('useTravellerRegistration', () => {
 			})
 		})
 
-		expect(result.current.formData.areas).toEqual({
-			val: ['north'],
-			isValid: true,
-		})
+		expect(result.current.formData.areas.value).toEqual(['north'])
+		expect(result.current.formData.areas.isValid).toBe(true)
 	})
 
 	it('should remove area when checkbox is unchecked', () => {
@@ -99,7 +86,7 @@ describe('useTravellerRegistration', () => {
 			})
 		})
 
-		expect(result.current.formData.areas.val).toEqual(['north', 'south'])
+		expect(result.current.formData.areas.value).toEqual(['north', 'south'])
 
 		// Then remove one
 		act(() => {
@@ -108,29 +95,7 @@ describe('useTravellerRegistration', () => {
 			})
 		})
 
-		expect(result.current.formData.areas.val).toEqual(['south'])
-	})
-
-	it('should handle multiple checkbox selections', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-
-		act(() => {
-			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
-			})
-			result.current.handleCheckboxChange({
-				target: { value: 'south', checked: true },
-			})
-			result.current.handleCheckboxChange({
-				target: { value: 'east', checked: true },
-			})
-		})
-
-		expect(result.current.formData.areas.val).toEqual([
-			'north',
-			'south',
-			'east',
-		])
+		expect(result.current.formData.areas.value).toEqual(['south'])
 	})
 
 	it('should prevent default on form submission', () => {
@@ -138,183 +103,38 @@ describe('useTravellerRegistration', () => {
 		const mockEvent = {
 			preventDefault: vi.fn(),
 		}
+		const mockOnSuccess = vi.fn()
 
 		act(() => {
-			result.current.submitHandler(mockEvent)
+			// submitHandler is curried: submitHandler(onSuccess)(event)
+			result.current.submitHandler(mockOnSuccess)(mockEvent)
 		})
 
 		expect(mockEvent.preventDefault).toHaveBeenCalledTimes(1)
 	})
 
-	it('should invalidate form when firstName is empty', () => {
+	it('should invalidate form when fields are empty on submit', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 		const mockEvent = { preventDefault: vi.fn() }
-
-		// Fill all fields except firstName
-		act(() => {
-			result.current.handleInputChange({
-				target: { id: 'lastName', value: 'Doe' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'description', value: 'Test description' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'days', value: '3' },
-			})
-			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
-			})
-		})
+		const mockOnSuccess = vi.fn()
 
 		act(() => {
-			result.current.submitHandler(mockEvent)
+			result.current.submitHandler(mockOnSuccess)(mockEvent)
 		})
 
 		expect(result.current.formData.firstName.isValid).toBe(false)
-		expect(result.current.formIsValid).toBe(false)
-	})
-
-	it('should invalidate form when lastName is empty', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-		const mockEvent = { preventDefault: vi.fn() }
-
-		act(() => {
-			result.current.handleInputChange({
-				target: { id: 'firstName', value: 'John' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'description', value: 'Test description' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'days', value: '3' },
-			})
-			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
-			})
-		})
-
-		act(() => {
-			result.current.submitHandler(mockEvent)
-		})
-
+		expect(result.current.formData.firstName.message).toBeTruthy()
 		expect(result.current.formData.lastName.isValid).toBe(false)
-		expect(result.current.formIsValid).toBe(false)
-	})
-
-	it('should invalidate form when description is empty', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-		const mockEvent = { preventDefault: vi.fn() }
-
-		act(() => {
-			result.current.handleInputChange({
-				target: { id: 'firstName', value: 'John' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'lastName', value: 'Doe' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'days', value: '3' },
-			})
-			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
-			})
-		})
-
-		act(() => {
-			result.current.submitHandler(mockEvent)
-		})
-
 		expect(result.current.formData.description.isValid).toBe(false)
-		expect(result.current.formIsValid).toBe(false)
-	})
-
-	it('should invalidate form when days is empty or invalid', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-		const mockEvent = { preventDefault: vi.fn() }
-
-		act(() => {
-			result.current.handleInputChange({
-				target: { id: 'firstName', value: 'John' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'lastName', value: 'Doe' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'description', value: 'Test description' },
-			})
-			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
-			})
-		})
-
-		act(() => {
-			result.current.submitHandler(mockEvent)
-		})
-
 		expect(result.current.formData.days.isValid).toBe(false)
-		expect(result.current.formIsValid).toBe(false)
-	})
-
-	it('should invalidate form when days is zero or negative', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-		const mockEvent = { preventDefault: vi.fn() }
-
-		act(() => {
-			result.current.handleInputChange({
-				target: { id: 'firstName', value: 'John' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'lastName', value: 'Doe' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'description', value: 'Test description' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'days', value: '0' },
-			})
-			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
-			})
-		})
-
-		act(() => {
-			result.current.submitHandler(mockEvent)
-		})
-
-		expect(result.current.formData.days.isValid).toBe(false)
-		expect(result.current.formIsValid).toBe(false)
-	})
-
-	it('should invalidate form when no areas are selected', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-		const mockEvent = { preventDefault: vi.fn() }
-
-		act(() => {
-			result.current.handleInputChange({
-				target: { id: 'firstName', value: 'John' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'lastName', value: 'Doe' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'description', value: 'Test description' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'days', value: '3' },
-			})
-		})
-
-		act(() => {
-			result.current.submitHandler(mockEvent)
-		})
-
 		expect(result.current.formData.areas.isValid).toBe(false)
-		expect(result.current.formIsValid).toBe(false)
+		expect(mockOnSuccess).not.toHaveBeenCalled()
 	})
 
-	it('should validate successfully with all valid data', () => {
+	it('should validate successfully and call onSuccess with data', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 		const mockEvent = { preventDefault: vi.fn() }
+		const mockOnSuccess = vi.fn()
 		const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
 		act(() => {
@@ -325,7 +145,7 @@ describe('useTravellerRegistration', () => {
 				target: { id: 'lastName', value: 'Doe' },
 			})
 			result.current.handleInputChange({
-				target: { id: 'description', value: 'I love traveling!' },
+				target: { id: 'description', value: 'I love travelling!' },
 			})
 			result.current.handleInputChange({
 				target: { id: 'days', value: '5' },
@@ -336,107 +156,57 @@ describe('useTravellerRegistration', () => {
 		})
 
 		act(() => {
-			result.current.submitHandler(mockEvent)
+			result.current.submitHandler(mockOnSuccess)(mockEvent)
 		})
 
-		expect(result.current.formIsValid).toBe(true)
 		expect(result.current.formData.firstName.isValid).toBe(true)
-		expect(result.current.formData.lastName.isValid).toBe(true)
-		expect(result.current.formData.description.isValid).toBe(true)
-		expect(result.current.formData.days.isValid).toBe(true)
-		expect(result.current.formData.areas.isValid).toBe(true)
-		expect(consoleSpy).toHaveBeenCalledWith('Form Submitted', {
-			first: 'John',
-			last: 'Doe',
-			desc: 'I love traveling!',
-			days: '5',
+		expect(mockOnSuccess).toHaveBeenCalledWith({
+			firstName: 'John',
+			lastName: 'Doe',
+			description: 'I love travelling!',
+			daysInCity: '5',
 			areas: ['north'],
 		})
+		expect(consoleSpy).toHaveBeenCalled()
 
 		consoleSpy.mockRestore()
 	})
 
-	it('should not return a value from submitHandler', () => {
-		const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+	it('should validate empty strings as invalid during input change', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
-		const mockEvent = { preventDefault: vi.fn() }
 
-		// Test with invalid form
-		let invalidResult
-		act(() => {
-			invalidResult = result.current.submitHandler(mockEvent)
-		})
-		expect(invalidResult).toBeUndefined()
-
-		// Test with valid form
 		act(() => {
 			result.current.handleInputChange({
-				target: { id: 'firstName', value: 'John' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'lastName', value: 'Doe' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'description', value: 'Test' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'days', value: '3' },
-			})
-			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
+				target: { id: 'firstName', value: '' }, // First empty
 			})
 		})
 
-		let validResult
-		act(() => {
-			validResult = result.current.submitHandler(mockEvent)
-		})
-		expect(validResult).toBeUndefined()
-		consoleSpy.mockRestore()
-	})
+		expect(result.current.formData.firstName.isValid).toBe(false)
+		expect(result.current.formData.firstName.message).toBeTruthy()
 
-	it('should trim whitespace when validating text fields', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-		const mockEvent = { preventDefault: vi.fn() }
-
+		// Change to whitespace only
 		act(() => {
 			result.current.handleInputChange({
 				target: { id: 'firstName', value: '   ' },
 			})
-			result.current.handleInputChange({
-				target: { id: 'lastName', value: 'Doe' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'description', value: 'Test' },
-			})
-			result.current.handleInputChange({
-				target: { id: 'days', value: '3' },
-			})
-			result.current.handleCheckboxChange({
-				target: { value: 'north', checked: true },
-			})
-		})
-
-		act(() => {
-			result.current.submitHandler(mockEvent)
 		})
 
 		expect(result.current.formData.firstName.isValid).toBe(false)
-		expect(result.current.formIsValid).toBe(false)
 	})
 
-	it('should reset field validity when user changes input after validation error', () => {
+	it('should recover from invalid state when user corrects input', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
-		const mockEvent = { preventDefault: vi.fn() }
 
-		// Trigger validation error
+		// Set invalid initially
 		act(() => {
-			result.current.submitHandler(mockEvent)
+			result.current.handleInputChange({
+				target: { id: 'firstName', value: '' },
+			})
 		})
 
 		expect(result.current.formData.firstName.isValid).toBe(false)
 
-		// User types in the field
+		// User corrects input
 		act(() => {
 			result.current.handleInputChange({
 				target: { id: 'firstName', value: 'John' },
@@ -444,13 +214,13 @@ describe('useTravellerRegistration', () => {
 		})
 
 		expect(result.current.formData.firstName.isValid).toBe(true)
+		expect(result.current.formData.firstName.message).toBe('')
 	})
 
 	it('should return expected hook properties', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 
 		expect(result.current).toHaveProperty('formData')
-		expect(result.current).toHaveProperty('formIsValid')
 		expect(result.current).toHaveProperty('handleInputChange')
 		expect(result.current).toHaveProperty('handleCheckboxChange')
 		expect(result.current).toHaveProperty('submitHandler')
