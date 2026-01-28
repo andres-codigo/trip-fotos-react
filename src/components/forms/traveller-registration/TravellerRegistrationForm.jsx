@@ -8,6 +8,7 @@ import Textarea from '@/components/ui/form/textarea/Textarea'
 import Checkbox from '@/components/ui/form/checkbox/Checkbox'
 import BaseButton from '@/components/ui/button/BaseButton'
 
+import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
 import { useTravellerRegistration } from './hooks/useTravellerRegistration'
 
 import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'
@@ -76,30 +77,20 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			<div
 				className={`${travellerRegistrationFormStyles.formControl} ${!formData.firstName.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
 				<Input {...getInputProps('firstName')} />
-				{!formData.firstName.isValid && formData.firstName.message && (
-					<span
-						id="first-name-error"
-						role="alert"
-						className={
-							travellerRegistrationFormStyles.visuallyHidden
-						}>
-						{formData.firstName.message}
-					</span>
+				{renderVisuallyHiddenError(
+					formData.firstName,
+					'first-name-error',
+					travellerRegistrationFormStyles.visuallyHidden,
 				)}
 			</div>
 
 			<div
 				className={`${travellerRegistrationFormStyles.formControl} ${!formData.lastName.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
 				<Input {...getInputProps('lastName')} />
-				{!formData.lastName.isValid && formData.lastName.message && (
-					<span
-						id="last-name-error"
-						role="alert"
-						className={
-							travellerRegistrationFormStyles.visuallyHidden
-						}>
-						{formData.lastName.message}
-					</span>
+				{renderVisuallyHiddenError(
+					formData.lastName,
+					'last-name-error',
+					travellerRegistrationFormStyles.visuallyHidden,
 				)}
 			</div>
 
@@ -109,17 +100,11 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 					rows={5}
 					{...getInputProps('description')}
 				/>
-				{!formData.description.isValid &&
-					formData.description.message && (
-						<span
-							id="description-error"
-							role="alert"
-							className={
-								travellerRegistrationFormStyles.visuallyHidden
-							}>
-							{formData.description.message}
-						</span>
-					)}
+				{renderVisuallyHiddenError(
+					formData.description,
+					'description-error',
+					travellerRegistrationFormStyles.visuallyHidden,
+				)}
 			</div>
 
 			<div
@@ -128,15 +113,10 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 					type="number"
 					{...getInputProps('days')}
 				/>
-				{!formData.days.isValid && formData.days.message && (
-					<span
-						id="days-error"
-						role="alert"
-						className={
-							travellerRegistrationFormStyles.visuallyHidden
-						}>
-						{formData.days.message}
-					</span>
+				{renderVisuallyHiddenError(
+					formData.days,
+					'days-error',
+					travellerRegistrationFormStyles.visuallyHidden,
 				)}
 			</div>
 
@@ -177,12 +157,11 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 							role="alert">
 							{formData.areas.message}
 						</p>
-						<span
-							className={
-								travellerRegistrationFormStyles.visuallyHidden
-							}>
-							{formData.areas.message}
-						</span>
+						{renderVisuallyHiddenError(
+							formData.areas,
+							'areas-error-hidden',
+							travellerRegistrationFormStyles.visuallyHidden,
+						)}
 					</>
 				)}
 			</fieldset>
