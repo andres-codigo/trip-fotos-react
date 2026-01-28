@@ -1,5 +1,5 @@
 @use '@/styles/setup/variables' as variables;
-@use '@/styles/setup/mixins/mixins' as mixins;
+@use '@/styles/setup/mixins/helpers' as helpers;
 
 a.navMenuButtonLink {
 	.totalMessagesContainer {
@@ -16,7 +16,7 @@ a.navMenuButtonLink {
 		top: 0rem;
 		width: var(--size);
 
-		@include mixins.fadeIn(ease, 2s, 1, forwards);
+		@include helpers.fadeIn(ease, 2s, 1, forwards);
 
 		.totalMessages {
 			display: inline-block;
@@ -89,7 +89,7 @@ a.navMenuButtonLink {
 			border: none;
 			border-radius: var(--size);
 
-			@include mixins.fadeIn(ease, 2s, 1, forwards);
+			@include helpers.fadeIn(ease, 2s, 1, forwards);
 
 			.totalMessages {
 				bottom: 0.0625rem;

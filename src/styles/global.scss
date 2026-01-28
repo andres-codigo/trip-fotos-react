@@ -4,8 +4,8 @@
 // main styles
 @forward '@/styles/setup/main';
 
-// mixins
-@forward '@/styles/setup/mixins/mixins';
+// helper mixins
+@forward '@/styles/setup/mixins/helpers';
 
 // form valid state mixins
 @forward '@/styles/setup/mixins/form/valid/valid';

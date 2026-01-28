@@ -1,5 +1,5 @@
 @use '@/styles/setup/variables' as variables;
-@use '@/styles/setup/mixins/mixins' as mixins;
+@use '@/styles/setup/mixins/helpers' as helpers;
 
 @mixin label() {
 	label {
@@ -62,7 +62,7 @@
 			line-height: 1.25rem;
 			padding-left: 1.875rem;
 			position: relative;
-			@include mixins.user-select(none);
+			@include helpers.user-select(none);
 
 			// Checkbox
 			&::before {

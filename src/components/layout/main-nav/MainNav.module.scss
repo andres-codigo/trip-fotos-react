@@ -1,9 +1,9 @@
 @use '@/styles/setup/variables' as variables;
-@use '@/styles/setup/mixins/mixins' as mixins;
+@use '@/styles/setup/mixins/helpers' as helpers;
 
 .navbar {
 	.navMenuItemsContainer {
-		@include mixins.flex-center;
+		@include helpers.flex-center;
 		justify-content: space-between;
 		margin: 0;
 		padding: 0;
@@ -14,7 +14,7 @@
 	}
 
 	.navMenuItem ul {
-		@include mixins.flex-center;
+		@include helpers.flex-center;
 		margin: 0;
 		padding: 0;
 	}
@@ -40,7 +40,7 @@
 		height: 0.1875rem;
 		margin: 0.3125rem auto;
 		width: 1.5625rem;
-		@include mixins.transition(background-color, 0.3s, ease-in-out);
+		@include helpers.transition(background-color, 0.3s, ease-in-out);
 	}
 }
 
