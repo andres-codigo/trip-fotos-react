@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 
 import { TRAVELLER_REGISTRATION_AREAS } from '@/constants/travellers/registration'
 import { ACCESSIBILITY } from '@/constants/ui'
-import { VALIDATION_MESSAGES } from '@/constants/validation/messages'
 
 import Input from '@/components/ui/form/input/Input'
 import Textarea from '@/components/ui/form/textarea/Textarea'
@@ -21,13 +20,14 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 	const LAST_NAME = 'lastName'
 	const DESCRIPTION = 'description'
 	const DAYS = 'days'
-	// const AREAS = 'areas'
+	const AREAS = 'areas'
 
 	const fieldConfig = {
 		[FIRST_NAME]: { label: 'First name', testId: 'first-name-input' },
 		[LAST_NAME]: { label: 'Last name', testId: 'last-name-input' },
 		[DESCRIPTION]: { label: 'Description', testId: 'description-input' },
 		[DAYS]: { label: 'Days', testId: 'days-input' },
+		[AREAS]: { label: 'Areas', testId: 'areas-input' },
 	}
 
 	const getInputProps = (field) => {
@@ -158,24 +158,32 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 							travellerRegistrationFormStyles.checkboxGroup
 						}>
 						<Checkbox
+							{...getInputProps(AREAS)}
 							id={area.id}
 							label={area.label}
 							value={area.id}
 							checked={formData.areas.value.includes(area.id)}
 							onChange={handleCheckboxChange}
+							isArrayItem={true}
+							showRequiredMark={false}
 							data-cy={`checkbox-${area.id}`}
 						/>
 					</div>
 				))}
-				{!formData.areas.isValid && (
-					<span
-						id="areas-error"
-						role="alert"
-						className={
-							travellerRegistrationFormStyles.visuallyHidden
-						}>
-						{VALIDATION_MESSAGES.CITIES_REQUIRED}
-					</span>
+				{!formData.areas.isValid && formData.areas.message && (
+					<>
+						<p
+							id="areas-error"
+							role="alert">
+							{formData.areas.message}
+						</p>
+						<span
+							className={
+								travellerRegistrationFormStyles.visuallyHidden
+							}>
+							{formData.areas.message}
+						</span>
+					</>
 				)}
 			</fieldset>
 
