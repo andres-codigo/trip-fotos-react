@@ -31,9 +31,9 @@ describe('Register Page', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).should(
 			'be.visible',
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO).should(
-			'be.visible',
-		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO)
+			.parent()
+			.should('be.visible')
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).should(
 			'be.visible',
 		)
