@@ -67,7 +67,7 @@ export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	CHECKBOX_PRAGUE: getByDataCy('checkbox-prague'),
 	CHECKBOX_SYDNEY: getByDataCy('checkbox-sydney'),
 	CHECKBOX_CANBERRA: getByDataCy('checkbox-canberra'),
-	SUBMIT_BUTTON: getByDataCy('submit-button'),
+	REGISTER_BUTTON: getByDataCy('register-button'),
 }
 
 /////

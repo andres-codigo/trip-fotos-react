@@ -34,13 +34,13 @@ describe('Register Page', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO).should(
 			'be.visible',
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.SUBMIT_BUTTON).should(
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).should(
 			'be.visible',
 		)
 	})
 
 	it('shows validation errors on empty submit', () => {
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.SUBMIT_BUTTON).click()
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
 		cy.contains(VALIDATION_MESSAGES.FIRST_NAME_REQUIRED).should(
 			'be.visible',
 		)
