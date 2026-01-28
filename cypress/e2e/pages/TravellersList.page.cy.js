@@ -49,7 +49,7 @@ describe('Travellers Page - WIP', () => {
 			)
 		})
 
-		// TOOO: Update when traveller user is available
+		// TODO: Update when traveller user is available
 		// it('should not show register button when user is logged in and is a traveller', () => {})
 
 		it('should navigate to register page when register button is clicked', () => {
