@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { TEST_IDS } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
@@ -13,7 +13,12 @@ import registerStyles from '../register.module.scss'
 vi.mock(
 	'@/components/forms/traveller-registration/TravellerRegistrationForm',
 	() => ({
-		default: () => <div data-cy="traveller-registration-form" />,
+		default: ({ isLoading }) => (
+			<div
+				data-cy="traveller-registration-form"
+				data-loading={isLoading ? 'true' : 'false'}
+			/>
+		),
 	}),
 )
 
@@ -22,14 +27,14 @@ vi.mock(
  *
  * Test Strategy:
  * - Focuses on rendering logic and correct application of CSS classes
- * - Verifies that the main container and heading are rendered as expected
+ * - Verifies that the main container is rendered as expected
  * - Ensures the <main> element has both global and module-specific classes
- * - Checks that the <h1> displays the correct text
- * - Uses isolated rendering to avoid external dependencies
+ * - Checks that the BaseCard component is rendered
+ * - Checks that the TravellerRegistrationForm is rendered with correct props
  */
 
 describe('Register', () => {
-	afterEach(() => {
+	beforeEach(() => {
 		vi.clearAllMocks()
 	})
 
@@ -62,13 +67,27 @@ describe('Register', () => {
 			)
 		})
 
-		it('renders the TravellerRegistrationForm', () => {
-			const { container } = render(<Register />)
+		it('renders the BaseCard component', () => {
+			render(<Register />)
+			expect(screen.getByTestId(TEST_IDS.BASE_CARD)).toBeInTheDocument()
+		})
+
+		it('renders the TravellerRegistrationForm within BaseCard', () => {
+			render(<Register />)
+
+			const baseCard = screen.getByTestId(TEST_IDS.BASE_CARD)
 			expect(
-				container.querySelector(
+				baseCard.querySelector(
 					TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM,
 				),
 			).toBeInTheDocument()
+		})
+
+		it('passes correct props to TravellerRegistrationForm', () => {
+			render(<Register />)
+
+			const form = screen.getByTestId('traveller-registration-form')
+			expect(form).toHaveAttribute('data-loading', 'false')
 		})
 	})
 })
