@@ -11,6 +11,8 @@ const Checkbox = ({
 	value,
 	disabled = false,
 	required = false,
+	isArrayItem = false,
+	showRequiredMark = false,
 	className = '',
 	isValid = true,
 	message = '',
@@ -41,10 +43,12 @@ const Checkbox = ({
 			{label && (
 				<label htmlFor={id}>
 					{label}
-					{required && <span className="input-required">*</span>}
+					{!isArrayItem && (showRequiredMark || required) && (
+						<span className="input-required">*</span>
+					)}
 				</label>
 			)}
-			{!isValid && message && (
+			{!isArrayItem && !isValid && message && (
 				<p
 					id={`${id}-error`}
 					role="alert"
@@ -68,8 +72,10 @@ Checkbox.propTypes = {
 	className: PropTypes.string,
 	isValid: PropTypes.bool,
 	message: PropTypes.string,
+	showRequiredMark: PropTypes.bool,
 	'data-cy': PropTypes.string,
 	'data-cy-error': PropTypes.string,
+	isArrayItem: PropTypes.bool,
 }
 
 export default Checkbox

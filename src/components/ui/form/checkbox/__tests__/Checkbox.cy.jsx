@@ -45,6 +45,64 @@ describe('<Checkbox />', () => {
 		cy.get('@onChangeSpy').should('have.been.called')
 	})
 
+	it('calls onChange when label is clicked', () => {
+		const onChangeSpy = cy.spy().as('onChangeSpy')
+		cy.mount(
+			<Checkbox
+				id={CHECKBOX.ID}
+				label="Test Checkbox"
+				checked={false}
+				onChange={onChangeSpy}
+				data-cy={CHECKBOX.ID}
+			/>,
+		)
+		cy.get('label').click()
+		cy.get('@onChangeSpy').should('have.been.called')
+	})
+
+	it('displays required mark when required is true', () => {
+		cy.mount(
+			<Checkbox
+				id={CHECKBOX.ID}
+				label="Test Checkbox"
+				checked={false}
+				onChange={() => {}}
+				required={true}
+				data-cy={CHECKBOX.ID}
+			/>,
+		)
+		cy.get('.input-required').should('exist').and('contain', '*')
+	})
+
+	it('displays required mark when showRequiredMark is true', () => {
+		cy.mount(
+			<Checkbox
+				id={CHECKBOX.ID}
+				label="Test Checkbox"
+				checked={false}
+				onChange={() => {}}
+				showRequiredMark={true}
+				data-cy={CHECKBOX.ID}
+			/>,
+		)
+		cy.get('.input-required').should('exist').and('contain', '*')
+	})
+
+	it('does not display required mark when isArrayItem is true', () => {
+		cy.mount(
+			<Checkbox
+				id={CHECKBOX.ID}
+				label="Test Checkbox"
+				checked={false}
+				onChange={() => {}}
+				required={true}
+				isArrayItem={true}
+				data-cy={CHECKBOX.ID}
+			/>,
+		)
+		cy.get('.input-required').should('not.exist')
+	})
+
 	it('displays error message when invalid', () => {
 		cy.mount(
 			<Checkbox
