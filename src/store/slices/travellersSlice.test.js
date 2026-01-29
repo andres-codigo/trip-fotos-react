@@ -9,8 +9,10 @@ import {
 } from '@/constants/test'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { API_ERROR_MESSAGE } from '@/constants/api'
 
 import travellersReducer, {
+	registerTraveller,
 	travellerName,
 	setTravellerName,
 	selectShouldUpdate,
@@ -27,6 +29,26 @@ import travellersReducer, {
 import { handleApiError } from '@/utils/errorHandler'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
+
+// Mock Firebase Storage
+vi.mock('firebase/storage', () => ({
+	getStorage: vi.fn(),
+	ref: vi.fn(),
+	uploadBytesResumable: vi.fn(() => ({
+		on: vi.fn((event, progress, error, complete) => {
+			complete()
+		}),
+		snapshot: { ref: 'mock-ref' },
+	})),
+	getDownloadURL: vi.fn(() =>
+		Promise.resolve('https://mock-url.com/image.jpg'),
+	),
+}))
+
+// Mock image compression
+vi.mock('browser-image-compression', () => ({
+	default: vi.fn((file) => Promise.resolve(file)),
+}))
 
 /**
  * travellersSlice Unit Tests
@@ -173,7 +195,7 @@ describe('travellersSlice', () => {
 
 					expect(handleApiError).toHaveBeenCalledWith(
 						mockError,
-						ERROR_MESSAGES.ERROR_UPDATING_TRAVELLER +
+						API_ERROR_MESSAGE.UPDATE_TRAVELLER_CATCH +
 							MOCK_USER.FULL_NAME,
 					)
 				})
@@ -344,6 +366,109 @@ describe('travellersSlice', () => {
 				const result = await store.dispatch(updateTravellers())
 
 				expect(result.payload).toBe(ERROR_MESSAGES.UNEXPECTED_ERROR)
+			})
+		})
+	})
+
+	describe('registerTraveller', () => {
+		const mockRegistrationData = {
+			firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+			lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
+			description: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description,
+			daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity,
+			cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
+			files: [{ name: 'test.jpg', file: new Blob() }],
+		}
+
+		beforeEach(() => {
+			localStorage.getItem.mockReturnValue(MOCK_USER.USER_ID)
+		})
+
+		afterEach(() => {
+			localStorage.getItem.mockReset()
+		})
+
+		describe('success scenarios', () => {
+			it('should upload images and register traveller successfully', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				// Verify successful registration
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(result.payload).toMatchObject({
+					id: MOCK_USER.USER_ID,
+					firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+					lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
+					description:
+						MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description,
+					daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity,
+					cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
+					files: ['https://mock-url.com/image.jpg'],
+				})
+
+				// Verify state updates
+				const state = store.getState().travellers
+				expect(state.isTraveller).toBe(true)
+				expect(state.hasTravellers).toBe(true)
+				expect(state.travellerName).toBe(
+					`${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`,
+				)
+				expect(state.travellers).toContainEqual(
+					expect.objectContaining({
+						id: MOCK_USER.USER_ID,
+						firstName:
+							MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+					}),
+				)
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('should return error message when API response is not ok', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: false,
+				})
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(handleApiError).toHaveBeenCalledWith(
+					expect.any(Error),
+					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
+				)
+
+				const state = store.getState().travellers
+				expect(state.status).toBe('failed')
+				expect(state.isTraveller).toBe(false)
+				expect(state.travellers).toEqual([])
+			})
+
+			it('should call handleApiError on network error', async () => {
+				const mockError = new Error(ERROR_MESSAGES.NETWORK_ERROR)
+				fetch.mockRejectedValueOnce(mockError)
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(handleApiError).toHaveBeenCalledWith(
+					mockError,
+					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
+				)
+
+				const state = store.getState().travellers
+				expect(state.status).toBe('failed')
+				expect(state.isTraveller).toBe(false)
+				expect(state.travellers).toEqual([])
 			})
 		})
 	})

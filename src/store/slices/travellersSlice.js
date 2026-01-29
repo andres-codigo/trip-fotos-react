@@ -1,4 +1,11 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
+import imageCompression from 'browser-image-compression'
+import {
+	getStorage,
+	getDownloadURL,
+	ref,
+	uploadBytesResumable,
+} from 'firebase/storage'
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import {
@@ -45,7 +52,7 @@ export const travellerName = createAsyncThunk(
 
 			if (!response.ok) {
 				return rejectWithValue(
-					`${API_ERROR_MESSAGE.UPDATE_TRAVELLER_NAME}${fullName}.`,
+					`${API_ERROR_MESSAGE.UPDATE_TRAVELLER_NAME_CATCH}${fullName}.`,
 				)
 			}
 
@@ -57,6 +64,117 @@ export const travellerName = createAsyncThunk(
 				handleApiError(
 					error,
 					`${API_ERROR_MESSAGE.UPDATE_TRAVELLER_NAME_CATCH}${fullName}`,
+				),
+			)
+		}
+	},
+)
+
+export const registerTraveller = createAsyncThunk(
+	TRAVELLERS_ACTION_TYPES.REGISTER_TRAVELLER,
+	async (data, { getState, rejectWithValue }) => {
+		const userId = localStorage.getItem('userId')
+		const token = selectAuthenticationToken(getState())
+
+		try {
+			const MAX_CONCURRENT_UPLOADS = 5
+			const imageQueue = [...(data.files || [])]
+			const imageUrls = []
+
+			const uploadImage = async (image) => {
+				const storage = getStorage()
+				const storageRef = ref(
+					storage,
+					`/images/${userId}/${image.name}`,
+				)
+
+				const metadata = {
+					customMetadata: {
+						userId: userId,
+					},
+				}
+
+				const compressedFile = await imageCompression(
+					image.file || image,
+					{
+						maxSizeMB: 1,
+						maxWidthOrHeight: 1920,
+						useWebWorker: true,
+					},
+				)
+
+				const uploadTask = uploadBytesResumable(
+					storageRef,
+					compressedFile,
+					metadata,
+				)
+
+				return new Promise((resolve, reject) => {
+					uploadTask.on(
+						'state_changed',
+						null,
+						() => {
+							reject(
+								new Error(
+									`Failed to upload image: ${image.name}`,
+								),
+							)
+						},
+						async () => {
+							const url = await getDownloadURL(
+								uploadTask.snapshot.ref,
+							)
+							resolve(url)
+						},
+					)
+				})
+			}
+
+			const uploadNextBatch = async () => {
+				const batch = imageQueue.splice(0, MAX_CONCURRENT_UPLOADS)
+				const batchPromises = batch.map(uploadImage)
+				const batchResults = await Promise.all(batchPromises)
+				imageUrls.push(...batchResults)
+			}
+
+			while (imageQueue.length > 0) {
+				await uploadNextBatch()
+			}
+
+			const travellerData = {
+				firstName: data.firstName,
+				lastName: data.lastName,
+				description: data.description,
+				daysInCity: data.daysInCity,
+				cities: data.cities,
+				files: imageUrls,
+				registered: new Date().toISOString(),
+			}
+
+			const response = await fetch(
+				`${API_DATABASE.BASE_URL}/travellers/${userId}.json?auth=${token}`,
+				{
+					method: API_DATABASE.PUT,
+					headers: COMMON_HEADERS.JSON,
+					body: JSON.stringify(travellerData),
+				},
+			)
+
+			if (!response.ok) {
+				throw new Error(
+					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${userId}.`,
+				)
+			}
+
+			return {
+				...travellerData,
+				id: userId,
+			}
+		} catch (error) {
+			return rejectWithValue(
+				handleApiError(
+					error,
+					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${userId}.`,
 				),
 			)
 		}
@@ -230,6 +348,22 @@ const travellersSlice = createSlice({
 				state.hasTravellers = action.payload.length > 0
 			})
 			.addCase(loadTravellers.rejected, (state, action) => {
+				state.status = 'failed'
+				state.error = action.payload
+			})
+
+			// REGISTER_TRAVELLER async thunk handlers
+			.addCase(registerTraveller.pending, (state) => {
+				state.status = 'loading'
+			})
+			.addCase(registerTraveller.fulfilled, (state, action) => {
+				state.status = 'succeeded'
+				state.travellers.unshift(action.payload)
+				state.isTraveller = true
+				state.hasTravellers = true
+				state.travellerName = `${action.payload.firstName} ${action.payload.lastName}`
+			})
+			.addCase(registerTraveller.rejected, (state, action) => {
 				state.status = 'failed'
 				state.error = action.payload
 			})
