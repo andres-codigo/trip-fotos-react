@@ -25,8 +25,7 @@ export const ERROR_MESSAGES = Object.freeze({
 	INVALID_PASSWORD: 'INVALID_PASSWORD',
 
 	// Traveller-specific errors
-	ERROR_UPDATING_TRAVELLER: 'An error occurred while updating traveller ',
-	FAILED_TO_UPDATE_TRAVELLER: 'Failed to update traveller ',
+	FAILED_TO_REGISTER_TRAVELLER: 'Failed to register traveller ',
 
 	// Default fallback
 	UNKNOWN_ERROR: 'An unknown error occurred.',

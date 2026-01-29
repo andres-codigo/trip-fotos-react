@@ -3,6 +3,7 @@ const TRAVELLERS_BASE_ACTIONS = Object.freeze({
 	TRAVELLER_NAME: 'travellers/travellerName',
 	LOAD_TRAVELLERS: 'travellers/loadTravellers',
 	UPDATE_TRAVELLERS: 'travellers/updateTravellers',
+	REGISTER_TRAVELLER: 'travellers/registerTraveller',
 })
 
 const AUTHENTICATION_BASE_ACTIONS = Object.freeze({
