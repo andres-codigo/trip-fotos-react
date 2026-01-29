@@ -3,11 +3,18 @@ import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../src/constants/te
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation/messages'
 
-const registerUrl = BASE_URL_CYPRESS + PATHS.REGISTER
+import { performLogin } from '../../support/utils/authHelpers'
+import { navigateToRegisterPage } from '../../support/utils/navigationHelpers'
+
+const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 
 describe('Register Page', () => {
 	beforeEach(() => {
-		cy.visit(registerUrl)
+		cy.visit(loginUrl)
+		performLogin()
+		cy.visit(PATHS.TRAVELLERS)
+
+		navigateToRegisterPage()
 	})
 
 	it('renders the register page container', () => {
