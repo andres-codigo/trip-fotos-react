@@ -8,7 +8,7 @@ export const useTravellerRegistration = () => {
 		lastName: { value: '', message: '', isValid: true },
 		description: { value: '', message: '', isValid: true },
 		days: { value: '', message: '', isValid: true },
-		areas: { value: [], message: '', isValid: true },
+		cities: { value: [], message: '', isValid: true },
 	})
 
 	const validateField = (id, value) => {
@@ -27,7 +27,7 @@ export const useTravellerRegistration = () => {
 		} else if (id === 'days' && (!value || Number(value) <= 0)) {
 			isValid = false
 			message = VALIDATION_MESSAGES.DAYS_REQUIRED
-		} else if (id === 'areas' && value.length === 0) {
+		} else if (id === 'cities' && value.length === 0) {
 			isValid = false
 			message = VALIDATION_MESSAGES.CITIES_REQUIRED
 		}
@@ -48,20 +48,20 @@ export const useTravellerRegistration = () => {
 	const handleCheckboxChange = (e) => {
 		const { value, checked } = e.target
 		setFormData((prev) => {
-			const currentAreas = prev.areas.value
-			let newAreas
+			const currentCities = prev.cities.value
+			let newCities
 			if (checked) {
-				newAreas = [...currentAreas, value]
+				newCities = [...currentCities, value]
 			} else {
-				newAreas = currentAreas.filter((area) => area !== value)
+				newCities = currentCities.filter((city) => city !== value)
 			}
 
-			const isValid = newAreas.length > 0
+			const isValid = newCities.length > 0
 			const message = isValid ? '' : VALIDATION_MESSAGES.CITIES_REQUIRED
 
 			return {
 				...prev,
-				areas: { ...prev.areas, value: newAreas, isValid, message },
+				cities: { ...prev.cities, value: newCities, isValid, message },
 			}
 		})
 	}
@@ -97,7 +97,7 @@ export const useTravellerRegistration = () => {
 			lastName: formData.lastName.value,
 			description: formData.description.value,
 			daysInCity: formData.days.value,
-			areas: formData.areas.value,
+			cities: formData.cities.value,
 			// files: [], // TODO: Implement file upload
 		}
 		console.log('Form Submitted', dataToSubmit)

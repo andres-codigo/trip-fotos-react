@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 
-import { TRAVELLER_REGISTRATION_AREAS } from '@/constants/travellers/registration'
+import { TRAVELLER_REGISTRATION_CITIES } from '@/constants/travellers/registration'
 import { ACCESSIBILITY } from '@/constants/ui'
 
 import Input from '@/components/ui/form/input/Input'
@@ -21,14 +21,14 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 	const LAST_NAME = 'lastName'
 	const DESCRIPTION = 'description'
 	const DAYS = 'days'
-	const AREAS = 'areas'
+	const CITIES = 'cities'
 
 	const fieldConfig = {
 		[FIRST_NAME]: { label: 'First name', testId: 'first-name-input' },
 		[LAST_NAME]: { label: 'Last name', testId: 'last-name-input' },
 		[DESCRIPTION]: { label: 'Description', testId: 'description-input' },
 		[DAYS]: { label: 'Days', testId: 'days-input' },
-		[AREAS]: { label: 'Areas', testId: 'areas-input' },
+		[CITIES]: { label: 'Cities', testId: 'cities-input' },
 	}
 
 	const getInputProps = (field) => {
@@ -121,7 +121,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			</div>
 
 			<fieldset
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.areas.isValid ? travellerRegistrationFormStyles.invalidForm : ''} ${travellerRegistrationFormStyles.fieldset}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData.cities.isValid ? travellerRegistrationFormStyles.invalidForm : ''} ${travellerRegistrationFormStyles.fieldset}`}>
 				<legend>
 					Cities visited{' '}
 					<span
@@ -131,35 +131,35 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 						*
 					</span>
 				</legend>
-				{TRAVELLER_REGISTRATION_AREAS.map((area) => (
+				{TRAVELLER_REGISTRATION_CITIES.map((city) => (
 					<div
-						key={area.id}
+						key={city.id}
 						className={
 							travellerRegistrationFormStyles.checkboxGroup
 						}>
 						<Checkbox
-							{...getInputProps(AREAS)}
-							id={area.id}
-							label={area.label}
-							value={area.id}
-							checked={formData.areas.value.includes(area.id)}
+							{...getInputProps(CITIES)}
+							id={city.id}
+							label={city.label}
+							value={city.id}
+							checked={formData.cities.value.includes(city.id)}
 							onChange={handleCheckboxChange}
 							isArrayItem={true}
 							showRequiredMark={false}
-							data-cy={`checkbox-${area.id}`}
+							data-cy={`checkbox-${city.id}`}
 						/>
 					</div>
 				))}
-				{!formData.areas.isValid && formData.areas.message && (
+				{!formData.cities.isValid && formData.cities.message && (
 					<>
 						<p
-							id="areas-error"
+							id="cities-error"
 							role="alert">
-							{formData.areas.message}
+							{formData.cities.message}
 						</p>
 						{renderVisuallyHiddenError(
-							formData.areas,
-							'areas-error-hidden',
+							formData.cities,
+							'cities-error-hidden',
 							travellerRegistrationFormStyles.visuallyHidden,
 						)}
 					</>

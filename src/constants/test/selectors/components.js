@@ -77,7 +77,7 @@ export const TRAVELLERS_LIST_SELECTORS = {
 	TRAVELLERS_LIST_CONTAINER: getByDataCy('travellers-list-container'),
 	TRAVELLERS_LIST: getByDataCy('travellers-list'),
 	TRAVELLER_ITEM: getByDataCy('traveller-item'),
-	REGISTER_BUTTON: getByDataCy('register-link'),
+	REGISTER_LINK: getByDataCy('register-link'),
 	CONTROLS: getByDataCy('controls'),
 }
 

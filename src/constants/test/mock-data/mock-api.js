@@ -16,7 +16,7 @@ export const MOCK_API_RESPONSES = {
 			lastName: 'Doe',
 			description: 'Test description',
 			daysInCity: 5,
-			areas: ['Area1'],
+			cities: ['City1'],
 			files: [],
 			registered: '2023-01-01',
 		},

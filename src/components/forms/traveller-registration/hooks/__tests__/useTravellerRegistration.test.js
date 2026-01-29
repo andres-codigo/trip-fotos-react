@@ -26,7 +26,7 @@ describe('useTravellerRegistration', () => {
 			lastName: { value: '', message: '', isValid: true },
 			description: { value: '', message: '', isValid: true },
 			days: { value: '', message: '', isValid: true },
-			areas: { value: [], message: '', isValid: true },
+			cities: { value: [], message: '', isValid: true },
 		})
 	})
 
@@ -68,47 +68,46 @@ describe('useTravellerRegistration', () => {
 		})
 	})
 
-	it('should add area when checkbox is checked', () => {
+	it('should add city when checkbox is checked', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
-		const area = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.areas[0]
+		const city = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities[0]
 
 		act(() => {
 			result.current.handleCheckboxChange({
-				target: { value: area, checked: true },
+				target: { value: city, checked: true },
 			})
 		})
 
-		expect(result.current.formData.areas.value).toEqual([area])
-		expect(result.current.formData.areas.isValid).toBe(true)
+		expect(result.current.formData.cities.value).toEqual([city])
+		expect(result.current.formData.cities.isValid).toBe(true)
 	})
 
-	it('should remove area when checkbox is unchecked', () => {
+	it('should remove city when checkbox is unchecked', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
-		const area1 = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.areas[0]
-		const area2 = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.areas[0]
+		const city1 = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities[0]
+		const city2 = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.cities[0]
 
-		// First add two areas
+		// First add two cities
 		act(() => {
 			result.current.handleCheckboxChange({
-				target: { value: area1, checked: true },
+				target: { value: city1, checked: true },
 			})
 		})
 		act(() => {
 			result.current.handleCheckboxChange({
-				target: { value: area2, checked: true },
+				target: { value: city2, checked: true },
 			})
 		})
 
-		expect(result.current.formData.areas.value).toEqual([area1, area2])
-
+		expect(result.current.formData.cities.value).toEqual([city1, city2])
 		// Then remove one
 		act(() => {
 			result.current.handleCheckboxChange({
-				target: { value: area1, checked: false },
+				target: { value: city1, checked: false },
 			})
 		})
 
-		expect(result.current.formData.areas.value).toEqual([area2])
+		expect(result.current.formData.cities.value).toEqual([city2])
 	})
 
 	it('should prevent default on form submission', () => {
@@ -142,7 +141,7 @@ describe('useTravellerRegistration', () => {
 		expect(result.current.formData.lastName.isValid).toBe(false)
 		expect(result.current.formData.description.isValid).toBe(false)
 		expect(result.current.formData.days.isValid).toBe(false)
-		expect(result.current.formData.areas.isValid).toBe(false)
+		expect(result.current.formData.cities.isValid).toBe(false)
 		expect(mockOnSuccess).not.toHaveBeenCalled()
 	})
 
@@ -152,7 +151,7 @@ describe('useTravellerRegistration', () => {
 		const mockOnSuccess = vi.fn()
 		const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-		const { firstName, lastName, description, daysInCity, areas } =
+		const { firstName, lastName, description, daysInCity, cities } =
 			MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE
 
 		act(() => {
@@ -169,7 +168,7 @@ describe('useTravellerRegistration', () => {
 				target: { id: 'days', value: daysInCity.toString() },
 			})
 			result.current.handleCheckboxChange({
-				target: { value: areas[0], checked: true },
+				target: { value: cities[0], checked: true },
 			})
 		})
 
@@ -183,7 +182,7 @@ describe('useTravellerRegistration', () => {
 			lastName,
 			description,
 			daysInCity: daysInCity.toString(),
-			areas,
+			cities: [cities[0]],
 		})
 		expect(consoleSpy).toHaveBeenCalled()
 

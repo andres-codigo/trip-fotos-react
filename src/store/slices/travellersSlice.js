@@ -104,7 +104,7 @@ export const updateTravellers = createAsyncThunk(
 				lastName: responseData[key].lastName,
 				description: responseData[key].description,
 				daysInCity: responseData[key].daysInCity,
-				areas: responseData[key].areas,
+				cities: responseData[key].cities,
 				files: responseData[key].files,
 				registered: responseData[key].registered,
 			}))
