@@ -1,6 +1,10 @@
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
-import { GLOBAL } from '@/constants/ui'
+import { registerTraveller } from '@/store/slices/travellersSlice'
+import { ERROR_MESSAGES } from '@/constants/errors'
+import { GLOBAL, PATHS } from '@/constants/ui'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 
@@ -12,14 +16,23 @@ import TravellerRegistrationForm from '@/components/forms/traveller-registration
 import registerStyles from './register.module.scss'
 
 const Register = () => {
-	const [isLoading] = useState(false)
+	const dispatch = useDispatch()
+	const navigate = useNavigate()
+	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState(false)
 
 	const handleError = () => setError(null)
 
-	const handleRegistrationSubmit = (formData) => {
-		console.log('Page received data:', formData)
-		// TODO: dispatch(registerUser(formData))
+	const handleRegistrationSubmit = async (formData) => {
+		setIsLoading(true)
+		try {
+			await dispatch(registerTraveller(formData)).unwrap()
+			navigate(PATHS.HOME)
+		} catch (error) {
+			setError(error || ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER)
+		} finally {
+			setIsLoading(false)
+		}
 	}
 
 	return (
