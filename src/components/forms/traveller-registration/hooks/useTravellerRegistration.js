@@ -98,10 +98,9 @@ export const useTravellerRegistration = () => {
 			description: formData.description.value,
 			daysInCity: formData.days.value,
 			cities: formData.cities.value,
-			// files: [], // TODO: Implement file upload
+			files: [], // TODO: Implement file upload
 		}
-		console.log('Form Submitted', dataToSubmit)
-		// TODO: Emit/Dispatch event
+
 		if (onSubmitSuccess) {
 			onSubmitSuccess(dataToSubmit)
 		}

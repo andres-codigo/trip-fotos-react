@@ -183,8 +183,8 @@ describe('useTravellerRegistration', () => {
 			description,
 			daysInCity: daysInCity.toString(),
 			cities: [cities[0]],
+			files: [],
 		})
-		expect(consoleSpy).toHaveBeenCalled()
 
 		consoleSpy.mockRestore()
 	})
