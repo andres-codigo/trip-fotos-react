@@ -8,6 +8,7 @@ import { registerTraveller } from '@/store/slices/travellersSlice'
 import { TEST_IDS } from '@/constants/test'
 import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '@/constants/test/selectors/components'
 import { GLOBAL, PATHS } from '@/constants/ui'
+import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
 import Register from '../Register'
 
@@ -166,7 +167,11 @@ describe('Register', () => {
 
 			// Should navigate after success
 			await waitFor(() => {
-				expect(mockNavigate).toHaveBeenCalledWith(PATHS.TRAVELLERS)
+				expect(mockNavigate).toHaveBeenCalledWith(PATHS.TRAVELLERS, {
+					state: {
+						alertMessage: TRAVELLER_REGISTRATION_SUCCESS_MESSAGE,
+					},
+				})
 			})
 
 			// Should set loading back to false

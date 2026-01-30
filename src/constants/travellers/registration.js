@@ -13,3 +13,6 @@ export const TRAVELLER_REGISTRATION_FIELDS = Object.freeze({
 	CITIES: 'cities',
 	FILES: 'files',
 })
+
+export const TRAVELLER_REGISTRATION_SUCCESS_MESSAGE =
+	'You have been successfully registered as a traveller!'

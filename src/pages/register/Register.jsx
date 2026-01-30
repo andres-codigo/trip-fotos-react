@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { registerTraveller } from '@/store/slices/travellersSlice'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { GLOBAL, PATHS } from '@/constants/ui'
+import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 
@@ -25,9 +26,16 @@ const Register = () => {
 
 	const handleRegistrationSubmit = async (formData) => {
 		setIsLoading(true)
+		setError(null)
+
 		try {
 			await dispatch(registerTraveller(formData)).unwrap()
-			navigate(PATHS.TRAVELLERS)
+
+			navigate(PATHS.TRAVELLERS, {
+				state: {
+					alertMessage: TRAVELLER_REGISTRATION_SUCCESS_MESSAGE,
+				},
+			})
 		} catch (error) {
 			setError(error || ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER)
 		} finally {

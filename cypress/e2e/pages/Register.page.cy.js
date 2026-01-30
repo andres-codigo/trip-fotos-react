@@ -2,9 +2,9 @@ import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation/messages'
+import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../../src/constants/travellers'
 
 import { performLogin } from '../../support/utils/authHelpers'
-import { navigateToRegisterPage } from '../../support/utils/navigationHelpers'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 
@@ -12,9 +12,7 @@ describe('Register Page', () => {
 	beforeEach(() => {
 		cy.visit(loginUrl)
 		performLogin()
-		cy.visit(PATHS.TRAVELLERS)
-
-		navigateToRegisterPage()
+		cy.visit(PATHS.REGISTER)
 	})
 
 	it('renders the register page container', () => {
@@ -57,5 +55,49 @@ describe('Register Page', () => {
 		)
 		cy.contains(VALIDATION_MESSAGES.DAYS_REQUIRED).should('be.visible')
 		cy.contains(VALIDATION_MESSAGES.CITIES_REQUIRED).should('be.visible')
+	})
+
+	it('successfully registers a traveller', () => {
+		// Intercept the registration API call
+		cy.intercept('PUT', '**/travellers/*.json?auth=*', {
+			statusCode: 200,
+			body: {
+				firstName: 'John',
+				lastName: 'Doe',
+				description: 'Traveller description',
+				daysInCity: '5',
+				cities: ['tokyo'],
+				registered: new Date().toISOString(),
+			},
+		}).as('registerTraveller')
+
+		// Fill in the form
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
+			'John',
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
+			'Doe',
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
+			'Traveller description',
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type('5')
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO).check({
+			force: true,
+		})
+
+		// Submit the form
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
+
+		// Wait for API call
+		cy.wait('@registerTraveller')
+
+		// Verify redirection to Travellers page
+		cy.url().should('include', PATHS.TRAVELLERS)
+
+		// Verify success alert message
+		cy.get('[role="alert"]')
+			.should('be.visible')
+			.and('contain', TRAVELLER_REGISTRATION_SUCCESS_MESSAGE)
 	})
 })
