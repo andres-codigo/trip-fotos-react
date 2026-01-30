@@ -3,6 +3,8 @@ import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../src/constants/te
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation/messages'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../../src/constants/travellers'
+import { API_DATABASE } from '../../../src/constants/api'
+import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-travellers'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
@@ -58,32 +60,36 @@ describe('Register Page', () => {
 	})
 
 	it('successfully registers a traveller', () => {
+		const { firstName, lastName, description, daysInCity, cities } =
+			MOCK_TRAVELLERS.NEW_TRAVELLER
+
 		// Intercept the registration API call
-		cy.intercept('PUT', '**/travellers/*.json?auth=*', {
+		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
 			statusCode: 200,
 			body: {
-				firstName: 'John',
-				lastName: 'Doe',
-				description: 'Traveller description',
-				daysInCity: '5',
-				cities: ['tokyo'],
+				...MOCK_TRAVELLERS.NEW_TRAVELLER,
 				registered: new Date().toISOString(),
 			},
 		}).as('registerTraveller')
 
 		// Fill in the form
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
-			'John',
+			firstName,
 		)
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
-			'Doe',
+			lastName,
 		)
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
-			'Traveller description',
+			description,
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type('5')
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO).check({
-			force: true,
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type(
+			daysInCity,
+		)
+
+		// Check the cities checkboxes
+		cities.forEach((city) => {
+			const checkboxSelector = `checkbox-${city}`
+			cy.get(`[data-cy="${checkboxSelector}"]`).siblings('label').click()
 		})
 
 		// Submit the form

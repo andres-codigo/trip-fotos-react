@@ -27,6 +27,14 @@ export const MOCK_TRAVELLERS = {
 		id: '1',
 		name: 'Test Traveller',
 	},
+	NEW_TRAVELLER: {
+		firstName: 'John',
+		lastName: 'Doe',
+		description: 'Traveller description',
+		daysInCity: '5',
+		cities: ['tokyo'],
+		files: [],
+	},
 	TEMP_TRAVELLER: { id: 'temp' },
 	TEST_NAME: 'Test Name',
 }
