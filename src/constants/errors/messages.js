@@ -1,7 +1,4 @@
 export const ERROR_MESSAGES = Object.freeze({
-	// Browser error messages
-	FAILED_TO_FETCH: 'Failed to fetch',
-
 	// Server/Network errors
 	SERVER_ERROR:
 		'The server is currently experiencing issues. Please try again later.',

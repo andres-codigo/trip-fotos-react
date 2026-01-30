@@ -348,7 +348,7 @@ describe('travellersSlice', () => {
 
 			it('should handle network errors with specific message', async () => {
 				const networkError = new TypeError(
-					ERROR_MESSAGES.FAILED_TO_FETCH,
+					API_ERROR_MESSAGE.FAILED_TO_FETCH,
 				)
 				fetch.mockRejectedValueOnce(networkError)
 

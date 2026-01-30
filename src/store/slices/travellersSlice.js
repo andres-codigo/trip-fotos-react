@@ -250,7 +250,7 @@ export const updateTravellers = createAsyncThunk(
 		} catch (error) {
 			if (
 				error.name === ERROR_TYPES.TYPE_ERROR &&
-				error.message.includes(ERROR_MESSAGES.FAILED_TO_FETCH)
+				error.message.includes(API_ERROR_MESSAGE.FAILED_TO_FETCH)
 			) {
 				return rejectWithValue(ERROR_MESSAGES.NETWORK_CONNECTION_ERROR)
 			}
