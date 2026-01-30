@@ -183,7 +183,7 @@ describe('travellersSlice', () => {
 				})
 
 				it('should call handleApiError on API error', async () => {
-					const mockError = new Error(ERROR_MESSAGES.NETWORK_ERROR)
+					const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
 					fetch.mockRejectedValueOnce(mockError)
 
 					await store.dispatch(
@@ -452,7 +452,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should call handleApiError on network error', async () => {
-				const mockError = new Error(ERROR_MESSAGES.NETWORK_ERROR)
+				const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
 				fetch.mockRejectedValueOnce(mockError)
 
 				const result = await store.dispatch(
@@ -585,7 +585,7 @@ describe('travellersSlice', () => {
 			it('should provide fallback message for short/generic errors', async () => {
 				// Mock updateTravellers to reject with a short error
 				global.fetch.mockRejectedValueOnce(
-					new Error(ERROR_MESSAGES.NETWORK_ERROR),
+					new Error(API_ERROR_MESSAGE.NETWORK_ERROR),
 				)
 
 				const result = await store.dispatch(
