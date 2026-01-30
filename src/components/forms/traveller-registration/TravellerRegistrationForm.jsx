@@ -1,6 +1,9 @@
 import PropTypes from 'prop-types'
 
-import { TRAVELLER_REGISTRATION_CITIES } from '@/constants/travellers/registration'
+import {
+	TRAVELLER_REGISTRATION_CITIES,
+	TRAVELLER_REGISTRATION_FIELDS,
+} from '@/constants/travellers/registration'
 import { ACCESSIBILITY } from '@/constants/ui'
 
 import Input from '@/components/ui/form/input/Input'
@@ -17,11 +20,8 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 	const { formData, handleInputChange, handleCheckboxChange, submitHandler } =
 		useTravellerRegistration()
 
-	const FIRST_NAME = 'firstName'
-	const LAST_NAME = 'lastName'
-	const DESCRIPTION = 'description'
-	const DAYS = 'days'
-	const CITIES = 'cities'
+	const { FIRST_NAME, LAST_NAME, DESCRIPTION, DAYS, CITIES } =
+		TRAVELLER_REGISTRATION_FIELDS
 
 	const fieldConfig = {
 		[FIRST_NAME]: { label: 'First name', testId: 'first-name-input' },
@@ -75,53 +75,53 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				{isLoading ? ACCESSIBILITY.ARIA_LIVE.POLITE.MESSAGE : ''}
 			</div>
 			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.firstName.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
-				<Input {...getInputProps('firstName')} />
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData[FIRST_NAME].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+				<Input {...getInputProps(FIRST_NAME)} />
 				{renderVisuallyHiddenError(
-					formData.firstName,
+					formData[FIRST_NAME],
 					'first-name-error',
 					travellerRegistrationFormStyles.visuallyHidden,
 				)}
 			</div>
 
 			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.lastName.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
-				<Input {...getInputProps('lastName')} />
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData[LAST_NAME].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+				<Input {...getInputProps(LAST_NAME)} />
 				{renderVisuallyHiddenError(
-					formData.lastName,
+					formData[LAST_NAME],
 					'last-name-error',
 					travellerRegistrationFormStyles.visuallyHidden,
 				)}
 			</div>
 
 			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.description.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData[DESCRIPTION].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
 				<Textarea
 					rows={5}
-					{...getInputProps('description')}
+					{...getInputProps(DESCRIPTION)}
 				/>
 				{renderVisuallyHiddenError(
-					formData.description,
+					formData[DESCRIPTION],
 					'description-error',
 					travellerRegistrationFormStyles.visuallyHidden,
 				)}
 			</div>
 
 			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.days.isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData[DAYS].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
 				<Input
 					type="number"
-					{...getInputProps('days')}
+					{...getInputProps(DAYS)}
 				/>
 				{renderVisuallyHiddenError(
-					formData.days,
+					formData[DAYS],
 					'days-error',
 					travellerRegistrationFormStyles.visuallyHidden,
 				)}
 			</div>
 
 			<fieldset
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData.cities.isValid ? travellerRegistrationFormStyles.invalidForm : ''} ${travellerRegistrationFormStyles.fieldset}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData[CITIES].isValid ? travellerRegistrationFormStyles.invalidForm : ''} ${travellerRegistrationFormStyles.fieldset}`}>
 				<legend>
 					Cities visited{' '}
 					<span
@@ -142,7 +142,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 							id={city.id}
 							label={city.label}
 							value={city.id}
-							checked={formData.cities.value.includes(city.id)}
+							checked={formData[CITIES].value.includes(city.id)}
 							onChange={handleCheckboxChange}
 							isArrayItem={true}
 							showRequiredMark={false}
@@ -150,15 +150,15 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 						/>
 					</div>
 				))}
-				{!formData.cities.isValid && formData.cities.message && (
+				{!formData[CITIES].isValid && formData[CITIES].message && (
 					<>
 						<p
 							id="cities-error"
 							role="alert">
-							{formData.cities.message}
+							{formData[CITIES].message}
 						</p>
 						{renderVisuallyHiddenError(
-							formData.cities,
+							formData[CITIES],
 							'cities-error-hidden',
 							travellerRegistrationFormStyles.visuallyHidden,
 						)}
