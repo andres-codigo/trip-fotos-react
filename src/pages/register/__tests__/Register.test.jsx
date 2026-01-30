@@ -166,7 +166,7 @@ describe('Register', () => {
 
 			// Should navigate after success
 			await waitFor(() => {
-				expect(mockNavigate).toHaveBeenCalledWith(PATHS.HOME)
+				expect(mockNavigate).toHaveBeenCalledWith(PATHS.TRAVELLERS)
 			})
 
 			// Should set loading back to false

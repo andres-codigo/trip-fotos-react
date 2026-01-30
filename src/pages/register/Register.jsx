@@ -27,7 +27,7 @@ const Register = () => {
 		setIsLoading(true)
 		try {
 			await dispatch(registerTraveller(formData)).unwrap()
-			navigate(PATHS.HOME)
+			navigate(PATHS.TRAVELLERS)
 		} catch (error) {
 			setError(error || ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER)
 		} finally {
