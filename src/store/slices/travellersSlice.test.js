@@ -314,7 +314,7 @@ describe('travellersSlice', () => {
 				const result = await store.dispatch(updateTravellers())
 
 				expect(result.payload).toBe(
-					`${API_ERROR_MESSAGE.UPDATE_TRAVELLERS_CATCH}: ${API_ERROR_MESSAGE.FAILED_TO_FETCH}`,
+					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 				)
 			})
 
@@ -327,7 +327,7 @@ describe('travellersSlice', () => {
 				const result = await store.dispatch(updateTravellers())
 
 				expect(result.payload).toBe(
-					`${API_ERROR_MESSAGE.UPDATE_TRAVELLERS_CATCH}: ${API_ERROR_MESSAGE.FAILED_TO_FETCH}`,
+					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 				)
 			})
 		})
@@ -626,7 +626,7 @@ describe('travellersSlice', () => {
 				)
 
 				expect(result.payload).toBe(
-					`${API_ERROR_MESSAGE.UPDATE_TRAVELLERS_CATCH}: ${API_ERROR_MESSAGE.NETWORK_ERROR}`,
+					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 				)
 			})
 		})

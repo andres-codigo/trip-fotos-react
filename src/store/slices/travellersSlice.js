@@ -240,6 +240,15 @@ export const updateTravellers = createAsyncThunk(
 				return travellers
 			}
 		} catch (error) {
+			if (
+				error.message === 'Failed to fetch' ||
+				error.message === 'Network Error'
+			) {
+				return rejectWithValue(ERROR_MESSAGES.NETWORK_CONNECTION_ERROR)
+			}
+			if (error instanceof SyntaxError) {
+				return rejectWithValue(ERROR_MESSAGES.UNEXPECTED_ERROR)
+			}
 			return rejectWithValue(
 				handleApiError(
 					error,

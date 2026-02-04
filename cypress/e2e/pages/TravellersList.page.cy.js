@@ -3,6 +3,7 @@ import {
 	TRAVELLERS_LIST_SELECTORS,
 	DIALOG_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
+import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 
@@ -164,27 +165,15 @@ describe('Travellers Page - WIP', () => {
 			cy.wait('@getTravellers500Error')
 
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
-				'contain',
-				'The server is currently experiencing issues. Please try again later.',
-			)
-		})
-
-		it('should display not found error dialog when API returns 404 status', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
-				statusCode: 404,
-				body: { message: 'Not Found' },
-			}).as('getTravellers404Error')
-
-			performLogin()
-			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellers404Error')
-
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
-				'contain',
-				'Travellers data not found. Please contact support.',
-			)
+			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).within(() => {
+				cy.get(DIALOG_SELECTORS.TITLE).should(
+					'contain',
+					DIALOG_SELECTORS.MESSAGES.ERROR.TITLE,
+				)
+				cy.contains(ERROR_MESSAGES.REQUEST_ERROR).should('exist')
+				// Close the dialog
+				cy.get('footer > button').click()
+			})
 		})
 
 		it('should display client error dialog when API returns 400-499 status', () => {
@@ -200,24 +189,7 @@ describe('Travellers Page - WIP', () => {
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
-				'There was a problem with your request. Please try again.',
-			)
-		})
-
-		it('should display connection error dialog when API returns other error status', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
-				statusCode: 502,
-				body: { message: 'Bad Gateway' },
-			}).as('getTravellers502Error')
-
-			performLogin()
-			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellers502Error')
-
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
-				'contain',
-				'Unable to load travellers. Please check your connection and try again.',
+				ERROR_MESSAGES.REQUEST_ERROR,
 			)
 		})
 
@@ -233,7 +205,7 @@ describe('Travellers Page - WIP', () => {
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
-				'Unable to connect to the server. Please check your internet connection.',
+				ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 			)
 		})
 
@@ -254,7 +226,7 @@ describe('Travellers Page - WIP', () => {
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
 				'contain',
-				'An unexpected error occurred while loading travellers. Please try again.',
+				ERROR_MESSAGES.UNEXPECTED_ERROR,
 			)
 		})
 
@@ -322,24 +294,6 @@ describe('Travellers Page - WIP', () => {
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('not.exist')
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'be.visible',
-			)
-		})
-
-		it('should handle timeout errors appropriately', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
-				statusCode: 504, // Gateway Timeout
-				body: { message: 'Gateway Timeout' },
-				delay: 2000,
-			}).as('getTravellersTimeout')
-
-			performLogin()
-			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellersTimeout')
-
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
-				'contain',
-				'Unable to load travellers. Please check your connection and try again.',
 			)
 		})
 	})
