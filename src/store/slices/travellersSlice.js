@@ -13,7 +13,7 @@ import {
 	API_ERROR_MESSAGE,
 	COMMON_HEADERS,
 } from '@/constants/api'
-import { ERROR_MESSAGES, ERROR_TYPES } from '@/constants/errors'
+import { ERROR_MESSAGES } from '@/constants/errors'
 
 import { selectAuthenticationToken } from './authenticationSlice'
 
@@ -194,15 +194,7 @@ export const updateTravellers = createAsyncThunk(
 			)
 
 			if (!response.ok) {
-				if (response.status === 500) {
-					return rejectWithValue(ERROR_MESSAGES.SERVER_ERROR)
-				} else if (response.status === 404) {
-					return rejectWithValue(ERROR_MESSAGES.DATA_NOT_FOUND)
-				} else if (response.status >= 400 && response.status < 500) {
-					return rejectWithValue(ERROR_MESSAGES.REQUEST_ERROR)
-				} else {
-					return rejectWithValue(ERROR_MESSAGES.CONNECTION_ERROR)
-				}
+				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
 			}
 
 			const responseData = await response.json()
@@ -248,14 +240,50 @@ export const updateTravellers = createAsyncThunk(
 				return travellers
 			}
 		} catch (error) {
-			if (
-				error.name === ERROR_TYPES.TYPE_ERROR &&
-				error.message.includes(API_ERROR_MESSAGE.FAILED_TO_FETCH)
-			) {
-				return rejectWithValue(ERROR_MESSAGES.NETWORK_CONNECTION_ERROR)
+			return rejectWithValue(
+				handleApiError(
+					error,
+					API_ERROR_MESSAGE.UPDATE_TRAVELLERS_CATCH,
+				),
+			)
+		}
+	},
+)
+
+export const loadTraveller = createAsyncThunk(
+	TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLER,
+	async (travellerId, { rejectWithValue }) => {
+		try {
+			const response = await fetch(
+				`${API_DATABASE.BASE_URL}/travellers/${travellerId}.json`,
+				{
+					method: API_DATABASE.GET,
+					headers: COMMON_HEADERS.JSON,
+				},
+			)
+
+			if (!response.ok) {
+				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
 			}
 
-			return rejectWithValue(ERROR_MESSAGES.UNEXPECTED_ERROR)
+			const responseData = await response.json()
+
+			// Check if traveller exists (Firebase returns null for non-existent keys)
+			if (!responseData) {
+				throw new Error(ERROR_MESSAGES.DATA_NOT_FOUND)
+			}
+
+			return {
+				...responseData,
+				id: travellerId,
+			}
+		} catch (error) {
+			return rejectWithValue(
+				handleApiError(
+					error,
+					`${API_ERROR_MESSAGE.LOAD_TRAVELLER_CATCH}${travellerId}.`,
+				),
+			)
 		}
 	},
 )
@@ -278,7 +306,7 @@ export const loadTravellers = createAsyncThunk(
 			dispatch(setFetchTimestamp())
 			return travellers
 		} catch (error) {
-			return rejectWithValue(error || ERROR_MESSAGES.REFRESH_ERROR)
+			return rejectWithValue(error)
 		}
 	},
 )
@@ -290,6 +318,7 @@ const travellersSlice = createSlice({
 		isTraveller: false,
 		hasTravellers: false,
 		travellers: [],
+		selectedTraveller: null,
 		lastFetch: null,
 		status: 'idle',
 		error: null,
@@ -352,6 +381,20 @@ const travellersSlice = createSlice({
 				state.error = action.payload
 			})
 
+			// LOAD_TRAVELLER async thunk handlers
+			.addCase(loadTraveller.pending, (state) => {
+				state.status = 'loading'
+				state.error = null
+			})
+			.addCase(loadTraveller.fulfilled, (state, action) => {
+				state.status = 'succeeded'
+				state.selectedTraveller = action.payload
+			})
+			.addCase(loadTraveller.rejected, (state, action) => {
+				state.status = 'failed'
+				state.error = action.payload
+			})
+
 			// REGISTER_TRAVELLER async thunk handlers
 			.addCase(registerTraveller.pending, (state) => {
 				state.status = 'loading'
@@ -390,6 +433,11 @@ export const selectIsTraveller = createSelector(
 export const selectTravellerName = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.travellerName,
+)
+
+export const selectSelectedTraveller = createSelector(
+	[selectTravellersState],
+	(travellersState) => travellersState.selectedTraveller,
 )
 
 export const selectTravellersStatus = createSelector(
