@@ -1,10 +1,14 @@
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
-import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
+import {
+	TRAVELLER_REGISTRATION_FORM_SELECTORS,
+	DIALOG_SELECTORS,
+} from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation/messages'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../../src/constants/travellers'
 import { API_DATABASE } from '../../../src/constants/api'
 import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-travellers'
+import { API_ERROR_MESSAGE } from '../../../src/constants/api'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
@@ -105,5 +109,117 @@ describe('Register Page', () => {
 		cy.get('[role="alert"]')
 			.should('be.visible')
 			.and('contain', TRAVELLER_REGISTRATION_SUCCESS_MESSAGE)
+	})
+
+	it('shows a loading dialog while registering', () => {
+		const { firstName, lastName, description, daysInCity, cities } =
+			MOCK_TRAVELLERS.NEW_TRAVELLER
+
+		// Intercept with delay
+		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
+			delay: 1000,
+			statusCode: 200,
+			body: {
+				...MOCK_TRAVELLERS.NEW_TRAVELLER,
+				registered: new Date().toISOString(),
+			},
+		}).as('registerTravellerDelayed')
+
+		// Fill in the form
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
+			firstName,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
+			lastName,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
+			description,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type(
+			daysInCity,
+		)
+
+		// Check the cities checkboxes
+		cities.forEach((city) => {
+			const checkboxSelector = `checkbox-${city}`
+			cy.get(`[data-cy="${checkboxSelector}"]`).siblings('label').click()
+		})
+
+		// Submit the form
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
+
+		// Check for loading dialog
+		cy.get(DIALOG_SELECTORS.REGISTERING).should('be.visible')
+		cy.get(DIALOG_SELECTORS.REGISTERING).within(() => {
+			cy.get(DIALOG_SELECTORS.TITLE).should('contain', 'Registering')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('exist')
+		})
+
+		cy.wait('@registerTravellerDelayed')
+	})
+
+	describe('Error Handling', () => {
+		it('shows an error dialog when registration fails', () => {
+			const { firstName, lastName, description, daysInCity, cities } =
+				MOCK_TRAVELLERS.NEW_TRAVELLER
+
+			// Intercept failure
+			cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
+				statusCode: 500,
+				body: { error: 'Internal Server Error' },
+			}).as('registerTravellerFailed')
+
+			// Fill in the form
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
+				firstName,
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
+				lastName,
+			)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT,
+			).type(description)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type(
+				daysInCity,
+			)
+
+			// Check the cities checkboxes
+			cities.forEach((city) => {
+				const checkboxSelector = `checkbox-${city}`
+				cy.get(`[data-cy="${checkboxSelector}"]`)
+					.siblings('label')
+					.click()
+			})
+
+			// Submit the form
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
+			).click()
+
+			cy.wait('@registerTravellerFailed')
+
+			// Check for error dialog
+			cy.get(DIALOG_SELECTORS.INVALID_TRAVELLER_REGISTRATION).should(
+				'be.visible',
+			)
+			cy.get(DIALOG_SELECTORS.INVALID_TRAVELLER_REGISTRATION).within(
+				() => {
+					cy.get(DIALOG_SELECTORS.TITLE).should(
+						'contain',
+						DIALOG_SELECTORS.MESSAGES.ERROR.TITLE,
+					)
+					cy.contains(
+						API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH,
+					).should('exist')
+					// Close the dialog
+					cy.get('footer > button').click()
+				},
+			)
+
+			// Ensure dialog is closed
+			cy.get(DIALOG_SELECTORS.INVALID_TRAVELLER_REGISTRATION).should(
+				'not.exist',
+			)
+		})
 	})
 })

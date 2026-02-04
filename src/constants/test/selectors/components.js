@@ -87,7 +87,11 @@ export const TRAVELLERS_LIST_SELECTORS = {
 export const DIALOG_SELECTORS = {
 	// Dialog
 	INVALID_EMAIL_OR_PASSWORD: getByDataCy('invalid-email-or-password-dialog'),
+	INVALID_TRAVELLER_REGISTRATION: getByDataCy(
+		'invalid-traveller-registration-dialog',
+	),
 	AUTHENTICATING: getByDataCy('authenticating-dialog'),
+	REGISTERING: getByDataCy('registering-dialog'),
 	TRAVELLERS_LIST_ERROR: getByDataCy('travellers-list-error-dialog'),
 	// Dialog elements
 	TITLE: getByDataCy('title'),
