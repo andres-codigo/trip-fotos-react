@@ -20,7 +20,7 @@ export const ERROR_MESSAGES = Object.freeze({
 	LOGIN_FAILED_FALLBACK: 'Login failed.',
 
 	// Traveller-specific errors
-	FAILED_TO_REGISTER_TRAVELLER: 'Failed to register traveller ',
+	FAILED_TO_REGISTER_TRAVELLER: 'Failed to register traveller.',
 
 	// Default fallback
 	UNKNOWN_ERROR: 'An unknown error occurred.',
