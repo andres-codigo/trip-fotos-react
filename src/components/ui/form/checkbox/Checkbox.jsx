@@ -18,7 +18,9 @@ const Checkbox = ({
 	message = '',
 	'data-cy': dataCy,
 	'data-cy-error': dataCyError,
-	...rest
+	'aria-label': ariaLabel,
+	'aria-labelledby': ariaLabelledby,
+	'data-testid': dataTestid,
 }) => {
 	const containerClass = classNames('checkbox-container', className)
 
@@ -33,12 +35,14 @@ const Checkbox = ({
 				disabled={disabled}
 				required={required}
 				data-cy={dataCy}
+				data-testid={dataTestid}
 				aria-required={required}
 				aria-invalid={!isValid}
+				aria-label={ariaLabel}
+				aria-labelledby={ariaLabelledby}
 				aria-describedby={
 					!isValid && message ? `${id}-error` : undefined
 				}
-				{...rest}
 			/>
 			{label && (
 				<label htmlFor={id}>
@@ -75,6 +79,9 @@ Checkbox.propTypes = {
 	showRequiredMark: PropTypes.bool,
 	'data-cy': PropTypes.string,
 	'data-cy-error': PropTypes.string,
+	'aria-label': PropTypes.string,
+	'aria-labelledby': PropTypes.string,
+	'data-testid': PropTypes.string,
 	isArrayItem: PropTypes.bool,
 }
 
