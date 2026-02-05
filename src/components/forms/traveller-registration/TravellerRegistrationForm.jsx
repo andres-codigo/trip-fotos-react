@@ -31,7 +31,6 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			label: 'Days spent in city',
 			testId: 'days-spent-in-city-input',
 		},
-		[CITIES]: { label: 'Cities', testId: 'cities-input' },
 	}
 
 	const getInputProps = (field) => {
@@ -141,12 +140,13 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 							travellerRegistrationFormStyles.checkboxGroup
 						}>
 						<Checkbox
-							{...getInputProps(CITIES)}
 							id={city.id}
 							label={city.label}
 							value={city.id}
 							checked={formData[CITIES].value.includes(city.id)}
 							onChange={handleCheckboxChange}
+							disabled={isLoading}
+							required={true}
 							isArrayItem={true}
 							showRequiredMark={false}
 							data-cy={`checkbox-${city.id}`}
@@ -155,11 +155,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				))}
 				{!formData[CITIES].isValid && formData[CITIES].message && (
 					<>
-						<p
-							id="cities-error"
-							role="alert">
-							{formData[CITIES].message}
-						</p>
+						<p id="cities-error">{formData[CITIES].message}</p>
 						{renderVisuallyHiddenError(
 							formData[CITIES],
 							'cities-error-hidden',
