@@ -62,7 +62,7 @@ export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	FIRST_NAME_INPUT: getByDataCy('first-name-input'),
 	LAST_NAME_INPUT: getByDataCy('last-name-input'),
 	DESCRIPTION_INPUT: getByDataCy('description-input'),
-	DAYS_INPUT: getByDataCy('days-input'),
+	DAYS_SPENT_IN_CITY_INPUT: getByDataCy('days-spent-in-city-input'),
 	CHECKBOX_TOKYO: getByDataCy('checkbox-tokyo'),
 	CHECKBOX_PRAGUE: getByDataCy('checkbox-prague'),
 	CHECKBOX_SYDNEY: getByDataCy('checkbox-sydney'),

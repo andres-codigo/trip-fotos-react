@@ -45,9 +45,9 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT,
 			).should('exist')
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).should(
-				'exist',
-			)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+			).should('exist')
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO).should(
 				'exist',
 			)
@@ -141,7 +141,9 @@ describe('<TravellerRegistrationForm />', () => {
 			render()
 
 			// Invalid input (0)
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type('0')
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+			).type('0')
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
 			).click()
@@ -162,9 +164,9 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT,
 			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description)
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type(
-				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString(),
-			)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString())
 			// Click the label associated with the checkbox since the input is hidden
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO)
 				.next('label')
@@ -238,11 +240,9 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT,
 			).should('have.attr', 'aria-required', 'true')
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).should(
-				'have.attr',
-				'aria-required',
-				'true',
-			)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+			).should('have.attr', 'aria-required', 'true')
 		})
 
 		it('shows invalid state via aria-invalid and connects to error message', () => {

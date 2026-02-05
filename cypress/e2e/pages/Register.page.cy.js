@@ -38,9 +38,9 @@ describe('Register Page', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).should(
 			'be.visible',
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).should(
-			'be.visible',
-		)
+		cy.get(
+			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+		).should('be.visible')
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO)
 			.parent()
 			.should('be.visible')
@@ -85,9 +85,9 @@ describe('Register Page', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
 			description,
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type(
-			daysInCity,
-		)
+		cy.get(
+			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+		).type(daysInCity)
 
 		// Check the cities checkboxes
 		cities.forEach((city) => {
@@ -134,9 +134,9 @@ describe('Register Page', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
 			description,
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type(
-			daysInCity,
-		)
+		cy.get(
+			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+		).type(daysInCity)
 
 		// Check the cities checkboxes
 		cities.forEach((city) => {
@@ -178,9 +178,9 @@ describe('Register Page', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT,
 			).type(description)
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_INPUT).type(
-				daysInCity,
-			)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+			).type(daysInCity)
 
 			// Check the cities checkboxes
 			cities.forEach((city) => {

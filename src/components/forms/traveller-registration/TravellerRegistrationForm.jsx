@@ -27,7 +27,10 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 		[FIRST_NAME]: { label: 'First name', testId: 'first-name-input' },
 		[LAST_NAME]: { label: 'Last name', testId: 'last-name-input' },
 		[DESCRIPTION]: { label: 'Description', testId: 'description-input' },
-		[DAYS]: { label: 'Days', testId: 'days-input' },
+		[DAYS]: {
+			label: 'Days spent in city',
+			testId: 'days-spent-in-city-input',
+		},
 		[CITIES]: { label: 'Cities', testId: 'cities-input' },
 	}
 
