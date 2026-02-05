@@ -235,7 +235,9 @@ describe('Register', () => {
 			// Verify the dialog is removed from the DOM
 			await waitFor(() => {
 				expect(
-					screen.queryByTestId('invalid-traveller-registration-dialog'),
+					screen.queryByTestId(
+						'invalid-traveller-registration-dialog',
+					),
 				).not.toBeInTheDocument()
 			})
 		})
