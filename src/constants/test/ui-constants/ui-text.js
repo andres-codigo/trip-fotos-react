@@ -11,4 +11,10 @@ export const UI_TEXT = {
 		CLOSE: 'Close',
 		REFRESH: 'Refresh',
 	},
+
+	// Form text
+	FORMS: {
+		REGISTER_AS_TRAVELLER: 'Register as a Traveller',
+		CITIES_VISITED: 'Cities visited',
+	},
 }

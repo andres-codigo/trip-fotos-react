@@ -1,7 +1,4 @@
 export const ERROR_MESSAGES = Object.freeze({
-	// Browser error messages
-	FAILED_TO_FETCH: 'Failed to fetch',
-
 	// Server/Network errors
 	SERVER_ERROR:
 		'The server is currently experiencing issues. Please try again later.',
@@ -17,16 +14,13 @@ export const ERROR_MESSAGES = Object.freeze({
 		'An unexpected error occurred while loading travellers. Please try again.',
 	REFRESH_ERROR: 'Failed to load travellers. Please try refreshing the page.',
 	SOMETHING_WENT_WRONG: 'Something went wrong!',
-	NETWORK_ERROR: 'Network Error',
 
 	// Authentication errors
 	LOGIN_FAILED: 'Login failed. Please check your credentials and try again.',
 	LOGIN_FAILED_FALLBACK: 'Login failed.',
-	INVALID_PASSWORD: 'INVALID_PASSWORD',
 
 	// Traveller-specific errors
-	ERROR_UPDATING_TRAVELLER: 'An error occurred while updating traveller ',
-	FAILED_TO_UPDATE_TRAVELLER: 'Failed to update traveller ',
+	FAILED_TO_REGISTER_TRAVELLER: 'Failed to register traveller.',
 
 	// Default fallback
 	UNKNOWN_ERROR: 'An unknown error occurred.',

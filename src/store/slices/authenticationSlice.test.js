@@ -10,6 +10,7 @@ import {
 	MOCK_ERROR_MESSAGES,
 } from '@/constants/test'
 
+import { API_ERROR_MESSAGE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
 
 import authenticationReducer, {
@@ -53,18 +54,22 @@ import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
  * - Selector functions for state access
  */
 
-vi.mock('@/constants/api', () => ({
-	API_DATABASE: {
-		URL: 'https://mock-api-url.com/',
-		KEY: 'mock-api-key',
-		POST: 'POST',
-		AUTH_LOGIN_MODE: 'login',
-		AUTH_SIGNUP_MODE: 'signup',
-	},
-	COMMON_HEADERS: {
-		'Content-Type': 'application/json',
-	},
-}))
+vi.mock('@/constants/api', async (importOriginal) => {
+	const actual = await importOriginal()
+	return {
+		...actual,
+		API_DATABASE: {
+			URL: 'https://mock-api-url.com/',
+			KEY: 'mock-api-key',
+			POST: 'POST',
+			AUTH_LOGIN_MODE: 'login',
+			AUTH_SIGNUP_MODE: 'signup',
+		},
+		COMMON_HEADERS: {
+			'Content-Type': 'application/json',
+		},
+	}
+})
 
 let store
 
@@ -305,7 +310,7 @@ describe('authenticationSlice', () => {
 
 			describe('failure scenarios', () => {
 				it('should handle login failure and return error message', async () => {
-					const mockErrorMessage = ERROR_MESSAGES.INVALID_PASSWORD
+					const mockErrorMessage = API_ERROR_MESSAGE.INVALID_PASSWORD
 					fetch.mockResolvedValueOnce({
 						ok: false,
 						json: async () => ({
@@ -369,7 +374,7 @@ describe('authenticationSlice', () => {
 				})
 
 				it('should handle network errors', async () => {
-					const mockError = new Error(ERROR_MESSAGES.NETWORK_ERROR)
+					const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
 					fetch.mockRejectedValueOnce(mockError)
 
 					const result = await store.dispatch(

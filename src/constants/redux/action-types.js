@@ -2,7 +2,9 @@
 const TRAVELLERS_BASE_ACTIONS = Object.freeze({
 	TRAVELLER_NAME: 'travellers/travellerName',
 	LOAD_TRAVELLERS: 'travellers/loadTravellers',
+	LOAD_TRAVELLER: 'travellers/loadTraveller',
 	UPDATE_TRAVELLERS: 'travellers/updateTravellers',
+	REGISTER_TRAVELLER: 'travellers/registerTraveller',
 })
 
 const AUTHENTICATION_BASE_ACTIONS = Object.freeze({
@@ -30,6 +32,9 @@ export const TRAVELLERS_ACTION_TYPES = Object.freeze({
 	),
 	LOAD_TRAVELLERS_ASYNC: createAsyncActionTypes(
 		TRAVELLERS_BASE_ACTIONS.LOAD_TRAVELLERS,
+	),
+	LOAD_TRAVELLER_ASYNC: createAsyncActionTypes(
+		TRAVELLERS_BASE_ACTIONS.LOAD_TRAVELLER,
 	),
 	UPDATE_TRAVELLERS_ASYNC: createAsyncActionTypes(
 		TRAVELLERS_BASE_ACTIONS.UPDATE_TRAVELLERS,

@@ -9,7 +9,8 @@
 	margin-top: 0.25rem;
 }
 
-@mixin invalid-border() {
+@mixin invalid-border-and-background() {
+	background-color: variables.$color-cosmos;
 	border: 1px solid variables.$color-mojo;
 }
 

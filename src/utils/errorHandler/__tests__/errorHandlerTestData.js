@@ -1,4 +1,4 @@
-export const ERROR_MESSAGES = {
+export const API_ERROR_MESSAGE = {
 	NETWORK_ERROR: 'Network error occurred',
 	API_ERROR: 'API error',
 	JAVASCRIPT_ERROR: 'JavaScript error',
@@ -11,11 +11,11 @@ export const ERROR_MESSAGES = {
 }
 
 export const ERROR_OBJECTS = {
-	WITH_MESSAGE: { message: ERROR_MESSAGES.NETWORK_ERROR },
+	WITH_MESSAGE: { message: API_ERROR_MESSAGE.NETWORK_ERROR },
 	WITH_CODE: { code: 500 },
 	EMPTY: {},
 	WITH_EMPTY_MESSAGE: { message: '' },
-	API_ERROR: { message: ERROR_MESSAGES.API_ERROR },
+	API_ERROR: { message: API_ERROR_MESSAGE.API_ERROR },
 }
 
-export const JS_ERROR = new Error(ERROR_MESSAGES.JAVASCRIPT_ERROR)
+export const JS_ERROR = new Error(API_ERROR_MESSAGE.JAVASCRIPT_ERROR)

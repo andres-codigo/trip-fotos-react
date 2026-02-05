@@ -1,90 +1,57 @@
 @use '@/styles/setup/variables' as variables;
-@use '@/styles/setup/mixins/form/valid/valid' as valid;
-@use '@/styles/setup/mixins/form/invalid/invalid' as invalid;
+@use '@/styles/setup/mixins/helpers' as helpers;
+@use '@/styles/setup/mixins/form/valid/valid' as validForm;
+@use '@/styles/setup/mixins/form/invalid/invalid' as invalidForm;
 
-h2 {
-	margin-top: 0;
-}
-.formControl {
-	margin: 0.5rem 0;
+.travellerRegistration {
+	.travellerRegistrationTitle {
+		margin-top: 0;
+	}
 
-	@include valid.label;
+	.visuallyHidden {
+		@include helpers.visually-hidden;
+	}
 
-	input,
-	textarea {
-		@include valid.default-styles;
+	.formControl {
+		margin: 0.5rem 0;
 
-		&:focus {
-			border-color: variables.$color-pigment-indigo;
-			background-color: variables.$color-magnolia;
-			outline: none;
+		@include validForm.input-textarea;
+
+		@include validForm.checkbox;
+
+		&.fieldset {
+			border: none;
+			padding: 0;
+			margin: 0.5rem 0;
+
+			legend {
+				font-weight: bold;
+				margin-bottom: 0.5rem;
+
+				.checkboxRequired {
+					color: variables.$color-red;
+					margin-left: 0.25rem;
+				}
+			}
+			.checkboxGroup {
+				margin-bottom: 0.5rem;
+				label {
+					margin: 0;
+				}
+			}
 		}
-	}
 
-	&.invalid {
-		p {
-			@include invalid.error-text;
-		}
+		&.invalidForm {
+			p {
+				@include invalidForm.error-message;
+			}
 
-		input,
-		textarea {
-			@include invalid.invalid-border;
-			background-color: variables.$color-cosmos;
-		}
-	}
-}
+			input,
+			textarea {
+				@include invalidForm.invalid-border-and-background;
+			}
 
-.checkboxLabel {
-	font-size: 1rem;
-	margin: 0.5rem 0;
-	font-weight: bold;
-}
-
-.checkboxGroup {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	margin-bottom: 0.5rem;
-
-	input {
-		width: auto;
-		display: inline-block;
-	}
-
-	label {
-		margin: 0;
-		font-weight: normal;
-	}
-}
-
-.fieldset {
-	border: none;
-	padding: 0;
-	margin: 0.5rem 0;
-}
-
-.invalidForm {
-	color: variables.$color-red;
-}
-
-.actions {
-	margin-top: 1rem;
-	display: flex;
-	justify-content: flex-end;
-
-	button {
-		font: inherit;
-		border: 1px solid variables.$color-pigment-indigo;
-		background-color: variables.$color-pigment-indigo;
-		color: variables.$color-white;
-		cursor: pointer;
-		padding: 0.75rem 2rem;
-		border-radius: 30px;
-
-		&:hover,
-		&:active {
-			border-color: variables.$color-violent-violet;
-			background-color: variables.$color-violent-violet;
+			@include invalidForm.invalid-checkbox;
 		}
 	}
 }

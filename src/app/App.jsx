@@ -62,6 +62,7 @@ function AppRoutes() {
 			const protectedPaths = [
 				PATHS.HOME,
 				PATHS.TRAVELLERS,
+				PATHS.REGISTER,
 				PATHS.MESSAGES,
 			]
 			if (protectedPaths.includes(location.pathname)) {

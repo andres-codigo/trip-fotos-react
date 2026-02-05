@@ -7,6 +7,11 @@
 - **Testing**: Cypress (E2E & Component), Vitest (Unit/Integration).
 - **State Management**: Redux Toolkit with `redux-persist`.
 
+## Language & Tone
+
+- **Spelling**: Use British English (`en-GB`) for all comments, documentation, and strings (e.g., `colour`, `behaviour`, `optimise`).
+- **Commit Messages**: Follow `en-GB` spelling conventions.
+
 ## Architecture & Patterns
 
 - **Entry Point**: `src/app/App.jsx` handles routing, auth checks, and global layout.
@@ -14,6 +19,7 @@
 - **State**:
     - Slices located in `src/store/slices`.
     - Async logic should use Redux Thunks.
+    - **Error Handling in Thunks**: Standard practice is to check `!response.ok` and throw a generic `REQUEST_ERROR` (or valid user-facing error) rather than granular status code checks, unless specific UI behavior depends on the status code.
     - Persisted state configuration in `src/store/store.js`.
 - **Components**:
     - Located in `src/components`, categorized by type (`common`, `forms`, `layout`, `ui`, `travellers`).
@@ -32,6 +38,7 @@
 - **Constants**:
     - **Strictly** use centralized constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`).
     - Do not hardcode strings for paths, API URLs, or error messages.
+    - **Error Constants separation**: Use `API_ERROR_MESSAGE` for internal/technical log messages and logic checks (e.g., 'Failed to fetch'). Use `ERROR_MESSAGES` for user-facing UI strings.
 - **Utils**:
     - **Validation**: Use `src/utils/validation` for common checks (email, password).
     - **Error Handling**: Use `src/utils/errorHandler` for API error extraction.
@@ -72,11 +79,14 @@
     - Hooks/Utils: camelCase (`useViewport.js`).
     - Constants: UPPER_SNAKE_CASE.
 - **Type Safety**: Use `prop-types` for all component props.
-- **Accessibility**: Ensure form components handle accessibility attributes (`aria-*`, `role`) for validation states.
+- **Accessibility**:
+    - Ensure form components handle accessibility attributes (`aria-*`, `role`) for validation states.
+    - **Form Errors**: Specific pattern for form field errors involves rendering a visual error (if design calls for it) AND a visually hidden error span with `role="alert"` for screen readers. Use `renderVisuallyHiddenError` utility where applicable.
 - **Styling**:
     - Use SCSS modules for component-specific styles. Import as `[componentName]Styles` (e.g., `import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'`).
     - **Variables & Mixins**:
         - When creating a new SCSS file, always review `src/styles` for available variables and mixins to ensure consistency.
+        - **Mixin Usage**: Prefer using namespaced imports (e.g., `@use '@/styles/setup/mixins/helpers' as helpers`). Use common helpers (like `helpers.visually-hidden`) instead of re-implementing CSS.
         - New colour variables should follow the existing naming convention (e.g., using "Name that Colour" tool).
 
 ## Key Files

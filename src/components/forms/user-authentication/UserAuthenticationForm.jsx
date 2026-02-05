@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 
 import { API_DATABASE } from '@/constants/api'
 import { ACCESSIBILITY } from '@/constants/ui'
+import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
@@ -91,13 +92,10 @@ const UserAuthenticationForm = ({
 					!email.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
 				<Input {...getInputProps(EMAIL_ID)} />
-				{!email.isValid && email.message && (
-					<span
-						id="email-error"
-						role="alert"
-						className={userAuthStyles.visuallyHidden}>
-						{email.message}
-					</span>
+				{renderVisuallyHiddenError(
+					email,
+					'email-error',
+					userAuthStyles.visuallyHidden,
 				)}
 			</div>
 			<div
@@ -105,13 +103,10 @@ const UserAuthenticationForm = ({
 					!password.isValid ? userAuthStyles.invalidForm : ''
 				}`}>
 				<Input {...getInputProps(PASSWORD_ID)} />
-				{!password.isValid && password.message && (
-					<span
-						id="password-error"
-						role="alert"
-						className={userAuthStyles.visuallyHidden}>
-						{password.message}
-					</span>
+				{renderVisuallyHiddenError(
+					password,
+					'password-error',
+					userAuthStyles.visuallyHidden,
 				)}
 			</div>
 			<div className={userAuthStyles.formActions}>

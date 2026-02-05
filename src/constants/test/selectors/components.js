@@ -59,15 +59,15 @@ export const AUTHENTICATION_FORM_SELECTORS = {
 
 export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	FORM: getByDataCy('traveller-registration-form'),
-	FIRST_NAME_INPUT: getByDataCy('input-first-name'),
-	LAST_NAME_INPUT: getByDataCy('input-last-name'),
-	DESCRIPTION_INPUT: getByDataCy('input-description'),
-	DAYS_INPUT: getByDataCy('input-days'),
+	FIRST_NAME_INPUT: getByDataCy('first-name-input'),
+	LAST_NAME_INPUT: getByDataCy('last-name-input'),
+	DESCRIPTION_INPUT: getByDataCy('description-input'),
+	DAYS_SPENT_IN_CITY_INPUT: getByDataCy('days-spent-in-city-input'),
 	CHECKBOX_TOKYO: getByDataCy('checkbox-tokyo'),
 	CHECKBOX_PRAGUE: getByDataCy('checkbox-prague'),
 	CHECKBOX_SYDNEY: getByDataCy('checkbox-sydney'),
 	CHECKBOX_CANBERRA: getByDataCy('checkbox-canberra'),
-	SUBMIT_BUTTON: getByDataCy('submit-button'),
+	REGISTER_BUTTON: getByDataCy('register-button'),
 }
 
 /////
@@ -77,7 +77,7 @@ export const TRAVELLERS_LIST_SELECTORS = {
 	TRAVELLERS_LIST_CONTAINER: getByDataCy('travellers-list-container'),
 	TRAVELLERS_LIST: getByDataCy('travellers-list'),
 	TRAVELLER_ITEM: getByDataCy('traveller-item'),
-	REGISTER_BUTTON: getByDataCy('register-link'),
+	REGISTER_LINK: getByDataCy('register-link'),
 	CONTROLS: getByDataCy('controls'),
 }
 
@@ -87,7 +87,11 @@ export const TRAVELLERS_LIST_SELECTORS = {
 export const DIALOG_SELECTORS = {
 	// Dialog
 	INVALID_EMAIL_OR_PASSWORD: getByDataCy('invalid-email-or-password-dialog'),
+	INVALID_TRAVELLER_REGISTRATION: getByDataCy(
+		'invalid-traveller-registration-dialog',
+	),
 	AUTHENTICATING: getByDataCy('authenticating-dialog'),
+	REGISTERING: getByDataCy('registering-dialog'),
 	TRAVELLERS_LIST_ERROR: getByDataCy('travellers-list-error-dialog'),
 	// Dialog elements
 	TITLE: getByDataCy('title'),

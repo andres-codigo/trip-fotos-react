@@ -9,12 +9,15 @@ import {
 } from '@/constants/test'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { API_ERROR_MESSAGE } from '@/constants/api'
 
 import travellersReducer, {
+	registerTraveller,
 	travellerName,
 	setTravellerName,
 	selectShouldUpdate,
 	updateTravellers,
+	loadTraveller,
 	loadTravellers,
 	setIsTraveller,
 	setTravellers,
@@ -22,11 +25,32 @@ import travellersReducer, {
 	selectHasTravellers,
 	selectIsTraveller,
 	selectTravellerName,
+	selectSelectedTraveller,
 } from './travellersSlice'
 
 import { handleApiError } from '@/utils/errorHandler'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
+
+// Mock Firebase Storage
+vi.mock('firebase/storage', () => ({
+	getStorage: vi.fn(),
+	ref: vi.fn(),
+	uploadBytesResumable: vi.fn(() => ({
+		on: vi.fn((event, progress, error, complete) => {
+			complete()
+		}),
+		snapshot: { ref: 'mock-ref' },
+	})),
+	getDownloadURL: vi.fn(() =>
+		Promise.resolve('https://mock-url.com/image.jpg'),
+	),
+}))
+
+// Mock image compression
+vi.mock('browser-image-compression', () => ({
+	default: vi.fn((file) => Promise.resolve(file)),
+}))
 
 /**
  * travellersSlice Unit Tests
@@ -65,7 +89,11 @@ vi.mock('@/constants/endpoints', () => ({
 }))
 
 vi.mock('@/utils/errorHandler', () => ({
-	handleApiError: vi.fn((error, message) => `${message}: ${error.message}`),
+	handleApiError: vi.fn((error, message) => {
+		// Handle cases where error is just a string (e.g. from rejectWithValue)
+		const errorMessage = error?.message || error
+		return `${message}: ${errorMessage}`
+	}),
 }))
 
 vi.mock('./authenticationSlice', () => ({
@@ -103,6 +131,7 @@ describe('travellersSlice', () => {
 					isTraveller: false,
 					hasTravellers: false,
 					travellers: [],
+					selectedTraveller: null,
 					lastFetch: null,
 					status: 'idle',
 					error: null,
@@ -161,7 +190,7 @@ describe('travellersSlice', () => {
 				})
 
 				it('should call handleApiError on API error', async () => {
-					const mockError = new Error(ERROR_MESSAGES.NETWORK_ERROR)
+					const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
 					fetch.mockRejectedValueOnce(mockError)
 
 					await store.dispatch(
@@ -173,7 +202,7 @@ describe('travellersSlice', () => {
 
 					expect(handleApiError).toHaveBeenCalledWith(
 						mockError,
-						ERROR_MESSAGES.ERROR_UPDATING_TRAVELLER +
+						API_ERROR_MESSAGE.UPDATE_TRAVELLER_NAME_CATCH +
 							MOCK_USER.FULL_NAME,
 					)
 				})
@@ -276,57 +305,9 @@ describe('travellersSlice', () => {
 		})
 
 		describe('error scenarios', () => {
-			it('should return specific error message for 500 status', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: false,
-					status: 500,
-					json: async () => ({ message: 'Internal Server Error' }),
-				})
-
-				const result = await store.dispatch(updateTravellers())
-
-				expect(result.payload).toBe(ERROR_MESSAGES.SERVER_ERROR)
-			})
-
-			it('should return specific error message for 404 status', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: false,
-					status: 404,
-					json: async () => ({ message: 'Not Found' }),
-				})
-
-				const result = await store.dispatch(updateTravellers())
-
-				expect(result.payload).toBe(ERROR_MESSAGES.DATA_NOT_FOUND)
-			})
-
-			it('should return client error message for 400-499 status codes', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: false,
-					status: 403,
-					json: async () => ({ message: 'Forbidden' }),
-				})
-
-				const result = await store.dispatch(updateTravellers())
-
-				expect(result.payload).toBe(ERROR_MESSAGES.REQUEST_ERROR)
-			})
-
-			it('should return connection error message for other status codes', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: false,
-					status: 502,
-					json: async () => ({ message: 'Bad Gateway' }),
-				})
-
-				const result = await store.dispatch(updateTravellers())
-
-				expect(result.payload).toBe(ERROR_MESSAGES.CONNECTION_ERROR)
-			})
-
 			it('should handle network errors with specific message', async () => {
 				const networkError = new TypeError(
-					ERROR_MESSAGES.FAILED_TO_FETCH,
+					API_ERROR_MESSAGE.FAILED_TO_FETCH,
 				)
 				fetch.mockRejectedValueOnce(networkError)
 
@@ -338,12 +319,191 @@ describe('travellersSlice', () => {
 			})
 
 			it('should handle unexpected errors with generic message', async () => {
-				const unexpectedError = new Error('Some unexpected error')
+				const unexpectedError = new Error(
+					`${API_ERROR_MESSAGE.FAILED_TO_FETCH}`,
+				)
 				fetch.mockRejectedValueOnce(unexpectedError)
 
 				const result = await store.dispatch(updateTravellers())
 
-				expect(result.payload).toBe(ERROR_MESSAGES.UNEXPECTED_ERROR)
+				expect(result.payload).toBe(
+					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
+				)
+			})
+		})
+	})
+
+	describe('registerTraveller', () => {
+		const mockRegistrationData = {
+			firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+			lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
+			description: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description,
+			daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity,
+			cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
+			files: [{ name: 'test.jpg', file: new Blob() }],
+		}
+
+		beforeEach(() => {
+			localStorage.getItem.mockReturnValue(MOCK_USER.USER_ID)
+		})
+
+		afterEach(() => {
+			localStorage.getItem.mockReset()
+		})
+
+		describe('success scenarios', () => {
+			it('should upload images and register traveller successfully', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				// Verify successful registration
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(result.payload).toMatchObject({
+					id: MOCK_USER.USER_ID,
+					firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+					lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
+					description:
+						MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description,
+					daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity,
+					cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
+					files: ['https://mock-url.com/image.jpg'],
+				})
+
+				// Verify state updates
+				const state = store.getState().travellers
+				expect(state.isTraveller).toBe(true)
+				expect(state.hasTravellers).toBe(true)
+				expect(state.travellerName).toBe(
+					`${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`,
+				)
+				expect(state.travellers).toContainEqual(
+					expect.objectContaining({
+						id: MOCK_USER.USER_ID,
+						firstName:
+							MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+					}),
+				)
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('should return error message when API response is not ok', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: false,
+				})
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(handleApiError).toHaveBeenCalledWith(
+					expect.any(Error),
+					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
+				)
+
+				const state = store.getState().travellers
+				expect(state.status).toBe('failed')
+				expect(state.isTraveller).toBe(false)
+				expect(state.travellers).toEqual([])
+			})
+
+			it('should call handleApiError on network error', async () => {
+				const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
+				fetch.mockRejectedValueOnce(mockError)
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(handleApiError).toHaveBeenCalledWith(
+					mockError,
+					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
+				)
+
+				const state = store.getState().travellers
+				expect(state.status).toBe('failed')
+				expect(state.isTraveller).toBe(false)
+				expect(state.travellers).toEqual([])
+			})
+		})
+	})
+
+	describe('loadTraveller', () => {
+		const mockId = 'user123'
+		const mockTravellerData = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE
+
+		describe('success scenarios', () => {
+			it('should fetch and set selected traveller', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => mockTravellerData,
+				})
+
+				const result = await store.dispatch(loadTraveller(mockId))
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(result.payload).toEqual({
+					...mockTravellerData,
+					id: mockId,
+				})
+
+				const state = store.getState().travellers
+				expect(state.selectedTraveller).toEqual({
+					...mockTravellerData,
+					id: mockId,
+				})
+				expect(state.status).toBe('succeeded')
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('should handle API error (not ok)', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: false,
+					status: 404, // Simulate Not Found
+				})
+
+				const result = await store.dispatch(loadTraveller(mockId))
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(handleApiError).toHaveBeenCalled()
+
+				const state = store.getState().travellers
+				expect(state.status).toBe('failed')
+				expect(state.error).toContain(
+					`${API_ERROR_MESSAGE.LOAD_TRAVELLER_CATCH}${mockId}`,
+				)
+			})
+
+			it('should handle missing data (valid 200 OK but null body)', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => null,
+				})
+
+				const result = await store.dispatch(loadTraveller(mockId))
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				const state = store.getState().travellers
+				expect(state.status).toBe('failed')
+			})
+
+			it('should handle network errors', async () => {
+				const networkError = new Error('Network Error')
+				fetch.mockRejectedValueOnce(networkError)
+
+				const result = await store.dispatch(loadTraveller(mockId))
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(handleApiError).toHaveBeenCalled()
 			})
 		})
 	})
@@ -442,9 +602,6 @@ describe('travellersSlice', () => {
 
 		describe('error scenarios', () => {
 			it('should pass through user-friendly error messages', async () => {
-				const userFriendlyError = ERROR_MESSAGES.SERVER_ERROR
-
-				// Mock updateTravellers to reject with user-friendly error
 				global.fetch.mockResolvedValueOnce({
 					ok: false,
 					status: 500,
@@ -454,20 +611,23 @@ describe('travellersSlice', () => {
 					loadTravellers({ forceRefresh: true }),
 				)
 
-				expect(result.payload).toBe(userFriendlyError)
+				expect(result.payload).toBe(
+					`${API_ERROR_MESSAGE.UPDATE_TRAVELLERS_CATCH}: ${ERROR_MESSAGES.REQUEST_ERROR}`,
+				)
 			})
 
 			it('should provide fallback message for short/generic errors', async () => {
-				// Mock updateTravellers to reject with a short error
 				global.fetch.mockRejectedValueOnce(
-					new Error(ERROR_MESSAGES.NETWORK_ERROR),
+					new Error(API_ERROR_MESSAGE.NETWORK_ERROR),
 				)
 
 				const result = await store.dispatch(
 					loadTravellers({ forceRefresh: true }),
 				)
 
-				expect(result.payload).toBe(ERROR_MESSAGES.UNEXPECTED_ERROR)
+				expect(result.payload).toBe(
+					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
+				)
 			})
 		})
 	})
@@ -532,6 +692,17 @@ describe('travellersSlice', () => {
 		it('should return travellerName string from state', () => {
 			const result = selectTravellerName(store.getState())
 			expect(result).toBe(MOCK_TRAVELLERS.TEST_NAME)
+		})
+
+		it('should return selectedTraveller from state', () => {
+			// Manually set selectedTraveller state
+			const mockState = {
+				travellers: {
+					selectedTraveller: MOCK_TRAVELLERS.TEST_TRAVELLER,
+				},
+			}
+			const result = selectSelectedTraveller(mockState)
+			expect(result).toEqual(MOCK_TRAVELLERS.TEST_TRAVELLER)
 		})
 	})
 })

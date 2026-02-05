@@ -4,7 +4,7 @@
 		"lastName": "Traveller",
 		"description": "Test description",
 		"daysInCity": 5,
-		"areas": ["Area 1"],
+		"cities": ["City 1"],
 		"files": [],
 		"registered": "2023-01-01"
 	},
@@ -13,7 +13,7 @@
 		"lastName": "Traveller",
 		"description": "Another description",
 		"daysInCity": 3,
-		"areas": ["Area 2"],
+		"cities": ["City 2"],
 		"files": [],
 		"registered": "2023-01-02"
 	}

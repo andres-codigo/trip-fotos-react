@@ -11,12 +11,16 @@ const Checkbox = ({
 	value,
 	disabled = false,
 	required = false,
+	isArrayItem = false,
+	showRequiredMark = false,
 	className = '',
 	isValid = true,
 	message = '',
 	'data-cy': dataCy,
 	'data-cy-error': dataCyError,
-	...rest
+	'aria-label': ariaLabel,
+	'aria-labelledby': ariaLabelledby,
+	'data-testid': dataTestid,
 }) => {
 	const containerClass = classNames('checkbox-container', className)
 
@@ -31,20 +35,24 @@ const Checkbox = ({
 				disabled={disabled}
 				required={required}
 				data-cy={dataCy}
+				data-testid={dataTestid}
 				aria-required={required}
 				aria-invalid={!isValid}
+				aria-label={ariaLabel}
+				aria-labelledby={ariaLabelledby}
 				aria-describedby={
 					!isValid && message ? `${id}-error` : undefined
 				}
-				{...rest}
 			/>
 			{label && (
 				<label htmlFor={id}>
 					{label}
-					{required && <span className="input-required">*</span>}
+					{!isArrayItem && (showRequiredMark || required) && (
+						<span className="input-required">*</span>
+					)}
 				</label>
 			)}
-			{!isValid && message && (
+			{!isArrayItem && !isValid && message && (
 				<p
 					id={`${id}-error`}
 					role="alert"
@@ -68,8 +76,13 @@ Checkbox.propTypes = {
 	className: PropTypes.string,
 	isValid: PropTypes.bool,
 	message: PropTypes.string,
+	showRequiredMark: PropTypes.bool,
 	'data-cy': PropTypes.string,
 	'data-cy-error': PropTypes.string,
+	'aria-label': PropTypes.string,
+	'aria-labelledby': PropTypes.string,
+	'data-testid': PropTypes.string,
+	isArrayItem: PropTypes.bool,
 }
 
 export default Checkbox
