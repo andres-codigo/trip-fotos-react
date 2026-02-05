@@ -212,7 +212,7 @@ describe('Register', () => {
 			})
 		})
 
-		it('should close error dialog when closed', async () => {
+		it('should close error dialog when close button is clicked', async () => {
 			const errorMsg = 'Registration Failed'
 			const mockUnwrap = vi.fn().mockRejectedValue(errorMsg)
 			store.dispatch.mockReturnValue({ unwrap: mockUnwrap })
@@ -228,16 +228,16 @@ describe('Register', () => {
 				).toBeInTheDocument()
 			})
 
-			// Close the dialog (assuming BaseDialog has a close button or we can inspect implementation)
-			// BaseDialog usually has a close button if onClose is provided.
-			// However, inspecting BaseDialog usage, it usually renders children.
-			// Let's assume hitting Escape or finding a button works, but BaseDialog functionality
-			// is usually tested in BaseDialog tests.
-			// Here we just check if state updates.
-			// BUT, the mocked BaseDialog isn't mocked here, it's the real one (or not mocked in this file).
-			// src/components/ui/dialog/BaseDialog is likely a real component.
-			// Let's check how to close it. Usually strict interaction depends on BaseDialog implementation.
-			// For now, let's verify error is displayed. Closing might require finding the close button.
+			// Find and click the close button within the dialog
+			const closeButton = screen.getByRole('button', { name: /close/i })
+			fireEvent.click(closeButton)
+
+			// Verify the dialog is removed from the DOM
+			await waitFor(() => {
+				expect(
+					screen.queryByTestId('invalid-traveller-registration-dialog'),
+				).not.toBeInTheDocument()
+			})
 		})
 	})
 })
