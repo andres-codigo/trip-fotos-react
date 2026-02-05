@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import TravellersList from '@/components/travellers/TravellersList/TravellersList'
@@ -13,13 +13,15 @@ const Travellers = () => {
 	const [alertMessage, setAlertMessage] = useState(() => {
 		// Initialise state from location if available
 		const message = location.state?.alertMessage
-		if (message) {
-			// Clear state immediately to prevent persistence on refresh
-			window.history.replaceState({}, document.title)
-			return message
-		}
-		return null
+		return message || null
 	})
+
+	useEffect(() => {
+		// Clear history state after alert message is set to prevent persistence on refresh
+		if (alertMessage) {
+			window.history.replaceState({}, document.title)
+		}
+	}, [alertMessage])
 
 	return (
 		<main

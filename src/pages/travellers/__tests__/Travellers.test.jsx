@@ -1,7 +1,7 @@
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import { Provider, useDispatch, useSelector } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 import { GLOBAL } from '@/constants/ui'
 import { MOCK_TRAVELLERS, TEST_IDS } from '@/constants/test'
