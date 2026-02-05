@@ -20,9 +20,9 @@ const Register = () => {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
 	const [isLoading, setIsLoading] = useState(false)
-	const [error, setError] = useState(false)
+	const [error, setError] = useState(null)
 
-	const handleError = () => setError(null)
+	const handleCloseError = () => setError(null)
 
 	const handleRegistrationSubmit = async (formData) => {
 		setIsLoading(true)
@@ -53,7 +53,7 @@ const Register = () => {
 					show={true}
 					isError={true}
 					title={GLOBAL.ERROR_DIALOG_TITLE}
-					onClose={handleError}
+					onClose={handleCloseError}
 					data-cy="invalid-traveller-registration-dialog">
 					{error}
 				</BaseDialog>
