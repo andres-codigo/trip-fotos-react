@@ -16,27 +16,45 @@ export const useTravellerRegistration = () => {
 	})
 
 	const validateField = (id, value) => {
-		let isValid = true
-		let message = ''
-
 		if (id === FIRST_NAME && value.trim() === '') {
-			isValid = false
-			message = VALIDATION_MESSAGES.FIRST_NAME_REQUIRED
-		} else if (id === LAST_NAME && value.trim() === '') {
-			isValid = false
-			message = VALIDATION_MESSAGES.LAST_NAME_REQUIRED
-		} else if (id === DESCRIPTION && value.trim() === '') {
-			isValid = false
-			message = VALIDATION_MESSAGES.DESCRIPTION_REQUIRED
-		} else if (id === DAYS && (!value || Number(value) <= 0)) {
-			isValid = false
-			message = VALIDATION_MESSAGES.DAYS_REQUIRED
-		} else if (id === CITIES && value.length === 0) {
-			isValid = false
-			message = VALIDATION_MESSAGES.CITIES_REQUIRED
+			return {
+				isValid: false,
+				message: VALIDATION_MESSAGES.FIRST_NAME_REQUIRED,
+			}
 		}
 
-		return { isValid, message }
+		if (id === LAST_NAME && value.trim() === '') {
+			return {
+				isValid: false,
+				message: VALIDATION_MESSAGES.LAST_NAME_REQUIRED,
+			}
+		}
+
+		if (id === DESCRIPTION && value.trim() === '') {
+			return {
+				isValid: false,
+				message: VALIDATION_MESSAGES.DESCRIPTION_REQUIRED,
+			}
+		}
+
+		if (id === DAYS && (!value || Number(value) <= 0)) {
+			return {
+				isValid: false,
+				message: VALIDATION_MESSAGES.DAYS_REQUIRED,
+			}
+		}
+
+		if (id === CITIES && value.length === 0) {
+			return {
+				isValid: false,
+				message: VALIDATION_MESSAGES.CITIES_REQUIRED,
+			}
+		}
+
+		return {
+			isValid: true,
+			message: '',
+		}
 	}
 
 	const handleInputChange = (e) => {
