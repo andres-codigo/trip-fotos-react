@@ -1,96 +1,39 @@
 # GitHub Copilot Instructions for trip-fotos-react
 
-## Project Context
-
-- **Stack**: React 19, Redux Toolkit, Firebase, React Router 7, Vite.
-- **Styling**: SCSS Modules (`*.module.scss`) and global SCSS (`src/styles`).
-- **Testing**: Cypress (E2E & Component), Vitest (Unit/Integration).
-- **State Management**: Redux Toolkit with `redux-persist`.
-
 ## Language & Tone
 
 - **Spelling**: Use British English (`en-GB`) for all comments, documentation, and strings (e.g., `colour`, `behaviour`, `optimise`).
 - **Commit Messages**: Follow `en-GB` spelling conventions.
 
-## Architecture & Patterns
+## Quick Architecture Reference
 
 - **Entry Point**: `src/app/App.jsx` handles routing, auth checks, and global layout.
 - **Routing**: Lazy-loaded routes defined in `App.jsx`. Protected routes redirect to `PATHS.AUTHENTICATION`.
-- **State**:
-    - Slices located in `src/store/slices`.
-    - Async logic should use Redux Thunks.
-    - **Error Handling in Thunks**: Standard practice is to check `!response.ok` and throw a generic `REQUEST_ERROR` (or valid user-facing error) rather than granular status code checks, unless specific UI behavior depends on the status code.
-    - Persisted state configuration in `src/store/store.js`.
-- **Components**:
-    - Located in `src/components`, categorized by type (`common`, `forms`, `layout`, `ui`, `travellers`).
-    - **Folder Structure**: Each component must reside in its own contextual folder (e.g., `src/components/forms/user-authentication/UserAuthenticationForm.jsx`).
-        - If adding to a folder with flat components, refactor existing components into their own folders first.
-        - Each component folder must contain a `__tests__` directory.
-        - If a component has specific hooks, place them in a `hooks` subfolder within the component's folder (e.g., `src/components/forms/user-authentication/hooks/useUserAuthentication.js`).
-    - Use functional components with hooks.
-    - Use default exports.
-    - **Reusability**:
-        - When creating or recreating components, check `src/components/ui` or `src/components/common` for existing reusable components (e.g., `Input`, `Button`) and use them.
-        - If a reusable pattern emerges, create a new reusable component in the appropriate folder.
-        - **Immediate Refactoring**: When a new reusable component is created, immediately refactor existing code to utilize it.
-        - **Consistency**: Maintain API consistency (prop names, validation patterns) when creating similar UI components.
-- **Services**: Firebase initialization in `src/services/firebase`.
-- **Constants**:
-    - **Strictly** use centralized constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`).
-    - Do not hardcode strings for paths, API URLs, or error messages.
-    - **Error Constants separation**: Use `API_ERROR_MESSAGE` for internal/technical log messages and logic checks (e.g., 'Failed to fetch'). Use `ERROR_MESSAGES` for user-facing UI strings.
-- **Utils**:
-    - **Validation**: Use `src/utils/validation` for common checks (email, password).
-    - **Error Handling**: Use `src/utils/errorHandler` for API error extraction.
-
-## Development Workflow
-
-- **Start Server**: `npm run dev` (Vite).
-- **Lint & Format**: `npm run lint:fix` (ESLint + Prettier).
-- **Dependency Check**: `npm run check:dependencies`.
-- **Documentation**: Whenever new folders/files are added, or new patterns are introduced, reference the `README.md` file and update it if applicable (e.g., updating the Folder Structure section).
-
-## Testing Strategy
-
-- **Creation Rule**: When creating a new component or page, always create the corresponding test files:
-    - **Local Tests** (in `__tests__` directory):
-        - Cypress component test (`*.cy.jsx`) for UI/interaction.
-        - Vitest unit test (`*.test.js`) for logic/hooks.
-    - **E2E Tests** (in `cypress/e2e`):
-        - For Pages: Create `[PageName].page.cy.js` in `cypress/e2e/pages`.
-        - For Components: Create `[ComponentName].component.cy.js` in `cypress/e2e/components`.
-- **State Management Tests**: When modifying Redux slices (`src/store/slices`) or the store configuration (`src/store/store.js`), immediately update or create the corresponding Vitest test file (`*.test.js`) to reflect changes in reducers, actions, thunks, or store setup.
-- **Component Tests**: Use Cypress (`*.cy.jsx`). Located alongside components.
-    - Run: `npm run cy:run:auto {path/to/component}`.
-- **E2E Tests**: Use Cypress (`cypress/e2e`).
-    - Run: `npm run cy:open:e2e` or `npm run cy:run:e2e`.
-    - **Constants**:
-        - Strictly use `cypress/support/constants` for selectors, URLs, and test data in E2E tests.
-        - Define reusable test constants (IDs, labels, error messages) in `src/constants/test` for component tests.
-- **Unit/Integration**: Use Vitest (`*.test.js`).
-    - Run: `npm run vitest:run` or `npm run vitest:watch`.
-- **Mocking**: Use `src/testUtils` and `src/constants/test` for mocks and selectors.
+- **Services**: Firebase initialisation in `src/services/firebase`.
 
 ## Coding Conventions
 
 - **Imports**: Use `@` alias for `src` (e.g., `import { ... } from '@/components/...'`).
 - **Naming**:
-    - Components: PascalCase (`UserAuthenticationForm.jsx`). Use descriptive suffixes (e.g., `Form`, `List`, `Card`) to avoid conflicts with page names or other components.
-    - Hooks/Utils: camelCase (`useViewport.js`).
+    - Components: PascalCase (e.g., `UserAuthenticationForm.jsx`).
+    - Hooks/Utils: camelCase (e.g., `useViewport.js`).
     - Constants: UPPER_SNAKE_CASE.
 - **Type Safety**: Use `prop-types` for all component props.
-- **Accessibility**:
-    - Ensure form components handle accessibility attributes (`aria-*`, `role`) for validation states.
-    - **Form Errors**: Specific pattern for form field errors involves rendering a visual error (if design calls for it) AND a visually hidden error span with `role="alert"` for screen readers. Use `renderVisuallyHiddenError` utility where applicable.
-- **Styling**:
-    - Use SCSS modules for component-specific styles. Import as `[componentName]Styles` (e.g., `import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'`).
-    - **Variables & Mixins**:
-        - When creating a new SCSS file, always review `src/styles` for available variables and mixins to ensure consistency.
-        - **Mixin Usage**: Prefer using namespaced imports (e.g., `@use '@/styles/setup/mixins/helpers' as helpers`). Use common helpers (like `helpers.visually-hidden`) instead of re-implementing CSS.
-        - New colour variables should follow the existing naming convention (e.g., using "Name that Colour" tool).
+- **Constants**: Strictly use centralised constants from `src/constants`. Do not hardcode strings for paths, API URLs, or error messages.
+- **Validation**: Use `src/utils/validation` for common checks (email, password).
+- **Error Handling**: Use `src/utils/errorHandler` for API error extraction.
 
-## Key Files
+## Domain-Specific Guidance
 
-- `vite.config.js`: Build and test configuration.
-- `cypress.config.js`: Cypress setup and environment variables.
-- `src/constants/index.js`: Root for application constants.
+For detailed guidance, refer to the following instruction files:
+
+- **Components**: `.github/instructions/components.instructions.md` — Folder structure, reusability, testing, accessibility.
+- **Redux Store**: `.github/instructions/store.instructions.md` — Slices, thunks, error handling, persistence, testing.
+- **Styling**: `.github/instructions/styles.instructions.md` — SCSS modules, variables, mixins, naming conventions.
+
+## Workflow Automation
+
+Use the following agents for common tasks:
+
+- **Create Component**: Use the `create-component` agent to scaffold new components with folder structure and tests.
+- **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with thunks and tests.
