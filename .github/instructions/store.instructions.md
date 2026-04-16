@@ -37,6 +37,43 @@ export const fetchTravellersThunk = createAsyncThunk(
 )
 ```
 
+### Modern Data Fetching: RTK Query (Preferred for New Features)
+
+For new data-fetching features, prefer **RTK Query** over manual thunks. RTK Query provides built-in caching, request deduplication, and automatic re-fetching—significantly reducing boilerplate.
+
+**Migration Strategy (Incremental Adoption)**:
+
+- **New data-fetching features**: Use RTK Query from the start.
+- **Existing thunks**: Migrate only when those slices/areas are already being changed for other reasons. Do not refactor thunks in isolation; combine migrations with other feature work.
+
+This prevents large refactoring efforts while gradually modernising the codebase.
+
+Example RTK Query slice (for reference):
+
+```javascript
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+
+export const travellersApi = createApi(
+    {
+        reducerPath: 'travellersApi',
+        baseQuery: fetchBaseQuery({ baseUrl: API_BACKEND_URL }),
+        endpoints: (builder) => ({
+            getTravellers: builder.query({
+                query: () => '/travellers',
+            }),
+            createTraveller: builder.mutation({
+                query: (travellerData) => ({
+                    url: '/travellers',
+                    method: 'POST',
+                    body: travellerData,
+                }),
+            }),
+        }),
+    },
+)
+
+export const { useGetTravellersQuery, useCreateTravellerMutation } = travellersApi
+
 ## Constants & Error Messages
 
 - **Strictly** use centralized constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`, `REQUEST_ERROR`).
@@ -66,3 +103,4 @@ When modifying Redux slices (`src/store/slices/`) or the store configuration (`s
 ### Mocking
 
 Use `src/testUtils` and `src/constants/test` for mocks and test data.
+```
