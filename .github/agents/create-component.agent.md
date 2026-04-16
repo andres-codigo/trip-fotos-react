@@ -51,3 +51,4 @@ Use this agent when you need to create a new React component with full structure
 - Always check for reusable components already available in the UI and common folders
 - When a new reusable component is created, the agent should flag that existing similar components should be refactored to use it
 - All new components must have `prop-types` validation from the start
+- All generated files must end with a trailing newline at EOF to satisfy linting rules

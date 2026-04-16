@@ -50,3 +50,4 @@ Use this agent when creating a new route-level page with structure, styling, and
 - Follow British English in generated comments and strings.
 - Keep page responsibilities focused on orchestration and route-level concerns.
 - Update tests in the same task as page creation.
+- All generated files must end with a trailing newline at EOF to satisfy linting rules

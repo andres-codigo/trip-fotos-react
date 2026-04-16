@@ -76,3 +76,4 @@ Use this agent when you need to create a new Redux slice with reducers, async lo
 - Error handling must follow the `!response.ok` check pattern with generic `REQUEST_ERROR` or user-facing messages
 - Slice tests must be created immediately when the slice is created
 - Persist configuration must be updated if the slice's state should survive page reloads
+- All generated files must end with a trailing newline at EOF to satisfy linting rules
