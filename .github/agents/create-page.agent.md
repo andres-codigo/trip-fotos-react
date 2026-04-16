@@ -33,6 +33,7 @@ Use this agent when creating a new route-level page with structure, styling, and
 5. **Page Composition**
     - Compose reusable UI from `src/components`.
     - Keep reusable logic in hooks/components, not embedded deeply in page files.
+    - Ensure all page-level and custom container elements include `data-cy` attributes for E2E testing.
 
 6. **Test Scaffolding**
     - Create `{PageName}.cy.jsx` (Cypress component test).
@@ -50,4 +51,5 @@ Use this agent when creating a new route-level page with structure, styling, and
 - Follow British English in generated comments and strings.
 - Keep page responsibilities focused on orchestration and route-level concerns.
 - Update tests in the same task as page creation.
-- All generated files must end with a trailing newline at EOF to satisfy linting rules
+- **All generated files must end with a trailing newline at EOF** — enforce this during file creation to satisfy linting rules
+- Every page file must include `data-cy` attributes on all page-level containers and custom elements for E2E testing

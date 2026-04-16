@@ -30,12 +30,14 @@ Use this agent when you need to create a new React component with full structure
     - Scaffold prop-types validation
     - Include a placeholder SCSS import with the correct naming convention
     - Add accessibility attributes if appropriate (form components, interactive elements)
+    - Add `data-cy` attributes to all meaningful DOM elements (buttons, form inputs, containers, labels, values) for testability
 
 5. **Test File Setup**
     - Create `{ComponentName}.cy.jsx` (Cypress component test) with mount setup
     - Create `{ComponentName}.test.js` (Vitest unit test) with render setup
     - Both test files should import the component and define placeholder test cases
     - Reference `src/testUtils` for mocking if needed
+    - For Cypress tests, do not use inline string selectors like `cy.get('[data-cy="..."]')`; create and use exported selector constants in `src/constants/test/selectors/components.js` using `getByDataCy`, following the `Header` and `Header.cy.jsx` pattern
 
 6. **Styling**
     - Review `src/styles` for available variables and mixins
@@ -51,4 +53,6 @@ Use this agent when you need to create a new React component with full structure
 - Always check for reusable components already available in the UI and common folders
 - When a new reusable component is created, the agent should flag that existing similar components should be refactored to use it
 - All new components must have `prop-types` validation from the start
-- All generated files must end with a trailing newline at EOF to satisfy linting rules
+- **All generated files must end with a trailing newline at EOF** — enforce this during file creation to satisfy linting rules
+- Every new component file must include `data-cy` attributes on all meaningful elements (buttons, inputs, containers, labels, values)
+- When new component markup introduces `data-cy` attributes, add corresponding exported constants to `src/constants/test/selectors/components.js` via `getByDataCy` and use those constants in all new `*.cy.jsx` tests instead of literal selector strings
