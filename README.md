@@ -354,6 +354,7 @@ This project includes structured guidance files for GitHub Copilot to ensure gen
 Detailed guidance for specific areas of the codebase:
 
 - **Components**: `.github/instructions/components.instructions.md` — Folder structure, reusability patterns, testing, and accessibility.
+- **Pages**: `.github/instructions/pages.instructions.md` — Route-level composition, data loading orchestration, and page testing.
 - **Redux Store**: `.github/instructions/store.instructions.md` — Slices, thunks, error handling, persistence, and testing.
 - **Styling**: `.github/instructions/styles.instructions.md` — SCSS modules, variables, mixins, and naming conventions.
 
@@ -777,7 +778,7 @@ trip-fotos-react/
 ### Explanation of Key Project Files and Folders:
 
 1. **`.github/workflows/`**: Contains GitHub Actions workflow YAML files that automate CI/CD tasks such as running tests, linting, and deployments on push or pull request events.
-2. **`.github/instructions/`**: Contains domain-specific Copilot guidance files for components, Redux store, and styling.
+2. **`.github/instructions/`**: Contains domain-specific Copilot guidance files for components, pages, Redux store, and styling.
 3. **`.github/agents/`**: Contains workflow agent files that automate scaffolding tasks (e.g., creating new components and Redux slices) with full structure and tests.
 4. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
 5. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).

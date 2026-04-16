@@ -2,7 +2,7 @@
 name: components-development
 description: Use when creating, modifying, or refactoring React components. Covers component folder structure, reusability patterns, hooks placement, testing requirements, and accessibility conventions.
 applyTo:
-    ['src/components/**/*.jsx', 'src/components/**/*.js', 'src/pages/**/*.jsx']
+  ['src/components/**/*.jsx', 'src/components/**/*.js']
 ---
 
 # Component Development Guidance
@@ -10,6 +10,8 @@ applyTo:
 ## Folder Structure
 
 Each component must reside in its own contextual folder. Components are located in `src/components`, categorised by type: `common`, `forms`, `layout`, `ui`, `travellers`.
+
+Page-level guidance is maintained separately in `.github/instructions/pages.instructions.md`.
 
 ### Naming & Location
 

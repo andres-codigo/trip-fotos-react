@@ -28,6 +28,7 @@
 For detailed guidance, refer to the following instruction files:
 
 - **Components**: `.github/instructions/components.instructions.md` — Folder structure, reusability, testing, accessibility.
+- **Pages**: `.github/instructions/pages.instructions.md` — Route-level composition, data loading orchestration, and page testing.
 - **Redux Store**: `.github/instructions/store.instructions.md` — Slices, thunks, error handling, persistence, testing.
 - **Styling**: `.github/instructions/styles.instructions.md` — SCSS modules, variables, mixins, naming conventions.
 
