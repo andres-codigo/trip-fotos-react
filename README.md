@@ -365,7 +365,7 @@ Automated scaffolding workflows for common tasks:
 
 - **Create Component**: Use the `create-component` agent to scaffold new components with full structure and tests.
 - **Create Page**: Use the `create-page` agent to scaffold new pages with route integration and tests.
-- **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with thunks and tests.
+- **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with RTK Query/thunks and tests.
 
 ---
 
