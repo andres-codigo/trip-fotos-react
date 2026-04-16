@@ -339,13 +339,33 @@ npm run dev
 
 Refer to the [Scripts](#scripts) section for commands to run ESLint, fix linting issues, and format files using Prettier.
 
-### AI Assistance
+### AI Assistance & Copilot Guidance
 
-This project includes a configuration file for GitHub Copilot to ensure generated code adheres to project standards.
+This project includes structured guidance files for GitHub Copilot to ensure generated code adheres to project standards.
+
+#### Workspace-Level Instructions
 
 - **File**: `.github/copilot-instructions.md`
-- **Purpose**: Provides context to AI agents about architecture, testing strategies, naming conventions, and tech stack.
-- **Usage**: Copilot automatically references this file. Developers can also refer to it for a quick summary of project guidelines.
+- **Purpose**: Global rules for language, imports, naming conventions, and type safety.
+- **Usage**: Copilot automatically references this file for behaviour guidance on all files.
+
+#### Domain-Specific Instructions
+
+Detailed guidance for specific areas of the codebase:
+
+- **Components**: `.github/instructions/components.instructions.md` — Folder structure, reusability patterns, testing, and accessibility.
+- **Pages**: `.github/instructions/pages.instructions.md` — Route-level composition, data loading orchestration, and page testing.
+- **Redux Store**: `.github/instructions/store.instructions.md` — Slices, thunks, error handling, persistence, and testing.
+- **Styling**: `.github/instructions/styles.instructions.md` — SCSS modules, variables, mixins, and naming conventions.
+- **Testing**: `.github/instructions/testing.instructions.md` — Vitest/Cypress standards, shared test data paths, and anti-flakiness practices.
+
+#### Workflow Agents
+
+Automated scaffolding workflows for common tasks:
+
+- **Create Component**: Use the `create-component` agent to scaffold new components with full structure and tests.
+- **Create Page**: Use the `create-page` agent to scaffold new pages with route integration and tests.
+- **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with RTK Query/thunks and tests.
 
 ---
 
@@ -721,8 +741,10 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 ```
 trip-fotos-react/
 ├── .github/
+│   ├── agents/                 # GitHub Copilot agent workflows for scaffolding
+│   ├── instructions/           # Domain-specific Copilot guidance files
 │   ├── workflows/              # GitHub Actions workflow files for CI/CD automation
-│   └── copilot-instructions.md # Context and guidelines for GitHub Copilot
+│   └── copilot-instructions.md # Workspace-level Copilot guidelines
 ├── cypress/                    # Cypress tests
 ├── declarations/               # Breaking issue fix when using ESLint V9
 ├── public/                     # Static assets
@@ -758,17 +780,19 @@ trip-fotos-react/
 ### Explanation of Key Project Files and Folders:
 
 1. **`.github/workflows/`**: Contains GitHub Actions workflow YAML files that automate CI/CD tasks such as running tests, linting, and deployments on push or pull request events.
-2. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
-3. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).
-4. **`.npmrc`**: Configuration file for custom npm settings and registry options.
-5. **`.nvmrc`**: Specifies the Node.js version for Node Version Manager (nvm).
-6. **`.prettierignore`**: Specifies files and directories to be ignored by Prettier for formatting.
-7. **`.prettierrc.json`**: Configuration file for Prettier to enforce consistent code formatting.
-8. **`cypress.config.js`**: Configuration file for Cypress end-to-end testing.
-9. **`eslint.config.mjs`**: ESLint configuration file for linting JavaScript/TypeScript code.
-10. **`jsconfig.json`**: JavaScript project configuration file that provides editor support for features like path aliases, module resolution, and improved IntelliSense in VS Code and other compatible editors.
-11. **`vercel.json`**: Configuration file for deploying the project to Vercel.
-12. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
+2. **`.github/instructions/`**: Contains domain-specific Copilot guidance files for components, pages, Redux store, styling, and testing.
+3. **`.github/agents/`**: Contains workflow agent files that automate scaffolding tasks (e.g., creating new components, pages, and Redux slices) with full structure and tests.
+4. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
+5. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).
+6. **`.npmrc`**: Configuration file for custom npm settings and registry options.
+7. **`.nvmrc`**: Specifies the Node.js version for Node Version Manager (nvm).
+8. **`.prettierignore`**: Specifies files and directories to be ignored by Prettier for formatting.
+9. **`.prettierrc.json`**: Configuration file for Prettier to enforce consistent code formatting.
+10. **`cypress.config.js`**: Configuration file for Cypress end-to-end testing.
+11. **`eslint.config.mjs`**: ESLint configuration file for linting JavaScript/TypeScript code.
+12. **`jsconfig.json`**: JavaScript project configuration file that provides editor support for features like path aliases, module resolution, and improved IntelliSense in VS Code and other compatible editors.
+13. **`vercel.json`**: Configuration file for deploying the project to Vercel.
+14. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
 
 <a id="troubleshooting"></a>
 
