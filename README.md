@@ -357,12 +357,14 @@ Detailed guidance for specific areas of the codebase:
 - **Pages**: `.github/instructions/pages.instructions.md` — Route-level composition, data loading orchestration, and page testing.
 - **Redux Store**: `.github/instructions/store.instructions.md` — Slices, thunks, error handling, persistence, and testing.
 - **Styling**: `.github/instructions/styles.instructions.md` — SCSS modules, variables, mixins, and naming conventions.
+- **Testing**: `.github/instructions/testing.instructions.md` — Vitest/Cypress standards, shared test data paths, and anti-flakiness practices.
 
 #### Workflow Agents
 
 Automated scaffolding workflows for common tasks:
 
 - **Create Component**: Use the `create-component` agent to scaffold new components with full structure and tests.
+- **Create Page**: Use the `create-page` agent to scaffold new pages with route integration and tests.
 - **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with thunks and tests.
 
 ---
@@ -778,8 +780,8 @@ trip-fotos-react/
 ### Explanation of Key Project Files and Folders:
 
 1. **`.github/workflows/`**: Contains GitHub Actions workflow YAML files that automate CI/CD tasks such as running tests, linting, and deployments on push or pull request events.
-2. **`.github/instructions/`**: Contains domain-specific Copilot guidance files for components, pages, Redux store, and styling.
-3. **`.github/agents/`**: Contains workflow agent files that automate scaffolding tasks (e.g., creating new components and Redux slices) with full structure and tests.
+2. **`.github/instructions/`**: Contains domain-specific Copilot guidance files for components, pages, Redux store, styling, and testing.
+3. **`.github/agents/`**: Contains workflow agent files that automate scaffolding tasks (e.g., creating new components, pages, and Redux slices) with full structure and tests.
 4. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
 5. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).
 6. **`.npmrc`**: Configuration file for custom npm settings and registry options.

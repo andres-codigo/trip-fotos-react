@@ -1,6 +1,6 @@
 ---
 name: redux-store-development
-description: Use when creating Redux slices, async thunks, configuring state, or modifying store logic. Covers slice structure, thunk error handling, persistence configuration, and testing requirements.
+description: Use when creating Redux slices, async thunks, configuring state, or modifying store logic. Covers slice structure, RTK Query and thunk patterns, error handling, persistence, and testing requirements.
 applyTo: ['src/store/**/*.js', 'src/store/**/*.jsx']
 ---
 
@@ -9,12 +9,33 @@ applyTo: ['src/store/**/*.js', 'src/store/**/*.jsx']
 ## Slices & State Structure
 
 - Redux slices are located in `src/store/slices/`.
-- Each slice file should export a reducer and any associated actions or thunks.
+- Each slice file should export a reducer and any associated actions, thunks, or RTK Query APIs.
 - State is persisted using `redux-persist`; configuration is in `src/store/store.js`.
 
-## Async Logic: Thunks
+## Data Fetching Strategy
 
-All asynchronous operations should use **Redux Thunks**. This ensures consistent state management and error handling across the application.
+### RTK Query (Preferred for New Features)
+
+Use **RTK Query** for all new server-data fetching requirements and most new mutations. RTK Query provides built-in caching, request deduplication, automatic re-fetching, and background synchronisation.
+
+Use RTK Query when:
+
+- Fetching lists or detail records from APIs
+- Creating, updating, or deleting server-backed entities
+- Cache invalidation and refetching are needed
+
+### Redux Thunks (Orchestration & Existing Flows)
+
+Use **thunks** for:
+
+- Complex orchestration across multiple slices
+- Side effects not centred on a single API request
+- Existing thunk-based flows that are being maintained
+
+Apply incremental migration:
+
+- **New server-data features**: RTK Query from the start
+- **Existing thunks**: migrate only when those areas are already being changed
 
 ### Error Handling Pattern
 
@@ -37,46 +58,35 @@ export const fetchTravellersThunk = createAsyncThunk(
 )
 ```
 
-### Modern Data Fetching: RTK Query (Preferred for New Features)
-
-For new data-fetching features, prefer **RTK Query** over manual thunks. RTK Query provides built-in caching, request deduplication, and automatic re-fetching—significantly reducing boilerplate.
-
-**Migration Strategy (Incremental Adoption)**:
-
-- **New data-fetching features**: Use RTK Query from the start.
-- **Existing thunks**: Migrate only when those slices/areas are already being changed for other reasons. Do not refactor thunks in isolation; combine migrations with other feature work.
-
-This prevents large refactoring efforts while gradually modernising the codebase.
-
-Example RTK Query slice (for reference):
+### RTK Query Example (Reference)
 
 ```javascript
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
-export const travellersApi = createApi(
-    {
-        reducerPath: 'travellersApi',
-        baseQuery: fetchBaseQuery({ baseUrl: API_BACKEND_URL }),
-        endpoints: (builder) => ({
-            getTravellers: builder.query({
-                query: () => '/travellers',
-            }),
-            createTraveller: builder.mutation({
-                query: (travellerData) => ({
-                    url: '/travellers',
-                    method: 'POST',
-                    body: travellerData,
-                }),
-            }),
-        }),
-    },
-)
+export const travellersApi = createApi({
+	reducerPath: 'travellersApi',
+	baseQuery: fetchBaseQuery({ baseUrl: API_BACKEND_URL }),
+	endpoints: (builder) => ({
+		getTravellers: builder.query({
+			query: () => '/travellers',
+		}),
+		createTraveller: builder.mutation({
+			query: (travellerData) => ({
+				url: '/travellers',
+				method: 'POST',
+				body: travellerData,
+			}),
+		}),
+	}),
+})
 
-export const { useGetTravellersQuery, useCreateTravellerMutation } = travellersApi
+export const { useGetTravellersQuery, useCreateTravellerMutation } =
+	travellersApi
+```
 
 ## Constants & Error Messages
 
-- **Strictly** use centralized constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`, `REQUEST_ERROR`).
+- **Strictly** use centralised constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`, `REQUEST_ERROR`).
 - Do not hardcode strings for error messages, API URLs, or paths.
 - **Error Constants separation**:
     - Use `API_ERROR_MESSAGE` for internal/technical log messages and logic checks (e.g., 'Failed to fetch').
@@ -103,4 +113,3 @@ When modifying Redux slices (`src/store/slices/`) or the store configuration (`s
 ### Mocking
 
 Use `src/testUtils` and `src/constants/test` for mocks and test data.
-```

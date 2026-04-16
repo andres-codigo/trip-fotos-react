@@ -31,10 +31,12 @@ For detailed guidance, refer to the following instruction files:
 - **Pages**: `.github/instructions/pages.instructions.md` — Route-level composition, data loading orchestration, and page testing.
 - **Redux Store**: `.github/instructions/store.instructions.md` — Slices, thunks, error handling, persistence, testing.
 - **Styling**: `.github/instructions/styles.instructions.md` — SCSS modules, variables, mixins, naming conventions.
+- **Testing**: `.github/instructions/testing.instructions.md` — Vitest/Cypress standards, shared test data paths, and anti-flakiness practices.
 
 ## Workflow Automation
 
 Use the following agents for common tasks:
 
 - **Create Component**: Use the `create-component` agent to scaffold new components with folder structure and tests.
+- **Create Page**: Use the `create-page` agent to scaffold new pages with route integration and tests.
 - **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with thunks and tests.

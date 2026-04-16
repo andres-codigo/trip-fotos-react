@@ -63,7 +63,7 @@ When creating or modifying pages, keep both local and end-to-end coverage aligne
 ### E2E tests (`cypress/e2e/pages`)
 
 - Create or update page flows as `[PageName].page.cy.js`.
-- Use shared constants from `cypress/support/constants` and `src/constants/test`.
+- Use shared constants from `src/constants/test` and helper utilities from `cypress/support/utils`.
 
 ### Run commands
 
