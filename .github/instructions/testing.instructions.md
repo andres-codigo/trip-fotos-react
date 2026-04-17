@@ -46,3 +46,7 @@ Whenever components, pages, or store logic are modified, update the related test
 - Vitest: `npm run vitest:run` or `npm run vitest:watch`
 - Cypress E2E: `npm run cy:run:e2e`
 - Cypress auto-targeting: `npm run cy:run:auto {path/to/test-file}`
+
+## Linting And Formatting
+
+- Before handing off test-related changes, ensure every edited or newly created test file is ESLint-clean and Prettier-formatted.

@@ -22,6 +22,7 @@
 - **Constants**: Strictly use centralised constants from `src/constants`. Do not hardcode strings for paths, API URLs, or error messages.
 - **Validation**: Use `src/utils/validation` for common checks (email, password).
 - **Error Handling**: Use `src/utils/errorHandler` for API error extraction.
+- **Linting and Formatting**: Ensure every edited or newly created file is ESLint-clean and Prettier-formatted before finishing work.
 
 ## Domain-Specific Guidance
 

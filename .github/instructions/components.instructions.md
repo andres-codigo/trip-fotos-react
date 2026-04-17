@@ -76,6 +76,10 @@ When creating a new component, always create corresponding test files:
 - For component tests, define reusable test constants (IDs, labels, error messages) in `src/constants/test`.
 - Use mocking utilities from `src/testUtils` for consistent test setup.
 
+## Linting And Formatting
+
+- Ensure every edited or newly created component file, hook, style module, and related test file is ESLint-clean and Prettier-formatted before finishing work.
+
 ## Styling
 
 - Use **SCSS modules** for component-specific styles.

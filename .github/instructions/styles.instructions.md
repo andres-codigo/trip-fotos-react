@@ -31,3 +31,7 @@ New colour variables should follow the existing naming convention. When possible
 ## Global Styles
 
 Global styles are located in `src/styles/global.scss`. Component-specific styles should always use SCSS modules, not global styles. This maintains clear style scoping and makes it easier to refactor or remove components later.
+
+## Linting And Formatting
+
+- Ensure every edited or newly created SCSS file is Prettier-formatted and remains compatible with the repository's linting rules before finishing work.
