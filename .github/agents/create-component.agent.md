@@ -54,5 +54,6 @@ Use this agent when you need to create a new React component with full structure
 - When a new reusable component is created, the agent should flag that existing similar components should be refactored to use it
 - All new components must have `prop-types` validation from the start
 - **All generated files must end with a trailing newline at EOF** — enforce this during file creation to satisfy linting rules
+- **Linting and formatting** — ensure all generated and edited files are ESLint-clean and Prettier-formatted before handing off the component work.
 - Every new component file must include `data-cy` attributes on all meaningful elements (buttons, inputs, containers, labels, values)
 - When new component markup introduces `data-cy` attributes, add corresponding exported constants to `src/constants/test/selectors/components.js` via `getByDataCy` and use those constants in all new `*.cy.jsx` tests instead of literal selector strings
