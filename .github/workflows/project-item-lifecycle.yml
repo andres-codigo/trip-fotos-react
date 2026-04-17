@@ -1,0 +1,255 @@
+name: GitHub - Project Item Lifecycle
+
+on:
+    pull_request_target:
+        types: [opened, reopened, synchronize, closed]
+
+permissions:
+    contents: read
+    issues: write
+    pull-requests: write
+    repository-projects: write
+
+jobs:
+    sync-project-lifecycle:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Sync issue and project lifecycle
+              uses: actions/github-script@v7
+              env:
+                  PROJECT_ID: PVT_kwHOAybMeM4BCojE
+                  PROJECT_STATUS_FIELD_ID: PVTSSF_lAHOAybMeM4BCojEzg0yW4g
+                  STATUS_BACKLOG_OPTION_ID: 7be623db
+                  STATUS_TODO_OPTION_ID: f75ad846
+                  STATUS_IN_PROGRESS_OPTION_ID: 47fc9ee4
+                  STATUS_DONE_OPTION_ID: 98236657
+              with:
+                  github-token: ${{ github.token }}
+                  script: |
+                      const owner = context.repo.owner
+                      const repo = context.repo.repo
+                      const pr = context.payload.pull_request
+
+                      const PROJECT_ID = process.env.PROJECT_ID
+                      const STATUS_FIELD_ID = process.env.PROJECT_STATUS_FIELD_ID
+                      const STATUS = {
+                        BACKLOG: process.env.STATUS_BACKLOG_OPTION_ID,
+                        TODO: process.env.STATUS_TODO_OPTION_ID,
+                        IN_PROGRESS: process.env.STATUS_IN_PROGRESS_OPTION_ID,
+                        DONE: process.env.STATUS_DONE_OPTION_ID,
+                      }
+
+                      const TRACKING_MARKER = /Tracking-Issue:\s*#(\d+)/i
+                      const KEYWORD_LINK = /(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+#(\d+)/ig
+
+                      const extractLinkedIssueNumber = (body = '') => {
+                        let markerMatch = body.match(TRACKING_MARKER)
+                        if (markerMatch) {
+                          return Number(markerMatch[1])
+                        }
+
+                        let match
+                        while ((match = KEYWORD_LINK.exec(body)) !== null) {
+                          if (match[3]) return Number(match[3])
+                        }
+
+                        return null
+                      }
+
+                      const graphql = async (query, variables) => {
+                        return github.graphql(query, variables)
+                      }
+
+                      const addProjectItem = async (contentId) => {
+                        await graphql(
+                          `mutation($projectId: ID!, $contentId: ID!) {
+                            addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                              item { id }
+                            }
+                          }`,
+                          {
+                            projectId: PROJECT_ID,
+                            contentId,
+                          },
+                        )
+                      }
+
+                      const getProjectItemIdByContentId = async (contentId) => {
+                        const data = await graphql(
+                          `query($projectId: ID!) {
+                            node(id: $projectId) {
+                              ... on ProjectV2 {
+                                items(first: 200) {
+                                  nodes {
+                                    id
+                                    content {
+                                      __typename
+                                      ... on Issue { id }
+                                      ... on PullRequest { id }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }`,
+                          {
+                            projectId: PROJECT_ID,
+                          },
+                        )
+
+                        const items = data?.node?.items?.nodes || []
+                        const found = items.find((item) => item?.content?.id === contentId)
+                        return found?.id || null
+                      }
+
+                      const ensureProjectItem = async (contentId) => {
+                        let itemId = await getProjectItemIdByContentId(contentId)
+                        if (!itemId) {
+                          await addProjectItem(contentId)
+                          itemId = await getProjectItemIdByContentId(contentId)
+                        }
+                        return itemId
+                      }
+
+                      const setStatus = async (itemId, optionId) => {
+                        if (!itemId || !optionId) return
+
+                        await graphql(
+                          `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                            updateProjectV2ItemFieldValue(
+                              input: {
+                                projectId: $projectId
+                                itemId: $itemId
+                                fieldId: $fieldId
+                                value: { singleSelectOptionId: $optionId }
+                              }
+                            ) {
+                              projectV2Item { id }
+                            }
+                          }`,
+                          {
+                            projectId: PROJECT_ID,
+                            itemId,
+                            fieldId: STATUS_FIELD_ID,
+                            optionId,
+                          },
+                        )
+                      }
+
+                      const ensureIssueAssignee = async (issueNumber, assignee) => {
+                        if (!assignee) return
+                        await github.rest.issues.addAssignees({
+                          owner,
+                          repo,
+                          issue_number: issueNumber,
+                          assignees: [assignee],
+                        })
+                      }
+
+                      const ensurePRAssignee = async (prNumber, assignee) => {
+                        if (!assignee) return
+                        await github.rest.issues.addAssignees({
+                          owner,
+                          repo,
+                          issue_number: prNumber,
+                          assignees: [assignee],
+                        })
+                      }
+
+                      const createTrackingIssue = async () => {
+                        const issueTitle = `Tracking: ${pr.title}`
+                        const issueBody = [
+                          '## Summary',
+                          'Automatically created lifecycle tracking issue for this pull request.',
+                          '',
+                          `- Pull request: #${pr.number}`,
+                          `- Branch: \`${pr.head.ref}\``,
+                          '',
+                          '## Notes',
+                          '- This issue is managed by `.github/workflows/project-item-lifecycle.yml`.',
+                        ].join('\n')
+
+                        const created = await github.rest.issues.create({
+                          owner,
+                          repo,
+                          title: issueTitle,
+                          body: issueBody,
+                        })
+
+                        const newBody = `${pr.body || ''}\n\nTracking-Issue: #${created.data.number}`.trim()
+                        await github.rest.pulls.update({
+                          owner,
+                          repo,
+                          pull_number: pr.number,
+                          body: newBody,
+                        })
+
+                        return created.data.number
+                      }
+
+                      const resolveIssueNumber = async () => {
+                        const fromBody = extractLinkedIssueNumber(pr.body || '')
+                        if (fromBody) return fromBody
+                        return createTrackingIssue()
+                      }
+
+                      const getIssueNodeId = async (issueNumber) => {
+                        const issue = await github.rest.issues.get({
+                          owner,
+                          repo,
+                          issue_number: issueNumber,
+                        })
+                        return issue.data.node_id
+                      }
+
+                      const closeIssueIfOpen = async (issueNumber) => {
+                        const issue = await github.rest.issues.get({
+                          owner,
+                          repo,
+                          issue_number: issueNumber,
+                        })
+
+                        if (issue.data.state === 'open') {
+                          await github.rest.issues.update({
+                            owner,
+                            repo,
+                            issue_number: issueNumber,
+                            state: 'closed',
+                          })
+                        }
+                      }
+
+                      const issueNumber = await resolveIssueNumber()
+                      const issueNodeId = await getIssueNodeId(issueNumber)
+                      const prNodeId = pr.node_id
+
+                      const issueItemId = await ensureProjectItem(issueNodeId)
+                      const prItemId = await ensureProjectItem(prNodeId)
+
+                      const author = pr.user?.login
+
+                      if (context.payload.action === 'opened' || context.payload.action === 'reopened') {
+                        await ensureIssueAssignee(issueNumber, author)
+                        await ensurePRAssignee(pr.number, author)
+
+                        await setStatus(issueItemId, STATUS.BACKLOG)
+                        await setStatus(issueItemId, STATUS.TODO)
+                        await setStatus(issueItemId, STATUS.IN_PROGRESS)
+                        await setStatus(prItemId, STATUS.IN_PROGRESS)
+                      }
+
+                      if (context.payload.action === 'synchronize') {
+                        await setStatus(issueItemId, STATUS.IN_PROGRESS)
+                        await setStatus(prItemId, STATUS.IN_PROGRESS)
+                      }
+
+                      if (context.payload.action === 'closed') {
+                        if (pr.merged) {
+                          await setStatus(issueItemId, STATUS.DONE)
+                          await setStatus(prItemId, STATUS.DONE)
+                          await closeIssueIfOpen(issueNumber)
+                        } else {
+                          await setStatus(issueItemId, STATUS.TODO)
+                        }
+                      }
