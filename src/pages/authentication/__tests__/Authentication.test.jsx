@@ -10,13 +10,13 @@ import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 
 import { FIREBASE_ERRORS } from '@/constants/auth'
+import { API_DATABASE } from '@/constants/api'
 
 import { GLOBAL } from '@/constants/ui'
 import {
 	DIALOG,
 	MOCK_KEYS,
 	MOCK_LOGIN_PAYLOAD,
-	MOCK_SIGNUP_ACTION,
 	MOCK_INVALID_LOGIN_ERROR,
 	MOCK_MESSAGES,
 	TEST_IDS,
@@ -535,7 +535,7 @@ describe('<Authentication />', () => {
 				expect(screen.getByText(/log in/i)).toBeInTheDocument()
 			})
 
-			it('dispatches signup action when component is in signup mode', async () => {
+			it('dispatches login thunk with signup mode when component is in signup mode', async () => {
 				renderWithProviders(<Authentication />)
 
 				const switchBtn = screen.getByTestId(
@@ -563,9 +563,11 @@ describe('<Authentication />', () => {
 				)
 
 				await waitFor(() => {
-					expect(mockDispatch).toHaveBeenCalledWith(
-						MOCK_SIGNUP_ACTION,
-					)
+					expect(login).toHaveBeenCalledWith({
+						mode: API_DATABASE.AUTH_SIGNUP_MODE,
+						email: MOCK_KEYS.EMAIL,
+						password: MOCK_KEYS.PASSWORD,
+					})
 				})
 			})
 
@@ -753,6 +755,42 @@ describe('<Authentication />', () => {
 				await expectErrorDialog(
 					FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
 						.INVALID_LOGIN_CREDENTIALS_MESSAGE,
+				)
+			})
+
+			it('displays email already in use error dialog when signup fails', async () => {
+				const getFirebaseAuthErrorMessage =
+					await setupFirebaseErrorMock(
+						FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
+							.EMAIL_EXISTS_MESSAGE,
+					)
+
+				mockDispatch.mockResolvedValueOnce({
+					meta: { rejectedWithValue: true },
+					payload:
+						FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
+							.EMAIL_EXISTS,
+				})
+
+				renderWithProviders(<Authentication />)
+
+				fireEvent.click(
+					screen.getByTestId(
+						TEST_IDS.USER_AUTH_FORM.LOGIN_SIGNUP_TOGGLE_LINK,
+					),
+				)
+				fillAndSubmitLoginForm()
+
+				await waitFor(() => {
+					expect(getFirebaseAuthErrorMessage).toHaveBeenCalledWith(
+						FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
+							.EMAIL_EXISTS,
+					)
+				})
+
+				await expectErrorDialog(
+					FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
+						.EMAIL_EXISTS_MESSAGE,
 				)
 			})
 

@@ -4,6 +4,7 @@ const { AUTHENTICATION_ACTION_TYPES: authTypes } = FIREBASE_ERRORS
 
 export const getFirebaseAuthErrorMessage = (error) => {
 	const messages = {
+		[authTypes.EMAIL_EXISTS]: authTypes.EMAIL_EXISTS_MESSAGE,
 		[authTypes.INVALID_LOGIN_CREDENTIALS]:
 			authTypes.INVALID_LOGIN_CREDENTIALS_MESSAGE,
 		[authTypes.TOO_MANY_ATTEMPTS_TRY_LATER]:

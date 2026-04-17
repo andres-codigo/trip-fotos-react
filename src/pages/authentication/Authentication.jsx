@@ -75,27 +75,15 @@ const Authentication = () => {
 			setIsLoading(true)
 
 			const actionPayload = {
-				mode: API_DATABASE.AUTH_LOGIN_MODE,
+				mode,
 				email: trimmedEmail,
 				password: trimmedPassword,
 			}
 
-			let result
-			if (mode === API_DATABASE.AUTH_LOGIN_MODE) {
-				result = await dispatch(login(actionPayload))
-			} else {
-				result = await dispatch({
-					type: API_DATABASE.AUTH_SIGNUP_MODE,
-					payload: actionPayload,
-				})
-			}
+			const result = await dispatch(login(actionPayload))
 
 			if (result.meta && result.meta.rejectedWithValue) {
-				setError(result.meta.rejectedWithValue)
-
-				let errorMessage
-				errorMessage = getFirebaseAuthErrorMessage(result.payload)
-
+				const errorMessage = getFirebaseAuthErrorMessage(result.payload)
 				throw new Error(errorMessage || getFirebaseAuthErrorMessage())
 			}
 
