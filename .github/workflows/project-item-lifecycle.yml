@@ -72,7 +72,7 @@ jobs:
                       }
 
                       const projectGithub = PROJECT_AUTOMATION_TOKEN
-                        ? github.getOctokit(PROJECT_AUTOMATION_TOKEN)
+                        ? getOctokit(PROJECT_AUTOMATION_TOKEN)
                         : github
 
                       const graphql = async (query, variables) => {
