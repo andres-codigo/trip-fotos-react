@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 
 import { API_DATABASE } from '@/constants/api'
+import { FIREBASE_ERRORS } from '@/constants/auth'
 import {
 	MOCK_API,
 	MOCK_KEYS,
@@ -323,6 +324,41 @@ describe('authenticationSlice', () => {
 							mode: API_DATABASE.AUTH_LOGIN_MODE,
 							email: MOCK_KEYS.EMAIL,
 							password: MOCK_KEYS.PASSWORD,
+						}),
+					)
+
+					expect(result.payload).toBe(mockErrorMessage)
+					expect(result.meta.rejectedWithValue).toBe(true)
+				})
+
+				it('should handle signup failure with existing email and return error message', async () => {
+					const mockErrorMessage =
+						FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.EMAIL_EXISTS
+
+					fetch.mockResolvedValueOnce({
+						ok: false,
+						json: async () => ({
+							error: { message: mockErrorMessage },
+						}),
+					})
+
+					const result = await store.dispatch(
+						login({
+							mode: API_DATABASE.AUTH_SIGNUP_MODE,
+							email: MOCK_KEYS.EMAIL,
+							password: MOCK_KEYS.PASSWORD,
+						}),
+					)
+
+					expect(fetch).toHaveBeenCalledWith(
+						`${MOCK_API.URL}signUp?key=${MOCK_API.KEY}`,
+						expect.objectContaining({
+							method: API_DATABASE.POST,
+							body: JSON.stringify({
+								email: MOCK_KEYS.EMAIL,
+								password: MOCK_KEYS.PASSWORD,
+								returnSecureToken: true,
+							}),
 						}),
 					)
 

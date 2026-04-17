@@ -20,6 +20,11 @@ describe('getFirebaseAuthErrorMessage', () => {
 		expect(result).toBe(authTypes.TOO_MANY_ATTEMPTS_TRY_LATER_MESSAGE)
 	})
 
+	it('should return correct message for email already exists', () => {
+		const result = getFirebaseAuthErrorMessage(authTypes.EMAIL_EXISTS)
+		expect(result).toBe(authTypes.EMAIL_EXISTS_MESSAGE)
+	})
+
 	it('should return default message for unknown error codes', () => {
 		const unknownError = 'unknown-error-code'
 		const result = getFirebaseAuthErrorMessage(unknownError)

@@ -292,6 +292,30 @@ describe('UI error dialog', () => {
 		logInUsingIntercept(FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.DEFAULT)
 	})
 
+	it('shows an email already in use error dialog on signup', () => {
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK).click()
+
+		cy.interceptLoginError(
+			API_DATABASE.POST,
+			`${API_DATABASE.URL}signUp?key=${API_DATABASE.KEY}`,
+			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.EMAIL_EXISTS,
+		)
+
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USERS.STANDARD.EMAIL,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
+			TEST_USERS.STANDARD.PASSWORD,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+
+		cy.wait('@loginErrorRequest')
+
+		assertErrorDialog(
+			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.EMAIL_EXISTS,
+		)
+	})
+
 	it('closes the error dialog when the Escape key is pressed', () => {
 		cy.interceptLoginError(
 			API_DATABASE.POST,
