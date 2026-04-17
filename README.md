@@ -647,6 +647,25 @@ Example labeler configuration:
     - '**/README*'
 ```
 
+---
+
+### 5. GitHub Project Item Lifecycle
+
+- **Workflow File:** `.github/workflows/project-item-lifecycle.yml`
+- **Triggers:**
+    - On **pull_request_target** events (`opened`, `reopened`, `synchronize`, `closed`)
+- **Purpose:** Keeps pull requests and linked issues in sync with the `Trip Fotos React` GitHub Project lifecycle.
+- **Secret (Optional but Recommended):** `PROJECT_AUTOMATION_TOKEN`
+    - Used for Project v2 write operations when `github.token` does not have enough access.
+
+#### Token Rotation / Recovery Guide
+
+If the workflow logs `Resource not accessible by integration`, check the runbook:
+
+- `.github/project-automation-token.md`
+
+The runbook includes expiry handling, recreation steps, secret update instructions, and post-rotation validation.
+
 ### 🛠 Manual Triggers
 
 Some workflows, like the **Vitest test runner**, can be manually executed from the GitHub UI:
@@ -662,12 +681,13 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 ### 📝 Summary Table
 
-| Workflow Name                     | File                                          | Tests Type       | Triggered On   |
-| --------------------------------- | --------------------------------------------- | ---------------- | -------------- |
-| Vitest - Run Unit Tests           | `.github/workflows/unit-tests-vitest.yml`     | Unit/Integration | Push/PR/Manual |
-| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml`           | E2E              | Push/PR/Manual |
-| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`     | Component        | Push/PR/Manual |
-| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml` | Automation       | PR Events      |
+| Workflow Name                     | File                                           | Tests Type       | Triggered On     |
+| --------------------------------- | ---------------------------------------------- | ---------------- | ---------------- |
+| Vitest - Run Unit Tests           | `.github/workflows/unit-tests-vitest.yml`      | Unit/Integration | Push/PR/Manual   |
+| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml`            | E2E              | Push/PR/Manual   |
+| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`      | Component        | Push/PR/Manual   |
+| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`  | Automation       | PR Events        |
+| GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml` | Automation       | PR Target Events |
 
 ---
 
