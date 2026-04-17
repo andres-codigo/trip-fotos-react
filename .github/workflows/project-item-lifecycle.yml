@@ -43,6 +43,7 @@ jobs:
                         DONE: process.env.STATUS_DONE_OPTION_ID,
                       }
                       const PROJECT_AUTOMATION_TOKEN = process.env.PROJECT_AUTOMATION_TOKEN || ''
+                      const { getOctokit } = require('@actions/github')
 
                       const TRACKING_MARKER = /Tracking-Issue:\s*#(\d+)/i
                       const KEYWORD_LINK = /(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+#(\d+)/ig
