@@ -4,6 +4,8 @@ feature:
 documentation:
     - '**/*.md'
     - '**/README*'
+    - '.github/**/*.md'
+    - '.github/**/README*'
 dependencies:
     - package.json
     - package-lock.json
@@ -31,6 +33,8 @@ config:
     - .prettierrc*
     - tsconfig.*
     - vercel.json
+    - '.github/**/*.yml'
+    - '.github/**/*.yaml'
 constants:
     - src/constants/**/*
 utilities:
