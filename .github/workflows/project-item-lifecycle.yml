@@ -42,6 +42,16 @@ jobs:
 
                       const TRACKING_MARKER = /Tracking-Issue:\s*#(\d+)/i
                       const KEYWORD_LINK = /(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+#(\d+)/ig
+                      const TRACKING_PR_LINE = `- Pull request: #${pr.number}`
+                      const DEPENDABOT_LOGINS = new Set(['app/dependabot', 'dependabot[bot]'])
+
+                      const isDependabotAuthor = (login = '') => DEPENDABOT_LOGINS.has(login)
+                      const isDependabotPR = isDependabotAuthor(pr.user?.login)
+
+                      const isResourceAccessError = (error) => {
+                        const message = String(error?.message || '')
+                        return message.includes('Resource not accessible by integration')
+                      }
 
                       const extractLinkedIssueNumber = (body = '') => {
                         let markerMatch = body.match(TRACKING_MARKER)
@@ -59,6 +69,16 @@ jobs:
 
                       const graphql = async (query, variables) => {
                         return github.graphql(query, variables)
+                      }
+
+                      const getLivePullRequest = async () => {
+                        const response = await github.rest.pulls.get({
+                          owner,
+                          repo,
+                          pull_number: pr.number,
+                        })
+
+                        return response.data
                       }
 
                       const addProjectItem = async (contentId) => {
@@ -119,12 +139,21 @@ jobs:
                       }
 
                       const ensureProjectItem = async (contentId) => {
-                        let itemId = await getProjectItemIdByContentId(contentId)
-                        if (!itemId) {
-                          await addProjectItem(contentId)
-                          itemId = await getProjectItemIdByContentId(contentId)
+                        try {
+                          let itemId = await getProjectItemIdByContentId(contentId)
+                          if (!itemId) {
+                            await addProjectItem(contentId)
+                            itemId = await getProjectItemIdByContentId(contentId)
+                          }
+                          return itemId
+                        } catch (error) {
+                          if (isResourceAccessError(error)) {
+                            core.warning('Project write was skipped because the workflow token cannot write to the project. Configure PROJECT_AUTOMATION_TOKEN for project writes.')
+                            return null
+                          }
+
+                          throw error
                         }
-                        return itemId
                       }
 
                       const setStatus = async (itemId, optionId) => {
@@ -172,13 +201,28 @@ jobs:
                         })
                       }
 
-                      const createTrackingIssue = async () => {
+                      const findTrackingIssueNumber = async () => {
+                        const allIssues = await github.paginate(github.rest.issues.listForRepo, {
+                          owner,
+                          repo,
+                          state: 'all',
+                          per_page: 100,
+                        })
+
+                        const existing = allIssues.find((issue) => {
+                          return !issue.pull_request && typeof issue.body === 'string' && issue.body.includes(TRACKING_PR_LINE)
+                        })
+
+                        return existing?.number || null
+                      }
+
+                      const createTrackingIssue = async (existingBody = '') => {
                         const issueTitle = `Tracking: ${pr.title}`
                         const issueBody = [
                           '## Summary',
                           'Automatically created lifecycle tracking issue for this pull request.',
                           '',
-                          `- Pull request: #${pr.number}`,
+                          TRACKING_PR_LINE,
                           `- Branch: \`${pr.head.ref}\``,
                           '',
                           '## Notes',
@@ -192,7 +236,7 @@ jobs:
                           body: issueBody,
                         })
 
-                        const newBody = `${pr.body || ''}\n\nTracking-Issue: #${created.data.number}`.trim()
+                        const newBody = `${existingBody}\n\nTracking-Issue: #${created.data.number}`.trim()
                         await github.rest.pulls.update({
                           owner,
                           repo,
@@ -204,9 +248,27 @@ jobs:
                       }
 
                       const resolveIssueNumber = async () => {
-                        const fromBody = extractLinkedIssueNumber(pr.body || '')
+                        if (isDependabotPR) return null
+
+                        const livePr = await getLivePullRequest()
+                        const liveBody = livePr.body || ''
+
+                        const fromBody = extractLinkedIssueNumber(liveBody)
                         if (fromBody) return fromBody
-                        return createTrackingIssue()
+
+                        const existingIssue = await findTrackingIssueNumber()
+                        if (existingIssue) {
+                          const newBody = `${liveBody}\n\nTracking-Issue: #${existingIssue}`.trim()
+                          await github.rest.pulls.update({
+                            owner,
+                            repo,
+                            pull_number: pr.number,
+                            body: newBody,
+                          })
+                          return existingIssue
+                        }
+
+                        return createTrackingIssue(liveBody)
                       }
 
                       const getIssueNodeId = async (issueNumber) => {
@@ -236,20 +298,24 @@ jobs:
                       }
 
                       const issueNumber = await resolveIssueNumber()
-                      const issueNodeId = await getIssueNodeId(issueNumber)
+                      const issueNodeId = issueNumber ? await getIssueNodeId(issueNumber) : null
                       const prNodeId = pr.node_id
 
-                      const issueItemId = await ensureProjectItem(issueNodeId)
+                      const issueItemId = issueNodeId ? await ensureProjectItem(issueNodeId) : null
                       const prItemId = await ensureProjectItem(prNodeId)
 
                       const author = pr.user?.login
+                      const shouldAssignAuthor = Boolean(author) && !isDependabotAuthor(author)
 
                       if (context.payload.action === 'opened' || context.payload.action === 'reopened') {
-                        await ensureIssueAssignee(issueNumber, author)
-                        await ensurePRAssignee(pr.number, author)
+                        if (issueNumber && shouldAssignAuthor) {
+                          await ensureIssueAssignee(issueNumber, author)
+                        }
 
-                        await setStatus(issueItemId, STATUS.BACKLOG)
-                        await setStatus(issueItemId, STATUS.TODO)
+                        if (shouldAssignAuthor) {
+                          await ensurePRAssignee(pr.number, author)
+                        }
+
                         await setStatus(issueItemId, STATUS.IN_PROGRESS)
                         await setStatus(prItemId, STATUS.IN_PROGRESS)
                       }
@@ -263,7 +329,9 @@ jobs:
                         if (pr.merged) {
                           await setStatus(issueItemId, STATUS.DONE)
                           await setStatus(prItemId, STATUS.DONE)
-                          await closeIssueIfOpen(issueNumber)
+                          if (issueNumber) {
+                            await closeIssueIfOpen(issueNumber)
+                          }
                         } else {
                           await setStatus(issueItemId, STATUS.TODO)
                         }
