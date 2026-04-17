@@ -52,4 +52,5 @@ Use this agent when creating a new route-level page with structure, styling, and
 - Keep page responsibilities focused on orchestration and route-level concerns.
 - Update tests in the same task as page creation.
 - **All generated files must end with a trailing newline at EOF** — enforce this during file creation to satisfy linting rules
+- **Linting and formatting** — ensure all generated and edited files are ESLint-clean and Prettier-formatted before handing off the page work.
 - Every page file must include `data-cy` attributes on all page-level containers and custom elements for E2E testing

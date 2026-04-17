@@ -105,6 +105,10 @@ When modifying Redux slices (`src/store/slices/`) or the store configuration (`s
 - Thunks (especially error handling)
 - Store setup and persistence
 
+## Linting And Formatting
+
+- Ensure every edited or newly created store file and related test file is ESLint-clean and Prettier-formatted before finishing work.
+
 ### Running Tests
 
 - Unit/Integration tests: `npm run vitest:run` or `npm run vitest:watch`

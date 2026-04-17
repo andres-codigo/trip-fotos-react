@@ -76,3 +76,7 @@ When creating or modifying pages, keep both local and end-to-end coverage aligne
 - Prefer page-specific SCSS modules for page layout concerns.
 - Reusable component styling must remain inside component-level style modules.
 - Follow shared SCSS conventions in `.github/instructions/styles.instructions.md`.
+
+## Linting And Formatting
+
+- Ensure every edited or newly created page file, style module, and related test file is ESLint-clean and Prettier-formatted before finishing work.
