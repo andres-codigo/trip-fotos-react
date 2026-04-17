@@ -16,7 +16,7 @@ jobs:
 
         steps:
             - name: Sync issue and project lifecycle
-              uses: actions/github-script@v7
+              uses: actions/github-script@v8
               env:
                   PROJECT_ID: PVT_kwHOAybMeM4BCojE
                   PROJECT_STATUS_FIELD_ID: PVTSSF_lAHOAybMeM4BCojEzg0yW4g
@@ -76,31 +76,46 @@ jobs:
                       }
 
                       const getProjectItemIdByContentId = async (contentId) => {
-                        const data = await graphql(
-                          `query($projectId: ID!) {
-                            node(id: $projectId) {
-                              ... on ProjectV2 {
-                                items(first: 200) {
-                                  nodes {
-                                    id
-                                    content {
-                                      __typename
-                                      ... on Issue { id }
-                                      ... on PullRequest { id }
+                        let hasNextPage = true
+                        let cursor = null
+
+                        while (hasNextPage) {
+                          const data = await graphql(
+                            `query($projectId: ID!, $cursor: String) {
+                              node(id: $projectId) {
+                                ... on ProjectV2 {
+                                  items(first: 100, after: $cursor) {
+                                    pageInfo {
+                                      hasNextPage
+                                      endCursor
+                                    }
+                                    nodes {
+                                      id
+                                      content {
+                                        __typename
+                                        ... on Issue { id }
+                                        ... on PullRequest { id }
+                                      }
                                     }
                                   }
                                 }
                               }
-                            }
-                          }`,
-                          {
-                            projectId: PROJECT_ID,
-                          },
-                        )
+                            }`,
+                            {
+                              projectId: PROJECT_ID,
+                              cursor,
+                            },
+                          )
 
-                        const items = data?.node?.items?.nodes || []
-                        const found = items.find((item) => item?.content?.id === contentId)
-                        return found?.id || null
+                          const items = data?.node?.items?.nodes || []
+                          const found = items.find((item) => item?.content?.id === contentId)
+                          if (found?.id) return found.id
+
+                          hasNextPage = data?.node?.items?.pageInfo?.hasNextPage || false
+                          cursor = data?.node?.items?.pageInfo?.endCursor || null
+                        }
+
+                        return null
                       }
 
                       const ensureProjectItem = async (contentId) => {
