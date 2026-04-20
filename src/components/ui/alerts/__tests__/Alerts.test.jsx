@@ -20,6 +20,7 @@ vi.mock('../Alerts.module.scss', () => ({
 		success: 'success',
 		error: 'error',
 		info: 'info',
+		fadeOut: 'fadeOut',
 		closeButton: 'closeButton',
 	},
 }))
@@ -86,17 +87,25 @@ describe('Alerts Component', () => {
 		expect(alert).toHaveClass('info')
 	})
 
-	it('calls onClose and hides alert when close button is clicked', () => {
+	it('starts fade-out on close button click and unmounts after animation ends', () => {
 		render(<Alerts {...defaultProps} />)
 
 		const closeButton = screen.getByLabelText('Close message')
 		fireEvent.click(closeButton)
 
+		const alert = screen.getByRole('alert')
+		expect(alert).toHaveClass('fadeOut')
+		expect(defaultProps.onClose).not.toHaveBeenCalled()
+
+		act(() => {
+			fireEvent.animationEnd(alert)
+		})
+
 		expect(defaultProps.onClose).toHaveBeenCalledTimes(1)
 		expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 	})
 
-	it('auto-closes using the default duration (5000ms)', () => {
+	it('auto-closes using the default duration (5000ms) after animation ends', () => {
 		render(<Alerts {...defaultProps} />)
 
 		expect(screen.getByRole('alert')).toBeInTheDocument()
@@ -112,11 +121,20 @@ describe('Alerts Component', () => {
 		act(() => {
 			vi.advanceTimersByTime(1)
 		})
+
+		const alert = screen.getByRole('alert')
+		expect(alert).toHaveClass('fadeOut')
+		expect(defaultProps.onClose).not.toHaveBeenCalled()
+
+		act(() => {
+			fireEvent.animationEnd(alert)
+		})
+
 		expect(defaultProps.onClose).toHaveBeenCalledTimes(1)
 		expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 	})
 
-	it('auto-closes after specified duration', () => {
+	it('auto-closes after specified duration and waits for animation end', () => {
 		const duration = 3000
 		render(
 			<Alerts
@@ -129,6 +147,14 @@ describe('Alerts Component', () => {
 
 		act(() => {
 			vi.advanceTimersByTime(duration)
+		})
+
+		const alert = screen.getByRole('alert')
+		expect(alert).toHaveClass('fadeOut')
+		expect(defaultProps.onClose).not.toHaveBeenCalled()
+
+		act(() => {
+			fireEvent.animationEnd(alert)
 		})
 
 		expect(defaultProps.onClose).toHaveBeenCalledTimes(1)
@@ -145,8 +171,15 @@ describe('Alerts Component', () => {
 
 		const closeButton = screen.getByLabelText('Close message')
 
-		// Should not throw error
+		// Should not throw error and should still unmount after the fade-out animation
 		fireEvent.click(closeButton)
+
+		const alert = screen.getByRole('alert')
+		expect(alert).toHaveClass('fadeOut')
+
+		act(() => {
+			fireEvent.animationEnd(alert)
+		})
 
 		expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 	})
@@ -164,7 +197,13 @@ describe('Alerts Component', () => {
 			vi.advanceTimersByTime(duration)
 		})
 
-		// The component should return null (unmount from DOM effectively)
+		// The component should remain mounted until the fade-out animation ends
+		expect(screen.getByRole('alert')).toBeInTheDocument()
+
+		act(() => {
+			fireEvent.animationEnd(screen.getByRole('alert'))
+		})
+
 		expect(screen.queryByRole('alert')).toBeNull()
 	})
 

@@ -7,26 +7,40 @@ import styles from './Alerts.module.scss'
 
 const Alerts = ({ message, type = 'success', duration = 5000, onClose }) => {
 	const [isVisible, setIsVisible] = useState(true)
+	const [isClosing, setIsClosing] = useState(false)
 
 	const handleClose = useCallback(() => {
-		setIsVisible(false)
-		if (onClose) onClose()
-	}, [onClose])
+		if (isClosing) return
+
+		setIsClosing(true)
+	}, [isClosing])
+
+	const handleAnimationEnd = useCallback(
+		(event) => {
+			if (!isClosing || event.currentTarget !== event.target) return
+
+			setIsVisible(false)
+			if (onClose) onClose()
+		},
+		[isClosing, onClose],
+	)
 
 	useEffect(() => {
-		if (duration) {
-			const timer = setTimeout(() => {
-				handleClose()
-			}, duration)
-			return () => clearTimeout(timer)
-		}
+		if (!duration) return undefined
+
+		const timer = setTimeout(() => {
+			handleClose()
+		}, duration)
+
+		return () => clearTimeout(timer)
 	}, [duration, handleClose])
 
 	if (!isVisible) return null
 
 	return (
 		<div
-			className={`${styles.container} ${styles[type]}`}
+			className={`${styles.container} ${styles[type]} ${isClosing ? styles.fadeOut : ''}`}
+			onAnimationEnd={handleAnimationEnd}
 			role="alert">
 			<p>{message}</p>
 			<BaseButton

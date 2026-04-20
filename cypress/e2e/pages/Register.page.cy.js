@@ -66,6 +66,8 @@ describe('Register Page', () => {
 		const { firstName, lastName, description, daysInCity, cities } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
+		cy.clock()
+
 		// Intercept the registration API call
 		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
 			statusCode: 200,
@@ -108,6 +110,10 @@ describe('Register Page', () => {
 		cy.get('[role="alert"]')
 			.should('be.visible')
 			.and('contain', TRAVELLER_REGISTRATION_SUCCESS_MESSAGE)
+
+		cy.tick(5000)
+		cy.get('[role="alert"]').trigger('animationend')
+		cy.get('[role="alert"]').should('not.exist')
 	})
 
 	it('shows a loading dialog while registering', () => {
