@@ -224,6 +224,13 @@ describe('Travellers', () => {
 				fireEvent.click(closeButton)
 			})
 
+			const alert = screen.getByRole('alert')
+			expect(alert).toBeInTheDocument()
+
+			await act(async () => {
+				fireEvent.animationEnd(alert)
+			})
+
 			expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 		})
 	})
