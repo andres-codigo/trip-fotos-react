@@ -3,6 +3,7 @@ import {
 	TRAVELLERS_LIST_SELECTORS,
 	DIALOG_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
+import { TEST_IDS } from '../../../src/constants/test/selectors/_ids'
 import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
@@ -122,7 +123,9 @@ describe('Travellers Page - WIP', () => {
 				delay: 600,
 			}).as('refreshTravellers')
 
-			cy.contains('button', 'Refresh').should('be.enabled').click()
+			cy.get(`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`)
+				.should('be.enabled')
+				.click()
 
 			// Should show loading again
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
@@ -146,7 +149,9 @@ describe('Travellers Page - WIP', () => {
 					$body.find('h3:contains("No travellers listed.")').length >
 					0
 				) {
-					cy.get('button:contains("Refresh")')
+					cy.get(
+						`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`,
+					)
 						.should('exist')
 						.and('not.be.disabled')
 				}
@@ -275,13 +280,15 @@ describe('Travellers Page - WIP', () => {
 				body: { message: 'Server error' },
 			}).as('getTravellersRefreshError')
 
-			cy.get('button').contains('Refresh').click()
+			cy.get(
+				`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`,
+			).click()
 			cy.wait('@getTravellersRefreshError', { timeout: REQUEST_TIMEOUT })
 
 			// Close error dialog
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).within(() => {
-				cy.get('button').contains('Close').click()
+				cy.contains('button', 'Close').click()
 			})
 
 			// Setup successful retry
@@ -290,8 +297,9 @@ describe('Travellers Page - WIP', () => {
 			}).as('getTravellersRetrySuccess')
 
 			// Button should still be enabled since we had initial data
-			cy.get('button').contains('Refresh').should('not.be.disabled')
-			cy.get('button').contains('Refresh').click()
+			cy.get(`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`)
+				.should('not.be.disabled')
+				.click()
 			cy.wait('@getTravellersRetrySuccess', { timeout: REQUEST_TIMEOUT })
 
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('not.exist')
