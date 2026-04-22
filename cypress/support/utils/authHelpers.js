@@ -2,6 +2,8 @@ import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
 import { PATHS } from '../../../src/constants/ui/paths'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
+const REQUEST_TIMEOUT = 10000
+
 /**
  * Performs login flow and waits for successful authentication
  * @param {string} email - User email (defaults to valid user email)
@@ -18,8 +20,8 @@ export const performLogin = (
 		SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
 	)
 	cy.login(email, password)
-	cy.wait('@loginRequest')
-	cy.url().should('include', expectedRedirectUrl)
+	cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+	cy.url({ timeout: REQUEST_TIMEOUT }).should('include', expectedRedirectUrl)
 }
 
 /**

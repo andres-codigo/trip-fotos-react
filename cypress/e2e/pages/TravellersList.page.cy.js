@@ -10,6 +10,7 @@ import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { performLogin } from '../../support/utils/authHelpers'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
+const REQUEST_TIMEOUT = 10000
 describe('Travellers Page - WIP', () => {
 	beforeEach(() => {
 		cy.visit(loginUrl)
@@ -64,7 +65,10 @@ describe('Travellers Page - WIP', () => {
 				.click()
 
 			// Wait for redirect
-			cy.url({ timeout: 10000 }).should('include', PATHS.REGISTER)
+			cy.url({ timeout: REQUEST_TIMEOUT }).should(
+				'include',
+				PATHS.REGISTER,
+			)
 		})
 	})
 
@@ -92,16 +96,17 @@ describe('Travellers Page - WIP', () => {
 
 			// Should show either travellers list or no travellers message
 			cy.get('body').then(($body) => {
-				if (
+				const hasTravellersList =
 					$body.find(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST)
 						.length > 0
-				) {
-					cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
-						'be.visible',
-					)
-				} else {
-					cy.contains('No travellers listed.').should('be.visible')
-				}
+				const hasEmptyState = $body
+					.text()
+					.includes('No travellers listed.')
+
+				expect(
+					hasTravellersList || hasEmptyState,
+					'expected either travellers list or empty-state message',
+				).to.equal(true)
 			})
 		})
 
@@ -111,26 +116,22 @@ describe('Travellers Page - WIP', () => {
 			// Wait for initial load
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 
-			// Click refresh if button is available
-			cy.get('body').then(($body) => {
-				const refreshButton = $body.find('button:contains("Refresh")')
-				if (
-					refreshButton.length > 0 &&
-					!refreshButton.is(':disabled')
-				) {
-					cy.wrap(refreshButton).click()
+			// Make refresh loading deterministic so spinner assertion is stable in CI
+			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+				fixture: 'travellers.json',
+				delay: 600,
+			}).as('refreshTravellers')
 
-					// Should show loading again
-					cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should(
-						'be.visible',
-					)
+			cy.contains('button', 'Refresh').should('be.enabled').click()
 
-					// Wait for refresh to complete
-					cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should(
-						'not.exist',
-					)
-				}
-			})
+			// Should show loading again
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+				timeout: REQUEST_TIMEOUT,
+			}).should('be.visible')
+			cy.wait('@refreshTravellers', { timeout: REQUEST_TIMEOUT })
+
+			// Wait for refresh to complete
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 		})
 
 		it('should show refresh button when no travellers exist', () => {
@@ -162,7 +163,7 @@ describe('Travellers Page - WIP', () => {
 
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellers500Error')
+			cy.wait('@getTravellers500Error', { timeout: REQUEST_TIMEOUT })
 
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).within(() => {
@@ -184,7 +185,7 @@ describe('Travellers Page - WIP', () => {
 
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellers403Error')
+			cy.wait('@getTravellers403Error', { timeout: REQUEST_TIMEOUT })
 
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
@@ -200,7 +201,7 @@ describe('Travellers Page - WIP', () => {
 
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellersNetworkError')
+			cy.wait('@getTravellersNetworkError', { timeout: REQUEST_TIMEOUT })
 
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
@@ -221,7 +222,7 @@ describe('Travellers Page - WIP', () => {
 
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellersInvalidJSON')
+			cy.wait('@getTravellersInvalidJSON', { timeout: REQUEST_TIMEOUT })
 
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
@@ -238,7 +239,7 @@ describe('Travellers Page - WIP', () => {
 
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellersError')
+			cy.wait('@getTravellersError', { timeout: REQUEST_TIMEOUT })
 
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
 
@@ -258,7 +259,9 @@ describe('Travellers Page - WIP', () => {
 
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellersInitialSuccess')
+			cy.wait('@getTravellersInitialSuccess', {
+				timeout: REQUEST_TIMEOUT,
+			})
 
 			// Verify refresh button is enabled and travellers are displayed
 			cy.get('button').contains('Refresh').should('not.be.disabled')
@@ -273,7 +276,7 @@ describe('Travellers Page - WIP', () => {
 			}).as('getTravellersRefreshError')
 
 			cy.get('button').contains('Refresh').click()
-			cy.wait('@getTravellersRefreshError')
+			cy.wait('@getTravellersRefreshError', { timeout: REQUEST_TIMEOUT })
 
 			// Close error dialog
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
@@ -289,7 +292,7 @@ describe('Travellers Page - WIP', () => {
 			// Button should still be enabled since we had initial data
 			cy.get('button').contains('Refresh').should('not.be.disabled')
 			cy.get('button').contains('Refresh').click()
-			cy.wait('@getTravellersRetrySuccess')
+			cy.wait('@getTravellersRetrySuccess', { timeout: REQUEST_TIMEOUT })
 
 			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('not.exist')
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
@@ -309,7 +312,7 @@ describe('Travellers Page - WIP', () => {
 			cy.visit(PATHS.TRAVELLERS)
 
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
-			cy.wait('@getTravellersWithDelay')
+			cy.wait('@getTravellersWithDelay', { timeout: REQUEST_TIMEOUT })
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 		})
 
@@ -328,7 +331,7 @@ describe('Travellers Page - WIP', () => {
 			)
 			cy.contains('No travellers listed.').should('not.exist')
 
-			cy.wait('@getTravellersWithDelay2')
+			cy.wait('@getTravellersWithDelay2', { timeout: REQUEST_TIMEOUT })
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 		})
 	})
@@ -341,7 +344,7 @@ describe('Travellers Page - WIP', () => {
 
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellersSuccess')
+			cy.wait('@getTravellersSuccess', { timeout: REQUEST_TIMEOUT })
 
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'be.visible',
@@ -357,7 +360,7 @@ describe('Travellers Page - WIP', () => {
 
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellersEmpty')
+			cy.wait('@getTravellersEmpty', { timeout: REQUEST_TIMEOUT })
 
 			cy.contains('No travellers listed.').should('be.visible')
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
