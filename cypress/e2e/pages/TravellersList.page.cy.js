@@ -116,10 +116,19 @@ describe('Travellers Page - WIP', () => {
 			// Wait for initial load
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
 
+			// Make refresh loading deterministic so spinner assertion is stable in CI
+			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+				fixture: 'travellers.json',
+				delay: 600,
+			}).as('refreshTravellers')
+
 			cy.contains('button', 'Refresh').should('be.enabled').click()
 
 			// Should show loading again
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+				timeout: REQUEST_TIMEOUT,
+			}).should('be.visible')
+			cy.wait('@refreshTravellers', { timeout: REQUEST_TIMEOUT })
 
 			// Wait for refresh to complete
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
