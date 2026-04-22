@@ -236,8 +236,6 @@ describe('UI state and mode switching', () => {
 			'aria-disabled',
 			'true',
 		)
-
-		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type('{enter}')
 		cy.wait('@delayedLogin', { timeout: REQUEST_TIMEOUT })
 	})
 })
