@@ -15,12 +15,30 @@ export const performLogin = (
 	password = TEST_USERS.STANDARD.PASSWORD,
 	expectedRedirectUrl = PATHS.HOME,
 ) => {
-	cy.interceptLogin(
-		API_DATABASE.POST,
-		SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+	cy.session(
+		`user-session-${email}`,
+		() => {
+			cy.visit(PATHS.AUTHENTICATION)
+			cy.interceptLogin(
+				API_DATABASE.POST,
+				SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+			)
+			cy.login(email, password)
+			cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+			cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.HOME)
+		},
+		{
+			validate() {
+				cy.visit(PATHS.TRAVELLERS)
+				cy.url({ timeout: REQUEST_TIMEOUT }).should(
+					'not.include',
+					PATHS.AUTHENTICATION,
+				)
+			},
+		},
 	)
-	cy.login(email, password)
-	cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+
+	cy.visit(expectedRedirectUrl)
 	cy.url({ timeout: REQUEST_TIMEOUT }).should('include', expectedRedirectUrl)
 }
 

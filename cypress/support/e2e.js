@@ -16,35 +16,10 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
-const clearBrowserCache = () => {
-	if (Cypress.browser.family !== 'chromium') {
-		return
-	}
-
-	return Cypress.automation('remote:debugger:protocol', {
-		command: 'Network.clearBrowserCache',
-	})
-}
-
-const disableBrowserCache = () => {
-	if (Cypress.browser.family !== 'chromium') {
-		return
-	}
-
-	return Cypress.automation('remote:debugger:protocol', {
-		command: 'Network.setCacheDisabled',
-		params: {
-			cacheDisabled: true,
-		},
-	})
-}
-
 beforeEach(() => {
-	cy.then(() => disableBrowserCache())
 	cy.clearAllCookies()
 	cy.clearAllLocalStorage()
 	cy.clearAllSessionStorage()
-	cy.then(() => clearBrowserCache())
 })
 
 // Alternatively you can use CommonJS syntax:
