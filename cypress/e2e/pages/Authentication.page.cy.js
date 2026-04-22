@@ -236,14 +236,6 @@ describe('UI state and mode switching', () => {
 			'aria-disabled',
 			'true',
 		)
-
-		// TODO: Investigate proper solution to not force: true on click
-		// Use force: true because the backdrop is covered by content due to CSS positioning,
-		// but clicking the backdrop is the intended functionality we need to test
-		// eslint-disable-next-line cypress/no-force
-		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click({
-			force: true,
-		})
 		cy.wait('@delayedLogin', { timeout: REQUEST_TIMEOUT })
 	})
 })
