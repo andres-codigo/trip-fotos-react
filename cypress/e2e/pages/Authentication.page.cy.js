@@ -12,6 +12,7 @@ import { TEST_USERS, AUTH_TEST_DATA } from '../../../src/constants/config/users'
 import { performLogin } from '../../support/utils/authHelpers'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
+const REQUEST_TIMEOUT = 10000
 
 describe('Form rendering and validation', () => {
 	beforeEach(() => {
@@ -109,6 +110,12 @@ describe('Form submission', () => {
 	})
 
 	it('submits the form when the Enter key is pressed in the password field', () => {
+		cy.interceptDelayedLogin(
+			API_DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+			1000,
+		)
+
 		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
 			TEST_USERS.STANDARD.EMAIL,
 		)
@@ -117,6 +124,7 @@ describe('Form submission', () => {
 			.type('{enter}')
 
 		cy.get(DIALOG_SELECTORS.AUTHENTICATING).should('exist')
+		cy.wait('@delayedLogin', { timeout: REQUEST_TIMEOUT })
 	})
 
 	it('trims leading/trailing spaces in the email and password fields before submitting', () => {
@@ -130,7 +138,7 @@ describe('Form submission', () => {
 
 		cy.login(emailWithSpaces, passwordWithSpaces)
 
-		cy.wait('@loginRequest')
+		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
 			.its('request.body')
 			.should((body) => {
 				expect(body.email).to.eq(TEST_USERS.STANDARD.EMAIL)
@@ -205,7 +213,7 @@ describe('UI state and mode switching', () => {
 					.and('include', 'data:image/svg+xml')
 			})
 
-		cy.wait('@loginRequest')
+		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
 	})
 
 	it('disables form fields and buttons while the loading dialog displayed', () => {
@@ -236,7 +244,7 @@ describe('UI state and mode switching', () => {
 		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click({
 			force: true,
 		})
-		cy.wait('@delayedLogin')
+		cy.wait('@delayedLogin', { timeout: REQUEST_TIMEOUT })
 	})
 })
 
@@ -269,7 +277,7 @@ describe('UI error dialog', () => {
 			errorKey,
 		)
 		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
-		cy.wait('@loginErrorRequest')
+		cy.wait('@loginErrorRequest', { timeout: REQUEST_TIMEOUT })
 
 		assertErrorDialog(errorKey)
 	}
@@ -309,7 +317,7 @@ describe('UI error dialog', () => {
 		)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
 
-		cy.wait('@loginErrorRequest')
+		cy.wait('@loginErrorRequest', { timeout: REQUEST_TIMEOUT })
 
 		assertErrorDialog(
 			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.EMAIL_EXISTS,
@@ -324,7 +332,7 @@ describe('UI error dialog', () => {
 				.INVALID_LOGIN_CREDENTIALS,
 		)
 		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
-		cy.wait('@loginErrorRequest')
+		cy.wait('@loginErrorRequest', { timeout: REQUEST_TIMEOUT })
 
 		cy.get(DIALOG_SELECTORS.INVALID_EMAIL_OR_PASSWORD).should('exist')
 

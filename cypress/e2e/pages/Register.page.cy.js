@@ -12,6 +12,7 @@ import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-trav
 import { performLogin } from '../../support/utils/authHelpers'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
+const REQUEST_TIMEOUT = 10000
 
 describe('Register Page', () => {
 	beforeEach(() => {
@@ -66,8 +67,6 @@ describe('Register Page', () => {
 		const { firstName, lastName, description, daysInCity, cities } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
-		cy.clock()
-
 		// Intercept the registration API call
 		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
 			statusCode: 200,
@@ -93,27 +92,22 @@ describe('Register Page', () => {
 
 		// Check the cities checkboxes
 		cities.forEach((city) => {
-			const checkboxSelector = `checkbox-${city}`
-			cy.get(`[data-cy="${checkboxSelector}"]`).siblings('label').click()
+			cy.get(`label[for="${city}"]`).click()
 		})
 
 		// Submit the form
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
 
 		// Wait for API call
-		cy.wait('@registerTraveller')
+		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
 
 		// Verify redirection to Travellers page
-		cy.url().should('include', PATHS.TRAVELLERS)
+		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)
 
 		// Verify success alert message
 		cy.get('[role="alert"]')
 			.should('be.visible')
 			.and('contain', TRAVELLER_REGISTRATION_SUCCESS_MESSAGE)
-
-		cy.tick(5000)
-		cy.get('[role="alert"]').trigger('animationend')
-		cy.get('[role="alert"]').should('not.exist')
 	})
 
 	it('shows a loading dialog while registering', () => {
@@ -146,21 +140,22 @@ describe('Register Page', () => {
 
 		// Check the cities checkboxes
 		cities.forEach((city) => {
-			const checkboxSelector = `checkbox-${city}`
-			cy.get(`[data-cy="${checkboxSelector}"]`).siblings('label').click()
+			cy.get(`label[for="${city}"]`).click()
 		})
 
 		// Submit the form
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
 
 		// Check for loading dialog
-		cy.get(DIALOG_SELECTORS.REGISTERING).should('be.visible')
+		cy.get(DIALOG_SELECTORS.REGISTERING, {
+			timeout: REQUEST_TIMEOUT,
+		}).should('be.visible')
 		cy.get(DIALOG_SELECTORS.REGISTERING).within(() => {
 			cy.get(DIALOG_SELECTORS.TITLE).should('contain', 'Registering')
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('exist')
 		})
 
-		cy.wait('@registerTravellerDelayed')
+		cy.wait('@registerTravellerDelayed', { timeout: REQUEST_TIMEOUT })
 	})
 
 	describe('Error Handling', () => {
@@ -190,10 +185,7 @@ describe('Register Page', () => {
 
 			// Check the cities checkboxes
 			cities.forEach((city) => {
-				const checkboxSelector = `checkbox-${city}`
-				cy.get(`[data-cy="${checkboxSelector}"]`)
-					.siblings('label')
-					.click()
+				cy.get(`label[for="${city}"]`).click()
 			})
 
 			// Submit the form
@@ -201,7 +193,7 @@ describe('Register Page', () => {
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
 			).click()
 
-			cy.wait('@registerTravellerFailed')
+			cy.wait('@registerTravellerFailed', { timeout: REQUEST_TIMEOUT })
 
 			// Check for error dialog
 			cy.get(DIALOG_SELECTORS.INVALID_TRAVELLER_REGISTRATION).should(

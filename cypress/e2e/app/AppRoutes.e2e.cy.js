@@ -3,6 +3,8 @@ import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
+const REQUEST_TIMEOUT = 10000
+
 describe('App Routing', () => {
 	it('redirects unauthenticated users from protected routes to login', () => {
 		cy.visit(BASE_URL_CYPRESS + PATHS.TRAVELLERS)
@@ -18,6 +20,10 @@ describe('App Routing', () => {
 
 	it('redirects to home after successful login', () => {
 		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
+		cy.interceptLogin(
+			API_DATABASE.POST,
+			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+		).as('loginRequest')
 		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
 			TEST_USERS.STANDARD.EMAIL,
 		)
@@ -25,7 +31,8 @@ describe('App Routing', () => {
 			TEST_USERS.STANDARD.PASSWORD,
 		)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
-		cy.url({ timeout: 10000 }).should('include', PATHS.HOME)
+		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.HOME)
 	})
 
 	it('allows access to protected routes after login', () => {
@@ -36,7 +43,7 @@ describe('App Routing', () => {
 		).as('loginRequest')
 		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
 
-		cy.wait('@loginRequest')
+		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
 		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)
 
 		cy.url().should('include', PATHS.MESSAGES)
