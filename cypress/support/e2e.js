@@ -16,5 +16,11 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+beforeEach(() => {
+	cy.clearAllCookies()
+	cy.clearAllLocalStorage()
+	cy.clearAllSessionStorage()
+})
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
