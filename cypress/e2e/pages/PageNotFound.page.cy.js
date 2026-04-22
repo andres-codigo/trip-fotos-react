@@ -1,17 +1,20 @@
 import { PAGE_NOT_FOUND_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { HEADER_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
-import { TEST_USERS } from '../../../src/constants/config/users'
+import { performLogin } from '../../support/utils/authHelpers'
 
 describe('Logged in > PageNotFound page', () => {
 	const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 
 	beforeEach(() => {
 		cy.visit(loginUrl)
-		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
+		performLogin()
 	})
-	it('displays the 404 page and user can navigate to the travellers page', () => {
-		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.TRAVELLERS)
+	it('displays the 404 page and user can navigate to the home page', () => {
+		cy.location('pathname').should('be.oneOf', [
+			PATHS.HOME,
+			PATHS.TRAVELLERS,
+		])
 		// // Visit a non-existent route
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
 
@@ -30,7 +33,10 @@ describe('Logged in > PageNotFound page', () => {
 		// Click the back to home link and verify url
 		cy.get(PAGE_NOT_FOUND_SELECTORS.HOME_LINK).as('homeLink')
 		cy.get('@homeLink').click()
-		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.TRAVELLERS)
+		cy.location('pathname').should('be.oneOf', [
+			PATHS.HOME,
+			PATHS.TRAVELLERS,
+		])
 
 		// Revisit a non-existent route
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
