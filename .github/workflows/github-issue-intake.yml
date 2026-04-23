@@ -1,0 +1,338 @@
+name: GitHub - Issue Intake
+
+on:
+    issues:
+        types: [opened, reopened, edited]
+    workflow_dispatch:
+        inputs:
+            issue_number:
+                description: 'Issue number to process'
+                required: true
+                type: string
+
+permissions:
+    contents: read
+    issues: write
+    repository-projects: write
+
+jobs:
+    intake-issue:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Intake issue into project backlog
+              uses: actions/github-script@v9
+              env:
+                  PROJECT_ID: PVT_kwHOAybMeM4BCojE
+                  PROJECT_STATUS_FIELD_ID: PVTSSF_lAHOAybMeM4BCojEzg0yW4g
+                  STATUS_BACKLOG_OPTION_ID: 7be623db
+                  DEFAULT_ASSIGNEE: andres-codigo
+                  TRIAGE_LABELS: enhancement,bug,question
+                  DOMAIN_LABELS: testing,config,utilities,documentation,dependencies,firebase,styling,feature,assets,build/deployment,constants,redux/state
+                  PROJECT_AUTOMATION_TOKEN: ${{ secrets['PROJECT_AUTOMATION_TOKEN'] }}
+              with:
+                  github-token: ${{ github.token }}
+                  script: |
+                      const owner = context.repo.owner
+                      const repo = context.repo.repo
+
+                      const PROJECT_ID = process.env.PROJECT_ID
+                      const STATUS_FIELD_ID = process.env.PROJECT_STATUS_FIELD_ID
+                      const STATUS_BACKLOG_OPTION_ID = process.env.STATUS_BACKLOG_OPTION_ID
+                      const DEFAULT_ASSIGNEE = process.env.DEFAULT_ASSIGNEE
+                      const TRIAGE_LABELS = (process.env.TRIAGE_LABELS || '')
+                        .split(',')
+                        .map((label) => label.trim())
+                        .filter(Boolean)
+                      const DOMAIN_LABELS = (process.env.DOMAIN_LABELS || '')
+                        .split(',')
+                        .map((label) => label.trim())
+                        .filter(Boolean)
+                      const PROJECT_AUTOMATION_TOKEN = process.env.PROJECT_AUTOMATION_TOKEN || ''
+
+                      const projectGithub = PROJECT_AUTOMATION_TOKEN
+                        ? getOctokit(PROJECT_AUTOMATION_TOKEN)
+                        : github
+
+                      const projectGraphql = async (query, variables) => {
+                        return projectGithub.graphql(query, variables)
+                      }
+
+                      const issueNumber = (() => {
+                        if (context.eventName === 'workflow_dispatch') {
+                          const parsed = Number(context.payload.inputs?.issue_number)
+                          return Number.isNaN(parsed) ? null : parsed
+                        }
+
+                        return context.payload.issue?.number || null
+                      })()
+
+                      if (!issueNumber) {
+                        core.setFailed('Unable to resolve issue number from event payload.')
+                        return
+                      }
+
+                      const issueResponse = await github.rest.issues.get({
+                        owner,
+                        repo,
+                        issue_number: issueNumber,
+                      })
+
+                      const issue = issueResponse.data
+
+                      if (issue.pull_request) {
+                        core.info(`Skipping #${issueNumber} because it is a pull request.`)
+                        return
+                      }
+
+                      const existingLabelNames = (issue.labels || []).map((label) =>
+                        typeof label === 'string' ? label : label.name,
+                      )
+
+                      const bodyText = `${issue.title || ''}\n${issue.body || ''}`.toLowerCase()
+
+                      const detectTriageLabel = () => {
+                        const current = TRIAGE_LABELS.find((label) => existingLabelNames.includes(label))
+                        if (current) return current
+
+                        if (/\b(question|how do i|clarify|help)\b/.test(bodyText)) {
+                          return 'question'
+                        }
+
+                        if (/\b(bug|broken|failure|fails|error|regression|flaky)\b/.test(bodyText)) {
+                          return 'bug'
+                        }
+
+                        return 'enhancement'
+                      }
+
+                      const detectDomainLabels = () => {
+                        const candidates = new Set()
+
+                        if (/\b(test|cypress|vitest|e2e|component test)\b/.test(bodyText)) {
+                          candidates.add('testing')
+                        }
+
+                        if (/\b(config|workflow|eslint|prettier|vite|yaml|yml|github actions|project automation)\b/.test(bodyText)) {
+                          candidates.add('config')
+                        }
+
+                        if (/\b(util|helper|shared function)\b/.test(bodyText)) {
+                          candidates.add('utilities')
+                        }
+
+                        if (/\b(readme|documentation|docs)\b/.test(bodyText)) {
+                          candidates.add('documentation')
+                        }
+
+                        if (/\b(dependency|dependencies|npm|package)\b/.test(bodyText)) {
+                          candidates.add('dependencies')
+                        }
+
+                        if (/\b(firebase|firestore|auth)\b/.test(bodyText)) {
+                          candidates.add('firebase')
+                        }
+
+                        if (/\b(style|styling|css|scss)\b/.test(bodyText)) {
+                          candidates.add('styling')
+                        }
+
+                        if (/\b(component|page|ui|frontend)\b/.test(bodyText)) {
+                          candidates.add('feature')
+                        }
+
+                        return Array.from(candidates).filter((label) => DOMAIN_LABELS.includes(label))
+                      }
+
+                      const triageLabel = detectTriageLabel()
+                      const domainLabels = detectDomainLabels()
+                      const labelsToApply = [triageLabel, ...domainLabels].filter(
+                        (label, idx, labels) => label && labels.indexOf(label) === idx,
+                      )
+
+                      const missingLabels = labelsToApply.filter((label) => !existingLabelNames.includes(label))
+                      if (missingLabels.length > 0) {
+                        await github.rest.issues.addLabels({
+                          owner,
+                          repo,
+                          issue_number: issueNumber,
+                          labels: missingLabels,
+                        })
+                      }
+
+                      if (DEFAULT_ASSIGNEE && !(issue.assignees || []).some((assignee) => assignee.login === DEFAULT_ASSIGNEE)) {
+                        await github.rest.issues.addAssignees({
+                          owner,
+                          repo,
+                          issue_number: issueNumber,
+                          assignees: [DEFAULT_ASSIGNEE],
+                        })
+                      }
+
+                      const addProjectItem = async (contentId) => {
+                        const data = await projectGraphql(
+                          `mutation($projectId: ID!, $contentId: ID!) {
+                            addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                              item { id }
+                            }
+                          }`,
+                          {
+                            projectId: PROJECT_ID,
+                            contentId,
+                          },
+                        )
+
+                        return data?.addProjectV2ItemById?.item?.id || null
+                      }
+
+                      const getProjectItemIdByContentId = async (contentId) => {
+                        let hasNextPage = true
+                        let cursor = null
+
+                        while (hasNextPage) {
+                          const data = await projectGraphql(
+                            `query($projectId: ID!, $cursor: String) {
+                              node(id: $projectId) {
+                                ... on ProjectV2 {
+                                  items(first: 100, after: $cursor) {
+                                    pageInfo {
+                                      hasNextPage
+                                      endCursor
+                                    }
+                                    nodes {
+                                      id
+                                      content {
+                                        __typename
+                                        ... on Issue { id }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }`,
+                            {
+                              projectId: PROJECT_ID,
+                              cursor,
+                            },
+                          )
+
+                          const items = data?.node?.items?.nodes || []
+                          const found = items.find((item) => item?.content?.id === contentId)
+                          if (found?.id) return found.id
+
+                          hasNextPage = data?.node?.items?.pageInfo?.hasNextPage || false
+                          cursor = data?.node?.items?.pageInfo?.endCursor || null
+                        }
+
+                        return null
+                      }
+
+                      const ensureProjectItem = async (contentId) => {
+                        let itemId = await getProjectItemIdByContentId(contentId)
+                        if (!itemId) {
+                          itemId = await addProjectItem(contentId)
+                        }
+                        return itemId
+                      }
+
+                      const setStatusToBacklog = async (itemId) => {
+                        await projectGraphql(
+                          `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                            updateProjectV2ItemFieldValue(
+                              input: {
+                                projectId: $projectId
+                                itemId: $itemId
+                                fieldId: $fieldId
+                                value: { singleSelectOptionId: $optionId }
+                              }
+                            ) {
+                              projectV2Item { id }
+                            }
+                          }`,
+                          {
+                            projectId: PROJECT_ID,
+                            itemId,
+                            fieldId: STATUS_FIELD_ID,
+                            optionId: STATUS_BACKLOG_OPTION_ID,
+                          },
+                        )
+                      }
+
+                      const verifyStatusIsBacklog = async (itemId) => {
+                        const data = await projectGraphql(
+                          `query($itemId: ID!) {
+                            node(id: $itemId) {
+                              ... on ProjectV2Item {
+                                fieldValues(first: 50) {
+                                  nodes {
+                                    ... on ProjectV2ItemFieldSingleSelectValue {
+                                      optionId
+                                      field {
+                                        ... on ProjectV2SingleSelectField {
+                                          id
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }`,
+                          {
+                            itemId,
+                          },
+                        )
+
+                        const values = data?.node?.fieldValues?.nodes || []
+                        const statusEntry = values.find((entry) => entry?.field?.id === STATUS_FIELD_ID)
+                        return statusEntry?.optionId === STATUS_BACKLOG_OPTION_ID
+                      }
+
+                      let projectItemId
+                      try {
+                        projectItemId = await ensureProjectItem(issue.node_id)
+                        if (!projectItemId) {
+                          core.setFailed(`Unable to create or resolve project item for issue #${issueNumber}.`)
+                          return
+                        }
+
+                        await setStatusToBacklog(projectItemId)
+                      } catch (error) {
+                        core.setFailed(
+                          `Project update failed for issue #${issueNumber}. Ensure PROJECT_AUTOMATION_TOKEN has project + repo scope. Error: ${error.message}`,
+                        )
+                        return
+                      }
+
+                      const refreshedIssue = await github.rest.issues.get({
+                        owner,
+                        repo,
+                        issue_number: issueNumber,
+                      })
+
+                      const refreshedLabels = (refreshedIssue.data.labels || []).map((label) =>
+                        typeof label === 'string' ? label : label.name,
+                      )
+
+                      const hasTriageLabel = TRIAGE_LABELS.some((label) => refreshedLabels.includes(label))
+                      const hasAssignee = (refreshedIssue.data.assignees || []).some(
+                        (assignee) => assignee.login === DEFAULT_ASSIGNEE,
+                      )
+                      const hasBacklogStatus = await verifyStatusIsBacklog(projectItemId)
+
+                      if (!hasTriageLabel) {
+                        core.setFailed(`Verification failed: issue #${issueNumber} has no triage label (${TRIAGE_LABELS.join(', ')}).`)
+                        return
+                      }
+
+                      if (!hasAssignee) {
+                        core.setFailed(`Verification failed: issue #${issueNumber} is not assigned to ${DEFAULT_ASSIGNEE}.`)
+                        return
+                      }
+
+                      if (!hasBacklogStatus) {
+                        core.setFailed(`Verification failed: issue #${issueNumber} project status is not backlog.`)
+                        return
+                      }
+
+                      core.info(`Issue #${issueNumber} intake succeeded: project item linked, backlog status set, labels and assignee verified.`)
