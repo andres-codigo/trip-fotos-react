@@ -1,5 +1,4 @@
 import { mount } from 'cypress/react'
-import configureStore from 'redux-mock-store'
 
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 
@@ -11,12 +10,20 @@ import {
 import { TEST_USERS } from '../../src/constants/config/users'
 import { VIEWPORTS } from '../../src/constants/config/viewports'
 
-const mockStore = configureStore([])
+let mockStore = null
+
+const getMockStore = () => {
+	if (!mockStore) {
+		const configureStore = require('redux-mock-store')
+		mockStore = configureStore([])
+	}
+	return mockStore
+}
 ////
 // HELPERS
 ////
 Cypress.Commands.add('createMockStore', (authToken = null) => {
-	return mockStore({
+	return getMockStore()({
 		authentication: {
 			token: authToken,
 			userId: TEST_USERS.STANDARD.ID,
