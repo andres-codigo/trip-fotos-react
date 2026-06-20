@@ -62,6 +62,7 @@ export default defineConfig({
 	},
 	optimizeDeps: {
 		force: true,
+		include: ['redux-mock-store'],
 	},
 	build: {
 		sourcemap: false,
