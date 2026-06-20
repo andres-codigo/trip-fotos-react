@@ -61,8 +61,7 @@ export default defineConfig({
 		extensions: ['.js', '.jsx', '.json', '.mjs', '.vue', '.svg', '.scss'],
 	},
 	optimizeDeps: {
-		force: true,
-		include: ['redux-mock-store'],
+		exclude: ['redux-mock-store'],
 	},
 	build: {
 		sourcemap: false,
