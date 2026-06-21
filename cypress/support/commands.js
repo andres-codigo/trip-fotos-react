@@ -11,27 +11,32 @@ import {
 import { TEST_USERS } from '../../src/constants/config/users'
 import { VIEWPORTS } from '../../src/constants/config/viewports'
 
-const mockStore = configureStore([])
 ////
 // HELPERS
 ////
 Cypress.Commands.add('createMockStore', (authToken = null) => {
-	return mockStore({
-		authentication: {
-			token: authToken,
-			userId: TEST_USERS.STANDARD.ID,
-			userName: TEST_USERS.STANDARD.NAME,
-			userEmail: TEST_USERS.STANDARD.EMAIL,
-			didAutoLogout: false,
+	return configureStore({
+		reducer: {
+			authentication: (state = {}) => state,
+			travellers: (state = {}) => state,
 		},
-		travellers: {
-			travellerName: '',
-			isTraveller: false,
-			hasTravellers: false,
-			travellers: [],
-			lastFetch: null,
-			status: 'idle',
-			error: null,
+		preloadedState: {
+			authentication: {
+				token: authToken,
+				userId: TEST_USERS.STANDARD.ID,
+				userName: TEST_USERS.STANDARD.NAME,
+				userEmail: TEST_USERS.STANDARD.EMAIL,
+				didAutoLogout: false,
+			},
+			travellers: {
+				travellerName: '',
+				isTraveller: false,
+				hasTravellers: false,
+				travellers: [],
+				lastFetch: null,
+				status: 'idle',
+				error: null,
+			},
 		},
 	})
 })
