@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
-import configureStore from 'redux-mock-store'
+import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter, useNavigate } from 'react-router-dom'
 
 import { registerTraveller } from '@/store/slices/travellersSlice'
@@ -60,13 +60,21 @@ vi.mock(
  * - Checks that the TravellerRegistrationForm is rendered with correct props
  */
 
+const createMockStore = (initialState) => {
+	return configureStore({
+		reducer: {
+			travellers: (state = { status: 'idle', error: null }) => state,
+		},
+		preloadedState: initialState,
+	})
+}
+
 describe('Register', () => {
-	const mockStore = configureStore([])
 	let store
 	const mockNavigate = vi.fn()
 
 	beforeEach(() => {
-		store = mockStore({
+		store = createMockStore({
 			travellers: {
 				status: 'idle',
 				error: null,

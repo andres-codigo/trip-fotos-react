@@ -1,5 +1,5 @@
 import { mount } from 'cypress/react'
-import configureStore from 'redux-mock-store'
+import { configureStore } from '@reduxjs/toolkit'
 
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 
