@@ -7,6 +7,10 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export default defineConfig({
+	// Cypress.env() is deprecated and lets any browser code (including the
+	// app under test) read it. Use cy.env() for values that must stay out of
+	// the AUT's reach, and `expose` below for values that are safe to be public.
+	allowCypressEnv: false,
 	env: {
 		// PATHS
 		HOME_URL: PATHS.HOME,
@@ -17,14 +21,16 @@ export default defineConfig({
 		PAGE_NOT_FOUND_URL: PATHS.PAGE_NOT_FOUND,
 		// TEST PATHS
 		NON_EXISTENT_URL: PATHS.NON_EXISTENT_PATH,
-		// API
+	},
+	// Public config values intentionally readable by app/test code running
+	// in the browser (AUT). See Cypress.expose() in src/constants/api/endpoints.js
+	// and src/constants/config/users.js.
+	expose: {
 		API_URL: process.env.VITE_API_URL,
 		API_KEY: process.env.VITE_API_KEY,
-		// USER CREDENTIALS
+		VITE_DATABASE_URL: process.env.VITE_BACKEND_BASE_URL,
 		CYPRESS_USER_EMAIL: process.env.CYPRESS_USER_EMAIL,
 		CYPRESS_USER_PASSWORD: process.env.CYPRESS_USER_PASSWORD,
-		// BACKEND
-		VITE_DATABASE_URL: process.env.VITE_BACKEND_BASE_URL,
 	},
 	e2e: {
 		baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',
