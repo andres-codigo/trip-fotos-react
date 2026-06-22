@@ -1,6 +1,6 @@
-const getCypressEnv = (key) => {
+const getCypressExposed = (key) => {
 	if (typeof Cypress !== 'undefined') {
-		return Cypress.env(key)
+		return Cypress.expose(key)
 	}
 	// Return undefined or a fallback for non-Cypress environments
 	return undefined
@@ -10,8 +10,8 @@ export const TEST_USERS = {
 	STANDARD: {
 		ID: 'cypress-mock-user-id',
 		NAME: 'Cypress Test User',
-		EMAIL: getCypressEnv('CYPRESS_USER_EMAIL'),
-		PASSWORD: getCypressEnv('CYPRESS_USER_PASSWORD'),
+		EMAIL: getCypressExposed('CYPRESS_USER_EMAIL'),
+		PASSWORD: getCypressExposed('CYPRESS_USER_PASSWORD'),
 	},
 }
 
