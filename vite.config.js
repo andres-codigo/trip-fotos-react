@@ -28,6 +28,16 @@ const getHttpsConfig = () => {
 const isCypress = !!process.env.CYPRESS
 const httpsConfig = !isCypress ? getHttpsConfig() : undefined
 
+const vendorChunks = {
+	react: ['react', 'react-dom'],
+	redux: ['redux', '@reduxjs/toolkit', 'react-redux', 'redux-persist'],
+	router: ['react-router-dom', 'react-router'],
+	firebase: ['firebase', '@firebase'],
+	analytics: ['@vercel/analytics'],
+	speedInsights: ['@vercel/speed-insights'],
+	transition: ['react-transition-group'],
+}
+
 export default defineConfig({
 	server: {
 		port: 3000,
@@ -67,19 +77,22 @@ export default defineConfig({
 		sourcemap: false,
 		rollupOptions: {
 			output: {
-				manualChunks: {
-					react: ['react', 'react-dom'],
-					redux: [
-						'redux',
-						'@reduxjs/toolkit',
-						'react-redux',
-						'redux-persist',
-					],
-					router: ['react-router-dom'],
-					firebase: ['firebase/app'],
-					analytics: ['@vercel/analytics'],
-					speedInsights: ['@vercel/speed-insights'],
-					transition: ['react-transition-group'],
+				// Vite 8's default bundler (Rolldown) only supports the
+				// function form of manualChunks, not the object-map shorthand.
+				manualChunks(id) {
+					if (!id.includes('node_modules')) return
+
+					for (const [chunk, packages] of Object.entries(
+						vendorChunks,
+					)) {
+						if (
+							packages.some((pkg) =>
+								id.includes(`node_modules/${pkg}/`),
+							)
+						) {
+							return chunk
+						}
+					}
 				},
 			},
 		},
