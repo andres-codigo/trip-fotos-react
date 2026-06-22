@@ -28,6 +28,9 @@ coverage
 cypress/downloads
 cypress/screenshots
 
+# PLAYWRIGHT MCP
+.playwright-mcp
+
 # DEPCHECK ANALYSIS FILES
 scripts/dependency-check
 
