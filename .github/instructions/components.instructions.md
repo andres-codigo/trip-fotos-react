@@ -1,7 +1,7 @@
 ---
 name: components-development
 description: Use when creating, modifying, or refactoring React components. Covers component folder structure, reusability patterns, hooks placement, testing requirements, and accessibility conventions.
-applyTo: ['src/components/**/*.jsx', 'src/components/**/*.js']
+applyTo: 'src/components/**/*.{jsx,js}'
 ---
 
 # Component Development Guidance

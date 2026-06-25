@@ -1,7 +1,7 @@
 ---
 name: testing-guidance
 description: Use when writing or modifying tests. Covers Vitest and Cypress patterns, test data sources, helper usage, and anti-flakiness practices.
-applyTo: ['**/__tests__/**/*', 'cypress/e2e/**/*.cy.js']
+applyTo: '{**/__tests__/**/*,cypress/e2e/**/*.cy.js}'
 ---
 
 # Testing Guidance
