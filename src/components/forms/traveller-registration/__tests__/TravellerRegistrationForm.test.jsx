@@ -14,7 +14,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
  */
 
 import TravellerRegistrationForm from '../TravellerRegistrationForm'
-import { UI_TEXT } from '@/constants/test/ui-constants/ui-text'
+import { UI_TEXT } from '@/constants/test'
 
 // Test selector constants
 const FORM_SELECTORS = {

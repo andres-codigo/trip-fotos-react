@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
-import { MOCK_TRAVELLERS } from '@/constants/test/mock-data/mock-travellers'
+import { MOCK_TRAVELLERS } from '@/constants/test'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import { useTravellerRegistration } from '../useTravellerRegistration'

@@ -2,11 +2,13 @@ import { BrowserRouter } from 'react-router-dom'
 
 import TravellerRegistrationForm from '../TravellerRegistrationForm'
 
-import { ACCESSIBILITY } from '../../../../constants/ui/accessibility'
+import { ACCESSIBILITY } from '@/constants/ui'
 
-import { MOCK_TRAVELLERS } from '../../../../constants/test/mock-data/mock-travellers'
-import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '../../../../constants/test/selectors/components'
-import { VALIDATION_MESSAGES } from '@/constants/validation/messages'
+import {
+	MOCK_TRAVELLERS,
+	TRAVELLER_REGISTRATION_FORM_SELECTORS,
+} from '@/constants/test'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import travellerRegistrationFormStyles from '../TravellerRegistrationForm.module.scss'
 

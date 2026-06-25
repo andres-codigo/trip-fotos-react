@@ -14,7 +14,7 @@ import { describe, it, expect, vi } from 'vitest'
  */
 
 import Checkbox from '../Checkbox'
-import { CHECKBOX } from '@/constants/test/ui-constants/checkbox'
+import { CHECKBOX } from '@/constants/test'
 
 describe('<Checkbox />', () => {
 	describe('Rendering tests', () => {

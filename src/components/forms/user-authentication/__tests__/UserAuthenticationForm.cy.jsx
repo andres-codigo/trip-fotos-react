@@ -1,9 +1,8 @@
 import { BrowserRouter } from 'react-router-dom'
 
-import { AUTHENTICATION_FORM_SELECTORS } from '../../../../constants/test/selectors/components'
+import { AUTHENTICATION_FORM_SELECTORS } from '@/constants/test'
 
-import { ATTRIBUTES } from '../../../../constants/ui/attributes'
-import { ACCESSIBILITY } from '../../../../constants/ui/accessibility'
+import { ATTRIBUTES, ACCESSIBILITY } from '@/constants/ui'
 
 import UserAuthenticationForm from '../UserAuthenticationForm'
 

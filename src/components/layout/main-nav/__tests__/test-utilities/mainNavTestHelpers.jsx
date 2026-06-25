@@ -1,6 +1,5 @@
-import { TOP_NAVIGATION_SELECTORS } from '../../../../../constants/test/selectors/components'
-import { TEST_UTILITIES } from '../../../../../constants/test/utilities/selectors'
-import { VIEWPORTS } from '../../../../../constants/config/viewports'
+import { TOP_NAVIGATION_SELECTORS, TEST_UTILITIES } from '@/constants/test'
+import { VIEWPORTS } from '@/constants/config'
 
 import { PATHS } from '@/constants/ui'
 
