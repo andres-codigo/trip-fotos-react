@@ -1,7 +1,4 @@
-import {
-	HEADER_SELECTORS,
-	TOP_NAVIGATION_SELECTORS,
-} from '../../../../../constants/test/selectors/components'
+import { HEADER_SELECTORS, TOP_NAVIGATION_SELECTORS } from '@/constants/test'
 
 export const assertHeaderTitleLink = (expectedHref) => {
 	cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK)

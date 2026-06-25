@@ -1,4 +1,4 @@
-import { HEADER_SELECTORS } from '../../../../constants/test/selectors/components'
+import { HEADER_SELECTORS } from '@/constants/test'
 
 import { PATHS } from '@/constants/ui'
 

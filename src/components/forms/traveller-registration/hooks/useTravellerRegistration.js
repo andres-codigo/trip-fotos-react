@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { VALIDATION_MESSAGES } from '@/constants/validation'
-import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers/registration'
+import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
 
 export const useTravellerRegistration = () => {
 	const { FIRST_NAME, LAST_NAME, DESCRIPTION, DAYS, CITIES, FILES } =

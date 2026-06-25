@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {
 	TRAVELLER_REGISTRATION_CITIES,
 	TRAVELLER_REGISTRATION_FIELDS,
-} from '@/constants/travellers/registration'
+} from '@/constants/travellers'
 import { ACCESSIBILITY } from '@/constants/ui'
 
 import Input from '@/components/ui/form/input/Input'

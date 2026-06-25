@@ -1,4 +1,4 @@
-import { CHECKBOX } from '@/constants/test/ui-constants/checkbox'
+import { CHECKBOX } from '@/constants/test'
 import { getByDataCy } from '@/testUtils/cypress/selectors'
 import Checkbox from '../Checkbox'
 

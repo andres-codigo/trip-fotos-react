@@ -5,8 +5,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter, useNavigate } from 'react-router-dom'
 
 import { registerTraveller } from '@/store/slices/travellersSlice'
-import { TEST_IDS } from '@/constants/test'
-import { TRAVELLER_REGISTRATION_FORM_SELECTORS } from '@/constants/test/selectors/components'
+import { TEST_IDS, TRAVELLER_REGISTRATION_FORM_SELECTORS } from '@/constants/test'
 import { GLOBAL, PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
