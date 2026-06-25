@@ -52,7 +52,9 @@ src/
 - Global styles only in `src/styles/global.scss`
 
 ### Constants
-- Barrel exports — import from `constants/` subdirectory index, not individual files
+- Always import from the subdirectory barrel (`index.js`), never from individual files within a subdirectory
+  - Correct: `import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'`
+  - Wrong: `import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers/registration'`
 - Domain constants (auth, travellers) are separate from UI constants
 
 ### Comments
@@ -60,7 +62,10 @@ src/
 - No multi-line docblocks; no "what this does" comments
 
 ### Imports
-- Path alias `@/` maps to `src/`
+- Always use the `@/` alias for imports within `src/` — never use relative paths (`../../`)
+  - Correct: `import Foo from '@/components/ui/foo/Foo'`
+  - Wrong: `import Foo from '../../../components/ui/foo/Foo'`
+- `@/` maps to `src/` (configured in Vite)
 
 ## Dev commands
 
