@@ -1,7 +1,7 @@
 ---
 name: redux-store-development
 description: Use when creating Redux slices, async thunks, configuring state, or modifying store logic. Covers slice structure, RTK Query and thunk patterns, error handling, persistence, and testing requirements.
-applyTo: ['src/store/**/*.js', 'src/store/**/*.jsx']
+applyTo: 'src/store/**/*.{jsx,js}'
 ---
 
 # Redux Store Development Guidance

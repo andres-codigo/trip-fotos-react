@@ -1,7 +1,7 @@
 ---
 name: page-development
 description: Use when creating or modifying React pages. Covers page folder structure, route-level responsibilities, data loading orchestration, and page testing requirements.
-applyTo: ['src/pages/**/*.jsx', 'src/pages/**/*.js']
+applyTo: 'src/pages/**/*.{jsx,js}'
 ---
 
 # Page Development Guidance

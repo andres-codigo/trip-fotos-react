@@ -1,7 +1,7 @@
 ---
 name: scss-styling-conventions
 description: Use when creating or modifying SCSS files. Covers SCSS module naming, mixin and variable usage, imports, and colour naming conventions.
-applyTo: ['src/**/*.module.scss', 'src/styles/**/*.scss']
+applyTo: '{src/**/*.module.scss,src/styles/**/*.scss}'
 ---
 
 # SCSS Styling Guidance
