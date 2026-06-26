@@ -1,115 +1,70 @@
 # Source Constants Directory
 
-## Import Flexibility Options
+## Import Convention
 
-### Option 1: Import everything from root
+Always import from the subdirectory barrel (`index.js`), never from individual files within a subdirectory.
+
+**src/ files** — use the `@/` alias:
 
 ```javascript
-import {
-	API_ENDPOINTS,
-	FIREBASE_ERRORS,
-	VALIDATION_MESSAGES,
-} from '../constants'
+import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
+import { API_ENDPOINTS } from '@/constants/api'
 ```
 
-### Option 2: Import by category
+**Cypress files** — use relative paths (the `@/` alias is not available in Cypress):
 
 ```javascript
-import * as api from '../constants/api'
-import * as errors from '../constants/errors'
-import * as test from '../constants/test'
-```
-
-### Option 3: Import specific files
-
-```javascript
-import { API_ENDPOINTS } from '../constants/api/endpoints'
-import { MOCK_USER_DATA } from '../constants/test/mock-data/mock-user'
+import { MOCK_USER_DATA } from '../../src/constants/test'
+import { COMPONENT_SELECTORS } from '../../src/constants/test/selectors'
 ```
 
 ## Directory Structure
 
 ```
 src/constants/
-├── index.js                   # Root aggregator
 ├── api/
-│   ├── index.js               # Re-exports endpoints.js, headers.js, etc.
+│   ├── index.js
 │   ├── endpoints.js
 │   ├── headers.js
-│   ├── messages.js
-│   └── firebase-errors.js
+│   └── messages.js
+├── auth/
+│   └── index.js               # FIREBASE_ERRORS
+├── config/
+│   ├── index.js
+│   ├── users.js
+│   └── viewports.js
 ├── errors/
-│   ├── index.js               # Re-exports messages.js, types.js
-│   ├── messages.js
-│   └── types.js
+│   ├── index.js
+│   └── messages.js
 ├── firebase/
-│   ├── index.js               # Re-exports config.js
-│   └── config.js
+│   └── index.js               # FIREBASE (env-based config)
 ├── redux/
-│   ├── index.js               # Re-exports action-types.js
-│   └── action-types.js
+│   └── index.js               # TRAVELLERS_ACTION_TYPES, AUTHENTICATION_ACTION_TYPES
 ├── test/
-│   ├── index.js               # Re-exports all test-related constants
+│   ├── index.js               # Re-exports all test constants
 │   ├── mock-data/
-│   │   ├── index.js           # Re-exports all mock data files
-│   │   ├── mock-user.js
 │   │   ├── mock-api.js
+│   │   ├── mock-common.js
 │   │   ├── mock-travellers.js
-│   │   └── mock-common.js
-│   ├── ui-constants/
-│   │   ├── index.js           # Re-exports all UI constant files
-│   │   ├── button.js
-│   │   ├── dialog.js
-│   │   ├── input.js
-│   │   ├── spinner.js
-│   │   └── ui-text.js
-│   └── test-utilities/
-│       ├── index.js           # Re-exports selectors.js
+│   │   └── mock-user.js
+│   ├── selectors/
+│   │   ├── index.js
+│   │   ├── _ids.js
+│   │   ├── components.js
+│   │   └── pages.js
+│   ├── ui-constants.js
+│   └── utilities/
+│       ├── index.js
 │       └── selectors.js
 ├── travellers/
-│   ├── index.js               # Re-exports registration.js
-│   └── registration.js
+│   └── index.js               # TRAVELLER_REGISTRATION_FIELDS, TRAVELLER_REGISTRATION_CITIES
 ├── ui/
-│   ├── index.js               # Re-exports accessibility.js, global.js, paths.js
+│   ├── index.js
 │   ├── accessibility.js
+│   ├── attributes.js
 │   ├── global.js
 │   └── paths.js
 └── validation/
-    ├── index.js               # Re-exports messages.js
-    └── messages.js
-```
-
-## Usage Examples
-
-### Application Code
-
-```javascript
-// Component imports
-import { UI_PATHS, ACCESSIBILITY_LABELS } from '../../constants'
-
-// API service imports
-import { API_ENDPOINTS, API_HEADERS } from '../../constants/api'
-```
-
-### Test Code
-
-```javascript
-// Test utilities
-import { TEST_UTILITIES } from '../../constants/test/test-utilities'
-
-// Mock data for tests
-import {
-	MOCK_USER_DATA,
-	MOCK_API_RESPONSES,
-} from '../../constants/test/mock-data'
-
-// UI constants for testing
-import { BUTTON_TEXT, DIALOG_CONFIG } from '../../constants/test/ui-constants'
-```
-
-### Redux Code
-
-```javascript
-// Action types
-import { ACTION_TYPES } from '../../constants/redux'
+    └── index.js               # VALIDATION_MESSAGES
 ```

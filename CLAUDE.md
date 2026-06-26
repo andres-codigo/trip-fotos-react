@@ -36,6 +36,22 @@ src/
   index.jsx      Entry point
 ```
 
+## Branch naming
+
+Branches must use a type prefix:
+
+| Prefix | Use for |
+|---|---|
+| `feature/` | New user-facing feature |
+| `fix/` | Bug fix |
+| `docs/` | Documentation only |
+| `refactor/` | Code restructuring, no behaviour change |
+| `enhancement/` | Improvement to an existing feature |
+| `chore/` | Maintenance — deps, config, CI |
+| `test/` | Test additions or changes only |
+
+Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
+
 ## Key conventions
 
 ### Tests
