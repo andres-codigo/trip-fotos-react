@@ -1,1 +1,16 @@
-export * from './firebase-errors'
+export const FIREBASE_ERRORS = Object.freeze({
+	// FIREBASE ERROR MESSAGES
+	AUTHENTICATION_ACTION_TYPES: {
+		DEFAULT: 'DEFAULT',
+		DEFAULT_MESSAGE: 'An unexpected error occurred. Please try again.',
+		EMAIL_EXISTS: 'EMAIL_EXISTS',
+		EMAIL_EXISTS_MESSAGE:
+			'This e-mail address is already in use. Try signing in or use a different e-mail address.',
+		INVALID_LOGIN_CREDENTIALS: 'INVALID_LOGIN_CREDENTIALS',
+		INVALID_LOGIN_CREDENTIALS_MESSAGE:
+			'The email or password you entered is incorrect.',
+		TOO_MANY_ATTEMPTS_TRY_LATER: 'TOO_MANY_ATTEMPTS_TRY_LATER',
+		TOO_MANY_ATTEMPTS_TRY_LATER_MESSAGE:
+			'Too many unsuccessful login attempts. Please try again later.',
+	},
+})

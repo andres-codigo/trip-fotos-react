@@ -4,7 +4,7 @@ import {
 	DIALOG_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
-import { VALIDATION_MESSAGES } from '../../../src/constants/validation/messages'
+import { VALIDATION_MESSAGES } from '../../../src/constants/validation'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../../src/constants/travellers'
 import { API_DATABASE, API_ERROR_MESSAGE } from '../../../src/constants/api'
 import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-travellers'
