@@ -1,9 +1,11 @@
 # CLAUDE.md — trip-fotos-react
 
 ## What this app does
+
 A React/Firebase app for finding popular travel destinations tied to registered travellers. Converted from a Vue Udemy course project ("Find a Coach") — reimagined as "Trip Fotos". Deployed on Vercel.
 
 ## Stack
+
 - **Vite** — dev server + build (port 3000, optional HTTPS via `certs/`)
 - **React** — UI library
 - **React Router** — routing
@@ -40,21 +42,22 @@ src/
 
 Branches must use a type prefix:
 
-| Prefix | Use for |
-|---|---|
-| `feature/` | New user-facing feature |
-| `fix/` | Bug fix |
-| `docs/` | Documentation only |
-| `refactor/` | Code restructuring, no behaviour change |
-| `enhancement/` | Improvement to an existing feature |
-| `chore/` | Maintenance — deps, config, CI |
-| `test/` | Test additions or changes only |
+| Prefix         | Use for                                 |
+| -------------- | --------------------------------------- |
+| `feature/`     | New user-facing feature                 |
+| `fix/`         | Bug fix                                 |
+| `docs/`        | Documentation only                      |
+| `refactor/`    | Code restructuring, no behaviour change |
+| `enhancement/` | Improvement to an existing feature      |
+| `chore/`       | Maintenance — deps, config, CI          |
+| `test/`        | Test additions or changes only          |
 
 Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
 
 ## Key conventions
 
 ### Tests
+
 - Co-located in `__tests__/` within each component/util folder
 - Vitest files: `*.test.jsx` / `*.test.js`
 - Cypress component files: `*.cy.jsx`
@@ -63,24 +66,28 @@ Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
 - Shared test data lives in `constants/test/`
 
 ### Styles
+
 - SCSS module per component: `ComponentName.module.scss`
 - Global variables/mixins in `src/styles/setup/`
 - Global styles only in `src/styles/global.scss`
 
 ### Constants
+
 - Always import from the subdirectory barrel (`index.js`), never from individual files within a subdirectory
-  - Correct: `import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'`
-  - Wrong: `import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers/registration'`
+    - Correct: `import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'`
+    - Wrong: `import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers/registration'`
 - Domain constants (auth, travellers) are separate from UI constants
 
 ### Comments
+
 - Minimal — only add a comment when the WHY is non-obvious
 - No multi-line docblocks; no "what this does" comments
 
 ### Imports
+
 - Always use the `@/` alias for imports within `src/` — never use relative paths (`../../`)
-  - Correct: `import Foo from '@/components/ui/foo/Foo'`
-  - Wrong: `import Foo from '../../../components/ui/foo/Foo'`
+    - Correct: `import Foo from '@/components/ui/foo/Foo'`
+    - Wrong: `import Foo from '../../../components/ui/foo/Foo'`
 - `@/` maps to `src/` (configured in Vite)
 
 ## Dev commands
@@ -104,10 +111,12 @@ npm run analyze          # Bundle size visualiser
 ```
 
 ## Environment
+
 Requires `.env` with Firebase config — see `.env.example` or README Setup section.
 Required keys: `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `VITE_ADMIN_ID`, `CYPRESS_USER_*`.
 
 ## Things to avoid
+
 - Do not commit `.env` or `certs/`
 - Do not mock the Firebase Realtime Database in integration tests
 - Do not add comments that describe what the code does — only why
