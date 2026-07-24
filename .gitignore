@@ -11,6 +11,9 @@ dist
 !.vscode/extensions.json
 .DS_Store
 
+# CLAUDE CODE LOCAL SETTINGS
+.claude/settings.local.json
+
 # NPM
 .npm
 
