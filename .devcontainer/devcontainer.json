@@ -1,0 +1,14 @@
+{
+	"name": "claude-code-dev",
+	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "lts"
+		}
+	},
+	"postCreateCommand": "npm config set allow-scripts=@anthropic-ai/claude-code --location=user && npm install -g @anthropic-ai/claude-code",
+	"remoteUser": "vscode",
+	"mounts": [
+		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind"
+	]
+}
