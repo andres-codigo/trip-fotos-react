@@ -152,7 +152,7 @@ npm run vitest:run:fast
 npm run vitest:coverage
 
 # Visual Vite bundle analysis
-npm run analyze
+npm run analyse
 
 # Build the project for production
 npm run build
@@ -377,15 +377,7 @@ This project uses [Vitest](https://vitest.dev/) for unit and integration testing
 
 ### 1. Vitest Setup
 
-Vitest is already configured in the project.
-
-To get started:
-
-**Install Vitest** (if not already installed):
-
-```bash
-npm install vitest --save-dev
-```
+Vitest is already configured and included as a dev dependency — running `npm install` (see [Installation](#installation)) is all that's needed to get started.
 
 **Run Vitest Tests**
 
@@ -430,7 +422,7 @@ src/
   │   ├── slices/
   │   │   ├── <slice-file>.js
   │   │   ├── <test-file>.test.js
-  ├── utlis/
+  ├── utils/
   │   ├── errorHandler/
   │   │   ├── __tests__/
   │   │   │   ├── errorHandler.test.js
@@ -440,20 +432,9 @@ src/
 
 ### Vitest Test Utilities
 
-Reusable test utilities are located in the [testSetup](https://github.com/andres-codigo/trip-fotos-react/blob/main/src/testUtils/testSetup.js) file. These include:
+Reusable test utilities are located in [testingLibrarySetup.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/src/testUtils/vitest/testingLibrarySetup.js). This includes:
 
-- **Mock Setup**: Functions to mock `fetch`, `localStorage`, and other global objects.
-
-Example usage:
-
-```javascript
-import { setupMocks, resetMocks } from '@/testUtils/testSetup'
-
-beforeEach(() => {
-	setupMocks()
-	resetMocks()
-})
-```
+- **Mock Setup**: `setupMocks()` mocks `fetch` and `localStorage`, and runs automatically when the module is imported (e.g. via the Vitest `setupFiles` config).
 
 ### 2. Cypress Setup
 
@@ -555,7 +536,7 @@ This project uses GitHub Actions to automate key development and monitoring task
 
 ### 1. Vitest Unit Tests
 
-- **Workflow File:** `.github/workflows/unit-tests-vitest.yml`
+- **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
 - **Triggers:**
     - On **push** to `main` (for changes in `src/**`, `package.json`, or `vitest.config.*`)
     - On **pull requests** to `main`
@@ -683,7 +664,7 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 | Workflow Name                     | File                                           | Tests Type       | Triggered On     |
 | --------------------------------- | ---------------------------------------------- | ---------------- | ---------------- |
-| Vitest - Run Unit Tests           | `.github/workflows/unit-tests-vitest.yml`      | Unit/Integration | Push/PR/Manual   |
+| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`      | Unit/Integration | Push/PR/Manual   |
 | Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml`            | E2E              | Push/PR/Manual   |
 | Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`      | Component        | Push/PR/Manual   |
 | GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`  | Automation       | PR Events        |
@@ -722,7 +703,7 @@ npm run preview
 You can analyse your production bundle to identify large dependencies and optimise performance using [Vite Bundle Visualizer](https://github.com/btd/vite-plugin-visualizer):
 
 ```bash
-npm run analyze
+npm run analyse
 ```
 
 This will generate a visual interactive report (usually `stats.html`) showing the size of each module in your bundle. Open the generated file in your browser to explore and identify optimisation opportunities.
@@ -760,59 +741,71 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 ```
 trip-fotos-react/
+├── .devcontainer/               # VS Code Dev Container configuration
 ├── .github/
 │   ├── agents/                 # GitHub Copilot agent workflows for scaffolding
 │   ├── instructions/           # Domain-specific Copilot guidance files
 │   ├── workflows/              # GitHub Actions workflow files for CI/CD automation
 │   └── copilot-instructions.md # Workspace-level Copilot guidelines
+├── .vscode/                     # Shared VS Code editor settings
 ├── cypress/                    # Cypress tests
 ├── declarations/               # Breaking issue fix when using ESLint V9
 ├── public/                     # Static assets
 ├── rules/                      # ESLint configuration rules
+├── scripts/                    # Repo maintenance scripts (e.g. dependency-check output)
 ├── src/
 │   ├── app/            # Main application component
 │   ├── assets/         # Fonts, SVGs, and other static assets
 │   ├── components/     # Reusable React components
 │   ├── constants/      # Global, Firebase, API, paths, and other constants
 │   ├── pages/          # Page components for routing
-|   ├── services/       # External service configurations (Firebase, APIs, etc.)
+│   ├── services/       # External service configurations (Firebase, APIs, etc.)
 │   ├── store/          # Redux store and slices
 │   ├── styles/         # SCSS stylesheets
 │   ├── testUtils/      # Testing environment configuration and Cypress and Vitest utility functions
 │   ├── utils/          # General utility functions
-│   └── index.js        # Root application entry point
-├── .env                        # Environment variables (not committed to version control)
-├── .firebaserc                 # Firebase project configuration
-├── .gitignore                  # Git ignore rules
-├── .npmrc                      # Configuration file for custom npm settings and registry options
-├── .nvmrc                      # Specifies the Node.js version for Node Version Manager (nvm)
-├── .prettierignore             # Prettier ignore rules
-├── .prettierrc.json            # Prettier configuration
-├── cypress.config.js           # Cypress testing configuration
-├── eslint.config.mjs           # ESLint configuration
-├── jsconfig.json               # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
-├── package.json                # Project dependencies and scripts
-├── README.md                   # Project documentation
-├── vercel.json                 # Vercel deployment configuration
-└── vite.config.js              # Vite build tool configuration
+│   └── index.jsx       # Root application entry point
+├── .dockerignore                # Files excluded from the dev container build context
+├── .env                         # Environment variables (not committed to version control)
+├── .firebaserc                  # Firebase project configuration
+├── .gitignore                   # Git ignore rules
+├── .npmrc                       # Configuration file for custom npm settings and registry options
+├── .nvmrc                       # Specifies the Node.js version for Node Version Manager (nvm)
+├── .prettierignore              # Prettier ignore rules
+├── .prettierrc.json             # Prettier configuration
+├── cypress.config.js            # Cypress testing configuration
+├── eslint-plugin-react-hooks.d.ts # Type declaration shim for the ESLint React Hooks plugin
+├── eslint.config.mjs            # ESLint configuration
+├── index.html                   # Vite HTML entry point
+├── jsconfig.json                # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
+├── package.json                 # Project dependencies and scripts
+├── README.md                    # Project documentation
+├── vercel.json                  # Vercel deployment configuration
+└── vite.config.js               # Vite build tool configuration
 ```
 
 ### Explanation of Key Project Files and Folders:
 
-1. **`.github/workflows/`**: Contains GitHub Actions workflow YAML files that automate CI/CD tasks such as running tests, linting, and deployments on push or pull request events.
-2. **`.github/instructions/`**: Contains domain-specific Copilot guidance files for components, pages, Redux store, styling, and testing.
-3. **`.github/agents/`**: Contains workflow agent files that automate scaffolding tasks (e.g., creating new components, pages, and Redux slices) with full structure and tests.
-4. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
-5. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).
-6. **`.npmrc`**: Configuration file for custom npm settings and registry options.
-7. **`.nvmrc`**: Specifies the Node.js version for Node Version Manager (nvm).
-8. **`.prettierignore`**: Specifies files and directories to be ignored by Prettier for formatting.
-9. **`.prettierrc.json`**: Configuration file for Prettier to enforce consistent code formatting.
-10. **`cypress.config.js`**: Configuration file for Cypress end-to-end testing.
-11. **`eslint.config.mjs`**: ESLint configuration file for linting JavaScript/TypeScript code.
-12. **`jsconfig.json`**: JavaScript project configuration file that provides editor support for features like path aliases, module resolution, and improved IntelliSense in VS Code and other compatible editors.
-13. **`vercel.json`**: Configuration file for deploying the project to Vercel.
-14. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
+1. **`.devcontainer/`**: VS Code Dev Container configuration for a reproducible, containerised development environment.
+2. **`.github/workflows/`**: Contains GitHub Actions workflow YAML files that automate CI/CD tasks such as running tests, linting, and deployments on push or pull request events.
+3. **`.github/instructions/`**: Contains domain-specific Copilot guidance files for components, pages, Redux store, styling, and testing.
+4. **`.github/agents/`**: Contains workflow agent files that automate scaffolding tasks (e.g., creating new components, pages, and Redux slices) with full structure and tests.
+5. **`.vscode/`**: Shared editor settings/recommendations for VS Code contributors.
+6. **`scripts/`**: Repo maintenance scripts, e.g. output from `npm run check:dependencies`.
+7. **`.dockerignore`**: Specifies files and directories excluded from the dev container build context.
+8. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
+9. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).
+10. **`.npmrc`**: Configuration file for custom npm settings and registry options.
+11. **`.nvmrc`**: Specifies the Node.js version for Node Version Manager (nvm).
+12. **`.prettierignore`**: Specifies files and directories to be ignored by Prettier for formatting.
+13. **`.prettierrc.json`**: Configuration file for Prettier to enforce consistent code formatting.
+14. **`cypress.config.js`**: Configuration file for Cypress end-to-end testing.
+15. **`eslint-plugin-react-hooks.d.ts`**: Type declaration shim so the ESLint React Hooks plugin resolves correctly in editors.
+16. **`eslint.config.mjs`**: ESLint configuration file for linting JavaScript/TypeScript code.
+17. **`index.html`**: Vite's HTML entry point for the app.
+18. **`jsconfig.json`**: JavaScript project configuration file that provides editor support for features like module resolution and improved IntelliSense in VS Code and other compatible editors. (The `@/` path alias itself is configured in `vite.config.js`.)
+19. **`vercel.json`**: Configuration file for deploying the project to Vercel.
+20. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
 
 <a id="troubleshooting"></a>
 
