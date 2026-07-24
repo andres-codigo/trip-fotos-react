@@ -40,11 +40,13 @@ const vendorChunks = {
 
 export default defineConfig({
 	server: {
+		host: true,
 		port: 3000,
 		open: process.env.VITE_OPEN === 'true',
 		https: httpsConfig,
 	},
 	preview: {
+		host: true,
 		port: 3001,
 		open: true,
 		https: httpsConfig,
