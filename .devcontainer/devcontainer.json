@@ -6,11 +6,13 @@
 			"version": "24"
 		}
 	},
-	"postCreateCommand": "sudo apt-get update && sudo apt-get install -y xvfb libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2t64 libxtst6 xauth && npm config set allow-scripts=@anthropic-ai/claude-code --location=user && npm install -g @anthropic-ai/claude-code && npm install",
 	"remoteUser": "vscode",
 	"mounts": [
 		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind",
 		"source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
-		"source=${localWorkspaceFolderBasename}-npm-cache,target=/home/vscode/.npm,type=volume"
-	]
+		"source=${localWorkspaceFolderBasename}-npm-cache,target=/home/vscode/.npm,type=volume",
+		"source=${localWorkspaceFolderBasename}-cypress-cache,target=/home/vscode/.cache/Cypress,type=volume"
+	],
+	"onCreateCommand": "sudo mkdir -p /home/vscode/.cache/Cypress && sudo chown -R vscode:vscode ${containerWorkspaceFolder}/node_modules /home/vscode/.npm /home/vscode/.cache",
+	"postCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2t64 libxtst6 xauth && npm install -g @anthropic-ai/claude-code && npm install"
 }
