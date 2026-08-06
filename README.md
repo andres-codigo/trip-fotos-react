@@ -84,6 +84,14 @@ Ensure you have the following installed:
 - [Node.js](https://nodejs.org/)
 - [npm](https://www.npmjs.com/)
 
+### Dev Container Prerequisites (Optional)
+
+This project includes a [VS Code Dev Container](.devcontainer/devcontainer.json) for a reproducible, containerised development environment. It bind-mounts the following files/folders from your **host machine** into the container, so make sure they exist and are configured on your host before opening the project in the container. If they're missing, Docker silently creates empty placeholders instead of erroring, and the corresponding tool will simply be unauthenticated inside the container:
+
+- `~/.gitconfig` — Git identity (set via `git config --global user.name`/`user.email`)
+- `~/.config/gh` — GitHub CLI authentication (set via `gh auth login`)
+- `~/.claude` and `~/.claude.json` — Claude Code configuration/authentication
+
 ### Clone the repository
 
 ```bash
