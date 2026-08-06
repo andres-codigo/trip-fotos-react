@@ -7,8 +7,21 @@
 		}
 	},
 	"remoteUser": "vscode",
+	"customizations": {
+		"vscode": {
+			"extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"],
+			"settings": {
+				"editor.formatOnSave": true,
+				"editor.defaultFormatter": "esbenp.prettier-vscode",
+				"editor.codeActionsOnSave": {
+					"source.fixAll.eslint": "always"
+				}
+			}
+		}
+	},
 	"mounts": [
 		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind",
+		"source=${localEnv:HOME}/.config/gh,target=/home/vscode/.config/gh,type=bind",
 		"source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
 		"source=${localWorkspaceFolderBasename}-npm-cache,target=/home/vscode/.npm,type=volume",
 		"source=${localWorkspaceFolderBasename}-cypress-cache,target=/home/vscode/.cache/Cypress,type=volume"
