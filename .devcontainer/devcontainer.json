@@ -31,6 +31,7 @@
 		"source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind",
 		"source=${localEnv:HOME}/.claude.json,target=/home/vscode/.claude.json,type=bind",
 		"source=${localEnv:HOME}/.config/gh,target=/home/vscode/.config/gh,type=bind",
+		"source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind",
 		"source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
 		"source=${localWorkspaceFolderBasename}-npm-cache,target=/home/vscode/.npm,type=volume",
 		"source=${localWorkspaceFolderBasename}-cypress-cache,target=/home/vscode/.cache/Cypress,type=volume"
