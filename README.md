@@ -75,7 +75,7 @@ This project uses the following technologies:
 
 ## 💾 Installation
 
-To get started with the project, follow these steps:
+See [Quick Start](#quick-start) to clone the repo and install dependencies (this also installs Cypress and Vitest).
 
 ### Prerequisites
 
@@ -91,21 +91,6 @@ This project includes a [VS Code Dev Container](.devcontainer/devcontainer.json)
 - `~/.gitconfig` — Git identity (set via `git config --global user.name`/`user.email`)
 - `~/.config/gh` — GitHub CLI authentication (set via `gh auth login`)
 - `~/.claude` and `~/.claude.json` — Claude Code configuration/authentication
-
-### Clone the repository
-
-```bash
-git clone https://github.com/andres-codigo/trip-fotos-react
-cd trip-fotos-react
-```
-
-### Install dependencies
-
-Run the following command to install all required dependencies, including Cypress and Vitest:
-
-```bash
-npm install
-```
 
 <a id="scripts"></a>
 
@@ -156,7 +141,7 @@ npm run vitest:run
 # Run tests quickly without coverage using dot reporter
 npm run vitest:run:fast
 
-# # Run tests with coverage reporting enabled
+# Run tests with coverage reporting enabled
 npm run vitest:coverage
 
 # Visual Vite bundle analysis
@@ -385,26 +370,7 @@ This project uses [Vitest](https://vitest.dev/) for unit and integration testing
 
 ### 1. Vitest Setup
 
-Vitest is already configured and included as a dev dependency — running `npm install` (see [Installation](#installation)) is all that's needed to get started.
-
-**Run Vitest Tests**
-
-- **Run tests in CI mode (local development):**
-    ```bash
-    npm run vitest:run
-    ```
-- **Run tests in watch mode (local development):**
-    ```bash
-    npm run vitest:watch
-    ```
-- **Run tests quickly without coverage using dot reporter:**
-    ```bash
-    npm run vitest:run:fast
-    ```
-- **Run tests with coverage reporting enabled:**
-    ```bash
-    npm run vitest:coverage
-    ```
+Vitest is already configured and included as a dev dependency — running `npm install` (see [Installation](#installation)) is all that's needed to get started. See [Scripts](#scripts) for the `vitest:*` commands.
 
 **Vitest Directory Structure**
 
@@ -446,50 +412,7 @@ Reusable test utilities are located in [testingLibrarySetup.js](https://github.c
 
 ### 2. Cypress Setup
 
-Cypress is already configured in the project for both end-to-end (E2E) and component testing.
-
-**Install Cypress**
-
-Cypress is included in the project dependencies. If you haven't already installed dependencies, run:
-
-```bash
-npm install
-```
-
-**Cypress Configuration**
-
-Cypress is pre-configured in this project. Feel free to customise the [cypress.config.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/cypress.config.js) file as needed for your testing requirements.
-
-**Run Cypress Tests**
-
-- **Open Cypress E2E Test Runner (interactive mode):**
-    ```bash
-    npm run cy:open:e2e
-    ```
-- **Open Cypress Component Test Runner (interactive mode):**
-    ```bash
-    npm run cy:open:ct
-    ```
-- **Run Cypress E2E tests in headless mode:**
-    ```bash
-    npm run cy:run:e2e
-    ```
-- **Run Cypress Component tests in headless mode:**
-    ```bash
-    npm run cy:run:ct
-    ```
-- **Run a specific test file (E2E or component based on path):**
-    ```bash
-    npm run cy:run:one
-    ```
-- **Smart test runner - automatically detects component vs E2E tests:**
-    ```bash
-    npm run cy:run:auto [file-path]
-    ```
-- **File watcher - automatically runs tests when files change:**
-    ```bash
-    npm run cy:watch
-    ```
+Cypress is already configured in the project (both E2E and component testing) and included in the project dependencies — `npm install` is all that's needed. Feel free to customise [cypress.config.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/cypress.config.js) as needed. See [Scripts](#scripts) for the `cy:*` commands.
 
 **Cypress Directory Structure**
 
@@ -552,13 +475,7 @@ This project uses GitHub Actions to automate key development and monitoring task
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Merge Blocking:** Pull requests must pass this test workflow before merging into `main`.
 
-#### Test Commands
-
-```bash
-npm run vitest:run      # Run all tests in CI mode
-npm run vitest:watch    # Run tests in watch mode (local dev)
-npm run vitest:coverage # Run tests with coverage reporting
-```
+Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 
 ---
 
@@ -569,13 +486,7 @@ npm run vitest:coverage # Run tests with coverage reporting
     - On **push** to `main` (for changes in `src/**`, `cypress/**`, `package.json`, or `cypress.config.*`)
     - On **pull requests** to `main`
     - Manually via **Actions → "Run workflow"**
-- **Purpose:** Runs Cypress end-to-end (E2E) tests against the running application to verify user flows and integration with backend services.
-
-#### E2E Test Command
-
-```bash
-npx cypress run
-```
+- **Purpose:** Runs Cypress end-to-end (E2E) tests against the running application to verify user flows and integration with backend services. Runs `npm run cy:run:e2e` — see [Scripts](#scripts).
 
 ---
 
@@ -586,13 +497,7 @@ npx cypress run
     - On **push** to `main` (for changes in `src/**/__tests__/**`, `src/**/*.jsx`, `src/**/*.tsx`, `cypress.config.*`, or `package.json`)
     - On **pull requests** to `main`
     - Manually via **Actions → "Run workflow"**
-- **Purpose:** Runs Cypress component tests to verify individual React components in isolation.
-
-#### Component Test Command
-
-```bash
-npx cypress run --component
-```
+- **Purpose:** Runs Cypress component tests to verify individual React components in isolation. Runs `npm run cy:run:ct` — see [Scripts](#scripts).
 
 ---
 
@@ -601,40 +506,7 @@ npx cypress run --component
 - **Workflow File:** `.github/workflows/github-auto-label-prs.yml`
 - **Triggers:**
     - On **pull request** events (`opened`, `synchronize`, `reopened`)
-- **Purpose:** Automatically applies relevant labels to pull requests based on the files changed, using the configuration defined in `.github/labeler.yml`.
-- **Labels Applied:**
-    - `feature` - Changes to components or pages
-    - `documentation` - Changes to markdown files
-    - `dependencies` - Changes to package.json or npm config files
-    - `testing` - Changes to test files or testing configuration
-    - `styling` - Changes to CSS/SCSS files
-    - `redux/state` - Changes to Redux store files
-    - `config` - Changes to configuration files
-    - `constants` - Changes to constants files
-    - `utilities` - Changes to utility functions
-    - `firebase` - Changes to Firebase-related files
-    - `assets` - Changes to images or static assets
-    - `build/deployment` - Changes to workflows or deployment config
-
-#### Label Configuration
-
-The labeling rules are defined in `.github/labeler.yml`. To modify which files trigger which labels:
-
-1. Edit `.github/labeler.yml`
-2. Use glob patterns to match file paths
-3. Labels will be automatically applied on the next pull request
-
-Example labeler configuration:
-
-```yaml
-'feature':
-    - 'src/components/**/*'
-    - 'src/pages/**/*'
-
-'documentation':
-    - '**/*.md'
-    - '**/README*'
-```
+- **Purpose:** Automatically applies relevant labels (e.g. `feature`, `documentation`, `dependencies`, `testing`, `styling`, `redux/state`, `firebase`) to pull requests based on the files changed, using glob-pattern rules defined in [`.github/labeler.yml`](.github/labeler.yml) — edit that file to change which files trigger which labels.
 
 ---
 
@@ -792,28 +664,7 @@ trip-fotos-react/
 └── vite.config.js               # Vite build tool configuration
 ```
 
-### Explanation of Key Project Files and Folders:
-
-1. **`.devcontainer/`**: VS Code Dev Container configuration for a reproducible, containerised development environment.
-2. **`.github/workflows/`**: Contains GitHub Actions workflow YAML files that automate CI/CD tasks such as running tests, linting, and deployments on push or pull request events.
-3. **`.github/instructions/`**: Contains domain-specific Copilot guidance files for components, pages, Redux store, styling, and testing.
-4. **`.github/agents/`**: Contains workflow agent files that automate scaffolding tasks (e.g., creating new components, pages, and Redux slices) with full structure and tests.
-5. **`.vscode/`**: Shared editor settings/recommendations for VS Code contributors.
-6. **`scripts/`**: Repo maintenance scripts, e.g. output from `npm run check:dependencies`.
-7. **`.dockerignore`**: Specifies files and directories excluded from the dev container build context.
-8. **`.firebaserc`**: Firebase project configuration file for managing Firebase environments.
-9. **`.gitignore`**: Specifies files and directories to be ignored by Git (e.g., `node_modules`, `.env`).
-10. **`.npmrc`**: Configuration file for custom npm settings and registry options.
-11. **`.nvmrc`**: Specifies the Node.js version for Node Version Manager (nvm).
-12. **`.prettierignore`**: Specifies files and directories to be ignored by Prettier for formatting.
-13. **`.prettierrc.json`**: Configuration file for Prettier to enforce consistent code formatting.
-14. **`cypress.config.js`**: Configuration file for Cypress end-to-end testing.
-15. **`eslint-plugin-react-hooks.d.ts`**: Type declaration shim so the ESLint React Hooks plugin resolves correctly in editors.
-16. **`eslint.config.mjs`**: ESLint configuration file for linting JavaScript/TypeScript code.
-17. **`index.html`**: Vite's HTML entry point for the app.
-18. **`jsconfig.json`**: JavaScript project configuration file that provides editor support for features like module resolution and improved IntelliSense in VS Code and other compatible editors. (The `@/` path alias itself is configured in `vite.config.js`.)
-19. **`vercel.json`**: Configuration file for deploying the project to Vercel.
-20. **`vite.config.js`**: Configuration file for Vite, specifying plugins, aliases, and build options.
+> **Note:** `jsconfig.json` provides editor IntelliSense/module resolution support; the `@/` path alias itself is configured in `vite.config.js`.
 
 <a id="troubleshooting"></a>
 
@@ -823,7 +674,7 @@ trip-fotos-react/
     - **Solution**: Ensure you have Node.js and npm installed. Check the required versions in the [Node.js](https://nodejs.org/) documentation.
 
 - **Issue**: Firebase environment variables are not working.
-    - **Solution**: Ensure you have created a [.env](http://_vscodecontentref_/1) file in the root directory with the correct Firebase configuration values.
+    - **Solution**: Ensure you have created a `.env` file in the root directory with the correct Firebase configuration values.
 
 - **Issue**: `Error: ENOENT: no such file or directory, open './certs/localhost.key'`
     - **Solution**: Make sure you have generated the SSL certificate and key as described above. In CI and production (e.g., Vercel), the build will fall back to HTTP if the certs are missing.
