@@ -360,6 +360,34 @@ Automated scaffolding workflows for common tasks:
 - **Create Page**: Use the `create-page` agent to scaffold new pages with route integration and tests.
 - **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with RTK Query/thunks and tests.
 
+### AI Assistance & Claude Code Guidance
+
+This project includes an equivalent, Claude-specific set of guidance files so Claude Code sessions follow the same standards without loading the full detail into every conversation.
+
+#### Workspace-Level Instructions
+
+- **File**: `CLAUDE.md`
+- **Purpose**: Global rules — stack, folder structure, branch naming, dev commands, environment, and pointers to detailed guidance.
+- **Usage**: Claude Code automatically reads this file at the start of every session in this repo.
+
+#### Domain-Specific Guidance
+
+Detailed guidance, read on demand when working in the relevant area (mirrors the Copilot instructions above):
+
+- **Components**: `.claude/docs/components.md` — Folder structure, reusability patterns, testing, and accessibility.
+- **Pages**: `.claude/docs/pages.md` — Route-level composition, data loading orchestration, and page testing.
+- **Redux Store**: `.claude/docs/store.md` — Slices, thunks, error handling, persistence, and testing.
+- **Styling**: `.claude/docs/styles.md` — SCSS modules, variables, mixins, and naming conventions.
+- **Testing**: `.claude/docs/testing.md` — Vitest/Cypress standards, shared test data paths, and anti-flakiness practices.
+
+#### Workflow Agents
+
+Automated scaffolding subagents for common tasks (invoke via the Agent tool):
+
+- **create-component**: Scaffold new components with full structure and tests.
+- **create-page**: Scaffold new pages with route integration and tests.
+- **create-redux-slice**: Scaffold new Redux slices with RTK Query/thunks and tests.
+
 ---
 
 <a id="testing"></a>
@@ -622,6 +650,10 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 ```
 trip-fotos-react/
 ├── .devcontainer/               # VS Code Dev Container configuration
+├── .claude/
+│   ├── agents/                 # Claude Code scaffolding subagents
+│   ├── docs/                   # Domain-specific Claude guidance files
+│   └── settings.local.json     # Local Claude Code permissions/settings
 ├── .github/
 │   ├── agents/                 # GitHub Copilot agent workflows for scaffolding
 │   ├── instructions/           # Domain-specific Copilot guidance files
@@ -653,6 +685,7 @@ trip-fotos-react/
 ├── .nvmrc                       # Specifies the Node.js version for Node Version Manager (nvm)
 ├── .prettierignore              # Prettier ignore rules
 ├── .prettierrc.json             # Prettier configuration
+├── CLAUDE.md                    # Workspace-level Claude Code guidelines
 ├── cypress.config.js            # Cypress testing configuration
 ├── eslint-plugin-react-hooks.d.ts # Type declaration shim for the ESLint React Hooks plugin
 ├── eslint.config.mjs            # ESLint configuration
