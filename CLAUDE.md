@@ -125,6 +125,17 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool):
 - **create-page** — scaffolds a new page with route integration and tests
 - **create-redux-slice** — scaffolds a new Redux slice with thunks/RTK Query and tests
 
+## Keeping README.md in sync
+
+`README.md` is the user-facing source of truth for setup, scripts, and structure — it drifts easily. Update it in the same change whenever you:
+
+- Add, remove, or rename an `npm run` script (update the Scripts section)
+- Add, remove, or rename a required `.env` variable (update the Environment Variables section)
+- Add, remove, or rename a top-level folder, or a `src/` subfolder (update the Folder Structure tree)
+- Add or change a GitHub Actions workflow (update the CI/CD Workflows section, including the summary table)
+- Add, remove, or materially change a user-facing feature (update the Features section)
+- Add or restructure `.claude/` or `.github/` guidance files (update the AI Assistance sections)
+
 ## Things to avoid
 
 - Do not commit `.env` or `certs/`
@@ -132,3 +143,4 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool):
 - Do not add comments that describe what the code does — only why
 - Do not create new top-level `src/` folders without updating this file
 - Do not re-inline domain-specific detail here — extend the relevant `.claude/docs/*.md` file instead
+- Do not let `README.md` go stale — see "Keeping README.md in sync" above
