@@ -8,6 +8,9 @@
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 	"remoteUser": "vscode",
+	"containerEnv": {
+		"GIT_CONFIG_GLOBAL": "/home/vscode/.config/git/config"
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -37,5 +40,5 @@
 		"source=${localWorkspaceFolderBasename}-cypress-cache,target=/home/vscode/.cache/Cypress,type=volume"
 	],
 	"onCreateCommand": "sudo chown -R vscode:vscode ${containerWorkspaceFolder}/node_modules /home/vscode/.npm /home/vscode/.cache",
-	"postCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2t64 libxtst6 xauth && npm config set allow-scripts=@anthropic-ai/claude-code --location=user && npm install -g @anthropic-ai/claude-code && npm install && npx cypress verify"
+	"postCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2t64 libxtst6 xauth && npm config set allow-scripts=@anthropic-ai/claude-code --location=user && npm install -g @anthropic-ai/claude-code && npm install && npx cypress verify && mkdir -p /home/vscode/.config/git && git config --global --get-all safe.directory | grep -Fxq /workspaces/trip-fotos-react || git config --global --add safe.directory /workspaces/trip-fotos-react"
 }
