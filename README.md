@@ -362,7 +362,7 @@ Automated scaffolding workflows for common tasks:
 
 ### AI Assistance & Claude Code Guidance
 
-Claude Code shares the Copilot guidance above rather than keeping its own copy, so both tools follow a single source of truth.
+Claude Code shares the Copilot guidance above rather than keeping its own copy, so both tools follow a single source of truth. Claude-specific automation — hooks, permissions, and skills — lives in `.claude/`.
 
 #### Workspace-Level Instructions
 
@@ -381,6 +381,16 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 - **create-component**: Scaffold new components with full structure and tests.
 - **create-page**: Scaffold new pages with route integration and tests.
 - **create-redux-slice**: Scaffold new Redux slices with RTK Query/thunks and tests.
+
+#### Hooks & Permissions
+
+- **File**: `.claude/settings.json` (committed; personal overrides go in the gitignored `.claude/settings.local.json`)
+- **Hook**: a `PostToolUse` hook runs `.claude/hooks/lint-edited-file.mjs` after every edit, applying Prettier and `eslint --fix`. Any remaining ESLint errors are fed back to Claude so they are fixed in the same turn.
+- **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git) run without prompting; pushes, PR creation, installs, and E2E runs ask first; reading `.env`/`certs/`, force-pushes, and hard resets are denied.
+
+#### Skills
+
+- **`/verify`** (`.claude/skills/verify/`): runs ESLint, Vitest, Cypress component tests, and the production build, then reports a pass/fail table. Use before committing or opening a pull request.
 
 ---
 
@@ -655,7 +665,10 @@ trip-fotos-react/
 ├── .devcontainer/               # VS Code Dev Container configuration
 ├── .claude/
 │   ├── agents/                 # Claude Code subagent wrappers (delegate to .github/agents)
-│   └── settings.local.json     # Local Claude Code permissions/settings
+│   ├── hooks/                  # Claude Code hook scripts (lint/format after edits)
+│   ├── skills/                 # Claude Code skills (e.g. /verify)
+│   ├── settings.json           # Shared Claude Code permissions and hooks
+│   └── settings.local.json     # Personal Claude Code overrides (gitignored)
 ├── .github/
 │   ├── agents/                 # Scaffolding workflows (shared by Copilot and Claude Code)
 │   ├── instructions/           # Domain-specific guidance (shared by Copilot and Claude Code)

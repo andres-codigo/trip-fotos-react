@@ -87,7 +87,11 @@ Claude Code is integrated as a persistent, repository-aware coding environment:
 - [`CLAUDE.md`](../CLAUDE.md) provides stable project context for sessions.
 - [`.github/instructions`](../.github/instructions) is shared with Copilot, so both tools follow one source of truth for components, pages, Redux, styling, and testing.
 - [`.claude/agents`](../.claude/agents) contains thin subagent wrappers that delegate to the shared [`.github/agents`](../.github/agents) scaffolding workflows.
+- [`.claude/settings.json`](../.claude/settings.json) commits team-wide permissions and a `PostToolUse` hook that formats and lints every file Claude edits, feeding remaining ESLint errors straight back so they are fixed in the same turn.
+- [`.claude/skills/verify`](../.claude/skills/verify/SKILL.md) provides a `/verify` skill that runs the local quality gates (lint, Vitest, Cypress component tests, build) and reports a pass/fail summary.
 - [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json) installs the Claude Code extension and CLI in the development container.
+
+The split is deliberate: conventions that both assistants need live once in `.github/instructions`, while `.claude/` holds only what is specific to Claude Code — hooks, permissions, skills, and subagents. This keeps the guidance from drifting between tools while still using Claude Code's harness features to enforce quality rather than relying on prompts alone.
 
 The development container also supports a consistent working environment by configuring Node.js, GitHub CLI, formatting, ESLint fixes, Cypress dependencies, and persistent tool configuration.
 
@@ -111,12 +115,13 @@ Claude Code follows the same engineering checks as the rest of the project:
 - inspect the existing implementation before changing it
 - keep changes scoped to the requested behaviour
 - follow the project instructions and existing abstractions
-- run linting and formatting
+- run linting and formatting automatically after every edit via a `PostToolUse` hook
 - run targeted tests first, then broader tests where appropriate
 - review the resulting diff
-- verify build and CI behaviour before merging
+- run `/verify` to check lint, tests, and the build locally before pushing
+- verify CI behaviour before merging
 
-Local credentials and machine-specific permissions are kept out of source control. This allows the repository to describe the workflow without exposing personal configuration.
+Shared permissions are committed in `.claude/settings.json` — they allow routine checks, ask before pushes or installs, and deny reading `.env` and `certs/`. Local credentials and machine-specific permissions stay in the gitignored `settings.local.json`. This allows the repository to describe the workflow without exposing personal configuration.
 
 ## My End-to-End Workflow
 

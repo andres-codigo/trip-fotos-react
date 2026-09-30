@@ -126,6 +126,13 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 - **create-page** — scaffolds a new page with route integration and tests
 - **create-redux-slice** — scaffolds a new Redux slice with thunks/RTK Query and tests
 
+Claude-specific automation lives in `.claude/` and is committed so every session gets it:
+
+- **`.claude/settings.json`** — shared permissions (safe checks allowed, pushes and installs ask, `.env`/`certs/` reads and force-pushes denied) and a `PostToolUse` hook
+- **`.claude/hooks/lint-edited-file.mjs`** — runs Prettier and `eslint --fix` on every file Claude edits; remaining ESLint errors are fed back so they get fixed in the same turn
+- **`/verify` skill** (`.claude/skills/verify/`) — runs lint, Vitest, Cypress component tests and the build, and reports a pass/fail table; use it before committing or opening a PR
+- Personal overrides go in the gitignored `.claude/settings.local.json`
+
 ## Keeping README.md in sync
 
 `README.md` is the user-facing source of truth for setup, scripts, and structure — it drifts easily. Update it in the same change whenever you:
