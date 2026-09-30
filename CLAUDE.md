@@ -61,15 +61,15 @@ Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
 
 ## Domain-Specific Guidance
 
-Detailed conventions live in `.claude/docs/` — read the relevant file when working in that area, rather than expecting it to be summarised here:
+Detailed conventions live in `.github/instructions/` — the single source of truth shared with GitHub Copilot. Read the relevant file when working in that area, rather than expecting it to be summarised here:
 
-| File                                                     | Applies to                              | Covers                                                             |
-| -------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------ |
-| [.claude/docs/components.md](.claude/docs/components.md) | `src/components/**`                     | Folder structure, prop-types, reusability, accessibility, testing  |
-| [.claude/docs/pages.md](.claude/docs/pages.md)           | `src/pages/**`                          | Route composition, data loading, testing                           |
-| [.claude/docs/store.md](.claude/docs/store.md)           | `src/store/**`                          | RTK Query vs. thunks, error handling pattern, persistence, testing |
-| [.claude/docs/styles.md](.claude/docs/styles.md)         | `src/**/*.module.scss`, `src/styles/**` | SCSS modules, namespaced imports, colour naming                    |
-| [.claude/docs/testing.md](.claude/docs/testing.md)       | `**/__tests__/**`, `cypress/e2e/**`     | Vitest/Cypress organisation, test data, anti-flakiness             |
+| File                                                                          | Applies to                              | Covers                                                             |
+| ----------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------ |
+| [components.instructions.md](.github/instructions/components.instructions.md) | `src/components/**`                     | Folder structure, prop-types, reusability, accessibility, testing  |
+| [pages.instructions.md](.github/instructions/pages.instructions.md)           | `src/pages/**`                          | Route composition, data loading, testing                           |
+| [store.instructions.md](.github/instructions/store.instructions.md)           | `src/store/**`                          | RTK Query vs. thunks, error handling pattern, persistence, testing |
+| [styles.instructions.md](.github/instructions/styles.instructions.md)         | `src/**/*.module.scss`, `src/styles/**` | SCSS modules, namespaced imports, colour naming                    |
+| [testing.instructions.md](.github/instructions/testing.instructions.md)       | `**/__tests__/**`, `cypress/e2e/**`     | Vitest/Cypress organisation, test data, anti-flakiness             |
 
 ## Key conventions
 
@@ -119,7 +119,7 @@ Required keys: `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `VITE
 
 ## Workflow automation
 
-Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool):
+Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is a thin wrapper around the shared workflow in `.github/agents/*.agent.md` — edit the workflow there, not in the wrapper:
 
 - **create-component** — scaffolds a new component with folder structure and tests
 - **create-page** — scaffolds a new page with route integration and tests
@@ -142,5 +142,5 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool):
 - Do not mock the Firebase Realtime Database in integration tests
 - Do not add comments that describe what the code does — only why
 - Do not create new top-level `src/` folders without updating this file
-- Do not re-inline domain-specific detail here — extend the relevant `.claude/docs/*.md` file instead
+- Do not re-inline domain-specific detail here — extend the relevant `.github/instructions/*.instructions.md` file instead
 - Do not let `README.md` go stale — see "Keeping README.md in sync" above

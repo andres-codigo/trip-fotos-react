@@ -105,6 +105,8 @@ When modifying Redux slices (`src/store/slices/`) or the store configuration (`s
 - Thunks (especially error handling)
 - Store setup and persistence
 
+See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypress conventions.
+
 ## Linting And Formatting
 
 - Ensure every edited or newly created store file and related test file is ESLint-clean and Prettier-formatted before finishing work.

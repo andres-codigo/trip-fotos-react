@@ -85,8 +85,8 @@ This means the assistant can improve speed without becoming the authority on cor
 Claude Code is integrated as a persistent, repository-aware coding environment:
 
 - [`CLAUDE.md`](../CLAUDE.md) provides stable project context for sessions.
-- [`.claude/docs`](../.claude/docs) contains detailed guidance for components, pages, Redux, styling, and testing.
-- [`.claude/agents`](../.claude/agents) contains reusable workflows for feature scaffolding.
+- [`.github/instructions`](../.github/instructions) is shared with Copilot, so both tools follow one source of truth for components, pages, Redux, styling, and testing.
+- [`.claude/agents`](../.claude/agents) contains thin subagent wrappers that delegate to the shared [`.github/agents`](../.github/agents) scaffolding workflows.
 - [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json) installs the Claude Code extension and CLI in the development container.
 
 The development container also supports a consistent working environment by configuring Node.js, GitHub CLI, formatting, ESLint fixes, Cypress dependencies, and persistent tool configuration.
