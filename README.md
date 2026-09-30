@@ -555,6 +555,15 @@ If the workflow logs `Resource not accessible by integration`, check the runbook
 
 The runbook includes expiry handling, recreation steps, secret update instructions, and post-rotation validation.
 
+---
+
+### 6. CodeQL Code Scanning
+
+- **Configured In:** **Settings → Advanced Security → CodeQL analysis** (GitHub-managed **Default setup** — no workflow file)
+- **Triggers:** On push and pull requests to `main`, plus a weekly scheduled scan
+- **Purpose:** Scans JavaScript/TypeScript and the GitHub Actions workflows for security vulnerabilities. Results appear under **Security → Code scanning**.
+- **Note:** Code scanning requires the repository to be **public** — on a private personal repository it is unavailable and the check will fail.
+
 ### 🛠 Manual Triggers
 
 Some workflows, like the **Vitest test runner**, can be manually executed from the GitHub UI:
