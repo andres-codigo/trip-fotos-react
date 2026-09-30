@@ -6,7 +6,6 @@ import os from 'os'
 
 import react from '@vitejs/plugin-react'
 import eslint from 'vite-plugin-eslint2'
-import { visualizer } from 'rollup-plugin-visualizer'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -57,13 +56,6 @@ export default defineConfig({
 			eslint({
 				include: ['src/**/*.js', 'src/**/*.jsx'],
 				exclude: ['node_modules', 'dist'],
-			}),
-		!process.env.VITEST &&
-			visualizer({
-				open: true,
-				filename: 'stats.html',
-				gzipSize: true,
-				brotliSize: true,
 			}),
 	].filter(Boolean),
 	resolve: {

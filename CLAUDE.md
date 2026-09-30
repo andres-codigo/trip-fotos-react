@@ -63,13 +63,13 @@ Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
 
 Detailed conventions live in `.claude/docs/` — read the relevant file when working in that area, rather than expecting it to be summarised here:
 
-| File                                                       | Applies to                                        | Covers                                                        |
-| ------------------------------------------------------------ | -------------------------------------------------- | --------------------------------------------------------------- |
-| [.claude/docs/components.md](.claude/docs/components.md) | `src/components/**`                               | Folder structure, prop-types, reusability, accessibility, testing |
-| [.claude/docs/pages.md](.claude/docs/pages.md)             | `src/pages/**`                                     | Route composition, data loading, testing                        |
-| [.claude/docs/store.md](.claude/docs/store.md)             | `src/store/**`                                     | RTK Query vs. thunks, error handling pattern, persistence, testing |
-| [.claude/docs/styles.md](.claude/docs/styles.md)           | `src/**/*.module.scss`, `src/styles/**`            | SCSS modules, namespaced imports, colour naming                 |
-| [.claude/docs/testing.md](.claude/docs/testing.md)         | `**/__tests__/**`, `cypress/e2e/**`                | Vitest/Cypress organisation, test data, anti-flakiness           |
+| File                                                     | Applies to                              | Covers                                                             |
+| -------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------ |
+| [.claude/docs/components.md](.claude/docs/components.md) | `src/components/**`                     | Folder structure, prop-types, reusability, accessibility, testing  |
+| [.claude/docs/pages.md](.claude/docs/pages.md)           | `src/pages/**`                          | Route composition, data loading, testing                           |
+| [.claude/docs/store.md](.claude/docs/store.md)           | `src/store/**`                          | RTK Query vs. thunks, error handling pattern, persistence, testing |
+| [.claude/docs/styles.md](.claude/docs/styles.md)         | `src/**/*.module.scss`, `src/styles/**` | SCSS modules, namespaced imports, colour naming                    |
+| [.claude/docs/testing.md](.claude/docs/testing.md)       | `**/__tests__/**`, `cypress/e2e/**`     | Vitest/Cypress organisation, test data, anti-flakiness             |
 
 ## Key conventions
 
@@ -109,7 +109,7 @@ npm run cy:open:ct       # Cypress component tests (interactive)
 npm run cy:open:e2e      # Cypress E2E tests (interactive)
 
 npm run build            # Production build → dist/
-npm run analyze          # Bundle size visualiser
+npm run analyse          # Bundle size visualiser
 ```
 
 ## Environment

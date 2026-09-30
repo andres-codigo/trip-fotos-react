@@ -614,7 +614,7 @@ You can analyse your production bundle to identify large dependencies and optimi
 npm run analyse
 ```
 
-This will generate a visual interactive report (usually `stats.html`) showing the size of each module in your bundle. Open the generated file in your browser to explore and identify optimisation opportunities.
+This will generate a visual interactive report (`dist/stats.html`) showing the size of each module in your bundle, then serve it with `vite preview` and open `https://localhost:3001/stats.html` in your browser — this also works from the devcontainer. Stop the server with `Ctrl+C` when you are done.
 
 > **Tip:** Keeping your bundle size small improves load times and user experience.
 
