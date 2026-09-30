@@ -88,7 +88,7 @@ Claude Code is integrated as a persistent, repository-aware coding environment:
 - [`.github/instructions`](../.github/instructions) is shared with Copilot, so both tools follow one source of truth for components, pages, Redux, styling, and testing.
 - [`.claude/agents`](../.claude/agents) contains thin subagent wrappers that delegate to the shared [`.github/agents`](../.github/agents) scaffolding workflows.
 - [`.claude/settings.json`](../.claude/settings.json) commits team-wide permissions and a `PostToolUse` hook that formats and lints every file Claude edits, feeding remaining ESLint errors straight back so they are fixed in the same turn.
-- [`.claude/skills/verify`](../.claude/skills/verify/SKILL.md) provides a `/verify` skill that runs the local quality gates (lint, Vitest, Cypress component tests, build) and reports a pass/fail summary.
+- [`.claude/skills/verify`](../.claude/skills/verify/SKILL.md) provides a `/verify` skill that runs the local quality gates (lint, Vitest, Cypress component tests, build) and reports a pass/fail summary. `/verify e2e` opts into the Cypress E2E suite, managing the local dev server lifecycle itself.
 - [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json) installs the Claude Code extension and CLI in the development container.
 
 The split is deliberate: conventions that both assistants need live once in `.github/instructions`, while `.claude/` holds only what is specific to Claude Code — hooks, permissions, skills, and subagents. This keeps the guidance from drifting between tools while still using Claude Code's harness features to enforce quality rather than relying on prompts alone.

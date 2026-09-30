@@ -130,7 +130,7 @@ Claude-specific automation lives in `.claude/` and is committed so every session
 
 - **`.claude/settings.json`** — shared permissions (safe checks allowed, pushes and installs ask, `.env`/`certs/` reads and force-pushes denied) and a `PostToolUse` hook
 - **`.claude/hooks/lint-edited-file.mjs`** — runs Prettier and `eslint --fix` on every file Claude edits; remaining ESLint errors are fed back so they get fixed in the same turn
-- **`/verify` skill** (`.claude/skills/verify/`) — runs lint, Vitest, Cypress component tests and the build, and reports a pass/fail table; use it before committing or opening a PR
+- **`/verify` skill** (`.claude/skills/verify/`) — runs lint, Vitest, Cypress component tests and the build, and reports a pass/fail table; use it before committing or opening a PR. `/verify e2e` also runs the Cypress E2E suite against a local dev server (opt-in, as it uses live Firebase)
 - Personal overrides go in the gitignored `.claude/settings.local.json`
 
 ## Keeping README.md in sync
