@@ -5,9 +5,9 @@ import { useSelector } from 'react-redux'
 import { TEST_IDS } from '@/constants/test'
 import { GLOBAL, PATHS } from '@/constants/ui'
 
-import PageNotFound from '../PageNotFound'
+import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
-import pageNotFoundStyles from '../pageNotFound.module.scss'
+import pageNotFoundStyles from '@/pages/page-not-found/pageNotFound.module.scss'
 
 /**
  * PageNotFound Unit Tests

@@ -1,6 +1,6 @@
 import { CHECKBOX } from '@/constants/test'
 import { getByDataCy } from '@/testUtils/cypress/selectors'
-import Checkbox from '../Checkbox'
+import Checkbox from '@/components/ui/form/checkbox/Checkbox'
 
 describe('<Checkbox />', () => {
 	it('renders correctly', () => {

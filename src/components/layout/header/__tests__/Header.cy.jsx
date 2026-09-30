@@ -4,7 +4,7 @@ import { PATHS } from '@/constants/ui'
 
 import { headerAssertions } from './test-utilities/headerTestHelpers'
 
-import Header from '../Header'
+import Header from '@/components/layout/header/Header'
 
 describe('<Header />', () => {
 	describe('Rendering tests', () => {

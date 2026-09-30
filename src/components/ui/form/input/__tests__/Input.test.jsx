@@ -13,7 +13,7 @@ import { describe, it, expect, vi } from 'vitest'
  * - Ensures prop spreading and custom class handling
  */
 
-import Input from '../Input'
+import Input from '@/components/ui/form/input/Input'
 
 describe('<Input />', () => {
 	describe('Rendering tests', () => {

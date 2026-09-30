@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
-import { getFirebaseAuthErrorMessage } from '../index'
+import { getFirebaseAuthErrorMessage } from '@/utils/getFirebaseAuthErrorMessage/index'
 import { FIREBASE_ERRORS } from '@/constants/auth'
 
 const { AUTHENTICATION_ACTION_TYPES: authTypes } = FIREBASE_ERRORS

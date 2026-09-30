@@ -29,7 +29,7 @@ import { validateEmail, validatePassword } from '@/utils/validation'
 
 import { login } from '@/store/slices/authenticationSlice'
 
-import Authentication from '../Authentication'
+import Authentication from '@/pages/authentication/Authentication'
 
 /**
  * Authentication Unit Tests

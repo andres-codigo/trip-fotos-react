@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
-import useViewport from '../index'
+import useViewport from '@/utils/useViewport/index'
 
 import { TEST_WIDTHS, DEBOUNCE_DELAYS } from './viewportTestData.js'
 

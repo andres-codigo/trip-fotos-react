@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
-import { validateEmail, validatePassword } from '../index'
+import { validateEmail, validatePassword } from '@/utils/validation/index'
 
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 import {

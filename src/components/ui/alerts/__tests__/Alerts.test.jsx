@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
-import Alerts from '../Alerts'
+import Alerts from '@/components/ui/alerts/Alerts'
 
 /**
  * Alerts Unit Tests
@@ -14,7 +14,7 @@ import Alerts from '../Alerts'
  */
 
 // Mock CSS Modules
-vi.mock('../Alerts.module.scss', () => ({
+vi.mock('@/components/ui/alerts/Alerts.module.scss', () => ({
 	default: {
 		container: 'container',
 		success: 'success',

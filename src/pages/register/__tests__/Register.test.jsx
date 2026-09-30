@@ -12,9 +12,9 @@ import {
 import { GLOBAL, PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
-import Register from '../Register'
+import Register from '@/pages/register/Register'
 
-import registerStyles from '../register.module.scss'
+import registerStyles from '@/pages/register/register.module.scss'
 
 // Mock react-router-dom's useNavigate
 vi.mock('react-router-dom', async (importOriginal) => {

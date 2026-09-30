@@ -91,6 +91,7 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
     - Correct: `import Foo from '@/components/ui/foo/Foo'`
     - Wrong: `import Foo from '../../../components/ui/foo/Foo'`
 - `@/` maps to `src/` (configured in Vite)
+- Enforced by ESLint (`rules/imports.js`). `src/constants/**` and `src/testUtils/cypress/**` are exempt and keep relative imports, because the Cypress E2E bundle loads them and cannot resolve `@/`
 
 ## Dev commands
 

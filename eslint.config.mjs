@@ -16,6 +16,7 @@ import vitest from '@vitest/eslint-plugin'
 import languageOptions from './rules/language-options.js'
 import reactRules from './rules/react.js'
 import cypressRules from './rules/cypress.js'
+import importRules from './rules/imports.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -79,6 +80,14 @@ export default [
 			...reactRules,
 		},
 		settings: { react: { version: '19' } },
+	},
+
+	// Import conventions
+	{
+		files: ['src/**/*.{js,jsx}'],
+		// Loaded by the Cypress E2E webpack bundle, which has no '@/' alias
+		ignores: ['src/constants/**', 'src/testUtils/cypress/**'],
+		rules: importRules,
 	},
 
 	// cypress

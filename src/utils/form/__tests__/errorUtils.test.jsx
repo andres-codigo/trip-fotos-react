@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { renderVisuallyHiddenError } from '../errorUtils'
+import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
 
 describe('renderVisuallyHiddenError', () => {
 	it('returns null if fieldState is undefined', () => {

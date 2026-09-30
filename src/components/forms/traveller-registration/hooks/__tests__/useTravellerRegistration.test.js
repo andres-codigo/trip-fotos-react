@@ -4,7 +4,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { MOCK_TRAVELLERS } from '@/constants/test'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
-import { useTravellerRegistration } from '../useTravellerRegistration'
+import { useTravellerRegistration } from '@/components/forms/traveller-registration/hooks/useTravellerRegistration'
 
 /**
  * useTravellerRegistration Hook Unit Tests

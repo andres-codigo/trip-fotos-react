@@ -1,6 +1,6 @@
 import { BrowserRouter } from 'react-router-dom'
 
-import TravellerRegistrationForm from '../TravellerRegistrationForm'
+import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
 
 import { ACCESSIBILITY } from '@/constants/ui'
 
@@ -10,7 +10,7 @@ import {
 } from '@/constants/test'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
-import travellerRegistrationFormStyles from '../TravellerRegistrationForm.module.scss'
+import travellerRegistrationFormStyles from '@/components/forms/traveller-registration/TravellerRegistrationForm.module.scss'
 
 describe('<TravellerRegistrationForm />', () => {
 	let onSubmit

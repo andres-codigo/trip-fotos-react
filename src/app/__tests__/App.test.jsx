@@ -7,7 +7,7 @@ import * as router from 'react-router-dom'
 import { AUTHENTICATION_ACTION_TYPES } from '@/constants/redux'
 import { PATHS } from '@/constants/ui'
 
-import App from '../App'
+import App from '@/app/App'
 
 /**
  * App Component Unit Tests

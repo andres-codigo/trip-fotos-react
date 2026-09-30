@@ -19,7 +19,7 @@ import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
  * - Accessibility: Focus management for error states and keyboard navigation support
  */
 
-import NavMenuButtonLink from '../NavMenuButtonLink'
+import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
 
 vi.mock('@/components/ui/button/BaseButton', () => ({
 	default: ({
@@ -61,12 +61,15 @@ vi.mock('classnames', () => ({
 	default: createClassNamesMock(),
 }))
 
-vi.mock('../NavMenuButtonLink.module.scss', () => ({
-	default: {
-		primary: 'mocked-primary-class',
-		secondary: 'mocked-secondary-class',
-	},
-}))
+vi.mock(
+	'@/components/layout/main-nav/nav-menu/NavMenuButtonLink.module.scss',
+	() => ({
+		default: {
+			primary: 'mocked-primary-class',
+			secondary: 'mocked-secondary-class',
+		},
+	}),
+)
 
 import useViewport from '@/utils/useViewport'
 import classNames from 'classnames'

@@ -6,9 +6,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { GLOBAL } from '@/constants/ui'
 import { MOCK_TRAVELLERS, TEST_IDS } from '@/constants/test'
 
-import Travellers from '../Travellers'
+import Travellers from '@/pages/travellers/Travellers'
 
-import travellersStyles from '../travellers.module.scss'
+import travellersStyles from '@/pages/travellers/travellers.module.scss'
 
 vi.mock('react-redux', async () => {
 	const actual = await vi.importActual('react-redux')

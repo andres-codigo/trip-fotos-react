@@ -32,7 +32,7 @@ vi.mock('react-dom', async () => {
 })
 
 import { render, screen, fireEvent } from '@testing-library/react'
-import BaseDialog from '../BaseDialog'
+import BaseDialog from '@/components/ui/dialog/BaseDialog'
 
 const defaultProps = {
 	show: true,

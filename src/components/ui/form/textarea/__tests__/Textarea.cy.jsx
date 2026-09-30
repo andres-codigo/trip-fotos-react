@@ -1,6 +1,6 @@
 import { TEXTAREA } from '@/constants/test'
 
-import Textarea from '../Textarea'
+import Textarea from '@/components/ui/form/textarea/Textarea'
 
 describe('<Textarea />', () => {
 	it('renders', () => {

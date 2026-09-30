@@ -31,27 +31,27 @@ vi.mock('react-redux', () => ({
 	useSelector: (selector) => mockUseSelector(selector),
 }))
 
-import MainNav from '../MainNav'
+import MainNav from '@/components/layout/main-nav/MainNav'
 
 // Mock custom hooks
-vi.mock('../hooks/useMainNavState', () => ({
+vi.mock('@/components/layout/main-nav/hooks/useMainNavState', () => ({
 	useMainNavState: vi.fn(),
 }))
 
-vi.mock('../hooks/useClickOutsideToClose', () => ({
+vi.mock('@/components/layout/main-nav/hooks/useClickOutsideToClose', () => ({
 	useClickOutsideToClose: vi.fn(),
 }))
 
-vi.mock('../hooks/useMobileMenu', () => ({
+vi.mock('@/components/layout/main-nav/hooks/useMobileMenu', () => ({
 	useMobileMenu: vi.fn(),
 }))
 
-vi.mock('../hooks/useLogout', () => ({
+vi.mock('@/components/layout/main-nav/hooks/useLogout', () => ({
 	useLogout: vi.fn(),
 }))
 
 // Mock child components
-vi.mock('../nav-menu/NavMenuButtonLink', () => ({
+vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
 	default: vi.fn(
 		({
 			className,
@@ -76,7 +76,7 @@ vi.mock('../nav-menu/NavMenuButtonLink', () => ({
 	),
 }))
 
-vi.mock('../nav-menu/NavMenuMessagesLink', () => ({
+vi.mock('@/components/layout/main-nav/nav-menu/NavMenuMessagesLink', () => ({
 	default: vi.fn(
 		({
 			onMenuItemClick,
@@ -103,18 +103,18 @@ vi.mock('../nav-menu/NavMenuMessagesLink', () => ({
 	),
 }))
 
-import { useMainNavState } from '../hooks/useMainNavState'
-import { useClickOutsideToClose } from '../hooks/useClickOutsideToClose'
-import { useMobileMenu } from '../hooks/useMobileMenu'
-import { useLogout } from '../hooks/useLogout'
+import { useMainNavState } from '@/components/layout/main-nav/hooks/useMainNavState'
+import { useClickOutsideToClose } from '@/components/layout/main-nav/hooks/useClickOutsideToClose'
+import { useMobileMenu } from '@/components/layout/main-nav/hooks/useMobileMenu'
+import { useLogout } from '@/components/layout/main-nav/hooks/useLogout'
 
 import { PATHS } from '@/constants/ui'
 
-import navMenuButtonLinkStyles from '../nav-menu/NavMenuButtonLink.module.scss'
-import mainNavStyles from '../MainNav.module.scss'
+import navMenuButtonLinkStyles from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink.module.scss'
+import mainNavStyles from '@/components/layout/main-nav/MainNav.module.scss'
 
-import NavMenuButtonLink from '../nav-menu/NavMenuButtonLink'
-import NavMenuMessagesLink from '../nav-menu/NavMenuMessagesLink'
+import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
+import NavMenuMessagesLink from '@/components/layout/main-nav/nav-menu/NavMenuMessagesLink'
 
 describe('<MainNav />', () => {
 	const mockTravellerName = 'John Doe'
