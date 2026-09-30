@@ -13,7 +13,7 @@
 
 ## Coding Conventions
 
-- **Imports**: Use `@` alias for `src` (e.g., `import { ... } from '@/components/...'`).
+- **Imports**: Use `@` alias for `src` (e.g., `import { ... } from '@/components/...'`) — never parent-relative (`../`) paths — and import constants from the subdirectory barrel (e.g., `'@/constants/ui'`). Enforced by ESLint (`rules/imports.js`); `src/constants/**` and `src/testUtils/cypress/**` are exempt because the Cypress E2E bundle loads them and cannot resolve `@/`.
 - **Naming**:
     - Components: PascalCase (e.g., `UserAuthenticationForm.jsx`).
     - Hooks/Utils: camelCase (e.g., `useViewport.js`).

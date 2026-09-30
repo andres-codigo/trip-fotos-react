@@ -21,7 +21,7 @@ import { PATHS } from '@/constants/ui'
  * - Uses unmount() between test iterations to prevent DOM conflicts
  */
 
-import Header from '../Header'
+import Header from '@/components/layout/header/Header'
 
 const createMockStore = (token) => {
 	return configureStore({

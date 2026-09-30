@@ -53,7 +53,7 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 	selectDidAutoLogout: vi.fn(),
 }))
 
-import TravellersList from '../TravellersList'
+import TravellersList from '@/components/travellers/TravellersList/TravellersList'
 import * as travellersSlice from '@/store/slices/travellersSlice'
 import * as authenticationSlice from '@/store/slices/authenticationSlice'
 

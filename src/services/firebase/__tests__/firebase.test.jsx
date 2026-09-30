@@ -35,7 +35,8 @@ describe('Firebase Configuration', () => {
 
 	describe('Initialisation tests', () => {
 		it('initialises Firebase app with correct configuration', async () => {
-			const { firebaseApp } = await import('../firebase.js')
+			const { firebaseApp } =
+				await import('@/services/firebase/firebase.js')
 
 			expect(initializeApp).toHaveBeenCalledWith({
 				apiKey: 'test-api-key',
@@ -52,7 +53,8 @@ describe('Firebase Configuration', () => {
 		})
 
 		it('exports firebaseApp instance', async () => {
-			const { firebaseApp } = await import('../firebase.js')
+			const { firebaseApp } =
+				await import('@/services/firebase/firebase.js')
 
 			expect(firebaseApp).toBeDefined()
 			expect(firebaseApp).toBe(mockApp)
@@ -63,12 +65,12 @@ describe('Firebase Configuration', () => {
 		it('calls initialiseApp only once', async () => {
 			// First import
 			// should call initialiseApp
-			await import('../firebase.js')
+			await import('@/services/firebase/firebase.js')
 			expect(initializeApp).toHaveBeenCalledTimes(1)
 
 			// Second import
 			// should not call again due to module caching
-			await import('../firebase.js')
+			await import('@/services/firebase/firebase.js')
 			expect(initializeApp).toHaveBeenCalledTimes(1)
 		})
 	})

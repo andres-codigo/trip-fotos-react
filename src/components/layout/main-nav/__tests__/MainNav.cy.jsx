@@ -2,8 +2,6 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
-import '../../../../../cypress/support/commands'
-
 import { PAGE_SELECTORS, TOP_NAVIGATION_SELECTORS } from '@/constants/test'
 
 import { VIEWPORTS } from '@/constants/config'
@@ -16,13 +14,13 @@ import {
 	assertMenuItems,
 	assertMenuItemRedirect,
 } from './test-utilities/mainNavTestHelpers'
-import TestLocationDisplay from '../../../../testUtils/cypress/TestLocationDisplay'
+import TestLocationDisplay from '@/testUtils/cypress/TestLocationDisplay'
 
-import MessagesPage from '../../../../pages/messages/Messages'
-import TravellersPage from '../../../../pages/travellers/Travellers'
-import AuthenticationPage from '../../../../pages/authentication/Authentication'
+import MessagesPage from '@/pages/messages/Messages'
+import TravellersPage from '@/pages/travellers/Travellers'
+import AuthenticationPage from '@/pages/authentication/Authentication'
 
-import mainNavStyles from '../MainNav.module.scss'
+import mainNavStyles from '@/components/layout/main-nav/MainNav.module.scss'
 
 const assertMenuItemRedirectWithDefaults = (
 	routePath,

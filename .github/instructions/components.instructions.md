@@ -6,11 +6,11 @@ applyTo: 'src/components/**/*.{jsx,js}'
 
 # Component Development Guidance
 
+Page-level guidance is maintained separately in [pages.instructions.md](./pages.instructions.md).
+
 ## Folder Structure
 
 Each component must reside in its own contextual folder. Components are located in `src/components`, categorised by type: `common`, `forms`, `layout`, `ui`, `travellers`.
-
-Page-level guidance is maintained separately in `.github/instructions/pages.instructions.md`.
 
 ### Naming & Location
 
@@ -76,6 +76,8 @@ When creating a new component, always create corresponding test files:
 - For component tests, define reusable test constants (IDs, labels, error messages) in `src/constants/test`.
 - Use mocking utilities from `src/testUtils` for consistent test setup.
 
+See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypress conventions.
+
 ## Linting And Formatting
 
 - Ensure every edited or newly created component file, hook, style module, and related test file is ESLint-clean and Prettier-formatted before finishing work.
@@ -85,3 +87,5 @@ When creating a new component, always create corresponding test files:
 - Use **SCSS modules** for component-specific styles.
 - Import as `[componentName]Styles` (e.g., `import userAuthenticationFormStyles from './UserAuthenticationForm.module.scss'`).
 - When creating a new SCSS file, review `src/styles` for available variables and mixins to ensure consistency.
+
+See [styles.instructions.md](./styles.instructions.md) for full SCSS conventions.

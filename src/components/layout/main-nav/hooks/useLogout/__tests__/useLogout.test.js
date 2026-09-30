@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useDispatch } from 'react-redux'
 
-import { useLogout } from '../index'
+import { useLogout } from '@/components/layout/main-nav/hooks/useLogout/index'
 import { logout } from '@/store/slices/authenticationSlice'
 
 vi.mock('react-redux', () => ({

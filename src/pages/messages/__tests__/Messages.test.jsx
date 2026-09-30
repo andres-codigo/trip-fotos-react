@@ -4,9 +4,9 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { TEST_IDS } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 
-import Messages from '../Messages'
+import Messages from '@/pages/messages/Messages'
 
-import messagesStyles from '../messages.module.scss'
+import messagesStyles from '@/pages/messages/messages.module.scss'
 
 /**
  * Messages Unit Tests

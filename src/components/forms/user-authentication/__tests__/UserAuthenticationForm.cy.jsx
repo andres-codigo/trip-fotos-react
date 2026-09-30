@@ -4,9 +4,9 @@ import { AUTHENTICATION_FORM_SELECTORS } from '@/constants/test'
 
 import { ATTRIBUTES, ACCESSIBILITY } from '@/constants/ui'
 
-import UserAuthenticationForm from '../UserAuthenticationForm'
+import UserAuthenticationForm from '@/components/forms/user-authentication/UserAuthenticationForm'
 
-import userAuthStyles from '../UserAuthenticationForm.module.scss'
+import userAuthStyles from '@/components/forms/user-authentication/UserAuthenticationForm.module.scss'
 
 describe('<UserAuthenticationForm />', () => {
 	const EMAIL_ID = 'email'

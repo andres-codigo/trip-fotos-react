@@ -21,9 +21,9 @@ import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
  * is already covered in NavMenuButtonLink.test.jsx
  */
 
-import NavMenuMessagesLink from '../NavMenuMessagesLink'
+import NavMenuMessagesLink from '@/components/layout/main-nav/nav-menu/NavMenuMessagesLink'
 
-vi.mock('../NavMenuButtonLink', () => ({
+vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
 	default: vi.fn(
 		({
 			children,
@@ -50,14 +50,17 @@ vi.mock('classnames', () => ({
 	default: createClassNamesMock(),
 }))
 
-vi.mock('../NavMenuButtonLink.module.scss', () => ({
-	default: {
-		totalMessagesContainer: 'mocked-total-messages-container',
-		totalMessages: 'mocked-total-messages',
-	},
-}))
+vi.mock(
+	'@/components/layout/main-nav/nav-menu/NavMenuButtonLink.module.scss',
+	() => ({
+		default: {
+			totalMessagesContainer: 'mocked-total-messages-container',
+			totalMessages: 'mocked-total-messages',
+		},
+	}),
+)
 
-import NavMenuButtonLink from '../NavMenuButtonLink'
+import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
 import classNames from 'classnames'
 
 const mockNavMenuButtonLink = vi.mocked(NavMenuButtonLink)

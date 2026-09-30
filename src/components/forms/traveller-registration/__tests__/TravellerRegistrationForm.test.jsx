@@ -13,7 +13,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
  * - Ensures fieldConfig logic and getInputProps helper work correctly
  */
 
-import TravellerRegistrationForm from '../TravellerRegistrationForm'
+import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
 import { UI_TEXT } from '@/constants/test'
 
 // Test selector constants
@@ -28,11 +28,14 @@ const FORM_SELECTORS = {
 }
 
 // Mock the hook to control form state in tests
-vi.mock('../hooks/useTravellerRegistration', () => ({
-	useTravellerRegistration: vi.fn(),
-}))
+vi.mock(
+	'@/components/forms/traveller-registration/hooks/useTravellerRegistration',
+	() => ({
+		useTravellerRegistration: vi.fn(),
+	}),
+)
 
-import { useTravellerRegistration } from '../hooks/useTravellerRegistration'
+import { useTravellerRegistration } from '@/components/forms/traveller-registration/hooks/useTravellerRegistration'
 
 describe('<TravellerRegistrationForm />', () => {
 	const mockOnSubmit = vi.fn()

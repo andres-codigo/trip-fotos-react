@@ -4,7 +4,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { GLOBAL } from '@/constants/ui'
 import { SPINNER } from '@/constants/test'
 
-import BaseSpinner from '../BaseSpinner'
+import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 /**
  * BaseSpinner Unit Tests

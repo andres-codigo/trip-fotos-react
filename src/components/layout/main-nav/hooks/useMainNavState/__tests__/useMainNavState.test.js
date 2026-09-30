@@ -1,12 +1,15 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-import { useMainNavState } from '../index'
-import { useLoggedInTravellerName } from '../../useLoggedInTravellerName/index'
+import { useMainNavState } from '@/components/layout/main-nav/hooks/useMainNavState/index'
+import { useLoggedInTravellerName } from '@/components/layout/main-nav/hooks/useLoggedInTravellerName/index'
 
-vi.mock('../../useLoggedInTravellerName/index', () => ({
-	useLoggedInTravellerName: vi.fn(),
-}))
+vi.mock(
+	'@/components/layout/main-nav/hooks/useLoggedInTravellerName/index',
+	() => ({
+		useLoggedInTravellerName: vi.fn(),
+	}),
+)
 
 describe('useMainNavState', () => {
 	const mockSetTravellerName = vi.fn()

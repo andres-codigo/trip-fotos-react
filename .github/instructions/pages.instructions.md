@@ -45,6 +45,8 @@ Pages should focus on route-level orchestration and composition:
 - Keep loading and error state in Redux/store-backed logic rather than ad hoc local patterns.
 - Reuse selectors where possible to avoid repetitive state mapping logic.
 
+See [store.instructions.md](./store.instructions.md) for RTK Query/thunk conventions.
+
 ## Error Handling
 
 - Use existing error handling utilities and constants.
@@ -71,11 +73,13 @@ When creating or modifying pages, keep both local and end-to-end coverage aligne
 - Cypress E2E: `npm run cy:run:e2e`
 - Vitest: `npm run vitest:run` or `npm run vitest:watch`
 
+See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypress conventions.
+
 ## Styling
 
 - Prefer page-specific SCSS modules for page layout concerns.
 - Reusable component styling must remain inside component-level style modules.
-- Follow shared SCSS conventions in `.github/instructions/styles.instructions.md`.
+- Follow shared SCSS conventions in [styles.instructions.md](./styles.instructions.md).
 
 ## Linting And Formatting
 

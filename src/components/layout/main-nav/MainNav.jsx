@@ -11,7 +11,7 @@ import { useLogout as useLogoutDefault } from './hooks/useLogout'
 import { useMainNavState as useMainNavStateDefault } from './hooks/useMainNavState'
 import { useMobileMenu as useMobileMenuDefault } from './hooks/useMobileMenu'
 
-import BaseButton from '../../ui/button/BaseButton'
+import BaseButton from '@/components/ui/button/BaseButton'
 
 import NavMenuButtonLink from './nav-menu/NavMenuButtonLink'
 import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink'

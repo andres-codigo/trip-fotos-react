@@ -362,7 +362,7 @@ Automated scaffolding workflows for common tasks:
 
 ### AI Assistance & Claude Code Guidance
 
-This project includes an equivalent, Claude-specific set of guidance files so Claude Code sessions follow the same standards without loading the full detail into every conversation.
+Claude Code shares the Copilot guidance above rather than keeping its own copy, so both tools follow a single source of truth. Claude-specific automation — hooks, permissions, and skills — lives in `.claude/`.
 
 #### Workspace-Level Instructions
 
@@ -372,21 +372,26 @@ This project includes an equivalent, Claude-specific set of guidance files so Cl
 
 #### Domain-Specific Guidance
 
-Detailed guidance, read on demand when working in the relevant area (mirrors the Copilot instructions above):
-
-- **Components**: `.claude/docs/components.md` — Folder structure, reusability patterns, testing, and accessibility.
-- **Pages**: `.claude/docs/pages.md` — Route-level composition, data loading orchestration, and page testing.
-- **Redux Store**: `.claude/docs/store.md` — Slices, thunks, error handling, persistence, and testing.
-- **Styling**: `.claude/docs/styles.md` — SCSS modules, variables, mixins, and naming conventions.
-- **Testing**: `.claude/docs/testing.md` — Vitest/Cypress standards, shared test data paths, and anti-flakiness practices.
+`CLAUDE.md` points Claude Code to the `.github/instructions/*.instructions.md` files listed above, which it reads on demand when working in the relevant area.
 
 #### Workflow Agents
 
-Automated scaffolding subagents for common tasks (invoke via the Agent tool):
+Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is a thin wrapper that delegates to the matching `.github/agents/*.agent.md` workflow:
 
 - **create-component**: Scaffold new components with full structure and tests.
 - **create-page**: Scaffold new pages with route integration and tests.
 - **create-redux-slice**: Scaffold new Redux slices with RTK Query/thunks and tests.
+
+#### Hooks & Permissions
+
+- **File**: `.claude/settings.json` (committed; personal overrides go in the gitignored `.claude/settings.local.json`)
+- **Hook**: a `PostToolUse` hook runs `.claude/hooks/lint-edited-file.mjs` after every edit, applying Prettier and `eslint --fix`. Any remaining ESLint errors are fed back to Claude so they are fixed in the same turn.
+- **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git) run without prompting; pushes, PR creation, installs, and E2E runs ask first; reading `.env`/`certs/`, force-pushes, and hard resets are denied.
+
+#### Skills
+
+- **`/verify`** (`.claude/skills/verify/`): runs ESLint, Vitest, Cypress component tests, and the production build, then reports a pass/fail table. Use before committing or opening a pull request.
+- **`/verify e2e`**: additionally runs the Cypress E2E suite via `.claude/skills/verify/run-e2e.mjs`, which reuses a dev server on port 3000 or starts one over HTTP (as CI does) and stops it afterwards. Opt-in and approval-gated, because the tests use the live Firebase project and `.env` credentials.
 
 ---
 
@@ -660,12 +665,14 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 trip-fotos-react/
 ├── .devcontainer/               # VS Code Dev Container configuration
 ├── .claude/
-│   ├── agents/                 # Claude Code scaffolding subagents
-│   ├── docs/                   # Domain-specific Claude guidance files
-│   └── settings.local.json     # Local Claude Code permissions/settings
+│   ├── agents/                 # Claude Code subagent wrappers (delegate to .github/agents)
+│   ├── hooks/                  # Claude Code hook scripts (lint/format after edits)
+│   ├── skills/                 # Claude Code skills (e.g. /verify)
+│   ├── settings.json           # Shared Claude Code permissions and hooks
+│   └── settings.local.json     # Personal Claude Code overrides (gitignored)
 ├── .github/
-│   ├── agents/                 # GitHub Copilot agent workflows for scaffolding
-│   ├── instructions/           # Domain-specific Copilot guidance files
+│   ├── agents/                 # Scaffolding workflows (shared by Copilot and Claude Code)
+│   ├── instructions/           # Domain-specific guidance (shared by Copilot and Claude Code)
 │   ├── workflows/              # GitHub Actions workflow files for CI/CD automation
 │   └── copilot-instructions.md # Workspace-level Copilot guidelines
 ├── .vscode/                     # Shared VS Code editor settings

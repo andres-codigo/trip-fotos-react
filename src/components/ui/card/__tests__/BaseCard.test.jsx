@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 
 import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 
-import BaseCard from '../BaseCard'
+import BaseCard from '@/components/ui/card/BaseCard'
 
 /**
  * BaseCard Unit Tests

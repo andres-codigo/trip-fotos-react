@@ -15,7 +15,7 @@ import { MOCK_KEYS } from '@/constants/test'
  *
  * Router: Tests wrap components in BrowserRouter since UserAuthenticationForm uses Router components
  */
-import UserAuthenticationForm from '../UserAuthenticationForm'
+import UserAuthenticationForm from '@/components/forms/user-authentication/UserAuthenticationForm'
 
 vi.mock('@/components/ui/form/input/Input', () => ({
 	default: ({ label, isValid, message, showRequiredMark, ...props }) => {
@@ -62,18 +62,21 @@ vi.mock('@/components/ui/button/BaseButton', () => ({
 	},
 }))
 
-vi.mock('../UserAuthenticationForm.module.scss', () => ({
-	default: {
-		userAuthentication: 'userAuthentication',
-		userAuthenticationTitle: 'userAuthenticationTitle',
-		visuallyHidden: 'visuallyHidden',
-		formControl: 'formControl',
-		invalidForm: 'invalidForm',
-		formActions: 'formActions',
-		formSubmitButton: 'formSubmitButton',
-		toggleLink: 'toggleLink',
-	},
-}))
+vi.mock(
+	'@/components/forms/user-authentication/UserAuthenticationForm.module.scss',
+	() => ({
+		default: {
+			userAuthentication: 'userAuthentication',
+			userAuthenticationTitle: 'userAuthenticationTitle',
+			visuallyHidden: 'visuallyHidden',
+			formControl: 'formControl',
+			invalidForm: 'invalidForm',
+			formActions: 'formActions',
+			formSubmitButton: 'formSubmitButton',
+			toggleLink: 'toggleLink',
+		},
+	}),
+)
 
 const renderWithRouter = (component) => {
 	return render(<BrowserRouter>{component}</BrowserRouter>)

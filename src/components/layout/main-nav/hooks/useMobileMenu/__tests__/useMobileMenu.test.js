@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-import { useMobileMenu } from '../index'
+import { useMobileMenu } from '@/components/layout/main-nav/hooks/useMobileMenu/index'
 
 describe('useMobileMenu', () => {
 	let mockHamburgerRef

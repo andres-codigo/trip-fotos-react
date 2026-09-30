@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
-import { handleApiError } from '../index'
+import { handleApiError } from '@/utils/errorHandler/index'
 import {
 	API_ERROR_MESSAGE,
 	ERROR_OBJECTS,

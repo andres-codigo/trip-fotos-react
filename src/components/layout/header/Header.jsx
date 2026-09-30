@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { PATHS } from '@/constants/ui'
 
-const MainNav = lazy(() => import('../main-nav/MainNav'))
+const MainNav = lazy(() => import('@/components/layout/main-nav/MainNav'))
 
 import headerStyles from './Header.module.scss'
 

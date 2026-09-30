@@ -13,7 +13,7 @@ import { describe, it, expect, vi } from 'vitest'
  * - Ensures className generation and error handling
  */
 
-import Checkbox from '../Checkbox'
+import Checkbox from '@/components/ui/form/checkbox/Checkbox'
 import { CHECKBOX } from '@/constants/test'
 
 describe('<Checkbox />', () => {
