@@ -3,7 +3,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { useSelector } from 'react-redux'
 
 import { TEST_IDS } from '@/constants/test'
-import { GLOBAL, PATHS } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
@@ -48,6 +48,21 @@ describe('PageNotFound', () => {
 	})
 
 	describe('Rendering tests', () => {
+		it('<main> is the skip link target', () => {
+			render(<PageNotFound />)
+
+			const main = screen.getByRole('main')
+
+			expect(main).toHaveAttribute('id', ACCESSIBILITY.MAIN_CONTENT_ID)
+			expect(main).toHaveAttribute('tabindex', '-1')
+		})
+
+		it('sets the document title', () => {
+			render(<PageNotFound />)
+
+			expect(document.title).toBe(`Page not found · ${GLOBAL.SITE_NAME}`)
+		})
+
 		it('renders the <main> element', () => {
 			render(<PageNotFound />)
 
@@ -89,7 +104,7 @@ describe('PageNotFound', () => {
 			expect(screen.getByTestId(TEST_IDS.BASE_CARD)).toBeInTheDocument()
 
 			expect(
-				screen.getByRole('heading', { level: 2 }),
+				screen.getByRole('heading', { level: 1 }),
 			).toBeInTheDocument()
 			expect(container.querySelector('p')).toBeInTheDocument()
 			expect(container.querySelector('a')).toBeInTheDocument()

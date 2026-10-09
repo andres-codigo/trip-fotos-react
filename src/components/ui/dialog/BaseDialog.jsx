@@ -81,7 +81,7 @@ const BaseDialog = ({
 					aria-labelledby={titleId}
 					aria-describedby={descId}
 					tabIndex={-1}>
-					<header className={baseDialogStyles.header}>
+					<div className={baseDialogStyles.header}>
 						{header ? (
 							header
 						) : (
@@ -91,8 +91,8 @@ const BaseDialog = ({
 								{title}
 							</h2>
 						)}
-					</header>
-					<main
+					</div>
+					<div
 						className={
 							sectionClasses
 								? baseDialogStyles.image
@@ -100,9 +100,9 @@ const BaseDialog = ({
 						}
 						data-cy={DIALOG.TEXT_CONTENT}>
 						<div id={descId}>{children}</div>
-					</main>
+					</div>
 					{!fixed && (
-						<footer>
+						<div className={baseDialogStyles.footer}>
 							{actions ? (
 								actions
 							) : (
@@ -113,7 +113,7 @@ const BaseDialog = ({
 									Close
 								</BaseButton>
 							)}
-						</footer>
+						</div>
 					)}
 				</dialog>
 			</CSSTransition>

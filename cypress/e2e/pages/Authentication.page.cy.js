@@ -257,8 +257,11 @@ describe('UI error dialog', () => {
 					'contain.text',
 					DIALOG_SELECTORS.MESSAGES.AUTHENTICATION_ERRORS[messageKey],
 				)
-				cy.get('footer > button').should('contain.text', 'Close')
-				cy.get('footer > button').click()
+				cy.get(DIALOG_SELECTORS.CLOSE_BUTTON).should(
+					'contain.text',
+					'Close',
+				)
+				cy.get(DIALOG_SELECTORS.CLOSE_BUTTON).click()
 			})
 	}
 

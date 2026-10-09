@@ -24,7 +24,7 @@ describe('Register Page', () => {
 	it('renders the register page container', () => {
 		cy.get(PAGE_SELECTORS.REGISTER_MAIN_CONTAINER).should('be.visible')
 		cy.get(PAGE_SELECTORS.REGISTER_MAIN_CONTAINER).within(() => {
-			cy.get('h2').should('contain', 'Register')
+			cy.get('h1').should('contain', 'Register')
 		})
 	})
 
@@ -209,7 +209,7 @@ describe('Register Page', () => {
 						API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH,
 					).should('exist')
 					// Close the dialog
-					cy.get('footer > button').click()
+					cy.get(DIALOG_SELECTORS.CLOSE_BUTTON).click()
 				},
 			)
 

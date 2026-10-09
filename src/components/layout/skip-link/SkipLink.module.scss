@@ -1,0 +1,19 @@
+@use '@/styles/setup/variables' as variables;
+
+// Kept off-screen rather than display: none so it stays in the tab order
+.skipLink {
+	background-color: variables.$color-white;
+	color: variables.$color-pigment-indigo;
+	font-weight: 700;
+	left: 1rem;
+	padding: 0.75rem 1rem;
+	position: absolute;
+	top: -100vh;
+	z-index: 2;
+
+	&:focus {
+		outline: 3px solid variables.$color-lavender-magenta;
+		outline-offset: 2px;
+		top: 1rem;
+	}
+}

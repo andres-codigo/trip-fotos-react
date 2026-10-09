@@ -63,14 +63,14 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			data-cy="traveller-registration-form"
 			aria-busy={isLoading}
 			aria-labelledby="traveller-registration-title">
-			<h2
+			<h1
 				id="traveller-registration-title"
 				className={
 					travellerRegistrationFormStyles.travellerRegistrationTitle
 				}
 				data-cy="traveller-registration-form-title">
 				Register as a Traveller
-			</h2>
+			</h1>
 			<div
 				aria-live="polite"
 				style={ACCESSIBILITY.ARIA_LIVE.POLITE.STYLE}>

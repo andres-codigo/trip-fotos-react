@@ -21,6 +21,10 @@ export const HEADER_SELECTORS = {
 	SITE_HEADER_TITLE_LINK: getByDataCy('site-header-title-link'),
 }
 
+export const SKIP_LINK_SELECTORS = {
+	SKIP_LINK: getByDataCy('skip-link'),
+}
+
 export const FOOTER_SELECTORS = {
 	SITE_FOOTER: getByDataCy('site-footer'),
 	PRIVACY_LINK: getByDataCy('footer-privacy-link'),
@@ -101,6 +105,7 @@ export const DIALOG_SELECTORS = {
 	// Dialog elements
 	TITLE: getByDataCy('title'),
 	TEXT_CONTENT: getByDataCy('text-content'),
+	CLOSE_BUTTON: getByDataCy('dialog-button'),
 	SPINNER_CONTAINER: getByDataCy('base-spinner'),
 	SPINNER_IMAGE: getByDataCy('base-spinner-img'),
 

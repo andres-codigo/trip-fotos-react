@@ -33,6 +33,16 @@ Pages should focus on route-level orchestration and composition:
 - Compose reusable UI/components from `src/components`.
 - Keep reusable view logic in components/hooks instead of embedding all logic in pages.
 
+## Page Structure And Accessibility
+
+Every page's root `<main>` must:
+
+- Have `id={ACCESSIBILITY.MAIN_CONTENT_ID}` and `tabIndex={-1}`, so the skip link in `App.jsx` can move focus to it.
+- Render its own `<title>` (React hoists it into `<head>`), in the form ``{`Page name · ${GLOBAL.SITE_NAME}`}``, so each route has a distinct browser tab title.
+- Contain exactly one `<h1>` naming the page. The site name in the header is not a heading, so the page's own heading is the `<h1>`; nest section headings from `<h2>` down.
+
+Do not render `<main>`, `<header>` or `<footer>` inside dialogs or other components: the dialog is portalled to `<body>`, where these would create duplicate page landmarks.
+
 ## Routing Rules
 
 - Routing configuration is owned by `src/app/App.jsx`.

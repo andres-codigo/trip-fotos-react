@@ -146,7 +146,7 @@ describe('Travellers Page - WIP', () => {
 			// If no travellers message is shown, refresh button should exist and be enabled
 			cy.get('body').then(($body) => {
 				if (
-					$body.find('h3:contains("No travellers listed.")').length >
+					$body.find('h2:contains("No travellers listed.")').length >
 					0
 				) {
 					cy.get(
@@ -178,7 +178,7 @@ describe('Travellers Page - WIP', () => {
 				)
 				cy.contains(ERROR_MESSAGES.REQUEST_ERROR).should('exist')
 				// Close the dialog
-				cy.get('footer > button').click()
+				cy.get(DIALOG_SELECTORS.CLOSE_BUTTON).click()
 			})
 		})
 

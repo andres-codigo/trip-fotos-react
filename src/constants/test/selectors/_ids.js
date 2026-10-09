@@ -41,6 +41,7 @@ export const TEST_IDS = {
 	PRIVACY: {
 		CONTAINER: 'privacy-main-container',
 	},
+	SKIP_LINK: 'skip-link',
 	FOOTER: {
 		SITE_FOOTER: 'site-footer',
 		PRIVACY_LINK: 'footer-privacy-link',
