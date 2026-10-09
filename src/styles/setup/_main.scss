@@ -31,6 +31,11 @@ body {
 main {
 	flex: 1;
 	width: 100%;
+
+	// Focused only programmatically by the skip link, so no ring is needed
+	&:focus {
+		outline: none;
+	}
 }
 
 section {

@@ -123,7 +123,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				<div
 					className={travellersListStyles.noTravellersContainer}
 					data-cy="no-travellers-list">
-					<h3>No travellers listed.</h3>
+					<h2>No travellers listed.</h2>
 				</div>
 			)}
 		</>

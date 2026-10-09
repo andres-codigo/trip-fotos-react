@@ -19,7 +19,7 @@ function Header() {
 			data-cy="site-header"
 			role="banner"
 			aria-label="Site header">
-			<h1
+			<p
 				className={headerStyles.siteHeaderTitleLink}
 				data-cy="site-header-title-link">
 				<Link
@@ -27,7 +27,7 @@ function Header() {
 					aria-label="Trip Fotos Home">
 					Trip Fotos
 				</Link>
-			</h1>
+			</p>
 			<Suspense fallback={null}>
 				<MainNav isLoggedIn={isLoggedIn} />
 			</Suspense>

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, afterEach, vi } from 'vitest'
 
 import { TEST_IDS } from '@/constants/test'
-import { GLOBAL } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import Messages from '@/pages/messages/Messages'
 
@@ -25,6 +25,21 @@ describe('Messages', () => {
 	})
 
 	describe('Rendering tests', () => {
+		it('<main> is the skip link target', () => {
+			render(<Messages />)
+
+			const main = screen.getByRole('main')
+
+			expect(main).toHaveAttribute('id', ACCESSIBILITY.MAIN_CONTENT_ID)
+			expect(main).toHaveAttribute('tabindex', '-1')
+		})
+
+		it('sets the document title', () => {
+			render(<Messages />)
+
+			expect(document.title).toBe(`Messages · ${GLOBAL.SITE_NAME}`)
+		})
+
 		it('renders the <main> element', () => {
 			render(<Messages />)
 

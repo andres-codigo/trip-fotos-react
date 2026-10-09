@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { registerTraveller } from '@/store/slices/travellersSlice'
 import { ERROR_MESSAGES } from '@/constants/errors'
-import { GLOBAL, PATHS } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
 import BaseCard from '@/components/ui/card/BaseCard'
@@ -45,9 +45,12 @@ const Register = () => {
 
 	return (
 		<main
+			id={ACCESSIBILITY.MAIN_CONTENT_ID}
+			tabIndex={-1}
 			className={`mainContainer ${registerStyles.registerContainer}`}
 			data-cy="main-container"
 			data-cy-alt="register-main-container">
+			<title>{`Register as a traveller · ${GLOBAL.SITE_NAME}`}</title>
 			{error && (
 				<BaseDialog
 					show={true}

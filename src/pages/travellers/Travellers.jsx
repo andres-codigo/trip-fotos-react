@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
+import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
+
 import TravellersList from '@/components/travellers/TravellersList/TravellersList'
 
 import BaseCard from '@/components/ui/card/BaseCard'
@@ -25,9 +27,12 @@ const Travellers = () => {
 
 	return (
 		<main
+			id={ACCESSIBILITY.MAIN_CONTENT_ID}
+			tabIndex={-1}
 			className={`mainContainer ${travellersStyles.travellersContainer}`}
 			data-cy="main-container"
 			data-cy-alt="travellers-main-container">
+			<title>{`Travellers · ${GLOBAL.SITE_NAME}`}</title>
 			<section>
 				<BaseCard>
 					{alertMessage && (

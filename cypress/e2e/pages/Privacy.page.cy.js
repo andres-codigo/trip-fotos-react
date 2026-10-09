@@ -10,7 +10,7 @@ describe('Not logged in > Privacy page', () => {
 
 		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.PRIVACY)
 		cy.get(PAGE_SELECTORS.PRIVACY_MAIN_CONTAINER).should('be.visible')
-		cy.contains('h2', 'Privacy policy').should('be.visible')
+		cy.contains('h1', 'Privacy policy').should('be.visible')
 	})
 
 	it('loads directly without redirecting to authentication', () => {

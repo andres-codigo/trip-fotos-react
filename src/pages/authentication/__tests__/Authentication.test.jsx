@@ -12,7 +12,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { FIREBASE_ERRORS } from '@/constants/auth'
 import { API_DATABASE } from '@/constants/api'
 
-import { GLOBAL } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 import {
 	DIALOG,
 	MOCK_KEYS,
@@ -182,6 +182,21 @@ describe('<Authentication />', () => {
 	})
 
 	describe('Rendering tests', () => {
+		it('<main> is the skip link target', () => {
+			renderWithProviders(<Authentication />)
+
+			const main = screen.getByRole('main')
+
+			expect(main).toHaveAttribute('id', ACCESSIBILITY.MAIN_CONTENT_ID)
+			expect(main).toHaveAttribute('tabindex', '-1')
+		})
+
+		it('sets the document title', () => {
+			renderWithProviders(<Authentication />)
+
+			expect(document.title).toBe(`Login · ${GLOBAL.SITE_NAME}`)
+		})
+
 		it('renders the <main> element', () => {
 			renderWithProviders(<Authentication />)
 
@@ -530,6 +545,7 @@ describe('<Authentication />', () => {
 
 				fireEvent.click(switchBtn)
 				expect(screen.getByText(/sign up/i)).toBeInTheDocument()
+				expect(document.title).toBe(`Signup · ${GLOBAL.SITE_NAME}`)
 
 				fireEvent.click(switchBtn)
 				expect(screen.getByText(/log in/i)).toBeInTheDocument()

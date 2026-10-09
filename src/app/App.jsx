@@ -16,6 +16,7 @@ import { tryLogin } from '@/store/slices/authenticationSlice'
 
 import LoadingFallback from '@/components/common/LoadingFallback'
 
+import SkipLink from '@/components/layout/skip-link/SkipLink'
 import Header from '@/components/layout/header/Header'
 import Footer from '@/components/layout/footer/Footer'
 const Authentication = lazy(
@@ -85,6 +86,7 @@ function AppRoutes() {
 					href={window.location.origin + location.pathname}
 				/>
 			)}
+			<SkipLink />
 			<Header />
 			<Suspense fallback={<LoadingFallback />}>
 				<Routes>

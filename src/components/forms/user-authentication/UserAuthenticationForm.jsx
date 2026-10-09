@@ -62,7 +62,7 @@ const UserAuthenticationForm = ({
 			data-cy="user-authentication-form"
 			aria-busy={isLoading}
 			aria-labelledby="user-authentication-form-title">
-			<h2
+			<h1
 				id="user-authentication-form-title"
 				className={userAuthStyles.userAuthenticationTitle}
 				data-cy="user-authentication-form-title">
@@ -81,7 +81,7 @@ const UserAuthenticationForm = ({
 						</span>
 					</>
 				)}
-			</h2>
+			</h1>
 			<div
 				aria-live="polite"
 				style={ACCESSIBILITY.ARIA_LIVE.POLITE.STYLE}>

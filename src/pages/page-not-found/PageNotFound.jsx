@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux'
 
-import { PATHS } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 import BaseButton from '@/components/ui/button/BaseButton'
@@ -14,14 +14,17 @@ const PageNotFound = () => {
 
 	return (
 		<main
+			id={ACCESSIBILITY.MAIN_CONTENT_ID}
+			tabIndex={-1}
 			className={[
 				'mainContainer',
 				pageNotFoundStyles.pageNotFoundContainer,
 			].join(' ')}
 			data-cy="main-container"
 			data-cy-alt="page-not-found-main-container">
+			<title>{`Page not found · ${GLOBAL.SITE_NAME}`}</title>
 			<BaseCard>
-				<h2>This page is not available. Sorry about that.</h2>
+				<h1>This page is not available. Sorry about that.</h1>
 				<p>
 					Best return to the
 					<BaseButton

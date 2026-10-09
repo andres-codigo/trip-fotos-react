@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
 import { TEST_IDS } from '@/constants/test'
-import { GLOBAL } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import Privacy from '@/pages/privacy/Privacy'
 
@@ -15,6 +15,21 @@ vi.mock('@/components/ui/card/BaseCard', () => ({
 
 describe('Privacy', () => {
 	describe('Rendering tests', () => {
+		it('<main> is the skip link target', () => {
+			render(<Privacy />)
+
+			const main = screen.getByRole('main')
+
+			expect(main).toHaveAttribute('id', ACCESSIBILITY.MAIN_CONTENT_ID)
+			expect(main).toHaveAttribute('tabindex', '-1')
+		})
+
+		it('sets the document title', () => {
+			render(<Privacy />)
+
+			expect(document.title).toBe(`Privacy policy · ${GLOBAL.SITE_NAME}`)
+		})
+
 		it('renders <main> with the shared and page classes', () => {
 			render(<Privacy />)
 
@@ -43,13 +58,13 @@ describe('Privacy', () => {
 
 			expect(
 				screen.getByRole('heading', {
-					level: 2,
+					level: 1,
 					name: 'Privacy policy',
 				}),
 			).toBeInTheDocument()
 			expect(
 				screen
-					.getAllByRole('heading', { level: 3 })
+					.getAllByRole('heading', { level: 2 })
 					.map((h) => h.textContent),
 			).toEqual([
 				'Account data',

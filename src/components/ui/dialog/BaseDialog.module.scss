@@ -36,21 +36,22 @@
 		}
 	}
 
-	main {
-		&.image {
-			align-items: center;
-			display: flex;
-			padding: 2.5rem 0 1rem 0;
+	.image {
+		align-items: center;
+		display: flex;
+		padding: 2.5rem 0 1rem 0;
+	}
+
+	.general {
+		padding: 1rem;
+
+		p {
+			text-align: center;
 		}
+	}
 
-		&.general {
-			padding: 1rem;
-
-			p {
-				text-align: center;
-			}
-		}
-
+	.image,
+	.general {
 		img {
 			display: block;
 			margin: 0 auto;
@@ -59,7 +60,7 @@
 		}
 	}
 
-	footer {
+	.footer {
 		display: flex;
 		justify-content: flex-end;
 		margin: 0;

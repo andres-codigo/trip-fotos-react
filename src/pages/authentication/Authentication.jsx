@@ -3,8 +3,7 @@ import { useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { API_DATABASE } from '@/constants/api'
-import { GLOBAL } from '@/constants/ui'
-import { PATHS } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import { login } from '@/store/slices/authenticationSlice'
 
@@ -114,9 +113,12 @@ const Authentication = () => {
 
 	return (
 		<main
+			id={ACCESSIBILITY.MAIN_CONTENT_ID}
+			tabIndex={-1}
 			className="mainContainer authenticationContainer"
 			data-cy="main-container"
 			data-cy-alt="authentication-main-container">
+			<title>{`${mode === API_DATABASE.AUTH_LOGIN_MODE ? 'Login' : 'Signup'} · ${GLOBAL.SITE_NAME}`}</title>
 			{error && (
 				<BaseDialog
 					show={true}

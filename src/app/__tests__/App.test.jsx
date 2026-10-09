@@ -67,6 +67,9 @@ vi.mock('@/components/common/LoadingFallback', () => ({
 	default: () => <div>Loading...</div>,
 }))
 
+vi.mock('@/components/layout/skip-link/SkipLink', () => ({
+	default: () => <div>SkipLink</div>,
+}))
 vi.mock('@/components/layout/header/Header', () => ({
 	default: () => <div>Header</div>,
 }))
@@ -129,6 +132,7 @@ describe('App', () => {
 
 			renderWithRoute(PATHS.HOME)
 
+			expect(screen.getByText('SkipLink')).toBeInTheDocument()
 			expect(screen.getByText('Header')).toBeInTheDocument()
 			expect(screen.getByText('Footer')).toBeInTheDocument()
 			await waitFor(() => {

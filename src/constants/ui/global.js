@@ -1,4 +1,6 @@
 export const GLOBAL = Object.freeze({
+	SITE_NAME: 'Trip Fotos',
+
 	// ADMIN
 	ADMIN_ID: import.meta.env.VITE_ADMIN_ID,
 

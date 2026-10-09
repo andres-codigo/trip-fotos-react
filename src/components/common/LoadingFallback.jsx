@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types'
 
+import { ACCESSIBILITY } from '@/constants/ui'
+
 import BaseCard from '@/components/ui/card/BaseCard'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
@@ -12,6 +14,8 @@ const LoadingFallback = ({ isComponent }) => {
 		</BaseCard>
 	) : (
 		<main
+			id={ACCESSIBILITY.MAIN_CONTENT_ID}
+			tabIndex={-1}
 			className="mainContainer loadingFallback"
 			data-cy="main-container">
 			<BaseCard className="loadingFallback">
