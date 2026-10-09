@@ -52,6 +52,7 @@ vi.mock('@/constants/ui', () => ({
 		AUTHENTICATION: '/authentication',
 		TRAVELLERS: '/travellers',
 		MESSAGES: '/messages',
+		PRIVACY: '/privacy',
 		PAGE_NOT_FOUND: '/404',
 	},
 }))
@@ -69,6 +70,9 @@ vi.mock('@/components/common/LoadingFallback', () => ({
 vi.mock('@/components/layout/header/Header', () => ({
 	default: () => <div>Header</div>,
 }))
+vi.mock('@/components/layout/footer/Footer', () => ({
+	default: () => <div>Footer</div>,
+}))
 vi.mock('@/pages/authentication/Authentication', () => ({
 	default: () => <div>UserAuthPage</div>,
 }))
@@ -80,6 +84,9 @@ vi.mock('@/pages/travellers/Travellers', () => ({
 }))
 vi.mock('@/pages/messages/Messages', () => ({
 	default: () => <div>MessagesPage</div>,
+}))
+vi.mock('@/pages/privacy/Privacy', () => ({
+	default: () => <div>PrivacyPage</div>,
 }))
 vi.mock('@/pages/page-not-found/PageNotFound', () => ({
 	default: () => <div>NotFoundPage</div>,
@@ -123,6 +130,7 @@ describe('App', () => {
 			renderWithRoute(PATHS.HOME)
 
 			expect(screen.getByText('Header')).toBeInTheDocument()
+			expect(screen.getByText('Footer')).toBeInTheDocument()
 			await waitFor(() => {
 				expect(screen.getByText('TravellersPage')).toBeInTheDocument()
 			})
@@ -141,6 +149,52 @@ describe('App', () => {
 			await waitFor(() => {
 				expect(screen.getByText('UserAuthPage')).toBeInTheDocument()
 			})
+		})
+
+		it('renders PrivacyPage without redirecting when not logged in', async () => {
+			setAuthState(null, false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.PRIVACY,
+			})
+
+			renderWithRoute(PATHS.PRIVACY)
+
+			expect(navigateMock).not.toHaveBeenCalled()
+			await waitFor(() => {
+				expect(screen.getByText('PrivacyPage')).toBeInTheDocument()
+			})
+		})
+
+		it('renders a canonical link for the current route', () => {
+			setAuthState(null, false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTHENTICATION,
+			})
+
+			renderWithRoute(PATHS.AUTHENTICATION)
+
+			expect(
+				document.head.querySelector('link[rel="canonical"]'),
+			).toHaveAttribute(
+				'href',
+				window.location.origin + PATHS.AUTHENTICATION,
+			)
+		})
+
+		it('omits the canonical link on the not found page', () => {
+			setAuthState(null, false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.PAGE_NOT_FOUND,
+			})
+
+			renderWithRoute(PATHS.PAGE_NOT_FOUND)
+
+			expect(
+				document.head.querySelector('link[rel="canonical"]'),
+			).toBeNull()
 		})
 
 		it('renders NotFoundPage for unknown route', async () => {

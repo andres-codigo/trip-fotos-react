@@ -25,11 +25,11 @@ src/
   components/
     common/      LoadingFallback
     forms/       traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
-    layout/      header/, main-nav/ (with nav-menu/, hooks/, __tests__/)
+    layout/      footer/, header/, main-nav/ (with nav-menu/, hooks/, __tests__/)
     travellers/  TravellersList
     ui/           Atomic: alerts, button, card, dialog, form/*, spinner
   constants/     45 files — api/, auth/, config/, errors/, firebase/, redux/, test/, travellers/, ui/, validation/
-  pages/         authentication/, home/, messages/, page-not-found/, register/, travellers/
+  pages/         authentication/, home/, messages/, page-not-found/, privacy/, register/, travellers/
   services/      firebase/ (firebase.js)
   store/         store.js, storage.js (redux-persist), slices/authenticationSlice.js, slices/travellersSlice.js
   styles/        global.scss, setup/ (variables, mixins, typography, routing, pages)
@@ -150,5 +150,6 @@ Claude-specific automation lives in `.claude/` and is committed so every session
 - Do not mock the Firebase Realtime Database in integration tests
 - Do not add comments that describe what the code does — only why
 - Do not create new top-level `src/` folders without updating this file
+- Do not add a route to `PATHS` without adding it to the `rewrites` allow-list in `vercel.json` — unlisted paths return a real 404 in production
 - Do not re-inline domain-specific detail here — extend the relevant `.github/instructions/*.instructions.md` file instead
 - Do not let `README.md` go stale — see "Keeping README.md in sync" above

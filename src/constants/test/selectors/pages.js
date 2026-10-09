@@ -11,6 +11,7 @@ export const PAGE_SELECTORS = {
 	HOME_MAIN_CONTAINER: getByDataCyAlt('home-main-container'),
 	TRAVELLERS_MAIN_CONTAINER: getByDataCyAlt('travellers-main-container'),
 	MESSAGES_MAIN_CONTAINER: getByDataCyAlt('messages-main-container'),
+	PRIVACY_MAIN_CONTAINER: getByDataCyAlt('privacy-main-container'),
 	AUTHENTICATION_MAIN_CONTAINER: getByDataCyAlt(
 		'authentication-main-container',
 	),

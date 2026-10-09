@@ -1,0 +1,4 @@
+Contact: https://github.com/andres-codigo/trip-fotos-react/security/advisories/new
+Expires: 2027-10-09T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://trip-fotos-project-react.vercel.app/.well-known/security.txt

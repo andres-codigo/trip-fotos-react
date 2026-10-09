@@ -38,4 +38,11 @@ export const TEST_IDS = {
 	PAGE_NOT_FOUND: {
 		HOME_LINK: 'home-link',
 	},
+	PRIVACY: {
+		CONTAINER: 'privacy-main-container',
+	},
+	FOOTER: {
+		SITE_FOOTER: 'site-footer',
+		PRIVACY_LINK: 'footer-privacy-link',
+	},
 }

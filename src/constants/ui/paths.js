@@ -9,6 +9,7 @@ export const PATHS = Object.freeze({
 	TRAVELLERS: '/travellers',
 	REGISTER: '/register',
 	MESSAGES: '/messages',
+	PRIVACY: '/privacy',
 	PAGE_NOT_FOUND: '/404',
 	// TEST PATHS
 	NON_EXISTENT_PATH: '/cy-non-existent-route',

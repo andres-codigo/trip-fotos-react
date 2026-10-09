@@ -1,0 +1,12 @@
+# Trip Fotos
+
+> A React and Firebase app for discovering popular travel destinations shared by registered travellers. Most content sits behind an email and password sign-in.
+
+## Public pages
+
+- [Sign in or sign up](https://trip-fotos-project-react.vercel.app/authentication): Create an account or log in to browse travellers
+- [Privacy policy](https://trip-fotos-project-react.vercel.app/privacy): What data the app collects and how it is used
+
+## Source
+
+- [GitHub repository](https://github.com/andres-codigo/trip-fotos-react): Source code, setup instructions and documentation

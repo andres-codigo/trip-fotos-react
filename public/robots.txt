@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /messages
+Disallow: /register
+Allow: /
+
+Sitemap: https://trip-fotos-project-react.vercel.app/sitemap.xml
