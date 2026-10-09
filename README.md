@@ -644,6 +644,16 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 2. Deploy the project by linking your GitHub repository to Vercel.
 3. Configure environment variables in the Vercel dashboard.
 
+### Routing, Headers and Static Files
+
+`vercel.json` controls how the production deployment responds:
+
+- **Route allow-list** — only the app's known routes (`/authentication`, `/travellers`, `/register`, `/messages`, `/privacy`, `/404`) are rewritten to the single-page app. Any other path falls through to `public/404.html` with a real `404` status, so crawlers do not see soft 404s. **When you add a route to `PATHS`, add it to the `rewrites` source in `vercel.json` too**, or it will 404 on a hard refresh in production.
+- **Security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` and `Cross-Origin-Opener-Policy` are set on every response. An enforced `Content-Security-Policy` limits scripts to the site itself and network requests to Firebase. If you add a new third-party service (a CDN, an analytics provider or another Firebase product), add its origin to the matching directive in `vercel.json`, or the browser will block it. To trial a change safely, rename the header to `Content-Security-Policy-Report-Only` on a preview: violations are then logged to the console without blocking.
+- **Caching** — fingerprinted build output in `/assets/` is cached for a year as `immutable`; fonts are cached for a week.
+
+`public/` also holds `robots.txt`, `sitemap.xml`, `llms.txt`, `site.webmanifest` and `.well-known/security.txt`. These contain the production URL, so update them if the domain changes. `security.txt` has an `Expires` date that must be renewed before it passes.
+
 <a id="features"></a>
 
 ## ✨ Features
@@ -656,6 +666,9 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 - **Traveller Profiles**
   Registered travellers can add a description of their travel destination, choose where they travelled to, the number of days spent there, as well as upload photos. They are also able to send messages to other registered travellers against their profile.
+
+- **Privacy Policy**
+  A public `/privacy` page, linked from the site footer, explains what data the app collects (account, traveller registration, browser storage and cookieless Vercel analytics) and where it is stored.
 
 <a id="folder-structure"></a>
 
@@ -678,7 +691,7 @@ trip-fotos-react/
 ├── .vscode/                     # Shared VS Code editor settings
 ├── cypress/                    # Cypress tests
 ├── declarations/               # Breaking issue fix when using ESLint V9
-├── public/                     # Static assets
+├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
 ├── rules/                      # ESLint configuration rules
 ├── scripts/                    # Repo maintenance scripts (e.g. dependency-check output)
 ├── src/

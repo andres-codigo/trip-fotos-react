@@ -17,6 +17,7 @@ import { tryLogin } from '@/store/slices/authenticationSlice'
 import LoadingFallback from '@/components/common/LoadingFallback'
 
 import Header from '@/components/layout/header/Header'
+import Footer from '@/components/layout/footer/Footer'
 const Authentication = lazy(
 	() => import('@/pages/authentication/Authentication'),
 )
@@ -25,6 +26,7 @@ const Authentication = lazy(
 const Register = lazy(() => import('@/pages/register/Register'))
 const Travellers = lazy(() => import('@/pages/travellers/Travellers'))
 const Messages = lazy(() => import('@/pages/messages/Messages'))
+const Privacy = lazy(() => import('@/pages/privacy/Privacy'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
 function AppRoutes() {
@@ -54,7 +56,11 @@ function AppRoutes() {
 
 	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
 	useEffect(() => {
-		const publicPaths = [PATHS.AUTHENTICATION, PATHS.PAGE_NOT_FOUND]
+		const publicPaths = [
+			PATHS.AUTHENTICATION,
+			PATHS.PRIVACY,
+			PATHS.PAGE_NOT_FOUND,
+		]
 		const isPublic = publicPaths.includes(location.pathname)
 
 		if (!isLoggedIn && !isPublic) {
@@ -73,6 +79,12 @@ function AppRoutes() {
 
 	return (
 		<>
+			{location.pathname !== PATHS.PAGE_NOT_FOUND && (
+				<link
+					rel="canonical"
+					href={window.location.origin + location.pathname}
+				/>
+			)}
 			<Header />
 			<Suspense fallback={<LoadingFallback />}>
 				<Routes>
@@ -97,6 +109,10 @@ function AppRoutes() {
 						element={<Messages />}
 					/>
 					<Route
+						path={PATHS.PRIVACY}
+						element={<Privacy />}
+					/>
+					<Route
 						path={PATHS.PAGE_NOT_FOUND}
 						element={<PageNotFound />}
 					/>
@@ -111,6 +127,7 @@ function AppRoutes() {
 					/>
 				</Routes>
 			</Suspense>
+			<Footer />
 		</>
 	)
 }

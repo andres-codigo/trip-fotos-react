@@ -21,6 +21,11 @@ export const HEADER_SELECTORS = {
 	SITE_HEADER_TITLE_LINK: getByDataCy('site-header-title-link'),
 }
 
+export const FOOTER_SELECTORS = {
+	SITE_FOOTER: getByDataCy('site-footer'),
+	PRIVACY_LINK: getByDataCy('footer-privacy-link'),
+}
+
 export const TOP_NAVIGATION_SELECTORS = {
 	NAV_MENU_CONTAINER: getByDataCy('nav-menu-container'),
 	HAMBURGER_MENU: getByDataCy('hamburger-menu'),

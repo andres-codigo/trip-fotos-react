@@ -1,0 +1,19 @@
+@use '@/styles/setup/variables' as variables;
+
+.siteFooter {
+	display: flex;
+	justify-content: center;
+	padding: 1.5rem 1.25rem;
+	border-top: 1px solid variables.$color-alto;
+
+	.siteFooterLink {
+		color: variables.$color-pigment-indigo;
+		display: inline-block;
+		padding: 0.75rem;
+
+		&:focus-visible {
+			outline: 3px solid variables.$color-lavender-magenta;
+			outline-offset: 2px;
+		}
+	}
+}
