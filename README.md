@@ -7,6 +7,7 @@
 ## Contents
 
 - [📘 About This Project](#about-this-project)
+- [🚧 Status](#status)
 - [🧱 Stack](#stack)
 - [⚡ Quick Start](#quick-start)
 - [💾 Installation](#installation)
@@ -26,6 +27,29 @@
 ## 📘 About This Project
 
 This project is a UI and functional conversion from Vue to React and extends the original Udemy Vue - The Complete Guide (incl. Router & Composition API) course > 'Find a coach' project. It has been reimagined as "finding popular travel destinations" tied to a registered traveller.
+
+<a id="status"></a>
+
+## 🚧 Status
+
+Work in progress. The engineering foundation is in place, and the user-facing features are being added on top of it.
+
+### Done
+
+- **Authentication** — email/password sign-up and log-in with Firebase Authentication, session persistence and auto-logout
+- **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database
+- **Routing and pages** — home, authentication, travellers, register, messages, privacy policy and 404 pages
+- **Accessibility** — skip link, landmark structure and per-page titles, following an audit against [The Website Specification](https://specification.website)
+- **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request
+- **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers
+- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook and a `/verify` skill
+
+### In progress
+
+- **Traveller cards** — travellers already load from the Realtime Database; next up is the card design for displaying each traveller's destination, days spent and photos
+- **Photo uploads** — Cloud Storage upload logic is built and tested in the store; the file selection, drag-and-drop and preview components are being built on top of it ([#99](https://github.com/andres-codigo/trip-fotos-react/issues/99), [#100](https://github.com/andres-codigo/trip-fotos-react/issues/100), [#101](https://github.com/andres-codigo/trip-fotos-react/issues/101))
+- **Messaging** — the route and page are in place, ready for sending and reading messages between travellers
+- **Admin tools** — admin identity is configured via `VITE_ADMIN_ID`, laying the groundwork for admin-only actions such as removing travellers
 
 <a id="stack"></a>
 
@@ -658,14 +682,16 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 ## ✨ Features
 
+See [🚧 Status](#status) for what is live and what is being built.
+
 - **User Registration and Authentication**
   Users can sign up and log in using Firebase Authentication.
 
-- **Admin Access**
-  Assign admin rights to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`. This allows the admin user to delete other travellers when logged in.
-
 - **Traveller Profiles**
-  Registered travellers can add a description of their travel destination, choose where they travelled to, the number of days spent there, as well as upload photos. They are also able to send messages to other registered travellers against their profile.
+  Registered travellers can describe their travel destination, choose where they travelled to and record the number of days spent there. Photo uploads and traveller-to-traveller messaging are in progress.
+
+- **Admin Access** _(in progress)_
+  Admin rights are assigned to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`. This will allow the admin user to remove other travellers when logged in.
 
 - **Privacy Policy**
   A public `/privacy` page, linked from the site footer, explains what data the app collects (account, traveller registration, browser storage and cookieless Vercel analytics) and where it is stored.
