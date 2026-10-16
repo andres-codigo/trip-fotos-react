@@ -8,6 +8,13 @@
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 	"remoteUser": "vscode",
+	"forwardPorts": [3000],
+	"portsAttributes": {
+		"3000": { "label": "Vite dev server" }
+	},
+	"otherPortsAttributes": {
+		"onAutoForward": "silent"
+	},
 	"containerEnv": {
 		"GIT_CONFIG_GLOBAL": "/home/vscode/.config/git/config"
 	},
@@ -22,6 +29,7 @@
 				"ms-python.python"
 			],
 			"settings": {
+				"remote.restoreForwardedPorts": false,
 				"editor.formatOnSave": true,
 				"editor.defaultFormatter": "esbenp.prettier-vscode",
 				"editor.codeActionsOnSave": {
