@@ -2,7 +2,7 @@
 name: verify
 description: Run the project's local quality gates (ESLint, Vitest, Cypress component tests, production build) and report a pass/fail summary. Pass `e2e` to also run the Cypress E2E suite against a local dev server. Use before committing, before opening a pull request, or when asked to check that a change is safe.
 argument-hint: '[e2e]'
-allowed-tools: Bash(npm run lint), Bash(npm run vitest:run:fast), Bash(npm run cy:run:ct), Bash(npm run build), Bash(git status *), Bash(git diff *)
+allowed-tools: Bash(npm run lint), Bash(npm run lint *), Bash(npm run vitest:run:fast), Bash(npm run vitest:run:fast *), Bash(npm run cy:run:ct), Bash(npm run cy:run:ct *), Bash(npm run build), Bash(npm run build *), Bash(tail *), Bash(grep *), Bash(git status *), Bash(git diff *)
 ---
 
 # Verify
@@ -19,6 +19,7 @@ Arguments: `$ARGUMENTS`
     2. `npm run vitest:run:fast`
     3. `npm run cy:run:ct`
     4. `npm run build`
+    - Keep output out of the conversation: redirect each gate to a log in the scratchpad (`> <scratchpad>/<gate>.log 2>&1`), note its exit code, and read only the tail of a passing log (pass counts) and the failing section of a failing one (`grep -n -A 15` on `FAIL`, `✖`, `error`)
 3. Only if the arguments include `e2e`, run `node .claude/skills/verify/run-e2e.mjs` with a timeout of at least 10 minutes. It reuses a dev server already on port 3000 or starts one over HTTP (as CI does), runs `cypress run --e2e`, and always stops any server it started.
     - These tests log in and read/write the live Firebase project using the credentials in `.env`, which is why they are opt-in and the command asks for approval.
     - Never run `npm run cy:run:e2e` directly from this skill — without a server it fails on connection errors, not real bugs.

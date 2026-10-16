@@ -20,6 +20,7 @@ Arguments: `$ARGUMENTS` (a GitHub issue number)
     - Read the Vue files listed under `## Vue source` (Vue repo path: `$VUE_REPO_PATH`, `/workspaces/trip-fotos-vue`, or `/tmp/trip-fotos-vue` — clone it shallowly there if none exists).
     - Read the matching section of `.claude/plans/parity-gap-report.md`.
     - Read the `.github/instructions/*.instructions.md` files for every area you will touch.
+    - Read large files (`README.md`, workflows, the gap report) by section — `grep -n` for the heading, then read just that range.
 3. **Build it**, using the scaffolding agents rather than writing structure by hand:
     - new component → `create-component` agent
     - new hook → `create-hook` agent
@@ -30,8 +31,9 @@ Arguments: `$ARGUMENTS` (a GitHub issue number)
     - New route → add to `PATHS` **and** the `rewrites` allow-list in `vercel.json`
     - New `src/` subfolder, feature or script → update the matching `README.md` section (Folder Structure, Features, Status)
     - Never mock the Firebase Realtime Database in integration tests
-5. **Verify**: run the `/verify` skill.
-    - On failure, fix and run `/verify` again.
+5. **Verify**: run the `/verify` skill once the item is complete — not after every edit.
+    - While building and fixing, check only what you touched: `npx vitest run <test file> --reporter=dot` and `npx cypress run --component --spec <spec file> 2>&1 | tail -30`.
+    - On a `/verify` failure, fix it using those targeted runs, then run `/verify` once more.
     - If it still fails after the **second** fix attempt, run `git stash push -u -m "parity #$ARGUMENTS"` so the tree is clean, label the issue `needs-human` (create the label if it is missing), comment the failing gate and first error on the issue, set the item to `needs-human` in `.claude/parity/state.json`, and stop.
 6. **Commit** exactly once:
     - Tick the acceptance-criteria boxes in the issue body that are now met (`gh issue edit --body-file`).

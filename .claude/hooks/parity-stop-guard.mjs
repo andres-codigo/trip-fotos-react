@@ -9,6 +9,9 @@ const statePath = path.join(projectDir, '.claude', 'parity', 'state.json')
 // Only active while /parity-run owns the session; every other session stops normally
 if (!existsSync(statePath)) process.exit(0)
 
+// run-fresh.sh deliberately ends each session after one item
+if (process.env.PARITY_FRESH_SESSIONS) process.exit(0)
+
 let state
 try {
 	state = JSON.parse(readFileSync(statePath, 'utf8'))

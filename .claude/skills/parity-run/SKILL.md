@@ -1,7 +1,7 @@
 ---
 name: parity-run
 description: Run the whole Vue to React parity programme unattended — audit, backlog sync, one commit per issue on feature/vue-parity, final checks, and a single PR for review. Resumable; re-run it to pick up where it stopped.
-argument-hint: '[--skip-audit]'
+argument-hint: '[--skip-audit] [--one]'
 ---
 
 # Parity run
@@ -22,9 +22,10 @@ The plan this executes is `.claude/plans/vue-parity-plan.md`. The user only revi
 5. **Implement**: for each queue item in order whose state is `pending`, run `/implement-item <issue>`.
     - Skip items whose dependencies are `needs-human`; mark them `needs-human` with reason "blocked by #<n>".
     - The `Stop` hook (`.claude/hooks/parity-stop-guard.mjs`) will send you back here if you try to finish while items are still pending.
+    - With `--one`, implement only the next pending item, then stop without running steps 6–7. `run-fresh.sh` uses this to give each item a fresh session.
 6. **Final checks**
     1. Run `/verify e2e`. Fix regressions as a separate `fix:` commit.
-    2. Run `/code-review high --fix` against `origin/main...HEAD`; commit any fixes as `refactor: apply review fixes`.
+    2. Run `/code-review medium --fix` against `origin/main...HEAD` (medium, because each commit already passed `/verify` and the full diff is large); commit any fixes as `refactor: apply review fixes`.
     3. Check `README.md` Features, Status and Folder Structure against what was built; commit any updates as `docs: sync README with parity work`.
 7. **PR**
     - `git push -u origin feature/vue-parity`
@@ -51,6 +52,12 @@ Unattended — the extra `--allowedTools` cover the steps that normally ask, sco
 claude -p "/parity-run" \
   --permission-mode acceptEdits \
   --allowedTools "Bash(git push -u origin feature/vue-parity)" "Bash(gh pr create *)" "Bash(node .claude/skills/verify/run-e2e.mjs*)" "Bash(gh issue *)" "Bash(gh project *)" "Bash(gh api graphql *)" "Bash(git checkout *)" "Bash(git switch *)" "Bash(git fetch *)" "Bash(git stash *)" "Bash(git add *)" "Bash(git commit *)" "Bash(test -f .env)"
+```
+
+Cheapest unattended option — one fresh session per item, so no item carries earlier items' context; it stops if an item makes no progress:
+
+```bash
+.claude/skills/parity-run/run-fresh.sh
 ```
 
 Pushing to `main` and merging PRs are denied in `.claude/settings.json`, so neither mode can bypass review.

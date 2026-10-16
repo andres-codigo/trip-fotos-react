@@ -402,7 +402,7 @@ Claude Code shares the Copilot guidance above rather than keeping its own copy, 
 
 #### Workflow Agents
 
-Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is a thin wrapper that delegates to the matching `.github/agents/*.agent.md` workflow:
+Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is a thin wrapper that delegates to the matching `.github/agents/*.agent.md` workflow, and runs on Sonnet (`model: sonnet`) to keep mechanical scaffolding and auditing cheap:
 
 - **create-component**: Scaffold new components with full structure and tests.
 - **create-page**: Scaffold new pages with route integration and tests.
@@ -423,7 +423,7 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 - **`/verify e2e`**: additionally runs the Cypress E2E suite via `.claude/skills/verify/run-e2e.mjs`, which reuses a dev server on port 3000 or starts one over HTTP (as CI does) and stops it afterwards. Opt-in and approval-gated, because the tests use the live Firebase project and `.env` credentials.
 - **`/backlog-sync [--apply]`** (`.claude/skills/backlog-sync/`): reconciles the parity gap report with the [project backlog](https://github.com/users/andres-codigo/projects/2/views/1) — updates stale issues, creates missing ones under a `Vue parity` epic, and writes the work queue. Dry run unless `--apply` is passed. Needs `gh auth refresh -s read:project,project`.
 - **`/implement-item <issue>`** (`.claude/skills/implement-item/`): implements one backlog issue with the scaffolding agents, passes `/verify`, and makes one commit referencing the issue.
-- **`/parity-run`** (`.claude/skills/parity-run/`): runs the whole programme in `.claude/plans/vue-parity-plan.md` — audit, backlog sync, one commit per issue on `feature/vue-parity`, `/verify e2e`, and a single PR for review. Resumable.
+- **`/parity-run`** (`.claude/skills/parity-run/`): runs the whole programme in `.claude/plans/vue-parity-plan.md` — audit, backlog sync, one commit per issue on `feature/vue-parity`, `/verify e2e`, and a single PR for review. Resumable. For the lowest token use, run `.claude/skills/parity-run/run-fresh.sh`, which gives each item its own fresh session.
 
 ---
 
