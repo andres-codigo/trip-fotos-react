@@ -18,10 +18,11 @@ The plan this executes is `.claude/plans/vue-parity-plan.md`. The user only revi
     - `.env` exists (do not read it — just `test -f .env`); E2E needs it.
 2. **Branch**: switch to `feature/vue-parity`, creating it from `origin/main` if it does not exist (`git fetch origin` first). If it exists, stay on it — this is a resume.
 3. **Audit** (skip if `--skip-audit` or the report is newer than the last commit on `main`): run the `parity-auditor` agent. Commit the report on its own: `docs: add Vue parity gap report`.
-4. **Backlog**: if `.claude/parity/state.json` is missing, run `/backlog-sync --apply`. If it exists, re-use its queue (resume).
+4. **Backlog**: if `.claude/parity/state.json` is missing, run `/backlog-sync --apply`. If it exists, re-use its queue (resume). Either way, set its `status` to `running` so the `Stop` hook is active; a status of `awaiting-review` means the user has approved the previous item.
 5. **Implement**: for each queue item in order whose state is `pending`, run `/implement-item <issue>`.
     - Skip items whose dependencies are `needs-human`; mark them `needs-human` with reason "blocked by #<n>".
     - The `Stop` hook (`.claude/hooks/parity-stop-guard.mjs`) will send you back here if you try to finish while items are still pending.
+    - With `reviewEachItem: true` in the state file, `/implement-item` stops after each commit for human review; reply with that item's one-line report and the commit hash, and do not continue until the user says so.
     - With `--one`, implement only the next pending item, then stop without running steps 6–7. `run-fresh.sh` uses this to give each item a fresh session.
 6. **Final checks**
     1. Run `/verify e2e`. Fix regressions as a separate `fix:` commit.

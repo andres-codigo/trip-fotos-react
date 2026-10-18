@@ -31,6 +31,8 @@ Arguments: `$ARGUMENTS` (a GitHub issue number)
     - New route → add to `PATHS` **and** the `rewrites` allow-list in `vercel.json`
     - New `src/` subfolder, feature or script → update the matching `README.md` section (Folder Structure, Features, Status)
     - Never mock the Firebase Realtime Database in integration tests
+    - Follow the React repo's conventions, not the Vue structure; where the issue's `React target` conflicts with an instructions file, the instructions file wins
+    - New folder category, pattern or convention → update the matching `.github/instructions/*.instructions.md`, the `.github/agents/*.agent.md` workflow if scaffolding output should change, and the `CLAUDE.md` `src/` tree, in the same commit
 5. **Verify**: run the `/verify` skill once the item is complete — not after every edit.
     - While building and fixing, check only what you touched: `npx vitest run <test file> --reporter=dot` and `npx cypress run --component --spec <spec file> 2>&1 | tail -30`.
     - On a `/verify` failure, fix it using those targeted runs, then run `/verify` once more.
@@ -49,6 +51,7 @@ Arguments: `$ARGUMENTS` (a GitHub issue number)
         ```
 
     - Set the item to `done` in `.claude/parity/state.json`.
+    - If `reviewEachItem` is `true` in the state file, also set `status` to `awaiting-review` (this releases the `Stop` hook) and stop so the user can review the commit before the next item.
 
 ## Report
 
