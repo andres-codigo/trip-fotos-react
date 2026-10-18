@@ -27,7 +27,7 @@ src/
     forms/       traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
     layout/      footer/, header/, main-nav/, skip-link/ (with nav-menu/, hooks/, __tests__/)
     travellers/  TravellersList
-    ui/           Atomic: alerts, button, card, dialog, form/*, spinner
+    ui/           Atomic: alerts, badge, button, card, dialog, form/*, image, spinner
   constants/     45 files — api/, auth/, config/, errors/, firebase/, redux/, test/, travellers/, ui/, validation/
   pages/         authentication/, home/, messages/, page-not-found/, privacy/, register/, travellers/
   services/      firebase/ (firebase.js)

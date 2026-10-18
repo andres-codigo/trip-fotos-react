@@ -1,3 +1,7 @@
+export const BADGE = Object.freeze({
+	ID: 'base-badge',
+})
+
 export const BUTTON = Object.freeze({
 	ID: 'test-button',
 	LINK_ID: 'test-link',
@@ -21,6 +25,14 @@ export const DIALOG = Object.freeze({
 	BUTTON: 'dialog-button',
 	ROLE_DIALOG: 'dialog',
 	ROLE_ALERTDIALOG: 'alertdialog',
+})
+
+export const IMAGE = Object.freeze({
+	ID: 'base-image',
+	BUTTON: 'base-image-button',
+	THUMBNAIL: 'base-image-thumbnail',
+	FULL: 'base-image-full',
+	FALLBACK: 'base-image-fallback',
 })
 
 export const INPUT = Object.freeze({

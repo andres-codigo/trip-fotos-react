@@ -5,12 +5,20 @@ import {
 	getByDataCyError,
 } from '../../../testUtils/cypress/selectors'
 
+import { BADGE, IMAGE } from '../ui-constants'
+
 /////
 /// Common Component Selectors
 /////
 export const COMMON_SELECTORS = {
 	BASE_CARD: getByDataCy('base-card'),
 	BASE_SPINNER: getByDataCy('base-spinner'),
+	BASE_BADGE: getByDataCy(BADGE.ID),
+	BASE_IMAGE: getByDataCy(IMAGE.ID),
+	BASE_IMAGE_BUTTON: getByDataCy(IMAGE.BUTTON),
+	BASE_IMAGE_THUMBNAIL: getByDataCy(IMAGE.THUMBNAIL),
+	BASE_IMAGE_FULL: getByDataCy(IMAGE.FULL),
+	BASE_IMAGE_FALLBACK: getByDataCy(IMAGE.FALLBACK),
 }
 
 /////

@@ -1,0 +1,82 @@
+@use '@/styles/setup/variables' as variables;
+@use '@/styles/setup/mixins/helpers' as helpers;
+
+.image-preview {
+	margin: 1rem 2.5%;
+	overflow: hidden;
+	position: relative;
+	width: 28%;
+
+	img {
+		cursor: pointer;
+		display: block;
+		height: 100%;
+		object-fit: scale-down;
+		width: 100%;
+	}
+}
+
+.trigger {
+	background: none;
+	border: 0;
+	cursor: pointer;
+	display: block;
+	padding: 0;
+	width: 100%;
+
+	&:focus-visible {
+		outline: 3px solid variables.$color-lavender-magenta;
+		outline-offset: 2px;
+	}
+}
+
+.fallback {
+	color: variables.$color-mine-shaft;
+	display: block;
+	padding: 1rem;
+	text-align: center;
+}
+
+@include helpers.dialog-min-max-width-image-resizing(
+	0px,
+	410px,
+	250px,
+	'portrait'
+);
+@include helpers.dialog-min-max-width-image-resizing(
+	411px,
+	667px,
+	300px,
+	'portrait'
+);
+@include helpers.dialog-min-max-width-image-resizing(
+	668px,
+	2000px,
+	350px,
+	'portrait'
+);
+@include helpers.dialog-min-max-width-image-resizing(
+	0px,
+	2048px,
+	90%,
+	'landscape'
+);
+
+@media only screen and (max-width: 480px) {
+	.image-preview {
+		margin: 0.5rem 2.5%;
+		width: 45%;
+	}
+}
+
+@media only screen and (max-height: 430px) {
+	.image {
+		img.portrait {
+			width: 120px;
+		}
+
+		img.landscape {
+			height: 180px;
+		}
+	}
+}

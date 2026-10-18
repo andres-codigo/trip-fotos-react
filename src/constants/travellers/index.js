@@ -5,6 +5,8 @@ export const TRAVELLER_REGISTRATION_CITIES = [
 	{ id: 'canberra', label: 'Canberra, Australia' },
 ]
 
+export const TRAVELLER_AREAS = TRAVELLER_REGISTRATION_CITIES.map(({ id }) => id)
+
 export const TRAVELLER_REGISTRATION_FIELDS = Object.freeze({
 	FIRST_NAME: 'firstName',
 	LAST_NAME: 'lastName',

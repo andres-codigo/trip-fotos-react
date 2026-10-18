@@ -11,6 +11,9 @@ export const GLOBAL = Object.freeze({
 	// IMAGE UPLOAD
 	LOADING_IMAGE: 'loading',
 
+	// IMAGE
+	IMAGE_UNAVAILABLE: 'Image unavailable',
+
 	// SPINNER
 	LOADING_SPINNER_ALT: 'Loading content, please wait...',
 
