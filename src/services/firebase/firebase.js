@@ -11,9 +11,9 @@ const firebaseConfig = {
 	storageBucket: FIREBASE.STORAGE_BUCKET,
 	messagingSenderId: FIREBASE.MESSAGING_SENDER_ID,
 	appId: FIREBASE.APP_ID,
-	measurementId: FIREBASE.MEASUREMENT_ID,
 }
 
 export const firebaseApp = initializeApp(firebaseConfig)
 
-export const firebaseAuth = getAuth(firebaseApp)
+// Lazy so importing the store doesn't throw auth/invalid-api-key where no Firebase config is set (e.g. CI)
+export const getFirebaseAuth = () => getAuth(firebaseApp)

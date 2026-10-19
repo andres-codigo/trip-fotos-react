@@ -335,7 +335,6 @@ VITE_FIREBASE_PROJECT_ID='' # firebaseConfig > projectId
 VITE_FIREBASE_STORAGE_BUCKET='' # firebaseConfig > storageBucket
 VITE_FIREBASE_MESSAGING_SENDER_ID='' # firebaseConfig > messagingSenderId
 VITE_FIREBASE_APP_ID='' # firebaseConfig > appId
-VITE_FIREBASE_MEASUREMENT_ID='' # firebaseConfig > measurementId
 
 # CYPRESS TESTING
 CYPRESS_USER_EMAIL=''
@@ -646,7 +645,7 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 ---
 
-> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly.
+> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly. The Vitest, component and E2E workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` secrets; E2E also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
 
 <a id="build"></a>
 

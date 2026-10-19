@@ -19,7 +19,6 @@ vi.mock('@/constants/firebase', () => ({
 		STORAGE_BUCKET: 'test-storage-bucket',
 		MESSAGING_SENDER_ID: 'test-messaging-sender-id',
 		APP_ID: 'test-app-id',
-		MEASUREMENT_ID: 'test-measurement-id',
 	},
 }))
 
@@ -31,6 +30,7 @@ describe('Firebase Configuration', () => {
 		// not call history for the "calls initializeApp only once" test
 		mockApp = { name: '[DEFAULT]' }
 		vi.mocked(initializeApp).mockReturnValue(mockApp)
+		vi.mocked(getAuth).mockClear()
 	})
 
 	afterEach(() => {
@@ -39,12 +39,18 @@ describe('Firebase Configuration', () => {
 	})
 
 	describe('Initialisation tests', () => {
-		it('exports the Auth instance for the initialised app', async () => {
-			const { firebaseAuth } =
+		it('does not initialise Auth on import', async () => {
+			await import('@/services/firebase/firebase.js')
+
+			expect(getAuth).not.toHaveBeenCalled()
+		})
+
+		it('returns the Auth instance for the initialised app', async () => {
+			const { getFirebaseAuth } =
 				await import('@/services/firebase/firebase.js')
 
+			expect(getFirebaseAuth()).toEqual({ name: 'mock-auth' })
 			expect(getAuth).toHaveBeenCalledWith(mockApp)
-			expect(firebaseAuth).toEqual({ name: 'mock-auth' })
 		})
 
 		it('initialises Firebase app with correct configuration', async () => {
@@ -59,7 +65,6 @@ describe('Firebase Configuration', () => {
 				storageBucket: 'test-storage-bucket',
 				messagingSenderId: 'test-messaging-sender-id',
 				appId: 'test-app-id',
-				measurementId: 'test-measurement-id',
 			})
 
 			expect(firebaseApp).toBe(mockApp)

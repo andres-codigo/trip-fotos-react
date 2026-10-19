@@ -5,7 +5,7 @@ import {
 	signOut,
 } from 'firebase/auth'
 
-import { firebaseAuth } from '@/services/firebase/firebase'
+import { getFirebaseAuth } from '@/services/firebase/firebase'
 
 import { AUTHENTICATION_ACTION_TYPES } from '@/constants/redux'
 import { API_DATABASE } from '@/constants/api'
@@ -25,7 +25,7 @@ export const login = createAsyncThunk(
 
 		try {
 			const { user } = await authenticate(
-				firebaseAuth,
+				getFirebaseAuth(),
 				payload.email,
 				payload.password,
 			)
@@ -124,7 +124,7 @@ export const logout = createAsyncThunk(
 
 			dispatch(authActions.clearUser())
 
-			await signOut(firebaseAuth)
+			await signOut(getFirebaseAuth())
 		} catch (error) {
 			return rejectWithValue(error.message)
 		}

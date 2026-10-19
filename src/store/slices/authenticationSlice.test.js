@@ -31,7 +31,6 @@ import {
 	signInWithEmailAndPassword,
 	signOut,
 } from 'firebase/auth'
-import { firebaseAuth } from '@/services/firebase/firebase'
 
 vi.mock('firebase/auth', () => ({
 	createUserWithEmailAndPassword: vi.fn(),
@@ -39,9 +38,11 @@ vi.mock('firebase/auth', () => ({
 	signOut: vi.fn(() => Promise.resolve()),
 }))
 
+const firebaseAuth = vi.hoisted(() => ({ name: 'mock-auth' }))
+
 vi.mock('@/services/firebase/firebase', () => ({
 	firebaseApp: {},
-	firebaseAuth: { name: 'mock-auth' },
+	getFirebaseAuth: () => firebaseAuth,
 }))
 
 /**
