@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
+import {
+	createSlice,
+	createAsyncThunk,
+	createSelector,
+	isAnyOf,
+} from '@reduxjs/toolkit'
 
 import { MESSAGES_ACTION_TYPES } from '@/constants/redux'
 import {
@@ -185,7 +190,11 @@ const messagesSlice = createSlice({
 			})
 
 			// LOGOUT async thunk handlers
-			.addCase(logout.fulfilled, () => initialState)
+			// The user is cleared before signOut can fail, so private messages must go either way
+			.addMatcher(
+				isAnyOf(logout.fulfilled, logout.rejected),
+				() => initialState,
+			)
 	},
 })
 

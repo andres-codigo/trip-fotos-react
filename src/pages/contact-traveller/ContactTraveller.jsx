@@ -99,7 +99,9 @@ const ContactTraveller = () => {
 					data-cy={CONTACT_TRAVELLER.TITLE}>
 					{title}
 				</h1>
+				{/* The form seeds its email once, so remount when the session email arrives after rehydration */}
 				<ContactTravellerForm
+					key={userEmail ?? ''}
 					userEmail={userEmail ?? ''}
 					isLoading={isLoading}
 					onSubmit={handleSubmit}

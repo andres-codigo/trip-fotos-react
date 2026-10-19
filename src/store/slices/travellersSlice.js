@@ -88,7 +88,8 @@ export const registerTraveller = createAsyncThunk(
 				const storage = getStorage(firebaseApp)
 				const storageRef = ref(
 					storage,
-					`/images/${userId}/${image.name}`,
+					// Distinct files can share a name, and the same path would overwrite the earlier upload
+					`/images/${userId}/${crypto.randomUUID()}-${image.name}`,
 				)
 
 				const metadata = {
@@ -394,7 +395,8 @@ export const deleteTraveller = createAsyncThunk(
 			)
 
 			await dispatch(deleteTravellerMessages(travellerId)).unwrap()
-			await dispatch(loadTravellers({ forceRefresh: true })).unwrap()
+			// The record is already gone, so a failed refresh must not report the delete as failed
+			await dispatch(loadTravellers({ forceRefresh: true }))
 
 			return travellerId
 		} catch (error) {

@@ -11,7 +11,17 @@
 				".read": "auth != null && (auth.uid === $travellerId || auth.token.admin === true)",
 				".write": "auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true)",
 				"$messageId": {
-					".write": "(!data.exists() && newData.exists()) || (auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true))"
+					".write": "(!data.exists() && newData.exists()) || (auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true))",
+					".validate": "root.child('travellers/' + $travellerId).exists() && newData.hasChildren(['userEmail', 'message'])",
+					"userEmail": {
+						".validate": "newData.isString() && newData.val().length <= 254"
+					},
+					"message": {
+						".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 5000"
+					},
+					"$other": {
+						".validate": false
+					}
 				}
 			}
 		}
