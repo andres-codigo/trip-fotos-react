@@ -2,7 +2,7 @@
 name: implement-item
 description: Implement one Vue parity backlog issue end to end on the current branch — read the issue and the Vue source, build it with the scaffolding agents, keep routes and README in sync, pass /verify, and make exactly one commit that references the issue. Use for a single issue; /parity-run calls it for each queued issue.
 argument-hint: '<issue-number>'
-allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, Bash(gh issue view *), Bash(gh issue edit *), Bash(gh issue comment *), Bash(git status *), Bash(git diff *), Bash(git log *), Bash(git add *), Bash(git commit *), Bash(npm run lint), Bash(npm run lint:fix), Bash(npm run vitest:run:fast), Bash(npm run cy:run:ct), Bash(npm run build), Bash(npx vitest *), Bash(npx cypress run --component *)
+allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, Bash(.claude/skills/implement-item/set-board-status.sh *), Bash(gh issue view *), Bash(gh issue edit *), Bash(gh issue comment *), Bash(git status *), Bash(git diff *), Bash(git log *), Bash(git add *), Bash(git commit *), Bash(npm run lint), Bash(npm run lint:fix), Bash(npm run vitest:run:fast), Bash(npm run cy:run:ct), Bash(npm run build), Bash(npx vitest *), Bash(npx cypress run --component *)
 ---
 
 # Implement item
@@ -16,6 +16,7 @@ Arguments: `$ARGUMENTS` (a GitHub issue number)
     - The current branch must not be `main`.
     - `gh issue view $ARGUMENTS --json number,title,body,labels,state`. If closed, report "already done" and stop.
     - Every `Depends on` issue must be `done` in `.claude/parity/state.json` (or closed). If not, stop and report which.
+    - Move the issue to `in progress` on the board: `.claude/skills/implement-item/set-board-status.sh $ARGUMENTS`. Leave it there after committing; the final PR's merge moves it to `done`. Never set `done` by hand.
 2. **Understand the behaviour**
     - Read the Vue files listed under `## Vue source` (Vue repo path: `$VUE_REPO_PATH`, `/workspaces/trip-fotos-vue`, or `/tmp/trip-fotos-vue` — clone it shallowly there if none exists).
     - Read the matching section of `.claude/plans/parity-gap-report.md`.
