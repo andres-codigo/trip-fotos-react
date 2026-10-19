@@ -5,7 +5,7 @@ import {
 	getByDataCyError,
 } from '../../../testUtils/cypress/selectors'
 
-import { BADGE, FILE_PREVIEW, IMAGE } from '../ui-constants'
+import { BADGE, FILE_DROP, FILE_PREVIEW, IMAGE } from '../ui-constants'
 
 /////
 /// Common Component Selectors
@@ -75,6 +75,10 @@ export const AUTHENTICATION_FORM_SELECTORS = {
 }
 
 export const FILE_UPLOADER_SELECTORS = {
+	FILE_DROP: getByDataCy(FILE_DROP.ID),
+	FILE_DROP_INPUT: getByDataCy(FILE_DROP.INPUT),
+	FILE_DROP_LIST: getByDataCy(FILE_DROP.LIST),
+	FILE_DROP_ERRORS: getByDataCy(FILE_DROP.ERRORS),
 	FILE_PREVIEW: getByDataCy(FILE_PREVIEW.ID),
 	FILE_PREVIEW_REMOVE: getByDataCy(FILE_PREVIEW.REMOVE_BUTTON),
 	FILE_PREVIEW_THUMBNAIL: getByDataCy(FILE_PREVIEW.THUMBNAIL),

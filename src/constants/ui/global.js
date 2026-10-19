@@ -21,6 +21,15 @@ export const GLOBAL = Object.freeze({
 		error: 'Error',
 	}),
 	REMOVE_FILE_LABEL: (name) => `Remove ${name}`,
+	FILE_DROP_TEXT: Object.freeze({
+		ACTIVE: 'Drop your files here',
+		ACTIVE_HINT: 'to add them',
+		IDLE: 'Drag and drop your files here',
+		IDLE_HINT_PREFIX: 'or',
+		IDLE_HINT_ACTION: 'click here',
+		IDLE_HINT_SUFFIX: 'to select your files',
+	}),
+	FILE_LIST_LABEL: 'Selected files',
 
 	// IMAGE
 	IMAGE_UNAVAILABLE: 'Image unavailable',

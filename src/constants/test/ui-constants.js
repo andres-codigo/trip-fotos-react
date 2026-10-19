@@ -27,6 +27,13 @@ export const DIALOG = Object.freeze({
 	ROLE_ALERTDIALOG: 'alertdialog',
 })
 
+export const FILE_DROP = Object.freeze({
+	ID: 'file-drop',
+	INPUT: 'file-drop-input',
+	LIST: 'file-drop-list',
+	ERRORS: 'file-drop-errors',
+})
+
 export const FILE_PREVIEW = Object.freeze({
 	ID: 'file-preview',
 	REMOVE_BUTTON: 'file-preview-remove',
