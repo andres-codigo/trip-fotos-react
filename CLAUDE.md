@@ -31,7 +31,7 @@ src/
   constants/     45 files — api/, auth/, config/, errors/, firebase/, redux/, test/, travellers/, ui/, validation/
   pages/         authentication/, home/, messages/, page-not-found/, privacy/, register/, travellers/
   services/      firebase/ (firebase.js)
-  store/         store.js, storage.js (redux-persist), slices/authenticationSlice.js, slices/travellersSlice.js
+  store/         store.js, storage.js (redux-persist), slices/authenticationSlice.js, slices/travellersSlice.js, slices/messagesSlice.js
   styles/        global.scss, setup/ (variables, mixins, typography, routing, pages)
   testUtils/     cypress/ (TestLocationDisplay, selectors), vitest/ (polyfills, mocks, setup)
   utils/         errorHandler/, form/, formatCity/, getFirebaseAuthErrorMessage/, useViewport/, validation/

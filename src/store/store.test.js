@@ -23,9 +23,14 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
  */
 
 // Mock redux-persist before importing store
+const persistConfigs = vi.hoisted(() => [])
+
 vi.mock('redux-persist', () => ({
 	persistStore: vi.fn(() => ({ dispatch: vi.fn() })),
-	persistReducer: vi.fn((config, reducer) => reducer),
+	persistReducer: vi.fn((config, reducer) => {
+		persistConfigs.push(config)
+		return reducer
+	}),
 }))
 
 vi.mock('redux-persist/lib/storage', () => ({
@@ -44,6 +49,7 @@ describe('Store Configuration', () => {
 
 		expect(state).toHaveProperty('authentication')
 		expect(state).toHaveProperty('travellers')
+		expect(state).toHaveProperty('messages')
 	})
 
 	it('should configure persistor', () => {
@@ -79,5 +85,14 @@ describe('Store Configuration', () => {
 	it('should have travellers slice in store', () => {
 		const state = store.getState()
 		expect(state.travellers).toBeDefined()
+	})
+
+	it('should have messages slice in store', () => {
+		const state = store.getState()
+		expect(state.messages).toBeDefined()
+	})
+
+	it('should exclude messages from persistence', () => {
+		expect(persistConfigs[0].blacklist).toContain('messages')
 	})
 })
