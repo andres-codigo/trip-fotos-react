@@ -44,6 +44,10 @@ describe('App Routing', () => {
 		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
 
 		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+		// The Auth SDK makes a follow-up call before the session is stored, so a reload any sooner logs the user out
+		cy.window({ timeout: REQUEST_TIMEOUT }).should((win) => {
+			expect(win.localStorage.getItem('token')).to.be.a('string')
+		})
 		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)
 
 		cy.url().should('include', PATHS.MESSAGES)
