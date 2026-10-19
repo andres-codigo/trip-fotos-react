@@ -135,3 +135,19 @@ export const TRAVELLER_FILTER = Object.freeze({
 	OPTION: 'traveller-filter-option',
 	CHECKBOX: 'traveller-filter-checkbox',
 })
+
+export const MESSAGES_PAGE = Object.freeze({
+	SPINNER: 'messages-spinner',
+	LIST: 'messages-list',
+	EMPTY: 'messages-empty',
+	ERROR_DIALOG: 'messages-error-dialog',
+})
+
+export const MESSAGE_ITEM = Object.freeze({
+	ROOT: 'message-item',
+	EMAIL: 'message-item-email',
+	TEXT: 'message-item-text',
+	DELETE: 'message-item-delete',
+	SPINNER: 'message-item-spinner',
+	ERROR_DIALOG: 'message-item-error-dialog',
+})

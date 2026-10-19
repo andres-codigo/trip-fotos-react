@@ -26,6 +26,7 @@ src/
     common/      LoadingFallback
     forms/       contact-traveller/, file-uploader/, traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
     layout/      footer/, header/, main-nav/, skip-link/ (with nav-menu/, hooks/, __tests__/)
+    messages/    message-item/
     travellers/  travellers-list/, traveller-item/, traveller-filter/
     ui/           Atomic: alerts, badge, button, card, dialog, form/*, image, spinner
   constants/     45 files — api/, auth/, config/, errors/, firebase/, redux/, test/, travellers/, ui/, validation/

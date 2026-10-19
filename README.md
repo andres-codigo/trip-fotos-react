@@ -51,7 +51,7 @@ Work in progress. The engineering foundation is in place, and the user-facing fe
 
 ### In progress
 
-- **Messaging** — travellers can be sent messages; the messages page for reading and deleting them is in progress
+- **Messaging** — travellers can be sent messages, and read and delete the messages they have received on the messages page
 - **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the admin can remove a traveller, with their database record, photos and messages, from the travellers list
 
 <a id="stack"></a>
@@ -719,7 +719,7 @@ See [🚧 Status](#status) for what is live and what is being built.
   Users can sign up and log in using Firebase Authentication.
 
 - **Traveller Profiles**
-  Registered travellers can describe their travel destination, choose where they travelled to and record the number of days spent there. Travellers can upload photos, and signed-in users can send a traveller a message from their profile; reading messages is in progress.
+  Registered travellers can describe their travel destination, choose where they travelled to and record the number of days spent there. Travellers can upload photos, and signed-in users can send a traveller a message from their profile and read and delete their own messages.
 
 - **Admin Access** _(in progress)_
   Admin rights are a Firebase custom claim granted with `npm run admin:claim` (see [Admin Role](#admin-role)). This will allow the admin user to remove other travellers when logged in.

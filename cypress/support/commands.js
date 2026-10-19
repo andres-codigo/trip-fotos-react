@@ -22,6 +22,7 @@ Cypress.Commands.add('createMockStore', (authToken = null) => {
 		reducer: {
 			authentication: (state = {}) => state,
 			travellers: (state = {}) => state,
+			messages: (state = {}) => state,
 		},
 		preloadedState: {
 			authentication: {
@@ -37,6 +38,11 @@ Cypress.Commands.add('createMockStore', (authToken = null) => {
 				hasTravellers: false,
 				travellers: [],
 				lastFetch: null,
+				status: 'idle',
+				error: null,
+			},
+			messages: {
+				messages: [],
 				status: 'idle',
 				error: null,
 			},
