@@ -19,6 +19,8 @@ import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
+import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
+
 import travellersListStyles from './TravellersList.module.scss'
 
 const TravellersList = ({ initialError = false, isLoading = false }) => {
@@ -116,7 +118,12 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				<ul
 					className={travellersListStyles.travellersList}
 					data-cy="travellers-list">
-					<li data-cy="traveller-item">Trip Item</li>
+					{travellers.map((traveller) => (
+						<TravellerItem
+							key={traveller.id}
+							{...traveller}
+						/>
+					))}
 				</ul>
 			)}
 			{!loading && !hasTravellers && (

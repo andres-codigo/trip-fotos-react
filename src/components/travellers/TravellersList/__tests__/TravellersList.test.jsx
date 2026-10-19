@@ -53,6 +53,10 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 	selectDidAutoLogout: vi.fn(),
 }))
 
+vi.mock('@/components/travellers/traveller-item/TravellerItem', () => ({
+	default: () => <li data-cy="traveller-item">Traveller item</li>,
+}))
+
 import TravellersList from '@/components/travellers/TravellersList/TravellersList'
 import * as travellersSlice from '@/store/slices/travellersSlice'
 import * as authenticationSlice from '@/store/slices/authenticationSlice'
@@ -228,7 +232,7 @@ describe('<TravellersList />', () => {
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 			).toBeInTheDocument()
 			expect(
-				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
+				screen.getAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM)[0],
 			).toBeInTheDocument()
 		})
 	})
@@ -557,7 +561,7 @@ describe('<TravellersList />', () => {
 				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 			).toBeInTheDocument()
 			expect(
-				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
+				screen.queryAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM)[0],
 			).toBeInTheDocument()
 		})
 	})

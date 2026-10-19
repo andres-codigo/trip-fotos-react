@@ -19,3 +19,9 @@ export const TRAVELLER_REGISTRATION_FIELDS = Object.freeze({
 
 export const TRAVELLER_REGISTRATION_SUCCESS_MESSAGE =
 	'You have been successfully registered as a traveller!'
+
+export const TRAVELLER_ITEM_CONFIG = Object.freeze({
+	DESCRIPTION_MAX_LENGTH: 250,
+	MAX_IMAGES: 5,
+	CONTACT_PATH_SEGMENT: '/contact',
+})

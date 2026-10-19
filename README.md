@@ -39,6 +39,7 @@ Work in progress. The engineering foundation is in place, and the user-facing fe
 - **Authentication** — email/password sign-up and log-in with Firebase Authentication, session persistence and auto-logout
 - **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database; cities visited are chosen through an accessible type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data) that stores each city with its country
 - **Photo uploads** — drag-and-drop or file-picker uploader with previews and type/size validation on the registration form; photos are compressed and uploaded to Cloud Storage as the signed-in user
+- **Traveller cards** — the travellers list shows each traveller's name, registration date, description, days in city, city badges and up to five photos, with contact and details links and an admin-only delete button
 - **Routing and pages** — home, authentication, travellers, register, messages, privacy policy and 404 pages
 - **Accessibility** — skip link, landmark structure and per-page titles, following an audit against [The Website Specification](https://specification.website)
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request
@@ -47,9 +48,8 @@ Work in progress. The engineering foundation is in place, and the user-facing fe
 
 ### In progress
 
-- **Traveller cards** — travellers already load from the Realtime Database; next up is the card design for displaying each traveller's destination, days spent and photos
 - **Messaging** — the route and page are in place, ready for sending and reading messages between travellers
-- **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the store can remove a traveller with their database record, photos and messages, ready for the admin-only delete button on the travellers list
+- **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the admin can remove a traveller, with their database record, photos and messages, from the travellers list
 
 <a id="stack"></a>
 

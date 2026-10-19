@@ -84,3 +84,19 @@ export const UI_TEXT = {
 		CITIES_VISITED: 'Cities visited',
 	},
 }
+
+export const TRAVELLER_ITEM = Object.freeze({
+	ROOT: 'traveller-item',
+	NAME: 'traveller-item-name',
+	REGISTERED: 'traveller-item-registered',
+	DESCRIPTION: 'traveller-item-description',
+	DAYS: 'traveller-item-days',
+	BADGES: 'traveller-item-badges',
+	IMAGES_LIST: 'traveller-item-images',
+	SEE_ALL_LINK: 'traveller-item-see-all',
+	CONTACT: 'traveller-item-contact',
+	DETAILS: 'traveller-item-details',
+	DELETE: 'traveller-item-delete',
+	SPINNER: 'traveller-item-spinner',
+	ERROR_DIALOG: 'traveller-item-error-dialog',
+})

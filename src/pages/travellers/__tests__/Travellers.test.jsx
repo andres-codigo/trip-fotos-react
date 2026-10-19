@@ -35,6 +35,8 @@ vi.mock('@/store/slices/authenticationSlice', async (importOriginal) => {
 	return {
 		...actual,
 		selectIsAuthenticated: vi.fn(),
+		selectUserId: vi.fn(),
+		selectIsAdmin: vi.fn(),
 	}
 })
 
