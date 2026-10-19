@@ -29,17 +29,20 @@ export const login = createAsyncThunk(
 				payload.email,
 				payload.password,
 			)
-			const { token, expirationTime } = await user.getIdTokenResult()
+			const { token, expirationTime, claims } =
+				await user.getIdTokenResult()
 
 			const expirationDate = new Date(expirationTime).getTime()
 			const expiresIn = expirationDate - new Date().getTime()
 			const userName = user.displayName || ''
+			const isAdmin = claims?.admin === true
 
 			localStorage.setItem('token', token)
 			localStorage.setItem('userId', user.uid)
 			localStorage.setItem('userName', userName)
 			localStorage.setItem('userEmail', user.email)
 			localStorage.setItem('tokenExpiration', expirationDate)
+			localStorage.setItem('isAdmin', isAdmin)
 
 			timer = setTimeout(() => {
 				dispatch(autoLogout())
@@ -50,6 +53,7 @@ export const login = createAsyncThunk(
 				userId: user.uid,
 				userName,
 				userEmail: user.email,
+				isAdmin,
 			}
 		} catch (error) {
 			if (error.code) {
@@ -73,6 +77,7 @@ export const tryLogin = createAsyncThunk(
 			const userName = localStorage.getItem('userName')
 			const userEmail = localStorage.getItem('userEmail')
 			const tokenExpiration = localStorage.getItem('tokenExpiration')
+			const isAdmin = localStorage.getItem('isAdmin') === 'true'
 
 			if (
 				!token ||
@@ -96,6 +101,7 @@ export const tryLogin = createAsyncThunk(
 				userId,
 				userName,
 				userEmail,
+				isAdmin,
 			}
 		} catch (error) {
 			return rejectWithValue(error.message)
@@ -112,6 +118,7 @@ export const logout = createAsyncThunk(
 			localStorage.removeItem('userName')
 			localStorage.removeItem('userEmail')
 			localStorage.removeItem('tokenExpiration')
+			localStorage.removeItem('isAdmin')
 
 			clearTimeout(timer)
 
@@ -140,6 +147,7 @@ const authSlice = createSlice({
 		userId: null,
 		userName: null,
 		userEmail: null,
+		isAdmin: false,
 		didAutoLogout: false,
 		status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
 		error: null,
@@ -150,6 +158,7 @@ const authSlice = createSlice({
 			state.userId = null
 			state.userName = null
 			state.userEmail = null
+			state.isAdmin = false
 			state.didAutoLogout = false
 			state.status = 'idle'
 			state.error = null
@@ -171,6 +180,7 @@ const authSlice = createSlice({
 				state.userId = action.payload.userId
 				state.userName = action.payload.userName
 				state.userEmail = action.payload.userEmail
+				state.isAdmin = action.payload.isAdmin
 				state.didAutoLogout = false
 				state.error = null
 			})
@@ -190,6 +200,7 @@ const authSlice = createSlice({
 					state.userId = action.payload.userId
 					state.userName = action.payload.userName
 					state.userEmail = action.payload.userEmail
+					state.isAdmin = action.payload.isAdmin
 				}
 			})
 			.addCase(tryLogin.rejected, (state, action) => {
@@ -251,6 +262,11 @@ export const selectUserName = createSelector(
 export const selectUserEmail = createSelector(
 	[selectAuthenticationState],
 	(authState) => authState.userEmail,
+)
+
+export const selectIsAdmin = createSelector(
+	[selectAuthenticationState],
+	(authState) => authState.isAdmin,
 )
 
 export const selectDidAutoLogout = createSelector(

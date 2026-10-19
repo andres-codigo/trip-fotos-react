@@ -49,7 +49,7 @@ Work in progress. The engineering foundation is in place, and the user-facing fe
 
 - **Traveller cards** — travellers already load from the Realtime Database; next up is the card design for displaying each traveller's destination, days spent and photos
 - **Messaging** — the route and page are in place, ready for sending and reading messages between travellers
-- **Admin tools** — admin identity is configured via `VITE_ADMIN_ID`, laying the groundwork for admin-only actions such as removing travellers
+- **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules, laying the groundwork for admin-only actions such as removing travellers
 
 <a id="stack"></a>
 
@@ -138,6 +138,9 @@ npm run format
 # NPM package dependency check
 npm run check:dependencies
 
+# Grant or remove the admin custom claim (see Setup > Admin Role)
+npm run admin:claim -- <email> [--remove]
+
 # Open the Cypress E2E Test Runner in interactive mode
 npm run cy:open:e2e
 
@@ -205,22 +208,31 @@ npm run preview
             	"rules": {
             		"travellers": {
             			".read": true,
-            			".write": "auth != null"
+            			"$uid": {
+            				".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)"
+            			}
             		},
             		"messages": {
-            			".read": "auth != null",
-            			".write": true
+            			"$travellerId": {
+            				".read": "auth != null && (auth.uid === $travellerId || auth.token.admin === true)",
+            				".write": "auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true)",
+            				"$messageId": {
+            					".write": "(!data.exists() && newData.exists()) || (auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true))"
+            				}
+            			}
             		}
             	}
             }
             ```
+
+            Travellers can only change their own record, and only the recipient (or an admin) can read or delete messages; anyone can send a new message, but not edit an existing one.
 
     - **Authentication**
         - Go to "Sign-in Method" and enable **Email/Password**. Ensure **Email link (passwordless sign-in)** is NOT enabled.
 
     - **Cloud Storage**
         - Set up a [Blaze Plan](https://firebase.google.com/pricing?hl=en) to enable storage capabilities.
-        - Under "Rules", let signed-in users write only to their own folder (the app signs in through the Firebase Auth SDK, so uploads carry the user's ID token) and let the admin delete other travellers' photos. Replace `ADMIN_UID` with your `VITE_ADMIN_ID` value, as rules cannot read environment variables:
+        - Under "Rules", let signed-in users write only to their own folder (the app signs in through the Firebase Auth SDK, so uploads carry the user's ID token) and let an admin (see [Admin Role](#admin-role)) delete other travellers' photos:
 
             ```
             rules_version = '2';
@@ -233,7 +245,7 @@ npm run preview
                     && request.resource.size < 5 * 1024 * 1024
                     && request.resource.contentType.matches('image/.*');
                   allow delete: if request.auth != null
-                    && (request.auth.uid == userId || request.auth.uid == 'ADMIN_UID');
+                    && (request.auth.uid == userId || request.auth.token.admin == true);
                 }
               }
             }
@@ -242,6 +254,22 @@ npm run preview
 3. **Add Firebase to Your Web App**
     - Register your app in the Firebase Console.
     - Copy the Firebase configuration values and add them to your `.env` file.
+
+<a id="admin-role"></a>
+
+#### Admin Role
+
+The admin role is a Firebase Auth custom claim (`admin: true`), so the database and Storage rules enforce it and no admin ID is bundled into the client.
+
+1. In the Firebase Console, go to Project settings > Service accounts and generate a new private key. Save it **outside the repo** — `.gitignore` also ignores common key file names as a safety net.
+2. Grant (or remove) the claim:
+
+    ```bash
+    GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run admin:claim -- admin@example.com
+    GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run admin:claim -- admin@example.com --remove
+    ```
+
+3. The user must sign out and in again: claims are read from the ID token at sign-in, and stored as `isAdmin` in the authentication slice (`selectIsAdmin`).
 
 ### HTTPS for Local Development
 
@@ -331,9 +359,6 @@ VITE_FIREBASE_STORAGE_BUCKET='' # firebaseConfig > storageBucket
 VITE_FIREBASE_MESSAGING_SENDER_ID='' # firebaseConfig > messagingSenderId
 VITE_FIREBASE_APP_ID='' # firebaseConfig > appId
 VITE_FIREBASE_MEASUREMENT_ID='' # firebaseConfig > measurementId
-
-# Admin User ID
-VITE_ADMIN_ID='' # Firebase authenticated User UID for deletion of users rights
 
 # CYPRESS TESTING
 CYPRESS_USER_EMAIL=''
@@ -717,7 +742,7 @@ See [🚧 Status](#status) for what is live and what is being built.
   Registered travellers can describe their travel destination, choose where they travelled to and record the number of days spent there. Photo uploads and traveller-to-traveller messaging are in progress.
 
 - **Admin Access** _(in progress)_
-  Admin rights are assigned to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`. This will allow the admin user to remove other travellers when logged in.
+  Admin rights are a Firebase custom claim granted with `npm run admin:claim` (see [Admin Role](#admin-role)). This will allow the admin user to remove other travellers when logged in.
 
 - **Privacy Policy**
   A public `/privacy` page, linked from the site footer, explains what data the app collects (account, traveller registration, city search via Photon with the OpenStreetMap credit, browser storage and cookieless Vercel analytics) and where it is stored.
@@ -746,7 +771,7 @@ trip-fotos-react/
 ├── declarations/               # Breaking issue fix when using ESLint V9
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
 ├── rules/                      # ESLint configuration rules
-├── scripts/                    # Repo maintenance scripts (e.g. dependency-check output)
+├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, dependency-check output)
 ├── src/
 │   ├── app/            # Main application component
 │   ├── assets/         # Fonts, SVGs, and other static assets

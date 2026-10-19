@@ -116,7 +116,7 @@ npm run analyse          # Bundle size visualiser
 ## Environment
 
 Requires `.env` with Firebase config — see `.env.example` or README Setup section.
-Required keys: `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `VITE_ADMIN_ID`, `CYPRESS_USER_*`.
+Required keys: `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `CYPRESS_USER_*`. The admin role is a Firebase custom claim (`npm run admin:claim`), not an env value.
 
 ## Workflow automation
 

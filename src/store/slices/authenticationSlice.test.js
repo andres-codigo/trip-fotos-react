@@ -21,6 +21,7 @@ import authenticationReducer, {
 	authActions,
 	selectAuthenticationToken,
 	selectUserProfile,
+	selectIsAdmin,
 } from './authenticationSlice'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
@@ -169,6 +170,7 @@ describe('authenticationSlice', () => {
 				userId: null,
 				userName: null,
 				userEmail: null,
+				isAdmin: false,
 				didAutoLogout: false,
 				status: 'idle',
 				error: null,
@@ -198,6 +200,7 @@ describe('authenticationSlice', () => {
 				userId: null,
 				userName: null,
 				userEmail: null,
+				isAdmin: false,
 				didAutoLogout: false,
 				status: 'idle',
 				error: null,
@@ -241,7 +244,7 @@ describe('authenticationSlice', () => {
 				Date.now() + MOCK_KEYS.EXPIRES_IN * 1000,
 			).toUTCString()
 
-			const mockUserCredential = (displayName) => ({
+			const mockUserCredential = (displayName, claims = {}) => ({
 				user: {
 					uid: MOCK_KEYS.LOCAL_ID,
 					email: MOCK_KEYS.EMAIL,
@@ -249,6 +252,7 @@ describe('authenticationSlice', () => {
 					getIdTokenResult: vi.fn().mockResolvedValue({
 						token: MOCK_KEYS.ID_TOKEN,
 						expirationTime,
+						claims,
 					}),
 				},
 			})
@@ -321,6 +325,42 @@ describe('authenticationSlice', () => {
 						expect(localStorage.setItem).toHaveBeenCalledWith(
 							MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
 							new Date(expirationTime).getTime(),
+						)
+					},
+				)
+			})
+
+			describe('admin claim', () => {
+				it.each([
+					{
+						description: 'present',
+						claims: { admin: true },
+						isAdmin: true,
+					},
+					{ description: 'absent', claims: {}, isAdmin: false },
+					{
+						description: 'not true',
+						claims: { admin: 'yes' },
+						isAdmin: false,
+					},
+				])(
+					'sets isAdmin to $isAdmin when the claim is $description',
+					async ({ claims, isAdmin }) => {
+						signInWithEmailAndPassword.mockResolvedValueOnce(
+							mockUserCredential('', claims),
+						)
+
+						await store.dispatch(
+							login({
+								mode: API_DATABASE.AUTH_LOGIN_MODE,
+								...credentials,
+							}),
+						)
+
+						expect(selectIsAdmin(store.getState())).toBe(isAdmin)
+						expect(localStorage.setItem).toHaveBeenCalledWith(
+							MOCK_STORAGE_KEYS.IS_ADMIN,
+							isAdmin,
 						)
 					},
 				)
@@ -502,6 +542,32 @@ describe('authenticationSlice', () => {
 					},
 				)
 
+				it.each([
+					{ stored: 'true', isAdmin: true },
+					{ stored: 'false', isAdmin: false },
+					{ stored: null, isAdmin: false },
+				])(
+					'restores isAdmin as $isAdmin when the stored value is $stored',
+					async ({ stored, isAdmin }) => {
+						localStorage.getItem.mockImplementation((key) => {
+							switch (key) {
+								case MOCK_STORAGE_KEYS.TOKEN:
+									return MOCK_KEYS.ID_TOKEN
+								case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
+									return MOCK_KEYS.EXPIRATION.toString()
+								case MOCK_STORAGE_KEYS.IS_ADMIN:
+									return stored
+								default:
+									return null
+							}
+						})
+
+						await store.dispatch(tryLogin())
+
+						expect(selectIsAdmin(store.getState())).toBe(isAdmin)
+					},
+				)
+
 				it('should handle expired token', async () => {
 					localStorage.getItem.mockImplementation((key) => {
 						switch (key) {
@@ -595,6 +661,10 @@ describe('authenticationSlice', () => {
 					expect(localStorage.removeItem).toHaveBeenCalledWith(
 						MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
 					)
+					expect(localStorage.removeItem).toHaveBeenCalledWith(
+						MOCK_STORAGE_KEYS.IS_ADMIN,
+					)
+					expect(state.isAdmin).toBe(false)
 				})
 			})
 
