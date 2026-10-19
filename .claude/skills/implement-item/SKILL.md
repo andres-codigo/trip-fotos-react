@@ -18,6 +18,7 @@ Arguments: `$ARGUMENTS` (a GitHub issue number)
     - Every `Depends on` issue must be `done` in `.claude/parity/state.json` (or closed). If not, stop and report which.
     - Move the issue to `in progress` on the board: `.claude/skills/implement-item/set-board-status.sh $ARGUMENTS`. Leave it there after committing; the final PR's merge moves it to `done`. Never set `done` by hand.
 2. **Understand the behaviour**
+    - If the issue says React-only (no Vue source), skip the Vue repo and go straight to the React files it names.
     - Read the Vue files listed under `## Vue source` (Vue repo path: `$VUE_REPO_PATH`, `/workspaces/trip-fotos-vue`, or `/tmp/trip-fotos-vue` — clone it shallowly there if none exists).
     - Read the matching section of `.claude/plans/parity-gap-report.md`.
     - Read the `.github/instructions/*.instructions.md` files for every area you will touch.
