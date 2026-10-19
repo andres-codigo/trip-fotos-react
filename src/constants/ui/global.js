@@ -31,6 +31,19 @@ export const GLOBAL = Object.freeze({
 	}),
 	FILE_LIST_LABEL: 'Selected files',
 
+	// CITY SEARCH
+	CITY_SEARCH_TEXT: Object.freeze({
+		LABEL: 'Cities visited',
+		PLACEHOLDER: 'Start typing a city name',
+		LOADING: 'Searching…',
+		NO_RESULTS: 'No matching cities found.',
+		ERROR: 'City search is unavailable. Please try again.',
+		RESULTS: (count) =>
+			`${count} ${count === 1 ? 'city' : 'cities'} found. Use the up and down arrow keys to choose one.`,
+		SELECTED_LABEL: 'Selected cities',
+	}),
+	REMOVE_CITY_LABEL: (name) => `Remove ${name}`,
+
 	// IMAGE
 	IMAGE_UNAVAILABLE: 'Image unavailable',
 

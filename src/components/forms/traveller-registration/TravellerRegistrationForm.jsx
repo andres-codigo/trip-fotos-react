@@ -1,19 +1,21 @@
+import { useState } from 'react'
 import PropTypes from 'prop-types'
 
-import {
-	TRAVELLER_REGISTRATION_CITIES,
-	TRAVELLER_REGISTRATION_FIELDS,
-} from '@/constants/travellers'
-import { ACCESSIBILITY } from '@/constants/ui'
+import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
+import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import Input from '@/components/ui/form/input/Input'
 import Textarea from '@/components/ui/form/textarea/Textarea'
-import Checkbox from '@/components/ui/form/checkbox/Checkbox'
+import Combobox from '@/components/ui/form/combobox/Combobox'
 import BaseButton from '@/components/ui/button/BaseButton'
 import AddFile from '@/components/forms/file-uploader/AddFile'
 
 import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
+import { formatCity, getCityId } from '@/utils/formatCity'
 import { useTravellerRegistration } from './hooks/useTravellerRegistration'
+import useCitySearch, {
+	CITY_SEARCH_STATUS,
+} from '@/components/forms/traveller-registration/hooks/useCitySearch'
 
 import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'
 
@@ -21,10 +23,33 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 	const {
 		formData,
 		handleInputChange,
-		handleCheckboxChange,
+		handleCityAdd,
+		handleCityRemove,
+		handleCitiesBlur,
 		handleFilesUpdated,
 		submitHandler,
 	} = useTravellerRegistration()
+
+	// City search uses the Photon geocoder with OpenStreetMap data (ODbL); the required credit is on the privacy page
+	const [cityQuery, setCityQuery] = useState('')
+	const { results: cityResults, status: citySearchStatus } =
+		useCitySearch(cityQuery)
+	const { CITY_SEARCH_TEXT } = GLOBAL
+
+	const citySearchMessage = {
+		[CITY_SEARCH_STATUS.IDLE]: '',
+		[CITY_SEARCH_STATUS.LOADING]: CITY_SEARCH_TEXT.LOADING,
+		[CITY_SEARCH_STATUS.ERROR]: CITY_SEARCH_TEXT.ERROR,
+		[CITY_SEARCH_STATUS.SUCCESS]: cityResults.length
+			? CITY_SEARCH_TEXT.RESULTS(cityResults.length)
+			: CITY_SEARCH_TEXT.NO_RESULTS,
+	}[citySearchStatus]
+
+	const cityOptions = cityResults.map((city) => ({
+		id: city.id,
+		label: formatCity(city, { withRegion: true }),
+		city,
+	}))
 
 	const { FIRST_NAME, LAST_NAME, DESCRIPTION, DAYS, CITIES, FILES } =
 		TRAVELLER_REGISTRATION_FIELDS
@@ -128,37 +153,56 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				)}
 			</div>
 
-			<fieldset
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData[CITIES].isValid ? travellerRegistrationFormStyles.invalidForm : ''} ${travellerRegistrationFormStyles.fieldset}`}>
-				<legend>
-					Cities visited{' '}
-					<span
+			<div
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData[CITIES].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+				<Combobox
+					id={CITIES}
+					label={CITY_SEARCH_TEXT.LABEL}
+					placeholder={CITY_SEARCH_TEXT.PLACEHOLDER}
+					value={cityQuery}
+					onChange={setCityQuery}
+					options={cityOptions}
+					onSelect={(option) => handleCityAdd(option.city)}
+					onBlur={handleCitiesBlur}
+					statusMessage={citySearchMessage}
+					isValid={formData[CITIES].isValid}
+					describedBy={
+						formData[CITIES].isValid ? undefined : 'cities-error'
+					}
+					disabled={isLoading}
+					required
+				/>
+				{formData[CITIES].value.length > 0 && (
+					<ul
 						className={
-							travellerRegistrationFormStyles.checkboxRequired
-						}>
-						*
-					</span>
-				</legend>
-				{TRAVELLER_REGISTRATION_CITIES.map((city) => (
-					<div
-						key={city.id}
-						className={
-							travellerRegistrationFormStyles.checkboxGroup
-						}>
-						<Checkbox
-							id={city.id}
-							label={city.label}
-							value={city.id}
-							checked={formData[CITIES].value.includes(city.id)}
-							onChange={handleCheckboxChange}
-							disabled={isLoading}
-							required={true}
-							isArrayItem={true}
-							showRequiredMark={false}
-							data-cy={`checkbox-${city.id}`}
-						/>
-					</div>
-				))}
+							travellerRegistrationFormStyles.selectedCities
+						}
+						aria-label={CITY_SEARCH_TEXT.SELECTED_LABEL}
+						data-cy="selected-cities">
+						{formData[CITIES].value.map((city) => {
+							const name = formatCity(city)
+							return (
+								<li
+									key={getCityId(city)}
+									data-cy="selected-city">
+									<span>{name}</span>
+									<button
+										type="button"
+										aria-label={GLOBAL.REMOVE_CITY_LABEL(
+											name,
+										)}
+										onClick={() =>
+											handleCityRemove(getCityId(city))
+										}
+										disabled={isLoading}
+										data-cy="selected-city-remove">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</li>
+							)
+						})}
+					</ul>
+				)}
 				{!formData[CITIES].isValid && formData[CITIES].message && (
 					<>
 						<p id="cities-error">{formData[CITIES].message}</p>
@@ -169,7 +213,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 						)}
 					</>
 				)}
-			</fieldset>
+			</div>
 
 			<fieldset
 				className={`${travellerRegistrationFormStyles.formControl} ${travellerRegistrationFormStyles.fieldset}`}>

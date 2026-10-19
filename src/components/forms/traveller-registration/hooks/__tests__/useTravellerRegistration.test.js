@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
-import { MOCK_TRAVELLERS } from '@/constants/test'
+import { MOCK_CITIES, MOCK_TRAVELLERS } from '@/constants/test'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import { useTravellerRegistration } from '@/components/forms/traveller-registration/hooks/useTravellerRegistration'
@@ -68,46 +68,57 @@ describe('useTravellerRegistration', () => {
 		})
 	})
 
-	it('should add city when checkbox is checked', () => {
+	it('adds a selected city object and validates the field', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
-		const city = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities[0]
 
 		act(() => {
-			result.current.handleCheckboxChange({
-				target: { value: city, checked: true },
-			})
+			result.current.handleCityAdd(MOCK_CITIES.TOKYO)
 		})
 
-		expect(result.current.formData.cities.value).toEqual([city])
+		expect(result.current.formData.cities.value).toEqual([
+			MOCK_CITIES.TOKYO,
+		])
 		expect(result.current.formData.cities.isValid).toBe(true)
 	})
 
-	it('should remove city when checkbox is unchecked', () => {
+	it('ignores a city that is already selected', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
-		const city1 = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities[0]
-		const city2 = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.cities[0]
 
-		// First add two cities
 		act(() => {
-			result.current.handleCheckboxChange({
-				target: { value: city1, checked: true },
-			})
+			result.current.handleCityAdd(MOCK_CITIES.TOKYO)
 		})
 		act(() => {
-			result.current.handleCheckboxChange({
-				target: { value: city2, checked: true },
-			})
+			result.current.handleCityAdd({ ...MOCK_CITIES.TOKYO })
 		})
 
-		expect(result.current.formData.cities.value).toEqual([city1, city2])
-		// Then remove one
+		expect(result.current.formData.cities.value).toHaveLength(1)
+	})
+
+	it('removes a city by id and flags the field when none remain', () => {
+		const { result } = renderHook(() => useTravellerRegistration())
+
 		act(() => {
-			result.current.handleCheckboxChange({
-				target: { value: city1, checked: false },
-			})
+			result.current.handleCityAdd(MOCK_CITIES.TOKYO)
+		})
+		act(() => {
+			result.current.handleCityAdd(MOCK_CITIES.PRAGUE)
+		})
+		act(() => {
+			result.current.handleCityRemove(MOCK_CITIES.TOKYO.id)
 		})
 
-		expect(result.current.formData.cities.value).toEqual([city2])
+		expect(result.current.formData.cities.value).toEqual([
+			MOCK_CITIES.PRAGUE,
+		])
+
+		act(() => {
+			result.current.handleCityRemove(MOCK_CITIES.PRAGUE.id)
+		})
+
+		expect(result.current.formData.cities.isValid).toBe(false)
+		expect(result.current.formData.cities.message).toBe(
+			VALIDATION_MESSAGES.CITIES_REQUIRED,
+		)
 	})
 
 	it('should prevent default on form submission', () => {
@@ -151,7 +162,7 @@ describe('useTravellerRegistration', () => {
 		const mockOnSuccess = vi.fn()
 		const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-		const { firstName, lastName, description, daysInCity, cities } =
+		const { firstName, lastName, description, daysInCity } =
 			MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE
 
 		act(() => {
@@ -167,9 +178,7 @@ describe('useTravellerRegistration', () => {
 			result.current.handleInputChange({
 				target: { id: 'days', value: daysInCity.toString() },
 			})
-			result.current.handleCheckboxChange({
-				target: { value: cities[0], checked: true },
-			})
+			result.current.handleCityAdd(MOCK_CITIES.TOKYO)
 		})
 
 		act(() => {
@@ -182,7 +191,7 @@ describe('useTravellerRegistration', () => {
 			lastName,
 			description,
 			daysInCity: daysInCity.toString(),
-			cities: [cities[0]],
+			cities: [MOCK_CITIES.TOKYO],
 			files: [],
 		})
 
@@ -244,10 +253,12 @@ describe('useTravellerRegistration', () => {
 
 		expect(result.current).toHaveProperty('formData')
 		expect(result.current).toHaveProperty('handleInputChange')
-		expect(result.current).toHaveProperty('handleCheckboxChange')
+		expect(result.current).toHaveProperty('handleCityAdd')
+		expect(result.current).toHaveProperty('handleCityRemove')
 		expect(result.current).toHaveProperty('submitHandler')
 		expect(typeof result.current.handleInputChange).toBe('function')
-		expect(typeof result.current.handleCheckboxChange).toBe('function')
+		expect(typeof result.current.handleCityAdd).toBe('function')
+		expect(typeof result.current.handleCityRemove).toBe('function')
 		expect(typeof result.current.submitHandler).toBe('function')
 	})
 
@@ -269,9 +280,7 @@ describe('useTravellerRegistration', () => {
 			result.current.handleInputChange({
 				target: { id: 'days', value: '3' },
 			})
-			result.current.handleCheckboxChange({
-				target: { value: 'tokyo', checked: true },
-			})
+			result.current.handleCityAdd(MOCK_CITIES.TOKYO)
 			result.current.handleFilesUpdated(files)
 		})
 		act(() => {
@@ -281,5 +290,31 @@ describe('useTravellerRegistration', () => {
 		expect(onSuccess).toHaveBeenCalledWith(
 			expect.objectContaining({ files }),
 		)
+	})
+
+	it('flags cities as required when the search is left with none chosen', () => {
+		const { result } = renderHook(() => useTravellerRegistration())
+
+		act(() => {
+			result.current.handleCitiesBlur()
+		})
+
+		expect(result.current.formData.cities.isValid).toBe(false)
+		expect(result.current.formData.cities.message).toBe(
+			VALIDATION_MESSAGES.CITIES_REQUIRED,
+		)
+	})
+
+	it('keeps cities valid on blur once one is chosen', () => {
+		const { result } = renderHook(() => useTravellerRegistration())
+
+		act(() => {
+			result.current.handleCityAdd(MOCK_CITIES.TOKYO)
+		})
+		act(() => {
+			result.current.handleCitiesBlur()
+		})
+
+		expect(result.current.formData.cities.isValid).toBe(true)
 	})
 })

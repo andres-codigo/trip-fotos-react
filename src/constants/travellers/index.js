@@ -1,3 +1,4 @@
+// Legacy fixed cities: older records store these ids instead of { id, city, region, country }
 export const TRAVELLER_REGISTRATION_CITIES = [
 	{ id: 'tokyo', label: 'Tokyo, Japan' },
 	{ id: 'prague', label: 'Prague, Czechia' },

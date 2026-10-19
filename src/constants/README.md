@@ -25,7 +25,7 @@ import { COMPONENT_SELECTORS } from '../../src/constants/test/selectors'
 src/constants/
 ├── api/
 │   ├── index.js
-│   ├── endpoints.js
+│   ├── endpoints.js           # API_DATABASE, SDK_METHOD_TYPE_URLS, CITY_SEARCH (Photon)
 │   ├── headers.js
 │   └── messages.js
 ├── auth/

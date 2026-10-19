@@ -2,9 +2,10 @@ import { BrowserRouter } from 'react-router-dom'
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
 
-import { ACCESSIBILITY } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import {
+	COMBOBOX_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 	MOCK_TRAVELLERS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
@@ -51,22 +52,89 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 			).should('exist')
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO).should(
-				'exist',
-			)
+			cy.get(COMBOBOX_SELECTORS.INPUT).should('exist')
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
 			).should('exist')
 		})
 
-		it('does not display required asterisks on individual city checkboxes', () => {
+		it('focuses the city search when its label is clicked', () => {
 			render()
-			// Check Checkbox for Tokyo
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO)
-				.parent()
-				.within(() => {
-					cy.get('.input-required').should('not.exist')
-				})
+			cy.get('label[for="cities"]')
+				.should('be.visible')
+				.and('contain.text', GLOBAL.CITY_SEARCH_TEXT.LABEL)
+				.click()
+			cy.get(COMBOBOX_SELECTORS.INPUT).should('have.focus')
+		})
+
+		it('shows the required error when the city search is left empty', () => {
+			render()
+			cy.get('label[for="cities"]').click()
+			cy.get(COMBOBOX_SELECTORS.INPUT).should('have.focus').blur()
+
+			cy.contains(VALIDATION_MESSAGES.CITIES_REQUIRED).should(
+				'be.visible',
+			)
+			cy.get(COMBOBOX_SELECTORS.INPUT)
+				.should('have.attr', 'aria-invalid', 'true')
+				.and('have.css', 'background-color', 'rgb(255, 204, 204)')
+
+			cy.selectCity()
+			cy.contains(VALIDATION_MESSAGES.CITIES_REQUIRED).should('not.exist')
+		})
+
+		it('adds and removes cities through the search', () => {
+			render()
+			cy.selectCity()
+
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.SELECTED_CITY)
+				.should('have.length', 1)
+				.and('contain.text', 'Tokyo, Japan')
+			cy.get(COMBOBOX_SELECTORS.INPUT).should('have.value', '')
+
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.SELECTED_CITY_REMOVE)
+				.should('have.attr', 'aria-label', 'Remove Tokyo, Japan')
+				.click()
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.SELECTED_CITIES,
+			).should('not.exist')
+			cy.contains(VALIDATION_MESSAGES.CITIES_REQUIRED).should('exist')
+		})
+
+		it('does not add a city from typed text alone', () => {
+			cy.intercept(
+				{ method: 'GET', hostname: 'photon.komoot.io' },
+				{ statusCode: 200, body: { features: [] } },
+			).as('citySearch')
+			render()
+
+			cy.get(COMBOBOX_SELECTORS.INPUT).type('Atlantis{enter}')
+			cy.wait('@citySearch')
+
+			cy.get(COMBOBOX_SELECTORS.STATUS).should(
+				'have.text',
+				GLOBAL.CITY_SEARCH_TEXT.NO_RESULTS,
+			)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.SELECTED_CITIES,
+			).should('not.exist')
+			cy.get('@onSubmit').should('not.have.been.called')
+		})
+
+		it('shows an error when the city search fails', () => {
+			cy.intercept(
+				{ method: 'GET', hostname: 'photon.komoot.io' },
+				{ statusCode: 500 },
+			).as('citySearch')
+			render()
+
+			cy.get(COMBOBOX_SELECTORS.INPUT).type('tok')
+			cy.wait('@citySearch')
+
+			cy.get(COMBOBOX_SELECTORS.STATUS).should(
+				'have.text',
+				GLOBAL.CITY_SEARCH_TEXT.ERROR,
+			)
 		})
 
 		it('renders the form with correct styling', () => {
@@ -170,10 +238,7 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString())
-			// Click the label associated with the checkbox since the input is hidden
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO)
-				.next('label')
-				.click()
+			cy.selectCity()
 
 			// Mock console.log to avoid cluttering test output, though we spy on onSubmit now
 			cy.window().then((win) => {
@@ -214,9 +279,7 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString())
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO)
-				.next('label')
-				.click()
+			cy.selectCity()
 
 			cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
 				'cypress/fixtures/test-image.png',
@@ -299,17 +362,6 @@ describe('<TravellerRegistrationForm />', () => {
 				.and('have.attr', 'aria-describedby')
 				.then((id) => {
 					cy.get(`#${id}`).should('exist')
-				})
-		})
-
-		it('groups city checkboxes in a fieldset with legend', () => {
-			render()
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM)
-				.find('fieldset')
-				.first()
-				.within(() => {
-					cy.get('legend').should('contain', 'Cities visited')
-					cy.get('input[type="checkbox"]').should('have.length.gt', 0)
 				})
 		})
 

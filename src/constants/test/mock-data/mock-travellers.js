@@ -38,3 +38,31 @@ export const MOCK_TRAVELLERS = {
 	TEMP_TRAVELLER: { id: 'temp' },
 	TEST_NAME: 'Test Name',
 }
+
+export const MOCK_CITIES = Object.freeze({
+	TOKYO: Object.freeze({
+		id: 'R1543125',
+		city: 'Tokyo',
+		region: '',
+		country: 'Japan',
+	}),
+	PRAGUE: Object.freeze({
+		id: 'R435514',
+		city: 'Prague',
+		region: '',
+		country: 'Czechia',
+	}),
+})
+
+export const MOCK_PHOTON_TOKYO_RESPONSE = Object.freeze({
+	features: [
+		{
+			properties: {
+				osm_type: 'R',
+				osm_id: 1543125,
+				name: 'Tokyo',
+				country: 'Japan',
+			},
+		},
+	],
+})

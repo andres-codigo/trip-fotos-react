@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
+import { CITY_SEARCH } from '@/constants/api'
 import { TEST_IDS } from '@/constants/test'
 import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
@@ -69,10 +70,24 @@ describe('Privacy', () => {
 			).toEqual([
 				'Account data',
 				'Traveller registration',
+				'City search',
 				'Data stored in your browser',
 				'Analytics',
 				'Your choices',
 			])
+		})
+
+		it('credits Photon and OpenStreetMap for city search', () => {
+			render(<Privacy />)
+
+			expect(
+				screen.getByRole('link', { name: 'Photon' }),
+			).toHaveAttribute('href', CITY_SEARCH.PROVIDER_URL)
+			expect(
+				screen.getByRole('link', {
+					name: 'OpenStreetMap contributors',
+				}),
+			).toHaveAttribute('href', CITY_SEARCH.ATTRIBUTION_URL)
 		})
 
 		it('links to the privacy contact email', () => {

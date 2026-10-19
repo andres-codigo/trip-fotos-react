@@ -3,6 +3,7 @@ import {
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
+	COMBOBOX_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation'
@@ -43,9 +44,7 @@ describe('Register Page', () => {
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).should('be.visible')
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO)
-			.parent()
-			.should('be.visible')
+		cy.get(COMBOBOX_SELECTORS.INPUT).should('be.visible')
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).should(
 			'be.visible',
 		)
@@ -65,7 +64,7 @@ describe('Register Page', () => {
 	})
 
 	it('successfully registers a traveller', () => {
-		const { firstName, lastName, description, daysInCity, cities } =
+		const { firstName, lastName, description, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept the registration API call
@@ -91,10 +90,8 @@ describe('Register Page', () => {
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).type(daysInCity)
 
-		// Check the cities checkboxes
-		cities.forEach((city) => {
-			cy.get(`label[for="${city}"]`).click()
-		})
+		// Choose a city through the (stubbed) city search
+		cy.selectCity()
 
 		// Submit the form
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
@@ -112,7 +109,7 @@ describe('Register Page', () => {
 	})
 
 	it('registers a traveller with a photo uploaded to Storage', () => {
-		const { firstName, lastName, description, daysInCity, cities } =
+		const { firstName, lastName, description, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Storage is live (the fixed file name overwrites the same object each run); the DB write is stubbed
@@ -140,9 +137,7 @@ describe('Register Page', () => {
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).type(daysInCity)
-		cities.forEach((city) => {
-			cy.get(`label[for="${city}"]`).click()
-		})
+		cy.selectCity()
 
 		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
 			'cypress/fixtures/test-image.png',
@@ -163,7 +158,7 @@ describe('Register Page', () => {
 	})
 
 	it('shows a loading dialog while registering', () => {
-		const { firstName, lastName, description, daysInCity, cities } =
+		const { firstName, lastName, description, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept with delay
@@ -190,10 +185,8 @@ describe('Register Page', () => {
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).type(daysInCity)
 
-		// Check the cities checkboxes
-		cities.forEach((city) => {
-			cy.get(`label[for="${city}"]`).click()
-		})
+		// Choose a city through the (stubbed) city search
+		cy.selectCity()
 
 		// Submit the form
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
@@ -212,7 +205,7 @@ describe('Register Page', () => {
 
 	describe('Error Handling', () => {
 		it('shows an error dialog when registration fails', () => {
-			const { firstName, lastName, description, daysInCity, cities } =
+			const { firstName, lastName, description, daysInCity } =
 				MOCK_TRAVELLERS.NEW_TRAVELLER
 
 			// Intercept failure
@@ -235,10 +228,8 @@ describe('Register Page', () => {
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 			).type(daysInCity)
 
-			// Check the cities checkboxes
-			cities.forEach((city) => {
-				cy.get(`label[for="${city}"]`).click()
-			})
+			// Choose a city through the (stubbed) city search
+			cy.selectCity()
 
 			// Submit the form
 			cy.get(

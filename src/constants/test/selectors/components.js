@@ -5,7 +5,13 @@ import {
 	getByDataCyError,
 } from '../../../testUtils/cypress/selectors'
 
-import { BADGE, FILE_DROP, FILE_PREVIEW, IMAGE } from '../ui-constants'
+import {
+	BADGE,
+	COMBOBOX,
+	FILE_DROP,
+	FILE_PREVIEW,
+	IMAGE,
+} from '../ui-constants'
 
 /////
 /// Common Component Selectors
@@ -92,10 +98,9 @@ export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	LAST_NAME_INPUT: getByDataCy('last-name-input'),
 	DESCRIPTION_INPUT: getByDataCy('description-input'),
 	DAYS_SPENT_IN_CITY_INPUT: getByDataCy('days-spent-in-city-input'),
-	CHECKBOX_TOKYO: getByDataCy('checkbox-tokyo'),
-	CHECKBOX_PRAGUE: getByDataCy('checkbox-prague'),
-	CHECKBOX_SYDNEY: getByDataCy('checkbox-sydney'),
-	CHECKBOX_CANBERRA: getByDataCy('checkbox-canberra'),
+	SELECTED_CITIES: getByDataCy('selected-cities'),
+	SELECTED_CITY: getByDataCy('selected-city'),
+	SELECTED_CITY_REMOVE: getByDataCy('selected-city-remove'),
 	REGISTER_BUTTON: getByDataCy('register-button'),
 }
 
@@ -113,6 +118,13 @@ export const TRAVELLERS_LIST_SELECTORS = {
 /////
 /// UI Selectors
 /////
+export const COMBOBOX_SELECTORS = {
+	INPUT: getByDataCy(COMBOBOX.INPUT),
+	LISTBOX: getByDataCy(COMBOBOX.LISTBOX),
+	OPTION: getByDataCy(COMBOBOX.OPTION),
+	STATUS: getByDataCy(COMBOBOX.STATUS),
+}
+
 export const DIALOG_SELECTORS = {
 	// Dialog
 	INVALID_EMAIL_OR_PASSWORD: getByDataCy('invalid-email-or-password-dialog'),

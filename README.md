@@ -37,7 +37,7 @@ Work in progress. The engineering foundation is in place, and the user-facing fe
 ### Done
 
 - **Authentication** — email/password sign-up and log-in with Firebase Authentication, session persistence and auto-logout
-- **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database
+- **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database; cities visited are chosen through an accessible type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data) that stores each city with its country
 - **Photo uploads** — drag-and-drop or file-picker uploader with previews and type/size validation on the registration form; photos are compressed and uploaded to Cloud Storage as the signed-in user
 - **Routing and pages** — home, authentication, travellers, register, messages, privacy policy and 404 pages
 - **Accessibility** — skip link, landmark structure and per-page titles, following an audit against [The Website Specification](https://specification.website)
@@ -720,7 +720,7 @@ See [🚧 Status](#status) for what is live and what is being built.
   Admin rights are assigned to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`. This will allow the admin user to remove other travellers when logged in.
 
 - **Privacy Policy**
-  A public `/privacy` page, linked from the site footer, explains what data the app collects (account, traveller registration, browser storage and cookieless Vercel analytics) and where it is stored.
+  A public `/privacy` page, linked from the site footer, explains what data the app collects (account, traveller registration, city search via Photon with the OpenStreetMap credit, browser storage and cookieless Vercel analytics) and where it is stored.
 
 <a id="folder-structure"></a>
 

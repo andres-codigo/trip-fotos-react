@@ -34,7 +34,7 @@ src/
   store/         store.js, storage.js (redux-persist), slices/authenticationSlice.js, slices/travellersSlice.js
   styles/        global.scss, setup/ (variables, mixins, typography, routing, pages)
   testUtils/     cypress/ (TestLocationDisplay, selectors), vitest/ (polyfills, mocks, setup)
-  utils/         errorHandler/, form/, getFirebaseAuthErrorMessage/, useViewport/, validation/
+  utils/         errorHandler/, form/, formatCity/, getFirebaseAuthErrorMessage/, useViewport/, validation/
   index.jsx      Entry point
 ```
 

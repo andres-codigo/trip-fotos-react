@@ -7,7 +7,10 @@ import {
 	HEADER_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
 	AUTHENTICATION_FORM_SELECTORS,
+	COMBOBOX_SELECTORS,
+	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 } from '../../src/constants/test/selectors/components'
+import { MOCK_PHOTON_TOKYO_RESPONSE } from '../../src/constants/test/mock-data/mock-travellers'
 import { TEST_USERS } from '../../src/constants/config/users'
 import { VIEWPORTS } from '../../src/constants/config/viewports'
 
@@ -83,6 +86,26 @@ Cypress.Commands.add('interceptDelayedLogin', (method, url, time) => {
 		})
 	}).as('delayedLogin')
 })
+
+////
+// CITY SEARCH
+////
+// Stubs the city search API so tests do not depend on Photon's live results
+Cypress.Commands.add(
+	'selectCity',
+	(query = 'tok', response = MOCK_PHOTON_TOKYO_RESPONSE) => {
+		cy.intercept(
+			{ method: 'GET', hostname: 'photon.komoot.io' },
+			{ statusCode: 200, body: response },
+		).as('citySearch')
+		cy.get(COMBOBOX_SELECTORS.INPUT).type(query)
+		cy.wait('@citySearch')
+		cy.get(COMBOBOX_SELECTORS.OPTION).first().click()
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.SELECTED_CITY).should(
+			'exist',
+		)
+	},
+)
 
 ////
 // VIEWPORTS

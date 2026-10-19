@@ -12,9 +12,12 @@ export const BUTTON = Object.freeze({
 	},
 })
 
-export const CHECKBOX = Object.freeze({
-	ID: 'test-checkbox',
-	ERROR_ID: 'test-checkbox-error',
+export const COMBOBOX = Object.freeze({
+	ID: 'test-combobox',
+	INPUT: 'combobox-input',
+	LISTBOX: 'combobox-listbox',
+	OPTION: 'combobox-option',
+	STATUS: 'combobox-status',
 })
 
 export const DIALOG = Object.freeze({

@@ -3,6 +3,8 @@ import { useCallback, useState } from 'react'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
 
+import { getCityId } from '@/utils/formatCity'
+
 export const useTravellerRegistration = () => {
 	const { FIRST_NAME, LAST_NAME, DESCRIPTION, DAYS, CITIES, FILES } =
 		TRAVELLER_REGISTRATION_FIELDS
@@ -72,17 +74,9 @@ export const useTravellerRegistration = () => {
 		}))
 	}
 
-	const handleCheckboxChange = (e) => {
-		const { value, checked } = e.target
+	const updateCities = (getNextCities) => {
 		setFormData((prev) => {
-			const currentCities = prev[CITIES].value
-			let newCities
-			if (checked) {
-				newCities = [...currentCities, value]
-			} else {
-				newCities = currentCities.filter((city) => city !== value)
-			}
-
+			const newCities = getNextCities(prev[CITIES].value)
 			const isValid = newCities.length > 0
 			const message = isValid ? '' : VALIDATION_MESSAGES.CITIES_REQUIRED
 
@@ -96,6 +90,24 @@ export const useTravellerRegistration = () => {
 				},
 			}
 		})
+	}
+
+	const handleCitiesBlur = () => {
+		updateCities((cities) => cities)
+	}
+
+	const handleCityAdd = (city) => {
+		updateCities((cities) =>
+			cities.some((existing) => getCityId(existing) === city.id)
+				? cities
+				: [...cities, city],
+		)
+	}
+
+	const handleCityRemove = (cityId) => {
+		updateCities((cities) =>
+			cities.filter((city) => getCityId(city) !== cityId),
+		)
 	}
 
 	const validateForm = () => {
@@ -141,7 +153,9 @@ export const useTravellerRegistration = () => {
 	return {
 		formData,
 		handleInputChange,
-		handleCheckboxChange,
+		handleCityAdd,
+		handleCityRemove,
+		handleCitiesBlur,
 		handleFilesUpdated,
 		submitHandler,
 	}

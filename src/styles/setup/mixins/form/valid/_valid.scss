@@ -1,5 +1,4 @@
 @use '@/styles/setup/variables' as variables;
-@use '@/styles/setup/mixins/helpers' as helpers;
 
 @mixin label() {
 	label {
@@ -44,93 +43,5 @@
 	textarea {
 		height: 9.375rem;
 		resize: none;
-	}
-}
-
-@mixin checkbox() {
-	input[type='checkbox'] {
-		opacity: 0;
-		position: absolute;
-		width: auto;
-
-		// Text
-		& + label {
-			cursor: pointer;
-			display: inline-block;
-			font-family: 'Roboto', sans-serif;
-			font-weight: 400;
-			line-height: 1.25rem;
-			padding-left: 1.875rem;
-			position: relative;
-			@include helpers.user-select(none);
-
-			// Checkbox
-			&::before {
-				background: transparent;
-				border-radius: 0.24rem;
-				box-shadow: inset 0 0 0 1px variables.$color-alto;
-				content: '';
-				display: block;
-				height: 1.25rem;
-				left: 0;
-				position: absolute;
-				top: 0;
-				width: 1.25rem;
-
-				transition: box-shadow 200ms ease-in-out;
-			}
-
-			// Tick
-			&::after {
-				content: '';
-				display: block;
-				height: 0.4375rem;
-				left: 0.5rem;
-				position: absolute;
-				top: 0.3125rem;
-				width: 0.1875rem;
-
-				border-bottom: 1px solid transparent;
-				border-right: 1px solid transparent;
-				transform: rotate(45deg);
-
-				transition:
-					border-color 200ms ease-in-out,
-					transform 200ms ease-in-out;
-			}
-
-			// Hover
-			&:hover {
-				color: variables.$color-mine-shaft;
-			}
-		}
-
-		&:focus {
-			& + label {
-				color: variables.$color-mine-shaft;
-
-				&::before {
-					background-color: variables.$color-selago;
-					box-shadow: inset 0 0 0 1px variables.$color-pigment-indigo;
-
-					transition:
-						background-color 200ms ease-in-out,
-						box-shadow 200ms ease-in-out;
-				}
-			}
-		}
-
-		// Checked
-		&:checked {
-			& + label {
-				&::before {
-					background: variables.$color-ripe-plum;
-					box-shadow: none;
-				}
-				&::after {
-					border-color: variables.$color-white;
-				}
-			}
-		}
 	}
 }
