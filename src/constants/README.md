@@ -66,5 +66,5 @@ src/constants/
 │   ├── global.js
 │   └── paths.js
 └── validation/
-    └── index.js               # VALIDATION_MESSAGES
+    └── index.js               # VALIDATION_MESSAGES, FILE_UPLOAD (accepted types, size limit)
 ```

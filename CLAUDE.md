@@ -24,7 +24,7 @@ src/
   assets/        Static assets (SVGs)
   components/
     common/      LoadingFallback
-    forms/       traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
+    forms/       file-uploader/, traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
     layout/      footer/, header/, main-nav/, skip-link/ (with nav-menu/, hooks/, __tests__/)
     travellers/  TravellersList
     ui/           Atomic: alerts, badge, button, card, dialog, form/*, image, spinner
