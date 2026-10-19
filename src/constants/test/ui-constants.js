@@ -27,6 +27,14 @@ export const DIALOG = Object.freeze({
 	ROLE_ALERTDIALOG: 'alertdialog',
 })
 
+export const FILE_PREVIEW = Object.freeze({
+	ID: 'file-preview',
+	REMOVE_BUTTON: 'file-preview-remove',
+	THUMBNAIL: 'file-preview-thumbnail',
+	NAME: 'file-preview-name',
+	STATUS: 'file-preview-status',
+})
+
 export const IMAGE = Object.freeze({
 	ID: 'base-image',
 	BUTTON: 'base-image-button',

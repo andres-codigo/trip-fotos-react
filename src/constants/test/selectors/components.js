@@ -5,7 +5,7 @@ import {
 	getByDataCyError,
 } from '../../../testUtils/cypress/selectors'
 
-import { BADGE, IMAGE } from '../ui-constants'
+import { BADGE, FILE_PREVIEW, IMAGE } from '../ui-constants'
 
 /////
 /// Common Component Selectors
@@ -72,6 +72,14 @@ export const AUTHENTICATION_FORM_SELECTORS = {
 	LOGIN_SIGNUP_TOGGLE_LINK: getByDataCy('login-signup-toggle-link'),
 	LOGIN_TEXT_TOGGLE_LINK: 'Switch to Login',
 	SIGNUP_TEXT_TOGGLE_LINK: 'Switch to Signup',
+}
+
+export const FILE_UPLOADER_SELECTORS = {
+	FILE_PREVIEW: getByDataCy(FILE_PREVIEW.ID),
+	FILE_PREVIEW_REMOVE: getByDataCy(FILE_PREVIEW.REMOVE_BUTTON),
+	FILE_PREVIEW_THUMBNAIL: getByDataCy(FILE_PREVIEW.THUMBNAIL),
+	FILE_PREVIEW_NAME: getByDataCy(FILE_PREVIEW.NAME),
+	FILE_PREVIEW_STATUS: getByDataCy(FILE_PREVIEW.STATUS),
 }
 
 export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
