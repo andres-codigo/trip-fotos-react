@@ -24,12 +24,12 @@ src/
   assets/        Static assets (SVGs)
   components/
     common/      LoadingFallback
-    forms/       file-uploader/, traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
+    forms/       contact-traveller/, file-uploader/, traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
     layout/      footer/, header/, main-nav/, skip-link/ (with nav-menu/, hooks/, __tests__/)
     travellers/  travellers-list/, traveller-item/, traveller-filter/
     ui/           Atomic: alerts, badge, button, card, dialog, form/*, image, spinner
   constants/     45 files — api/, auth/, config/, errors/, firebase/, redux/, test/, travellers/, ui/, validation/
-  pages/         authentication/, home/, messages/, page-not-found/, privacy/, register/, traveller-detail/, travellers/
+  pages/         authentication/, contact-traveller/, home/, messages/, page-not-found/, privacy/, register/, traveller-detail/, travellers/
   services/      firebase/ (firebase.js)
   store/         store.js, storage.js (redux-persist), slices/authenticationSlice.js, slices/travellersSlice.js, slices/messagesSlice.js
   styles/        global.scss, setup/ (variables, mixins, typography, routing, pages)

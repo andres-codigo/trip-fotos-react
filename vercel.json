@@ -7,6 +7,10 @@
 		{
 			"source": "/travellers/:id",
 			"destination": "/"
+		},
+		{
+			"source": "/travellers/:id/contact",
+			"destination": "/"
 		}
 	],
 	"trailingSlash": false,

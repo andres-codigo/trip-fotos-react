@@ -30,6 +30,9 @@ const Travellers = lazy(() => import('@/pages/travellers/Travellers'))
 const TravellerDetail = lazy(
 	() => import('@/pages/traveller-detail/TravellerDetail'),
 )
+const ContactTraveller = lazy(
+	() => import('@/pages/contact-traveller/ContactTraveller'),
+)
 const Messages = lazy(() => import('@/pages/messages/Messages'))
 const Privacy = lazy(() => import('@/pages/privacy/Privacy'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
@@ -76,6 +79,7 @@ function AppRoutes() {
 				PATHS.REGISTER,
 				PATHS.MESSAGES,
 				PATHS.TRAVELLER_DETAIL,
+				PATHS.CONTACT_TRAVELLER,
 			]
 			if (
 				protectedPaths.some((path) =>
@@ -118,6 +122,10 @@ function AppRoutes() {
 					<Route
 						path={PATHS.TRAVELLER_DETAIL}
 						element={<TravellerDetail />}
+					/>
+					<Route
+						path={PATHS.CONTACT_TRAVELLER}
+						element={<ContactTraveller />}
 					/>
 					<Route
 						path={PATHS.MESSAGES}

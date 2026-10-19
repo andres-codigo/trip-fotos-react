@@ -35,3 +35,17 @@ export const TRAVELLER_DETAIL_CONFIG = Object.freeze({
 	NOT_FOUND_MESSAGE: 'Traveller not found.',
 	BACK_LABEL: 'Back to travellers',
 })
+
+export const CONTACT_TRAVELLER_FIELDS = Object.freeze({
+	EMAIL: 'email',
+	MESSAGE: 'message',
+})
+
+export const CONTACT_TRAVELLER_CONFIG = Object.freeze({
+	FALLBACK_TITLE: 'Contact traveller',
+	TITLE: (firstName) => `Contact ${firstName}`,
+	SUBMIT_LABEL: 'Send Message',
+	SENDING_TITLE: 'Sending',
+	SENDING_MESSAGE: 'Sending your message, one moment please...',
+	SUCCESS_MESSAGE: 'Your message has been sent!',
+})

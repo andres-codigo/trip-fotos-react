@@ -11,6 +11,9 @@ export const VALIDATION_MESSAGES = {
 	DAYS_REQUIRED: 'Number of days spent in the city cannot be empty.',
 	CITIES_REQUIRED: 'At least one city must be selected.',
 
+	// CONTACT TRAVELLER FORM
+	MESSAGE_REQUIRED: 'Message must not be empty.',
+
 	// FILE UPLOAD
 	FILE_TYPE_INVALID: (name) =>
 		`${name} is not a supported image type. Use JPEG, PNG, WebP or GIF.`,

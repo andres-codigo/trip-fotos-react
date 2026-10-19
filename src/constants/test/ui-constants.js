@@ -117,6 +117,19 @@ export const TRAVELLER_DETAIL = Object.freeze({
 	CONTACT: 'traveller-detail-contact',
 })
 
+export const CONTACT_TRAVELLER = Object.freeze({
+	ROOT: 'contact-traveller',
+	TITLE: 'contact-traveller-title',
+	FORM: 'contact-traveller-form',
+	EMAIL_INPUT: 'contact-email-input',
+	EMAIL_ERROR: 'contact-email-error-message',
+	MESSAGE_INPUT: 'contact-message-input',
+	MESSAGE_ERROR: 'contact-message-error-message',
+	SUBMIT: 'contact-submit-button',
+	SENDING_DIALOG: 'contact-sending-dialog',
+	ERROR_DIALOG: 'contact-error-dialog',
+})
+
 export const TRAVELLER_FILTER = Object.freeze({
 	ROOT: 'traveller-filter',
 	OPTION: 'traveller-filter-option',
