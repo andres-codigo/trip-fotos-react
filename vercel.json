@@ -3,6 +3,10 @@
 		{
 			"source": "/:path(authentication|travellers|register|messages|privacy|404)",
 			"destination": "/"
+		},
+		{
+			"source": "/travellers/:id",
+			"destination": "/"
 		}
 	],
 	"trailingSlash": false,

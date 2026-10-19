@@ -29,7 +29,7 @@ src/
     travellers/  travellers-list/, traveller-item/, traveller-filter/
     ui/           Atomic: alerts, badge, button, card, dialog, form/*, image, spinner
   constants/     45 files — api/, auth/, config/, errors/, firebase/, redux/, test/, travellers/, ui/, validation/
-  pages/         authentication/, home/, messages/, page-not-found/, privacy/, register/, travellers/
+  pages/         authentication/, home/, messages/, page-not-found/, privacy/, register/, traveller-detail/, travellers/
   services/      firebase/ (firebase.js)
   store/         store.js, storage.js (redux-persist), slices/authenticationSlice.js, slices/travellersSlice.js, slices/messagesSlice.js
   styles/        global.scss, setup/ (variables, mixins, typography, routing, pages)

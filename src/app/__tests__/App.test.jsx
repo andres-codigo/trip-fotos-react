@@ -51,6 +51,8 @@ vi.mock('@/constants/ui', () => ({
 		HOME: '/home',
 		AUTHENTICATION: '/authentication',
 		TRAVELLERS: '/travellers',
+		TRAVELLER_DETAIL: '/travellers/:id',
+		REGISTER: '/register',
 		MESSAGES: '/messages',
 		PRIVACY: '/privacy',
 		PAGE_NOT_FOUND: '/404',
@@ -84,6 +86,9 @@ vi.mock('@/pages/home/Home', () => ({
 }))
 vi.mock('@/pages/travellers/Travellers', () => ({
 	default: () => <div>TravellersPage</div>,
+}))
+vi.mock('@/pages/traveller-detail/TravellerDetail', () => ({
+	default: () => <div>TravellerDetailPage</div>,
 }))
 vi.mock('@/pages/messages/Messages', () => ({
 	default: () => <div>MessagesPage</div>,
@@ -235,6 +240,42 @@ describe('App', () => {
 					},
 				)
 			})
+		})
+
+		it('redirects to /authentication if not logged in and on a traveller detail route', async () => {
+			setAuthState(null, false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: '/travellers/abc123',
+			})
+
+			renderWithRoute('/travellers/abc123')
+
+			await waitFor(() => {
+				expect(navigateMock).toHaveBeenCalledWith(
+					PATHS.AUTHENTICATION,
+					{
+						replace: true,
+					},
+				)
+			})
+		})
+
+		it('renders TravellerDetailPage when logged in and on a traveller detail route', async () => {
+			setAuthState('token', false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: '/travellers/abc123',
+			})
+
+			renderWithRoute('/travellers/abc123')
+
+			await waitFor(() => {
+				expect(
+					screen.getByText('TravellerDetailPage'),
+				).toBeInTheDocument()
+			})
+			expect(navigateMock).not.toHaveBeenCalled()
 		})
 
 		it('redirects to /authentication on auto logout', async () => {

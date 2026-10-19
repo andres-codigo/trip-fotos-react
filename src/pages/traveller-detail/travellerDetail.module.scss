@@ -1,0 +1,42 @@
+@use '@/styles/setup/variables' as variables;
+
+.travellerDetailContainer {
+	text-align: left;
+}
+
+.section {
+	&.own {
+		border: 2px solid variables.$color-tundora;
+	}
+}
+
+.name {
+	font-size: 1.5rem;
+	font-weight: 400;
+	margin: 0;
+}
+
+.description {
+	font-style: italic;
+	white-space: pre-line;
+}
+
+.badges {
+	padding: 0.25rem 0 0.5rem 0;
+}
+
+.imagesList {
+	display: flex;
+	flex-wrap: wrap;
+	list-style: none;
+	padding: 0;
+}
+
+.actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.spinnerContainer {
+	margin: 0.5rem 0;
+}

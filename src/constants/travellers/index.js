@@ -29,3 +29,9 @@ export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 export const TRAVELLER_FILTER_CONFIG = Object.freeze({
 	LEGEND: 'Filter by city',
 })
+
+export const TRAVELLER_DETAIL_CONFIG = Object.freeze({
+	FALLBACK_TITLE: 'Traveller',
+	NOT_FOUND_MESSAGE: 'Traveller not found.',
+	BACK_LABEL: 'Back to travellers',
+})

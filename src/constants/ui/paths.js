@@ -7,6 +7,7 @@ export const PATHS = Object.freeze({
 	HOME: '/',
 	AUTHENTICATION: '/authentication',
 	TRAVELLERS: '/travellers',
+	TRAVELLER_DETAIL: '/travellers/:id',
 	REGISTER: '/register',
 	MESSAGES: '/messages',
 	PRIVACY: '/privacy',

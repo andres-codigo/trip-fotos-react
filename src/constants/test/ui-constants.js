@@ -102,6 +102,21 @@ export const TRAVELLER_ITEM = Object.freeze({
 	ERROR_DIALOG: 'traveller-item-error-dialog',
 })
 
+export const TRAVELLER_DETAIL = Object.freeze({
+	ROOT: 'traveller-detail',
+	NAME: 'traveller-detail-name',
+	SPINNER: 'traveller-detail-spinner',
+	NOT_FOUND: 'traveller-detail-not-found',
+	BACK_LINK: 'traveller-detail-back',
+	PROFILE: 'traveller-detail-profile',
+	DESCRIPTION: 'traveller-detail-description',
+	DAYS: 'traveller-detail-days',
+	BADGES: 'traveller-detail-badges',
+	IMAGES_LIST: 'traveller-detail-images',
+	CONTACT_SECTION: 'traveller-detail-contact-section',
+	CONTACT: 'traveller-detail-contact',
+})
+
 export const TRAVELLER_FILTER = Object.freeze({
 	ROOT: 'traveller-filter',
 	OPTION: 'traveller-filter-option',

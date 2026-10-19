@@ -40,8 +40,9 @@ Work in progress. The engineering foundation is in place, and the user-facing fe
 - **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database; cities visited are chosen through an accessible type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data) that stores each city with its country
 - **Photo uploads** — drag-and-drop or file-picker uploader with previews and type/size validation on the registration form; photos are compressed and uploaded to Cloud Storage as the signed-in user
 - **Traveller cards** — the travellers list shows each traveller's name, registration date, description, days in city, city badges and up to five photos, with contact and details links and an admin-only delete button
+- **Traveller details** — `/travellers/:id` shows a traveller's full profile, cities and every photo, with a contact link for other travellers; unknown ids show a not-found message
 - **City filter** — checkboxes above the travellers list, built from the cities the loaded travellers have visited, narrow the list by city; all cities start selected
-- **Routing and pages** — home, authentication, travellers, register, messages, privacy policy and 404 pages
+- **Routing and pages** — home, authentication, travellers, traveller details, register, messages, privacy policy and 404 pages
 - **Accessibility** — skip link, landmark structure and per-page titles, following an audit against [The Website Specification](https://specification.website)
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request
 - **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers
@@ -701,7 +702,7 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 `vercel.json` controls how the production deployment responds:
 
-- **Route allow-list** — only the app's known routes (`/authentication`, `/travellers`, `/register`, `/messages`, `/privacy`, `/404`) are rewritten to the single-page app. Any other path falls through to `public/404.html` with a real `404` status, so crawlers do not see soft 404s. **When you add a route to `PATHS`, add it to the `rewrites` source in `vercel.json` too**, or it will 404 on a hard refresh in production.
+- **Route allow-list** — only the app's known routes (`/authentication`, `/travellers`, `/travellers/:id`, `/register`, `/messages`, `/privacy`, `/404`) are rewritten to the single-page app. Any other path falls through to `public/404.html` with a real `404` status, so crawlers do not see soft 404s. **When you add a route to `PATHS`, add it to the `rewrites` source in `vercel.json` too**, or it will 404 on a hard refresh in production.
 - **Security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` and `Cross-Origin-Opener-Policy` are set on every response. An enforced `Content-Security-Policy` limits scripts to the site itself and network requests to Firebase. If you add a new third-party service (a CDN, an analytics provider or another Firebase product), add its origin to the matching directive in `vercel.json`, or the browser will block it. To trial a change safely, rename the header to `Content-Security-Policy-Report-Only` on a preview: violations are then logged to the console without blocking.
 - **Caching** — fingerprinted build output in `/assets/` is cached for a year as `immutable`; fonts are cached for a week.
 
