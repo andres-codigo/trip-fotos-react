@@ -72,6 +72,7 @@ export const TEXTAREA = Object.freeze({
 export const UI_TEXT = {
 	TRAVELLERS: {
 		NO_TRAVELLERS_MESSAGE: 'No travellers listed.',
+		NO_MATCHING_MESSAGE: 'No travellers match the selected cities.',
 		REGISTER_AS_TRAVELLER: 'Register',
 		REFRESH_BUTTON: 'Refresh',
 	},
@@ -99,4 +100,10 @@ export const TRAVELLER_ITEM = Object.freeze({
 	DELETE: 'traveller-item-delete',
 	SPINNER: 'traveller-item-spinner',
 	ERROR_DIALOG: 'traveller-item-error-dialog',
+})
+
+export const TRAVELLER_FILTER = Object.freeze({
+	ROOT: 'traveller-filter',
+	OPTION: 'traveller-filter-option',
+	CHECKBOX: 'traveller-filter-checkbox',
 })

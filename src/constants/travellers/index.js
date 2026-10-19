@@ -25,3 +25,7 @@ export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 	MAX_IMAGES: 5,
 	CONTACT_PATH_SEGMENT: '/contact',
 })
+
+export const TRAVELLER_FILTER_CONFIG = Object.freeze({
+	LEGEND: 'Filter by city',
+})

@@ -19,7 +19,10 @@ import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
+import TravellerFilter from '@/components/travellers/traveller-filter/TravellerFilter'
 import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
+
+import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
 
 import travellersListStyles from './TravellersList.module.scss'
 
@@ -34,6 +37,8 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const isTraveller = useSelector(selectIsTraveller)
 	const hasTravellers = useSelector(selectHasTravellers)
 	const travellers = useSelector(selectTravellers)
+	const { options, inactiveIds, toggleCity, filteredTravellers } =
+		useCityFilter(travellers)
 
 	const loadTravellersHandler = useCallback(
 		async (refresh = false) => {
@@ -114,17 +119,31 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					<BaseSpinner />
 				</div>
 			)}
-			{!loading && hasTravellers && (
+			{!loading && hasTravellers && options.length > 0 && (
+				<TravellerFilter
+					options={options}
+					inactiveIds={inactiveIds}
+					onChangeFilter={toggleCity}
+				/>
+			)}
+			{!loading && hasTravellers && filteredTravellers.length > 0 && (
 				<ul
 					className={travellersListStyles.travellersList}
 					data-cy="travellers-list">
-					{travellers.map((traveller) => (
+					{filteredTravellers.map((traveller) => (
 						<TravellerItem
 							key={traveller.id}
 							{...traveller}
 						/>
 					))}
 				</ul>
+			)}
+			{!loading && hasTravellers && filteredTravellers.length === 0 && (
+				<div
+					className={travellersListStyles.noTravellersContainer}
+					data-cy="no-matching-travellers">
+					<h2>No travellers match the selected cities.</h2>
+				</div>
 			)}
 			{!loading && !hasTravellers && (
 				<div

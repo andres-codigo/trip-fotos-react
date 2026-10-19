@@ -7,6 +7,7 @@ import { ERROR_MESSAGES } from '@/constants/errors'
 import { GLOBAL } from '@/constants/ui'
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import {
+	MOCK_CITIES,
 	MOCK_ERROR_MESSAGES,
 	MOCK_TRAVELLERS,
 	MOCK_USER,
@@ -563,6 +564,73 @@ describe('<TravellersList />', () => {
 			expect(
 				screen.queryAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM)[0],
 			).toBeInTheDocument()
+		})
+	})
+
+	describe('City filter', () => {
+		const TRAVELLERS_WITH_CITIES = [
+			{
+				...MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE,
+				cities: [MOCK_CITIES.TOKYO],
+			},
+			{
+				...MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO,
+				cities: [MOCK_CITIES.PRAGUE, MOCK_CITIES.TOKYO],
+			},
+		]
+
+		const setupMocksForTravellersWithCities = () => {
+			setupMocksForHasTravellers()
+			vi.mocked(travellersSlice.selectTravellers).mockReturnValue(
+				TRAVELLERS_WITH_CITIES,
+			)
+		}
+
+		const getCheckbox = (city) =>
+			screen.getByRole('checkbox', {
+				name: `${city.city}, ${city.country}`,
+			})
+
+		it('should render one active checkbox per distinct city', () => {
+			setupMocksForTravellersWithCities()
+			renderTravellersList()
+
+			const checkboxes = screen.getAllByRole('checkbox')
+			expect(checkboxes).toHaveLength(2)
+			checkboxes.forEach((checkbox) => expect(checkbox).toBeChecked())
+			expect(
+				screen.getAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
+			).toHaveLength(2)
+		})
+
+		it('should hide travellers whose cities are all filtered out', () => {
+			setupMocksForTravellersWithCities()
+			renderTravellersList()
+
+			fireEvent.click(getCheckbox(MOCK_CITIES.PRAGUE))
+			expect(
+				screen.getAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
+			).toHaveLength(2)
+
+			fireEvent.click(getCheckbox(MOCK_CITIES.TOKYO))
+			expect(
+				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
+			).not.toBeInTheDocument()
+			expect(
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.NO_MATCHES),
+			).toHaveTextContent(UI_TEXT.TRAVELLERS.NO_MATCHING_MESSAGE)
+
+			fireEvent.click(getCheckbox(MOCK_CITIES.PRAGUE))
+			expect(
+				screen.getAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
+			).toHaveLength(1)
+		})
+
+		it('should not render the filter when no traveller has a city', () => {
+			setupMocksForHasTravellers()
+			renderTravellersList()
+
+			expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
 		})
 	})
 })

@@ -1,0 +1,38 @@
+@use '@/styles/setup/mixins/helpers' as helpers;
+
+.filter {
+	border: none;
+	margin: 0 0 1rem;
+	padding: 0;
+}
+
+.legend {
+	font-size: 1.5rem;
+	font-weight: bold;
+	margin: 0.5rem 0;
+	padding: 0;
+}
+
+.options {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.option {
+	margin-right: 1rem;
+}
+
+.label {
+	@include helpers.user-select(none);
+
+	&.active {
+		font-weight: bold;
+	}
+}
+
+@media (max-width: 440px) {
+	.option {
+		margin-right: 0;
+		width: 50%;
+	}
+}
