@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 
 import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
-import TravellersList from '@/components/travellers/TravellersList/TravellersList'
+import TravellersList from '@/components/travellers/travellers-list/TravellersList'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 import Alerts from '@/components/ui/alerts/Alerts'

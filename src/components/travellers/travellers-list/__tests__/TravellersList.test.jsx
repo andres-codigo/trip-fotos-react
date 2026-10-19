@@ -57,7 +57,7 @@ vi.mock('@/components/travellers/traveller-item/TravellerItem', () => ({
 	default: () => <li data-cy="traveller-item">Traveller item</li>,
 }))
 
-import TravellersList from '@/components/travellers/TravellersList/TravellersList'
+import TravellersList from '@/components/travellers/travellers-list/TravellersList'
 import * as travellersSlice from '@/store/slices/travellersSlice'
 import * as authenticationSlice from '@/store/slices/authenticationSlice'
 
