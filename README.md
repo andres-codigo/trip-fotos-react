@@ -220,6 +220,24 @@ npm run preview
 
     - **Cloud Storage**
         - Set up a [Blaze Plan](https://firebase.google.com/pricing?hl=en) to enable storage capabilities.
+        - Under "Rules", let signed-in users write only to their own folder (the app signs in through the Firebase Auth SDK, so uploads carry the user's ID token) and let the admin delete other travellers' photos. Replace `ADMIN_UID` with your `VITE_ADMIN_ID` value, as rules cannot read environment variables:
+
+            ```
+            rules_version = '2';
+            service firebase.storage {
+              match /b/{bucket}/o {
+                match /images/{userId}/{fileName} {
+                  allow read: if request.auth != null;
+                  allow create, update: if request.auth != null
+                    && request.auth.uid == userId
+                    && request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+                  allow delete: if request.auth != null
+                    && (request.auth.uid == userId || request.auth.uid == 'ADMIN_UID');
+                }
+              }
+            }
+            ```
 
 3. **Add Firebase to Your Web App**
     - Register your app in the Firebase Console.

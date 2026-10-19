@@ -4,7 +4,6 @@ import { configureStore } from '@reduxjs/toolkit'
 import { API_DATABASE } from '@/constants/api'
 import { FIREBASE_ERRORS } from '@/constants/auth'
 import {
-	MOCK_API,
 	MOCK_KEYS,
 	MOCK_STORAGE_KEYS,
 	MOCK_USER,
@@ -26,6 +25,24 @@ import authenticationReducer, {
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
+import {
+	createUserWithEmailAndPassword,
+	signInWithEmailAndPassword,
+	signOut,
+} from 'firebase/auth'
+import { firebaseAuth } from '@/services/firebase/firebase'
+
+vi.mock('firebase/auth', () => ({
+	createUserWithEmailAndPassword: vi.fn(),
+	signInWithEmailAndPassword: vi.fn(),
+	signOut: vi.fn(() => Promise.resolve()),
+}))
+
+vi.mock('@/services/firebase/firebase', () => ({
+	firebaseApp: {},
+	firebaseAuth: { name: 'mock-auth' },
+}))
+
 /**
  * authenticationSlice Unit Tests
  *
@@ -34,7 +51,7 @@ import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
  * Mocks:
  * - API_DATABASE: Mock Firebase authentication API configuration
  * - COMMON_HEADERS: Mock HTTP headers for API requests
- * - global.fetch: Mock fetch API for authentication requests
+ * - firebase/auth: Mock Auth SDK sign-in, sign-up and sign-out
  * - localStorage: Mock storage for session persistence
  * - timers: Fake timers for testing auto-logout functionality
  *
@@ -216,155 +233,169 @@ describe('authenticationSlice', () => {
 
 	describe('actions', () => {
 		describe('login', () => {
+			const credentials = {
+				email: MOCK_KEYS.EMAIL,
+				password: MOCK_KEYS.PASSWORD,
+			}
+			const expirationTime = new Date(
+				Date.now() + MOCK_KEYS.EXPIRES_IN * 1000,
+			).toUTCString()
+
+			const mockUserCredential = (displayName) => ({
+				user: {
+					uid: MOCK_KEYS.LOCAL_ID,
+					email: MOCK_KEYS.EMAIL,
+					displayName,
+					getIdTokenResult: vi.fn().mockResolvedValue({
+						token: MOCK_KEYS.ID_TOKEN,
+						expirationTime,
+					}),
+				},
+			})
+
 			describe('success scenarios', () => {
 				const loginTestCases = [
 					{
 						description: 'empty string',
 						displayName: '',
 						mode: API_DATABASE.AUTH_LOGIN_MODE,
+						sdkMethod: signInWithEmailAndPassword,
+					},
+					{
+						description: 'null',
+						displayName: null,
+						mode: API_DATABASE.AUTH_LOGIN_MODE,
+						sdkMethod: signInWithEmailAndPassword,
 					},
 					{
 						description: 'non-empty string',
 						displayName: 'Test User',
 						mode: API_DATABASE.AUTH_LOGIN_MODE,
-					},
-					{
-						description: 'empty string (signup)',
-						displayName: '',
-						mode: API_DATABASE.AUTH_SIGNUP_MODE,
+						sdkMethod: signInWithEmailAndPassword,
 					},
 					{
 						description: 'non-empty string (signup)',
 						displayName: 'Test User',
 						mode: API_DATABASE.AUTH_SIGNUP_MODE,
+						sdkMethod: createUserWithEmailAndPassword,
 					},
 				]
 
-				describe.each(loginTestCases)(
-					'login test cases',
-					({ description, displayName, mode }) => {
-						it(`should handle login success when displayName is ${description} and mode is ${mode}`, async () => {
-							const mockResponse = {
-								idToken: MOCK_KEYS.ID_TOKEN,
-								localId: MOCK_KEYS.LOCAL_ID,
-								displayName: displayName,
-								email: MOCK_KEYS.EMAIL,
-								expiresIn: MOCK_KEYS.EXPIRES_IN,
-							}
+				it.each(loginTestCases)(
+					'signs in through the SDK when displayName is $description and mode is $mode',
+					async ({ displayName, mode, sdkMethod }) => {
+						sdkMethod.mockResolvedValueOnce(
+							mockUserCredential(displayName),
+						)
 
-							fetch.mockResolvedValueOnce({
-								ok: true,
-								json: async () => mockResponse,
-							})
+						await store.dispatch(login({ mode, ...credentials }))
 
-							await store.dispatch(
-								login({
-									mode,
-									email: MOCK_KEYS.EMAIL,
-									password: MOCK_KEYS.PASSWORD,
-								}),
-							)
+						expect(sdkMethod).toHaveBeenCalledWith(
+							firebaseAuth,
+							MOCK_KEYS.EMAIL,
+							MOCK_KEYS.PASSWORD,
+						)
 
-							const expectedUrl =
-								mode === API_DATABASE.AUTH_SIGNUP_MODE
-									? `${MOCK_API.URL}signUp?key=${MOCK_API.KEY}`
-									: `${MOCK_API.URL}signInWithPassword?key=${MOCK_API.KEY}`
+						const state = store.getState().authentication
+						expect(state.token).toBe(MOCK_KEYS.ID_TOKEN)
+						expect(state.userId).toBe(MOCK_KEYS.LOCAL_ID)
+						expect(state.userName).toBe(displayName || '')
+						expect(state.userEmail).toBe(MOCK_KEYS.EMAIL)
 
-							expect(fetch).toHaveBeenCalledWith(
-								expectedUrl,
-								expect.objectContaining({
-									method: API_DATABASE.POST,
-									body: JSON.stringify({
-										email: MOCK_KEYS.EMAIL,
-										password: MOCK_KEYS.PASSWORD,
-										returnSecureToken: true,
-									}),
-								}),
-							)
-
-							const state = store.getState().authentication
-							expect(state.token).toBe(MOCK_KEYS.ID_TOKEN)
-							expect(state.userId).toBe(MOCK_KEYS.LOCAL_ID)
-							expect(state.userName).toBe(displayName)
-							expect(state.userEmail).toBe(MOCK_KEYS.EMAIL)
-
-							expect(localStorage.setItem).toHaveBeenCalledWith(
-								MOCK_STORAGE_KEYS.TOKEN,
-								MOCK_KEYS.ID_TOKEN,
-							)
-							expect(localStorage.setItem).toHaveBeenCalledWith(
-								MOCK_STORAGE_KEYS.USER_ID,
-								MOCK_KEYS.LOCAL_ID,
-							)
-							expect(localStorage.setItem).toHaveBeenCalledWith(
-								MOCK_STORAGE_KEYS.USER_NAME,
-								displayName,
-							)
-							expect(localStorage.setItem).toHaveBeenCalledWith(
-								MOCK_STORAGE_KEYS.USER_EMAIL,
-								MOCK_KEYS.EMAIL,
-							)
-						})
+						expect(localStorage.setItem).toHaveBeenCalledWith(
+							MOCK_STORAGE_KEYS.TOKEN,
+							MOCK_KEYS.ID_TOKEN,
+						)
+						expect(localStorage.setItem).toHaveBeenCalledWith(
+							MOCK_STORAGE_KEYS.USER_ID,
+							MOCK_KEYS.LOCAL_ID,
+						)
+						expect(localStorage.setItem).toHaveBeenCalledWith(
+							MOCK_STORAGE_KEYS.USER_NAME,
+							displayName || '',
+						)
+						expect(localStorage.setItem).toHaveBeenCalledWith(
+							MOCK_STORAGE_KEYS.USER_EMAIL,
+							MOCK_KEYS.EMAIL,
+						)
+						expect(localStorage.setItem).toHaveBeenCalledWith(
+							MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
+							new Date(expirationTime).getTime(),
+						)
 					},
 				)
 			})
 
 			describe('failure scenarios', () => {
-				it('should handle login failure and return error message', async () => {
-					const mockErrorMessage = API_ERROR_MESSAGE.INVALID_PASSWORD
-					fetch.mockResolvedValueOnce({
-						ok: false,
-						json: async () => ({
-							error: { message: mockErrorMessage },
-						}),
-					})
+				const { AUTHENTICATION_ACTION_TYPES: authTypes } =
+					FIREBASE_ERRORS
 
-					const result = await store.dispatch(
-						login({
-							mode: API_DATABASE.AUTH_LOGIN_MODE,
-							email: MOCK_KEYS.EMAIL,
-							password: MOCK_KEYS.PASSWORD,
-						}),
-					)
+				it.each([
+					[
+						'auth/invalid-credential',
+						authTypes.INVALID_LOGIN_CREDENTIALS,
+					],
+					[
+						'auth/wrong-password',
+						authTypes.INVALID_LOGIN_CREDENTIALS,
+					],
+					[
+						'auth/user-not-found',
+						authTypes.INVALID_LOGIN_CREDENTIALS,
+					],
+					[
+						'auth/too-many-requests',
+						authTypes.TOO_MANY_ATTEMPTS_TRY_LATER,
+					],
+				])(
+					'maps SDK code %s to %s on login',
+					async (code, expected) => {
+						signInWithEmailAndPassword.mockRejectedValueOnce({
+							code,
+						})
 
-					expect(result.payload).toBe(mockErrorMessage)
-					expect(result.meta.rejectedWithValue).toBe(true)
-				})
+						const result = await store.dispatch(
+							login({
+								mode: API_DATABASE.AUTH_LOGIN_MODE,
+								...credentials,
+							}),
+						)
 
-				it('should handle signup failure with existing email and return error message', async () => {
-					const mockErrorMessage =
-						FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.EMAIL_EXISTS
+						expect(result.payload).toBe(expected)
+						expect(result.meta.rejectedWithValue).toBe(true)
+					},
+				)
 
-					fetch.mockResolvedValueOnce({
-						ok: false,
-						json: async () => ({
-							error: { message: mockErrorMessage },
-						}),
+				it('maps an existing email on signup to EMAIL_EXISTS', async () => {
+					createUserWithEmailAndPassword.mockRejectedValueOnce({
+						code: 'auth/email-already-in-use',
 					})
 
 					const result = await store.dispatch(
 						login({
 							mode: API_DATABASE.AUTH_SIGNUP_MODE,
-							email: MOCK_KEYS.EMAIL,
-							password: MOCK_KEYS.PASSWORD,
+							...credentials,
 						}),
 					)
 
-					expect(fetch).toHaveBeenCalledWith(
-						`${MOCK_API.URL}signUp?key=${MOCK_API.KEY}`,
-						expect.objectContaining({
-							method: API_DATABASE.POST,
-							body: JSON.stringify({
-								email: MOCK_KEYS.EMAIL,
-								password: MOCK_KEYS.PASSWORD,
-								returnSecureToken: true,
-							}),
-						}),
-					)
-
-					expect(result.payload).toBe(mockErrorMessage)
-					expect(result.meta.rejectedWithValue).toBe(true)
+					expect(result.payload).toBe(authTypes.EMAIL_EXISTS)
 				})
+
+				it('passes an unmapped SDK code through', async () => {
+					signInWithEmailAndPassword.mockRejectedValueOnce({
+						code: 'auth/user-disabled',
+					})
+
+					const result = await store.dispatch(
+						login({
+							mode: API_DATABASE.AUTH_LOGIN_MODE,
+							...credentials,
+						}),
+					)
+
+					expect(result.payload).toBe('auth/user-disabled')
+				})
+
 				it('should handle autoLogout.rejected and set error state', async () => {
 					const mockErrorMessage =
 						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR
@@ -387,49 +418,29 @@ describe('authenticationSlice', () => {
 					expect(state.error).toBe(mockErrorMessage)
 				})
 
-				it('should handle login failure with missing error message and use fallback', async () => {
-					fetch.mockResolvedValueOnce({
-						ok: false,
-						json: async () => ({
-							error: { message: null }, // or message: undefined, or no message property
-						}),
-					})
+				it('uses the fallback when an error has no code or message', async () => {
+					signInWithEmailAndPassword.mockRejectedValueOnce({})
 
 					const result = await store.dispatch(
 						login({
 							mode: API_DATABASE.AUTH_LOGIN_MODE,
-							email: MOCK_KEYS.EMAIL,
-							password: MOCK_KEYS.PASSWORD,
+							...credentials,
 						}),
 					)
 
 					expect(result.payload).toBe(
 						ERROR_MESSAGES.LOGIN_FAILED_FALLBACK,
 					)
-					expect(result.meta.rejectedWithValue).toBe(true)
 				})
 
-				it('should handle network errors', async () => {
+				it('should handle network errors without changing state', async () => {
 					const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
-					fetch.mockRejectedValueOnce(mockError)
+					signInWithEmailAndPassword.mockRejectedValueOnce(mockError)
 
 					const result = await store.dispatch(
 						login({
 							mode: API_DATABASE.AUTH_LOGIN_MODE,
-							email: MOCK_KEYS.EMAIL,
-							password: MOCK_KEYS.PASSWORD,
-						}),
-					)
-
-					expect(fetch).toHaveBeenCalledWith(
-						`${MOCK_API.URL}signInWithPassword?key=${MOCK_API.KEY}`,
-						expect.objectContaining({
-							method: API_DATABASE.POST,
-							body: JSON.stringify({
-								email: MOCK_KEYS.EMAIL,
-								password: MOCK_KEYS.PASSWORD,
-								returnSecureToken: true,
-							}),
+							...credentials,
 						}),
 					)
 
@@ -567,6 +578,7 @@ describe('authenticationSlice', () => {
 					expect(state.userId).toBeNull()
 					expect(state.userName).toBeNull()
 					expect(state.userEmail).toBeNull()
+					expect(signOut).toHaveBeenCalledWith(firebaseAuth)
 
 					expect(localStorage.removeItem).toHaveBeenCalledWith(
 						MOCK_STORAGE_KEYS.TOKEN,
@@ -636,17 +648,19 @@ describe('authenticationSlice', () => {
 				})
 
 				it('should set timer and dispatch autoLogout when timer expires after successful login', async () => {
-					const mockResponse = {
-						idToken: MOCK_KEYS.ID_TOKEN,
-						localId: MOCK_KEYS.LOCAL_ID,
-						displayName: MOCK_USER.FULL_NAME,
-						email: MOCK_KEYS.EMAIL,
-						expiresIn: MOCK_KEYS.EXPIRES_IN,
-					}
-
-					fetch.mockResolvedValueOnce({
-						ok: true,
-						json: async () => mockResponse,
+					const expiresInMs = +MOCK_KEYS.EXPIRES_IN * 1000
+					signInWithEmailAndPassword.mockResolvedValueOnce({
+						user: {
+							uid: MOCK_KEYS.LOCAL_ID,
+							email: MOCK_KEYS.EMAIL,
+							displayName: MOCK_USER.FULL_NAME,
+							getIdTokenResult: vi.fn().mockResolvedValue({
+								token: MOCK_KEYS.ID_TOKEN,
+								expirationTime: new Date(
+									Date.now() + expiresInMs,
+								).toISOString(),
+							}),
+						},
 					})
 
 					await store.dispatch(
@@ -663,13 +677,9 @@ describe('authenticationSlice', () => {
 					expect(state.didAutoLogout).toBe(false)
 
 					// Verify setTimeout was called with correct duration
-					expect(setTimeoutSpy).toHaveBeenCalledWith(
-						expect.any(Function),
-						+MOCK_KEYS.EXPIRES_IN * 1000,
-					)
-
-					// Get the callback function from setTimeout
-					const timerCallback = setTimeoutSpy.mock.calls[0][0]
+					const [timerCallback, delay] = setTimeoutSpy.mock.calls[0]
+					expect(delay).toBeGreaterThan(expiresInMs - 1000)
+					expect(delay).toBeLessThanOrEqual(expiresInMs)
 
 					// Execute the callback to trigger autoLogout
 					await timerCallback()

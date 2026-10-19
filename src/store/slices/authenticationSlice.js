@@ -1,7 +1,15 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
+import {
+	createUserWithEmailAndPassword,
+	signInWithEmailAndPassword,
+	signOut,
+} from 'firebase/auth'
+
+import { firebaseAuth } from '@/services/firebase/firebase'
 
 import { AUTHENTICATION_ACTION_TYPES } from '@/constants/redux'
-import { API_DATABASE, COMMON_HEADERS } from '@/constants/api'
+import { API_DATABASE } from '@/constants/api'
+import { FIREBASE_ERRORS } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
 
 let timer
@@ -9,37 +17,28 @@ let timer
 export const login = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.LOGIN,
 	async (payload, { dispatch, rejectWithValue }) => {
-		const url =
+		// The SDK session is what authorises Cloud Storage uploads; the REST API alone leaves Storage anonymous
+		const authenticate =
 			payload.mode === API_DATABASE.AUTH_SIGNUP_MODE
-				? `${API_DATABASE.URL}signUp?key=${API_DATABASE.KEY}`
-				: `${API_DATABASE.URL}signInWithPassword?key=${API_DATABASE.KEY}`
+				? createUserWithEmailAndPassword
+				: signInWithEmailAndPassword
 
 		try {
-			const response = await fetch(url, {
-				method: API_DATABASE.POST,
-				body: JSON.stringify({
-					email: payload.email,
-					password: payload.password,
-					returnSecureToken: true,
-				}),
-				headers: COMMON_HEADERS.JSON,
-			})
+			const { user } = await authenticate(
+				firebaseAuth,
+				payload.email,
+				payload.password,
+			)
+			const { token, expirationTime } = await user.getIdTokenResult()
 
-			const data = await response.json()
+			const expirationDate = new Date(expirationTime).getTime()
+			const expiresIn = expirationDate - new Date().getTime()
+			const userName = user.displayName || ''
 
-			if (!response.ok) {
-				throw new Error(
-					data.error.message || ERROR_MESSAGES.LOGIN_FAILED_FALLBACK,
-				)
-			}
-
-			const expiresIn = +data.expiresIn * 1000
-			const expirationDate = new Date().getTime() + expiresIn
-
-			localStorage.setItem('token', data.idToken)
-			localStorage.setItem('userId', data.localId)
-			localStorage.setItem('userName', data.displayName || '')
-			localStorage.setItem('userEmail', data.email)
+			localStorage.setItem('token', token)
+			localStorage.setItem('userId', user.uid)
+			localStorage.setItem('userName', userName)
+			localStorage.setItem('userEmail', user.email)
 			localStorage.setItem('tokenExpiration', expirationDate)
 
 			timer = setTimeout(() => {
@@ -47,13 +46,20 @@ export const login = createAsyncThunk(
 			}, expiresIn)
 
 			return {
-				token: data.idToken,
-				userId: data.localId,
-				userName: data.displayName || '',
-				userEmail: data.email,
+				token,
+				userId: user.uid,
+				userName,
+				userEmail: user.email,
 			}
 		} catch (error) {
-			return rejectWithValue(error.message)
+			if (error.code) {
+				return rejectWithValue(
+					FIREBASE_ERRORS.SDK_ERROR_CODES[error.code] ?? error.code,
+				)
+			}
+			return rejectWithValue(
+				error.message || ERROR_MESSAGES.LOGIN_FAILED_FALLBACK,
+			)
 		}
 	},
 )
@@ -110,6 +116,8 @@ export const logout = createAsyncThunk(
 			clearTimeout(timer)
 
 			dispatch(authActions.clearUser())
+
+			await signOut(firebaseAuth)
 		} catch (error) {
 			return rejectWithValue(error.message)
 		}

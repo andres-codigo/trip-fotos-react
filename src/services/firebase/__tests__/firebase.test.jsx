@@ -1,8 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { initializeApp } from 'firebase/app'
+import { getAuth } from 'firebase/auth'
 
 vi.mock('firebase/app', () => ({
 	initializeApp: vi.fn(),
+}))
+
+vi.mock('firebase/auth', () => ({
+	getAuth: vi.fn(() => ({ name: 'mock-auth' })),
 }))
 
 vi.mock('@/constants/firebase', () => ({
@@ -34,6 +39,14 @@ describe('Firebase Configuration', () => {
 	})
 
 	describe('Initialisation tests', () => {
+		it('exports the Auth instance for the initialised app', async () => {
+			const { firebaseAuth } =
+				await import('@/services/firebase/firebase.js')
+
+			expect(getAuth).toHaveBeenCalledWith(mockApp)
+			expect(firebaseAuth).toEqual({ name: 'mock-auth' })
+		})
+
 		it('initialises Firebase app with correct configuration', async () => {
 			const { firebaseApp } =
 				await import('@/services/firebase/firebase.js')
