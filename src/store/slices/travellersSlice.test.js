@@ -19,6 +19,8 @@ import travellersReducer, {
 	updateTravellers,
 	loadTraveller,
 	loadTravellers,
+	deleteTraveller,
+	deleteTravellerMessages,
 	setIsTraveller,
 	setTravellers,
 	selectTravellers,
@@ -29,7 +31,7 @@ import travellersReducer, {
 } from './travellersSlice'
 
 import { handleApiError } from '@/utils/errorHandler'
-import { getStorage } from 'firebase/storage'
+import { deleteObject, getStorage, ref } from 'firebase/storage'
 import { firebaseApp } from '@/services/firebase/firebase'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
@@ -37,7 +39,8 @@ import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 // Mock Firebase Storage
 vi.mock('firebase/storage', () => ({
 	getStorage: vi.fn(),
-	ref: vi.fn(),
+	ref: vi.fn((storage, path) => path),
+	deleteObject: vi.fn(() => Promise.resolve()),
 	uploadBytesResumable: vi.fn(() => ({
 		on: vi.fn((event, progress, error, complete) => {
 			complete()
@@ -632,6 +635,241 @@ describe('travellersSlice', () => {
 				expect(result.payload).toBe(
 					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 				)
+			})
+		})
+	})
+
+	describe('deleteTravellerMessages', () => {
+		const travellerId = 'traveller-to-delete'
+
+		describe('success scenarios', () => {
+			it('should send an authorised DELETE for the traveller messages', async () => {
+				fetch.mockResolvedValueOnce({ ok: true })
+
+				const result = await store.dispatch(
+					deleteTravellerMessages(travellerId),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(result.payload).toBe(travellerId)
+				expect(fetch).toHaveBeenCalledWith(
+					expect.stringContaining(
+						`/messages/${travellerId}.json?auth=${MOCK_USER.TOKEN}`,
+					),
+					expect.objectContaining({ method: 'DELETE' }),
+				)
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('should reject when the response is not ok', async () => {
+				fetch.mockResolvedValueOnce({ ok: false, status: 401 })
+
+				const result = await store.dispatch(
+					deleteTravellerMessages(travellerId),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(result.payload).toContain(
+					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_MESSAGES_CATCH}${travellerId}`,
+				)
+			})
+
+			it('should reject on a network error', async () => {
+				fetch.mockRejectedValueOnce(new Error('Network Error'))
+
+				const result = await store.dispatch(
+					deleteTravellerMessages(travellerId),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(handleApiError).toHaveBeenCalled()
+			})
+		})
+	})
+
+	describe('deleteTraveller', () => {
+		const travellerId = 'traveller-to-delete'
+		const files = [
+			'https://storage.example.com/images/traveller-to-delete/one.jpg',
+			'https://storage.example.com/images/traveller-to-delete/two.jpg',
+		]
+		const remainingTraveller = {
+			...MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE,
+			id: 'remaining-traveller',
+		}
+
+		const preloadStore = () =>
+			configureStore({
+				reducer: { travellers: travellersReducer },
+				preloadedState: {
+					travellers: {
+						travellerName: '',
+						isTraveller: false,
+						hasTravellers: true,
+						travellers: [
+							remainingTraveller,
+							{ id: travellerId, files },
+						],
+						selectedTraveller: { id: travellerId },
+						lastFetch: new Date().getTime(),
+						status: 'idle',
+						error: null,
+					},
+				},
+			})
+
+		const mockFetchByUrl = ({
+			travellerOk = true,
+			messagesOk = true,
+		} = {}) =>
+			fetch.mockImplementation(async (url, options) => {
+				if (url.includes('/travellers/')) {
+					return { ok: travellerOk }
+				}
+				if (url.includes('/messages/')) {
+					return { ok: messagesOk }
+				}
+				if (options?.method === 'GET') {
+					return {
+						ok: true,
+						json: async () => ({
+							[remainingTraveller.id]: remainingTraveller,
+						}),
+					}
+				}
+				throw new Error(`Unexpected request: ${url}`)
+			})
+
+		describe('success scenarios', () => {
+			it('should delete the record, images and messages, then force a list refresh', async () => {
+				const testStore = preloadStore()
+				mockFetchByUrl()
+
+				const result = await testStore.dispatch(
+					deleteTraveller({ travellerId, files }),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(fetch).toHaveBeenCalledWith(
+					expect.stringContaining(
+						`/travellers/${travellerId}.json?auth=${MOCK_USER.TOKEN}`,
+					),
+					expect.objectContaining({ method: 'DELETE' }),
+				)
+				expect(getStorage).toHaveBeenCalledWith(firebaseApp)
+				files.forEach((file) =>
+					expect(ref).toHaveBeenCalledWith(undefined, file),
+				)
+				expect(deleteObject).toHaveBeenCalledTimes(files.length)
+				expect(fetch).toHaveBeenCalledWith(
+					expect.stringContaining(`/messages/${travellerId}.json`),
+					expect.objectContaining({ method: 'DELETE' }),
+				)
+				// The cache is still fresh, so a GET proves the refresh was forced
+				expect(fetch).toHaveBeenCalledWith(
+					expect.stringContaining('/travellers.json'),
+					expect.objectContaining({ method: 'GET' }),
+				)
+
+				const state = testStore.getState().travellers
+				expect(state.status).toBe('succeeded')
+				expect(state.travellers.map(({ id }) => id)).toEqual([
+					remainingTraveller.id,
+				])
+				expect(state.selectedTraveller).toBeNull()
+			})
+
+			it('should skip Storage when the traveller has no images', async () => {
+				const testStore = preloadStore()
+				mockFetchByUrl()
+
+				const result = await testStore.dispatch(
+					deleteTraveller({ travellerId }),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(deleteObject).not.toHaveBeenCalled()
+			})
+
+			it('should treat an already-missing image as deleted', async () => {
+				const testStore = preloadStore()
+				mockFetchByUrl()
+				deleteObject.mockRejectedValueOnce({
+					code: API_ERROR_MESSAGE.STORAGE_OBJECT_NOT_FOUND,
+				})
+
+				const result = await testStore.dispatch(
+					deleteTraveller({ travellerId, files }),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('should reject without touching Storage when the record delete fails', async () => {
+				const testStore = preloadStore()
+				mockFetchByUrl({ travellerOk: false })
+
+				const result = await testStore.dispatch(
+					deleteTraveller({ travellerId, files }),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(deleteObject).not.toHaveBeenCalled()
+
+				const state = testStore.getState().travellers
+				expect(state.status).toBe('failed')
+				expect(state.error).toContain(
+					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_CATCH}${travellerId}`,
+				)
+				expect(state.travellers).toHaveLength(2)
+			})
+
+			it('should reject when an image delete fails', async () => {
+				const testStore = preloadStore()
+				mockFetchByUrl()
+				deleteObject.mockRejectedValueOnce({
+					code: 'storage/unauthorized',
+				})
+
+				const result = await testStore.dispatch(
+					deleteTraveller({ travellerId, files }),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(fetch).not.toHaveBeenCalledWith(
+					expect.stringContaining('/messages/'),
+					expect.anything(),
+				)
+				expect(testStore.getState().travellers.status).toBe('failed')
+			})
+
+			it('should reject when the messages delete fails', async () => {
+				const testStore = preloadStore()
+				mockFetchByUrl({ messagesOk: false })
+
+				const result = await testStore.dispatch(
+					deleteTraveller({ travellerId, files }),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(result.payload).toContain(
+					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_CATCH}${travellerId}`,
+				)
+			})
+
+			it('should reject on a network error', async () => {
+				const testStore = preloadStore()
+				fetch.mockRejectedValueOnce(new Error('Network Error'))
+
+				const result = await testStore.dispatch(
+					deleteTraveller({ travellerId, files }),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(handleApiError).toHaveBeenCalled()
 			})
 		})
 	})

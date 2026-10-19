@@ -49,7 +49,7 @@ Work in progress. The engineering foundation is in place, and the user-facing fe
 
 - **Traveller cards** — travellers already load from the Realtime Database; next up is the card design for displaying each traveller's destination, days spent and photos
 - **Messaging** — the route and page are in place, ready for sending and reading messages between travellers
-- **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules, laying the groundwork for admin-only actions such as removing travellers
+- **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the store can remove a traveller with their database record, photos and messages, ready for the admin-only delete button on the travellers list
 
 <a id="stack"></a>
 
