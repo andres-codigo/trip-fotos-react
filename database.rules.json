@@ -1,0 +1,19 @@
+{
+	"rules": {
+		"travellers": {
+			".read": true,
+			"$uid": {
+				".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)"
+			}
+		},
+		"messages": {
+			"$travellerId": {
+				".read": "auth != null && (auth.uid === $travellerId || auth.token.admin === true)",
+				".write": "auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true)",
+				"$messageId": {
+					".write": "(!data.exists() && newData.exists()) || (auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true))"
+				}
+			}
+		}
+	}
+}

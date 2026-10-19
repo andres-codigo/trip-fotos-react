@@ -138,6 +138,9 @@ npm run format
 # NPM package dependency check
 npm run check:dependencies
 
+# Deploy Realtime Database and Storage security rules
+npm run firebase:rules
+
 # Grant or remove the admin custom claim (see Setup > Admin Role)
 npm run admin:claim -- <email> [--remove]
 
@@ -202,58 +205,32 @@ npm run preview
     - **Realtime Database**
         - Set the location to **United States (us-central1, us-east1, or us-west1)**.
         - Copy the database URL and add it to your `.env` file under `VITE_BACKEND_BASE_URL`.
-        - Update the database rules as follows:
-            ```json
-            {
-            	"rules": {
-            		"travellers": {
-            			".read": true,
-            			"$uid": {
-            				".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)"
-            			}
-            		},
-            		"messages": {
-            			"$travellerId": {
-            				".read": "auth != null && (auth.uid === $travellerId || auth.token.admin === true)",
-            				".write": "auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true)",
-            				"$messageId": {
-            					".write": "(!data.exists() && newData.exists()) || (auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true))"
-            				}
-            			}
-            		}
-            	}
-            }
-            ```
-
-            Travellers can only change their own record, and only the recipient (or an admin) can read or delete messages; anyone can send a new message, but not edit an existing one.
+        - Rules live in [`database.rules.json`](database.rules.json) and are deployed with `npm run firebase:rules` (see [Firebase Security Rules](#firebase-security-rules)).
+          Travellers can only change their own record, and only the recipient (or an admin) can read or delete messages; anyone can send a new message, but not edit an existing one.
 
     - **Authentication**
         - Go to "Sign-in Method" and enable **Email/Password**. Ensure **Email link (passwordless sign-in)** is NOT enabled.
 
     - **Cloud Storage**
         - Set up a [Blaze Plan](https://firebase.google.com/pricing?hl=en) to enable storage capabilities.
-        - Under "Rules", let signed-in users write only to their own folder (the app signs in through the Firebase Auth SDK, so uploads carry the user's ID token) and let an admin (see [Admin Role](#admin-role)) delete other travellers' photos:
-
-            ```
-            rules_version = '2';
-            service firebase.storage {
-              match /b/{bucket}/o {
-                match /images/{userId}/{fileName} {
-                  allow read: if request.auth != null;
-                  allow create, update: if request.auth != null
-                    && request.auth.uid == userId
-                    && request.resource.size < 5 * 1024 * 1024
-                    && request.resource.contentType.matches('image/.*');
-                  allow delete: if request.auth != null
-                    && (request.auth.uid == userId || request.auth.token.admin == true);
-                }
-              }
-            }
-            ```
+        - Rules live in [`storage.rules`](storage.rules): signed-in users write only to their own `images/{uid}/` folder (the app signs in through the Firebase Auth SDK, so uploads carry the user's ID token), and an admin (see [Admin Role](#admin-role)) can delete other travellers' photos.
 
 3. **Add Firebase to Your Web App**
     - Register your app in the Firebase Console.
     - Copy the Firebase configuration values and add them to your `.env` file.
+
+<a id="firebase-security-rules"></a>
+
+#### Firebase Security Rules
+
+`firebase.json` points the Firebase CLI at `database.rules.json` and `storage.rules`, so the rules are versioned with the code. Edit them there, never in the Console, then deploy to the project in `.firebaserc`:
+
+```bash
+npx firebase-tools login      # once
+npm run firebase:rules        # firebase-tools deploy --only database,storage
+```
+
+Use the Console's Rules Playground to try a rule before deploying it.
 
 <a id="admin-role"></a>
 
@@ -794,12 +771,15 @@ trip-fotos-react/
 ├── .prettierrc.json             # Prettier configuration
 ├── CLAUDE.md                    # Workspace-level Claude Code guidelines
 ├── cypress.config.js            # Cypress testing configuration
+├── database.rules.json          # Realtime Database security rules
 ├── eslint-plugin-react-hooks.d.ts # Type declaration shim for the ESLint React Hooks plugin
 ├── eslint.config.mjs            # ESLint configuration
+├── firebase.json                # Firebase CLI config (points at the rules files)
 ├── index.html                   # Vite HTML entry point
 ├── jsconfig.json                # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
 ├── package.json                 # Project dependencies and scripts
 ├── README.md                    # Project documentation
+├── storage.rules                # Cloud Storage security rules
 ├── vercel.json                  # Vercel deployment configuration
 └── vite.config.js               # Vite build tool configuration
 ```
