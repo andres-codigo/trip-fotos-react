@@ -10,6 +10,7 @@ import Input from '@/components/ui/form/input/Input'
 import Textarea from '@/components/ui/form/textarea/Textarea'
 import Checkbox from '@/components/ui/form/checkbox/Checkbox'
 import BaseButton from '@/components/ui/button/BaseButton'
+import AddFile from '@/components/forms/file-uploader/AddFile'
 
 import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
 import { useTravellerRegistration } from './hooks/useTravellerRegistration'
@@ -17,10 +18,15 @@ import { useTravellerRegistration } from './hooks/useTravellerRegistration'
 import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'
 
 const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
-	const { formData, handleInputChange, handleCheckboxChange, submitHandler } =
-		useTravellerRegistration()
+	const {
+		formData,
+		handleInputChange,
+		handleCheckboxChange,
+		handleFilesUpdated,
+		submitHandler,
+	} = useTravellerRegistration()
 
-	const { FIRST_NAME, LAST_NAME, DESCRIPTION, DAYS, CITIES } =
+	const { FIRST_NAME, LAST_NAME, DESCRIPTION, DAYS, CITIES, FILES } =
 		TRAVELLER_REGISTRATION_FIELDS
 
 	const fieldConfig = {
@@ -165,7 +171,14 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				)}
 			</fieldset>
 
-			{/* TODO: AddFile component */}
+			<fieldset
+				className={`${travellerRegistrationFormStyles.formControl} ${travellerRegistrationFormStyles.fieldset}`}>
+				<legend>Photos (optional)</legend>
+				<AddFile
+					id={FILES}
+					onFilesUpdated={handleFilesUpdated}
+				/>
+			</fieldset>
 
 			<div className={travellerRegistrationFormStyles.actions}>
 				<BaseButton

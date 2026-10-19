@@ -29,6 +29,8 @@ import travellersReducer, {
 } from './travellersSlice'
 
 import { handleApiError } from '@/utils/errorHandler'
+import { getStorage } from 'firebase/storage'
+import { firebaseApp } from '@/services/firebase/firebase'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
@@ -364,6 +366,8 @@ describe('travellersSlice', () => {
 
 				// Verify successful registration
 				expect(result.meta.requestStatus).toBe('fulfilled')
+				// Without the initialised app, Storage throws app/no-app
+				expect(getStorage).toHaveBeenCalledWith(firebaseApp)
 				expect(result.payload).toMatchObject({
 					id: MOCK_USER.USER_ID,
 					firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,

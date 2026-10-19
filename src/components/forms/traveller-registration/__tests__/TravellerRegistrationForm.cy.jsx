@@ -5,6 +5,7 @@ import TravellerRegistrationForm from '@/components/forms/traveller-registration
 import { ACCESSIBILITY } from '@/constants/ui'
 
 import {
+	FILE_UPLOADER_SELECTORS,
 	MOCK_TRAVELLERS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 } from '@/constants/test'
@@ -198,6 +199,46 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get('@onSubmit').should('have.been.called')
 		})
 
+		it('submits selected photos with the form', () => {
+			render()
+
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
+			)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT,
+			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString())
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO)
+				.next('label')
+				.click()
+
+			cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+				'cypress/fixtures/test-image.png',
+				{ force: true },
+			)
+			cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should(
+				'have.length',
+				1,
+			)
+
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
+			).click()
+
+			cy.get('@onSubmit')
+				.should('have.been.calledOnce')
+				.its('firstCall.args.0.files')
+				.should('have.length', 1)
+				.its('0.name')
+				.should('eq', 'test-image.png')
+		})
+
 		it('displays loading state correctly', () => {
 			render({ isLoading: true })
 
@@ -265,9 +306,10 @@ describe('<TravellerRegistrationForm />', () => {
 			render()
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM)
 				.find('fieldset')
-				.should('exist')
+				.first()
 				.within(() => {
 					cy.get('legend').should('contain', 'Cities visited')
+					cy.get('input[type="checkbox"]').should('have.length.gt', 0)
 				})
 		})
 

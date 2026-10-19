@@ -7,6 +7,8 @@ import {
 	uploadBytesResumable,
 } from 'firebase/storage'
 
+import { firebaseApp } from '@/services/firebase/firebase'
+
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import {
 	API_DATABASE,
@@ -82,7 +84,7 @@ export const registerTraveller = createAsyncThunk(
 			const imageUrls = []
 
 			const uploadImage = async (image) => {
-				const storage = getStorage()
+				const storage = getStorage(firebaseApp)
 				const storageRef = ref(
 					storage,
 					`/images/${userId}/${image.name}`,

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
@@ -14,6 +14,11 @@ export const useTravellerRegistration = () => {
 		[DAYS]: { value: '', message: '', isValid: true },
 		[CITIES]: { value: [], message: '', isValid: true },
 	})
+	const [files, setFiles] = useState([])
+
+	const handleFilesUpdated = useCallback((updatedFiles) => {
+		setFiles(updatedFiles)
+	}, [])
 
 	const validateField = (id, value) => {
 		if (id === FIRST_NAME && value.trim() === '') {
@@ -125,7 +130,7 @@ export const useTravellerRegistration = () => {
 			[DESCRIPTION]: formData[DESCRIPTION].value,
 			daysInCity: formData[DAYS].value,
 			[CITIES]: formData[CITIES].value,
-			[FILES]: [], // TODO: Implement file upload
+			[FILES]: files,
 		}
 
 		if (onSubmitSuccess) {
@@ -137,6 +142,7 @@ export const useTravellerRegistration = () => {
 		formData,
 		handleInputChange,
 		handleCheckboxChange,
+		handleFilesUpdated,
 		submitHandler,
 	}
 }

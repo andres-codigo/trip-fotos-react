@@ -1,4 +1,4 @@
-import { render, fireEvent, screen } from '@testing-library/react'
+import { render, fireEvent, screen, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 /**
@@ -14,7 +14,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
  */
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
-import { UI_TEXT } from '@/constants/test'
+import { FILE_DROP, UI_TEXT } from '@/constants/test'
+import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
 
 // Test selector constants
 const FORM_SELECTORS = {
@@ -50,6 +51,7 @@ describe('<TravellerRegistrationForm />', () => {
 		},
 		handleInputChange: vi.fn(),
 		handleCheckboxChange: vi.fn(),
+		handleFilesUpdated: vi.fn(),
 		submitHandler: (onSuccess) => (e) => {
 			e.preventDefault()
 			onSuccess?.({
@@ -551,5 +553,16 @@ describe('<TravellerRegistrationForm />', () => {
 			form.dispatchEvent(submitEvent)
 			expect(preventDefaultSpy).toHaveBeenCalled()
 		})
+	})
+
+	it('renders the optional photo uploader in its own fieldset', () => {
+		render(<TravellerRegistrationForm onSubmit={vi.fn()} />)
+		const fieldset = screen.getByRole('group', {
+			name: 'Photos (optional)',
+		})
+		expect(within(fieldset).getByTestId(FILE_DROP.INPUT)).toHaveAttribute(
+			'id',
+			TRAVELLER_REGISTRATION_FIELDS.FILES,
+		)
 	})
 })

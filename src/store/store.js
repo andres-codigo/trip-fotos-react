@@ -32,6 +32,8 @@ const store = configureStore({
 					'persist/PURGE',
 					'persist/REGISTER',
 				],
+				// File objects are passed to the upload thunk, never stored in state
+				ignoredActionPaths: ['meta.arg.files'],
 			},
 		}),
 })

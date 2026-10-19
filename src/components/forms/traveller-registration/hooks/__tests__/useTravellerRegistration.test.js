@@ -250,4 +250,36 @@ describe('useTravellerRegistration', () => {
 		expect(typeof result.current.handleCheckboxChange).toBe('function')
 		expect(typeof result.current.submitHandler).toBe('function')
 	})
+
+	it('submits the files reported by the uploader', () => {
+		const { result } = renderHook(() => useTravellerRegistration())
+		const files = [{ id: 'a', name: 'a.png', file: {} }]
+		const onSuccess = vi.fn()
+
+		act(() => {
+			result.current.handleInputChange({
+				target: { id: 'firstName', value: 'Ada' },
+			})
+			result.current.handleInputChange({
+				target: { id: 'lastName', value: 'Lovelace' },
+			})
+			result.current.handleInputChange({
+				target: { id: 'description', value: 'Hi' },
+			})
+			result.current.handleInputChange({
+				target: { id: 'days', value: '3' },
+			})
+			result.current.handleCheckboxChange({
+				target: { value: 'tokyo', checked: true },
+			})
+			result.current.handleFilesUpdated(files)
+		})
+		act(() => {
+			result.current.submitHandler(onSuccess)({ preventDefault: vi.fn() })
+		})
+
+		expect(onSuccess).toHaveBeenCalledWith(
+			expect.objectContaining({ files }),
+		)
+	})
 })

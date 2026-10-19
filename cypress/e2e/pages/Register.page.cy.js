@@ -2,6 +2,7 @@ import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import {
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
+	FILE_UPLOADER_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation'
@@ -108,6 +109,57 @@ describe('Register Page', () => {
 		cy.get('[role="alert"]')
 			.should('be.visible')
 			.and('contain', TRAVELLER_REGISTRATION_SUCCESS_MESSAGE)
+	})
+
+	it('registers a traveller with a photo uploaded to Storage', () => {
+		const { firstName, lastName, description, daysInCity, cities } =
+			MOCK_TRAVELLERS.NEW_TRAVELLER
+
+		// Storage is live (the fixed file name overwrites the same object each run); the DB write is stubbed
+		cy.intercept({
+			method: 'POST',
+			hostname: 'firebasestorage.googleapis.com',
+		}).as('uploadImage')
+		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
+			statusCode: 200,
+			body: {
+				...MOCK_TRAVELLERS.NEW_TRAVELLER,
+				registered: new Date().toISOString(),
+			},
+		}).as('registerTraveller')
+
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
+			firstName,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
+			lastName,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
+			description,
+		)
+		cy.get(
+			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+		).type(daysInCity)
+		cities.forEach((city) => {
+			cy.get(`label[for="${city}"]`).click()
+		})
+
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+			'cypress/fixtures/test-image.png',
+			{ force: true },
+		)
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should('have.length', 1)
+
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
+
+		cy.wait('@uploadImage', { timeout: REQUEST_TIMEOUT })
+		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
+			.its('request.body.files')
+			.should('have.length', 1)
+			.its('0')
+			.should('include', 'firebasestorage.googleapis.com')
+
+		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)
 	})
 
 	it('shows a loading dialog while registering', () => {
