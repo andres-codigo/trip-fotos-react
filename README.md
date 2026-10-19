@@ -32,7 +32,7 @@ This project is a UI and functional conversion from Vue to React and extends the
 
 ## 🚧 Status
 
-Work in progress. The engineering foundation is in place, and the user-facing features are being added on top of it.
+Feature parity with the original Vue app is complete: every user-facing feature has been ported on top of the engineering foundation.
 
 ### Done
 
@@ -43,16 +43,13 @@ Work in progress. The engineering foundation is in place, and the user-facing fe
 - **Traveller details** — `/travellers/:id` shows a traveller's full profile, cities and every photo, with a contact link for other travellers; unknown ids show a not-found message
 - **Contact a traveller** — `/travellers/:id/contact` (signed-in users only) sends a traveller a message from the user's email address, with email and message validation, a success alert on the travellers list and an error dialog if sending fails
 - **City filter** — checkboxes above the travellers list, built from the cities the loaded travellers have visited, narrow the list by city; all cities start selected
+- **Messaging** — travellers can be sent messages, and read and delete the messages they have received on the messages page
+- **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the admin can remove a traveller, with their database record, photos and messages, from the travellers list
 - **Routing and pages** — home, authentication, travellers, traveller details, contact traveller, register, messages, privacy policy and 404 pages
 - **Accessibility** — skip link, landmark structure and per-page titles, following an audit against [The Website Specification](https://specification.website)
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request
 - **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers
 - **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook and a `/verify` skill
-
-### In progress
-
-- **Messaging** — travellers can be sent messages, and read and delete the messages they have received on the messages page
-- **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the admin can remove a traveller, with their database record, photos and messages, from the travellers list
 
 <a id="stack"></a>
 
@@ -713,16 +710,16 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 ## ✨ Features
 
-See [🚧 Status](#status) for what is live and what is being built.
+See [🚧 Status](#status) for a fuller list of what is live.
 
 - **User Registration and Authentication**
   Users can sign up and log in using Firebase Authentication.
 
 - **Traveller Profiles**
-  Registered travellers can describe their travel destination, choose where they travelled to and record the number of days spent there. Travellers can upload photos, and signed-in users can send a traveller a message from their profile and read and delete their own messages.
+  Registered travellers can describe their travel destination, choose where they travelled to and record the number of days spent there. Travellers can upload photos, the travellers list can be filtered by city, and signed-in users can send a traveller a message from their profile and read and delete their own messages.
 
-- **Admin Access** _(in progress)_
-  Admin rights are a Firebase custom claim granted with `npm run admin:claim` (see [Admin Role](#admin-role)). This will allow the admin user to remove other travellers when logged in.
+- **Admin Access**
+  Admin rights are a Firebase custom claim granted with `npm run admin:claim` (see [Admin Role](#admin-role)). When logged in, the admin can remove other travellers, along with their photos and messages.
 
 - **Privacy Policy**
   A public `/privacy` page, linked from the site footer, explains what data the app collects (account, traveller registration, city search via Photon with the OpenStreetMap credit, browser storage and cookieless Vercel analytics) and where it is stored.
