@@ -19,6 +19,7 @@ The tools support my work, but I remain responsible for design decisions, implem
     - [How I integrate it](#how-i-integrate-it-1)
     - [How I use it](#how-i-use-it-1)
     - [How I control quality](#how-i-control-quality-1)
+- [Case Study: Automating the Vue Parity Port](#case-study-automating-the-vue-parity-port)
 - [My End-to-End Workflow](#my-end-to-end-workflow)
 
 ## Approach
@@ -86,7 +87,7 @@ Claude Code is integrated as a persistent, repository-aware coding environment:
 
 - [`CLAUDE.md`](../CLAUDE.md) provides stable project context for sessions.
 - [`.github/instructions`](../.github/instructions) is shared with Copilot, so both tools follow one source of truth for components, pages, Redux, styling, and testing.
-- [`.claude/agents`](../.claude/agents) contains thin subagent wrappers that delegate to the shared [`.github/agents`](../.github/agents) scaffolding workflows.
+- [`.claude/agents`](../.claude/agents) contains thin subagent wrappers that delegate to the shared [`.github/agents`](../.github/agents) scaffolding workflows (component, page, Redux slice and hook). They run on Sonnet, because scaffolding is mechanical and doesn't need the most capable model.
 - [`.claude/settings.json`](../.claude/settings.json) commits team-wide permissions and a `PostToolUse` hook that formats and lints every file Claude edits, feeding remaining ESLint errors straight back so they are fixed in the same turn.
 - [`.claude/skills/verify`](../.claude/skills/verify/SKILL.md) provides a `/verify` skill that runs the local quality gates (lint, Vitest, Cypress component tests, build) and reports a pass/fail summary. `/verify e2e` opts into the Cypress E2E suite, managing the local dev server lifecycle itself.
 - [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json) installs the Claude Code extension and CLI in the development container.
@@ -119,9 +120,31 @@ Claude Code follows the same engineering checks as the rest of the project:
 - run targeted tests first, then broader tests where appropriate
 - review the resulting diff
 - run `/verify` to check lint, tests, and the build locally before pushing
+- for unattended, multi-step work, enforce the checks through the harness (hooks, quality gates and denied permissions) instead of relying on instructions alone
 - verify CI behaviour before merging
 
 Shared permissions are committed in `.claude/settings.json` — they allow routine checks, ask before pushes or installs, and deny reading `.env` and `certs/`. Local credentials and machine-specific permissions stay in the gitignored `settings.local.json`. This allows the repository to describe the workflow without exposing personal configuration.
+
+## Case Study: Automating the Vue Parity Port
+
+The largest use of Claude Code in this project was porting the remaining features of the original Vue app (epic [#274](https://github.com/andres-codigo/trip-fotos-react/issues/274)). Instead of prompting feature by feature, I built a small pipeline of agents and skills on top of the existing tooling:
+
+1. **Audit:** a read-only agent compared the Vue and React codebases and wrote a gap report.
+2. **Backlog sync:** a skill turned the report into GitHub issues on the project board and wrote a dependency-ordered work queue. I reviewed a dry run and recorded my decisions in the report before anything was written to GitHub.
+3. **Implement:** a skill built one issue at a time with the scaffolding agents, passed `/verify`, and made one commit for each issue.
+4. **Orchestrate:** a top-level skill ran the queue on a single branch, ran the E2E suite and a code review, and opened one PR.
+
+The guardrails were enforced by the harness, not left to the prompt:
+
+- A `Stop` hook sent Claude back to the queue while items were pending. It gave up after three stops with no progress.
+- No commit could be made without passing `/verify`.
+- Pushes to `main` and merging PRs were denied.
+
+The original plan was to run unattended and review only the final PR. Part-way through I added a per-item review gate, so the run stopped after each commit until I approved it. That kept each review small and let me correct course before later items built on earlier ones.
+
+The result was 15 issues delivered in one PR ([#291](https://github.com/andres-codigo/trip-fotos-react/pull/291)), with one reviewable commit for each issue, and judgement calls recorded in the PR description. Once the epic was finished, I archived the tooling out of `.claude/` so it no longer loads in every session.
+
+The full write-up, plan, gap report and the archived skills, agent and hook are in [`vue-parity-programme/`](vue-parity-programme/README.md).
 
 ## My End-to-End Workflow
 

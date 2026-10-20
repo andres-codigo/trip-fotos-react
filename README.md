@@ -403,7 +403,6 @@ Automated scaffolding workflows for common tasks:
 - **Create Page**: Use the `create-page` agent to scaffold new pages with route integration and tests.
 - **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with RTK Query/thunks and tests.
 - **Create Hook**: Use the `create-hook` agent to scaffold new custom hooks with tests, component-scoped or shared.
-- **Parity Auditor**: Use the `parity-auditor` agent to compare the original [trip-fotos-vue](https://github.com/andres-codigo/trip-fotos-vue) app with this port and write a gap report.
 
 ### AI Assistance & Claude Code Guidance
 
@@ -421,28 +420,27 @@ Claude Code shares the Copilot guidance above rather than keeping its own copy, 
 
 #### Workflow Agents
 
-Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is a thin wrapper that delegates to the matching `.github/agents/*.agent.md` workflow, and runs on Sonnet (`model: sonnet`) to keep mechanical scaffolding and auditing cheap:
+Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is a thin wrapper that delegates to the matching `.github/agents/*.agent.md` workflow, and runs on Sonnet (`model: sonnet`) to keep mechanical scaffolding cheap:
 
 - **create-component**: Scaffold new components with full structure and tests.
 - **create-page**: Scaffold new pages with route integration and tests.
 - **create-redux-slice**: Scaffold new Redux slices with RTK Query/thunks and tests.
 - **create-hook**: Scaffold new custom hooks with tests.
-- **parity-auditor**: Compare trip-fotos-vue with this port and write `.claude/plans/parity-gap-report.md` (read-only otherwise).
 
 #### Hooks & Permissions
 
 - **File**: `.claude/settings.json` (committed; personal overrides go in the gitignored `.claude/settings.local.json`)
 - **Hook**: a `PostToolUse` hook runs `.claude/hooks/lint-edited-file.mjs` after every edit, applying Prettier and `eslint --fix`. Any remaining ESLint errors are fed back to Claude so they are fixed in the same turn.
-- **Hook**: a `Stop` hook runs `.claude/hooks/parity-stop-guard.mjs`, which keeps an unattended `/parity-run` working while queued issues remain. It does nothing unless `.claude/parity/state.json` (gitignored) marks a run as in progress, and gives up after three stops without progress.
 - **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git) run without prompting; read-only `gh issue`/`gh project` queries also run without prompting; pushes, PR creation, installs, and E2E runs ask first; reading `.env`/`certs/`, force-pushes, hard resets, pushes to `main`, and `gh pr merge` are denied.
 
 #### Skills
 
 - **`/verify`** (`.claude/skills/verify/`): runs ESLint, Vitest, Cypress component tests, and the production build, then reports a pass/fail table. Use before committing or opening a pull request.
 - **`/verify e2e`**: additionally runs the Cypress E2E suite via `.claude/skills/verify/run-e2e.mjs`, which reuses a dev server on port 3000 or starts one over HTTP (as CI does) and stops it afterwards. Opt-in and approval-gated, because the tests use the live Firebase project and `.env` credentials.
-- **`/backlog-sync [--apply]`** (`.claude/skills/backlog-sync/`): reconciles the parity gap report with the [project backlog](https://github.com/users/andres-codigo/projects/2/views/1) — updates stale issues, creates missing ones under a `Vue parity` epic, and writes the work queue. Dry run unless `--apply` is passed. Needs `gh auth refresh -s read:project,project`.
-- **`/implement-item <issue>`** (`.claude/skills/implement-item/`): implements one backlog issue with the scaffolding agents, passes `/verify`, and makes one commit referencing the issue.
-- **`/parity-run`** (`.claude/skills/parity-run/`): runs the whole programme in `.claude/plans/vue-parity-plan.md` — audit, backlog sync, one commit per issue on `feature/vue-parity`, `/verify e2e`, and a single PR for review. Resumable. Each issue moves to `in progress` on the project board when `/implement-item` starts it (via `.claude/skills/implement-item/set-board-status.sh`) and to `done` when the final PR merges. Set `"reviewEachItem": true` in the state file to pause after each commit for human review (status `awaiting-review`); re-run `/parity-run` to approve and continue. For the lowest token use, run `.claude/skills/parity-run/run-fresh.sh`, which gives each item its own fresh session.
+
+#### Archived: Vue parity programme
+
+The tooling that ported the remaining Vue features (epic #274, delivered in #291) — the `parity-auditor` agent, the `/backlog-sync`, `/implement-item` and `/parity-run` skills, and the `Stop` hook guard — has been retired from `.claude/` so it no longer loads in every session. It is kept for reference, with the plan, gap report and a write-up, in [`_ai-assisted-dev-story/vue-parity-programme/`](_ai-assisted-dev-story/vue-parity-programme/README.md).
 
 ---
 
@@ -732,9 +730,9 @@ trip-fotos-react/
 ├── .devcontainer/               # VS Code Dev Container configuration
 ├── .claude/
 │   ├── agents/                 # Claude Code subagent wrappers (delegate to .github/agents)
-│   ├── hooks/                  # Claude Code hook scripts (lint/format after edits, parity Stop guard)
-│   ├── plans/                  # Committed work plans and reports (e.g. Vue parity)
-│   ├── skills/                 # Claude Code skills (e.g. /verify, /parity-run)
+│   ├── hooks/                  # Claude Code hook scripts (lint/format after edits)
+│   ├── plans/                  # Committed work plans (e.g. deferred Firebase emulator plan)
+│   ├── skills/                 # Claude Code skills (e.g. /verify)
 │   ├── settings.json           # Shared Claude Code permissions and hooks
 │   └── settings.local.json     # Personal Claude Code overrides (gitignored)
 ├── .github/

@@ -42,4 +42,3 @@ Use the following agents for common tasks:
 - **Create Page**: Use the `create-page` agent to scaffold new pages with route integration and tests.
 - **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with thunks and tests.
 - **Create Hook**: Use the `create-hook` agent to scaffold new custom hooks with tests.
-- **Parity Auditor**: Use the `parity-auditor` agent to compare trip-fotos-vue with this port and write a gap report.

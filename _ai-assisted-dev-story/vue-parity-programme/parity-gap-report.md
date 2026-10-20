@@ -1,5 +1,7 @@
 # Parity gap report
 
+> **Archived.** Retired after the Vue parity epic (#274) closed in #291. Paths in this file refer to where it lived while active (`.claude/…`, `.github/agents/…`); see [the case study](README.md) for context.
+
 Vue commit: `c0287e6 2026-06-04` · React commit: `b7820e0` · Generated: 2026-10-16
 
 ## Summary
