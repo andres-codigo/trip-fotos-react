@@ -411,7 +411,7 @@ Claude Code shares the Copilot guidance above rather than keeping its own copy, 
 #### Workspace-Level Instructions
 
 - **File**: `CLAUDE.md`
-- **Purpose**: Global rules — stack, folder structure, branch naming, dev commands, environment, and pointers to detailed guidance.
+- **Purpose**: Global rules — branch naming, conventions, dev commands, environment, and pointers to detailed guidance (the stack, full script list and folder structure live in this README, not duplicated there, to keep the per-request context small).
 - **Usage**: Claude Code automatically reads this file at the start of every session in this repo.
 
 #### Domain-Specific Guidance
@@ -435,7 +435,7 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 
 #### Skills
 
-- **`/verify`** (`.claude/skills/verify/`): runs ESLint, Vitest, Cypress component tests, and the production build, then reports a pass/fail table. Use before committing or opening a pull request.
+- **`/verify`** (`.claude/skills/verify/`): runs ESLint, Vitest, Cypress component tests, and the production build, then reports a pass/fail table. `changed-gates.mjs` compares the branch with `main` and picks only the gates the change can affect (e.g. a `cypress/e2e/` change runs ESLint only; docs, `.claude/` or `.github/` changes run none), so CI on the pull request, which runs every workflow, stays the full check. `/verify all` forces every gate. Use before committing or opening a pull request. It runs on Haiku (`model: haiku`) in a forked context (`context: fork`), so test and build logs stay out of the main conversation.
 - **`/verify e2e`**: additionally runs the Cypress E2E suite via `.claude/skills/verify/run-e2e.mjs`, which reuses a dev server on port 3000 or starts one over HTTP (as CI does) and stops it afterwards. Opt-in and approval-gated, because the tests use the live Firebase project and `.env` credentials.
 
 #### Archived: Vue parity programme
