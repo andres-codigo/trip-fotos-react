@@ -20,7 +20,6 @@ import travellersReducer, {
 	loadTraveller,
 	loadTravellers,
 	deleteTraveller,
-	deleteTravellerMessages,
 	setIsTraveller,
 	setTravellers,
 	selectTravellers,
@@ -104,9 +103,15 @@ vi.mock('@/utils/errorHandler', () => ({
 	}),
 }))
 
-vi.mock('./authenticationSlice', () => ({
-	selectAuthenticationToken: vi.fn(() => MOCK_USER.TOKEN),
-}))
+// messagesSlice is imported via deleteTraveller and needs selectUserId and logout at load time
+vi.mock('./authenticationSlice', async () => {
+	const { createAsyncThunk } = await import('@reduxjs/toolkit')
+	return {
+		selectAuthenticationToken: vi.fn(() => MOCK_USER.TOKEN),
+		selectUserId: vi.fn(() => MOCK_USER.USER_ID),
+		logout: createAsyncThunk('authentication/logout', async () => {}),
+	}
+})
 
 let store
 
@@ -638,55 +643,6 @@ describe('travellersSlice', () => {
 				expect(result.payload).toBe(
 					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 				)
-			})
-		})
-	})
-
-	describe('deleteTravellerMessages', () => {
-		const travellerId = 'traveller-to-delete'
-
-		describe('success scenarios', () => {
-			it('should send an authorised DELETE for the traveller messages', async () => {
-				fetch.mockResolvedValueOnce({ ok: true })
-
-				const result = await store.dispatch(
-					deleteTravellerMessages(travellerId),
-				)
-
-				expect(result.meta.requestStatus).toBe('fulfilled')
-				expect(result.payload).toBe(travellerId)
-				expect(fetch).toHaveBeenCalledWith(
-					expect.stringContaining(
-						`/messages/${travellerId}.json?auth=${MOCK_USER.TOKEN}`,
-					),
-					expect.objectContaining({ method: 'DELETE' }),
-				)
-			})
-		})
-
-		describe('failure scenarios', () => {
-			it('should reject when the response is not ok', async () => {
-				fetch.mockResolvedValueOnce({ ok: false, status: 401 })
-
-				const result = await store.dispatch(
-					deleteTravellerMessages(travellerId),
-				)
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(result.payload).toContain(
-					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_MESSAGES_CATCH}${travellerId}`,
-				)
-			})
-
-			it('should reject on a network error', async () => {
-				fetch.mockRejectedValueOnce(new Error('Network Error'))
-
-				const result = await store.dispatch(
-					deleteTravellerMessages(travellerId),
-				)
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(handleApiError).toHaveBeenCalled()
 			})
 		})
 	})

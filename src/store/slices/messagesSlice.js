@@ -139,6 +139,36 @@ export const deleteMessage = createAsyncThunk(
 	},
 )
 
+export const deleteTravellerMessages = createAsyncThunk(
+	MESSAGES_ACTION_TYPES.DELETE_TRAVELLER_MESSAGES,
+	async (travellerId, { getState, rejectWithValue }) => {
+		try {
+			const token = selectAuthenticationToken(getState())
+
+			const response = await fetch(
+				`${API_DATABASE.BASE_URL}/messages/${travellerId}.json?auth=${token}`,
+				{
+					method: API_DATABASE.DELETE,
+					headers: COMMON_HEADERS.JSON,
+				},
+			)
+
+			if (!response.ok) {
+				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
+			}
+
+			return travellerId
+		} catch (error) {
+			return rejectWithValue(
+				handleApiError(
+					error,
+					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_MESSAGES_CATCH}${travellerId}.`,
+				),
+			)
+		}
+	},
+)
+
 const messagesSlice = createSlice({
 	name: 'messages',
 	initialState,
