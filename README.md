@@ -592,12 +592,22 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 
 ---
 
-### 5. GitHub Project Item Lifecycle
+### 5. GitHub Issue Intake
+
+- **Workflow File:** `.github/workflows/github-issue-intake.yml`
+- **Triggers:**
+    - On **issue** events (`opened`, `reopened`, `edited`, `labeled`, `unlabeled`)
+    - Manually via **Actions → "Run workflow"** (takes an issue number)
+- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, auto-labels them and assigns the default assignee. Editing an issue never changes its status. Labels you add move it across the board (see [Project Board Statuses](#project-board-statuses)).
+
+---
+
+### 6. GitHub Project Item Lifecycle
 
 - **Workflow File:** `.github/workflows/project-item-lifecycle.yml`
 - **Triggers:**
-    - On **pull_request_target** events (`opened`, `reopened`, `synchronize`, `closed`)
-- **Purpose:** Keeps pull requests and linked issues in sync with the `Trip Fotos React` GitHub Project lifecycle.
+    - On **pull_request_target** events (`opened`, `reopened`, `synchronize`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`)
+- **Purpose:** Keeps pull requests and the issues they close (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. A PR with no linked issue gets a tracking issue (Dependabot PRs excepted).
 - **Secret (Optional but Recommended):** `PROJECT_AUTOMATION_TOKEN`
     - Used for Project v2 write operations when `github.token` does not have enough access.
 
@@ -611,7 +621,27 @@ The runbook includes expiry handling, recreation steps, secret update instructio
 
 ---
 
-### 6. CodeQL Code Scanning
+<a id="project-board-statuses"></a>
+
+#### Project Board Statuses
+
+Every Status is set by the two workflows above. Items also carry **Kind** (Epic / Feature / Bug / Chore / Deps) and **Workstream** (Vue parity / Tooling & AI / Maintenance) fields, set by hand.
+
+| Status      | Meaning                  | Moved there when                                                    |
+| ----------- | ------------------------ | ------------------------------------------------------------------- |
+| Triage      | New, not yet assessed    | An issue is opened                                                  |
+| Backlog     | Accepted, not scheduled  | You add any label to an issue in Triage, or reopen a Done issue     |
+| Ready       | Queued, dependencies met | You add the `ready` label, or a linked PR is closed without merging |
+| In progress | Being built              | A draft PR that closes the issue is opened                          |
+| Blocked     | Needs a human decision   | You add the `blocked` label; removing it restores the status        |
+| In review   | PR open for review       | The PR is opened (not as a draft) or marked ready for review        |
+| Done        | Merged                   | The PR is merged                                                    |
+
+While an issue has the `blocked` label its PR events leave it in Blocked; only a merge moves it on.
+
+---
+
+### 7. CodeQL Code Scanning
 
 - **Configured In:** **Settings → Advanced Security → CodeQL analysis** (GitHub-managed **Default setup** — no workflow file)
 - **Triggers:** On push and pull requests to `main`, plus a weekly scheduled scan
@@ -639,6 +669,7 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 | Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml`            | E2E              | Push/PR/Manual   |
 | Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`      | Component        | Push/PR/Manual   |
 | GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`  | Automation       | PR Events        |
+| GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`    | Automation       | Issue Events     |
 | GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml` | Automation       | PR Target Events |
 
 ---
