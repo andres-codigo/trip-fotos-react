@@ -68,7 +68,11 @@ With the epic finished, keeping them active would have cost context in every ses
 
 ## Lessons learnt
 
-<!-- TODO(andres): add your own reflections before merging — e.g. what the review gate caught, where the automation saved or cost time, what you would change next time. -->
+"Fully unattended" was the wrong goal. A green `/verify` showed that a commit built and passed its tests, not that it was the right change. Reviewing one 15-commit PR at the end would have meant finding problems after later items had already been built on them. The per-item review gate cost a little speed but kept each review small, so I could correct course early. Automated checks also didn't replace review. Every commit passed `/verify`, yet the final code review still found real issues, such as Storage upload paths that could collide and database rules that were too loose. Those are security and data-model questions that lint and unit tests don't ask.
+
+The audit was a good starting point, but it wasn't the full scope. It compared features file by file, so it missed cross-cutting problems that only appeared during implementation. Storage uploads needed a signed-in Auth SDK user (#285), and the admin check needed a proper custom claim (#286). The plan needed room for new issues to join the queue part-way through. The dry run before `/backlog-sync --apply` mattered for the same reason. Dropping one work item, splitting another and reusing existing issues were judgement calls about the product and the backlog, and the tool shouldn't make those on its own.
+
+Guardrails belong in the harness, and tooling should be retired when its job is done. The `Stop` hook, the `/verify` gate and the denied pushes to `main` held up because they didn't depend on the model remembering an instruction. Cost and reliability needed design too. Subagent-heavy, long-context sessions drove most of the token use, which led to fresh sessions per item and cheaper models for routine work. E2E flakes against the live Firebase project led to the emulator plan (#292). Finally, one-off automation left in `.claude/` keeps costing context in every session, so archiving it once the epic closed was part of finishing the work.
 
 ## Files
 
