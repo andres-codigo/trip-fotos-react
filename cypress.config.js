@@ -53,5 +53,10 @@ export default defineConfig({
 			}),
 		},
 		specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+		// Fixed so specs never depend on .env or CI secrets, and an unstubbed
+		// request fails on the unresolvable .invalid host instead of reaching the live DB
+		expose: {
+			VITE_DATABASE_URL: 'https://component-tests.firebaseio.invalid',
+		},
 	},
 })
