@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { mergeConfig } from 'vite'
 import viteConfig from './vite.config.js'
 
 import { PATHS } from './src/constants/ui/paths.js'
@@ -40,8 +41,22 @@ export default defineConfig({
 		devServer: {
 			framework: 'react',
 			bundler: 'vite',
-			viteConfig,
+			// Vite only scans index.html for deps, so spec-only imports were
+			// found mid-run and the optimiser reload failed the next spec
+			viteConfig: mergeConfig(viteConfig, {
+				optimizeDeps: {
+					entries: [
+						'cypress/support/component.{js,jsx}',
+						'src/**/*.cy.{js,jsx}',
+					],
+				},
+			}),
 		},
 		specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+		// Fixed so specs never depend on .env or CI secrets, and an unstubbed
+		// request fails on the unresolvable .invalid host instead of reaching the live DB
+		expose: {
+			VITE_DATABASE_URL: 'https://component-tests.firebaseio.invalid',
+		},
 	},
 })

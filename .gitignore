@@ -22,6 +22,11 @@ dist
 # ENVIRONMENT
 .env
 
+# FIREBASE SERVICE-ACCOUNT KEYS
+*service-account*.json
+*serviceAccount*.json
+*-firebase-adminsdk-*.json
+
 # LINTING
 .eslintcache
 

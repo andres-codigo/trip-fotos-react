@@ -1,8 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { initializeApp } from 'firebase/app'
+import { browserLocalPersistence, initializeAuth } from 'firebase/auth'
+import { getStorage } from 'firebase/storage'
 
 vi.mock('firebase/app', () => ({
 	initializeApp: vi.fn(),
+}))
+
+vi.mock('firebase/auth', () => ({
+	browserLocalPersistence: { type: 'LOCAL' },
+	initializeAuth: vi.fn(() => ({ name: 'mock-auth' })),
+}))
+
+vi.mock('firebase/storage', () => ({
+	getStorage: vi.fn(() => ({ name: 'mock-storage' })),
 }))
 
 vi.mock('@/constants/firebase', () => ({
@@ -14,7 +25,6 @@ vi.mock('@/constants/firebase', () => ({
 		STORAGE_BUCKET: 'test-storage-bucket',
 		MESSAGING_SENDER_ID: 'test-messaging-sender-id',
 		APP_ID: 'test-app-id',
-		MEASUREMENT_ID: 'test-measurement-id',
 	},
 }))
 
@@ -26,6 +36,7 @@ describe('Firebase Configuration', () => {
 		// not call history for the "calls initializeApp only once" test
 		mockApp = { name: '[DEFAULT]' }
 		vi.mocked(initializeApp).mockReturnValue(mockApp)
+		vi.mocked(initializeAuth).mockClear()
 	})
 
 	afterEach(() => {
@@ -34,6 +45,39 @@ describe('Firebase Configuration', () => {
 	})
 
 	describe('Initialisation tests', () => {
+		it('does not initialise Auth on import', async () => {
+			await import('@/services/firebase/firebase.js')
+
+			expect(initializeAuth).not.toHaveBeenCalled()
+		})
+
+		it('returns the Auth instance for the initialised app', async () => {
+			const { getFirebaseAuth } =
+				await import('@/services/firebase/firebase.js')
+
+			expect(getFirebaseAuth()).toEqual({ name: 'mock-auth' })
+			expect(initializeAuth).toHaveBeenCalledWith(mockApp, {
+				persistence: browserLocalPersistence,
+			})
+		})
+
+		it('initialises Auth only once across calls', async () => {
+			const { getFirebaseAuth } =
+				await import('@/services/firebase/firebase.js')
+
+			expect(getFirebaseAuth()).toBe(getFirebaseAuth())
+			expect(initializeAuth).toHaveBeenCalledTimes(1)
+		})
+
+		it('initialises Auth before returning Storage so uploads carry the user token', async () => {
+			const { getFirebaseStorage } =
+				await import('@/services/firebase/firebase.js')
+
+			expect(getFirebaseStorage()).toEqual({ name: 'mock-storage' })
+			expect(initializeAuth).toHaveBeenCalled()
+			expect(getStorage).toHaveBeenCalledWith(mockApp)
+		})
+
 		it('initialises Firebase app with correct configuration', async () => {
 			const { firebaseApp } =
 				await import('@/services/firebase/firebase.js')
@@ -46,7 +90,6 @@ describe('Firebase Configuration', () => {
 				storageBucket: 'test-storage-bucket',
 				messagingSenderId: 'test-messaging-sender-id',
 				appId: 'test-app-id',
-				measurementId: 'test-measurement-id',
 			})
 
 			expect(firebaseApp).toBe(mockApp)

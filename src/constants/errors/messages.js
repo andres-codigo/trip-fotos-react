@@ -21,6 +21,10 @@ export const ERROR_MESSAGES = Object.freeze({
 
 	// Traveller-specific errors
 	FAILED_TO_REGISTER_TRAVELLER: 'Failed to register traveller.',
+	FAILED_TO_CONTACT_TRAVELLER: 'Failed to send your message.',
+
+	// Messages errors
+	INVALID_MESSAGE_PAYLOAD: 'Please provide your email address and a message.',
 
 	// Default fallback
 	UNKNOWN_ERROR: 'An unknown error occurred.',

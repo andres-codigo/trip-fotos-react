@@ -27,3 +27,14 @@ export const API_DATABASE = Object.freeze({
 export const SDK_METHOD_TYPE_URLS = {
 	SIGN_IN_WITH_PASSWORD: `${API_DATABASE.URL}signInWithPassword?key=${API_DATABASE.KEY}`,
 }
+
+export const CITY_SEARCH = Object.freeze({
+	URL: 'https://photon.komoot.io/api/',
+	LAYER: 'city',
+	LANGUAGE: 'en',
+	LIMIT: 8,
+	MIN_CHARACTERS: 2,
+	DEBOUNCE_MS: 300,
+	PROVIDER_URL: 'https://photon.komoot.io',
+	ATTRIBUTION_URL: 'https://www.openstreetmap.org/copyright',
+})

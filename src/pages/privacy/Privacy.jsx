@@ -1,3 +1,4 @@
+import { CITY_SEARCH } from '@/constants/api'
 import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import BaseCard from '@/components/ui/card/BaseCard'
@@ -36,6 +37,27 @@ const Privacy = () => {
 					travel days, cities and photos you provide are stored in
 					Firebase Realtime Database and Cloud Storage, and are shown
 					to other signed-in users.
+				</p>
+
+				<h2>City search</h2>
+				<p>
+					When you search for a city during registration, the text you
+					type is sent to{' '}
+					<a
+						href={CITY_SEARCH.PROVIDER_URL}
+						target="_blank"
+						rel="noopener noreferrer">
+						Photon
+					</a>
+					, a place search service run by Komoot, to suggest matching
+					cities. It is not linked to your account. City data is ©{' '}
+					<a
+						href={CITY_SEARCH.ATTRIBUTION_URL}
+						target="_blank"
+						rel="noopener noreferrer">
+						OpenStreetMap contributors
+					</a>
+					, available under the Open Database Licence.
 				</p>
 
 				<h2>Data stored in your browser</h2>

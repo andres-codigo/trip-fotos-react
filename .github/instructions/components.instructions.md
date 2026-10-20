@@ -10,7 +10,7 @@ Page-level guidance is maintained separately in [pages.instructions.md](./pages.
 
 ## Folder Structure
 
-Each component must reside in its own contextual folder. Components are located in `src/components`, categorised by type: `common`, `forms`, `layout`, `ui`, `travellers`.
+Each component must reside in its own contextual folder. Components are located in `src/components`, categorised by type: `common`, `forms`, `layout`, `messages`, `travellers`, `ui`.
 
 ### Naming & Location
 

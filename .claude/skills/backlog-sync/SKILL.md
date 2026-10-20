@@ -63,7 +63,7 @@ Turn `.claude/plans/parity-gap-report.md` into GitHub issues on [project 2](http
         ```bash
         gh api graphql -f query='mutation($p:ID!,$c:ID!){addSubIssue(input:{issueId:$p,subIssueId:$c}){issue{number}}}' -f p=<epicId> -f c=<childId>
         ```
-    4. The intake workflow adds new issues to the board as `backlog`; do not set board fields by hand.
+    4. The intake workflow adds new issues to the board as `backlog`; do not set board fields here. `/implement-item` moves each issue to `in progress` when it starts, and the final PR's merge moves it to `done`.
 7. **Write the queue** (apply mode only) to `.claude/parity/state.json`:
 
     ```json

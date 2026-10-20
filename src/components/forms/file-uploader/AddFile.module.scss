@@ -1,0 +1,45 @@
+@use '@/styles/setup/variables' as variables;
+@use '@/styles/setup/mixins/helpers' as helpers;
+
+.addFile {
+	margin: 0 auto;
+	text-align: center;
+}
+
+.label {
+	cursor: pointer;
+	display: block;
+	padding: 3rem;
+	position: relative;
+
+	span {
+		display: block;
+	}
+
+	&:focus-within {
+		outline: 3px solid variables.$color-lavender-magenta;
+		outline-offset: 2px;
+	}
+}
+
+.input {
+	@include helpers.visually-hidden;
+}
+
+.fileList {
+	background-color: variables.$color-azure;
+	border: 1px solid variables.$color-white;
+	display: flex;
+	flex-wrap: wrap;
+	list-style: none;
+	margin: 10px;
+	padding: 0;
+}
+
+.errors {
+	color: variables.$color-el-salva;
+
+	p {
+		margin: 0.25rem 0;
+	}
+}

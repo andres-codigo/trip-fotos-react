@@ -10,4 +10,30 @@ export const VALIDATION_MESSAGES = {
 	DESCRIPTION_REQUIRED: 'Description must not be empty.',
 	DAYS_REQUIRED: 'Number of days spent in the city cannot be empty.',
 	CITIES_REQUIRED: 'At least one city must be selected.',
+
+	// CONTACT TRAVELLER FORM
+	MESSAGE_REQUIRED: 'Message must not be empty.',
+	MESSAGE_TOO_LONG: (maxLength) =>
+		`Message must be ${maxLength} characters or fewer.`,
+
+	// FILE UPLOAD
+	FILE_TYPE_INVALID: (name) =>
+		`${name} is not a supported image type. Use JPEG, PNG, WebP or GIF.`,
+	FILE_TOO_LARGE: (name, maxMegabytes) =>
+		`${name} is larger than the ${maxMegabytes} MB limit.`,
 }
+
+export const FILE_UPLOAD = Object.freeze({
+	ACCEPTED_TYPES: Object.freeze([
+		'image/jpeg',
+		'image/png',
+		'image/webp',
+		'image/gif',
+	]),
+	MAX_SIZE_MEGABYTES: 5,
+})
+
+// Must match the messages limit in database.rules.json, or messages the form accepts are rejected on save
+export const CONTACT_MESSAGE = Object.freeze({
+	MAX_LENGTH: 5000,
+})

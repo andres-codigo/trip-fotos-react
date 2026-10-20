@@ -1,0 +1,164 @@
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import PropTypes from 'prop-types'
+
+import { GLOBAL } from '@/constants/ui'
+import { ERROR_MESSAGES } from '@/constants/errors'
+import { PATHS } from '@/constants/ui'
+
+import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
+
+import {
+	loadTravellers,
+	selectTravellers,
+	selectHasTravellers,
+	selectIsTraveller,
+} from '@/store/slices/travellersSlice'
+
+import BaseDialog from '@/components/ui/dialog/BaseDialog'
+import BaseButton from '@/components/ui/button/BaseButton'
+import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
+
+import TravellerFilter from '@/components/travellers/traveller-filter/TravellerFilter'
+import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
+
+import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
+
+import travellersListStyles from './TravellersList.module.scss'
+
+const TravellersList = ({ initialError = false, isLoading = false }) => {
+	const [error, setError] = useState(initialError)
+	const [loading, setLoading] = useState(isLoading)
+	const hasInitialisedRef = useRef(false)
+
+	const dispatch = useDispatch()
+	const isLoggedIn = useSelector(selectIsAuthenticated)
+
+	const isTraveller = useSelector(selectIsTraveller)
+	const hasTravellers = useSelector(selectHasTravellers)
+	const travellers = useSelector(selectTravellers)
+	const { options, inactiveIds, toggleCity, filteredTravellers } =
+		useCityFilter(travellers)
+
+	const loadTravellersHandler = useCallback(
+		async (refresh = false) => {
+			try {
+				setLoading(true)
+				setError(null)
+
+				const result = await dispatch(
+					loadTravellers({ forceRefresh: refresh }),
+				)
+
+				if (loadTravellers.rejected.match(result)) {
+					setError(
+						result.payload || ERROR_MESSAGES.SOMETHING_WENT_WRONG,
+					)
+				}
+				setLoading(false)
+			} catch (error) {
+				setError(error.message || ERROR_MESSAGES.SOMETHING_WENT_WRONG)
+				setLoading(false)
+			}
+		},
+		[dispatch],
+	)
+
+	// Load travellers on mount if not already cached in Redux
+	useEffect(() => {
+		// Check travellers at time of mount, not reactive to changes
+		const shouldLoad =
+			!travellers ||
+			(Array.isArray(travellers) && travellers.length === 0)
+
+		if (shouldLoad && !hasInitialisedRef.current) {
+			hasInitialisedRef.current = true
+			loadTravellersHandler()
+		}
+		// Intentionally only run on mount
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [])
+
+	const handleError = () => setError(null)
+
+	return (
+		<>
+			{error && (
+				<BaseDialog
+					show={true}
+					isError={true}
+					title={GLOBAL.ERROR_DIALOG_TITLE}
+					onClose={handleError}
+					data-cy="travellers-list-error-dialog">
+					{error}
+				</BaseDialog>
+			)}
+			<h1>Travellers</h1>
+			<div
+				className={travellersListStyles.controls}
+				data-cy="controls">
+				<BaseButton
+					mode="outline"
+					disabled={loading}
+					data-cy="refresh-button"
+					onClick={() => loadTravellersHandler(true)}>
+					Refresh
+				</BaseButton>
+				{isLoggedIn && !isTraveller && (
+					<BaseButton
+						isLink
+						to={PATHS.REGISTER}
+						isDisabled={loading}
+						data-cy="register-link">
+						Register
+					</BaseButton>
+				)}
+			</div>
+			{loading && (
+				<div className={travellersListStyles.spinnerContainer}>
+					<BaseSpinner />
+				</div>
+			)}
+			{!loading && hasTravellers && options.length > 0 && (
+				<TravellerFilter
+					options={options}
+					inactiveIds={inactiveIds}
+					onChangeFilter={toggleCity}
+				/>
+			)}
+			{!loading && hasTravellers && filteredTravellers.length > 0 && (
+				<ul
+					className={travellersListStyles.travellersList}
+					data-cy="travellers-list">
+					{filteredTravellers.map((traveller) => (
+						<TravellerItem
+							key={traveller.id}
+							{...traveller}
+						/>
+					))}
+				</ul>
+			)}
+			{!loading && hasTravellers && filteredTravellers.length === 0 && (
+				<div
+					className={travellersListStyles.noTravellersContainer}
+					data-cy="no-matching-travellers">
+					<h2>No travellers match the selected cities.</h2>
+				</div>
+			)}
+			{!loading && !hasTravellers && (
+				<div
+					className={travellersListStyles.noTravellersContainer}
+					data-cy="no-travellers-list">
+					<h2>No travellers listed.</h2>
+				</div>
+			)}
+		</>
+	)
+}
+
+TravellersList.propTypes = {
+	initialError: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+	isLoading: PropTypes.bool,
+}
+
+export default TravellersList

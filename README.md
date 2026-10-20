@@ -32,24 +32,24 @@ This project is a UI and functional conversion from Vue to React and extends the
 
 ## 🚧 Status
 
-Work in progress. The engineering foundation is in place, and the user-facing features are being added on top of it.
+Feature parity with the original Vue app is complete: every user-facing feature has been ported on top of the engineering foundation.
 
 ### Done
 
 - **Authentication** — email/password sign-up and log-in with Firebase Authentication, session persistence and auto-logout
-- **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database
-- **Routing and pages** — home, authentication, travellers, register, messages, privacy policy and 404 pages
+- **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database; cities visited are chosen through an accessible type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data) that stores each city with its country
+- **Photo uploads** — drag-and-drop or file-picker uploader with previews and type/size validation on the registration form; photos are compressed and uploaded to Cloud Storage as the signed-in user
+- **Traveller cards** — the travellers list shows each traveller's name, registration date, description, days in city, city badges and up to five photos, with contact and details links and an admin-only delete button
+- **Traveller details** — `/travellers/:id` shows a traveller's full profile, cities and every photo, with a contact link for other travellers; unknown ids show a not-found message
+- **Contact a traveller** — `/travellers/:id/contact` (signed-in users only) sends a traveller a message from the user's email address, with email and message validation, a success alert on the travellers list and an error dialog if sending fails
+- **City filter** — checkboxes above the travellers list, built from the cities the loaded travellers have visited, narrow the list by city; all cities start selected
+- **Messaging** — travellers can be sent messages, and read and delete the messages they have received on the messages page
+- **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the admin can remove a traveller, with their database record, photos and messages, from the travellers list
+- **Routing and pages** — home, authentication, travellers, traveller details, contact traveller, register, messages, privacy policy and 404 pages
 - **Accessibility** — skip link, landmark structure and per-page titles, following an audit against [The Website Specification](https://specification.website)
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request
 - **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers
 - **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook and a `/verify` skill
-
-### In progress
-
-- **Traveller cards** — travellers already load from the Realtime Database; next up is the card design for displaying each traveller's destination, days spent and photos
-- **Photo uploads** — Cloud Storage upload logic is built and tested in the store; the file selection, drag-and-drop and preview components are being built on top of it ([#99](https://github.com/andres-codigo/trip-fotos-react/issues/99), [#100](https://github.com/andres-codigo/trip-fotos-react/issues/100), [#101](https://github.com/andres-codigo/trip-fotos-react/issues/101))
-- **Messaging** — the route and page are in place, ready for sending and reading messages between travellers
-- **Admin tools** — admin identity is configured via `VITE_ADMIN_ID`, laying the groundwork for admin-only actions such as removing travellers
 
 <a id="stack"></a>
 
@@ -138,6 +138,12 @@ npm run format
 # NPM package dependency check
 npm run check:dependencies
 
+# Deploy Realtime Database and Storage security rules
+npm run firebase:rules
+
+# Grant or remove the admin custom claim (see Setup > Admin Role)
+npm run admin:claim -- <email> [--remove]
+
 # Open the Cypress E2E Test Runner in interactive mode
 npm run cy:open:e2e
 
@@ -199,31 +205,48 @@ npm run preview
     - **Realtime Database**
         - Set the location to **United States (us-central1, us-east1, or us-west1)**.
         - Copy the database URL and add it to your `.env` file under `VITE_BACKEND_BASE_URL`.
-        - Update the database rules as follows:
-            ```json
-            {
-            	"rules": {
-            		"travellers": {
-            			".read": true,
-            			".write": "auth != null"
-            		},
-            		"messages": {
-            			".read": "auth != null",
-            			".write": true
-            		}
-            	}
-            }
-            ```
+        - Rules live in [`database.rules.json`](database.rules.json) and are deployed with `npm run firebase:rules` (see [Firebase Security Rules](#firebase-security-rules)).
+          Travellers can only change their own record, and only the recipient (or an admin) can read or delete messages; anyone can send a new message, but not edit an existing one.
 
     - **Authentication**
         - Go to "Sign-in Method" and enable **Email/Password**. Ensure **Email link (passwordless sign-in)** is NOT enabled.
 
     - **Cloud Storage**
         - Set up a [Blaze Plan](https://firebase.google.com/pricing?hl=en) to enable storage capabilities.
+        - Rules live in [`storage.rules`](storage.rules): signed-in users write only to their own `images/{uid}/` folder (the app signs in through the Firebase Auth SDK, so uploads carry the user's ID token), and an admin (see [Admin Role](#admin-role)) can delete other travellers' photos.
 
 3. **Add Firebase to Your Web App**
     - Register your app in the Firebase Console.
     - Copy the Firebase configuration values and add them to your `.env` file.
+
+<a id="firebase-security-rules"></a>
+
+#### Firebase Security Rules
+
+`firebase.json` points the Firebase CLI at `database.rules.json` and `storage.rules`, so the rules are versioned with the code. Edit them there, never in the Console, then deploy to the project in `.firebaserc`:
+
+```bash
+npx firebase-tools login      # once
+npm run firebase:rules        # firebase-tools deploy --only database,storage
+```
+
+Use the Console's Rules Playground to try a rule before deploying it.
+
+<a id="admin-role"></a>
+
+#### Admin Role
+
+The admin role is a Firebase Auth custom claim (`admin: true`), so the database and Storage rules enforce it and no admin ID is bundled into the client.
+
+1. In the Firebase Console, go to Project settings > Service accounts and generate a new private key. Save it **outside the repo** — `.gitignore` also ignores common key file names as a safety net.
+2. Grant (or remove) the claim:
+
+    ```bash
+    GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run admin:claim -- admin@example.com
+    GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run admin:claim -- admin@example.com --remove
+    ```
+
+3. The user must sign out and in again: claims are read from the ID token at sign-in, and stored as `isAdmin` in the authentication slice (`selectIsAdmin`).
 
 ### HTTPS for Local Development
 
@@ -312,10 +335,6 @@ VITE_FIREBASE_PROJECT_ID='' # firebaseConfig > projectId
 VITE_FIREBASE_STORAGE_BUCKET='' # firebaseConfig > storageBucket
 VITE_FIREBASE_MESSAGING_SENDER_ID='' # firebaseConfig > messagingSenderId
 VITE_FIREBASE_APP_ID='' # firebaseConfig > appId
-VITE_FIREBASE_MEASUREMENT_ID='' # firebaseConfig > measurementId
-
-# Admin User ID
-VITE_ADMIN_ID='' # Firebase authenticated User UID for deletion of users rights
 
 # CYPRESS TESTING
 CYPRESS_USER_EMAIL=''
@@ -423,7 +442,7 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 - **`/verify e2e`**: additionally runs the Cypress E2E suite via `.claude/skills/verify/run-e2e.mjs`, which reuses a dev server on port 3000 or starts one over HTTP (as CI does) and stops it afterwards. Opt-in and approval-gated, because the tests use the live Firebase project and `.env` credentials.
 - **`/backlog-sync [--apply]`** (`.claude/skills/backlog-sync/`): reconciles the parity gap report with the [project backlog](https://github.com/users/andres-codigo/projects/2/views/1) — updates stale issues, creates missing ones under a `Vue parity` epic, and writes the work queue. Dry run unless `--apply` is passed. Needs `gh auth refresh -s read:project,project`.
 - **`/implement-item <issue>`** (`.claude/skills/implement-item/`): implements one backlog issue with the scaffolding agents, passes `/verify`, and makes one commit referencing the issue.
-- **`/parity-run`** (`.claude/skills/parity-run/`): runs the whole programme in `.claude/plans/vue-parity-plan.md` — audit, backlog sync, one commit per issue on `feature/vue-parity`, `/verify e2e`, and a single PR for review. Resumable. For the lowest token use, run `.claude/skills/parity-run/run-fresh.sh`, which gives each item its own fresh session.
+- **`/parity-run`** (`.claude/skills/parity-run/`): runs the whole programme in `.claude/plans/vue-parity-plan.md` — audit, backlog sync, one commit per issue on `feature/vue-parity`, `/verify e2e`, and a single PR for review. Resumable. Each issue moves to `in progress` on the project board when `/implement-item` starts it (via `.claude/skills/implement-item/set-board-status.sh`) and to `done` when the final PR merges. Set `"reviewEachItem": true` in the state file to pause after each commit for human review (status `awaiting-review`); re-run `/parity-run` to approve and continue. For the lowest token use, run `.claude/skills/parity-run/run-fresh.sh`, which gives each item its own fresh session.
 
 ---
 
@@ -626,7 +645,7 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 ---
 
-> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly.
+> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly. The Vitest, component and E2E workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` secrets; E2E also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
 
 <a id="build"></a>
 
@@ -680,7 +699,7 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 `vercel.json` controls how the production deployment responds:
 
-- **Route allow-list** — only the app's known routes (`/authentication`, `/travellers`, `/register`, `/messages`, `/privacy`, `/404`) are rewritten to the single-page app. Any other path falls through to `public/404.html` with a real `404` status, so crawlers do not see soft 404s. **When you add a route to `PATHS`, add it to the `rewrites` source in `vercel.json` too**, or it will 404 on a hard refresh in production.
+- **Route allow-list** — only the app's known routes (`/authentication`, `/travellers`, `/travellers/:id`, `/travellers/:id/contact`, `/register`, `/messages`, `/privacy`, `/404`) are rewritten to the single-page app. Any other path falls through to `public/404.html` with a real `404` status, so crawlers do not see soft 404s. **When you add a route to `PATHS`, add it to the `rewrites` source in `vercel.json` too**, or it will 404 on a hard refresh in production.
 - **Security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` and `Cross-Origin-Opener-Policy` are set on every response. An enforced `Content-Security-Policy` limits scripts to the site itself and network requests to Firebase. If you add a new third-party service (a CDN, an analytics provider or another Firebase product), add its origin to the matching directive in `vercel.json`, or the browser will block it. To trial a change safely, rename the header to `Content-Security-Policy-Report-Only` on a preview: violations are then logged to the console without blocking.
 - **Caching** — fingerprinted build output in `/assets/` is cached for a year as `immutable`; fonts are cached for a week.
 
@@ -690,19 +709,19 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 
 ## ✨ Features
 
-See [🚧 Status](#status) for what is live and what is being built.
+See [🚧 Status](#status) for a fuller list of what is live.
 
 - **User Registration and Authentication**
   Users can sign up and log in using Firebase Authentication.
 
 - **Traveller Profiles**
-  Registered travellers can describe their travel destination, choose where they travelled to and record the number of days spent there. Photo uploads and traveller-to-traveller messaging are in progress.
+  Registered travellers can describe their travel destination, choose where they travelled to and record the number of days spent there. Travellers can upload photos, the travellers list can be filtered by city, and signed-in users can send a traveller a message from their profile and read and delete their own messages.
 
-- **Admin Access** _(in progress)_
-  Admin rights are assigned to a specific user by adding their Firebase Auth User UID to the `.env` file under `VITE_ADMIN_ID`. This will allow the admin user to remove other travellers when logged in.
+- **Admin Access**
+  Admin rights are a Firebase custom claim granted with `npm run admin:claim` (see [Admin Role](#admin-role)). When logged in, the admin can remove other travellers, along with their photos and messages.
 
 - **Privacy Policy**
-  A public `/privacy` page, linked from the site footer, explains what data the app collects (account, traveller registration, browser storage and cookieless Vercel analytics) and where it is stored.
+  A public `/privacy` page, linked from the site footer, explains what data the app collects (account, traveller registration, city search via Photon with the OpenStreetMap credit, browser storage and cookieless Vercel analytics) and where it is stored.
 
 <a id="folder-structure"></a>
 
@@ -728,7 +747,7 @@ trip-fotos-react/
 ├── declarations/               # Breaking issue fix when using ESLint V9
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
 ├── rules/                      # ESLint configuration rules
-├── scripts/                    # Repo maintenance scripts (e.g. dependency-check output)
+├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, dependency-check output)
 ├── src/
 │   ├── app/            # Main application component
 │   ├── assets/         # Fonts, SVGs, and other static assets
@@ -751,12 +770,15 @@ trip-fotos-react/
 ├── .prettierrc.json             # Prettier configuration
 ├── CLAUDE.md                    # Workspace-level Claude Code guidelines
 ├── cypress.config.js            # Cypress testing configuration
+├── database.rules.json          # Realtime Database security rules
 ├── eslint-plugin-react-hooks.d.ts # Type declaration shim for the ESLint React Hooks plugin
 ├── eslint.config.mjs            # ESLint configuration
+├── firebase.json                # Firebase CLI config (points at the rules files)
 ├── index.html                   # Vite HTML entry point
 ├── jsconfig.json                # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
 ├── package.json                 # Project dependencies and scripts
 ├── README.md                    # Project documentation
+├── storage.rules                # Cloud Storage security rules
 ├── vercel.json                  # Vercel deployment configuration
 └── vite.config.js               # Vite build tool configuration
 ```

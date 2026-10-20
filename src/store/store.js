@@ -5,15 +5,19 @@ import { combineReducers } from 'redux'
 import storage from './storage'
 import authenticationReducer from './slices/authenticationSlice'
 import travellersReducer from './slices/travellersSlice'
+import messagesReducer from './slices/messagesSlice'
 
 const rootReducer = combineReducers({
 	authentication: authenticationReducer,
 	travellers: travellersReducer,
+	messages: messagesReducer,
 })
 
 const persistConfig = {
 	key: 'root',
 	storage,
+	// Messages are private and fetched fresh on the Messages page, so they must not sit in localStorage
+	blacklist: ['messages'],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
@@ -32,6 +36,8 @@ const store = configureStore({
 					'persist/PURGE',
 					'persist/REGISTER',
 				],
+				// File objects are passed to the upload thunk, never stored in state
+				ignoredActionPaths: ['meta.arg.files'],
 			},
 		}),
 })

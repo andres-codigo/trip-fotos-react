@@ -1,4 +1,4 @@
-import { render, fireEvent, screen } from '@testing-library/react'
+import { render, fireEvent, screen, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 /**
@@ -14,7 +14,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
  */
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
-import { UI_TEXT } from '@/constants/test'
+import { FILE_DROP, MOCK_CITIES, UI_TEXT } from '@/constants/test'
+import { GLOBAL } from '@/constants/ui'
+import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
 
 // Test selector constants
 const FORM_SELECTORS = {
@@ -23,7 +25,6 @@ const FORM_SELECTORS = {
 	LAST_NAME_INPUT: 'last-name-input',
 	DESCRIPTION_INPUT: 'description-input',
 	DAYS_SPENT_IN_CITY_INPUT: 'days-spent-in-city-input',
-	CHECKBOX_TOKYO: 'checkbox-tokyo',
 	REGISTER_BUTTON: 'register-button',
 }
 
@@ -35,6 +36,20 @@ vi.mock(
 	}),
 )
 
+vi.mock(
+	'@/components/forms/traveller-registration/hooks/useCitySearch',
+	() => ({
+		default: vi.fn(() => ({ results: [], status: 'idle' })),
+		CITY_SEARCH_STATUS: {
+			IDLE: 'idle',
+			LOADING: 'loading',
+			SUCCESS: 'success',
+			ERROR: 'error',
+		},
+	}),
+)
+
+import useCitySearch from '@/components/forms/traveller-registration/hooks/useCitySearch'
 import { useTravellerRegistration } from '@/components/forms/traveller-registration/hooks/useTravellerRegistration'
 
 describe('<TravellerRegistrationForm />', () => {
@@ -49,7 +64,10 @@ describe('<TravellerRegistrationForm />', () => {
 			cities: { value: [], message: '', isValid: true },
 		},
 		handleInputChange: vi.fn(),
-		handleCheckboxChange: vi.fn(),
+		handleCityAdd: vi.fn(),
+		handleCityRemove: vi.fn(),
+		handleCitiesBlur: vi.fn(),
+		handleFilesUpdated: vi.fn(),
 		submitHandler: (onSuccess) => (e) => {
 			e.preventDefault()
 			onSuccess?.({
@@ -94,16 +112,13 @@ describe('<TravellerRegistrationForm />', () => {
 			).toBeInTheDocument()
 		})
 
-		it('renders fieldset for cities selection', () => {
-			const { container } = render(
-				<TravellerRegistrationForm onSubmit={mockOnSubmit} />,
-			)
+		it('labels the city search "Cities visited" with a required mark', () => {
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 
-			const fieldset = container.querySelector('fieldset')
-			expect(fieldset).toBeInTheDocument()
-			expect(
-				screen.getByText(UI_TEXT.FORMS.CITIES_VISITED),
-			).toBeInTheDocument()
+			const combobox = screen.getByRole('combobox', {
+				name: UI_TEXT.FORMS.CITIES_VISITED,
+			})
+			expect(combobox).toHaveAttribute('aria-required', 'true')
 		})
 
 		it('renders submit button', () => {
@@ -292,26 +307,45 @@ describe('<TravellerRegistrationForm />', () => {
 			expect(mockHandleInputChange).toHaveBeenCalled()
 		})
 
-		it('calls handleCheckboxChange when checkbox is toggled', () => {
-			const mockHandleCheckboxChange = vi.fn()
+		it('adds a city chosen from the search results', () => {
+			const mockHandleCityAdd = vi.fn()
 			useTravellerRegistration.mockReturnValue({
 				...mockHookReturnValue,
-				handleCheckboxChange: mockHandleCheckboxChange,
-				formData: {
-					firstName: { value: '', message: '', isValid: true },
-					lastName: { value: '', message: '', isValid: true },
-					description: { value: '', message: '', isValid: true },
-					days: { value: '', message: '', isValid: true },
-					cities: { value: [], message: '', isValid: true },
-				},
+				handleCityAdd: mockHandleCityAdd,
+			})
+			useCitySearch.mockReturnValue({
+				results: [MOCK_CITIES.TOKYO],
+				status: 'success',
 			})
 
 			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 
-			const checkboxes = screen.getAllByRole('checkbox')
-			expect(checkboxes.length).toBeGreaterThan(0)
-			fireEvent.click(checkboxes[0])
-			expect(mockHandleCheckboxChange).toHaveBeenCalled()
+			const combobox = screen.getByRole('combobox', {
+				name: GLOBAL.CITY_SEARCH_TEXT.LABEL,
+			})
+			fireEvent.change(combobox, { target: { value: 'tok' } })
+			expect(
+				screen.getByText(GLOBAL.CITY_SEARCH_TEXT.RESULTS(1)),
+			).toBeInTheDocument()
+			fireEvent.click(
+				screen.getByRole('option', { name: 'Tokyo, Japan' }),
+			)
+
+			expect(mockHandleCityAdd).toHaveBeenCalledWith(MOCK_CITIES.TOKYO)
+			useCitySearch.mockReturnValue({ results: [], status: 'idle' })
+		})
+
+		it.each([
+			['loading', GLOBAL.CITY_SEARCH_TEXT.LOADING],
+			['error', GLOBAL.CITY_SEARCH_TEXT.ERROR],
+			['success', GLOBAL.CITY_SEARCH_TEXT.NO_RESULTS],
+		])('shows the %s search status', (status, message) => {
+			useCitySearch.mockReturnValue({ results: [], status })
+
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+
+			expect(screen.getByRole('status')).toHaveTextContent(message)
+			useCitySearch.mockReturnValue({ results: [], status: 'idle' })
 		})
 
 		it('calls onSubmit when form is submitted', () => {
@@ -370,17 +404,6 @@ describe('<TravellerRegistrationForm />', () => {
 			expect(ariaLiveRegion).toBeInTheDocument()
 		})
 
-		it('cities fieldset is rendered with required indicator in legend', () => {
-			const { container } = render(
-				<TravellerRegistrationForm onSubmit={mockOnSubmit} />,
-			)
-
-			const fieldset = container.querySelector('fieldset')
-			const legend = fieldset?.querySelector('legend')
-			expect(legend).toBeInTheDocument()
-			expect(legend?.textContent).toContain(UI_TEXT.FORMS.CITIES_VISITED)
-		})
-
 		it('all text inputs have required attribute', () => {
 			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 
@@ -401,9 +424,7 @@ describe('<TravellerRegistrationForm />', () => {
 
 	describe('Form field configuration', () => {
 		it('renders form with all expected sections', () => {
-			const { container } = render(
-				<TravellerRegistrationForm onSubmit={mockOnSubmit} />,
-			)
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 
 			// Check for form title
 			expect(
@@ -424,9 +445,7 @@ describe('<TravellerRegistrationForm />', () => {
 				screen.getByTestId(FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT),
 			).toBeInTheDocument()
 
-			// Check for fieldset
-			const fieldset = container.querySelector('fieldset')
-			expect(fieldset).toBeInTheDocument()
+			expect(screen.getByRole('combobox')).toBeInTheDocument()
 		})
 
 		it('renders Input component with correct type for days field', () => {
@@ -510,33 +529,76 @@ describe('<TravellerRegistrationForm />', () => {
 		})
 	})
 
-	describe('Checkbox rendering in cities fieldset', () => {
-		it('renders checkboxes for each city', () => {
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			// Checkboxes should be rendered based on TRAVELLER_REGISTRATION_CITIES constant
-			const checkboxes = screen.getAllByRole('checkbox')
-			expect(checkboxes.length).toBeGreaterThan(0)
-		})
-
-		it('updates checkbox checked state based on formData', () => {
+	describe('Selected cities', () => {
+		it('lists legacy and searched cities with remove buttons', () => {
+			const mockHandleCityRemove = vi.fn()
 			useTravellerRegistration.mockReturnValue({
 				...mockHookReturnValue,
+				handleCityRemove: mockHandleCityRemove,
 				formData: {
-					firstName: { value: '', message: '', isValid: true },
-					lastName: { value: '', message: '', isValid: true },
-					description: { value: '', message: '', isValid: true },
-					days: { value: '', message: '', isValid: true },
-					cities: { value: ['tokyo'], message: '', isValid: true },
+					...mockHookReturnValue.formData,
+					cities: {
+						value: ['tokyo', MOCK_CITIES.PRAGUE],
+						message: '',
+						isValid: true,
+					},
 				},
 			})
 
 			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 
-			const tokyoCheckbox = screen.getByTestId(
-				FORM_SELECTORS.CHECKBOX_TOKYO,
+			const list = screen.getByRole('list', {
+				name: GLOBAL.CITY_SEARCH_TEXT.SELECTED_LABEL,
+			})
+			expect(list).toHaveTextContent('Tokyo, Japan')
+			expect(list).toHaveTextContent('Prague, Czechia')
+
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: GLOBAL.REMOVE_CITY_LABEL('Tokyo, Japan'),
+				}),
 			)
-			expect(tokyoCheckbox).toBeChecked()
+			expect(mockHandleCityRemove).toHaveBeenCalledWith('tokyo')
+
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: GLOBAL.REMOVE_CITY_LABEL('Prague, Czechia'),
+				}),
+			)
+			expect(mockHandleCityRemove).toHaveBeenCalledWith(
+				MOCK_CITIES.PRAGUE.id,
+			)
+		})
+
+		it('shows no list before a city is chosen', () => {
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+			expect(
+				screen.queryByRole('list', {
+					name: GLOBAL.CITY_SEARCH_TEXT.SELECTED_LABEL,
+				}),
+			).toBeNull()
+		})
+
+		it('links the cities error to the search input', () => {
+			useTravellerRegistration.mockReturnValue({
+				...mockHookReturnValue,
+				formData: {
+					...mockHookReturnValue.formData,
+					cities: {
+						value: [],
+						message: 'Select at least one city',
+						isValid: false,
+					},
+				},
+			})
+
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+
+			const combobox = screen.getByRole('combobox')
+			expect(combobox).toHaveAttribute('aria-invalid', 'true')
+			expect(combobox.getAttribute('aria-describedby')).toContain(
+				'cities-error',
+			)
 		})
 	})
 
@@ -551,5 +613,16 @@ describe('<TravellerRegistrationForm />', () => {
 			form.dispatchEvent(submitEvent)
 			expect(preventDefaultSpy).toHaveBeenCalled()
 		})
+	})
+
+	it('renders the optional photo uploader in its own fieldset', () => {
+		render(<TravellerRegistrationForm onSubmit={vi.fn()} />)
+		const fieldset = screen.getByRole('group', {
+			name: 'Photos (optional)',
+		})
+		expect(within(fieldset).getByTestId(FILE_DROP.INPUT)).toHaveAttribute(
+			'id',
+			TRAVELLER_REGISTRATION_FIELDS.FILES,
+		)
 	})
 })

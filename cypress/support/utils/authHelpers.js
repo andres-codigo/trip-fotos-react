@@ -25,6 +25,10 @@ export const performLogin = (
 			)
 			cy.login(email, password)
 			cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+			// The Auth SDK makes a follow-up call before the session is stored, so wait for it before cy.session snapshots storage
+			cy.window({ timeout: REQUEST_TIMEOUT }).should((win) => {
+				expect(win.localStorage.getItem('token')).to.be.a('string')
+			})
 			cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.HOME)
 		},
 		{

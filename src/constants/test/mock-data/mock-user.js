@@ -14,6 +14,7 @@ export const MOCK_STORAGE_KEYS = Object.freeze({
 	USER_NAME: 'userName',
 	USER_EMAIL: 'userEmail',
 	TOKEN_EXPIRATION: 'tokenExpiration',
+	IS_ADMIN: 'isAdmin',
 })
 
 export const MOCK_KEYS = Object.freeze({

@@ -24,17 +24,18 @@ src/
   assets/        Static assets (SVGs)
   components/
     common/      LoadingFallback
-    forms/       traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
+    forms/       contact-traveller/, file-uploader/, traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
     layout/      footer/, header/, main-nav/, skip-link/ (with nav-menu/, hooks/, __tests__/)
-    travellers/  TravellersList
-    ui/           Atomic: alerts, button, card, dialog, form/*, spinner
+    messages/    message-item/
+    travellers/  travellers-list/, traveller-item/, traveller-filter/
+    ui/           Atomic: alerts, badge, button, card, dialog, form/*, image, spinner
   constants/     45 files — api/, auth/, config/, errors/, firebase/, redux/, test/, travellers/, ui/, validation/
-  pages/         authentication/, home/, messages/, page-not-found/, privacy/, register/, travellers/
+  pages/         authentication/, contact-traveller/, home/, messages/, page-not-found/, privacy/, register/, traveller-detail/, travellers/
   services/      firebase/ (firebase.js)
-  store/         store.js, storage.js (redux-persist), slices/authenticationSlice.js, slices/travellersSlice.js
+  store/         store.js, storage.js (redux-persist), slices/authenticationSlice.js, slices/travellersSlice.js, slices/messagesSlice.js
   styles/        global.scss, setup/ (variables, mixins, typography, routing, pages)
   testUtils/     cypress/ (TestLocationDisplay, selectors), vitest/ (polyfills, mocks, setup)
-  utils/         errorHandler/, form/, getFirebaseAuthErrorMessage/, useViewport/, validation/
+  utils/         errorHandler/, form/, formatCity/, getFirebaseAuthErrorMessage/, useViewport/, validation/
   index.jsx      Entry point
 ```
 
@@ -116,7 +117,7 @@ npm run analyse          # Bundle size visualiser
 ## Environment
 
 Requires `.env` with Firebase config — see `.env.example` or README Setup section.
-Required keys: `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `VITE_ADMIN_ID`, `CYPRESS_USER_*`.
+Required keys: `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `CYPRESS_USER_*`. The admin role is a Firebase custom claim (`npm run admin:claim`), not an env value.
 
 ## Workflow automation
 

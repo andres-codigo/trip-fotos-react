@@ -3,6 +3,7 @@ export * from './mock-data/mock-user'
 export * from './mock-data/mock-api'
 export * from './mock-data/mock-travellers'
 export * from './mock-data/mock-common'
+export * from './mock-data/mock-messages'
 
 // Utilities exports
 export * from './selectors/_ids'

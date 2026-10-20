@@ -19,6 +19,8 @@ Arguments: `$ARGUMENTS`
     2. `npm run vitest:run:fast`
     3. `npm run cy:run:ct`
     4. `npm run build`
+    - Run all gates in a single Bash call (a `for` loop echoing each exit code), not one call per gate.
+    - Skip Cypress component tests (report `⏭ skipped`) only when nothing under `src/` or `cypress/`, no `*.config.*` and no `package*.json` changed — e.g. docs or `.claude/` only.
     - Keep output out of the conversation: redirect each gate to a log in the scratchpad (`> <scratchpad>/<gate>.log 2>&1`), note its exit code, and read only the tail of a passing log (pass counts) and the failing section of a failing one (`grep -n -A 15` on `FAIL`, `✖`, `error`)
 3. Only if the arguments include `e2e`, run `node .claude/skills/verify/run-e2e.mjs` with a timeout of at least 10 minutes. It reuses a dev server already on port 3000 or starts one over HTTP (as CI does), runs `cypress run --e2e`, and always stops any server it started.
     - These tests log in and read/write the live Firebase project using the credentials in `.env`, which is why they are opt-in and the command asks for approval.

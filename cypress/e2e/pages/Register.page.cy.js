@@ -2,6 +2,8 @@ import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import {
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
+	FILE_UPLOADER_SELECTORS,
+	COMBOBOX_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation'
@@ -15,10 +17,20 @@ const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
 
 describe('Register Page', () => {
+	let uploadedImageUrl
+
 	beforeEach(() => {
 		cy.visit(loginUrl)
 		performLogin()
 		cy.visit(PATHS.REGISTER)
+	})
+
+	// afterEach rather than the test body, so the image is removed even when a later assertion fails
+	afterEach(() => {
+		if (uploadedImageUrl) {
+			cy.deleteStorageObject(uploadedImageUrl)
+			uploadedImageUrl = undefined
+		}
 	})
 
 	it('renders the register page container', () => {
@@ -42,9 +54,7 @@ describe('Register Page', () => {
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).should('be.visible')
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.CHECKBOX_TOKYO)
-			.parent()
-			.should('be.visible')
+		cy.get(COMBOBOX_SELECTORS.INPUT).should('be.visible')
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).should(
 			'be.visible',
 		)
@@ -64,7 +74,7 @@ describe('Register Page', () => {
 	})
 
 	it('successfully registers a traveller', () => {
-		const { firstName, lastName, description, daysInCity, cities } =
+		const { firstName, lastName, description, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept the registration API call
@@ -90,10 +100,8 @@ describe('Register Page', () => {
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).type(daysInCity)
 
-		// Check the cities checkboxes
-		cities.forEach((city) => {
-			cy.get(`label[for="${city}"]`).click()
-		})
+		// Choose a city through the (stubbed) city search
+		cy.selectCity()
 
 		// Submit the form
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
@@ -110,8 +118,60 @@ describe('Register Page', () => {
 			.and('contain', TRAVELLER_REGISTRATION_SUCCESS_MESSAGE)
 	})
 
+	it('registers a traveller with a photo uploaded to Storage', () => {
+		const { firstName, lastName, description, daysInCity } =
+			MOCK_TRAVELLERS.NEW_TRAVELLER
+
+		// Storage is live (the upload is deleted in afterEach); the DB write is stubbed
+		cy.intercept({
+			method: 'POST',
+			hostname: 'firebasestorage.googleapis.com',
+		}).as('uploadImage')
+		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
+			statusCode: 200,
+			body: {
+				...MOCK_TRAVELLERS.NEW_TRAVELLER,
+				registered: new Date().toISOString(),
+			},
+		}).as('registerTraveller')
+
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
+			firstName,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
+			lastName,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
+			description,
+		)
+		cy.get(
+			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+		).type(daysInCity)
+		cy.selectCity()
+
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+			'cypress/fixtures/test-image.png',
+			{ force: true },
+		)
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should('have.length', 1)
+
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
+
+		cy.wait('@uploadImage', { timeout: REQUEST_TIMEOUT })
+		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
+			.its('request.body.files')
+			.should('have.length', 1)
+			.its('0')
+			.should('include', 'firebasestorage.googleapis.com')
+			.then((url) => {
+				uploadedImageUrl = url
+			})
+
+		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)
+	})
+
 	it('shows a loading dialog while registering', () => {
-		const { firstName, lastName, description, daysInCity, cities } =
+		const { firstName, lastName, description, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept with delay
@@ -138,10 +198,8 @@ describe('Register Page', () => {
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).type(daysInCity)
 
-		// Check the cities checkboxes
-		cities.forEach((city) => {
-			cy.get(`label[for="${city}"]`).click()
-		})
+		// Choose a city through the (stubbed) city search
+		cy.selectCity()
 
 		// Submit the form
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
@@ -160,7 +218,7 @@ describe('Register Page', () => {
 
 	describe('Error Handling', () => {
 		it('shows an error dialog when registration fails', () => {
-			const { firstName, lastName, description, daysInCity, cities } =
+			const { firstName, lastName, description, daysInCity } =
 				MOCK_TRAVELLERS.NEW_TRAVELLER
 
 			// Intercept failure
@@ -183,10 +241,8 @@ describe('Register Page', () => {
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 			).type(daysInCity)
 
-			// Check the cities checkboxes
-			cities.forEach((city) => {
-				cy.get(`label[for="${city}"]`).click()
-			})
+			// Choose a city through the (stubbed) city search
+			cy.selectCity()
 
 			// Submit the form
 			cy.get(

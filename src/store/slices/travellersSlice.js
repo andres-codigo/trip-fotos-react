@@ -1,11 +1,13 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import imageCompression from 'browser-image-compression'
 import {
-	getStorage,
+	deleteObject,
 	getDownloadURL,
 	ref,
 	uploadBytesResumable,
 } from 'firebase/storage'
+
+import { getFirebaseStorage } from '@/services/firebase/firebase'
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import {
@@ -82,10 +84,11 @@ export const registerTraveller = createAsyncThunk(
 			const imageUrls = []
 
 			const uploadImage = async (image) => {
-				const storage = getStorage()
+				const storage = getFirebaseStorage()
 				const storageRef = ref(
 					storage,
-					`/images/${userId}/${image.name}`,
+					// Distinct files can share a name, and the same path would overwrite the earlier upload
+					`/images/${userId}/${crypto.randomUUID()}-${image.name}`,
 				)
 
 				const metadata = {
@@ -322,6 +325,90 @@ export const loadTravellers = createAsyncThunk(
 	},
 )
 
+export const deleteTravellerMessages = createAsyncThunk(
+	TRAVELLERS_ACTION_TYPES.DELETE_TRAVELLER_MESSAGES,
+	async (travellerId, { getState, rejectWithValue }) => {
+		try {
+			const token = selectAuthenticationToken(getState())
+
+			const response = await fetch(
+				`${API_DATABASE.BASE_URL}/messages/${travellerId}.json?auth=${token}`,
+				{
+					method: API_DATABASE.DELETE,
+					headers: COMMON_HEADERS.JSON,
+				},
+			)
+
+			if (!response.ok) {
+				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
+			}
+
+			return travellerId
+		} catch (error) {
+			return rejectWithValue(
+				handleApiError(
+					error,
+					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_MESSAGES_CATCH}${travellerId}.`,
+				),
+			)
+		}
+	},
+)
+
+export const deleteTraveller = createAsyncThunk(
+	TRAVELLERS_ACTION_TYPES.DELETE_TRAVELLER,
+	async (
+		{ travellerId, files = [] },
+		{ getState, dispatch, rejectWithValue },
+	) => {
+		try {
+			const token = selectAuthenticationToken(getState())
+
+			const response = await fetch(
+				`${API_DATABASE.BASE_URL}/travellers/${travellerId}.json?auth=${token}`,
+				{
+					method: API_DATABASE.DELETE,
+					headers: COMMON_HEADERS.JSON,
+				},
+			)
+
+			if (!response.ok) {
+				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
+			}
+
+			const storage = getFirebaseStorage()
+			await Promise.all(
+				files.map(async (fileUrl) => {
+					try {
+						await deleteObject(ref(storage, fileUrl))
+					} catch (error) {
+						// An already-missing image is the outcome we want, so a retry after a partial failure can still succeed
+						if (
+							error?.code !==
+							API_ERROR_MESSAGE.STORAGE_OBJECT_NOT_FOUND
+						) {
+							throw error
+						}
+					}
+				}),
+			)
+
+			await dispatch(deleteTravellerMessages(travellerId)).unwrap()
+			// The record is already gone, so a failed refresh must not report the delete as failed
+			await dispatch(loadTravellers({ forceRefresh: true }))
+
+			return travellerId
+		} catch (error) {
+			return rejectWithValue(
+				handleApiError(
+					error,
+					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_CATCH}${travellerId}.`,
+				),
+			)
+		}
+	},
+)
+
 const travellersSlice = createSlice({
 	name: 'travellers',
 	initialState: {
@@ -418,6 +505,26 @@ const travellersSlice = createSlice({
 				state.travellerName = `${action.payload.firstName} ${action.payload.lastName}`
 			})
 			.addCase(registerTraveller.rejected, (state, action) => {
+				state.status = 'failed'
+				state.error = action.payload
+			})
+
+			// DELETE_TRAVELLER async thunk handlers
+			.addCase(deleteTraveller.pending, (state) => {
+				state.status = 'loading'
+				state.error = null
+			})
+			.addCase(deleteTraveller.fulfilled, (state, action) => {
+				state.status = 'succeeded'
+				state.travellers = state.travellers.filter(
+					(traveller) => traveller.id !== action.payload,
+				)
+				state.hasTravellers = state.travellers.length > 0
+				if (state.selectedTraveller?.id === action.payload) {
+					state.selectedTraveller = null
+				}
+			})
+			.addCase(deleteTraveller.rejected, (state, action) => {
 				state.status = 'failed'
 				state.error = action.payload
 			})
