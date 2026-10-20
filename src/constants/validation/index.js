@@ -13,6 +13,8 @@ export const VALIDATION_MESSAGES = {
 
 	// CONTACT TRAVELLER FORM
 	MESSAGE_REQUIRED: 'Message must not be empty.',
+	MESSAGE_TOO_LONG: (maxLength) =>
+		`Message must be ${maxLength} characters or fewer.`,
 
 	// FILE UPLOAD
 	FILE_TYPE_INVALID: (name) =>
@@ -29,4 +31,9 @@ export const FILE_UPLOAD = Object.freeze({
 		'image/gif',
 	]),
 	MAX_SIZE_MEGABYTES: 5,
+})
+
+// Must match the messages limit in database.rules.json, or messages the form accepts are rejected on save
+export const CONTACT_MESSAGE = Object.freeze({
+	MAX_LENGTH: 5000,
 })

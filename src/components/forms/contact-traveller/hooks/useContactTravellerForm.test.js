@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { CONTACT_TRAVELLER_FIELDS } from '@/constants/travellers'
-import { VALIDATION_MESSAGES } from '@/constants/validation'
+import { CONTACT_MESSAGE, VALIDATION_MESSAGES } from '@/constants/validation'
 
 import { useContactTravellerForm } from './useContactTravellerForm'
 
@@ -36,6 +36,20 @@ describe('useContactTravellerForm', () => {
 		expect(result.current.formData[MESSAGE]).toMatchObject({
 			isValid: false,
 			message: VALIDATION_MESSAGES.MESSAGE_REQUIRED,
+		})
+	})
+
+	it('flags a message over the maximum length', () => {
+		const { result } = renderHook(() => useContactTravellerForm())
+		change(result, MESSAGE, 'a'.repeat(CONTACT_MESSAGE.MAX_LENGTH))
+		expect(result.current.formData[MESSAGE].isValid).toBe(true)
+
+		change(result, MESSAGE, 'a'.repeat(CONTACT_MESSAGE.MAX_LENGTH + 1))
+		expect(result.current.formData[MESSAGE]).toMatchObject({
+			isValid: false,
+			message: VALIDATION_MESSAGES.MESSAGE_TOO_LONG(
+				CONTACT_MESSAGE.MAX_LENGTH,
+			),
 		})
 	})
 

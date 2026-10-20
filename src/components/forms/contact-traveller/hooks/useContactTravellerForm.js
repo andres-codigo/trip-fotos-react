@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { VALIDATION_MESSAGES } from '@/constants/validation'
+import { CONTACT_MESSAGE, VALIDATION_MESSAGES } from '@/constants/validation'
 import { CONTACT_TRAVELLER_FIELDS } from '@/constants/travellers'
 
 import { validateEmail } from '@/utils/validation'
@@ -14,6 +14,15 @@ const validateField = (id, value) => {
 
 	if (id === MESSAGE && value.trim() === '') {
 		return { isValid: false, message: VALIDATION_MESSAGES.MESSAGE_REQUIRED }
+	}
+
+	if (id === MESSAGE && value.trim().length > CONTACT_MESSAGE.MAX_LENGTH) {
+		return {
+			isValid: false,
+			message: VALIDATION_MESSAGES.MESSAGE_TOO_LONG(
+				CONTACT_MESSAGE.MAX_LENGTH,
+			),
+		}
 	}
 
 	return { isValid: true, message: '' }
