@@ -10,6 +10,7 @@ import messagesReducer, {
 	contactTraveller,
 	loadMessages,
 	deleteMessage,
+	deleteTravellerMessages,
 	selectMessagesState,
 	selectMessages,
 	selectHasMessages,
@@ -35,7 +36,7 @@ import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
  *
  * Test Coverage:
  * - Initial state verification
- * - contactTraveller, loadMessages and deleteMessage success and failure scenarios
+ * - contactTraveller, loadMessages, deleteMessage and deleteTravellerMessages success and failure scenarios
  * - Reset of state on logout
  * - Selectors for state access
  */
@@ -305,6 +306,55 @@ describe('messagesSlice', () => {
 
 				const result = await store.dispatch(
 					deleteMessage(SAMPLE_MESSAGE_ONE.id),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(handleApiError).toHaveBeenCalled()
+			})
+		})
+	})
+
+	describe('deleteTravellerMessages', () => {
+		const travellerId = 'traveller-to-delete'
+
+		describe('success scenarios', () => {
+			it('should send an authorised DELETE for the traveller messages', async () => {
+				fetch.mockResolvedValueOnce({ ok: true })
+
+				const result = await store.dispatch(
+					deleteTravellerMessages(travellerId),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(result.payload).toBe(travellerId)
+				expect(fetch).toHaveBeenCalledWith(
+					expect.stringContaining(
+						`/messages/${travellerId}.json?auth=${MOCK_USER.TOKEN}`,
+					),
+					expect.objectContaining({ method: 'DELETE' }),
+				)
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('should reject when the response is not ok', async () => {
+				fetch.mockResolvedValueOnce({ ok: false, status: 401 })
+
+				const result = await store.dispatch(
+					deleteTravellerMessages(travellerId),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(result.payload).toContain(
+					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_MESSAGES_CATCH}${travellerId}`,
+				)
+			})
+
+			it('should reject on a network error', async () => {
+				fetch.mockRejectedValueOnce(new Error('Network Error'))
+
+				const result = await store.dispatch(
+					deleteTravellerMessages(travellerId),
 				)
 
 				expect(result.meta.requestStatus).toBe('rejected')

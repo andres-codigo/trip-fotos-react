@@ -18,6 +18,7 @@ import {
 import { ERROR_MESSAGES } from '@/constants/errors'
 
 import { selectAuthenticationToken } from './authenticationSlice'
+import { deleteTravellerMessages } from './messagesSlice'
 
 import { handleApiError } from '@/utils/errorHandler'
 
@@ -321,36 +322,6 @@ export const loadTravellers = createAsyncThunk(
 			return travellers
 		} catch (error) {
 			return rejectWithValue(error)
-		}
-	},
-)
-
-export const deleteTravellerMessages = createAsyncThunk(
-	TRAVELLERS_ACTION_TYPES.DELETE_TRAVELLER_MESSAGES,
-	async (travellerId, { getState, rejectWithValue }) => {
-		try {
-			const token = selectAuthenticationToken(getState())
-
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/messages/${travellerId}.json?auth=${token}`,
-				{
-					method: API_DATABASE.DELETE,
-					headers: COMMON_HEADERS.JSON,
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
-			}
-
-			return travellerId
-		} catch (error) {
-			return rejectWithValue(
-				handleApiError(
-					error,
-					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_MESSAGES_CATCH}${travellerId}.`,
-				),
-			)
 		}
 	},
 )
