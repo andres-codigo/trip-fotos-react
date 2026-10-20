@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
 import { GLOBAL } from '@/constants/ui'
 import { BADGE, IMAGE, TRAVELLER_ITEM } from '@/constants/test'
 
@@ -218,10 +219,62 @@ describe('<TravellerItem />', () => {
 	describe('Delete', () => {
 		beforeEach(() => setup({ isAdmin: true }))
 
-		it('dispatches deleteTraveller with id and files', async () => {
+		const confirmDelete = () => {
+			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
+			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE_CONFIRM))
+		}
+
+		it('asks for confirmation naming the traveller before deleting', () => {
+			renderItem()
+			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
+			const dialog = screen.getByTestId(TRAVELLER_ITEM.DELETE_DIALOG)
+			expect(dialog).toHaveTextContent(
+				TRAVELLER_ITEM_CONFIG.DELETE_DIALOG_TITLE,
+			)
+			expect(dialog).toHaveTextContent(
+				"Ada Lovelace's profile, photos and messages",
+			)
+			expect(dispatch).not.toHaveBeenCalled()
+		})
+
+		it('focuses cancel when the confirmation opens', () => {
+			renderItem()
+			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
+			expect(
+				screen.getByTestId(TRAVELLER_ITEM.DELETE_CANCEL),
+			).toHaveFocus()
+		})
+
+		it('cancels without deleting and returns focus to the delete button', async () => {
+			renderItem()
+			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
+			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE_CANCEL))
+			await waitFor(() =>
+				expect(
+					screen.queryByTestId(TRAVELLER_ITEM.DELETE_DIALOG),
+				).not.toBeInTheDocument(),
+			)
+			expect(dispatch).not.toHaveBeenCalled()
+			expect(screen.getByTestId(TRAVELLER_ITEM.DELETE)).toHaveFocus()
+		})
+
+		it('cancels on Escape', async () => {
+			renderItem()
+			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
+			fireEvent.keyDown(window, { key: 'Escape' })
+			await waitFor(() =>
+				expect(
+					screen.queryByTestId(TRAVELLER_ITEM.DELETE_DIALOG),
+				).not.toBeInTheDocument(),
+			)
+			expect(dispatch).not.toHaveBeenCalled()
+			expect(screen.getByTestId(TRAVELLER_ITEM.DELETE)).toHaveFocus()
+		})
+
+		it('dispatches deleteTraveller with id and files on confirm', async () => {
 			const urls = files(2)
 			renderItem({ files: urls })
-			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
+			confirmDelete()
 			await waitFor(() => expect(dispatch).toHaveBeenCalled())
 			expect(deleteTraveller).toHaveBeenCalledWith({
 				travellerId: 'abc',
@@ -232,7 +285,7 @@ describe('<TravellerItem />', () => {
 		it('shows a spinner while pending', async () => {
 			dispatch.mockReturnValue(new Promise(() => {}))
 			renderItem()
-			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
+			confirmDelete()
 			expect(
 				await screen.findByTestId(TRAVELLER_ITEM.SPINNER),
 			).toBeInTheDocument()
@@ -244,7 +297,7 @@ describe('<TravellerItem />', () => {
 		it('shows the payload in a dialog on failure and clears it on close', async () => {
 			dispatch.mockResolvedValue({ rejected: true, payload: 'Nope' })
 			renderItem()
-			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
+			confirmDelete()
 			const dialog = await screen.findByTestId(
 				TRAVELLER_ITEM.ERROR_DIALOG,
 			)
@@ -263,7 +316,7 @@ describe('<TravellerItem />', () => {
 		it('falls back to the generic message without a payload', async () => {
 			dispatch.mockResolvedValue({ rejected: true })
 			renderItem()
-			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
+			confirmDelete()
 			expect(
 				await screen.findByText(ERROR_MESSAGES.SOMETHING_WENT_WRONG),
 			).toBeInTheDocument()
