@@ -5,6 +5,8 @@ argument-hint: '[--apply]'
 allowed-tools: Read, Write, Grep, Glob, Bash(gh project *), Bash(gh issue *), Bash(gh label list *), Bash(gh api graphql *), Bash(git log *)
 ---
 
+> **Archived.** Retired after the Vue parity epic (#274) closed in #291. Paths in this file refer to where it lived while active (`.claude/…`, `.github/agents/…`); see [the case study](../../README.md) for context.
+
 # Backlog sync
 
 Arguments: `$ARGUMENTS`

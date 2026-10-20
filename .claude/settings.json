@@ -51,17 +51,6 @@
 					}
 				]
 			}
-		],
-		"Stop": [
-			{
-				"hooks": [
-					{
-						"type": "command",
-						"command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/parity-stop-guard.mjs\"",
-						"timeout": 10
-					}
-				]
-			}
 		]
 	}
 }

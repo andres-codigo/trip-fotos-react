@@ -14,7 +14,6 @@ dist
 # CLAUDE CODE LOCAL SETTINGS
 .claude/settings.local.json
 .claude/worktrees/
-.claude/parity/
 
 # NPM
 .npm

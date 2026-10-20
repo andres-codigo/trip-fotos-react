@@ -5,6 +5,8 @@ argument-hint: '<issue-number>'
 allowed-tools: Read, Write, Edit, Grep, Glob, Agent, Skill, Bash(.claude/skills/implement-item/set-board-status.sh *), Bash(gh issue view *), Bash(gh issue edit *), Bash(gh issue comment *), Bash(git status *), Bash(git diff *), Bash(git log *), Bash(git add *), Bash(git commit *), Bash(npm run lint), Bash(npm run lint:fix), Bash(npm run vitest:run:fast), Bash(npm run cy:run:ct), Bash(npm run build), Bash(npx vitest *), Bash(npx cypress run --component *)
 ---
 
+> **Archived.** Retired after the Vue parity epic (#274) closed in #291. Paths in this file refer to where it lived while active (`.claude/…`, `.github/agents/…`); see [the case study](../../README.md) for context.
+
 # Implement item
 
 Arguments: `$ARGUMENTS` (a GitHub issue number)

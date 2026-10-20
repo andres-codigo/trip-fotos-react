@@ -127,14 +127,13 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 - **create-page** — scaffolds a new page with route integration and tests
 - **create-redux-slice** — scaffolds a new Redux slice with thunks/RTK Query and tests
 - **create-hook** — scaffolds a new custom hook (component-scoped or shared) with tests
-- **parity-auditor** — compares trip-fotos-vue with this port and writes `.claude/plans/parity-gap-report.md`
 
 Claude-specific automation lives in `.claude/` and is committed so every session gets it:
 
-- **`.claude/settings.json`** — shared permissions (safe checks and read-only `gh` queries allowed, pushes and installs ask, `.env`/`certs/` reads, force-pushes, pushes to `main` and `gh pr merge` denied), a `PostToolUse` lint hook and a `Stop` hook
+- **`.claude/settings.json`** — shared permissions (safe checks and read-only `gh` queries allowed, pushes and installs ask, `.env`/`certs/` reads, force-pushes, pushes to `main` and `gh pr merge` denied), and a `PostToolUse` lint hook
 - **`.claude/hooks/lint-edited-file.mjs`** — runs Prettier and `eslint --fix` on every file Claude edits; remaining ESLint errors are fed back so they get fixed in the same turn
 - **`/verify` skill** (`.claude/skills/verify/`) — runs lint, Vitest, Cypress component tests and the build, and reports a pass/fail table; use it before committing or opening a PR. `/verify e2e` also runs the Cypress E2E suite against a local dev server (opt-in, as it uses live Firebase)
-- **Vue parity programme** — plan in `.claude/plans/vue-parity-plan.md`. `/parity-run` drives it end to end via `/backlog-sync` (gap report ↔ project backlog) and `/implement-item <issue>` (one verified commit per issue); a `Stop` hook (`.claude/hooks/parity-stop-guard.mjs`) keeps the run going while `.claude/parity/state.json` (gitignored) has pending items
+- **Vue parity programme (archived)** — the parity agent, skills and `Stop` hook were retired after epic #274; they live, with a write-up, in `_ai-assisted-dev-story/vue-parity-programme/` and are not loaded by Claude Code or Copilot
 - Personal overrides go in the gitignored `.claude/settings.local.json`
 
 ## Keeping README.md in sync

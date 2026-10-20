@@ -3,6 +3,8 @@ name: parity-auditor
 description: Use when comparing the original trip-fotos-vue app against this React port. Inventories Vue routes, store modules, components and composables, maps each to its React equivalent, and writes a gap report rating every feature as done, partial or missing.
 ---
 
+> **Archived.** Retired after the Vue parity epic (#274) closed in #291. Paths in this file refer to where it lived while active (`.claude/…`, `.github/agents/…`); see [the case study](../README.md) for context.
+
 # Vue Parity Audit Workflow
 
 Use this agent to find out what the React app still lacks compared with the Vue app it was ported from. It reads code and writes one report; it never changes source files.

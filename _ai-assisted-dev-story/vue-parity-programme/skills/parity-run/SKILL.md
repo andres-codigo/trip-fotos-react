@@ -4,6 +4,8 @@ description: Run the whole Vue to React parity programme unattended — audit, b
 argument-hint: '[--skip-audit] [--one]'
 ---
 
+> **Archived.** Retired after the Vue parity epic (#274) closed in #291. Paths in this file refer to where it lived while active (`.claude/…`, `.github/agents/…`); see [the case study](../../README.md) for context.
+
 # Parity run
 
 Arguments: `$ARGUMENTS`

@@ -1,5 +1,7 @@
 # Vue → React parity plan
 
+> **Archived.** Retired after the Vue parity epic (#274) closed in #291. Paths in this file refer to where it lived while active (`.claude/…`, `.github/agents/…`); see [the case study](README.md) for context.
+
 Bring `trip-fotos-react` to feature parity with [trip-fotos-vue](https://github.com/andres-codigo/trip-fotos-vue), keep the [project backlog](https://github.com/users/andres-codigo/projects/2/views/1) in step, and deliver everything as **one PR with one commit per backlog issue**, run **locally** in the dev container.
 
 The only human step is reviewing that final PR.
