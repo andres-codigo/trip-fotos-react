@@ -2,7 +2,16 @@ name: GitHub - Project Item Lifecycle
 
 on:
     pull_request_target:
-        types: [opened, reopened, synchronize, edited, closed]
+        types:
+            [
+                opened,
+                reopened,
+                synchronize,
+                edited,
+                ready_for_review,
+                converted_to_draft,
+                closed,
+            ]
 
 permissions:
     contents: read
@@ -20,10 +29,11 @@ jobs:
               env:
                   PROJECT_ID: PVT_kwHOAybMeM4BCojE
                   PROJECT_STATUS_FIELD_ID: PVTSSF_lAHOAybMeM4BCojEzg0yW4g
-                  STATUS_BACKLOG_OPTION_ID: 7be623db
-                  STATUS_TODO_OPTION_ID: f75ad846
+                  STATUS_READY_OPTION_ID: f75ad846
                   STATUS_IN_PROGRESS_OPTION_ID: 47fc9ee4
+                  STATUS_IN_REVIEW_OPTION_ID: 5e639cc6
                   STATUS_DONE_OPTION_ID: 98236657
+                  BLOCKED_LABEL: blocked
                   # Optional PAT for Project v2 writes. Rotation/recreation guide:
                   # .github/project-automation-token.md
                   PROJECT_AUTOMATION_TOKEN: ${{ secrets['PROJECT_AUTOMATION_TOKEN'] }}
@@ -37,11 +47,12 @@ jobs:
                       const PROJECT_ID = process.env.PROJECT_ID
                       const STATUS_FIELD_ID = process.env.PROJECT_STATUS_FIELD_ID
                       const STATUS = {
-                        BACKLOG: process.env.STATUS_BACKLOG_OPTION_ID,
-                        TODO: process.env.STATUS_TODO_OPTION_ID,
+                        READY: process.env.STATUS_READY_OPTION_ID,
                         IN_PROGRESS: process.env.STATUS_IN_PROGRESS_OPTION_ID,
+                        IN_REVIEW: process.env.STATUS_IN_REVIEW_OPTION_ID,
                         DONE: process.env.STATUS_DONE_OPTION_ID,
                       }
+                      const BLOCKED_LABEL = process.env.BLOCKED_LABEL
                       const PROJECT_AUTOMATION_TOKEN = process.env.PROJECT_AUTOMATION_TOKEN || ''
 
                       const TRACKING_MARKER = /Tracking-Issue:\s*#(\d+)/i
@@ -57,18 +68,14 @@ jobs:
                         return message.includes('Resource not accessible by integration')
                       }
 
-                      const extractLinkedIssueNumber = (body = '') => {
-                        let markerMatch = body.match(TRACKING_MARKER)
+                      const extractLinkedIssueNumbers = (body = '') => {
+                        const markerMatch = body.match(TRACKING_MARKER)
                         if (markerMatch) {
-                          return Number(markerMatch[1])
+                          return [Number(markerMatch[1])]
                         }
 
-                        let match
-                        while ((match = KEYWORD_LINK.exec(body)) !== null) {
-                          if (match[3]) return Number(match[3])
-                        }
-
-                        return null
+                        const numbers = Array.from(body.matchAll(KEYWORD_LINK), (match) => Number(match[3]))
+                        return [...new Set(numbers)]
                       }
 
                       const projectGithub = PROJECT_AUTOMATION_TOKEN
@@ -260,14 +267,14 @@ jobs:
                         return created.data.number
                       }
 
-                      const resolveIssueNumber = async () => {
-                        if (isDependabotPR) return null
+                      const resolveIssueNumbers = async () => {
+                        if (isDependabotPR) return []
 
                         const livePr = await getLivePullRequest()
                         const liveBody = livePr.body || ''
 
-                        const fromBody = extractLinkedIssueNumber(liveBody)
-                        if (fromBody) return fromBody
+                        const fromBody = extractLinkedIssueNumbers(liveBody)
+                        if (fromBody.length > 0) return fromBody
 
                         const existingIssue = await findTrackingIssueNumber()
                         if (existingIssue) {
@@ -278,19 +285,19 @@ jobs:
                             pull_number: pr.number,
                             body: newBody,
                           })
-                          return existingIssue
+                          return [existingIssue]
                         }
 
-                        return createTrackingIssue(liveBody)
+                        return [await createTrackingIssue(liveBody)]
                       }
 
-                      const getIssueNodeId = async (issueNumber) => {
+                      const getIssue = async (issueNumber) => {
                         const issue = await github.rest.issues.get({
                           owner,
                           repo,
                           issue_number: issueNumber,
                         })
-                        return issue.data.node_id
+                        return issue.data
                       }
 
                       const closeIssueIfOpen = async (issueNumber) => {
@@ -310,42 +317,53 @@ jobs:
                         }
                       }
 
-                      const issueNumber = await resolveIssueNumber()
-                      const issueNodeId = issueNumber ? await getIssueNodeId(issueNumber) : null
-                      const prNodeId = pr.node_id
-
-                      const issueItemId = issueNodeId ? await ensureProjectItem(issueNodeId) : null
-                      const prItemId = await ensureProjectItem(prNodeId)
+                      const issueNumbers = await resolveIssueNumbers()
+                      const linkedIssues = []
+                      for (const issueNumber of issueNumbers) {
+                        const issue = await getIssue(issueNumber)
+                        const labels = (issue.labels || []).map((label) => (typeof label === 'string' ? label : label.name))
+                        linkedIssues.push({
+                          number: issueNumber,
+                          itemId: await ensureProjectItem(issue.node_id),
+                          isBlocked: labels.includes(BLOCKED_LABEL),
+                        })
+                      }
+                      const prItemId = await ensureProjectItem(pr.node_id)
 
                       const author = pr.user?.login
                       const shouldAssignAuthor = Boolean(author) && !isDependabotAuthor(author)
+                      const action = context.payload.action
 
-                      if (context.payload.action === 'opened' || context.payload.action === 'reopened') {
-                        if (issueNumber && shouldAssignAuthor) {
-                          await ensureIssueAssignee(issueNumber, author)
+                      // A blocked issue stays Blocked until its label is removed, however its PR moves
+                      const setIssueStatuses = async (optionId) => {
+                        for (const issue of linkedIssues) {
+                          if (!issue.isBlocked) await setStatus(issue.itemId, optionId)
                         }
+                      }
 
+                      if (action === 'opened' || action === 'reopened') {
                         if (shouldAssignAuthor) {
+                          for (const issue of linkedIssues) {
+                            await ensureIssueAssignee(issue.number, author)
+                          }
                           await ensurePRAssignee(pr.number, author)
                         }
-
-                        await setStatus(issueItemId, STATUS.IN_PROGRESS)
-                        await setStatus(prItemId, STATUS.IN_PROGRESS)
                       }
 
-                      if (context.payload.action === 'synchronize') {
-                        await setStatus(issueItemId, STATUS.IN_PROGRESS)
-                        await setStatus(prItemId, STATUS.IN_PROGRESS)
+                      if (['opened', 'reopened', 'synchronize', 'ready_for_review', 'converted_to_draft'].includes(action)) {
+                        const openStatus = pr.draft ? STATUS.IN_PROGRESS : STATUS.IN_REVIEW
+                        await setIssueStatuses(openStatus)
+                        await setStatus(prItemId, openStatus)
                       }
 
-                      if (context.payload.action === 'closed') {
+                      if (action === 'closed') {
                         if (pr.merged) {
-                          await setStatus(issueItemId, STATUS.DONE)
-                          await setStatus(prItemId, STATUS.DONE)
-                          if (issueNumber) {
-                            await closeIssueIfOpen(issueNumber)
+                          for (const issue of linkedIssues) {
+                            await setStatus(issue.itemId, STATUS.DONE)
+                            await closeIssueIfOpen(issue.number)
                           }
+                          await setStatus(prItemId, STATUS.DONE)
                         } else {
-                          await setStatus(issueItemId, STATUS.TODO)
+                          await setIssueStatuses(STATUS.READY)
                         }
                       }

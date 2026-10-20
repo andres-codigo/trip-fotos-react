@@ -2,7 +2,7 @@ name: GitHub - Issue Intake
 
 on:
     issues:
-        types: [opened, reopened, edited]
+        types: [opened, reopened, edited, labeled, unlabeled]
     workflow_dispatch:
         inputs:
             issue_number:
@@ -20,12 +20,20 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Intake issue into project backlog
+            - name: Intake issue and sync its board status
               uses: actions/github-script@v9
               env:
                   PROJECT_ID: PVT_kwHOAybMeM4BCojE
                   PROJECT_STATUS_FIELD_ID: PVTSSF_lAHOAybMeM4BCojEzg0yW4g
+                  STATUS_TRIAGE_OPTION_ID: 46daf40e
                   STATUS_BACKLOG_OPTION_ID: 7be623db
+                  STATUS_READY_OPTION_ID: f75ad846
+                  STATUS_IN_PROGRESS_OPTION_ID: 47fc9ee4
+                  STATUS_BLOCKED_OPTION_ID: ba1ca20d
+                  STATUS_IN_REVIEW_OPTION_ID: 5e639cc6
+                  STATUS_DONE_OPTION_ID: 98236657
+                  READY_LABEL: ready
+                  BLOCKED_LABEL: blocked
                   DEFAULT_ASSIGNEE: andres-codigo
                   TRIAGE_LABELS: enhancement,bug,question
                   DOMAIN_LABELS: testing,config,utilities,documentation,dependencies,firebase,styling,feature,assets,build/deployment,constants,redux/state
@@ -38,7 +46,17 @@ jobs:
 
                       const PROJECT_ID = process.env.PROJECT_ID
                       const STATUS_FIELD_ID = process.env.PROJECT_STATUS_FIELD_ID
-                      const STATUS_BACKLOG_OPTION_ID = process.env.STATUS_BACKLOG_OPTION_ID
+                      const STATUS = {
+                        TRIAGE: process.env.STATUS_TRIAGE_OPTION_ID,
+                        BACKLOG: process.env.STATUS_BACKLOG_OPTION_ID,
+                        READY: process.env.STATUS_READY_OPTION_ID,
+                        IN_PROGRESS: process.env.STATUS_IN_PROGRESS_OPTION_ID,
+                        BLOCKED: process.env.STATUS_BLOCKED_OPTION_ID,
+                        IN_REVIEW: process.env.STATUS_IN_REVIEW_OPTION_ID,
+                        DONE: process.env.STATUS_DONE_OPTION_ID,
+                      }
+                      const READY_LABEL = process.env.READY_LABEL
+                      const BLOCKED_LABEL = process.env.BLOCKED_LABEL
                       const DEFAULT_ASSIGNEE = process.env.DEFAULT_ASSIGNEE
                       const TRIAGE_LABELS = (process.env.TRIAGE_LABELS || '')
                         .split(',')
@@ -144,29 +162,40 @@ jobs:
                         return Array.from(candidates).filter((label) => DOMAIN_LABELS.includes(label))
                       }
 
-                      const triageLabel = detectTriageLabel()
-                      const domainLabels = detectDomainLabels()
-                      const labelsToApply = [triageLabel, ...domainLabels].filter(
-                        (label, idx, labels) => label && labels.indexOf(label) === idx,
-                      )
+                      const action = context.eventName === 'workflow_dispatch' ? 'dispatch' : context.payload.action
+                      const isLabelEvent = action === 'labeled' || action === 'unlabeled'
 
-                      const missingLabels = labelsToApply.filter((label) => !existingLabelNames.includes(label))
-                      if (missingLabels.length > 0) {
-                        await github.rest.issues.addLabels({
-                          owner,
-                          repo,
-                          issue_number: issueNumber,
-                          labels: missingLabels,
-                        })
+                      // Labels added by a workflow are auto-labels, not a triage decision
+                      if (isLabelEvent && context.payload.sender?.type === 'Bot') {
+                        core.info(`Skipping ${action} event on #${issueNumber} from bot ${context.payload.sender.login}.`)
+                        return
                       }
 
-                      if (DEFAULT_ASSIGNEE && !(issue.assignees || []).some((assignee) => assignee.login === DEFAULT_ASSIGNEE)) {
-                        await github.rest.issues.addAssignees({
-                          owner,
-                          repo,
-                          issue_number: issueNumber,
-                          assignees: [DEFAULT_ASSIGNEE],
-                        })
+                      if (!isLabelEvent) {
+                        const triageLabel = detectTriageLabel()
+                        const domainLabels = detectDomainLabels()
+                        const labelsToApply = [triageLabel, ...domainLabels].filter(
+                          (label, idx, labels) => label && labels.indexOf(label) === idx,
+                        )
+
+                        const missingLabels = labelsToApply.filter((label) => !existingLabelNames.includes(label))
+                        if (missingLabels.length > 0) {
+                          await github.rest.issues.addLabels({
+                            owner,
+                            repo,
+                            issue_number: issueNumber,
+                            labels: missingLabels,
+                          })
+                        }
+
+                        if (DEFAULT_ASSIGNEE && !(issue.assignees || []).some((assignee) => assignee.login === DEFAULT_ASSIGNEE)) {
+                          await github.rest.issues.addAssignees({
+                            owner,
+                            repo,
+                            issue_number: issueNumber,
+                            assignees: [DEFAULT_ASSIGNEE],
+                          })
+                        }
                       }
 
                       const addProjectItem = async (contentId) => {
@@ -235,7 +264,7 @@ jobs:
                         return itemId
                       }
 
-                      const setStatusToBacklog = async (itemId) => {
+                      const setStatus = async (itemId, optionId) => {
                         await projectGraphql(
                           `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
                             updateProjectV2ItemFieldValue(
@@ -253,12 +282,12 @@ jobs:
                             projectId: PROJECT_ID,
                             itemId,
                             fieldId: STATUS_FIELD_ID,
-                            optionId: STATUS_BACKLOG_OPTION_ID,
+                            optionId,
                           },
                         )
                       }
 
-                      const verifyStatusIsBacklog = async (itemId) => {
+                      const getStatusOptionId = async (itemId) => {
                         const data = await projectGraphql(
                           `query($itemId: ID!) {
                             node(id: $itemId) {
@@ -285,10 +314,71 @@ jobs:
 
                         const values = data?.node?.fieldValues?.nodes || []
                         const statusEntry = values.find((entry) => entry?.field?.id === STATUS_FIELD_ID)
-                        return statusEntry?.optionId === STATUS_BACKLOG_OPTION_ID
+                        return statusEntry?.optionId || null
+                      }
+
+                      // Only "Closes #N"-style links are visible here; Tracking-Issue markers are handled by the lifecycle workflow
+                      const getOpenLinkedPullRequests = async () => {
+                        const data = await github.graphql(
+                          `query($owner: String!, $repo: String!, $number: Int!) {
+                            repository(owner: $owner, name: $repo) {
+                              issue(number: $number) {
+                                closedByPullRequestsReferences(first: 10, includeClosedPrs: false) {
+                                  nodes { isDraft state }
+                                }
+                              }
+                            }
+                          }`,
+                          {
+                            owner,
+                            repo,
+                            number: issueNumber,
+                          },
+                        )
+
+                        const nodes = data?.repository?.issue?.closedByPullRequestsReferences?.nodes || []
+                        return nodes.filter((node) => node?.state === 'OPEN')
+                      }
+
+                      const resolveUnblockedStatus = async () => {
+                        const openPullRequests = await getOpenLinkedPullRequests()
+                        if (openPullRequests.some((pull) => !pull.isDraft)) return STATUS.IN_REVIEW
+                        if (openPullRequests.length > 0) return STATUS.IN_PROGRESS
+                        if (existingLabelNames.includes(READY_LABEL)) return STATUS.READY
+                        return STATUS.BACKLOG
+                      }
+
+                      const resolveNextStatus = async (currentStatus) => {
+                        if (!isLabelEvent) {
+                          if (!currentStatus) return STATUS.TRIAGE
+                          if (action === 'reopened' && currentStatus === STATUS.DONE) return STATUS.BACKLOG
+                          // Edits never move an issue that is already on the board (#290)
+                          return null
+                        }
+
+                        const labelName = context.payload.label?.name
+                        const isBlocked = existingLabelNames.includes(BLOCKED_LABEL)
+
+                        if (action === 'labeled') {
+                          if (labelName === BLOCKED_LABEL) return STATUS.BLOCKED
+                          if (isBlocked) return null
+                          if (labelName === READY_LABEL) {
+                            return [null, STATUS.TRIAGE, STATUS.BACKLOG].includes(currentStatus) ? STATUS.READY : null
+                          }
+                          // Labels picked on the new-issue form arrive with the opened event; they are not a triage decision
+                          const isJustCreated = Date.now() - new Date(issue.created_at).getTime() < 60_000
+                          if (isJustCreated) return null
+                          // Any later manual label counts as the issue having been triaged
+                          return [null, STATUS.TRIAGE].includes(currentStatus) ? STATUS.BACKLOG : null
+                        }
+
+                        if (labelName === BLOCKED_LABEL) return resolveUnblockedStatus()
+                        if (labelName === READY_LABEL && currentStatus === STATUS.READY) return STATUS.BACKLOG
+                        return null
                       }
 
                       let projectItemId
+                      let finalStatus
                       try {
                         projectItemId = await ensureProjectItem(issue.node_id)
                         if (!projectItemId) {
@@ -296,13 +386,29 @@ jobs:
                           return
                         }
 
-                        await setStatusToBacklog(projectItemId)
+                        const currentStatus = await getStatusOptionId(projectItemId)
+                        const nextStatus = await resolveNextStatus(currentStatus)
+                        if (nextStatus && nextStatus !== currentStatus) {
+                          await setStatus(projectItemId, nextStatus)
+                          core.info(`Issue #${issueNumber} status: ${currentStatus || 'empty'} -> ${nextStatus}.`)
+                        } else {
+                          core.info(`Issue #${issueNumber} status left unchanged (${currentStatus || 'empty'}).`)
+                        }
+
+                        finalStatus = await getStatusOptionId(projectItemId)
                       } catch (error) {
                         core.setFailed(
                           `Project update failed for issue #${issueNumber}. Ensure PROJECT_AUTOMATION_TOKEN has project + repo scope. Error: ${error.message}`,
                         )
                         return
                       }
+
+                      if (!finalStatus) {
+                        core.setFailed(`Verification failed: issue #${issueNumber} has no project status.`)
+                        return
+                      }
+
+                      if (isLabelEvent) return
 
                       const refreshedIssue = await github.rest.issues.get({
                         owner,
@@ -318,7 +424,6 @@ jobs:
                       const hasAssignee = (refreshedIssue.data.assignees || []).some(
                         (assignee) => assignee.login === DEFAULT_ASSIGNEE,
                       )
-                      const hasBacklogStatus = await verifyStatusIsBacklog(projectItemId)
 
                       if (!hasTriageLabel) {
                         core.setFailed(`Verification failed: issue #${issueNumber} has no triage label (${TRIAGE_LABELS.join(', ')}).`)
@@ -330,9 +435,4 @@ jobs:
                         return
                       }
 
-                      if (!hasBacklogStatus) {
-                        core.setFailed(`Verification failed: issue #${issueNumber} project status is not backlog.`)
-                        return
-                      }
-
-                      core.info(`Issue #${issueNumber} intake succeeded: project item linked, backlog status set, labels and assignee verified.`)
+                      core.info(`Issue #${issueNumber} intake succeeded: project item linked, status set, labels and assignee verified.`)
