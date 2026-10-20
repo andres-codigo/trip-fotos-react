@@ -4,40 +4,9 @@
 
 A React/Firebase app for finding popular travel destinations tied to registered travellers. Converted from a Vue Udemy course project ("Find a Coach") — reimagined as "Trip Fotos". Deployed on Vercel.
 
-## Stack
+## Stack and src/ structure
 
-- **Vite** — dev server + build (port 3000, optional HTTPS via `certs/`)
-- **React** — UI library
-- **React Router** — routing
-- **Redux** (RTK) — state management
-- **SCSS Modules** — per-component styles
-- **ESLint + Prettier** — linting and formatting
-- **Vitest** — unit and integration tests
-- **Cypress** — component tests (`cy.jsx`) and E2E tests
-- **Firebase** — Realtime Database, Authentication (email/password), Cloud Storage
-
-## src/ structure
-
-```
-src/
-  app/           App.jsx + routing — entry wrapper only
-  assets/        Static assets (SVGs)
-  components/
-    common/      LoadingFallback
-    forms/       contact-traveller/, file-uploader/, traveller-registration/, user-authentication/ (each with hooks/ + __tests__/)
-    layout/      footer/, header/, main-nav/, skip-link/ (with nav-menu/, hooks/, __tests__/)
-    messages/    message-item/
-    travellers/  travellers-list/, traveller-item/, traveller-filter/
-    ui/           Atomic: alerts, badge, button, card, dialog, form/*, image, spinner
-  constants/     45 files — api/, auth/, config/, errors/, firebase/, redux/, test/, travellers/, ui/, validation/
-  pages/         authentication/, contact-traveller/, home/, messages/, page-not-found/, privacy/, register/, traveller-detail/, travellers/
-  services/      firebase/ (firebase.js)
-  store/         store.js, storage.js (redux-persist), slices/authenticationSlice.js, slices/travellersSlice.js, slices/messagesSlice.js
-  styles/        global.scss, setup/ (variables, mixins, typography, routing, pages)
-  testUtils/     cypress/ (TestLocationDisplay, selectors), vitest/ (polyfills, mocks, setup)
-  utils/         errorHandler/, form/, formatCity/, getFirebaseAuthErrorMessage/, useViewport/, validation/
-  index.jsx      Entry point
-```
+See the README [Stack](README.md#stack) and [Folder Structure](README.md#folder-structure) sections.
 
 ## Branch naming
 
@@ -103,22 +72,14 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
 ## Dev commands
 
 ```bash
-npm run dev              # Start dev server (http or https if certs/ present)
 npm run lint             # ESLint check
-npm run lint:fix         # ESLint auto-fix + format
-
-npm run vitest:run       # All unit/integration tests (CI mode)
-npm run vitest:run:fast  # Fast run, no coverage
-npm run vitest:coverage  # With coverage report
-
+npm run vitest:run:fast  # Unit/integration tests, no coverage
 npm run cy:run:ct        # Cypress component tests (headless)
-npm run cy:run:e2e       # Cypress E2E tests (headless)
-npm run cy:open:ct       # Cypress component tests (interactive)
-npm run cy:open:e2e      # Cypress E2E tests (interactive)
-
 npm run build            # Production build → dist/
 npm run analyse          # Bundle size visualiser
 ```
+
+Full list in the README [Scripts](README.md#scripts) section.
 
 ## Environment
 
@@ -127,19 +88,12 @@ Required keys: `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `CYPR
 
 ## Workflow automation
 
-Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is a thin wrapper around the shared workflow in `.github/agents/*.agent.md` — edit the workflow there, not in the wrapper:
+Detail lives in `.claude/` and the README AI Assistance sections.
 
-- **create-component** — scaffolds a new component with folder structure and tests
-- **create-page** — scaffolds a new page with route integration and tests
-- **create-redux-slice** — scaffolds a new Redux slice with thunks/RTK Query and tests
-- **create-hook** — scaffolds a new custom hook (component-scoped or shared) with tests
-
-Claude-specific automation lives in `.claude/` and is committed so every session gets it:
-
-- **`.claude/settings.json`** — shared permissions (safe checks and read-only `gh` queries allowed, pushes and installs ask, `.env`/`certs/` reads, force-pushes, pushes to `main` and `gh pr merge` denied), and a `PostToolUse` lint hook
-- **`.claude/hooks/lint-edited-file.mjs`** — runs Prettier and `eslint --fix` on every file Claude edits; remaining ESLint errors are fed back so they get fixed in the same turn
-- **`/verify` skill** (`.claude/skills/verify/`) — runs lint, Vitest, Cypress component tests and the build, and reports a pass/fail table; use it before committing or opening a PR. `/verify e2e` also runs the Cypress E2E suite against a local dev server (opt-in, as it uses live Firebase)
-- **Vue parity programme (archived)** — the parity agent, skills and `Stop` hook were retired after epic #274; they live, with a write-up, in `_ai-assisted-dev-story/vue-parity-programme/` and are not loaded by Claude Code or Copilot
+- **Agents** (`.claude/agents/`, wrappers around `.github/agents/*.agent.md` — edit the workflow there): `create-component`, `create-page`, `create-redux-slice`, `create-hook`
+- **`.claude/settings.json`** — shared permissions and a `PostToolUse` hook (`.claude/hooks/lint-edited-file.mjs`) that lints every edited file
+- **`/verify`** — runs the lint, Vitest, Cypress component test and build gates the change can affect (picked by `changed-gates.mjs`), as a pass/fail table; run before committing. `/verify all` forces every gate; `/verify e2e` adds the live-Firebase E2E suite
+- **Vue parity programme** — archived in `_ai-assisted-dev-story/vue-parity-programme/`; not loaded
 - Personal overrides go in the gitignored `.claude/settings.local.json`
 
 ## Keeping README.md in sync
@@ -158,7 +112,7 @@ Claude-specific automation lives in `.claude/` and is committed so every session
 - Do not commit `.env` or `certs/`
 - Do not mock the Firebase Realtime Database in integration tests
 - Do not add comments that describe what the code does — only why
-- Do not create new top-level `src/` folders without updating this file
+- Do not create new top-level `src/` folders without updating the README Folder Structure tree
 - Do not add a route to `PATHS` without adding it to the `rewrites` allow-list in `vercel.json` — unlisted paths return a real 404 in production
 - Do not add a database or Storage field, or a write limit, without updating `database.rules.json` / `storage.rules` to match — client-side validation must mirror the rules. Deploy rule changes with `npm run firebase:rules` before the production deploy
 - Do not call a new external origin without adding it to the CSP `connect-src` in `vercel.json`
