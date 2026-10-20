@@ -96,6 +96,13 @@ export const { useGetTravellersQuery, useCreateTravellerMutation } =
 
 Persisted state is configured in `src/store/store.js`. When modifying which slices or state properties should persist, update the persist configuration accordingly.
 
+- Keep private data (e.g. messages) out of redux-persist, and clear it on logout — including when logout is rejected.
+
+## Authentication
+
+- Sign in through the Firebase Auth SDK, not the Identity Toolkit REST API — the Storage SDK needs a signed-in SDK user to authorise uploads.
+- Ensure Auth is initialised before Storage is used.
+
 ## Testing
 
 When modifying Redux slices (`src/store/slices/`) or the store configuration (`src/store/store.js`), **immediately update or create** the corresponding Vitest test file (`*.test.js`) to reflect changes in:
