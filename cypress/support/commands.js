@@ -114,6 +114,27 @@ Cypress.Commands.add(
 )
 
 ////
+// STORAGE CLEANUP
+////
+// Live uploads get a unique path per run, so each test must remove its own;
+// the signed-in user's ID token satisfies the owner-delete Storage rule
+Cypress.Commands.add('deleteStorageObject', (downloadUrl) => {
+	const { origin, pathname } = new URL(downloadUrl)
+
+	cy.window().then((win) => {
+		cy.request({
+			method: 'DELETE',
+			url: `${origin}${pathname}`,
+			headers: {
+				Authorization: `Firebase ${win.localStorage.getItem('token')}`,
+			},
+		})
+			.its('status')
+			.should('eq', 204)
+	})
+})
+
+////
 // VIEWPORTS
 ////
 Cypress.Commands.add('setViewportToMobile', () => {

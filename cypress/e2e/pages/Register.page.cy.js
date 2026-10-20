@@ -17,10 +17,20 @@ const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
 
 describe('Register Page', () => {
+	let uploadedImageUrl
+
 	beforeEach(() => {
 		cy.visit(loginUrl)
 		performLogin()
 		cy.visit(PATHS.REGISTER)
+	})
+
+	// afterEach rather than the test body, so the image is removed even when a later assertion fails
+	afterEach(() => {
+		if (uploadedImageUrl) {
+			cy.deleteStorageObject(uploadedImageUrl)
+			uploadedImageUrl = undefined
+		}
 	})
 
 	it('renders the register page container', () => {
@@ -112,7 +122,7 @@ describe('Register Page', () => {
 		const { firstName, lastName, description, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
-		// Storage is live (the fixed file name overwrites the same object each run); the DB write is stubbed
+		// Storage is live (the upload is deleted in afterEach); the DB write is stubbed
 		cy.intercept({
 			method: 'POST',
 			hostname: 'firebasestorage.googleapis.com',
@@ -153,6 +163,9 @@ describe('Register Page', () => {
 			.should('have.length', 1)
 			.its('0')
 			.should('include', 'firebasestorage.googleapis.com')
+			.then((url) => {
+				uploadedImageUrl = url
+			})
 
 		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)
 	})
