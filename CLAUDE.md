@@ -55,6 +55,12 @@ Branches must use a type prefix:
 
 Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
 
+## Merging PRs
+
+- **Squash-merge** by default — one PR, one commit on `main`, titled with the PR's conventional-commit title
+- **Rebase-merge** multi-commit PRs whose commits are individually meaningful (e.g. one commit per issue), so `git log`, `blame` and `bisect` keep them distinct
+- Merge commits are disabled; head branches are auto-deleted on merge
+
 ## Language & Tone
 
 - Use British English (`en-GB`) for all code comments, documentation, and strings (e.g., `colour`, `behaviour`, `optimise`).
@@ -154,5 +160,7 @@ Claude-specific automation lives in `.claude/` and is committed so every session
 - Do not add comments that describe what the code does — only why
 - Do not create new top-level `src/` folders without updating this file
 - Do not add a route to `PATHS` without adding it to the `rewrites` allow-list in `vercel.json` — unlisted paths return a real 404 in production
+- Do not add a database or Storage field, or a write limit, without updating `database.rules.json` / `storage.rules` to match — client-side validation must mirror the rules. Deploy rule changes with `npm run firebase:rules` before the production deploy
+- Do not call a new external origin without adding it to the CSP `connect-src` in `vercel.json`
 - Do not re-inline domain-specific detail here — extend the relevant `.github/instructions/*.instructions.md` file instead
 - Do not let `README.md` go stale — see "Keeping README.md in sync" above

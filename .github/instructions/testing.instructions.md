@@ -36,6 +36,9 @@ Do not introduce `cypress/support/constants` unless explicitly adopted in a futu
 - Avoid arbitrary waits; rely on Cypress retry behaviour and explicit route aliases when needed.
 - Keep E2E flows user-centred and scenario-driven.
 - Reset or isolate state in `beforeEach` to prevent cross-test leakage.
+- E2E tests that upload to Storage must delete their uploads afterwards.
+- After logging in, wait for the stored session before reloading — the Auth SDK persists it asynchronously.
+- If an E2E spec fails in a full run, re-run it on its own before treating it as a regression; specs can flake under load.
 
 ## Required Updates
 
