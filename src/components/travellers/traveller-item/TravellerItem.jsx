@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
 import classNames from 'classnames'
@@ -51,6 +51,8 @@ const TravellerItem = ({
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false)
 	const [error, setError] = useState(null)
+	const [isConfirming, setIsConfirming] = useState(false)
+	const deleteButtonRef = useRef(null)
 
 	const dispatch = useDispatch()
 	const userId = useSelector(selectUserId)
@@ -64,7 +66,15 @@ const TravellerItem = ({
 	const canContact = !isOwnRecord && isTraveller
 	const canDelete = isAdmin && !isOwnRecord
 
-	const deleteHandler = async () => {
+	const openConfirm = () => setIsConfirming(true)
+
+	const cancelDelete = () => {
+		setIsConfirming(false)
+		deleteButtonRef.current?.focus()
+	}
+
+	const confirmDelete = async () => {
+		setIsConfirming(false)
 		setIsDeleting(true)
 		const result = await dispatch(
 			deleteTraveller({ travellerId: id, files }),
@@ -88,6 +98,36 @@ const TravellerItem = ({
 					onClose={clearError}
 					data-cy={TRAVELLER_ITEM.ERROR_DIALOG}>
 					{error}
+				</BaseDialog>
+			)}
+			{isConfirming && (
+				<BaseDialog
+					show={true}
+					title={TRAVELLER_ITEM_CONFIG.DELETE_DIALOG_TITLE}
+					onClose={cancelDelete}
+					data-cy={TRAVELLER_ITEM.DELETE_DIALOG}
+					actions={
+						<>
+							{/* Cancel takes focus so a stray Enter cannot confirm an irreversible delete */}
+							<BaseButton
+								type="button"
+								modeType="outline"
+								autoFocus
+								onClick={cancelDelete}
+								data-cy={TRAVELLER_ITEM.DELETE_CANCEL}>
+								Cancel
+							</BaseButton>
+							<BaseButton
+								type="button"
+								className={travellerItemStyles.delete}
+								onClick={confirmDelete}
+								data-cy={TRAVELLER_ITEM.DELETE_CONFIRM}>
+								Delete
+							</BaseButton>
+						</>
+					}>
+					This permanently removes {fullName}&apos;s profile, photos
+					and messages.
 				</BaseDialog>
 			)}
 			{isDeleting ? (
@@ -183,7 +223,8 @@ const TravellerItem = ({
 							<BaseButton
 								type="button"
 								className={travellerItemStyles.delete}
-								onClick={deleteHandler}
+								ref={deleteButtonRef}
+								onClick={openConfirm}
 								data-cy={TRAVELLER_ITEM.DELETE}>
 								Delete
 							</BaseButton>

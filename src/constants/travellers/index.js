@@ -24,6 +24,7 @@ export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 	DESCRIPTION_MAX_LENGTH: 250,
 	MAX_IMAGES: 5,
 	CONTACT_PATH_SEGMENT: '/contact',
+	DELETE_DIALOG_TITLE: 'Delete traveller?',
 })
 
 export const TRAVELLER_FILTER_CONFIG = Object.freeze({

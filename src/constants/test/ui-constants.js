@@ -100,6 +100,9 @@ export const TRAVELLER_ITEM = Object.freeze({
 	DELETE: 'traveller-item-delete',
 	SPINNER: 'traveller-item-spinner',
 	ERROR_DIALOG: 'traveller-item-error-dialog',
+	DELETE_DIALOG: 'traveller-item-delete-dialog',
+	DELETE_CANCEL: 'traveller-item-delete-cancel',
+	DELETE_CONFIRM: 'traveller-item-delete-confirm',
 })
 
 export const TRAVELLER_DETAIL = Object.freeze({

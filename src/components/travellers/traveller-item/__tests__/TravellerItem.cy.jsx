@@ -6,7 +6,11 @@ import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 import travellersReducer from '@/store/slices/travellersSlice'
 
-import { COMMON_SELECTORS, TRAVELLER_ITEM_SELECTORS } from '@/constants/test'
+import {
+	COMMON_SELECTORS,
+	TRAVELLER_ITEM,
+	TRAVELLER_ITEM_SELECTORS,
+} from '@/constants/test'
 
 const traveller = {
 	id: 'abc',
@@ -138,7 +142,24 @@ describe('<TravellerItem />', () => {
 		})
 		render({ auth: { isAdmin: true } })
 		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).click()
+		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_CONFIRM).click()
 		cy.get(TRAVELLER_ITEM_SELECTORS.ERROR_DIALOG).should('be.visible')
+	})
+
+	it('cancels the delete from the keyboard and restores focus', () => {
+		cy.intercept('DELETE', '**/travellers/abc.json*').as('deleteTraveller')
+		render({ auth: { isAdmin: true } })
+		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).click()
+		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_DIALOG).should('be.visible')
+		cy.focused().should(
+			'have.attr',
+			'data-cy',
+			TRAVELLER_ITEM.DELETE_CANCEL,
+		)
+		cy.get('body').type('{esc}')
+		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_DIALOG).should('not.exist')
+		cy.focused().should('have.attr', 'data-cy', TRAVELLER_ITEM.DELETE)
+		cy.get('@deleteTraveller.all').should('have.length', 0)
 	})
 
 	it('exposes a heading and accessible image buttons', () => {
