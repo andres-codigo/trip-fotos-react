@@ -31,14 +31,17 @@ import travellersReducer, {
 } from './travellersSlice'
 
 import { handleApiError } from '@/utils/errorHandler'
-import { deleteObject, getStorage, ref } from 'firebase/storage'
-import { firebaseApp } from '@/services/firebase/firebase'
+import { deleteObject, ref } from 'firebase/storage'
+import { getFirebaseStorage } from '@/services/firebase/firebase'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
+vi.mock('@/services/firebase/firebase', () => ({
+	getFirebaseStorage: vi.fn(),
+}))
+
 // Mock Firebase Storage
 vi.mock('firebase/storage', () => ({
-	getStorage: vi.fn(),
 	ref: vi.fn((storage, path) => path),
 	deleteObject: vi.fn(() => Promise.resolve()),
 	uploadBytesResumable: vi.fn(() => ({
@@ -370,7 +373,7 @@ describe('travellersSlice', () => {
 				// Verify successful registration
 				expect(result.meta.requestStatus).toBe('fulfilled')
 				// Without the initialised app, Storage throws app/no-app
-				expect(getStorage).toHaveBeenCalledWith(firebaseApp)
+				expect(getFirebaseStorage).toHaveBeenCalled()
 				expect(result.payload).toMatchObject({
 					id: MOCK_USER.USER_ID,
 					firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
@@ -757,7 +760,7 @@ describe('travellersSlice', () => {
 					),
 					expect.objectContaining({ method: 'DELETE' }),
 				)
-				expect(getStorage).toHaveBeenCalledWith(firebaseApp)
+				expect(getFirebaseStorage).toHaveBeenCalled()
 				files.forEach((file) =>
 					expect(ref).toHaveBeenCalledWith(undefined, file),
 				)

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
+import { getStorage } from 'firebase/storage'
 
 vi.mock('firebase/app', () => ({
 	initializeApp: vi.fn(),
@@ -8,6 +9,10 @@ vi.mock('firebase/app', () => ({
 
 vi.mock('firebase/auth', () => ({
 	getAuth: vi.fn(() => ({ name: 'mock-auth' })),
+}))
+
+vi.mock('firebase/storage', () => ({
+	getStorage: vi.fn(() => ({ name: 'mock-storage' })),
 }))
 
 vi.mock('@/constants/firebase', () => ({
@@ -51,6 +56,15 @@ describe('Firebase Configuration', () => {
 
 			expect(getFirebaseAuth()).toEqual({ name: 'mock-auth' })
 			expect(getAuth).toHaveBeenCalledWith(mockApp)
+		})
+
+		it('initialises Auth before returning Storage so uploads carry the user token', async () => {
+			const { getFirebaseStorage } =
+				await import('@/services/firebase/firebase.js')
+
+			expect(getFirebaseStorage()).toEqual({ name: 'mock-storage' })
+			expect(getAuth).toHaveBeenCalledWith(mockApp)
+			expect(getStorage).toHaveBeenCalledWith(mockApp)
 		})
 
 		it('initialises Firebase app with correct configuration', async () => {

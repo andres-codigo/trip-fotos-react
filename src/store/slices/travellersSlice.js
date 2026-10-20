@@ -2,13 +2,12 @@ import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import imageCompression from 'browser-image-compression'
 import {
 	deleteObject,
-	getStorage,
 	getDownloadURL,
 	ref,
 	uploadBytesResumable,
 } from 'firebase/storage'
 
-import { firebaseApp } from '@/services/firebase/firebase'
+import { getFirebaseStorage } from '@/services/firebase/firebase'
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import {
@@ -85,7 +84,7 @@ export const registerTraveller = createAsyncThunk(
 			const imageUrls = []
 
 			const uploadImage = async (image) => {
-				const storage = getStorage(firebaseApp)
+				const storage = getFirebaseStorage()
 				const storageRef = ref(
 					storage,
 					// Distinct files can share a name, and the same path would overwrite the earlier upload
@@ -377,7 +376,7 @@ export const deleteTraveller = createAsyncThunk(
 				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
 			}
 
-			const storage = getStorage(firebaseApp)
+			const storage = getFirebaseStorage()
 			await Promise.all(
 				files.map(async (fileUrl) => {
 					try {
