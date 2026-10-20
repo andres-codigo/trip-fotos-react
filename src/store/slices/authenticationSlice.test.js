@@ -38,7 +38,11 @@ vi.mock('firebase/auth', () => ({
 	signOut: vi.fn(() => Promise.resolve()),
 }))
 
-const firebaseAuth = vi.hoisted(() => ({ name: 'mock-auth' }))
+const firebaseAuth = vi.hoisted(() => ({
+	name: 'mock-auth',
+	authStateReady: () => Promise.resolve(),
+	currentUser: null,
+}))
 
 vi.mock('@/services/firebase/firebase', () => ({
 	firebaseApp: {},
@@ -106,6 +110,7 @@ setupMocks()
 describe('authenticationSlice', () => {
 	beforeEach(() => {
 		initialiseStore()
+		firebaseAuth.currentUser = { uid: MOCK_KEYS.LOCAL_ID }
 	})
 
 	describe('selectors', () => {
@@ -554,6 +559,8 @@ describe('authenticationSlice', () => {
 							switch (key) {
 								case MOCK_STORAGE_KEYS.TOKEN:
 									return MOCK_KEYS.ID_TOKEN
+								case MOCK_STORAGE_KEYS.USER_ID:
+									return MOCK_KEYS.LOCAL_ID
 								case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
 									return MOCK_KEYS.EXPIRATION.toString()
 								case MOCK_STORAGE_KEYS.IS_ADMIN:
@@ -566,6 +573,43 @@ describe('authenticationSlice', () => {
 						await store.dispatch(tryLogin())
 
 						expect(selectIsAdmin(store.getState())).toBe(isAdmin)
+					},
+				)
+
+				it.each([
+					{ description: 'no Auth SDK user', currentUser: null },
+					{
+						description: 'an Auth SDK user with a different uid',
+						currentUser: { uid: 'another-uid' },
+					},
+				])(
+					'logs out instead of restoring the session when there is $description',
+					async ({ currentUser }) => {
+						firebaseAuth.currentUser = currentUser
+						localStorage.getItem.mockImplementation((key) => {
+							switch (key) {
+								case MOCK_STORAGE_KEYS.TOKEN:
+									return MOCK_KEYS.ID_TOKEN
+								case MOCK_STORAGE_KEYS.USER_ID:
+									return MOCK_KEYS.LOCAL_ID
+								case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
+									return MOCK_KEYS.EXPIRATION.toString()
+								default:
+									return null
+							}
+						})
+
+						const result = await store.dispatch(tryLogin())
+
+						const state = store.getState().authentication
+						expect(result.payload).toBeNull()
+						expect(state.token).toBeNull()
+						expect(state.userId).toBeNull()
+						expect(state.didAutoLogout).toBe(false)
+						expect(localStorage.removeItem).toHaveBeenCalledWith(
+							MOCK_STORAGE_KEYS.TOKEN,
+						)
+						expect(signOut).toHaveBeenCalledWith(firebaseAuth)
 					},
 				)
 

@@ -89,6 +89,15 @@ export const tryLogin = createAsyncThunk(
 				return null
 			}
 
+			const auth = getFirebaseAuth()
+			await auth.authStateReady()
+			// Storage uploads need the SDK user; sessions from before the SDK sign-in have none, so make them log in again
+			if (auth.currentUser?.uid !== userId) {
+				await dispatch(logout())
+				dispatch(authActions.setAutoLogout(false))
+				return null
+			}
+
 			const expiresIn = +tokenExpiration - new Date().getTime()
 			timer = setTimeout(() => {
 				dispatch(autoLogout())

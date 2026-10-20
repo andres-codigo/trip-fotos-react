@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { browserLocalPersistence, initializeAuth } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
 
 vi.mock('firebase/app', () => ({
@@ -8,7 +8,8 @@ vi.mock('firebase/app', () => ({
 }))
 
 vi.mock('firebase/auth', () => ({
-	getAuth: vi.fn(() => ({ name: 'mock-auth' })),
+	browserLocalPersistence: { type: 'LOCAL' },
+	initializeAuth: vi.fn(() => ({ name: 'mock-auth' })),
 }))
 
 vi.mock('firebase/storage', () => ({
@@ -35,7 +36,7 @@ describe('Firebase Configuration', () => {
 		// not call history for the "calls initializeApp only once" test
 		mockApp = { name: '[DEFAULT]' }
 		vi.mocked(initializeApp).mockReturnValue(mockApp)
-		vi.mocked(getAuth).mockClear()
+		vi.mocked(initializeAuth).mockClear()
 	})
 
 	afterEach(() => {
@@ -47,7 +48,7 @@ describe('Firebase Configuration', () => {
 		it('does not initialise Auth on import', async () => {
 			await import('@/services/firebase/firebase.js')
 
-			expect(getAuth).not.toHaveBeenCalled()
+			expect(initializeAuth).not.toHaveBeenCalled()
 		})
 
 		it('returns the Auth instance for the initialised app', async () => {
@@ -55,7 +56,17 @@ describe('Firebase Configuration', () => {
 				await import('@/services/firebase/firebase.js')
 
 			expect(getFirebaseAuth()).toEqual({ name: 'mock-auth' })
-			expect(getAuth).toHaveBeenCalledWith(mockApp)
+			expect(initializeAuth).toHaveBeenCalledWith(mockApp, {
+				persistence: browserLocalPersistence,
+			})
+		})
+
+		it('initialises Auth only once across calls', async () => {
+			const { getFirebaseAuth } =
+				await import('@/services/firebase/firebase.js')
+
+			expect(getFirebaseAuth()).toBe(getFirebaseAuth())
+			expect(initializeAuth).toHaveBeenCalledTimes(1)
 		})
 
 		it('initialises Auth before returning Storage so uploads carry the user token', async () => {
@@ -63,7 +74,7 @@ describe('Firebase Configuration', () => {
 				await import('@/services/firebase/firebase.js')
 
 			expect(getFirebaseStorage()).toEqual({ name: 'mock-storage' })
-			expect(getAuth).toHaveBeenCalledWith(mockApp)
+			expect(initializeAuth).toHaveBeenCalled()
 			expect(getStorage).toHaveBeenCalledWith(mockApp)
 		})
 
