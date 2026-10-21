@@ -40,6 +40,17 @@ Do not introduce `cypress/support/constants` unless explicitly adopted in a futu
 - After logging in, wait for the stored session before reloading — the Auth SDK persists it asynchronously.
 - If an E2E spec fails in a full run, re-run it on its own before treating it as a regression; specs can flake under load.
 
+## When to Run E2E Locally
+
+CI runs the full E2E suite on every pull request, so a local run is for earlier feedback, not the safety net. It uses the live Firebase project, so it stays opt-in (`/verify e2e`). Run it before pushing when:
+
+- An E2E spec or `cypress/support/` file is added or changed — otherwise its first run is in CI
+- Routing, route guards or redirects change (`src/app/`, `src/pages/`, `PATHS`)
+- Store logic or persisted state changes (`src/store/`) — Vitest and component tests build their own store without redux-persist, so only E2E sees rehydration
+- Firebase services or API constants change
+
+`/verify` prints an `E2E advised` line for these paths. For other changes, leave E2E to CI. To run one spec, pass it through: `node .claude/skills/verify/run-e2e.mjs --spec <path>`. The runner reuses a dev server already on port 3000, so a Vite error overlay left from an earlier compile failure there will fail every spec; restart that server first.
+
 ## Required Updates
 
 Whenever components, pages, or store logic are modified, update the related tests in the same change.

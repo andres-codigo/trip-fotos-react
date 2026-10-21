@@ -16,6 +16,16 @@ const RULES = [
 	[/^(index\.html|public\/)/, ['build']],
 ]
 
+// E2E stays opt-in (live Firebase, and CI runs it on every PR), so these only earn an advisory
+const E2E_ADVISED = [
+	[/^cypress\/(e2e|support)\//, 'E2E specs or support changed'],
+	[/^cypress\.config\./, 'Cypress config changed'],
+	[/^src\/(app|pages)\//, 'routing or pages changed'],
+	[/^src\/store\//, 'store or persisted state changed'],
+	[/^src\/services\//, 'Firebase services changed'],
+	[/^src\/constants\/(api|ui\/paths)/, 'API or route constants changed'],
+]
+
 const git = (args) =>
 	execSync(`git ${args}`, { encoding: 'utf8' }).split('\n').filter(Boolean)
 
@@ -34,4 +44,13 @@ for (const file of files) {
 	rule?.[1].forEach((gate) => gates.add(gate))
 }
 
+const reasons = new Set(
+	files.flatMap((file) =>
+		E2E_ADVISED.filter(([pattern]) => pattern.test(file)).map(
+			([, reason]) => reason,
+		),
+	),
+)
+
 console.log(ALL.filter((gate) => gates.has(gate)).join(' ') || 'none')
+if (reasons.size) console.log(`e2e advised: ${[...reasons].join('; ')}`)
