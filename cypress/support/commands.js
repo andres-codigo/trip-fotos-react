@@ -67,6 +67,18 @@ Cypress.Commands.add('login', (email, password) => {
 //INTERCEPTORS
 ////
 
+// The app checks traveller registration against the live database, so pin the answer rather than depend on the shared E2E account's record
+Cypress.Commands.add('stubTravellerCheck', (isTraveller = false) => {
+	cy.intercept(
+		{
+			method: 'GET',
+			pathname: '/travellers/*.json',
+			query: { shallow: 'true' },
+		},
+		isTraveller ? { body: { registered: true } } : 'null',
+	).as('travellerCheck')
+})
+
 // Intercept successful login requests
 Cypress.Commands.add('interceptLogin', (method, url) => {
 	cy.intercept(method, url).as('loginRequest')

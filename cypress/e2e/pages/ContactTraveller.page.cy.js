@@ -11,8 +11,9 @@ const OTHER_TRAVELLER_ID = 'e2e-other-traveller'
 
 const contactPath = (id) => `${PATHS.TRAVELLERS}/${id}/contact`
 
-// The E2E user is not a registered traveller, so seed the persisted flag a registered user would carry
-const visitAsTraveller = (path) =>
+// Seeds the persisted traveller state a returning user would carry; checkedFor null is a new device
+const visitAsTraveller = (path, { isNewDevice = false } = {}) => {
+	cy.stubTravellerCheck(true)
 	cy.visit(path, {
 		onBeforeLoad(win) {
 			const persisted = JSON.parse(
@@ -21,11 +22,15 @@ const visitAsTraveller = (path) =>
 			const travellers = JSON.parse(persisted.travellers)
 			persisted.travellers = JSON.stringify({
 				...travellers,
-				isTraveller: true,
+				isTraveller: !isNewDevice,
+				isTravellerCheckedFor: isNewDevice
+					? null
+					: win.localStorage.getItem('userId'),
 			})
 			win.localStorage.setItem('persist:root', JSON.stringify(persisted))
 		},
 	})
+}
 
 const assertRedirectedToDetail = (id) => {
 	cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
@@ -44,6 +49,14 @@ describe('Contact Traveller Page', () => {
 	it('shows the contact form to a traveller after a hard reload', () => {
 		visitAsTraveller(contactPath(OTHER_TRAVELLER_ID))
 
+		cy.location('pathname').should('eq', contactPath(OTHER_TRAVELLER_ID))
+		cy.get(CONTACT_TRAVELLER_SELECTORS.FORM).should('be.visible')
+	})
+
+	it('shows the contact form to a traveller on a new device once the check resolves', () => {
+		visitAsTraveller(contactPath(OTHER_TRAVELLER_ID), { isNewDevice: true })
+
+		cy.wait('@travellerCheck', { timeout: REQUEST_TIMEOUT })
 		cy.location('pathname').should('eq', contactPath(OTHER_TRAVELLER_ID))
 		cy.get(CONTACT_TRAVELLER_SELECTORS.FORM).should('be.visible')
 	})
