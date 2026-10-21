@@ -17,7 +17,11 @@ const TravellersStub = () => {
 	return <p>{location.state?.alertMessage}</p>
 }
 
-const renderPage = ({ travellers = [] } = {}) => {
+const renderPage = ({
+	travellers = [],
+	isTraveller = true,
+	id = 'abc',
+} = {}) => {
 	const store = configureStore({
 		reducer: {
 			authentication: authenticationReducer,
@@ -33,13 +37,14 @@ const renderPage = ({ travellers = [] } = {}) => {
 			travellers: {
 				...travellersReducer(undefined, { type: '@@init' }),
 				travellers,
+				isTraveller,
 			},
 		},
 	})
 
 	return render(
 		<Provider store={store}>
-			<MemoryRouter initialEntries={['/travellers/abc/contact']}>
+			<MemoryRouter initialEntries={[`/travellers/${id}/contact`]}>
 				<Routes>
 					<Route
 						path="/travellers/:id/contact"
@@ -48,6 +53,10 @@ const renderPage = ({ travellers = [] } = {}) => {
 					<Route
 						path="/travellers"
 						element={<TravellersStub />}
+					/>
+					<Route
+						path="/travellers/:id"
+						element={<p>Traveller detail</p>}
 					/>
 				</Routes>
 			</MemoryRouter>
@@ -64,6 +73,22 @@ const sendMessage = () => {
 
 describe('<ContactTraveller />', () => {
 	afterEach(() => vi.unstubAllGlobals())
+
+	it('redirects to the detail page when the record is the user’s own', () => {
+		renderPage({ id: 'me' })
+		expect(screen.getByText('Traveller detail')).toBeInTheDocument()
+		expect(
+			screen.queryByTestId(CONTACT_TRAVELLER.ROOT),
+		).not.toBeInTheDocument()
+	})
+
+	it('redirects to the detail page when the user is not a traveller', () => {
+		renderPage({ isTraveller: false })
+		expect(screen.getByText('Traveller detail')).toBeInTheDocument()
+		expect(
+			screen.queryByTestId(CONTACT_TRAVELLER.ROOT),
+		).not.toBeInTheDocument()
+	})
 
 	it('names the traveller when they are already in the store', () => {
 		renderPage({ travellers: [{ id: 'abc', firstName: 'Ada' }] })
