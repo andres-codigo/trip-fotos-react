@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
+import {
+	createSlice,
+	createAsyncThunk,
+	createSelector,
+	isAnyOf,
+} from '@reduxjs/toolkit'
 import imageCompression from 'browser-image-compression'
 import {
 	deleteObject,
@@ -17,7 +22,11 @@ import {
 } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
 
-import { selectAuthenticationToken } from './authenticationSlice'
+import {
+	authActions,
+	logout,
+	selectAuthenticationToken,
+} from './authenticationSlice'
 import { deleteTravellerMessages } from './messagesSlice'
 
 import { handleApiError } from '@/utils/errorHandler'
@@ -303,6 +312,37 @@ export const loadTraveller = createAsyncThunk(
 	},
 )
 
+export const checkIsTraveller = createAsyncThunk(
+	TRAVELLERS_ACTION_TYPES.CHECK_IS_TRAVELLER,
+	async (userId, { rejectWithValue }) => {
+		try {
+			// shallow avoids downloading the whole record just to test it exists
+			const response = await fetch(
+				`${API_DATABASE.BASE_URL}/travellers/${userId}.json?shallow=true`,
+				{
+					method: API_DATABASE.GET,
+					headers: COMMON_HEADERS.JSON,
+				},
+			)
+
+			if (!response.ok) {
+				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
+			}
+
+			const responseData = await response.json()
+
+			return responseData !== null
+		} catch (error) {
+			return rejectWithValue(
+				handleApiError(
+					error,
+					`${API_ERROR_MESSAGE.CHECK_IS_TRAVELLER_CATCH}${userId}.`,
+				),
+			)
+		}
+	},
+)
+
 export const loadTravellers = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS,
 	async (
@@ -385,6 +425,7 @@ const travellersSlice = createSlice({
 	initialState: {
 		travellerName: '',
 		isTraveller: false,
+		isTravellerCheckedFor: null,
 		hasTravellers: false,
 		travellers: [],
 		selectedTraveller: null,
@@ -499,6 +540,30 @@ const travellersSlice = createSlice({
 				state.status = 'failed'
 				state.error = action.payload
 			})
+
+			// CHECK_IS_TRAVELLER async thunk handlers
+			// A failed check keeps the last known value rather than hiding traveller-only features
+			.addCase(checkIsTraveller.fulfilled, (state, action) => {
+				state.isTraveller = action.payload
+				state.isTravellerCheckedFor = action.meta.arg
+			})
+			.addCase(checkIsTraveller.rejected, (state, action) => {
+				state.isTravellerCheckedFor = action.meta.arg
+			})
+
+			// LOGOUT handlers
+			// The flag is persisted, so it must not carry over to the next user in this browser
+			.addMatcher(
+				isAnyOf(
+					authActions.clearUser,
+					logout.fulfilled,
+					logout.rejected,
+				),
+				(state) => {
+					state.isTraveller = false
+					state.isTravellerCheckedFor = null
+				},
+			)
 	},
 })
 
@@ -517,6 +582,11 @@ export const selectHasTravellers = createSelector(
 export const selectIsTraveller = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.isTraveller,
+)
+
+export const selectIsTravellerCheckedFor = createSelector(
+	[selectTravellersState],
+	(travellersState) => travellersState.isTravellerCheckedFor,
 )
 
 export const selectTravellerName = createSelector(

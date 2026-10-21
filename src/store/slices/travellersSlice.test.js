@@ -11,6 +11,7 @@ import {
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { API_ERROR_MESSAGE } from '@/constants/api'
 
+import { authActions, logout } from './authenticationSlice'
 import travellersReducer, {
 	registerTraveller,
 	travellerName,
@@ -20,6 +21,7 @@ import travellersReducer, {
 	loadTraveller,
 	loadTravellers,
 	deleteTraveller,
+	checkIsTraveller,
 	setIsTraveller,
 	setTravellers,
 	selectTravellers,
@@ -105,8 +107,11 @@ vi.mock('@/utils/errorHandler', () => ({
 
 // messagesSlice is imported via deleteTraveller and needs selectUserId and logout at load time
 vi.mock('./authenticationSlice', async () => {
-	const { createAsyncThunk } = await import('@reduxjs/toolkit')
+	const { createAction, createAsyncThunk } = await import('@reduxjs/toolkit')
 	return {
+		authActions: {
+			clearUser: createAction('authentication/clearUser'),
+		},
 		selectAuthenticationToken: vi.fn(() => MOCK_USER.TOKEN),
 		selectUserId: vi.fn(() => MOCK_USER.USER_ID),
 		logout: createAsyncThunk('authentication/logout', async () => {}),
@@ -142,6 +147,7 @@ describe('travellersSlice', () => {
 				expect(initialState).toEqual({
 					travellerName: '',
 					isTraveller: false,
+					isTravellerCheckedFor: null,
 					hasTravellers: false,
 					travellers: [],
 					selectedTraveller: null,
@@ -829,6 +835,82 @@ describe('travellersSlice', () => {
 
 				expect(result.meta.requestStatus).toBe('rejected')
 				expect(handleApiError).toHaveBeenCalled()
+			})
+		})
+	})
+
+	describe('checkIsTraveller', () => {
+		describe('success scenarios', () => {
+			it('should set isTraveller to true when the traveller record exists', async () => {
+				global.fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ firstName: true, lastName: true }),
+				})
+
+				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
+
+				expect(global.fetch).toHaveBeenCalledWith(
+					expect.stringContaining(
+						`/travellers/${MOCK_USER.USER_ID}.json?shallow=true`,
+					),
+					expect.any(Object),
+				)
+				expect(store.getState().travellers).toMatchObject({
+					isTraveller: true,
+					isTravellerCheckedFor: MOCK_USER.USER_ID,
+				})
+			})
+
+			it('should set isTraveller to false when there is no traveller record', async () => {
+				store.dispatch(setIsTraveller(true))
+				global.fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => null,
+				})
+
+				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
+
+				expect(store.getState().travellers.isTraveller).toBe(false)
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('should keep the last known value when the request fails', async () => {
+				store.dispatch(setIsTraveller(true))
+				global.fetch.mockResolvedValueOnce({ ok: false, status: 500 })
+
+				const result = await store.dispatch(
+					checkIsTraveller(MOCK_USER.USER_ID),
+				)
+
+				expect(result.payload).toBe(
+					`${API_ERROR_MESSAGE.CHECK_IS_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.: ${ERROR_MESSAGES.REQUEST_ERROR}`,
+				)
+				expect(store.getState().travellers).toMatchObject({
+					isTraveller: true,
+					isTravellerCheckedFor: MOCK_USER.USER_ID,
+				})
+			})
+		})
+	})
+
+	describe('logout', () => {
+		it.each([
+			['clearUser', () => authActions.clearUser()],
+			['logout fulfilled', () => logout.fulfilled(undefined, 'req')],
+			['logout rejected', () => logout.rejected(null, 'req')],
+		])('should reset isTraveller on %s', async (_, action) => {
+			global.fetch.mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({ firstName: true }),
+			})
+			await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
+
+			store.dispatch(action())
+
+			expect(store.getState().travellers).toMatchObject({
+				isTraveller: false,
+				isTravellerCheckedFor: null,
 			})
 		})
 	})

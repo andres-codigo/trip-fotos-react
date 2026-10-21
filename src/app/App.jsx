@@ -13,7 +13,8 @@ import {
 
 import { PATHS } from '@/constants/ui'
 
-import { tryLogin } from '@/store/slices/authenticationSlice'
+import { selectUserId, tryLogin } from '@/store/slices/authenticationSlice'
+import { checkIsTraveller } from '@/store/slices/travellersSlice'
 
 import LoadingFallback from '@/components/common/LoadingFallback'
 
@@ -49,11 +50,19 @@ function AppRoutes() {
 	const didAutoLogout = useSelector(
 		(state) => state.authentication.didAutoLogout,
 	)
+	const userId = useSelector(selectUserId)
 
 	// Dispatch `tryLogin` on component mount
 	useEffect(() => {
 		dispatch(tryLogin())
 	}, [dispatch])
+
+	// Registration lives in the database, not the session, so a new device or cleared storage would otherwise count as a non-traveller
+	useEffect(() => {
+		if (userId) {
+			dispatch(checkIsTraveller(userId))
+		}
+	}, [userId, dispatch])
 
 	// Watch for changes in `didAutoLogout` and redirect to the login page
 	useEffect(() => {

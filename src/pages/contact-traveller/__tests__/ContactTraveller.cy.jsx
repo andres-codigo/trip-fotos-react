@@ -28,6 +28,7 @@ describe('<ContactTraveller />', () => {
 					...travellersReducer(undefined, { type: '@@init' }),
 					travellers: [{ id: 'abc', firstName: 'Ada' }],
 					isTraveller: true,
+					isTravellerCheckedFor: 'me',
 				},
 			},
 		})

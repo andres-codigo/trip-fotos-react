@@ -20,6 +20,7 @@ const TravellersStub = () => {
 const renderPage = ({
 	travellers = [],
 	isTraveller = true,
+	isTravellerCheckedFor = 'me',
 	id = 'abc',
 } = {}) => {
 	const store = configureStore({
@@ -38,6 +39,7 @@ const renderPage = ({
 				...travellersReducer(undefined, { type: '@@init' }),
 				travellers,
 				isTraveller,
+				isTravellerCheckedFor,
 			},
 		},
 	})
@@ -85,6 +87,14 @@ describe('<ContactTraveller />', () => {
 	it('redirects to the detail page when the user is not a traveller', () => {
 		renderPage({ isTraveller: false })
 		expect(screen.getByText('Traveller detail')).toBeInTheDocument()
+		expect(
+			screen.queryByTestId(CONTACT_TRAVELLER.ROOT),
+		).not.toBeInTheDocument()
+	})
+
+	it('waits for the traveller check before judging access', () => {
+		renderPage({ isTraveller: false, isTravellerCheckedFor: null })
+		expect(screen.queryByText('Traveller detail')).not.toBeInTheDocument()
 		expect(
 			screen.queryByTestId(CONTACT_TRAVELLER.ROOT),
 		).not.toBeInTheDocument()
