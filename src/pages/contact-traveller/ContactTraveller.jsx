@@ -1,15 +1,19 @@
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { CONTACT_TRAVELLER } from '@/constants/test'
 import { CONTACT_TRAVELLER_CONFIG } from '@/constants/travellers'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
-import { selectUserEmail } from '@/store/slices/authenticationSlice'
+import {
+	selectUserEmail,
+	selectUserId,
+} from '@/store/slices/authenticationSlice'
 import { contactTraveller } from '@/store/slices/messagesSlice'
 import {
+	selectIsTraveller,
 	selectSelectedTraveller,
 	selectTravellers,
 } from '@/store/slices/travellersSlice'
@@ -27,6 +31,12 @@ const ContactTraveller = () => {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
 	const userEmail = useSelector(selectUserEmail)
+	const userId = useSelector(selectUserId)
+	const isTraveller = useSelector(selectIsTraveller)
+	// isTraveller is persisted, so judging before rehydration would bounce allowed users on a hard reload
+	const isRehydrated = useSelector(
+		(state) => state._persist?.rehydrated ?? true,
+	)
 	const selectedTraveller = useSelector(selectSelectedTraveller)
 	const travellers = useSelector(selectTravellers)
 
@@ -41,6 +51,8 @@ const ContactTraveller = () => {
 	const title = traveller?.firstName
 		? CONTACT_TRAVELLER_CONFIG.TITLE(traveller.firstName)
 		: CONTACT_TRAVELLER_CONFIG.FALLBACK_TITLE
+
+	const canContact = id !== userId && isTraveller
 
 	const handleCloseError = () => setError(null)
 
@@ -63,6 +75,19 @@ const ContactTraveller = () => {
 			setError(error || ERROR_MESSAGES.FAILED_TO_CONTACT_TRAVELLER)
 			setIsLoading(false)
 		}
+	}
+
+	if (!isRehydrated) {
+		return null
+	}
+
+	if (!canContact) {
+		return (
+			<Navigate
+				to={`${PATHS.TRAVELLERS}/${id}`}
+				replace
+			/>
+		)
 	}
 
 	return (
