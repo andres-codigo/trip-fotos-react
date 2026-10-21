@@ -92,7 +92,7 @@ Detail lives in `.claude/` and the README AI Assistance sections.
 
 - **Agents** (`.claude/agents/`, wrappers around `.github/agents/*.agent.md` — edit the workflow there): `create-component`, `create-page`, `create-redux-slice`, `create-hook`
 - **`.claude/settings.json`** — shared permissions and a `PostToolUse` hook (`.claude/hooks/lint-edited-file.mjs`) that lints every edited file
-- **`/verify`** — runs the lint, Vitest, Cypress component test and build gates the change can affect (picked by `changed-gates.mjs`), as a pass/fail table; run before committing. `/verify all` forces every gate; `/verify e2e` adds the live-Firebase E2E suite. If the code changes while a run is in progress, stop it and start a fresh one — its result would describe stale code
+- **`/verify`** — runs the lint, Vitest, Cypress component test and build gates the change can affect (picked by `changed-gates.mjs`), as a pass/fail table; run before committing. `/verify all` forces every gate fresh; `/verify e2e` adds the live-Firebase E2E suite. Passes are cached per working-tree hash, so repeat runs on unchanged code are cheap. If the code changes while a run is in progress, stop it and start a fresh one — its result would describe stale code
 - **Vue parity programme** — archived in `_ai-assisted-dev-story/vue-parity-programme/`; not loaded
 - Personal overrides go in the gitignored `.claude/settings.local.json`
 
