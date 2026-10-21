@@ -52,5 +52,11 @@ const reasons = new Set(
 	),
 )
 
-console.log(ALL.filter((gate) => gates.has(gate)).join(' ') || 'none')
-if (reasons.size) console.log(`e2e advised: ${[...reasons].join('; ')}`)
+// The agent passes this line straight to run-gates.mjs, so opt-ins are decided here rather than by the agent
+const runArgs = ALL.filter((gate) => gates.has(gate))
+if (process.argv.includes('e2e')) runArgs.push('e2e')
+if (runArgs.length && forceAll) runArgs.push('fresh')
+
+console.log(runArgs.join(' ') || 'none')
+if (reasons.size && !process.argv.includes('e2e'))
+	console.log(`e2e advised: ${[...reasons].join('; ')}`)
