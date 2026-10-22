@@ -66,6 +66,14 @@ const TravellerDetail = () => {
 	const cities = traveller?.cities ?? []
 	const files = traveller?.files ?? []
 
+	const heading = (
+		<h1
+			className={travellerDetailStyles.name}
+			data-cy={TRAVELLER_DETAIL.NAME}>
+			{fullName}
+		</h1>
+	)
+
 	return (
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
@@ -76,11 +84,7 @@ const TravellerDetail = () => {
 			)}
 			data-cy={TRAVELLER_DETAIL.ROOT}>
 			<title>{`${fullName} · ${GLOBAL.SITE_NAME}`}</title>
-			<h1
-				className={travellerDetailStyles.name}
-				data-cy={TRAVELLER_DETAIL.NAME}>
-				{fullName}
-			</h1>
+			{isLoading && heading}
 			{isLoading && (
 				<div
 					className={travellerDetailStyles.spinnerContainer}
@@ -90,6 +94,7 @@ const TravellerDetail = () => {
 			)}
 			{!isLoading && !showProfile && (
 				<BaseCard>
+					{heading}
 					<div data-cy={TRAVELLER_DETAIL.NOT_FOUND}>
 						<p role="alert">
 							{TRAVELLER_DETAIL_CONFIG.NOT_FOUND_MESSAGE}
@@ -97,6 +102,7 @@ const TravellerDetail = () => {
 						<BaseButton
 							isLink
 							to={PATHS.TRAVELLERS}
+							modeType="outline"
 							data-cy={TRAVELLER_DETAIL.BACK_LINK}>
 							{TRAVELLER_DETAIL_CONFIG.BACK_LABEL}
 						</BaseButton>
@@ -109,6 +115,7 @@ const TravellerDetail = () => {
 						className={classNames(travellerDetailStyles.section, {
 							[travellerDetailStyles.own]: isOwnRecord,
 						})}>
+						{heading}
 						<section data-cy={TRAVELLER_DETAIL.PROFILE}>
 							<p
 								className={travellerDetailStyles.description}
@@ -163,6 +170,7 @@ const TravellerDetail = () => {
 									<BaseButton
 										isLink
 										to={`${PATHS.TRAVELLERS}/${id}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`}
+										modeType="primary"
 										data-cy={TRAVELLER_DETAIL.CONTACT}>
 										Contact
 									</BaseButton>
