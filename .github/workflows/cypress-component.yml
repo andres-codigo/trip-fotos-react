@@ -16,6 +16,15 @@ on:
     pull_request:
         branches:
             - main
+        # Docs and tooling-guidance changes cannot affect the app; workflow edits still run everything
+        paths:
+            - '**'
+            - '!**/*.md'
+            - '!.claude/**'
+            - '!.devcontainer/**'
+            - '!.vscode/**'
+            - '!.github/**'
+            - '.github/workflows/**'
     workflow_dispatch:
 
 jobs:
