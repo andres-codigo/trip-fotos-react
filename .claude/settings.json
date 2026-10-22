@@ -15,15 +15,17 @@
 			"Bash(git diff *)",
 			"Bash(git log *)",
 			"Bash(git branch *)",
+			"Bash(git add *)",
+			"Bash(git commit *)",
 			"Bash(gh issue view *)",
 			"Bash(gh issue list *)",
 			"Bash(gh label list *)",
 			"Bash(gh project item-list *)",
-			"Bash(gh project field-list *)"
+			"Bash(gh project field-list *)",
+			"Bash(gh pr create --draft *)"
 		],
 		"ask": [
 			"Bash(git push *)",
-			"Bash(gh pr create *)",
 			"Bash(gh pr merge *)",
 			"Bash(npm install *)",
 			"Bash(npm run cy:run:e2e)",
