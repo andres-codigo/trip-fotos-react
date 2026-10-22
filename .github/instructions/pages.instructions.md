@@ -41,6 +41,8 @@ Every page's root `<main>` must:
 - Render its own `<title>` (React hoists it into `<head>`), in the form ``{`Page name · ${GLOBAL.SITE_NAME}`}``, so each route has a distinct browser tab title.
 - Contain exactly one `<h1>` naming the page. The site name in the header is not a heading, so the page's own heading is the `<h1>`; nest section headings from `<h2>` down.
 
+Keep the `<h1>` inside the layout column it labels. When a page's content sits in centred `BaseCard`s, render the heading inside the first card (as `TravellerDetail` does), not above the cards in `<main>` — the cards are centred with a `max-width`, so a loose heading drifts to the page edge on wide screens.
+
 Do not render `<main>`, `<header>` or `<footer>` inside dialogs or other components: the dialog is portalled to `<body>`, where these would create duplicate page landmarks.
 
 ## Routing Rules
@@ -89,6 +91,7 @@ See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypr
 
 - Prefer page-specific SCSS modules for page layout concerns.
 - Reusable component styling must remain inside component-level style modules.
+- Scope every rule to a class — a bare `h1` or `a` in a page module restyles every page. `npm run lint:styles` enforces this.
 - Follow shared SCSS conventions in [styles.instructions.md](./styles.instructions.md).
 
 ## Linting And Formatting

@@ -44,7 +44,7 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
 | [components.instructions.md](.github/instructions/components.instructions.md) | `src/components/**`                     | Folder structure, prop-types, reusability, accessibility, testing  |
 | [pages.instructions.md](.github/instructions/pages.instructions.md)           | `src/pages/**`                          | Route composition, data loading, testing                           |
 | [store.instructions.md](.github/instructions/store.instructions.md)           | `src/store/**`                          | RTK Query vs. thunks, error handling pattern, persistence, testing |
-| [styles.instructions.md](.github/instructions/styles.instructions.md)         | `src/**/*.module.scss`, `src/styles/**` | SCSS modules, namespaced imports, colour naming                    |
+| [styles.instructions.md](.github/instructions/styles.instructions.md)         | `src/**/*.scss`                         | SCSS modules, class-scoped selectors, spacing, colour naming       |
 | [testing.instructions.md](.github/instructions/testing.instructions.md)       | `**/__tests__/**`, `cypress/e2e/**`     | Vitest/Cypress organisation, test data, anti-flakiness             |
 
 ## Key conventions
@@ -72,7 +72,7 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
 ## Dev commands
 
 ```bash
-npm run lint             # ESLint check
+npm run lint             # ESLint + Stylelint check
 npm run vitest:run:fast  # Unit/integration tests, no coverage
 npm run cy:run:ct        # Cypress component tests (headless)
 npm run build            # Production build → dist/

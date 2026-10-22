@@ -48,6 +48,15 @@ Use `prop-types` for **all component props**. Define type-checking for each prop
 
 When creating or recreating components, check `src/components/ui` or `src/components/common` for existing reusable components (e.g., `Input`, `Button`) and use them.
 
+### Buttons And Links
+
+Choose the element by what it does, then choose the look with `modeType`:
+
+- **Navigates to a route** → `<BaseButton isLink to={...}>` (renders a `<Link>`). Never a `<button>` with a navigate handler: links keep middle-click, open-in-new-tab and correct screen-reader semantics.
+- **Performs an action** (submit, delete, open a dialog) → `<BaseButton type="button">` (renders a `<button>`).
+- A link with no `modeType` renders as an inline text link. Give it a `modeType` to look like a button: `primary` (filled — the main action), `outline` (secondary), `flat`, `text`. A destructive action uses the filled button plus a red override class, as `TravellerItem` does for Delete.
+- One `primary` per action group; actions sit in a flex row spaced with `gap` (see [styles.instructions.md](./styles.instructions.md#spacing-between-siblings)).
+
 ### Consistency
 
 Maintain **API consistency** (prop names, validation patterns) when creating similar UI components. This ensures developers can switch between components with minimal cognitive load.
@@ -87,5 +96,6 @@ See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypr
 - Use **SCSS modules** for component-specific styles.
 - Import as `[componentName]Styles` (e.g., `import userAuthenticationFormStyles from './UserAuthenticationForm.module.scss'`).
 - When creating a new SCSS file, review `src/styles` for available variables and mixins to ensure consistency.
+- Never use a bare element selector at the top level of a style module, and never import a plain `.scss` file from a component — both leak globally. `npm run lint:styles` enforces the first.
 
 See [styles.instructions.md](./styles.instructions.md) for full SCSS conventions.
