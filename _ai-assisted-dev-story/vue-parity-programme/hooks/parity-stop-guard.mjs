@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 const MAX_BLOCKS_WITHOUT_PROGRESS = 3
@@ -6,12 +6,10 @@ const MAX_BLOCKS_WITHOUT_PROGRESS = 3
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd()
 const statePath = path.join(projectDir, '.claude', 'parity', 'state.json')
 
-// Only active while /parity-run owns the session; every other session stops normally
-if (!existsSync(statePath)) process.exit(0)
-
 // run-fresh.sh deliberately ends each session after one item
 if (process.env.PARITY_FRESH_SESSIONS) process.exit(0)
 
+// Only active while /parity-run owns the session; a missing state file lets every other session stop normally
 let state
 try {
 	state = JSON.parse(readFileSync(statePath, 'utf8'))
