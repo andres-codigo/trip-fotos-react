@@ -568,7 +568,7 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
     - On **push** to `main` (for changes in `src/**`, `cypress/**`, `package.json`, or `cypress.config.*`)
     - On **pull requests** to `main`
     - Manually via **Actions → "Run workflow"**
-- **Purpose:** Runs Cypress end-to-end (E2E) tests against the running application to verify user flows and integration with backend services. Runs `npm run cy:run:e2e` — see [Scripts](#scripts).
+- **Purpose:** Runs Cypress end-to-end (E2E) tests against the running application to verify user flows and integration with backend services. Runs `npm run cy:run:e2e` — see [Scripts](#scripts). The dev server is awaited with a `curl` retry loop (up to 60 seconds) rather than the Cypress action's URL ping, which gave up on the first unexpected connection error.
 
 ---
 

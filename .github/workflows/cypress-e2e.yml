@@ -75,8 +75,8 @@ jobs:
                   CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
               with:
                   start: npm run dev
-                  wait-on: 'http://localhost:3000'
-                  wait-on-timeout: 60
+                  # The action's URL ping only retries a fixed list of error codes and failed at once on the runner (#317)
+                  wait-on: 'curl --silent --fail --output /dev/null --retry 30 --retry-delay 2 --retry-max-time 60 --retry-all-errors http://localhost:3000'
                   browser: chrome
 
             - name: Upload Cypress screenshots on failure
