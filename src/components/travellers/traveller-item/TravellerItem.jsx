@@ -119,7 +119,7 @@ const TravellerItem = ({
 							</BaseButton>
 							<BaseButton
 								type="button"
-								className={travellerItemStyles.delete}
+								modeType="danger"
 								onClick={confirmDelete}
 								data-cy={TRAVELLER_ITEM.DELETE_CONFIRM}>
 								Delete
@@ -223,7 +223,7 @@ const TravellerItem = ({
 						{canDelete && (
 							<BaseButton
 								type="button"
-								className={travellerItemStyles.delete}
+								modeType="danger"
 								ref={deleteButtonRef}
 								onClick={openConfirm}
 								data-cy={TRAVELLER_ITEM.DELETE}>

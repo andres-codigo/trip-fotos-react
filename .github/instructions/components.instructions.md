@@ -54,7 +54,7 @@ Choose the element by what it does, then choose the look with `modeType`:
 
 - **Navigates to a route** → `<BaseButton isLink to={...}>` (renders a `<Link>`). Never a `<button>` with a navigate handler: links keep middle-click, open-in-new-tab and correct screen-reader semantics.
 - **Performs an action** (submit, delete, open a dialog) → `<BaseButton type="button">` (renders a `<button>`).
-- A link with no `modeType` renders as an inline text link. Give it a `modeType` to look like a button: `primary` (filled — the main action), `outline` (secondary), `flat`, `text`. A destructive action uses the filled button plus a red override class, as `TravellerItem` does for Delete.
+- A link with no `modeType` renders as an inline text link. Give it a `modeType` to look like a button: `primary` (filled — the main action), `outline` (secondary), `danger` (destructive, e.g. Delete), `flat`, `text`. Use these rather than a local override class, so colours and hover states stay consistent; add a new mode to `BaseButton` if none fits.
 - One `primary` per action group; actions sit in a flex row spaced with `gap` (see [styles.instructions.md](./styles.instructions.md#spacing-between-siblings)).
 
 ### Consistency

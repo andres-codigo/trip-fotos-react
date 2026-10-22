@@ -70,7 +70,7 @@ const MessageItem = ({ id, email, message }) => {
 					<div className={messageItemStyles.actions}>
 						<BaseButton
 							type="button"
-							className={messageItemStyles.delete}
+							modeType="danger"
 							onClick={deleteHandler}
 							data-cy={MESSAGE_ITEM.DELETE}>
 							Delete

@@ -51,7 +51,8 @@ li {
 	margin: 0;
 }
 
-a {
+// Zero specificity so BaseButton and any component class can recolour a link, whichever stylesheet loads first
+:where(a) {
 	text-decoration: none;
 	color: inherit;
 }

@@ -6,6 +6,25 @@ import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 
+// Cypress events never trigger :hover, so move the real mouse through the Chrome DevTools protocol
+const realHover = (selector) =>
+	cy.get(selector).then(($el) => {
+		const { x, y, width, height } = $el[0].getBoundingClientRect()
+		// The protocol takes top-window coordinates, but the app runs in a scaled iframe
+		const frame = window.top.document.querySelector('.aut-iframe')
+		const frameRect = frame.getBoundingClientRect()
+		const scale = frameRect.width / frame.offsetWidth
+
+		return Cypress.automation('remote:debugger:protocol', {
+			command: 'Input.dispatchMouseEvent',
+			params: {
+				type: 'mouseMoved',
+				x: frameRect.x + (x + width / 2) * scale,
+				y: frameRect.y + (y + height / 2) * scale,
+			},
+		})
+	})
+
 describe('<BaseButton />', () => {
 	describe('Rendering tests', () => {
 		it('renders a button with children', () => {
@@ -141,6 +160,49 @@ describe('<BaseButton />', () => {
 				</BaseButton>,
 			)
 			cy.get(getByDataCy(BUTTON.ID)).should('be.focused')
+		})
+	})
+
+	describe('Hover tests', () => {
+		const expectHover = (modeType, isLink, { color, backgroundColor }) => {
+			cy.mount(
+				<MemoryRouter>
+					<div style={{ color: 'rgb(0, 0, 0)', padding: '1rem' }}>
+						<BaseButton
+							isLink={isLink}
+							to="/somewhere"
+							modeType={modeType}
+							data-cy={BUTTON.ID}>
+							Hover me
+						</BaseButton>
+					</div>
+				</MemoryRouter>,
+			)
+			realHover(getByDataCy(BUTTON.ID))
+			cy.get(getByDataCy(BUTTON.ID))
+				.should('have.css', 'color', color)
+				.and('have.css', 'background-color', backgroundColor)
+		}
+
+		it('keeps white text on a darker red when hovering a danger button', () => {
+			expectHover(BUTTON.MODE.DANGER, false, {
+				color: 'rgb(255, 255, 255)',
+				backgroundColor: 'rgb(186, 1, 1)',
+			})
+		})
+
+		it('keeps purple text on the pale hover background of an outline link', () => {
+			expectHover(BUTTON.MODE.OUTLINE, true, {
+				color: 'rgb(100, 12, 159)',
+				backgroundColor: 'rgb(237, 210, 255)',
+			})
+		})
+
+		it('keeps white text when hovering a primary link', () => {
+			expectHover(BUTTON.MODE.PRIMARY, true, {
+				color: 'rgb(255, 255, 255)',
+				backgroundColor: 'rgb(100, 12, 159)',
+			})
 		})
 	})
 

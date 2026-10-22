@@ -71,18 +71,6 @@
 	justify-content: flex-end;
 }
 
-.delete {
-	background-color: variables.$color-mojo;
-	border-color: variables.$color-mojo;
-	color: variables.$color-white;
-
-	&:hover,
-	&:active {
-		background-color: variables.$color-mojo-otro;
-		border-color: variables.$color-mojo-otro;
-	}
-}
-
 .spinnerContainer {
 	margin: 0.5rem 0;
 	list-style: none;

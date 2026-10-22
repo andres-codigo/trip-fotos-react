@@ -19,7 +19,8 @@ CSS Modules hash class names only. An element selector (`a`, `button`, `label`, 
 - Every rule in a component or page stylesheet must start from a class: `.label`, not `label`. Element selectors are fine nested under a class (`.formControl label`) or compounded with one (`a.navLink`).
 - Plain `.scss` files imported for side effects (`import './input.scss'`) are global stylesheets. Components must import a `.module.scss` instead.
 - Mixins that emit element selectors (`valid.label`, `valid.input`, `valid.input-textarea`) may only be included inside a class block.
-- Element-level defaults belong in `src/styles` (see Global Styles below).
+- Element-level defaults belong in `src/styles` (see Global Styles below), wrapped in `:where()` (e.g. `:where(a)`) so they have zero specificity and never override a component's class. Do not rely on stylesheet order to settle a tie: in production Vite splits shared component CSS into chunks that can load before `global.scss`. `BaseButton`'s base sits at one element's specificity for this reason — above the `:where()` globals, below any component class.
+- Hover and active states must differ visibly from the resting state and keep text contrast at or above WCAG AA (4.5:1) in every state. Check the hover colour, not just the resting one: a lighter red hover under white text can fall below 4.5:1.
 
 `npm run lint:styles` (Stylelint `selector-max-type`, part of `npm run lint`) rejects bare element selectors in `src/components` and `src/pages`. It cannot see inside mixins, so the mixin rule above still needs a reviewer's eye.
 
