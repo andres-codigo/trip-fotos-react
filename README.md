@@ -555,6 +555,7 @@ This project uses GitHub Actions to automate key development and monitoring task
     - On **pull requests** to `main`
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
+- **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
 - **Merge Blocking:** Pull requests must pass this test workflow before merging into `main`.
 
 Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
