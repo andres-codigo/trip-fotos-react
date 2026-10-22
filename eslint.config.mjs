@@ -9,7 +9,7 @@ import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
-import pluginCypress from 'eslint-plugin-cypress/flat'
+import pluginCypress from 'eslint-plugin-cypress'
 
 import vitest from '@vitest/eslint-plugin'
 

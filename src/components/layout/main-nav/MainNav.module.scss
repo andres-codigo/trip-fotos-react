@@ -55,10 +55,13 @@
 			width: 100%;
 			text-align: center;
 			box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+			// Off-screen alone leaves the closed menu's links keyboard-focusable
+			visibility: hidden;
 		}
 
 		.navMenuItemsContainer.active {
 			left: 0;
+			visibility: visible;
 		}
 
 		.navMenuItem {
