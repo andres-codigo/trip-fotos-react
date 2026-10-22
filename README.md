@@ -431,7 +431,7 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 
 - **File**: `.claude/settings.json` (committed; personal overrides go in the gitignored `.claude/settings.local.json`)
 - **Hook**: a `PostToolUse` hook runs `.claude/hooks/lint-edited-file.mjs` after every edit, applying Prettier and `eslint --fix`. Any remaining ESLint errors are fed back to Claude so they are fixed in the same turn.
-- **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git) run without prompting; read-only `gh issue`/`gh project` queries also run without prompting; pushes, PR creation, installs, and E2E runs ask first; reading `.env`/`certs/`, force-pushes, hard resets, pushes to `main`, and `gh pr merge` are denied.
+- **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git) run without prompting; read-only `gh issue`/`gh project` queries also run without prompting; pushes, PR creation, PR merges, installs, and E2E runs ask first; reading `.env`/`certs/`, force-pushes, hard resets, and pushes to `main` are denied.
 
 #### Skills
 
