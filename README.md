@@ -552,7 +552,7 @@ This project uses GitHub Actions to automate key development and monitoring task
 - **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
 - **Triggers:**
     - On **push** to `main` (for changes in `src/**`, `package.json`, or `vitest.config.*`)
-    - On **pull requests** to `main`
+    - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files, `.github/labels.json` and `.github/scripts/**` still trigger it)
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
@@ -567,7 +567,7 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 - **Workflow File:** `.github/workflows/cypress-e2e.yml`
 - **Triggers:**
     - On **push** to `main` (for changes in `src/**`, `cypress/**`, `package.json`, or `cypress.config.*`)
-    - On **pull requests** to `main`
+    - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files still trigger it)
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs Cypress end-to-end (E2E) tests against the running application to verify user flows and integration with backend services. Runs `npm run cy:run:e2e` — see [Scripts](#scripts). The dev server is awaited with a `curl` retry loop (up to 60 seconds) rather than the Cypress action's URL ping, which gave up on the first unexpected connection error.
 
@@ -578,7 +578,7 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 - **Workflow File:** `.github/workflows/cypress-component.yml`
 - **Triggers:**
     - On **push** to `main` (for changes in `src/**/__tests__/**`, `src/**/*.jsx`, `src/**/*.tsx`, `cypress.config.*`, or `package.json`)
-    - On **pull requests** to `main`
+    - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files still trigger it)
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs Cypress component tests to verify individual React components in isolation. Runs `npm run cy:run:ct` — see [Scripts](#scripts).
 
