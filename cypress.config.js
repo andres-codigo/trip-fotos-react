@@ -8,10 +8,6 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export default defineConfig({
-	// Cypress.env() is deprecated and lets any browser code (including the
-	// app under test) read it. Use cy.env() for values that must stay out of
-	// the AUT's reach, and `expose` below for values that are safe to be public.
-	allowCypressEnv: false,
 	env: {
 		// PATHS
 		HOME_URL: PATHS.HOME,
