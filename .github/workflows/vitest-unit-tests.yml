@@ -49,6 +49,16 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
+            # A version bump leaves its pinned allowScripts entry stale, and npm ci then silently skips that package's install script
+            - name: Check allowScripts covers every install script
+              run: |
+                  pending=$(npm install-scripts ls 2>&1)
+                  if grep -q 'not yet covered' <<< "$pending"; then
+                      echo "$pending"
+                      echo "::error::Run 'npm install-scripts approve <pkg>' for each package above and commit package.json"
+                      exit 1
+                  fi
+
             - name: Run Vitest Unit Tests
               run: npm run vitest:run
               timeout-minutes: 3
