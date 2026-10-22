@@ -1,0 +1,214 @@
+{
+	"type": [
+		{
+			"name": "feature",
+			"color": "0e8a16",
+			"description": "Type: new user-facing feature",
+			"prefixes": ["feat", "feature"]
+		},
+		{
+			"name": "fix",
+			"color": "d73a4a",
+			"description": "Type: bug fix",
+			"prefixes": ["fix"]
+		},
+		{
+			"name": "enhancement",
+			"color": "a2eeef",
+			"description": "Type: improvement to an existing feature",
+			"prefixes": ["enhancement", "perf"]
+		},
+		{
+			"name": "refactor",
+			"color": "fef2c0",
+			"description": "Type: code restructuring, no behaviour change",
+			"prefixes": ["refactor"]
+		},
+		{
+			"name": "docs",
+			"color": "0075ca",
+			"description": "Type: documentation only",
+			"prefixes": ["docs"]
+		},
+		{
+			"name": "test",
+			"color": "bfd4f2",
+			"description": "Type: test additions or changes only",
+			"prefixes": ["test"]
+		},
+		{
+			"name": "chore",
+			"color": "ededed",
+			"description": "Type: maintenance — deps, config, CI",
+			"prefixes": ["chore", "build", "ci", "dependabot"]
+		}
+	],
+	"area": [
+		{
+			"name": "ui",
+			"color": "c5def5",
+			"description": "Area: components, pages and the app shell",
+			"paths": [
+				"src/components/**",
+				"src/pages/**",
+				"src/app/**",
+				"src/index.jsx",
+				"index.html"
+			],
+			"exclude": [
+				"**/__tests__/**",
+				"**/*.test.*",
+				"**/*.cy.*",
+				"**/*.css",
+				"**/*.scss"
+			]
+		},
+		{
+			"name": "styling",
+			"color": "c5def5",
+			"description": "Area: CSS and SCSS",
+			"paths": ["**/*.css", "**/*.scss"]
+		},
+		{
+			"name": "redux/state",
+			"color": "c5def5",
+			"description": "Area: Redux store and state management",
+			"paths": ["src/store/**"],
+			"exclude": ["**/__tests__/**", "**/*.test.*"]
+		},
+		{
+			"name": "constants",
+			"color": "c5def5",
+			"description": "Area: application constants",
+			"paths": ["src/constants/**"],
+			"exclude": ["src/constants/test/**", "**/__tests__/**"]
+		},
+		{
+			"name": "utilities",
+			"color": "c5def5",
+			"description": "Area: helper functions",
+			"paths": ["src/utils/**"],
+			"exclude": ["**/__tests__/**", "**/*.test.*"]
+		},
+		{
+			"name": "firebase",
+			"color": "c5def5",
+			"description": "Area: Firebase services, rules and config",
+			"paths": [
+				"src/services/firebase/**",
+				"database.rules.json",
+				"storage.rules",
+				"firebase.json",
+				".firebaserc",
+				"scripts/set-admin-claim.mjs"
+			],
+			"exclude": ["**/__tests__/**", "**/*.test.*"]
+		},
+		{
+			"name": "assets",
+			"color": "c5def5",
+			"description": "Area: images, icons and static files",
+			"paths": [
+				"src/assets/**",
+				"public/**",
+				"**/*.{png,jpg,jpeg,gif,svg,ico,webp}"
+			],
+			"exclude": ["cypress/fixtures/**"]
+		},
+		{
+			"name": "testing",
+			"color": "c5def5",
+			"description": "Area: tests, test utilities and test config",
+			"paths": [
+				"**/__tests__/**",
+				"**/*.test.*",
+				"**/*.spec.*",
+				"**/*.cy.*",
+				"cypress/**",
+				"cypress.config.*",
+				"src/testUtils/**",
+				"src/constants/test/**"
+			]
+		},
+		{
+			"name": "documentation",
+			"color": "c5def5",
+			"description": "Area: README, guides and other Markdown",
+			"paths": ["**/*.md"]
+		},
+		{
+			"name": "dependencies",
+			"color": "0366d6",
+			"description": "Area: package manifests and lockfile",
+			"paths": ["package.json", "package-lock.json", ".npmrc", ".nvmrc"]
+		},
+		{
+			"name": "config",
+			"color": "c5def5",
+			"description": "Area: build, lint, editor and tooling config",
+			"paths": [
+				"vite.config.*",
+				"eslint.config.*",
+				"rules/**",
+				"declarations/**",
+				"*.d.ts",
+				".prettierrc*",
+				".prettierignore",
+				"jsconfig.json",
+				".gitignore",
+				".dockerignore",
+				".devcontainer/**",
+				".vscode/**",
+				".claude/**"
+			],
+			"exclude": ["**/*.md"]
+		},
+		{
+			"name": "build/deployment",
+			"color": "c5def5",
+			"description": "Area: CI workflows, repo automation and deployment",
+			"paths": [".github/**", "scripts/**", "vercel.json"],
+			"exclude": ["**/*.md", "scripts/set-admin-claim.mjs"]
+		}
+	],
+	"status": [
+		{
+			"name": "ready",
+			"color": "0e8a16",
+			"description": "Accepted and scheduled; moves the issue to Ready",
+			"role": "ready"
+		},
+		{
+			"name": "in-progress",
+			"color": "1d76db",
+			"description": "Work has started; moves the issue to In progress",
+			"role": "inProgress"
+		},
+		{
+			"name": "blocked",
+			"color": "b60205",
+			"description": "Needs a human decision; moves the issue to Blocked",
+			"role": "blocked"
+		}
+	],
+	"other": [
+		{
+			"name": "javascript",
+			"color": "168700",
+			"description": "Added by Dependabot to JavaScript dependency updates"
+		},
+		{
+			"name": "duplicate",
+			"color": "cfd3d7",
+			"description": "This issue or pull request already exists"
+		}
+	],
+	"replaced": {
+		"feature": "ui",
+		"bug": "fix",
+		"frontend": "ui",
+		"form": "ui",
+		"registration": "ui",
+		"question": null
+	}
+}

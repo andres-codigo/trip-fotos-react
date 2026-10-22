@@ -24,6 +24,11 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Checkout label config
+              uses: actions/checkout@v4
+              with:
+                  sparse-checkout: .github
+
             - name: Sync issue and project lifecycle
               uses: actions/github-script@v9
               env:
@@ -33,8 +38,6 @@ jobs:
                   STATUS_IN_PROGRESS_OPTION_ID: 47fc9ee4
                   STATUS_IN_REVIEW_OPTION_ID: 5e639cc6
                   STATUS_DONE_OPTION_ID: 98236657
-                  BLOCKED_LABEL: blocked
-                  IN_PROGRESS_LABEL: in-progress
                   # Optional PAT for Project v2 writes. Rotation/recreation guide:
                   # .github/project-automation-token.md
                   PROJECT_AUTOMATION_TOKEN: ${{ secrets['PROJECT_AUTOMATION_TOKEN'] }}
@@ -53,8 +56,12 @@ jobs:
                         IN_REVIEW: process.env.STATUS_IN_REVIEW_OPTION_ID,
                         DONE: process.env.STATUS_DONE_OPTION_ID,
                       }
-                      const BLOCKED_LABEL = process.env.BLOCKED_LABEL
-                      const IN_PROGRESS_LABEL = process.env.IN_PROGRESS_LABEL
+                      const { loadLabelConfig, statusLabel, managedLabelNames, diffManagedLabels } = await import(
+                        `${process.env.GITHUB_WORKSPACE}/.github/scripts/labels.mjs`
+                      )
+                      const labelConfig = loadLabelConfig(process.env.GITHUB_WORKSPACE)
+                      const BLOCKED_LABEL = statusLabel(labelConfig, 'blocked')
+                      const IN_PROGRESS_LABEL = statusLabel(labelConfig, 'inProgress')
                       const PROJECT_AUTOMATION_TOKEN = process.env.PROJECT_AUTOMATION_TOKEN || ''
 
                       const TRACKING_MARKER = /Tracking-Issue:\s*#(\d+)/i
@@ -326,6 +333,7 @@ jobs:
                         const labels = (issue.labels || []).map((label) => (typeof label === 'string' ? label : label.name))
                         linkedIssues.push({
                           number: issueNumber,
+                          labels,
                           itemId: await ensureProjectItem(issue.node_id),
                           isBlocked: labels.includes(BLOCKED_LABEL),
                           isInProgress: labels.includes(IN_PROGRESS_LABEL),
@@ -359,9 +367,26 @@ jobs:
                         await setStatus(prItemId, openStatus)
                       }
 
+                      // The merged PR's file-based labels describe the work better than any guess made at intake
+                      const copyLabelsToIssue = async (issue) => {
+                        const livePr = await getLivePullRequest()
+                        const managed = managedLabelNames(labelConfig)
+                        const wanted = livePr.labels.map((label) => label.name).filter((name) => managed.has(name))
+                        if (wanted.length === 0) return
+                        const { add, remove } = diffManagedLabels(labelConfig, issue.labels, wanted)
+                        if (add.length) {
+                          await github.rest.issues.addLabels({ owner, repo, issue_number: issue.number, labels: add })
+                        }
+                        for (const name of remove) {
+                          await github.rest.issues.removeLabel({ owner, repo, issue_number: issue.number, name })
+                        }
+                      }
+
                       if (action === 'closed') {
                         if (pr.merged) {
                           for (const issue of linkedIssues) {
+                            // A PR closing several issues has labels for the batch, not for each issue
+                            if (linkedIssues.length === 1) await copyLabelsToIssue(issue)
                             await setStatus(issue.itemId, STATUS.DONE)
                             await closeIssueIfOpen(issue.number)
                             // Bot label events are ignored by the intake workflow, so this cannot move the issue off Done

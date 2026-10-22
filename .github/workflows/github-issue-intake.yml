@@ -20,6 +20,11 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Checkout label config
+              uses: actions/checkout@v4
+              with:
+                  sparse-checkout: .github
+
             - name: Intake issue and sync its board status
               uses: actions/github-script@v9
               env:
@@ -32,12 +37,7 @@ jobs:
                   STATUS_BLOCKED_OPTION_ID: ba1ca20d
                   STATUS_IN_REVIEW_OPTION_ID: 5e639cc6
                   STATUS_DONE_OPTION_ID: 98236657
-                  READY_LABEL: ready
-                  BLOCKED_LABEL: blocked
-                  IN_PROGRESS_LABEL: in-progress
                   DEFAULT_ASSIGNEE: andres-codigo
-                  TRIAGE_LABELS: enhancement,bug,question
-                  DOMAIN_LABELS: testing,config,utilities,documentation,dependencies,firebase,styling,feature,assets,build/deployment,constants,redux/state
                   PROJECT_AUTOMATION_TOKEN: ${{ secrets['PROJECT_AUTOMATION_TOKEN'] }}
               with:
                   github-token: ${{ github.token }}
@@ -56,18 +56,15 @@ jobs:
                         IN_REVIEW: process.env.STATUS_IN_REVIEW_OPTION_ID,
                         DONE: process.env.STATUS_DONE_OPTION_ID,
                       }
-                      const READY_LABEL = process.env.READY_LABEL
-                      const BLOCKED_LABEL = process.env.BLOCKED_LABEL
-                      const IN_PROGRESS_LABEL = process.env.IN_PROGRESS_LABEL
+                      const { loadLabelConfig, statusLabel, typeFor } = await import(
+                        `${process.env.GITHUB_WORKSPACE}/.github/scripts/labels.mjs`
+                      )
+                      const labelConfig = loadLabelConfig(process.env.GITHUB_WORKSPACE)
+                      const READY_LABEL = statusLabel(labelConfig, 'ready')
+                      const BLOCKED_LABEL = statusLabel(labelConfig, 'blocked')
+                      const IN_PROGRESS_LABEL = statusLabel(labelConfig, 'inProgress')
+                      const TYPE_LABELS = labelConfig.type.map((label) => label.name)
                       const DEFAULT_ASSIGNEE = process.env.DEFAULT_ASSIGNEE
-                      const TRIAGE_LABELS = (process.env.TRIAGE_LABELS || '')
-                        .split(',')
-                        .map((label) => label.trim())
-                        .filter(Boolean)
-                      const DOMAIN_LABELS = (process.env.DOMAIN_LABELS || '')
-                        .split(',')
-                        .map((label) => label.trim())
-                        .filter(Boolean)
                       const PROJECT_AUTOMATION_TOKEN = process.env.PROJECT_AUTOMATION_TOKEN || ''
 
                       const projectGithub = PROJECT_AUTOMATION_TOKEN
@@ -109,60 +106,8 @@ jobs:
                         typeof label === 'string' ? label : label.name,
                       )
 
-                      const bodyText = `${issue.title || ''}\n${issue.body || ''}`.toLowerCase()
-
-                      const detectTriageLabel = () => {
-                        const current = TRIAGE_LABELS.find((label) => existingLabelNames.includes(label))
-                        if (current) return current
-
-                        if (/\b(question|how do i|clarify|help)\b/.test(bodyText)) {
-                          return 'question'
-                        }
-
-                        if (/\b(bug|broken|failure|fails|error|regression|flaky)\b/.test(bodyText)) {
-                          return 'bug'
-                        }
-
-                        return 'enhancement'
-                      }
-
-                      const detectDomainLabels = () => {
-                        const candidates = new Set()
-
-                        if (/\b(test|cypress|vitest|e2e|component test)\b/.test(bodyText)) {
-                          candidates.add('testing')
-                        }
-
-                        if (/\b(config|workflow|eslint|prettier|vite|yaml|yml|github actions|project automation)\b/.test(bodyText)) {
-                          candidates.add('config')
-                        }
-
-                        if (/\b(util|helper|shared function)\b/.test(bodyText)) {
-                          candidates.add('utilities')
-                        }
-
-                        if (/\b(readme|documentation|docs)\b/.test(bodyText)) {
-                          candidates.add('documentation')
-                        }
-
-                        if (/\b(dependency|dependencies|npm|package)\b/.test(bodyText)) {
-                          candidates.add('dependencies')
-                        }
-
-                        if (/\b(firebase|firestore|auth)\b/.test(bodyText)) {
-                          candidates.add('firebase')
-                        }
-
-                        if (/\b(style|styling|css|scss)\b/.test(bodyText)) {
-                          candidates.add('styling')
-                        }
-
-                        if (/\b(component|page|ui|frontend)\b/.test(bodyText)) {
-                          candidates.add('feature')
-                        }
-
-                        return Array.from(candidates).filter((label) => DOMAIN_LABELS.includes(label))
-                      }
+                      // Only the title prefix is a reliable signal; areas come from the PR that closes the issue
+                      const expectedType = typeFor(labelConfig, { title: issue.title })
 
                       const action = context.eventName === 'workflow_dispatch' ? 'dispatch' : context.payload.action
                       const isLabelEvent = action === 'labeled' || action === 'unlabeled'
@@ -174,20 +119,19 @@ jobs:
                       }
 
                       if (!isLabelEvent) {
-                        const triageLabel = detectTriageLabel()
-                        const domainLabels = detectDomainLabels()
-                        const labelsToApply = [triageLabel, ...domainLabels].filter(
-                          (label, idx, labels) => label && labels.indexOf(label) === idx,
-                        )
-
-                        const missingLabels = labelsToApply.filter((label) => !existingLabelNames.includes(label))
-                        if (missingLabels.length > 0) {
-                          await github.rest.issues.addLabels({
-                            owner,
-                            repo,
-                            issue_number: issueNumber,
-                            labels: missingLabels,
-                          })
+                        if (expectedType) {
+                          if (!existingLabelNames.includes(expectedType)) {
+                            await github.rest.issues.addLabels({
+                              owner,
+                              repo,
+                              issue_number: issueNumber,
+                              labels: [expectedType],
+                            })
+                          }
+                          // A retitled issue keeps a single type label
+                          for (const name of existingLabelNames.filter((label) => TYPE_LABELS.includes(label) && label !== expectedType)) {
+                            await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNumber, name })
+                          }
                         }
 
                         if (DEFAULT_ASSIGNEE && !(issue.assignees || []).some((assignee) => assignee.login === DEFAULT_ASSIGNEE)) {
@@ -430,13 +374,12 @@ jobs:
                         typeof label === 'string' ? label : label.name,
                       )
 
-                      const hasTriageLabel = TRIAGE_LABELS.some((label) => refreshedLabels.includes(label))
                       const hasAssignee = (refreshedIssue.data.assignees || []).some(
                         (assignee) => assignee.login === DEFAULT_ASSIGNEE,
                       )
 
-                      if (!hasTriageLabel) {
-                        core.setFailed(`Verification failed: issue #${issueNumber} has no triage label (${TRIAGE_LABELS.join(', ')}).`)
+                      if (expectedType && !refreshedLabels.includes(expectedType)) {
+                        core.setFailed(`Verification failed: issue #${issueNumber} is missing its type label (${expectedType}).`)
                         return
                       }
 
