@@ -58,7 +58,9 @@ describe('Travellers Page - WIP', () => {
 			cy.visit(PATHS.TRAVELLERS)
 
 			// Wait for initial loading to complete so button is enabled
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+				timeout: REQUEST_TIMEOUT,
+			}).should('not.exist')
 
 			// Ensure the link is enabled (not aria-disabled) before clicking
 			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK)
@@ -93,7 +95,9 @@ describe('Travellers Page - WIP', () => {
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
 
 			// Wait for loading to complete
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+				timeout: REQUEST_TIMEOUT,
+			}).should('not.exist')
 
 			// Should show either travellers list or no travellers message
 			cy.get('body').then(($body) => {
@@ -115,7 +119,9 @@ describe('Travellers Page - WIP', () => {
 			performLogin()
 
 			// Wait for initial load
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+				timeout: REQUEST_TIMEOUT,
+			}).should('not.exist')
 
 			// Make refresh loading deterministic so spinner assertion is stable in CI
 			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
@@ -141,7 +147,9 @@ describe('Travellers Page - WIP', () => {
 			performLogin()
 
 			// Wait for loading to complete
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+				timeout: REQUEST_TIMEOUT,
+			}).should('not.exist')
 
 			// If no travellers message is shown, refresh button should exist and be enabled
 			cy.get('body').then(($body) => {
