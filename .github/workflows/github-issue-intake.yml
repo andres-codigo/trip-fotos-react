@@ -34,6 +34,7 @@ jobs:
                   STATUS_DONE_OPTION_ID: 98236657
                   READY_LABEL: ready
                   BLOCKED_LABEL: blocked
+                  IN_PROGRESS_LABEL: in-progress
                   DEFAULT_ASSIGNEE: andres-codigo
                   TRIAGE_LABELS: enhancement,bug,question
                   DOMAIN_LABELS: testing,config,utilities,documentation,dependencies,firebase,styling,feature,assets,build/deployment,constants,redux/state
@@ -57,6 +58,7 @@ jobs:
                       }
                       const READY_LABEL = process.env.READY_LABEL
                       const BLOCKED_LABEL = process.env.BLOCKED_LABEL
+                      const IN_PROGRESS_LABEL = process.env.IN_PROGRESS_LABEL
                       const DEFAULT_ASSIGNEE = process.env.DEFAULT_ASSIGNEE
                       const TRIAGE_LABELS = (process.env.TRIAGE_LABELS || '')
                         .split(',')
@@ -344,6 +346,7 @@ jobs:
                         const openPullRequests = await getOpenLinkedPullRequests()
                         if (openPullRequests.some((pull) => !pull.isDraft)) return STATUS.IN_REVIEW
                         if (openPullRequests.length > 0) return STATUS.IN_PROGRESS
+                        if (existingLabelNames.includes(IN_PROGRESS_LABEL)) return STATUS.IN_PROGRESS
                         if (existingLabelNames.includes(READY_LABEL)) return STATUS.READY
                         return STATUS.BACKLOG
                       }
@@ -365,6 +368,12 @@ jobs:
                           if (labelName === READY_LABEL) {
                             return [null, STATUS.TRIAGE, STATUS.BACKLOG].includes(currentStatus) ? STATUS.READY : null
                           }
+                          // Never pulls an issue back from In review or Done (#302)
+                          if (labelName === IN_PROGRESS_LABEL) {
+                            return [null, STATUS.TRIAGE, STATUS.BACKLOG, STATUS.READY].includes(currentStatus)
+                              ? STATUS.IN_PROGRESS
+                              : null
+                          }
                           // Labels picked on the new-issue form arrive with the opened event; they are not a triage decision
                           const isJustCreated = Date.now() - new Date(issue.created_at).getTime() < 60_000
                           if (isJustCreated) return null
@@ -374,6 +383,7 @@ jobs:
 
                         if (labelName === BLOCKED_LABEL) return resolveUnblockedStatus()
                         if (labelName === READY_LABEL && currentStatus === STATUS.READY) return STATUS.BACKLOG
+                        if (labelName === IN_PROGRESS_LABEL && currentStatus === STATUS.IN_PROGRESS) return resolveUnblockedStatus()
                         return null
                       }
 

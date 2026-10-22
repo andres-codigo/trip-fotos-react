@@ -598,7 +598,7 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 - **Triggers:**
     - On **issue** events (`opened`, `reopened`, `edited`, `labeled`, `unlabeled`)
     - Manually via **Actions → "Run workflow"** (takes an issue number)
-- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, auto-labels them and assigns the default assignee. Editing an issue never changes its status. Labels you add move it across the board (see [Project Board Statuses](#project-board-statuses)).
+- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, auto-labels them and assigns the default assignee. Editing an issue never changes its status. Labels you add (`ready`, `in-progress`, `blocked`) move it across the board (see [Project Board Statuses](#project-board-statuses)).
 
 ---
 
@@ -607,7 +607,7 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 - **Workflow File:** `.github/workflows/project-item-lifecycle.yml`
 - **Triggers:**
     - On **pull_request_target** events (`opened`, `reopened`, `synchronize`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`)
-- **Purpose:** Keeps pull requests and the issues they close (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. A PR with no linked issue gets a tracking issue (Dependabot PRs excepted).
+- **Purpose:** Keeps pull requests and the issues they close (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. A PR with no linked issue gets a tracking issue (Dependabot PRs excepted). Merging removes the `in-progress` label from the issues it closes.
 - **Secret (Optional but Recommended):** `PROJECT_AUTOMATION_TOKEN`
     - Used for Project v2 write operations when `github.token` does not have enough access.
 
@@ -627,17 +627,19 @@ The runbook includes expiry handling, recreation steps, secret update instructio
 
 Every Status is set by the two workflows above. Items also carry **Kind** (Epic / Feature / Bug / Chore / Deps) and **Workstream** (Vue parity / Tooling & AI / Maintenance) fields, set by hand.
 
-| Status      | Meaning                  | Moved there when                                                    |
-| ----------- | ------------------------ | ------------------------------------------------------------------- |
-| Triage      | New, not yet assessed    | An issue is opened                                                  |
-| Backlog     | Accepted, not scheduled  | You add any label to an issue in Triage, or reopen a Done issue     |
-| Ready       | Queued, dependencies met | You add the `ready` label, or a linked PR is closed without merging |
-| In progress | Being built              | A draft PR that closes the issue is opened                          |
-| Blocked     | Needs a human decision   | You add the `blocked` label; removing it restores the status        |
-| In review   | PR open for review       | The PR is opened (not as a draft) or marked ready for review        |
-| Done        | Merged                   | The PR is merged                                                    |
+| Status      | Meaning                  | Moved there when                                                               |
+| ----------- | ------------------------ | ------------------------------------------------------------------------------ |
+| Triage      | New, not yet assessed    | An issue is opened                                                             |
+| Backlog     | Accepted, not scheduled  | You add any label to an issue in Triage, or reopen a Done issue                |
+| Ready       | Queued, dependencies met | You add the `ready` label, or a linked PR is closed without merging            |
+| In progress | Being built              | You add the `in-progress` label, or a draft PR that closes the issue is opened |
+| Blocked     | Needs a human decision   | You add the `blocked` label; removing it restores the status                   |
+| In review   | PR open for review       | The PR is opened (not as a draft) or marked ready for review                   |
+| Done        | Merged                   | The PR is merged                                                               |
 
 While an issue has the `blocked` label its PR events leave it in Blocked; only a merge moves it on.
+
+Add the `in-progress` label when you start work, before any PR exists. It moves an issue in Triage, Backlog or Ready to In progress, never one already In review or Done. Removing it restores the status. An issue that keeps the label returns to In progress, not Ready, when its PR is closed without merging, and a merge removes the label.
 
 ---
 
