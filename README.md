@@ -628,15 +628,15 @@ The runbook includes expiry handling, recreation steps, secret update instructio
 
 Every Status is set by the two workflows above. Items also carry **Kind** (Epic / Feature / Bug / Chore / Deps) and **Workstream** (Vue parity / Tooling & AI / Maintenance) fields, set by hand.
 
-| Status      | Meaning                  | Moved there when                                                               |
-| ----------- | ------------------------ | ------------------------------------------------------------------------------ |
-| Triage      | New, not yet assessed    | An issue is opened                                                             |
-| Backlog     | Accepted, not scheduled  | You add any label to an issue in Triage, or reopen a Done issue                |
-| Ready       | Queued, dependencies met | You add the `ready` label, or a linked PR is closed without merging            |
-| In progress | Being built              | You add the `in-progress` label, or a draft PR that closes the issue is opened |
-| Blocked     | Needs a human decision   | You add the `blocked` label; removing it restores the status                   |
-| In review   | PR open for review       | The PR is opened (not as a draft) or marked ready for review                   |
-| Done        | Merged                   | The PR is merged                                                               |
+| Status      | Meaning                                         | Moved there when                                                               |
+| ----------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
+| Triage      | New, not yet assessed                           | An issue is opened                                                             |
+| Backlog     | Accepted, not scheduled                         | You add any label to an issue in Triage, or reopen a Done issue                |
+| Ready       | Queued, dependencies met                        | You add the `ready` label, or a linked PR is closed without merging            |
+| In progress | Being built                                     | You add the `in-progress` label, or a draft PR that closes the issue is opened |
+| Blocked     | Waiting on a decision or an external dependency | You add the `blocked` label; removing it restores the status                   |
+| In review   | PR open for review                              | The PR is opened (not as a draft) or marked ready for review                   |
+| Done        | Merged                                          | The PR is merged                                                               |
 
 While an issue has the `blocked` label its PR events leave it in Blocked; only a merge moves it on.
 
