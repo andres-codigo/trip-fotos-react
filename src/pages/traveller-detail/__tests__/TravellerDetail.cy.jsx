@@ -64,6 +64,23 @@ describe('<TravellerDetail />', () => {
 		cy.intercept('GET', '**/travellers/nope.json', { body: null })
 	})
 
+	it('keeps the placeholder heading hidden while loading, then shows the name inside the profile card', () => {
+		cy.intercept('GET', '**/travellers/abc.json', {
+			body: traveller,
+			delay: 500,
+		}).as('slowTraveller')
+		mountPage()
+		cy.get(TRAVELLER_DETAIL_SELECTORS.NAME)
+			.should('have.text', 'Traveller')
+			.and('have.css', 'width', '1px')
+		cy.wait('@slowTraveller')
+		cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE)
+			.parent()
+			.find(TRAVELLER_DETAIL_SELECTORS.NAME)
+			.should('have.text', 'Ada Lovelace')
+			.and('not.have.css', 'width', '1px')
+	})
+
 	it('renders the profile, badges and every photo', () => {
 		mountPage()
 		cy.get(TRAVELLER_DETAIL_SELECTORS.NAME).should(

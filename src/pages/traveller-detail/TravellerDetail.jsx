@@ -68,7 +68,9 @@ const TravellerDetail = () => {
 
 	const heading = (
 		<h1
-			className={travellerDetailStyles.name}
+			className={classNames(travellerDetailStyles.name, {
+				[travellerDetailStyles.visuallyHidden]: isLoading,
+			})}
 			data-cy={TRAVELLER_DETAIL.NAME}>
 			{fullName}
 		</h1>
