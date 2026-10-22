@@ -50,5 +50,6 @@ describe('<BaseImage />', () => {
 			'contain',
 			GLOBAL.IMAGE_UNAVAILABLE,
 		)
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should('not.exist')
 	})
 })

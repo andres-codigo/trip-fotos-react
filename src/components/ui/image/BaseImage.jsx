@@ -29,7 +29,7 @@ const BaseImage = ({ title, url }) => {
 		<span
 			className={baseImageStyles.fallback}
 			role="img"
-			aria-label={alt}
+			aria-label={`${alt} is unavailable`}
 			data-cy={IMAGE.FALLBACK}>
 			{GLOBAL.IMAGE_UNAVAILABLE}
 		</span>
@@ -39,24 +39,29 @@ const BaseImage = ({ title, url }) => {
 		<li
 			className={baseImageStyles['image-preview']}
 			data-cy={IMAGE.ID}>
-			<button
-				type="button"
-				className={baseImageStyles.trigger}
-				aria-label={`View ${title}'s photo`}
-				onClick={toggleDialog}
-				data-cy={IMAGE.BUTTON}>
-				{hasError ? (
-					renderFallback()
-				) : (
-					<img
-						src={url}
-						alt={alt}
-						loading="lazy"
-						onError={handleError}
-						data-cy={IMAGE.THUMBNAIL}
-					/>
-				)}
-			</button>
+			{/* Nothing to enlarge, so the fallback is not a button */}
+			{hasError && !showDialog ? (
+				renderFallback()
+			) : (
+				<button
+					type="button"
+					className={baseImageStyles.trigger}
+					aria-label={`View ${title}'s photo`}
+					onClick={toggleDialog}
+					data-cy={IMAGE.BUTTON}>
+					{hasError ? (
+						renderFallback()
+					) : (
+						<img
+							src={url}
+							alt={alt}
+							loading="lazy"
+							onError={handleError}
+							data-cy={IMAGE.THUMBNAIL}
+						/>
+					)}
+				</button>
+			)}
 			<BaseDialog
 				show={showDialog}
 				title={`${title}'s photos`}

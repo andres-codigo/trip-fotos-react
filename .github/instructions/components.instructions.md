@@ -55,6 +55,7 @@ Maintain **API consistency** (prop names, validation patterns) when creating sim
 ## Accessibility
 
 - Ensure form components handle accessibility attributes (`aria-*`, `role`) for validation states.
+- Render a control only while it can do something. An error, empty or unavailable state (e.g. `BaseImage`'s "Image unavailable" fallback) should drop its button or link rather than stay clickable, focusable and lead nowhere.
 - **Form Errors**: When displaying form field errors, render both a visual error (if the design calls for one) AND a visually hidden error span with `role="alert"` for screen readers. Use the `renderVisuallyHiddenError` utility where applicable.
 
 ## Testing

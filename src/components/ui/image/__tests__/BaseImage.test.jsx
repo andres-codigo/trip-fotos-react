@@ -66,13 +66,21 @@ describe('<BaseImage />', () => {
 		expect(full).toHaveClass(expected)
 	})
 
-	it('shows the fallback when the image fails to load', () => {
+	it('shows a non-clickable fallback when the image fails to load', () => {
 		render(<BaseImage {...props} />)
 		fireEvent.error(screen.getByAltText("Ada's photo"))
 		expect(
-			screen.queryByRole('img', { name: "Ada's photo" }),
+			screen.getByRole('img', { name: "Ada's photo is unavailable" }),
 		).toHaveTextContent(GLOBAL.IMAGE_UNAVAILABLE)
+		expect(screen.queryByRole('button')).not.toBeInTheDocument()
+	})
+
+	it('keeps the dialog open with the fallback when the full image fails', () => {
+		render(<BaseImage {...props} />)
 		openDialog()
-		expect(screen.getAllByText(GLOBAL.IMAGE_UNAVAILABLE)).toHaveLength(2)
+		fireEvent.error(screen.getByTestId(IMAGE.FULL))
+		expect(screen.getByRole('dialog')).toHaveTextContent(
+			GLOBAL.IMAGE_UNAVAILABLE,
+		)
 	})
 })
