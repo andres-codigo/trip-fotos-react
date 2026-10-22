@@ -588,8 +588,8 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 
 - **Workflow File:** `.github/workflows/github-auto-label-prs.yml`
 - **Triggers:**
-    - On **pull request** events (`opened`, `synchronize`, `reopened`)
-- **Purpose:** Automatically applies relevant labels (e.g. `feature`, `documentation`, `dependencies`, `testing`, `styling`, `redux/state`, `firebase`) to pull requests based on the files changed, using glob-pattern rules defined in [`.github/labeler.yml`](.github/labeler.yml) — edit that file to change which files trigger which labels.
+    - On **pull_request_target** events (`opened`, `synchronize`, `reopened`, `edited`), so Dependabot PRs can be labelled too; only the base branch is checked out
+- **Purpose:** Gives each pull request one **type** label from its conventional-commit title (or branch prefix), e.g. `chore`, `fix`, `feature`, and the **area** labels whose paths its changed files match, e.g. `ui`, `testing`, `config`. Labels it no longer matches are removed; status labels and Dependabot's `javascript` are left alone. The rules live in [`.github/labels.json`](.github/labels.json) — see [Labels](#labels).
 
 ---
 
@@ -599,7 +599,7 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 - **Triggers:**
     - On **issue** events (`opened`, `reopened`, `edited`, `labeled`, `unlabeled`)
     - Manually via **Actions → "Run workflow"** (takes an issue number)
-- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, auto-labels them and assigns the default assignee. Editing an issue never changes its status. Labels you add (`ready`, `in-progress`, `blocked`) move it across the board (see [Project Board Statuses](#project-board-statuses)).
+- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, gives them the **type** label for their title prefix (`chore:` → `chore`; none without a prefix) and assigns the default assignee. Area labels arrive later from the PR that closes the issue. Editing an issue never changes its status. Labels you add (`ready`, `in-progress`, `blocked`) move it across the board (see [Project Board Statuses](#project-board-statuses)).
 
 ---
 
@@ -608,7 +608,7 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 - **Workflow File:** `.github/workflows/project-item-lifecycle.yml`
 - **Triggers:**
     - On **pull_request_target** events (`opened`, `reopened`, `synchronize`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`)
-- **Purpose:** Keeps pull requests and the issues they close (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. A PR with no linked issue gets a tracking issue (Dependabot PRs excepted). Merging removes the `in-progress` label from the issues it closes.
+- **Purpose:** Keeps pull requests and the issues they close (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. A PR with no linked issue gets a tracking issue (Dependabot PRs excepted). Merging removes the `in-progress` label from the issues it closes and, when it closes exactly one issue (a tracking issue included), copies the PR's type and area labels to it; a PR closing several issues leaves their labels alone.
 - **Secret (Optional but Recommended):** `PROJECT_AUTOMATION_TOKEN`
     - Used for Project v2 write operations when `github.token` does not have enough access.
 
@@ -644,7 +644,30 @@ Add the `in-progress` label when you start work, before any PR exists. It moves 
 
 ---
 
-### 7. CodeQL Code Scanning
+### 7. GitHub Label Sync
+
+- **Workflow File:** `.github/workflows/github-label-sync.yml`
+- **Triggers:**
+    - On **push** to `main` that changes `.github/labels.json` or `.github/scripts/labels.mjs`
+    - Manually via **Actions → "Run workflow"** (a dry run by default, which only logs the plan)
+- **Purpose:** Makes the repository's labels match `.github/labels.json`: creates and updates them, renames or merges retired ones listed under `replaced` (so issues and PRs keep the meaning), and deletes labels the file does not define.
+
+<a id="labels"></a>
+
+#### Labels
+
+[`.github/labels.json`](.github/labels.json) is the single source of truth for labels. Every workflow above reads it through `.github/scripts/labels.mjs`, and none hard-codes a label name. To add, rename or recolour a label, or change which files map to an area, edit that file only; the sync workflow applies it when merged.
+
+| Group  | Labels                                                                                                                                                   | Set by                                                      |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Type   | `feature`, `fix`, `enhancement`, `refactor`, `docs`, `test`, `chore` (the [branch prefixes](CLAUDE.md#branch-naming))                                    | Title or branch prefix — PR labeller and issue intake       |
+| Area   | `ui`, `styling`, `redux/state`, `constants`, `utilities`, `firebase`, `assets`, `testing`, `documentation`, `dependencies`, `config`, `build/deployment` | Changed files — PR labeller; copied to the issue on merge   |
+| Status | `ready`, `in-progress`, `blocked`                                                                                                                        | You — see [Project Board Statuses](#project-board-statuses) |
+| Other  | `javascript`, `duplicate`                                                                                                                                | Dependabot / you                                            |
+
+---
+
+### 8. CodeQL Code Scanning
 
 - **Configured In:** **Settings → Advanced Security → CodeQL analysis** (GitHub-managed **Default setup** — no workflow file)
 - **Triggers:** On push and pull requests to `main`, plus a weekly scheduled scan
@@ -671,9 +694,10 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 | Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`      | Unit/Integration | Push/PR/Manual   |
 | Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml`            | E2E              | Push/PR/Manual   |
 | Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`      | Component        | Push/PR/Manual   |
-| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`  | Automation       | PR Events        |
+| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`  | Automation       | PR Target Events |
 | GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`    | Automation       | Issue Events     |
 | GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml` | Automation       | PR Target Events |
+| GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`      | Automation       | Push/Manual      |
 
 ---
 
@@ -772,8 +796,10 @@ trip-fotos-react/
 ├── .github/
 │   ├── agents/                 # Scaffolding workflows (shared by Copilot and Claude Code)
 │   ├── instructions/           # Domain-specific guidance (shared by Copilot and Claude Code)
+│   ├── scripts/                # Shared workflow logic (labels.mjs) with its Vitest tests
 │   ├── workflows/              # GitHub Actions workflow files for CI/CD automation
-│   └── copilot-instructions.md # Workspace-level Copilot guidelines
+│   ├── copilot-instructions.md # Workspace-level Copilot guidelines
+│   └── labels.json             # Single source of truth for every label
 ├── .vscode/                     # Shared VS Code editor settings
 ├── cypress/                    # Cypress tests
 ├── declarations/               # Breaking issue fix when using ESLint V9

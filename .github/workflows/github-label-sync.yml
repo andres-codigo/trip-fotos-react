@@ -1,0 +1,96 @@
+name: GitHub - Label Sync
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - '.github/labels.json'
+            - '.github/scripts/labels.mjs'
+    workflow_dispatch:
+        inputs:
+            dry_run:
+                description: 'Only print the plan'
+                required: true
+                default: true
+                type: boolean
+
+permissions:
+    contents: read
+    issues: write
+    pull-requests: write
+
+jobs:
+    sync-labels:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout label config
+              uses: actions/checkout@v4
+              with:
+                  sparse-checkout: .github
+
+            - name: Make repository labels match .github/labels.json
+              uses: actions/github-script@v9
+              env:
+                  DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+              with:
+                  github-token: ${{ github.token }}
+                  script: |
+                      const { loadLabelConfig, planLabelSync } = await import(
+                        `${process.env.GITHUB_WORKSPACE}/.github/scripts/labels.mjs`
+                      )
+                      const config = loadLabelConfig(process.env.GITHUB_WORKSPACE)
+                      const { owner, repo } = context.repo
+                      const dryRun = process.env.DRY_RUN === 'true'
+
+                      const repoLabels = await github.paginate(github.rest.issues.listLabelsForRepo, {
+                        owner,
+                        repo,
+                        per_page: 100,
+                      })
+                      const steps = planLabelSync(config, repoLabels)
+                      if (steps.length === 0) {
+                        core.info('Labels already match .github/labels.json.')
+                        return
+                      }
+
+                      for (const step of steps) {
+                        core.info(`${dryRun ? '[dry run] ' : ''}${JSON.stringify(step)}`)
+                        if (dryRun) continue
+
+                        if (step.action === 'rename') {
+                          await github.rest.issues.updateLabel({ owner, repo, name: step.from, new_name: step.to })
+                        } else if (step.action === 'merge') {
+                          // Carry the retired label over before deleting it, so no issue or PR loses the meaning
+                          const items = await github.paginate(github.rest.issues.listForRepo, {
+                            owner,
+                            repo,
+                            labels: step.from,
+                            state: 'all',
+                            per_page: 100,
+                          })
+                          for (const item of items) {
+                            await github.rest.issues.addLabels({ owner, repo, issue_number: item.number, labels: [step.to] })
+                          }
+                          await github.rest.issues.deleteLabel({ owner, repo, name: step.from })
+                        } else if (step.action === 'create') {
+                          await github.rest.issues.createLabel({
+                            owner,
+                            repo,
+                            name: step.name,
+                            color: step.color,
+                            description: step.description,
+                          })
+                        } else if (step.action === 'update') {
+                          await github.rest.issues.updateLabel({
+                            owner,
+                            repo,
+                            name: step.name,
+                            color: step.color,
+                            description: step.description,
+                          })
+                        } else if (step.action === 'delete') {
+                          await github.rest.issues.deleteLabel({ owner, repo, name: step.name })
+                        }
+                      }
