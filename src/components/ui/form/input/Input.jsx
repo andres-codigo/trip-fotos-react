@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 
-import './input.scss'
+import inputStyles from './Input.module.scss'
 
 const Input = ({
 	id,
@@ -24,7 +24,7 @@ const Input = ({
 			<label htmlFor={id}>
 				{label + ' '}
 				{(showRequiredMark || required) && (
-					<span className="input-required">*</span>
+					<span className={inputStyles.required}>*</span>
 				)}
 			</label>
 		)}

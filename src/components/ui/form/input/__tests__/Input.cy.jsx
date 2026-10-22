@@ -66,7 +66,7 @@ describe('<Input />', () => {
 				/>,
 			)
 			cy.get('label').should('contain', 'Required Field')
-			cy.get('label .input-required').should('contain', '*')
+			cy.get('label span').should('contain', '*')
 			cy.get(getByDataCy(INPUT.ID)).should('have.attr', 'required')
 		})
 
