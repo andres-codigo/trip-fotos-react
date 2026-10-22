@@ -1,6 +1,7 @@
+import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
-import './textarea.scss'
+import textareaStyles from './Textarea.module.scss'
 
 const Textarea = ({
 	id,
@@ -21,10 +22,12 @@ const Textarea = ({
 }) => (
 	<div>
 		{label && (
-			<label htmlFor={id}>
+			<label
+				htmlFor={id}
+				className={textareaStyles.label}>
 				{label + ' '}
 				{(showRequiredMark || required) && (
-					<span className="input-required">*</span>
+					<span className={textareaStyles.required}>*</span>
 				)}
 			</label>
 		)}
@@ -37,7 +40,7 @@ const Textarea = ({
 			data-cy={dataCy}
 			disabled={disabled}
 			required={required}
-			className={className}
+			className={classNames(textareaStyles.textarea, className)}
 			aria-required={required}
 			aria-invalid={!isValid}
 			aria-describedby={!isValid && message ? `${id}-error` : undefined}
