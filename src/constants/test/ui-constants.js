@@ -9,6 +9,9 @@ export const BUTTON = Object.freeze({
 		FLAT: 'flat',
 		OUTLINED: 'outlined',
 		FILLED: 'filled',
+		PRIMARY: 'primary',
+		OUTLINE: 'outline',
+		DANGER: 'danger',
 	},
 })
 

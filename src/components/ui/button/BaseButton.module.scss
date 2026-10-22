@@ -1,7 +1,9 @@
 @use '@/styles/setup/variables' as variables;
 
-// :where() keeps the base at zero specificity so consumers' single-class overrides always win
-:where(.button) {
+// One element's specificity: beats the zero-specificity global :where(a) whatever order the CSS chunks load in, yet loses to any consumer class
+a:where(.button),
+button:where(.button),
+span:where(.button) {
 	align-items: center;
 	background-color: variables.$color-ripe-plum;
 	border: 1px solid variables.$color-ripe-plum;
@@ -19,7 +21,6 @@
 	&:active {
 		background-color: variables.$color-ripe-eggplant;
 		border-color: variables.$color-ripe-eggplant;
-		color: variables.$color-white;
 	}
 }
 
@@ -45,11 +46,27 @@
 		}
 	}
 
+	&.danger {
+		background-color: variables.$color-mojo;
+		border-color: variables.$color-mojo;
+
+		&:hover,
+		&:active {
+			background-color: variables.$color-guardsman-red;
+			border-color: variables.$color-guardsman-red;
+		}
+	}
+
 	&.text {
-		background-color: transparent;
-		border: none;
-		color: inherit;
 		padding: 0;
+
+		&,
+		&:hover,
+		&:active {
+			background-color: transparent;
+			border: none;
+			color: inherit;
+		}
 	}
 
 	&.outline,
