@@ -1,44 +1,55 @@
 @use '@/styles/setup/variables' as variables;
 
-button {
+// :where() keeps the base at zero specificity so consumers' single-class overrides always win
+:where(.button) {
+	align-items: center;
 	background-color: variables.$color-ripe-plum;
 	border: 1px solid variables.$color-ripe-plum;
 	border-radius: 30px;
 	color: variables.$color-white;
 	cursor: pointer;
-	display: inline-block;
+	display: inline-flex;
 	font: inherit;
+	justify-content: center;
+	line-height: 1.25;
 	padding: 0.75rem 1.5rem;
-	margin-right: 0.5rem;
 	text-decoration: none;
 
 	&:hover,
 	&:active {
 		background-color: variables.$color-ripe-eggplant;
 		border-color: variables.$color-ripe-eggplant;
+		color: variables.$color-white;
 	}
 }
 
-a {
+:where(.link) {
 	border: 1px solid transparent;
 	display: inline-block;
+
 	&:hover,
 	&:active {
 		color: variables.$color-fresh-eggplant;
 	}
 }
 
-button,
-a {
+:where(.button) {
 	&.flat {
 		background-color: transparent;
+		border-color: transparent;
 		color: variables.$color-ripe-plum;
-		border: none;
 
 		&:hover,
 		&:active {
 			background-color: variables.$color-blue-chalk;
 		}
+	}
+
+	&.text {
+		background-color: transparent;
+		border: none;
+		color: inherit;
+		padding: 0;
 	}
 
 	&.outline,
@@ -66,11 +77,3 @@ a {
 		}
 	}
 }
-
-// TODO: Uncomment and test UI once further components are implemented
-// @media only screen and (max-width: 768px) {
-// 	button,
-// 	a {
-// 		padding: 0.5rem 1rem;
-// 	}
-// }

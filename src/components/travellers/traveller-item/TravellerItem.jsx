@@ -216,6 +216,7 @@ const TravellerItem = ({
 						<BaseButton
 							isLink
 							to={detailsLink}
+							modeType="primary"
 							data-cy={TRAVELLER_ITEM.DETAILS}>
 							Details
 						</BaseButton>

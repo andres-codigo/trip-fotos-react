@@ -25,6 +25,9 @@ vi.mock('classnames', () => ({
 
 vi.mock('@/components/ui/button/BaseButton.module.scss', () => ({
 	default: {
+		button: 'mocked-button-class',
+		link: 'mocked-link-class',
+		disabled: 'mocked-disabled-class',
 		flat: 'mocked-flat-class',
 		outlined: 'mocked-outlined-class',
 	},
@@ -57,11 +60,60 @@ describe('<BaseButton />', () => {
 			const button = screen.getByTestId('styled-button')
 
 			expect(mockClassNames).toHaveBeenCalledWith(
-				'custom-class',
+				'mocked-button-class',
 				'mocked-outlined-class',
+				{ 'mocked-disabled-class': false },
+				'custom-class',
 			)
 
-			expect(button).toHaveClass('custom-class mocked-outlined-class')
+			expect(button).toHaveClass(
+				'mocked-button-class mocked-outlined-class custom-class',
+			)
+		})
+
+		it('styles a link with a modeType as a button', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					modeType={BUTTON.MODE.OUTLINED}
+					data-cy="button-styled-link">
+					Contact
+				</BaseButton>,
+			)
+
+			expect(screen.getByTestId('button-styled-link')).toHaveClass(
+				'mocked-button-class mocked-outlined-class',
+			)
+		})
+
+		it('styles a link without a modeType as a text link', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					data-cy="text-link">
+					Switch to Login
+				</BaseButton>,
+			)
+
+			const link = screen.getByTestId('text-link')
+			expect(link).toHaveClass('mocked-link-class')
+			expect(link).not.toHaveClass('mocked-button-class')
+		})
+
+		it('greys out a disabled button-styled link', () => {
+			renderWithRouter(
+				<BaseButton
+					isLink
+					isDisabled
+					modeType={BUTTON.MODE.OUTLINED}
+					data-cy="disabled-button-link">
+					Register
+				</BaseButton>,
+			)
+
+			expect(screen.getByTestId('disabled-button-link')).toHaveClass(
+				'mocked-disabled-class',
+			)
 		})
 
 		it('spreads additional props to button element without conflicts', () => {

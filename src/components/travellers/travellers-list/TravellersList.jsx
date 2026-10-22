@@ -93,12 +93,12 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					{error}
 				</BaseDialog>
 			)}
-			<h1>Travellers</h1>
+			<h1 className={travellersListStyles.heading}>Travellers</h1>
 			<div
 				className={travellersListStyles.controls}
 				data-cy="controls">
 				<BaseButton
-					mode="outline"
+					modeType="outline"
 					disabled={loading}
 					data-cy="refresh-button"
 					onClick={() => loadTravellersHandler(true)}>
@@ -109,6 +109,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 						isLink
 						to={PATHS.REGISTER}
 						isDisabled={loading}
+						modeType="primary"
 						data-cy="register-link">
 						Register
 					</BaseButton>
@@ -142,14 +143,18 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				<div
 					className={travellersListStyles.noTravellersContainer}
 					data-cy="no-matching-travellers">
-					<h2>No travellers match the selected cities.</h2>
+					<h2 className={travellersListStyles.message}>
+						No travellers match the selected cities.
+					</h2>
 				</div>
 			)}
 			{!loading && !hasTravellers && (
 				<div
 					className={travellersListStyles.noTravellersContainer}
 					data-cy="no-travellers-list">
-					<h2>No travellers listed.</h2>
+					<h2 className={travellersListStyles.message}>
+						No travellers listed.
+					</h2>
 				</div>
 			)}
 		</>

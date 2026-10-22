@@ -26,7 +26,14 @@ const BaseButton = ({
 		}
 	}, [isError])
 
-	const combinedClassName = classNames(className, baseButtonStyles[modeType])
+	const isButtonStyled = !isLink || Boolean(modeType)
+
+	const combinedClassName = classNames(
+		isButtonStyled ? baseButtonStyles.button : baseButtonStyles.link,
+		baseButtonStyles[modeType],
+		{ [baseButtonStyles.disabled]: isButtonStyled && isDisabled },
+		className,
+	)
 
 	return (
 		<>
