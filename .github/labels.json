@@ -38,7 +38,7 @@
 		},
 		{
 			"name": "chore",
-			"color": "ededed",
+			"color": "d4c5f9",
 			"description": "Type: maintenance — deps, config, CI",
 			"prefixes": ["chore", "build", "ci", "dependabot"]
 		}
@@ -46,7 +46,7 @@
 	"area": [
 		{
 			"name": "ui",
-			"color": "c5def5",
+			"color": "061dff",
 			"description": "Area: components, pages and the app shell",
 			"paths": [
 				"src/components/**",
@@ -65,13 +65,13 @@
 		},
 		{
 			"name": "styling",
-			"color": "c5def5",
+			"color": "e99695",
 			"description": "Area: CSS and SCSS",
 			"paths": ["**/*.css", "**/*.scss"]
 		},
 		{
 			"name": "redux/state",
-			"color": "c5def5",
+			"color": "5319e7",
 			"description": "Area: Redux store and state management",
 			"paths": ["src/store/**"],
 			"exclude": ["**/__tests__/**", "**/*.test.*"]
@@ -85,14 +85,14 @@
 		},
 		{
 			"name": "utilities",
-			"color": "c5def5",
+			"color": "0052cc",
 			"description": "Area: helper functions",
 			"paths": ["src/utils/**"],
 			"exclude": ["**/__tests__/**", "**/*.test.*"]
 		},
 		{
 			"name": "firebase",
-			"color": "c5def5",
+			"color": "ff9500",
 			"description": "Area: Firebase services, rules and config",
 			"paths": [
 				"src/services/firebase/**",
@@ -106,7 +106,7 @@
 		},
 		{
 			"name": "assets",
-			"color": "c5def5",
+			"color": "006b75",
 			"description": "Area: images, icons and static files",
 			"paths": [
 				"src/assets/**",
@@ -117,7 +117,7 @@
 		},
 		{
 			"name": "testing",
-			"color": "c5def5",
+			"color": "fbca04",
 			"description": "Area: tests, test utilities and test config",
 			"paths": [
 				"**/__tests__/**",
@@ -132,7 +132,7 @@
 		},
 		{
 			"name": "documentation",
-			"color": "c5def5",
+			"color": "0075ca",
 			"description": "Area: README, guides and other Markdown",
 			"paths": ["**/*.md"]
 		},
@@ -144,7 +144,7 @@
 		},
 		{
 			"name": "config",
-			"color": "c5def5",
+			"color": "b60205",
 			"description": "Area: build, lint, editor and tooling config",
 			"paths": [
 				"vite.config.*",
@@ -165,7 +165,7 @@
 		},
 		{
 			"name": "build/deployment",
-			"color": "c5def5",
+			"color": "1d76db",
 			"description": "Area: CI workflows, repo automation and deployment",
 			"paths": [".github/**", "scripts/**", "vercel.json"],
 			"exclude": ["**/*.md", "scripts/set-admin-claim.mjs"]
