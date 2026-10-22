@@ -20,6 +20,8 @@ beforeEach(() => {
 	cy.clearAllCookies()
 	cy.clearAllLocalStorage()
 	cy.clearAllSessionStorage()
+	// Specs assume a non-traveller unless they stub otherwise
+	cy.stubTravellerCheck(false)
 })
 
 // Alternatively you can use CommonJS syntax:

@@ -6,6 +6,7 @@ const TRAVELLERS_BASE_ACTIONS = Object.freeze({
 	UPDATE_TRAVELLERS: 'travellers/updateTravellers',
 	REGISTER_TRAVELLER: 'travellers/registerTraveller',
 	DELETE_TRAVELLER: 'travellers/deleteTraveller',
+	CHECK_IS_TRAVELLER: 'travellers/checkIsTraveller',
 })
 
 const MESSAGES_BASE_ACTIONS = Object.freeze({
@@ -49,6 +50,9 @@ export const TRAVELLERS_ACTION_TYPES = Object.freeze({
 	),
 	DELETE_TRAVELLER_ASYNC: createAsyncActionTypes(
 		TRAVELLERS_BASE_ACTIONS.DELETE_TRAVELLER,
+	),
+	CHECK_IS_TRAVELLER_ASYNC: createAsyncActionTypes(
+		TRAVELLERS_BASE_ACTIONS.CHECK_IS_TRAVELLER,
 	),
 })
 

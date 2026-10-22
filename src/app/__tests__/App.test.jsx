@@ -4,7 +4,10 @@ import { render, screen, waitFor } from '@testing-library/react'
 import * as redux from 'react-redux'
 import * as router from 'react-router-dom'
 
-import { AUTHENTICATION_ACTION_TYPES } from '@/constants/redux'
+import {
+	AUTHENTICATION_ACTION_TYPES,
+	TRAVELLERS_ACTION_TYPES,
+} from '@/constants/redux'
 import { PATHS } from '@/constants/ui'
 
 import App from '@/app/App'
@@ -64,6 +67,14 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 	tryLogin: () => ({
 		type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN_ASYNC.PENDING,
 	}),
+	selectUserId: (state) => state.authentication.userId,
+}))
+
+vi.mock('@/store/slices/travellersSlice', () => ({
+	checkIsTraveller: (userId) => ({
+		type: TRAVELLERS_ACTION_TYPES.CHECK_IS_TRAVELLER_ASYNC.PENDING,
+		meta: { arg: userId },
+	}),
 }))
 
 vi.mock('@/components/common/LoadingFallback', () => ({
@@ -117,9 +128,9 @@ describe('App', () => {
 	let useDispatchMock
 	let navigateMock
 
-	function setAuthState(token = null, didAutoLogout = false) {
+	function setAuthState(token = null, didAutoLogout = false, userId = null) {
 		useSelectorMock.mockImplementation((fn) =>
-			fn({ authentication: { token, didAutoLogout } }),
+			fn({ authentication: { token, didAutoLogout, userId } }),
 		)
 	}
 
@@ -348,6 +359,40 @@ describe('App', () => {
 			await waitFor(() => {
 				expect(dispatch).toHaveBeenCalled()
 			})
+		})
+
+		it('checks traveller registration when a user is signed in', async () => {
+			const dispatch = vi.fn()
+			useDispatchMock.mockReturnValue(dispatch)
+			setAuthState('token', false, 'user-1')
+
+			renderWithRoute(PATHS.HOME)
+
+			await waitFor(() => {
+				expect(dispatch).toHaveBeenCalledWith({
+					type: TRAVELLERS_ACTION_TYPES.CHECK_IS_TRAVELLER_ASYNC
+						.PENDING,
+					meta: { arg: 'user-1' },
+				})
+			})
+		})
+
+		it('does not check traveller registration when signed out', async () => {
+			const dispatch = vi.fn()
+			useDispatchMock.mockReturnValue(dispatch)
+			setAuthState(null, false, null)
+
+			renderWithRoute(PATHS.PRIVACY)
+
+			await waitFor(() => {
+				expect(dispatch).toHaveBeenCalled()
+			})
+			expect(dispatch).not.toHaveBeenCalledWith(
+				expect.objectContaining({
+					type: TRAVELLERS_ACTION_TYPES.CHECK_IS_TRAVELLER_ASYNC
+						.PENDING,
+				}),
+			)
 		})
 	})
 })

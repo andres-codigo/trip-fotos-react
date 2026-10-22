@@ -14,6 +14,7 @@ import {
 import { contactTraveller } from '@/store/slices/messagesSlice'
 import {
 	selectIsTraveller,
+	selectIsTravellerCheckedFor,
 	selectSelectedTraveller,
 	selectTravellers,
 } from '@/store/slices/travellersSlice'
@@ -37,6 +38,8 @@ const ContactTraveller = () => {
 	const isRehydrated = useSelector(
 		(state) => state._persist?.rehydrated ?? true,
 	)
+	// On a new device the flag starts false, so judging before the login check resolves would bounce a registered traveller
+	const isTravellerCheckedFor = useSelector(selectIsTravellerCheckedFor)
 	const selectedTraveller = useSelector(selectSelectedTraveller)
 	const travellers = useSelector(selectTravellers)
 
@@ -77,7 +80,7 @@ const ContactTraveller = () => {
 		}
 	}
 
-	if (!isRehydrated) {
+	if (!isRehydrated || (userId && isTravellerCheckedFor !== userId)) {
 		return null
 	}
 
