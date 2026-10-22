@@ -431,7 +431,7 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 
 - **File**: `.claude/settings.json` (committed; personal overrides go in the gitignored `.claude/settings.local.json`)
 - **Hook**: a `PostToolUse` hook runs `.claude/hooks/lint-edited-file.mjs` after every edit, applying Prettier and `eslint --fix`. Any remaining ESLint errors are fed back to Claude so they are fixed in the same turn.
-- **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git), staging and committing, read-only `gh issue`/`gh project` queries and opening draft PRs run without prompting; pushes, PR merges, installs, and E2E runs ask first, and opening a non-draft PR prompts by default; reading `.env`/`certs/`, force-pushes, hard resets, and pushes to `main` are denied.
+- **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git), staging, committing and pushing, read-only `gh issue`/`gh project` queries and opening draft PRs run without prompting; PR merges, installs, and E2E runs ask first, and opening a non-draft PR prompts by default; reading `.env`/`certs/`, force-pushes and hard resets are denied. Pushing is safe to allow because GitHub rejects direct pushes to `main` — see [Branch Protection](#-branch-protection).
 
 #### Skills
 
@@ -556,7 +556,7 @@ This project uses GitHub Actions to automate key development and monitoring task
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
-- **Merge Blocking:** Pull requests must pass this test workflow before merging into `main`.
+- **Merge Blocking:** Not a required check — see [Branch Protection](#-branch-protection). Don't merge a pull request whose run failed.
 
 Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 
@@ -673,6 +673,22 @@ Add the `in-progress` label when you start work, before any PR exists. It moves 
 - **Triggers:** On push and pull requests to `main`, plus a weekly scheduled scan
 - **Purpose:** Scans JavaScript/TypeScript and the GitHub Actions workflows for security vulnerabilities. Results appear under **Security → Code scanning**.
 - **Note:** Code scanning requires the repository to be **public** — on a private personal repository it is unavailable and the check will fail.
+
+### 🔒 Branch Protection
+
+The **Protect main** repository ruleset (**Settings → Rules → Rulesets**) applies to `main`, with no bypass list:
+
+- Changes must arrive through a pull request, merged by squash or rebase (no approvals required)
+- Force-pushes and deleting the branch are blocked
+- **No required status checks.** The test workflows skip docs- and tooling-only pull requests with `paths` filters, and a required check that never runs would block those pull requests from merging
+
+The ruleset is kept in [`.github/rulesets/protect-main.json`](.github/rulesets/protect-main.json). To recreate it, or apply an edit, run as a repository admin:
+
+```bash
+gh api -X POST repos/{owner}/{repo}/rulesets --input .github/rulesets/protect-main.json
+# or, to update the existing ruleset:
+gh api -X PUT repos/{owner}/{repo}/rulesets/<id> --input .github/rulesets/protect-main.json
+```
 
 ### 🛠 Manual Triggers
 
@@ -796,6 +812,7 @@ trip-fotos-react/
 ├── .github/
 │   ├── agents/                 # Scaffolding workflows (shared by Copilot and Claude Code)
 │   ├── instructions/           # Domain-specific guidance (shared by Copilot and Claude Code)
+│   ├── rulesets/               # Repository rulesets as JSON (applied via gh api)
 │   ├── scripts/                # Shared workflow logic (labels.mjs) with its Vitest tests
 │   ├── workflows/              # GitHub Actions workflow files for CI/CD automation
 │   ├── copilot-instructions.md # Workspace-level Copilot guidelines
