@@ -34,6 +34,7 @@ jobs:
                   STATUS_IN_REVIEW_OPTION_ID: 5e639cc6
                   STATUS_DONE_OPTION_ID: 98236657
                   BLOCKED_LABEL: blocked
+                  IN_PROGRESS_LABEL: in-progress
                   # Optional PAT for Project v2 writes. Rotation/recreation guide:
                   # .github/project-automation-token.md
                   PROJECT_AUTOMATION_TOKEN: ${{ secrets['PROJECT_AUTOMATION_TOKEN'] }}
@@ -53,6 +54,7 @@ jobs:
                         DONE: process.env.STATUS_DONE_OPTION_ID,
                       }
                       const BLOCKED_LABEL = process.env.BLOCKED_LABEL
+                      const IN_PROGRESS_LABEL = process.env.IN_PROGRESS_LABEL
                       const PROJECT_AUTOMATION_TOKEN = process.env.PROJECT_AUTOMATION_TOKEN || ''
 
                       const TRACKING_MARKER = /Tracking-Issue:\s*#(\d+)/i
@@ -326,6 +328,7 @@ jobs:
                           number: issueNumber,
                           itemId: await ensureProjectItem(issue.node_id),
                           isBlocked: labels.includes(BLOCKED_LABEL),
+                          isInProgress: labels.includes(IN_PROGRESS_LABEL),
                         })
                       }
                       const prItemId = await ensureProjectItem(pr.node_id)
@@ -361,9 +364,23 @@ jobs:
                           for (const issue of linkedIssues) {
                             await setStatus(issue.itemId, STATUS.DONE)
                             await closeIssueIfOpen(issue.number)
+                            // Bot label events are ignored by the intake workflow, so this cannot move the issue off Done
+                            if (issue.isInProgress) {
+                              await github.rest.issues.removeLabel({
+                                owner,
+                                repo,
+                                issue_number: issue.number,
+                                name: IN_PROGRESS_LABEL,
+                              })
+                            }
                           }
                           await setStatus(prItemId, STATUS.DONE)
                         } else {
-                          await setIssueStatuses(STATUS.READY)
+                          // Work flagged with the in-progress label carries on after an abandoned PR
+                          for (const issue of linkedIssues) {
+                            if (!issue.isBlocked) {
+                              await setStatus(issue.itemId, issue.isInProgress ? STATUS.IN_PROGRESS : STATUS.READY)
+                            }
+                          }
                         }
                       }
