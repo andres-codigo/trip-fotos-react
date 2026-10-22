@@ -42,6 +42,10 @@ Use this agent when you need to create a new React component with full structure
 6. **Styling**
     - Review `src/styles` for available variables and mixins
     - Add SCSS module with proper imports and namespace usage for helpers/utilities
+    - Scope every rule to a class — no top-level element selectors, no plain `.scss` side-effect imports (see `styles.instructions.md` → Scope Every Selector To A Class)
+    - Space sibling items with `gap` on the parent, never an outer margin on a reusable component
+    - For buttons and links, follow `components.instructions.md` → Buttons And Links: navigation is `BaseButton isLink` with a `modeType`, actions are `<button>`
+    - Run `npm run lint:styles` on the new module
 
 7. **Output**
     - Summarise the created structure
@@ -54,6 +58,6 @@ Use this agent when you need to create a new React component with full structure
 - When a new reusable component is created, the agent should flag that existing similar components should be refactored to use it
 - All new components must have `prop-types` validation from the start
 - **All generated files must end with a trailing newline at EOF** — enforce this during file creation to satisfy linting rules
-- **Linting and formatting** — ensure all generated and edited files are ESLint-clean and Prettier-formatted before handing off the component work.
+- **Linting and formatting** — ensure all generated and edited files are ESLint-clean, Stylelint-clean and Prettier-formatted before handing off the component work.
 - Every new component file must include `data-cy` attributes on all meaningful elements (buttons, inputs, containers, labels, values)
 - When new component markup introduces `data-cy` attributes, add corresponding exported constants to `src/constants/test/selectors/components.js` via `getByDataCy` and use those constants in all new `*.cy.jsx` tests instead of literal selector strings

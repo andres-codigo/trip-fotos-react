@@ -63,6 +63,7 @@ This project uses the following technologies:
 - [Redux](https://redux.js.org/) for state management.
 - [SASS](https://sass-lang.com/) for CSS preprocessing.
 - [ESLint](https://eslint.org/) for JavaScript linting.
+- [Stylelint](https://stylelint.io/) to keep component and page styles scoped (no bare element selectors in CSS modules).
 - [Prettier](https://prettier.io/) for code formatting.
 - [Vitest](https://vitest.dev/) for unit and integration testing.
 - [Cypress](https://www.cypress.io/) for end-to-end and component testing.
@@ -126,8 +127,11 @@ Below are the available npm scripts for this project:
 # Start the development server with linting
 npm run dev
 
-# Run ESLint to check for issues
+# Run ESLint and Stylelint to check for issues
 npm run lint
+
+# Run Stylelint only (component and page stylesheets)
+npm run lint:styles
 
 # Automatically fix linting issues and format files
 npm run lint:fix
@@ -430,12 +434,12 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 #### Hooks & Permissions
 
 - **File**: `.claude/settings.json` (committed; personal overrides go in the gitignored `.claude/settings.local.json`)
-- **Hook**: a `PostToolUse` hook runs `.claude/hooks/lint-edited-file.mjs` after every edit, applying Prettier and `eslint --fix`. Any remaining ESLint errors are fed back to Claude so they are fixed in the same turn.
+- **Hook**: a `PostToolUse` hook runs `.claude/hooks/lint-edited-file.mjs` after every edit, applying Prettier and `eslint --fix`, and Stylelint to edited component and page stylesheets. Any remaining ESLint or Stylelint errors are fed back to Claude so they are fixed in the same turn.
 - **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git), staging, committing and pushing, read-only `gh issue`/`gh project` queries and opening draft PRs run without prompting; PR merges, installs, and E2E runs ask first, and opening a non-draft PR prompts by default; reading `.env`/`certs/`, force-pushes and hard resets are denied. Pushing is safe to allow because GitHub rejects direct pushes to `main` — see [Branch Protection](#-branch-protection).
 
 #### Skills
 
-- **`/verify`** (`.claude/skills/verify/`): runs ESLint, Vitest, Cypress component tests, and the production build, then reports a pass/fail table. `changed-gates.mjs` compares the branch with `main` and picks only the gates the change can affect (e.g. a `cypress/e2e/` change runs ESLint only; docs, `.claude/` or `.github/` changes run none), so CI on the pull request, which runs every workflow, stays the full check. `/verify all` forces every gate. Use before committing or opening a pull request. It runs on Haiku (`model: haiku`) in a forked context (`context: fork`), so test and build logs stay out of the main conversation. `run-gates.mjs` runs the gates in one call, writes full logs to `node_modules/.cache/verify/` and prints a line per gate with any error lines, and caches passes against a hash of the working tree (including uncommitted and untracked files), so a gate that already passed on identical code reports `cached` instead of running again — e.g. `/verify e2e` straight after `/verify` runs only E2E. `/verify all` bypasses the cache. A run reflects the code as it was when it started, so if the code changes mid-run, stop it and run it again.
+- **`/verify`** (`.claude/skills/verify/`): runs ESLint and Stylelint, Vitest, Cypress component tests, and the production build, then reports a pass/fail table. `changed-gates.mjs` compares the branch with `main` and picks only the gates the change can affect (e.g. a `cypress/e2e/` change runs ESLint only; docs, `.claude/` or `.github/` changes run none), so CI on the pull request, which runs every workflow, stays the full check. `/verify all` forces every gate. Use before committing or opening a pull request. It runs on Haiku (`model: haiku`) in a forked context (`context: fork`), so test and build logs stay out of the main conversation. `run-gates.mjs` runs the gates in one call, writes full logs to `node_modules/.cache/verify/` and prints a line per gate with any error lines, and caches passes against a hash of the working tree (including uncommitted and untracked files), so a gate that already passed on identical code reports `cached` instead of running again — e.g. `/verify e2e` straight after `/verify` runs only E2E. `/verify all` bypasses the cache. A run reflects the code as it was when it started, so if the code changes mid-run, stop it and run it again.
 - **`/verify e2e`**: additionally runs the Cypress E2E suite via `.claude/skills/verify/run-e2e.mjs`, which reuses a dev server on port 3000 or starts one over HTTP (as CI does) and stops it afterwards. Opt-in and approval-gated, because the tests use the live Firebase project and `.env` credentials. `/verify` prints an `E2E advised` line, without running E2E, when a change touches routing, pages, the store, Firebase services, route or API constants, or the E2E specs — see [testing.instructions.md](.github/instructions/testing.instructions.md#when-to-run-e2e-locally) for when to run it locally.
 
 #### Archived: Vue parity programme
@@ -854,6 +858,7 @@ trip-fotos-react/
 ├── package.json                 # Project dependencies and scripts
 ├── README.md                    # Project documentation
 ├── storage.rules                # Cloud Storage security rules
+├── stylelint.config.mjs         # Stylelint configuration (scoped style modules)
 ├── vercel.json                  # Vercel deployment configuration
 └── vite.config.js               # Vite build tool configuration
 ```

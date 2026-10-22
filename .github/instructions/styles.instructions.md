@@ -1,7 +1,7 @@
 ---
 name: scss-styling-conventions
 description: Use when creating or modifying SCSS files. Covers SCSS module naming, mixin and variable usage, imports, and colour naming conventions.
-applyTo: '{src/**/*.module.scss,src/styles/**/*.scss}'
+applyTo: 'src/**/*.scss'
 ---
 
 # SCSS Styling Guidance
@@ -11,6 +11,21 @@ applyTo: '{src/**/*.module.scss,src/styles/**/*.scss}'
 - Use **SCSS modules** for component-specific styles.
 - Import as `[componentName]Styles` (e.g., `import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'`).
 - Module filename should match the component filename: `ComponentName.module.scss`.
+
+### Scope Every Selector To A Class
+
+CSS Modules hash class names only. An element selector (`a`, `button`, `label`, `h1`) at the top level of a component stylesheet is emitted unchanged, so it restyles that element across the whole app — and only once the component's chunk has loaded, so the bug comes and goes with navigation.
+
+- Every rule in a component or page stylesheet must start from a class: `.label`, not `label`. Element selectors are fine nested under a class (`.formControl label`) or compounded with one (`a.navLink`).
+- Plain `.scss` files imported for side effects (`import './input.scss'`) are global stylesheets. Components must import a `.module.scss` instead.
+- Mixins that emit element selectors (`valid.label`, `valid.input`, `valid.input-textarea`) may only be included inside a class block.
+- Element-level defaults belong in `src/styles` (see Global Styles below).
+
+`npm run lint:styles` (Stylelint `selector-max-type`, part of `npm run lint`) rejects bare element selectors in `src/components` and `src/pages`. It cannot see inside mixins, so the mixin rule above still needs a reviewer's eye.
+
+### Spacing Between Siblings
+
+Space a row or column of items with `gap` on the flex/grid parent, plus `align-items: center` for mixed-height rows. Do not give reusable components (`BaseButton`, `BaseBadge`) an outer margin to fake spacing — it compounds and misaligns wherever the component is reused.
 
 ## Variables & Mixins
 
