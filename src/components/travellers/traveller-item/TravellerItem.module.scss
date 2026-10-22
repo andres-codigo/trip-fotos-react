@@ -64,8 +64,10 @@
 }
 
 .actions {
+	align-items: center;
 	display: flex;
-	margin-right: 11px;
+	flex-wrap: wrap;
+	gap: 0.5rem;
 	justify-content: flex-end;
 }
 
@@ -94,9 +96,5 @@
 	.imageCounter {
 		margin: 0.5rem 2.5%;
 		width: 45%;
-	}
-
-	.actions {
-		margin-right: 0;
 	}
 }
