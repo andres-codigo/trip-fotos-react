@@ -81,7 +81,7 @@ The runbook includes expiry handling, recreation steps, secret update instructio
 
 ### Project Board Statuses
 
-Every Status is set by the two workflows above. Items also carry **Kind** (Epic / Feature / Bug / Chore / Deps) and **Workstream** (Vue parity / Tooling & AI / Maintenance) fields, set by hand.
+Every Status is set by the two workflows above. Items also carry **Kind** (Epic / Feature / Bug / Chore / Deps) and **Workstream** (Vue parity / Tooling & AI / Maintenance / Lean repo / Design system) fields, set by hand.
 
 | Status      | Meaning                                         | Moved there when                                                               |
 | ----------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
@@ -98,6 +98,11 @@ While an issue has the `blocked` label its PR events leave it in Blocked; only a
 Add the `in-progress` label when you start work, before any PR exists. It moves an issue in Triage, Backlog or Ready to In progress, never one already In review or Done. Removing it restores the status. An issue that keeps the label returns to In progress, not Ready, when its PR is closed without merging, and a merge removes the label.
 
 Epics (Kind = Epic, titled `Epic: ...`) group sub-issues in order and have no PR, so no workflow moves them. They stay in Backlog until you add `in-progress` when the first sub-issue starts, and you close the epic when its last sub-issue closes.
+
+Order within an epic:
+
+- Hard dependencies are **blocked-by** links on the issue (`POST /repos/{owner}/{repo}/issues/{n}/dependencies/blocked_by`). They show a marker on the issue and board but never change Status, so Blocked keeps its meaning above. Start the body of a dependent issue with `Do after #N.`
+- Keep one `ready` issue per workstream, and never add `ready` to an issue with an open blocker.
 
 ### Project README and status updates
 
