@@ -39,13 +39,13 @@ Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
 
 Detailed conventions live in `.github/instructions/` — the single source of truth shared with GitHub Copilot. Read the relevant file when working in that area, rather than expecting it to be summarised here:
 
-| File                                                                          | Applies to                              | Covers                                                             |
-| ----------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------ |
-| [components.instructions.md](.github/instructions/components.instructions.md) | `src/components/**`                     | Folder structure, prop-types, reusability, accessibility, testing  |
-| [pages.instructions.md](.github/instructions/pages.instructions.md)           | `src/pages/**`                          | Route composition, data loading, testing                           |
-| [store.instructions.md](.github/instructions/store.instructions.md)           | `src/store/**`                          | RTK Query vs. thunks, error handling pattern, persistence, testing |
-| [styles.instructions.md](.github/instructions/styles.instructions.md)         | `src/**/*.scss`                         | SCSS modules, class-scoped selectors, spacing, colour naming       |
-| [testing.instructions.md](.github/instructions/testing.instructions.md)       | `**/__tests__/**`, `cypress/e2e/**`     | Vitest/Cypress organisation, test data, anti-flakiness             |
+| File                                                                          | Applies to                          | Covers                                                             |
+| ----------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------ |
+| [components.instructions.md](.github/instructions/components.instructions.md) | `src/components/**`                 | Folder structure, prop-types, reusability, accessibility, testing  |
+| [pages.instructions.md](.github/instructions/pages.instructions.md)           | `src/pages/**`                      | Route composition, data loading, testing                           |
+| [store.instructions.md](.github/instructions/store.instructions.md)           | `src/store/**`                      | RTK Query vs. thunks, error handling pattern, persistence, testing |
+| [styles.instructions.md](.github/instructions/styles.instructions.md)         | `src/**/*.scss`                     | SCSS modules, class-scoped selectors, spacing, colour naming       |
+| [testing.instructions.md](.github/instructions/testing.instructions.md)       | `**/__tests__/**`, `cypress/e2e/**` | Vitest/Cypress organisation, test data, anti-flakiness             |
 
 ## Key conventions
 
@@ -88,7 +88,7 @@ Required keys: `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `CYPR
 
 ## Workflow automation
 
-Detail lives in `.claude/` and the README AI Assistance sections.
+Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 
 - **Agents** (`.claude/agents/`, wrappers around `.github/agents/*.agent.md` — edit the workflow there): `create-component`, `create-page`, `create-redux-slice`, `create-hook`
 - **`.claude/settings.json`** — shared permissions and a `PostToolUse` hook (`.claude/hooks/lint-edited-file.mjs`) that lints every edited file
@@ -98,14 +98,14 @@ Detail lives in `.claude/` and the README AI Assistance sections.
 
 ## Keeping README.md in sync
 
-`README.md` is the user-facing source of truth for setup, scripts, and structure — it drifts easily. Update it in the same change whenever you:
+`README.md` is the user-facing source of truth for setup, scripts, and structure — it drifts easily. It stays a summary; detail lives in `docs/` (`ci-cd.md`, `testing.md`, `ai-assistance.md`, `local-https.md`). Update both in the same change whenever you:
 
 - Add, remove, or rename an `npm run` script (update the Scripts section)
 - Add, remove, or rename a required `.env` variable (update the Environment Variables section)
 - Add, remove, or rename a top-level folder, or a `src/` subfolder (update the Folder Structure tree)
-- Add or change a GitHub Actions workflow (update the CI/CD Workflows section, including the summary table)
+- Add or change a GitHub Actions workflow (update `docs/ci-cd.md` and the README Testing and CI summary table)
 - Add, remove, or materially change a user-facing feature (update the Features section)
-- Add or restructure `.claude/` or `.github/` guidance files (update the AI Assistance sections)
+- Add or restructure `.claude/` or `.github/` guidance files (update `docs/ai-assistance.md` and the README AI Assistance summary)
 
 ## Things to avoid
 

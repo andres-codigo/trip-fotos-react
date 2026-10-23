@@ -38,7 +38,7 @@ GitHub Copilot is integrated through repository-level and path-specific guidance
 
 - [`.github/copilot-instructions.md`](../.github/copilot-instructions.md) provides the overall project conventions.
 - [`.github/instructions`](../.github/instructions) contains focused guidance for components, pages, Redux, styling, and testing.
-- [`.github/agents`](../.github/agents) contains reusable workflows for creating components, pages, and Redux slices.
+- [`.github/agents`](../.github/agents) contains reusable workflows for creating components, pages, Redux slices and hooks.
 
 The guidance gives Copilot knowledge of the project structure and preferred implementation patterns, including:
 
@@ -123,7 +123,7 @@ Claude Code follows the same engineering checks as the rest of the project:
 - for unattended, multi-step work, enforce the checks through the harness (hooks, quality gates and denied permissions) instead of relying on instructions alone
 - verify CI behaviour before merging
 
-Shared permissions are committed in `.claude/settings.json` — they allow routine checks, ask before pushes or installs, and deny reading `.env` and `certs/`. Local credentials and machine-specific permissions stay in the gitignored `settings.local.json`. This allows the repository to describe the workflow without exposing personal configuration.
+Shared permissions are committed in `.claude/settings.json` — they allow routine checks, commits, pushes and draft PRs (GitHub's ruleset rejects direct pushes to `main`), ask before merges, installs and E2E runs, and deny force-pushes, hard resets and reading `.env` and `certs/`. Local credentials and machine-specific permissions stay in the gitignored `settings.local.json`. This allows the repository to describe the workflow without exposing personal configuration.
 
 ## Case Study: Automating the Vue Parity Port
 
