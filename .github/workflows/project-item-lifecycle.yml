@@ -339,7 +339,8 @@ jobs:
                           isInProgress: labels.includes(IN_PROGRESS_LABEL),
                         })
                       }
-                      const prItemId = await ensureProjectItem(pr.node_id)
+                      // The issue card carries the status, so a PR only gets its own card when nothing tracks it
+                      const prItemId = linkedIssues.length === 0 ? await ensureProjectItem(pr.node_id) : null
 
                       const author = pr.user?.login
                       const shouldAssignAuthor = Boolean(author) && !isDependabotAuthor(author)
