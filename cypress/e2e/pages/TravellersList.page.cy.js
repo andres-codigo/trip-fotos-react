@@ -55,7 +55,6 @@ describe('Travellers Page - WIP', () => {
 
 		it('should navigate to register page when register link is clicked', () => {
 			performLogin()
-			cy.visit(PATHS.TRAVELLERS)
 
 			// Wait for initial loading to complete so button is enabled
 			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
