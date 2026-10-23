@@ -612,7 +612,7 @@ Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
 - **Workflow File:** `.github/workflows/project-item-lifecycle.yml`
 - **Triggers:**
     - On **pull_request_target** events (`opened`, `reopened`, `synchronize`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`)
-- **Purpose:** Keeps pull requests and the issues they close (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. A PR with no linked issue gets a tracking issue (Dependabot PRs excepted). Merging removes the `in-progress` label from the issues it closes and, when it closes exactly one issue (a tracking issue included), copies the PR's type and area labels to it; a PR closing several issues leaves their labels alone.
+- **Purpose:** Keeps the issues a pull request closes (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. The board has one card per piece of work: the issue, with its PRs under **Linked pull requests**. A PR with no linked issue gets a tracking issue; Dependabot PRs get none and appear as their own card instead. Merging removes the `in-progress` label from the issues it closes and, when it closes exactly one issue (a tracking issue included), copies the PR's type and area labels to it; a PR closing several issues leaves their labels alone.
 - **Secret (Optional but Recommended):** `PROJECT_AUTOMATION_TOKEN`
     - Used for Project v2 write operations when `github.token` does not have enough access.
 
