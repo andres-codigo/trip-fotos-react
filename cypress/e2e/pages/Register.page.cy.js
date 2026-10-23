@@ -40,6 +40,12 @@ describe('Register Page', () => {
 		})
 	})
 
+	it('has no axe violations', () => {
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('be.visible')
+
+		cy.checkA11y()
+	})
+
 	it('renders the traveller registration form', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('be.visible')
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).should(

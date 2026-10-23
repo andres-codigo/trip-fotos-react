@@ -179,6 +179,7 @@ function MainNav({
 										navMenuButtonLinkStyles.navMenuButtonLink
 									}
 									data-cy="nav-menu-item-logout"
+									ariaLabel={`Logout ${travellerName}`}
 									onClick={handleLogoutClick}>
 									Logout {travellerName}
 								</NavMenuButtonLink>

@@ -30,6 +30,15 @@ Harness.propTypes = {
 }
 
 describe('<Combobox />', () => {
+	it('has no axe violations closed and with the listbox open', () => {
+		cy.mount(<Harness onSelect={cy.stub()} />)
+		cy.checkA11y()
+
+		cy.get(COMBOBOX_SELECTORS.INPUT).type('to')
+		cy.get(COMBOBOX_SELECTORS.LISTBOX).should('be.visible')
+		cy.checkA11y()
+	})
+
 	it('chooses an option with the keyboard', () => {
 		const onSelect = cy.stub().as('onSelect')
 		cy.mount(<Harness onSelect={onSelect} />)

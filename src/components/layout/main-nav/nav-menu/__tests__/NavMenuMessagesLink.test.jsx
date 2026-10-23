@@ -108,6 +108,7 @@ describe('<NavMenuMessagesLink />', () => {
 
 			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
 				{
+					ariaLabel: 'Messages',
 					children: ['Messages', false],
 					className:
 						'mocked-total-messages-container mocked-total-messages',
@@ -137,6 +138,7 @@ describe('<NavMenuMessagesLink />', () => {
 
 			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
 				{
+					ariaLabel: 'Messages',
 					children: ['Messages', false],
 					className: 'custom-class combined-styles',
 					'data-cy': 'messages-link',
@@ -144,6 +146,20 @@ describe('<NavMenuMessagesLink />', () => {
 					onMenuItemClick: defaultProps.onMenuItemClick,
 					to: '/messages',
 				},
+				undefined,
+			)
+		})
+
+		it('should include the unread count in the accessible name', () => {
+			render(
+				<NavMenuMessagesLink
+					{...defaultProps}
+					totalMessages={3}
+				/>,
+			)
+
+			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
+				expect.objectContaining({ ariaLabel: 'Messages 3' }),
 				undefined,
 			)
 		})
@@ -159,6 +175,7 @@ describe('<NavMenuMessagesLink />', () => {
 			expect(screen.getByText('Messages')).toBeInTheDocument()
 			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
 				{
+					ariaLabel: 'Messages',
 					children: ['Messages', false],
 					className:
 						'mocked-total-messages-container mocked-total-messages',

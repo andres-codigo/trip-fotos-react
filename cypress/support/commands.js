@@ -1,6 +1,5 @@
 import { mount } from 'cypress/react'
 import { configureStore } from '@reduxjs/toolkit'
-import axe from 'axe-core'
 
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 
@@ -193,16 +192,22 @@ Cypress.Commands.add('assertHamburgerMenuState', (isActive) => {
 ////
 const WCAG_AA_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
-// Injected into the app's window, not run from the spec's, so axe audits the app's own document
+// Read from disk, not imported: the E2E bundler breaks axe's source ("exports is not defined").
+// Injected into the app's window so axe audits the app's own document
 Cypress.Commands.add('checkA11y', (context, options = {}) => {
-	cy.window({ log: false })
-		.then((win) => {
-			if (!win.axe) win.eval(axe.source)
-			return win.axe.run(context ?? win.document, {
+	cy.readFile('node_modules/axe-core/axe.min.js', null, { log: false })
+		.then((source) =>
+			cy.window({ log: false }).then((win) => {
+				if (!win.axe) win.eval(Cypress.Buffer.from(source).toString())
+				return win
+			}),
+		)
+		.then((win) =>
+			win.axe.run(context ?? win.document, {
 				runOnly: { type: 'tag', values: WCAG_AA_TAGS },
 				...options,
-			})
-		})
+			}),
+		)
 		.then(({ violations }) => {
 			const summary = violations
 				.map(

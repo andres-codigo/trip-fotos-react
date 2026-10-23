@@ -38,6 +38,8 @@ Do not introduce `cypress/support/constants` unless explicitly adopted in a futu
 - Reset or isolate state in `beforeEach` to prevent cross-test leakage.
 - E2E tests that upload to Storage must delete their uploads afterwards.
 - After logging in, wait for the stored session before reloading — the Auth SDK persists it asynchronously.
+- Run `cy.checkA11y()` once per route in the E2E page specs (signed in where the spec signs in) and in component tests for forms and shared UI. It runs the WCAG 2.2 AA axe rules only.
+- Fix axe violations rather than excluding them; if a rule must be disabled, pass `{ rules: { 'rule-id': { enabled: false } } }` for that call with a one-line reason.
 - If an E2E spec fails in a full run, re-run it on its own before treating it as a regression; specs can flake under load.
 
 ## When to Run E2E Locally

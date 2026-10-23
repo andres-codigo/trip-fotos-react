@@ -104,6 +104,15 @@ describe('Form rendering and validation', () => {
 	})
 })
 
+describe('Accessibility', () => {
+	it('has no axe violations on the authentication page', () => {
+		cy.visit(loginUrl)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).should('be.visible')
+
+		cy.checkA11y()
+	})
+})
+
 describe('Form submission', () => {
 	beforeEach(() => {
 		cy.visit(loginUrl)

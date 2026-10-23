@@ -27,6 +27,17 @@ const realHover = (selector) =>
 
 describe('<BaseButton />', () => {
 	describe('Rendering tests', () => {
+		it('has no axe violations', () => {
+			cy.mount(
+				<BaseButton
+					modeType={BUTTON.MODE.FLAT}
+					data-cy={BUTTON.ID}>
+					Click me
+				</BaseButton>,
+			)
+			cy.checkA11y()
+		})
+
 		it('renders a button with children', () => {
 			cy.mount(
 				<BaseButton

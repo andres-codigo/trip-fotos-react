@@ -42,6 +42,15 @@ describe('Logged in > Messages page', () => {
 		cy.contains(SAMPLE_MESSAGE_TWO.userEmail).should('be.visible')
 	})
 
+	it('has no axe violations', () => {
+		cy.intercept(API_DATABASE.GET, MESSAGES_URL, inbox).as('loadMessages')
+		cy.visit(PATHS.MESSAGES)
+		cy.wait('@loadMessages', { timeout: REQUEST_TIMEOUT })
+		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 2)
+
+		cy.checkA11y()
+	})
+
 	it('shows the empty state when there are no messages', () => {
 		cy.intercept(API_DATABASE.GET, MESSAGES_URL, 'null').as('loadMessages')
 		cy.visit(PATHS.MESSAGES)

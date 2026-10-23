@@ -38,6 +38,12 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('exist')
 		})
 
+		it('has no axe violations', () => {
+			render()
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('exist')
+			cy.checkA11y()
+		})
+
 		it('has all required fields', () => {
 			render()
 			cy.get(
