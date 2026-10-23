@@ -43,6 +43,18 @@ describe('Logged in > PageNotFound page', () => {
 	})
 })
 
+describe('Not logged in > PageNotFound page accessibility', () => {
+	it('has no axe violations', () => {
+		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
+		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.PAGE_NOT_FOUND)
+		cy.contains('This page is not available. Sorry about that.').should(
+			'be.visible',
+		)
+
+		cy.checkA11y()
+	})
+})
+
 describe('Not logged in > PageNotFound page', () => {
 	it('displays the 404 page and user can only navigate to the authentication page', () => {
 		const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION

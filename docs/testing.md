@@ -80,6 +80,13 @@ src/
   │   │   ├── Button.jsx
 ```
 
+**Accessibility Checks**
+
+`cy.checkA11y()` (in [commands.js](../cypress/support/commands.js)) injects [`axe-core`](https://github.com/dequelabs/axe-core) into the app's window and fails the test with a list of violations. It runs the WCAG 2.2 AA rules only, so best-practice advice never fails a build. It takes an optional context and axe options, e.g. `cy.checkA11y('#dialog', { rules: { 'color-contrast': { enabled: false } } })` — add a one-line comment saying why whenever a rule is disabled.
+
+- E2E: every route in `PATHS` has a check in its page spec (`/` redirects to `/travellers`; the traveller detail page is checked in `ContactTraveller.page.cy.js`)
+- Component tests: the forms and shared UI (button, dialog, input, textarea, combobox) each check the states that change the markup, such as an error message showing
+
 **Test Artifacts**
 
 Cypress stores screenshots and videos (if enabled) in the following directories:

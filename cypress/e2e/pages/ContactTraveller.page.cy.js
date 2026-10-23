@@ -74,4 +74,18 @@ describe('Contact Traveller Page', () => {
 		cy.visit(contactPath(OTHER_TRAVELLER_ID))
 		assertRedirectedToDetail(OTHER_TRAVELLER_ID)
 	})
+
+	it('has no axe violations on the contact form', () => {
+		visitAsTraveller(contactPath(OTHER_TRAVELLER_ID))
+		cy.get(CONTACT_TRAVELLER_SELECTORS.FORM).should('be.visible')
+
+		cy.checkA11y()
+	})
+
+	it('has no axe violations on the traveller detail page', () => {
+		cy.visit(contactPath(OTHER_TRAVELLER_ID))
+		assertRedirectedToDetail(OTHER_TRAVELLER_ID)
+
+		cy.checkA11y()
+	})
 })

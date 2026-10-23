@@ -4,6 +4,15 @@ import { CONTACT_TRAVELLER_SELECTORS } from '@/constants/test'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 describe('<ContactTravellerForm />', () => {
+	it('has no axe violations, including with validation errors showing', () => {
+		cy.mount(<ContactTravellerForm onSubmit={cy.stub()} />)
+		cy.checkA11y()
+
+		cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()
+		cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_ERROR).should('exist')
+		cy.checkA11y()
+	})
+
 	it('shows validation errors for an empty form and does not submit', () => {
 		const onSubmit = cy.stub().as('onSubmit')
 		cy.mount(<ContactTravellerForm onSubmit={onSubmit} />)

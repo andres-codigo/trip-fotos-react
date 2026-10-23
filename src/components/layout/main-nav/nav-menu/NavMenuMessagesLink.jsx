@@ -22,6 +22,9 @@ const NavMenuMessagesLink = ({
 				to={to}
 				onMenuItemClick={onMenuItemClick}
 				className={combinedClassName}
+				ariaLabel={
+					totalMessages > 0 ? `Messages ${totalMessages}` : 'Messages'
+				}
 				data-cy={dataCy}>
 				Messages
 				{!!totalMessages && totalMessages > 0 && (

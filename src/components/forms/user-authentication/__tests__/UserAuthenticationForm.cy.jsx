@@ -69,6 +69,14 @@ describe('<UserAuthenticationForm />', () => {
 				'exist',
 			)
 		})
+		it('has no axe violations in login and signup modes', () => {
+			render()
+			cy.checkA11y()
+
+			render({ mode: 'signup' })
+			cy.checkA11y()
+		})
+
 		it('renders form title', () => {
 			render()
 			cy.get(

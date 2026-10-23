@@ -13,6 +13,13 @@ describe('Not logged in > Privacy page', () => {
 		cy.contains('h1', 'Privacy policy').should('be.visible')
 	})
 
+	it('has no axe violations', () => {
+		cy.visit(BASE_URL_CYPRESS + PATHS.PRIVACY)
+		cy.get(PAGE_SELECTORS.PRIVACY_MAIN_CONTAINER).should('be.visible')
+
+		cy.checkA11y()
+	})
+
 	it('loads directly without redirecting to authentication', () => {
 		cy.visit(BASE_URL_CYPRESS + PATHS.PRIVACY)
 

@@ -25,6 +25,16 @@ describe('Travellers Page - WIP', () => {
 			cy.get(PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER).should('exist')
 		})
 
+		it('has no axe violations', () => {
+			performLogin()
+			cy.get(PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER).should('exist')
+			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+				timeout: REQUEST_TIMEOUT,
+			}).should('not.exist')
+
+			cy.checkA11y()
+		})
+
 		/* TODO: revisit once travellers are implemented via registration*/
 		it.skip('should render the travellers list component', () => {
 			performLogin()

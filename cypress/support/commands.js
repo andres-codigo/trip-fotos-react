@@ -186,3 +186,35 @@ Cypress.Commands.add('assertHamburgerMenuState', (isActive) => {
 		.invoke('attr', 'class')
 		.should(isActive ? 'contain' : 'not.contain', '_active_')
 })
+
+////
+// ACCESSIBILITY
+////
+const WCAG_AA_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
+
+// Read from disk, not imported: the E2E bundler breaks axe's source ("exports is not defined").
+// Injected into the app's window so axe audits the app's own document
+Cypress.Commands.add('checkA11y', (context, options = {}) => {
+	cy.readFile('node_modules/axe-core/axe.min.js', null, { log: false })
+		.then((source) =>
+			cy.window({ log: false }).then((win) => {
+				if (!win.axe) win.eval(Cypress.Buffer.from(source).toString())
+				return win
+			}),
+		)
+		.then((win) =>
+			win.axe.run(context ?? win.document, {
+				runOnly: { type: 'tag', values: WCAG_AA_TAGS },
+				...options,
+			}),
+		)
+		.then(({ violations }) => {
+			const summary = violations
+				.map(
+					({ id, impact, help, nodes }) =>
+						`${id} (${impact}): ${help} — ${nodes.map((node) => node.target.join(' ')).join(', ')}`,
+				)
+				.join('\n')
+			expect(violations, summary).to.have.length(0)
+		})
+})
