@@ -239,42 +239,22 @@ The admin role is a Firebase Auth custom claim (`admin: true`), so the database 
 
 ### Environment Variables
 
-Create a `.env` file in the root directory and add the following key-value pairs:
-
-**Note:**
-Do not commit your `.env` file to version control.
-Instead, create a `.env.example` file (without sensitive values) to document required environment variables for collaborators.
+Copy [`.env.example`](.env.example) to `.env` and fill in the values from your Firebase web app's `firebaseConfig`:
 
 ```bash
-
-VITE_ROOT_URL='http://localhost:3000'
-
-# Firebase Auth REST API
-VITE_API_URL='https://identitytoolkit.googleapis.com/v1/accounts:'
-VITE_API_KEY='' # firebaseConfig > apiKey
-
-# Firebase Realtime Database
-VITE_BACKEND_BASE_URL='' # firebaseConfig > databaseURL
-
-# Firebase App Configuration
-VITE_FIREBASE_API_KEY='' # firebaseConfig > apiKey
-VITE_FIREBASE_AUTH_DOMAIN='' # firebaseConfig > authDomain
-VITE_DATABASE_URL=$VITE_BACKEND_BASE_URL
-VITE_FIREBASE_PROJECT_ID='' # firebaseConfig > projectId
-VITE_FIREBASE_STORAGE_BUCKET='' # firebaseConfig > storageBucket
-VITE_FIREBASE_MESSAGING_SENDER_ID='' # firebaseConfig > messagingSenderId
-VITE_FIREBASE_APP_ID='' # firebaseConfig > appId
-
-# CYPRESS TESTING
-CYPRESS_USER_EMAIL=''
-CYPRESS_USER_PASSWORD=''
-
-# HTTPS CONFIGURATION
-HTTPS=true
-SSL_CRT_FILE=./certs/localhost.crt
-SSL_KEY_FILE=./certs/localhost.key
-
+cp .env.example .env
 ```
+
+| Variable                                      | Used for                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------ |
+| `VITE_FIREBASE_*`, `VITE_DATABASE_URL`        | Firebase SDK (Auth, Realtime Database, Storage)                          |
+| `VITE_BACKEND_BASE_URL`                       | Realtime Database REST calls                                             |
+| `VITE_API_URL`, `VITE_API_KEY`                | Firebase Auth REST API — profile updates, and the E2E sign-in intercepts |
+| `VITE_ROOT_URL`                               | Cypress `baseUrl`                                                        |
+| `CYPRESS_USER_EMAIL`, `CYPRESS_USER_PASSWORD` | An existing test account the E2E suite signs in with                     |
+| `VITE_OPEN` (optional)                        | `true` opens the browser when the dev server starts                      |
+
+`.env` is gitignored — never commit it. When you add, rename or remove a variable, update `.env.example` and this table together.
 
 ### Firebase Project Configuration File
 
@@ -388,7 +368,8 @@ trip-fotos-react/
 │   ├── utils/          # General utility functions
 │   └── index.jsx       # Root application entry point
 ├── .dockerignore                # Files excluded from the dev container build context
-├── .env                         # Environment variables (not committed to version control)
+├── .env                         # Environment variables (gitignored; copy from .env.example)
+├── .env.example                 # Template listing every environment variable
 ├── .firebaserc                  # Firebase project configuration
 ├── .gitignore                   # Git ignore rules
 ├── .npmrc                       # Configuration file for custom npm settings and registry options
@@ -421,7 +402,7 @@ trip-fotos-react/
     - **Solution**: Ensure you have Node.js and npm installed. Check the required versions in the [Node.js](https://nodejs.org/) documentation.
 
 - **Issue**: Firebase environment variables are not working.
-    - **Solution**: Ensure you have created a `.env` file in the root directory with the correct Firebase configuration values.
+    - **Solution**: Copy `.env.example` to `.env` in the project root and fill in the Firebase configuration values, then restart `npm run dev` (Vite reads `.env` only at start-up).
 
 - **Issue**: `Error: ENOENT: no such file or directory, open './certs/localhost.key'`
     - **Solution**: Make sure you have generated the SSL certificate and key as described in [docs/local-https.md](docs/local-https.md). In CI and production (e.g., Vercel), the build will fall back to HTTP if the certs are missing.

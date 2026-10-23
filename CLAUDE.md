@@ -84,7 +84,7 @@ Full list in the README [Scripts](README.md#scripts) section.
 ## Environment
 
 Requires `.env` with Firebase config — see `.env.example` or README Setup section.
-Required keys: `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `CYPRESS_USER_*`. The admin role is a Firebase custom claim (`npm run admin:claim`), not an env value.
+Required keys: `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `CYPRESS_USER_*`. The admin role is a Firebase custom claim (`npm run admin:claim`), not an env value.
 
 ## Workflow automation
 
@@ -101,7 +101,7 @@ Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 `README.md` is the user-facing source of truth for setup, scripts, and structure — it drifts easily. It stays a summary; detail lives in `docs/` (`ci-cd.md`, `testing.md`, `ai-assistance.md`, `local-https.md`). Update both in the same change whenever you:
 
 - Add, remove, or rename an `npm run` script (update the Scripts section)
-- Add, remove, or rename a required `.env` variable (update the Environment Variables section)
+- Add, remove, or rename a `.env` variable (update `.env.example` and the Environment Variables table)
 - Add, remove, or rename a top-level folder, or a `src/` subfolder (update the Folder Structure tree)
 - Add or change a GitHub Actions workflow (update `docs/ci-cd.md` and the README Testing and CI summary table)
 - Add, remove, or materially change a user-facing feature (update the Features section)
