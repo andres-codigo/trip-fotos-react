@@ -54,7 +54,7 @@ Runs `npm run vitest:run` — see [Scripts](../README.md#scripts) for other Vite
 - **Triggers:**
     - On **issue** events (`opened`, `reopened`, `edited`, `labeled`, `unlabeled`)
     - Manually via **Actions → "Run workflow"** (takes an issue number)
-- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, gives them the **type** label for their title prefix (`chore:` → `chore`; none without a prefix) and assigns the default assignee. Area labels arrive later from the PR that closes the issue. Editing an issue never changes its status. Labels you add (`ready`, `in-progress`, `blocked`) move it across the board (see [Project Board Statuses](#project-board-statuses)).
+- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, gives them the **type** label for their title prefix (`chore:` → `chore`; none without a prefix) and assigns the default assignee. Area labels arrive later from the PR that closes the issue. Editing an issue never changes its status. Runs queue per issue, so the `opened` and `labeled` events from creating a labelled issue do not race. Labels you add (`ready`, `in-progress`, `blocked`) move it across the board (see [Project Board Statuses](#project-board-statuses)).
 
 ---
 
