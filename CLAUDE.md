@@ -106,6 +106,8 @@ Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 - Add or change a GitHub Actions workflow (update `docs/ci-cd.md` and the README Testing and CI summary table)
 - Add, remove, or materially change a user-facing feature (update the Features section)
 - Add or restructure `.claude/` or `.github/` guidance files (update `docs/ai-assistance.md` and the README AI Assistance summary)
+- Change the README's About, Features, Stack or Status sections (update the GitHub Project README to match)
+- Merge a PR that ships user-visible work or changes the "Next up" list (post a Project status update) — see [Project README and status updates](docs/ci-cd.md#project-readme-and-status-updates)
 
 ## Things to avoid
 

@@ -97,6 +97,21 @@ While an issue has the `blocked` label its PR events leave it in Blocked; only a
 
 Add the `in-progress` label when you start work, before any PR exists. It moves an issue in Triage, Backlog or Ready to In progress, never one already In review or Done. Removing it restores the status. An issue that keeps the label returns to In progress, not Ready, when its PR is closed without merging, and a merge removes the label.
 
+### Project README and status updates
+
+The project's short description and README (Project > Settings) and its status updates are written by hand — no workflow touches them. Keep them current:
+
+- **Status update** — post one after a PR merges that ships user-visible work, closes a backlog item or changes the "Next up" list, and when the overall status changes (On track / At risk / Off track). List what shipped with PR numbers and what is next.
+- **Project README** — edit it when the repo README's About, Features, Stack or Status sections change.
+- **Short description** — edit it only if the app's purpose changes.
+
+```bash
+gh project edit 2 --owner andres-codigo --description "<text>" --readme "<markdown>"
+gh api graphql -f query='mutation($p:ID!,$b:String!){createProjectV2StatusUpdate(input:{projectId:$p,status:ON_TRACK,body:$b}){statusUpdate{id}}}' -f p=PVT_kwHOAybMeM4BCojE -f b="<markdown>"
+```
+
+Fetch the current README first with `gh project view 2 --owner andres-codigo --format json`. Skip a status update for dependency bumps, test-only and docs-only merges.
+
 ---
 
 ## 7. GitHub Label Sync
