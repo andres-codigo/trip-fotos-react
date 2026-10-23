@@ -26,6 +26,7 @@ import {
 	authActions,
 	logout,
 	selectAuthenticationToken,
+	selectUserId,
 } from './authenticationSlice'
 import { deleteTravellerMessages } from './messagesSlice'
 
@@ -587,6 +588,13 @@ export const selectIsTraveller = createSelector(
 export const selectIsTravellerCheckedFor = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.isTravellerCheckedFor,
+)
+
+// isTraveller starts false on a new device, so a negative answer means nothing until the login check resolves
+export const selectIsTravellerKnown = createSelector(
+	[selectIsTravellerCheckedFor, selectUserId],
+	(isTravellerCheckedFor, userId) =>
+		Boolean(userId) && isTravellerCheckedFor === userId,
 )
 
 export const selectTravellerName = createSelector(

@@ -27,6 +27,7 @@ import travellersReducer, {
 	selectTravellers,
 	selectHasTravellers,
 	selectIsTraveller,
+	selectIsTravellerKnown,
 	selectTravellerName,
 	selectSelectedTraveller,
 } from './travellersSlice'
@@ -971,6 +972,32 @@ describe('travellersSlice', () => {
 			const result = selectIsTraveller(store.getState())
 			expect(result).toBe(true)
 		})
+
+		it.each([
+			[
+				'the check has resolved for the current user',
+				MOCK_USER.USER_ID,
+				MOCK_USER.USER_ID,
+				true,
+			],
+			['the check is still pending', null, MOCK_USER.USER_ID, false],
+			[
+				'the check was for a different user',
+				'other-user',
+				MOCK_USER.USER_ID,
+				false,
+			],
+			['no user is logged in', null, null, false],
+		])(
+			'should return isTravellerKnown when %s',
+			(_, isTravellerCheckedFor, userId, expected) => {
+				const result = selectIsTravellerKnown({
+					travellers: { isTravellerCheckedFor },
+					authentication: { userId },
+				})
+				expect(result).toBe(expected)
+			},
+		)
 
 		it('should return travellerName string from state', () => {
 			const result = selectTravellerName(store.getState())
