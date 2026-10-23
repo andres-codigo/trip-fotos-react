@@ -7,18 +7,15 @@
 ## Contents
 
 - [📘 About This Project](#about-this-project)
+- [✨ Features](#features)
 - [🚧 Status](#status)
 - [🧱 Stack](#stack)
 - [⚡ Quick Start](#quick-start)
-- [💾 Installation](#installation)
 - [🎯 Scripts](#scripts)
 - [⚙️ Setup](#setup)
-- [👨‍💻 Development](#development)
-- [🧪 Testing](#testing)
-- [🚀 CI/CD Workflows](#cicd-workflows)
-- [🛠️ Build](#build)
-- [📦 Deployment](#deployment)
-- [✨ Features](#features)
+- [🤖 AI Assistance](#ai-assistance)
+- [🧪 Testing and CI](#testing-and-ci)
+- [📦 Build and Deployment](#build-and-deployment)
 - [📁 Folder Structure](#folder-structure)
 - [🧯 Troubleshooting](#troubleshooting)
 
@@ -32,13 +29,9 @@ This project is a UI and functional conversion from Vue to React and extends the
 
 It is also a working example of AI-assisted development: GitHub Copilot and Claude Code share one set of repository instructions, and hooks, a `/verify` skill and CI enforce the quality gates. The Vue port was largely delivered by an agent pipeline under human review — see [AI-Assisted Development Story](_ai-assisted-dev-story/README.md).
 
-<a id="status"></a>
+<a id="features"></a>
 
-## 🚧 Status
-
-Feature parity with the original Vue app is complete (epic [#274](https://github.com/andres-codigo/trip-fotos-react/issues/274)), and the app is live. Current work is polish, test reliability and tooling rather than new features.
-
-### Done
+## ✨ Features
 
 - **Authentication** — email/password sign-up and log-in with Firebase Authentication, session persistence and auto-logout
 - **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database; cities visited are chosen through an accessible type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data) that stores each city with its country
@@ -49,13 +42,18 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - **City filter** — checkboxes above the travellers list, built from the cities the loaded travellers have visited, narrow the list by city; all cities start selected
 - **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the admin can remove a traveller, with their database record, photos and messages, from the travellers list
 - **Routing and pages** — home, authentication, travellers, traveller details, contact traveller, register, messages, privacy policy and 404 pages
+- **Privacy policy** — a public `/privacy` page, linked from the footer, explains what data the app collects (account, traveller registration, Photon city search, browser storage and cookieless Vercel analytics) and where it is stored
 - **Accessibility** — skip link, landmark structure and per-page titles, following an audit against [The Website Specification](https://specification.website)
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request; CodeQL scanning and a ruleset protecting `main`
 - **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers; versioned Firebase security rules
 - **Project automation** — issues and pull requests are labelled from one `labels.json` and moved across the GitHub Project board by workflows
-- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook and a `/verify` skill (see [AI Assistance](#ai-assistance--copilot-guidance))
+- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook and a `/verify` skill (see [AI Assistance](#ai-assistance))
 
-### Next
+<a id="status"></a>
+
+## 🚧 Status
+
+Feature parity with the original Vue app is complete (epic [#274](https://github.com/andres-codigo/trip-fotos-react/issues/274)), and the app is live. Current work is polish, test reliability and tooling rather than new features. Next up:
 
 - [#344](https://github.com/andres-codigo/trip-fotos-react/issues/344) — fix the flaky E2E Register-link click
 - [#287](https://github.com/andres-codigo/trip-fotos-react/issues/287) — a reusable `/ui-review` skill for UI/UX audits
@@ -88,47 +86,18 @@ This project uses the following technologies:
 
 ## ⚡ Quick Start
 
-1. Clone the repository:
+Requires [Node.js](https://nodejs.org/) 24 or later (see `.nvmrc`) and npm.
 
-    ```bash
-    git clone https://github.com/andres-codigo/trip-fotos-react
-    cd trip-fotos-react
-    ```
+```bash
+git clone https://github.com/andres-codigo/trip-fotos-react
+cd trip-fotos-react
+npm install       # also installs Cypress and Vitest
+npm run dev       # http://localhost:3000
+```
 
-2. Install dependencies:
+The app needs a Firebase project and a `.env` file first — see [Setup](#setup).
 
-    ```bash
-    npm install
-    ```
-
-3. Start the development server:
-
-    ```bash
-    npm run dev
-    ```
-
-4. Open the app in your browser at http://localhost:3000
-
-<a id="installation"></a>
-
-## 💾 Installation
-
-See [Quick Start](#quick-start) to clone the repo and install dependencies (this also installs Cypress and Vitest).
-
-### Prerequisites
-
-Ensure you have the following installed:
-
-- [Node.js](https://nodejs.org/) 24 or later (see `.nvmrc`)
-- [npm](https://www.npmjs.com/)
-
-### Dev Container Prerequisites (Optional)
-
-This project includes a [VS Code Dev Container](.devcontainer/devcontainer.json) for a reproducible, containerised development environment. It bind-mounts the following files/folders from your **host machine** into the container, so make sure they exist and are configured on your host before opening the project in the container. If they're missing, Docker silently creates empty placeholders instead of erroring, and the corresponding tool will simply be unauthenticated inside the container:
-
-- `~/.gitconfig` — Git identity (set via `git config --global user.name`/`user.email`)
-- `~/.config/gh` — GitHub CLI authentication (set via `gh auth login`)
-- `~/.claude` and `~/.claude.json` — Claude Code configuration/authentication
+A [VS Code Dev Container](.devcontainer/devcontainer.json) is included. It bind-mounts `~/.gitconfig`, `~/.config/gh`, `~/.claude` and `~/.claude.json` from the host, so set those up first; if they are missing, Docker creates empty placeholders and the matching tool is unauthenticated inside the container.
 
 <a id="scripts"></a>
 
@@ -268,66 +237,6 @@ The admin role is a Firebase Auth custom claim (`admin: true`), so the database 
 
 3. The user must sign out and in again: claims are read from the ID token at sign-in, and stored as `isAdmin` in the authentication slice (`selectIsAdmin`).
 
-### HTTPS for Local Development
-
-This project supports running the local development server over **HTTPS** for a more production-like environment.
-
-#### 1. Generate Self-Signed Certificates
-
-You need a self-signed SSL certificate and key for local HTTPS.
-Run the following command in your project root to generate them:
-
-```sh
-openssl req -x509 -out localhost.crt -keyout localhost.key \
-  -newkey rsa:2048 -nodes -sha256 \
-  -subj '/CN=localhost' -extensions EXT -config <( \
-   printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
-```
-
-#### 2. Move Certificates to the `certs` Folder
-
-Create a `certs` directory in your project root and move the generated files:
-
-```sh
-mkdir -p certs
-mv localhost.crt certs/
-mv localhost.key certs/
-```
-
-Your project structure should now include:
-
-```
-trip-fotos-react/
-  certs/
-    localhost.crt
-    localhost.key
-  ...
-```
-
-#### 3. Update `.gitignore`
-
-Add the `certs/` folder to your `.gitignore` to prevent committing sensitive certificate files:
-
-```
-certs/
-```
-
-#### 4. Vite HTTPS Configuration
-
-The Vite config is set up to use these certificates for HTTPS **only in local development**.
-If the `certs` folder or files are missing, Vite will fall back to HTTP (as in CI or Vercel deployments).
-
-#### 5. Start the Development Server
-
-```sh
-npm run dev
-```
-
-Visit [https://localhost:3000](https://localhost:3000) in your browser.
-You may see a browser warning about the self-signed certificate—this is expected for local development.
-
----
-
 ### Environment Variables
 
 Create a `.env` file in the root directory and add the following key-value pairs:
@@ -379,413 +288,52 @@ Create a `.firebaserc` file in the root directory with the following content:
 }
 ```
 
-<a id="development"></a>
+### HTTPS for Local Development
 
-## 👨‍💻 Development
+Optional: with a self-signed certificate in `certs/`, `npm run dev` serves over HTTPS; without one it falls back to HTTP, as in CI and on Vercel. See [docs/local-https.md](docs/local-https.md).
 
-### Start the Development Server
+<a id="ai-assistance"></a>
 
-Run the following command to start the local development server with hot module replacement:
+## 🤖 AI Assistance
 
-```bash
-npm run dev
-```
+GitHub Copilot and Claude Code share one set of guidance, so the two tools do not drift apart:
 
-### Linting and Formatting
+- **Shared conventions** — `.github/copilot-instructions.md` and `CLAUDE.md` hold the workspace rules; `.github/instructions/*.instructions.md` hold the component, page, store, styling and testing guidance both tools read.
+- **Scaffolding agents** — `create-component`, `create-page`, `create-redux-slice` and `create-hook` live in `.github/agents/`, with thin Claude Code wrappers in `.claude/agents/`.
+- **Enforced quality** — a Claude Code `PostToolUse` hook formats and lints every edited file, and the `/verify` skill runs only the lint, Vitest, Cypress component and build gates a change can affect, caching passes per working-tree hash. `/verify e2e` adds the live-Firebase E2E suite.
+- **Permissions** — `.claude/settings.json` allows routine checks, commits, pushes and draft PRs, asks before merges, installs and E2E runs, and denies force-pushes and reading `.env` or `certs/`.
 
-Refer to the [Scripts](#scripts) section for commands to run ESLint, fix linting issues, and format files using Prettier.
+Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools are used day to day, and the agent pipeline that delivered the Vue port, are written up in the [AI-Assisted Development Story](_ai-assisted-dev-story/README.md).
 
-### AI Assistance & Copilot Guidance
+<a id="testing-and-ci"></a>
 
-This project includes structured guidance files for GitHub Copilot to ensure generated code adheres to project standards.
+## 🧪 Testing and CI
 
-#### Workspace-Level Instructions
+- **Vitest** unit and integration tests sit beside the code they test, in `__tests__/` folders or as `*.test.js` next to store files.
+- **Cypress** component tests (`*.cy.jsx`) sit in the same `__tests__/` folders; E2E specs live in `cypress/e2e/` and run against the live Firebase project.
+- **GitHub Actions** run Vitest, Cypress component and Cypress E2E tests on pull requests that touch code, label issues and PRs from [`.github/labels.json`](.github/labels.json) and move them across the project board. CodeQL scans every PR, and the **Protect main** ruleset requires a pull request to change `main`.
 
-- **File**: `.github/copilot-instructions.md`
-- **Purpose**: Global rules for language, imports, naming conventions, and type safety.
-- **Usage**: Copilot automatically references this file for behaviour guidance on all files.
+| Workflow                          | File                                           | Triggered On     |
+| --------------------------------- | ---------------------------------------------- | ---------------- |
+| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`      | Push/PR/Manual   |
+| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml`            | Push/PR/Manual   |
+| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`      | Push/PR/Manual   |
+| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`  | PR Target Events |
+| GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`    | Issue Events     |
+| GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml` | PR Target Events |
+| GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`      | Push/Manual      |
 
-#### Domain-Specific Instructions
+The workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` repository secrets; E2E also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
 
-Detailed guidance for specific areas of the codebase:
+Details: [docs/testing.md](docs/testing.md) (test layout and utilities) and [docs/ci-cd.md](docs/ci-cd.md) (each workflow's triggers, project board statuses, labels, branch protection and token rotation).
 
-- **Components**: `.github/instructions/components.instructions.md` — Folder structure, reusability patterns, testing, and accessibility.
-- **Pages**: `.github/instructions/pages.instructions.md` — Route-level composition, data loading orchestration, and page testing.
-- **Redux Store**: `.github/instructions/store.instructions.md` — Slices, thunks, error handling, persistence, and testing.
-- **Styling**: `.github/instructions/styles.instructions.md` — SCSS modules, variables, mixins, and naming conventions.
-- **Testing**: `.github/instructions/testing.instructions.md` — Vitest/Cypress standards, shared test data paths, and anti-flakiness practices.
+<a id="build-and-deployment"></a>
 
-#### Workflow Agents
+## 📦 Build and Deployment
 
-Automated scaffolding workflows for common tasks:
+`npm run build` writes the production build to `dist/`; `npm run preview` serves it, and `npm run analyse` opens a bundle-size report at `https://localhost:3001/stats.html`.
 
-- **Create Component**: Use the `create-component` agent to scaffold new components with full structure and tests.
-- **Create Page**: Use the `create-page` agent to scaffold new pages with route integration and tests.
-- **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with RTK Query/thunks and tests.
-- **Create Hook**: Use the `create-hook` agent to scaffold new custom hooks with tests, component-scoped or shared.
-
-### AI Assistance & Claude Code Guidance
-
-Claude Code shares the Copilot guidance above rather than keeping its own copy, so both tools follow a single source of truth. Claude-specific automation — hooks, permissions, and skills — lives in `.claude/`.
-
-#### Workspace-Level Instructions
-
-- **File**: `CLAUDE.md`
-- **Purpose**: Global rules — branch naming, conventions, dev commands, environment, and pointers to detailed guidance (the stack, full script list and folder structure live in this README, not duplicated there, to keep the per-request context small).
-- **Usage**: Claude Code automatically reads this file at the start of every session in this repo.
-
-#### Domain-Specific Guidance
-
-`CLAUDE.md` points Claude Code to the `.github/instructions/*.instructions.md` files listed above, which it reads on demand when working in the relevant area.
-
-#### Workflow Agents
-
-Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is a thin wrapper that delegates to the matching `.github/agents/*.agent.md` workflow, and runs on Sonnet (`model: sonnet`) to keep mechanical scaffolding cheap:
-
-- **create-component**: Scaffold new components with full structure and tests.
-- **create-page**: Scaffold new pages with route integration and tests.
-- **create-redux-slice**: Scaffold new Redux slices with RTK Query/thunks and tests.
-- **create-hook**: Scaffold new custom hooks with tests.
-
-#### Hooks & Permissions
-
-- **File**: `.claude/settings.json` (committed; personal overrides go in the gitignored `.claude/settings.local.json`)
-- **Hook**: a `PostToolUse` hook runs `.claude/hooks/lint-edited-file.mjs` after every edit, applying Prettier and `eslint --fix`, and Stylelint to edited component and page stylesheets. Any remaining ESLint or Stylelint errors are fed back to Claude so they are fixed in the same turn.
-- **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git), staging, committing and pushing, read-only `gh issue`/`gh project` queries and opening draft PRs run without prompting; PR merges, installs, and E2E runs ask first, and opening a non-draft PR prompts by default; reading `.env`/`certs/`, force-pushes and hard resets are denied. Pushing is safe to allow because GitHub rejects direct pushes to `main` — see [Branch Protection](#-branch-protection).
-
-#### Skills
-
-- **`/verify`** (`.claude/skills/verify/`): runs ESLint and Stylelint, Vitest, Cypress component tests, and the production build, then reports a pass/fail table. `changed-gates.mjs` compares the branch with `main` and picks only the gates the change can affect (e.g. a `cypress/e2e/` change runs ESLint only; docs, `.claude/` or `.github/` changes run none), so CI on the pull request, which runs every workflow, stays the full check. `/verify all` forces every gate. Use before committing or opening a pull request. It runs on Haiku (`model: haiku`) in a forked context (`context: fork`), so test and build logs stay out of the main conversation. `run-gates.mjs` runs the gates in one call, writes full logs to `node_modules/.cache/verify/` and prints a line per gate with any error lines, and caches passes against a hash of the working tree (including uncommitted and untracked files), so a gate that already passed on identical code reports `cached` instead of running again — e.g. `/verify e2e` straight after `/verify` runs only E2E. `/verify all` bypasses the cache. A run reflects the code as it was when it started, so if the code changes mid-run, stop it and run it again.
-- **`/verify e2e`**: additionally runs the Cypress E2E suite via `.claude/skills/verify/run-e2e.mjs`, which reuses a dev server on port 3000 or starts one over HTTP (as CI does) and stops it afterwards. Opt-in and approval-gated, because the tests use the live Firebase project and `.env` credentials. `/verify` prints an `E2E advised` line, without running E2E, when a change touches routing, pages, the store, Firebase services, route or API constants, or the E2E specs — see [testing.instructions.md](.github/instructions/testing.instructions.md#when-to-run-e2e-locally) for when to run it locally.
-
-#### Archived: Vue parity programme
-
-The tooling that ported the remaining Vue features (epic #274, delivered in #291) — the `parity-auditor` agent, the `/backlog-sync`, `/implement-item` and `/parity-run` skills, and the `Stop` hook guard — has been retired from `.claude/` so it no longer loads in every session. It is kept for reference, with the plan, gap report and a write-up, in [`_ai-assisted-dev-story/vue-parity-programme/`](_ai-assisted-dev-story/vue-parity-programme/README.md).
-
----
-
-<a id="testing"></a>
-
-## 🧪 Testing
-
-This project uses [Vitest](https://vitest.dev/) for unit and integration testing, and [Cypress](https://www.cypress.io/) for end-to-end testing.
-
-### 1. Vitest Setup
-
-Vitest is already configured and included as a dev dependency — running `npm install` (see [Installation](#installation)) is all that's needed to get started. See [Scripts](#scripts) for the `vitest:*` commands.
-
-**Vitest Directory Structure**
-
-Vitest test files are located alongside the source files they test, following these conventions:
-
-- For store logic: `*.test.js` files are placed next to the source file.
-- For components and utility files: tests are typically placed in a `__tests__` folder within the component/utility directory.
-
-```
-src/
-  ├── components/
-  │   ├── forms/
-  │   │   ├── __tests__/
-  │   │   │   ├── UserAuthenticationForm.test.jsx
-  │   │   │   └── ...
-  │   │   ├── FormComponent.jsx
-  │   ├── ui/
-  │   │   ├── __tests__/
-  │   │   │   ├── Button.test.jsx
-  │   │   │   └── ...
-  │   │   ├── Button.jsx
-  ├── store/
-  │   ├── slices/
-  │   │   ├── <slice-file>.js
-  │   │   ├── <test-file>.test.js
-  ├── utils/
-  │   ├── errorHandler/
-  │   │   ├── __tests__/
-  │   │   │   ├── errorHandler.test.js
-  │   │   │   └── ...
-  │   │   ├── index.js
-```
-
-### Vitest Test Utilities
-
-Reusable test utilities are located in [testingLibrarySetup.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/src/testUtils/vitest/testingLibrarySetup.js). This includes:
-
-- **Mock Setup**: `setupMocks()` mocks `fetch` and `localStorage`, and runs automatically when the module is imported (e.g. via the Vitest `setupFiles` config).
-
-### 2. Cypress Setup
-
-Cypress is already configured in the project (both E2E and component testing) and included in the project dependencies — `npm install` is all that's needed. Feel free to customise [cypress.config.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/cypress.config.js) as needed. See [Scripts](#scripts) for the `cy:*` commands.
-
-**Cypress Directory Structure**
-
-**End-to-End (E2E) Testing**: E2E test files are placed in the e2e directory.
-
-**Fixtures**: Contains mock data used in tests (e.g., JSON files for API responses).
-
-**Support**: Contains custom commands and global test setup files.
-
-```
-    cypress/
-      ├── e2e/         # End-to-end test files (e.g., Authentication.page.cy.js)
-      ├── fixtures/    # Mock data used in tests
-      ├── support/     # Custom commands and test setup
-```
-
-**Component Testing**: Component test files are placed in a **tests** folder located within each component’s directory. For example:
-
-```
-src/
-  ├── components/
-  │   ├── forms/
-  │   │   ├── __tests__/
-  │   │   │   ├── UserAuthenticationForm.cy.jsx
-  │   │   │   └── ...
-  │   │   ├── FormComponent.jsx
-  │   ├── ui/
-  │   │   ├── __tests__/
-  │   │   │   ├── Button.cy.jsx
-  │   │   │   └── ...
-  │   │   ├── Button.jsx
-```
-
-**Test Artifacts**
-
-Cypress stores screenshots and videos (if enabled) in the following directories:
-
-- **Screenshots**: `cypress/screenshots/`
-- **Videos**: `cypress/videos/`
-
-You can configure these paths in the [cypress.config.js](https://github.com/andres-codigo/trip-fotos-react/blob/main/cypress.config.js) file.
-
-**Debugging Cypress Tests**
-
-To debug tests, use the Cypress Test Runner in interactive mode (`npx cypress open`). You can inspect elements and view console logs using the browser's developer tools.
-
-<a id="cicd-workflows"></a>
-
-## 🚀 CI/CD Workflows
-
-This project uses GitHub Actions to automate key development and monitoring tasks.
-
-### 1. Vitest Unit Tests
-
-- **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
-- **Triggers:**
-    - On **push** to `main` (for changes in `src/**`, `package.json`, or `vitest.config.*`)
-    - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files, `.github/labels.json` and `.github/scripts/**` still trigger it)
-    - Manually via **Actions → "Run workflow"**
-- **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
-- **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
-- **Merge Blocking:** Not a required check — see [Branch Protection](#-branch-protection). Don't merge a pull request whose run failed.
-
-Runs `npm run vitest:run` — see [Scripts](#scripts) for other Vitest commands.
-
----
-
-### 2. Cypress E2E Tests
-
-- **Workflow File:** `.github/workflows/cypress-e2e.yml`
-- **Triggers:**
-    - On **push** to `main` (for changes in `src/**`, `cypress/**`, `package.json`, or `cypress.config.*`)
-    - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files still trigger it)
-    - Manually via **Actions → "Run workflow"**
-- **Purpose:** Runs Cypress end-to-end (E2E) tests against the running application to verify user flows and integration with backend services. Runs `npm run cy:run:e2e` — see [Scripts](#scripts). The dev server is awaited with a `curl` retry loop (up to 60 seconds) rather than the Cypress action's URL ping, which gave up on the first unexpected connection error.
-
----
-
-### 3. Cypress Component Tests
-
-- **Workflow File:** `.github/workflows/cypress-component.yml`
-- **Triggers:**
-    - On **push** to `main` (for changes in `src/**/__tests__/**`, `src/**/*.jsx`, `src/**/*.tsx`, `cypress.config.*`, or `package.json`)
-    - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files still trigger it)
-    - Manually via **Actions → "Run workflow"**
-- **Purpose:** Runs Cypress component tests to verify individual React components in isolation. Runs `npm run cy:run:ct` — see [Scripts](#scripts).
-
----
-
-### 4. GitHub Auto Label Pull Requests
-
-- **Workflow File:** `.github/workflows/github-auto-label-prs.yml`
-- **Triggers:**
-    - On **pull_request_target** events (`opened`, `synchronize`, `reopened`, `edited`), so Dependabot PRs can be labelled too; only the base branch is checked out
-- **Purpose:** Gives each pull request one **type** label from its conventional-commit title (or branch prefix), e.g. `chore`, `fix`, `feature`, and the **area** labels whose paths its changed files match, e.g. `ui`, `testing`, `config`. Labels it no longer matches are removed; status labels and Dependabot's `javascript` are left alone. The rules live in [`.github/labels.json`](.github/labels.json) — see [Labels](#labels).
-
----
-
-### 5. GitHub Issue Intake
-
-- **Workflow File:** `.github/workflows/github-issue-intake.yml`
-- **Triggers:**
-    - On **issue** events (`opened`, `reopened`, `edited`, `labeled`, `unlabeled`)
-    - Manually via **Actions → "Run workflow"** (takes an issue number)
-- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, gives them the **type** label for their title prefix (`chore:` → `chore`; none without a prefix) and assigns the default assignee. Area labels arrive later from the PR that closes the issue. Editing an issue never changes its status. Labels you add (`ready`, `in-progress`, `blocked`) move it across the board (see [Project Board Statuses](#project-board-statuses)).
-
----
-
-### 6. GitHub Project Item Lifecycle
-
-- **Workflow File:** `.github/workflows/project-item-lifecycle.yml`
-- **Triggers:**
-    - On **pull_request_target** events (`opened`, `reopened`, `synchronize`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`)
-- **Purpose:** Keeps the issues a pull request closes (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. The board has one card per piece of work: the issue, with its PRs under **Linked pull requests**. A PR with no linked issue gets a tracking issue; Dependabot PRs get none and appear as their own card instead. Merging removes the `in-progress` label from the issues it closes and, when it closes exactly one issue (a tracking issue included), copies the PR's type and area labels to it; a PR closing several issues leaves their labels alone.
-- **Secret (Optional but Recommended):** `PROJECT_AUTOMATION_TOKEN`
-    - Used for Project v2 write operations when `github.token` does not have enough access.
-
-#### Token Rotation / Recovery Guide
-
-If the workflow logs `Resource not accessible by integration`, check the runbook:
-
-- `.github/project-automation-token.md`
-
-The runbook includes expiry handling, recreation steps, secret update instructions, and post-rotation validation.
-
----
-
-<a id="project-board-statuses"></a>
-
-#### Project Board Statuses
-
-Every Status is set by the two workflows above. Items also carry **Kind** (Epic / Feature / Bug / Chore / Deps) and **Workstream** (Vue parity / Tooling & AI / Maintenance) fields, set by hand.
-
-| Status      | Meaning                                         | Moved there when                                                               |
-| ----------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
-| Triage      | New, not yet assessed                           | An issue is opened                                                             |
-| Backlog     | Accepted, not scheduled                         | You add any label to an issue in Triage, or reopen a Done issue                |
-| Ready       | Queued, dependencies met                        | You add the `ready` label, or a linked PR is closed without merging            |
-| In progress | Being built                                     | You add the `in-progress` label, or a draft PR that closes the issue is opened |
-| Blocked     | Waiting on a decision or an external dependency | You add the `blocked` label; removing it restores the status                   |
-| In review   | PR open for review                              | The PR is opened (not as a draft) or marked ready for review                   |
-| Done        | Merged                                          | The PR is merged                                                               |
-
-While an issue has the `blocked` label its PR events leave it in Blocked; only a merge moves it on.
-
-Add the `in-progress` label when you start work, before any PR exists. It moves an issue in Triage, Backlog or Ready to In progress, never one already In review or Done. Removing it restores the status. An issue that keeps the label returns to In progress, not Ready, when its PR is closed without merging, and a merge removes the label.
-
----
-
-### 7. GitHub Label Sync
-
-- **Workflow File:** `.github/workflows/github-label-sync.yml`
-- **Triggers:**
-    - On **push** to `main` that changes `.github/labels.json` or `.github/scripts/labels.mjs`
-    - Manually via **Actions → "Run workflow"** (a dry run by default, which only logs the plan)
-- **Purpose:** Makes the repository's labels match `.github/labels.json`: creates and updates them, renames or merges retired ones listed under `replaced` (so issues and PRs keep the meaning), and deletes labels the file does not define.
-
-<a id="labels"></a>
-
-#### Labels
-
-[`.github/labels.json`](.github/labels.json) is the single source of truth for labels. Every workflow above reads it through `.github/scripts/labels.mjs`, and none hard-codes a label name. To add, rename or recolour a label, or change which files map to an area, edit that file only; the sync workflow applies it when merged.
-
-| Group  | Labels                                                                                                                                                   | Set by                                                      |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Type   | `feature`, `fix`, `enhancement`, `refactor`, `docs`, `test`, `chore` (the [branch prefixes](CLAUDE.md#branch-naming))                                    | Title or branch prefix — PR labeller and issue intake       |
-| Area   | `ui`, `styling`, `redux/state`, `constants`, `utilities`, `firebase`, `assets`, `testing`, `documentation`, `dependencies`, `config`, `build/deployment` | Changed files — PR labeller; copied to the issue on merge   |
-| Status | `ready`, `in-progress`, `blocked`                                                                                                                        | You — see [Project Board Statuses](#project-board-statuses) |
-| Other  | `javascript`, `duplicate`                                                                                                                                | Dependabot / you                                            |
-
----
-
-### 8. CodeQL Code Scanning
-
-- **Configured In:** **Settings → Advanced Security → CodeQL analysis** (GitHub-managed **Default setup** — no workflow file)
-- **Triggers:** On push and pull requests to `main`, plus a weekly scheduled scan
-- **Purpose:** Scans JavaScript/TypeScript and the GitHub Actions workflows for security vulnerabilities. Results appear under **Security → Code scanning**.
-- **Note:** Code scanning requires the repository to be **public** — on a private personal repository it is unavailable and the check will fail.
-
-### 🔒 Branch Protection
-
-The **Protect main** repository ruleset (**Settings → Rules → Rulesets**) applies to `main`, with no bypass list:
-
-- Changes must arrive through a pull request, merged by squash or rebase (no approvals required)
-- Force-pushes and deleting the branch are blocked
-- **No required status checks.** The test workflows skip docs- and tooling-only pull requests with `paths` filters, and a required check that never runs would block those pull requests from merging
-
-The ruleset is kept in [`.github/rulesets/protect-main.json`](.github/rulesets/protect-main.json). To recreate it, or apply an edit, run as a repository admin:
-
-```bash
-gh api -X POST repos/{owner}/{repo}/rulesets --input .github/rulesets/protect-main.json
-# or, to update the existing ruleset:
-gh api -X PUT repos/{owner}/{repo}/rulesets/<id> --input .github/rulesets/protect-main.json
-```
-
-### 🛠 Manual Triggers
-
-Some workflows, like the **Vitest test runner**, can be manually executed from the GitHub UI:
-
-1. Navigate to the **Actions** tab of the repository
-2. Select the desired workflow (e.g., **"Run Unit Tests (Vitest)"**, **"E2E - Run Cypress Page Tests"**, or **"Component - Run Cypress Component Tests"**).
-3. Click the **"Run workflow"** button on the right side
-4. The workflow will be executed immediately (no input needed)
-
-> This is useful for manually re-running workflows after configuration changes or failed automated runs.
-
----
-
-### 📝 Summary Table
-
-| Workflow Name                     | File                                           | Tests Type       | Triggered On     |
-| --------------------------------- | ---------------------------------------------- | ---------------- | ---------------- |
-| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`      | Unit/Integration | Push/PR/Manual   |
-| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml`            | E2E              | Push/PR/Manual   |
-| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`      | Component        | Push/PR/Manual   |
-| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`  | Automation       | PR Target Events |
-| GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`    | Automation       | Issue Events     |
-| GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml` | Automation       | PR Target Events |
-| GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`      | Automation       | Push/Manual      |
-
----
-
-> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly. The Vitest, component and E2E workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` secrets; E2E also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
-
-<a id="build"></a>
-
-## 🛠️ Build
-
-### Build for Production
-
-Compile and minify the project for production:
-
-```bash
-npm run build
-```
-
-The output will be located in the `./dist` folder.
-
-### Preview Production Build
-
-Serve the production build locally:
-
-```bash
-npm run preview
-```
-
----
-
-### Analyse Bundle Size (Vite Bundle Visualizer)
-
-You can analyse your production bundle to identify large dependencies and optimise performance using [Vite Bundle Visualizer](https://github.com/btd/vite-plugin-visualizer):
-
-```bash
-npm run analyse
-```
-
-This will generate a visual interactive report (`dist/stats.html`) showing the size of each module in your bundle, then serve it with `vite preview` and open `https://localhost:3001/stats.html` in your browser — this also works from the devcontainer. Stop the server with `Ctrl+C` when you are done.
-
-> **Tip:** Keeping your bundle size small improves load times and user experience.
-
-<a id="deployment"></a>
-
-## 📦 Deployment
-
-This project is configured for deployment on [Vercel](https://vercel.com/).
-
-### Steps
-
-1. Follow the [Vercel Getting Started Guide](https://vercel.com/docs/getting-started-with-vercel).
-2. Deploy the project by linking your GitHub repository to Vercel.
-3. Configure environment variables in the Vercel dashboard.
+The app deploys to [Vercel](https://vercel.com/) from the GitHub repository, with the environment variables set in the Vercel dashboard. Deploy rule changes with `npm run firebase:rules` before the production deploy.
 
 ### Routing, Headers and Static Files
 
@@ -796,24 +344,6 @@ This project is configured for deployment on [Vercel](https://vercel.com/).
 - **Caching** — fingerprinted build output in `/assets/` is cached for a year as `immutable`; fonts are cached for a week.
 
 `public/` also holds `robots.txt`, `sitemap.xml`, `llms.txt`, `site.webmanifest` and `.well-known/security.txt`. These contain the production URL, so update them if the domain changes. `security.txt` has an `Expires` date that must be renewed before it passes.
-
-<a id="features"></a>
-
-## ✨ Features
-
-See [🚧 Status](#status) for a fuller list of what is live.
-
-- **User Registration and Authentication**
-  Users can sign up and log in using Firebase Authentication.
-
-- **Traveller Profiles**
-  Registered travellers can describe their travel destination, choose where they travelled to and record the number of days spent there. Travellers can upload photos, the travellers list can be filtered by city, and signed-in users can send a traveller a message from their profile and read and delete their own messages.
-
-- **Admin Access**
-  Admin rights are a Firebase custom claim granted with `npm run admin:claim` (see [Admin Role](#admin-role)). When logged in, the admin can remove other travellers, along with their photos and messages.
-
-- **Privacy Policy**
-  A public `/privacy` page, linked from the site footer, explains what data the app collects (account, traveller registration, city search via Photon with the OpenStreetMap credit, browser storage and cookieless Vercel analytics) and where it is stored.
 
 <a id="folder-structure"></a>
 
@@ -840,6 +370,7 @@ trip-fotos-react/
 ├── .vscode/                     # Shared VS Code editor settings
 ├── _ai-assisted-dev-story/      # How Copilot and Claude Code are used, and the archived Vue parity programme
 ├── cypress/                    # Cypress tests
+├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS
 ├── declarations/               # Breaking issue fix when using ESLint V9
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
 ├── rules/                      # ESLint configuration rules
@@ -893,7 +424,7 @@ trip-fotos-react/
     - **Solution**: Ensure you have created a `.env` file in the root directory with the correct Firebase configuration values.
 
 - **Issue**: `Error: ENOENT: no such file or directory, open './certs/localhost.key'`
-    - **Solution**: Make sure you have generated the SSL certificate and key as described above. In CI and production (e.g., Vercel), the build will fall back to HTTP if the certs are missing.
+    - **Solution**: Make sure you have generated the SSL certificate and key as described in [docs/local-https.md](docs/local-https.md). In CI and production (e.g., Vercel), the build will fall back to HTTP if the certs are missing.
 
 - **Issue**: Browser shows "Your connection is not private" on `https://localhost:3000`
     - **Solution**: This is normal for self-signed certificates. Click "Advanced" and "Proceed" to continue.
