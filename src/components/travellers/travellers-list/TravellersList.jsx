@@ -28,8 +28,15 @@ import useCityFilter from '@/components/travellers/travellers-list/hooks/useCity
 import travellersListStyles from './TravellersList.module.scss'
 
 const TravellersList = ({ initialError = false, isLoading = false }) => {
+	const travellers = useSelector(selectTravellers)
 	const [error, setError] = useState(initialError)
-	const [loading, setLoading] = useState(isLoading)
+	const [shouldLoadOnMount] = useState(
+		() =>
+			!travellers ||
+			(Array.isArray(travellers) && travellers.length === 0),
+	)
+	// Start in the loading state when a mount load is due, so the first paint never shows an enabled Register link that the load then disables
+	const [loading, setLoading] = useState(isLoading || shouldLoadOnMount)
 	const hasInitialisedRef = useRef(false)
 
 	const dispatch = useDispatch()
@@ -38,7 +45,6 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const isTraveller = useSelector(selectIsTraveller)
 	const isTravellerKnown = useSelector(selectIsTravellerKnown)
 	const hasTravellers = useSelector(selectHasTravellers)
-	const travellers = useSelector(selectTravellers)
 	const { options, inactiveIds, toggleCity, filteredTravellers } =
 		useCityFilter(travellers)
 
@@ -68,12 +74,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 
 	// Load travellers on mount if not already cached in Redux
 	useEffect(() => {
-		// Check travellers at time of mount, not reactive to changes
-		const shouldLoad =
-			!travellers ||
-			(Array.isArray(travellers) && travellers.length === 0)
-
-		if (shouldLoad && !hasInitialisedRef.current) {
+		if (shouldLoadOnMount && !hasInitialisedRef.current) {
 			hasInitialisedRef.current = true
 			loadTravellersHandler()
 		}
