@@ -1,5 +1,6 @@
 import { mount } from 'cypress/react'
 import { configureStore } from '@reduxjs/toolkit'
+import axe from 'axe-core'
 
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 
@@ -185,4 +186,30 @@ Cypress.Commands.add('assertHamburgerMenuState', (isActive) => {
 	cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
 		.invoke('attr', 'class')
 		.should(isActive ? 'contain' : 'not.contain', '_active_')
+})
+
+////
+// ACCESSIBILITY
+////
+const WCAG_AA_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
+
+// Injected into the app's window, not run from the spec's, so axe audits the app's own document
+Cypress.Commands.add('checkA11y', (context, options = {}) => {
+	cy.window({ log: false })
+		.then((win) => {
+			if (!win.axe) win.eval(axe.source)
+			return win.axe.run(context ?? win.document, {
+				runOnly: { type: 'tag', values: WCAG_AA_TAGS },
+				...options,
+			})
+		})
+		.then(({ violations }) => {
+			const summary = violations
+				.map(
+					({ id, impact, help, nodes }) =>
+						`${id} (${impact}): ${help} — ${nodes.map((node) => node.target.join(' ')).join(', ')}`,
+				)
+				.join('\n')
+			expect(violations, summary).to.have.length(0)
+		})
 })
