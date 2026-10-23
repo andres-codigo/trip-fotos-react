@@ -97,6 +97,8 @@ While an issue has the `blocked` label its PR events leave it in Blocked; only a
 
 Add the `in-progress` label when you start work, before any PR exists. It moves an issue in Triage, Backlog or Ready to In progress, never one already In review or Done. Removing it restores the status. An issue that keeps the label returns to In progress, not Ready, when its PR is closed without merging, and a merge removes the label.
 
+Epics (Kind = Epic, titled `Epic: ...`) group sub-issues in order and have no PR, so no workflow moves them. They stay in Backlog until you add `in-progress` when the first sub-issue starts, and you close the epic when its last sub-issue closes.
+
 ### Project README and status updates
 
 The project's short description and README (Project > Settings) and its status updates are written by hand — no workflow touches them. Keep them current:
