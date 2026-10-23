@@ -27,6 +27,7 @@ vi.mock('@/store/slices/travellersSlice', async (importOriginal) => {
 		selectTravellers: vi.fn(),
 		selectHasTravellers: vi.fn(),
 		selectIsTraveller: vi.fn(),
+		selectIsTravellerKnown: vi.fn(),
 	}
 })
 

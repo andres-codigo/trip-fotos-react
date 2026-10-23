@@ -42,6 +42,7 @@ vi.mock('@/store/slices/travellersSlice', () => ({
 	selectTravellers: vi.fn(),
 	selectHasTravellers: vi.fn(),
 	selectIsTraveller: vi.fn(),
+	selectIsTravellerKnown: vi.fn(),
 }))
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
@@ -116,6 +117,7 @@ describe('<TravellersList />', () => {
 		vi.mocked(authenticationSlice.selectUserId).mockReturnValue(null)
 		vi.mocked(authenticationSlice.selectUserName).mockReturnValue(null)
 		vi.mocked(authenticationSlice.selectUserEmail).mockReturnValue(null)
+		vi.mocked(travellersSlice.selectIsTravellerKnown).mockReturnValue(true)
 	})
 
 	const setupMocksForHasTravellers = () => {
@@ -263,6 +265,30 @@ describe('<TravellersList />', () => {
 				expect(
 					screen.getByText(UI_TEXT.TRAVELLERS.REGISTER_AS_TRAVELLER),
 				).toBeInTheDocument()
+			})
+
+			it('should not show register button while the traveller check is pending', async () => {
+				setupMocksForNoTravellers()
+				setupMocksForLoggedInUser()
+				vi.mocked(
+					travellersSlice.selectIsTravellerKnown,
+				).mockReturnValue(false)
+
+				await act(async () => {
+					renderTravellersList()
+				})
+
+				await waitFor(() => {
+					expect(
+						screen.queryByRole(SPINNER.ROLE_STATUS),
+					).not.toBeInTheDocument()
+				})
+
+				expect(
+					screen.queryByTestId(
+						TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK,
+					),
+				).not.toBeInTheDocument()
 			})
 
 			it('should not show register button when user is not logged in', async () => {

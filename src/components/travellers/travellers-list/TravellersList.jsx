@@ -13,6 +13,7 @@ import {
 	selectTravellers,
 	selectHasTravellers,
 	selectIsTraveller,
+	selectIsTravellerKnown,
 } from '@/store/slices/travellersSlice'
 
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
@@ -35,6 +36,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const isLoggedIn = useSelector(selectIsAuthenticated)
 
 	const isTraveller = useSelector(selectIsTraveller)
+	const isTravellerKnown = useSelector(selectIsTravellerKnown)
 	const hasTravellers = useSelector(selectHasTravellers)
 	const travellers = useSelector(selectTravellers)
 	const { options, inactiveIds, toggleCity, filteredTravellers } =
@@ -104,7 +106,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					onClick={() => loadTravellersHandler(true)}>
 					Refresh
 				</BaseButton>
-				{isLoggedIn && !isTraveller && (
+				{isLoggedIn && isTravellerKnown && !isTraveller && (
 					<BaseButton
 						isLink
 						to={PATHS.REGISTER}
