@@ -1,6 +1,6 @@
 ---
 name: redux-store-development
-description: Use when creating Redux slices, async thunks, configuring state, or modifying store logic. Covers slice structure, RTK Query and thunk patterns, error handling, persistence, and testing requirements.
+description: Use when creating Redux slices, async thunks, configuring state, or modifying store logic. Covers slice structure, thunk patterns, error handling, persistence, and testing requirements.
 applyTo: 'src/store/**/*.{jsx,js}'
 ---
 
@@ -9,37 +9,25 @@ applyTo: 'src/store/**/*.{jsx,js}'
 ## Slices & State Structure
 
 - Redux slices are located in `src/store/slices/`.
-- Each slice file should export a reducer and any associated actions, thunks, or RTK Query APIs.
+- Each slice file should export a reducer and any associated actions, thunks and selectors.
 - State is persisted using `redux-persist`; configuration is in `src/store/store.js`.
 
 ## Data Fetching Strategy
 
-### RTK Query (Preferred for New Features)
+Thunks (`createAsyncThunk`) are the single standard for server data. There is no RTK Query in this app; do not add `createApi` alongside them.
 
-Use **RTK Query** for all new server-data fetching requirements and most new mutations. RTK Query provides built-in caching, request deduplication, automatic re-fetching, and background synchronisation.
+- **Realtime Database** calls use `fetch` from inside a thunk.
+- **Auth and Storage** calls use the Firebase SDK from inside a thunk.
+- Components, hooks and pages never call `fetch` themselves; they dispatch a thunk (target: `useCitySearch` still does, see #396).
+- Each slice owns `status` and `error` for its thunks, set from `pending`/`fulfilled`/`rejected` extra reducers.
 
-Use RTK Query when:
+### Shared Request Helper (target — #396)
 
-- Fetching lists or detail records from APIs
-- Creating, updating, or deleting server-backed entities
-- Cache invalidation and refetching are needed
-
-### Redux Thunks (Orchestration & Existing Flows)
-
-Use **thunks** for:
-
-- Complex orchestration across multiple slices
-- Side effects not centred on a single API request
-- Existing thunk-based flows that are being maintained
-
-Apply incremental migration:
-
-- **New server-data features**: RTK Query from the start
-- **Existing thunks**: migrate only when those areas are already being changed
+Today each thunk repeats the `fetch(\`${API_DATABASE.BASE_URL}/...json?auth=${token}\`, { headers: COMMON_HEADERS.JSON })` block. New thunks must not add another copy: use the shared helper once it exists, and until then follow the shape below exactly so migration is mechanical.
 
 ### Error Handling Pattern
 
-The standard practice is to check `!response.ok` and throw a generic `REQUEST_ERROR` (or a valid user-facing error message) rather than performing granular status code checks, **unless specific UI behaviour depends on the status code**.
+Check `!response.ok` and throw a generic `REQUEST_ERROR` (or a user-facing message from `ERROR_MESSAGES`) rather than performing granular status code checks, **unless specific UI behaviour depends on the status code**. Always reject with a string: `rejectWithValue(error.message)`, never the error object.
 
 ```javascript
 export const fetchTravellersThunk = createAsyncThunk(
@@ -58,43 +46,27 @@ export const fetchTravellersThunk = createAsyncThunk(
 )
 ```
 
-### RTK Query Example (Reference)
-
-```javascript
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-
-export const travellersApi = createApi({
-	reducerPath: 'travellersApi',
-	baseQuery: fetchBaseQuery({ baseUrl: API_BACKEND_URL }),
-	endpoints: (builder) => ({
-		getTravellers: builder.query({
-			query: () => '/travellers',
-		}),
-		createTraveller: builder.mutation({
-			query: (travellerData) => ({
-				url: '/travellers',
-				method: 'POST',
-				body: travellerData,
-			}),
-		}),
-	}),
-})
-
-export const { useGetTravellersQuery, useCreateTravellerMutation } =
-	travellersApi
-```
+Reference implementations: `loadMessages` in `src/store/slices/messagesSlice.js` (fetch) and `login` in `src/store/slices/authenticationSlice.js` (Firebase SDK, where `error.code` is mapped to a message).
 
 ## Constants & Error Messages
 
-- **Strictly** use centralised constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`, `REQUEST_ERROR`).
+- **Strictly** use centralised constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`, `REQUEST_ERROR`). The Realtime Database base URL is `API_DATABASE.BASE_URL`.
 - Do not hardcode strings for error messages, API URLs, or paths.
 - **Error Constants separation**:
     - Use `API_ERROR_MESSAGE` for internal/technical log messages and logic checks (e.g., 'Failed to fetch').
     - Use `ERROR_MESSAGES` for user-facing UI strings.
+    - Firebase Auth messages currently sit under `AUTHENTICATION_ACTION_TYPES.*_MESSAGE` in `src/constants/auth`; do not add a further location (target: fold into `ERROR_MESSAGES`, #397).
+    - Use `handleApiError` from `src/utils/errorHandler` to turn a caught error into a message; do not repeat `error.message || '...'` inline.
 
 ## State Persistence
 
 Persisted state is configured in `src/store/store.js`. When modifying which slices or state properties should persist, update the persist configuration accordingly.
+
+- `authentication` and `travellers` persist; `messages` is blacklisted.
+- A `resetLastFetch` transform nulls `travellers.lastFetch` on rehydrate so a persisted list is always reconciled with the database.
+- `src/store/storage.js` is a Vite CommonJS interop shim for `redux-persist`'s storage; import storage from it, not from `redux-persist/lib/storage`.
+- Non-serialisable action arguments (e.g. `meta.arg.files`) are listed in `ignoredActionPaths` in the serialisable check; add to it rather than disabling the check.
+- The session is also mirrored to `localStorage` (`token`, `userId`, `userName`, `userEmail`, `tokenExpiration`, `isAdmin`). Read it through the selectors in `authenticationSlice.js` (`selectUserId`, `selectAuthenticationToken`, …), never `localStorage.getItem` (target: key constant and call-site cleanup, #398).
 
 - Keep private data (e.g. messages) out of redux-persist, and clear it on logout — including when logout is rejected.
 

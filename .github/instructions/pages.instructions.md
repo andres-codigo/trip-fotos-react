@@ -18,18 +18,17 @@ Pages are located in `src/pages` and should be grouped by route or feature area.
     ```
     src/pages/authentication/
       Authentication.jsx
-      Authentication.module.scss
       __tests__/
-        Authentication.cy.jsx
-        Authentication.test.js
+        Authentication.test.jsx
     ```
+    A page that needs its own styles adds `{PageName}.module.scss` (PascalCase, matching the page file; target: the existing lowercase `register.module.scss`-style names, #401). Add `{PageName}.cy.jsx` when the page has non-trivial interaction.
 
 ## Page Responsibilities
 
 Pages should focus on route-level orchestration and composition:
 
 - Handle route and query parameters when needed.
-- Orchestrate data loading via Redux thunks or RTK Query hooks.
+- Orchestrate data loading by dispatching Redux thunks.
 - Compose reusable UI/components from `src/components`.
 - Keep reusable view logic in components/hooks instead of embedding all logic in pages.
 
@@ -53,11 +52,11 @@ Do not render `<main>`, `<header>` or `<footer>` inside dialogs or other compone
 
 ## Data Loading
 
-- Trigger page data loading in lifecycle hooks (for example, `useEffect`) or RTK Query hooks.
-- Keep loading and error state in Redux/store-backed logic rather than ad hoc local patterns.
+- Trigger page data loading by dispatching a thunk from a lifecycle hook (for example, `useEffect`).
+- Read loading and error state from the slice (`status`/`error` via selectors). Local `useState` is acceptable only for the outcome of a single dispatch the page awaits itself (e.g. `Authentication`, `Register`); do not add a third variant such as `TravellerDetail`'s `{ id, failed }` object when a selector would do.
 - Reuse selectors where possible to avoid repetitive state mapping logic.
 
-See [store.instructions.md](./store.instructions.md) for RTK Query/thunk conventions.
+See [store.instructions.md](./store.instructions.md) for thunk conventions.
 
 ## Error Handling
 
@@ -71,12 +70,12 @@ When creating or modifying pages, keep both local and end-to-end coverage aligne
 
 ### Local tests (page folder `__tests__`)
 
-- Cypress component-style page test: `*.cy.jsx`.
-- Vitest page/unit logic test: `*.test.js`.
+- Vitest page test: `*.test.jsx` (always).
+- Cypress component-style page test: `*.cy.jsx` (when the page has non-trivial interaction; today `ContactTraveller` and `TravellerDetail`).
 
 ### E2E tests (`cypress/e2e/pages`)
 
-- Create or update page flows as `[PageName].page.cy.js`.
+- Create or update page flows as `[PageName].page.cy.js`. App-wide flows are `*.e2e.cy.js` (`cypress/e2e/app`) and shared-component flows `*.component.cy.js` (`cypress/e2e/components`).
 - Use shared constants from `src/constants/test` and helper utilities from `cypress/support/utils`.
 
 ### Run commands

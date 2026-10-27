@@ -26,8 +26,12 @@ Automated scaffolding workflows for common tasks:
 
 - **Create Component**: Use the `create-component` agent to scaffold new components with full structure and tests.
 - **Create Page**: Use the `create-page` agent to scaffold new pages with route integration and tests.
-- **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with RTK Query/thunks and tests.
+- **Create Redux Slice**: Use the `create-redux-slice` agent to scaffold new Redux slices with thunks and tests.
 - **Create Hook**: Use the `create-hook` agent to scaffold new custom hooks with tests, component-scoped or shared.
+
+### Keeping Guidance In Step With The Code
+
+Each concern (data fetching, error messages, form errors, loading state, hooks, spacing, test selectors) has one documented pattern. A change that introduces a different way of doing one must update the matching instruction file in the same PR, or reuse the documented one. Where the code has not yet converged, the instruction file says "target" and names the tracking issue, so a reader can tell the rule from the exception.
 
 ## AI Assistance & Claude Code Guidance
 
@@ -49,7 +53,7 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 
 - **create-component**: Scaffold new components with full structure and tests.
 - **create-page**: Scaffold new pages with route integration and tests.
-- **create-redux-slice**: Scaffold new Redux slices with RTK Query/thunks and tests.
+- **create-redux-slice**: Scaffold new Redux slices with thunks and tests.
 - **create-hook**: Scaffold new custom hooks with tests.
 
 ### Hooks & Permissions
