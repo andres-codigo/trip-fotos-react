@@ -8,7 +8,6 @@ export const MOCK_API = Object.freeze({
 })
 
 export const MOCK_API_RESPONSES = {
-	DISPLAY_NAME_SUCCESS: { displayName: MOCK_USER.FULL_NAME },
 	GENERIC_ERROR: { error: 'Error' },
 	TRAVELLERS_RESPONSE: {
 		user1: {

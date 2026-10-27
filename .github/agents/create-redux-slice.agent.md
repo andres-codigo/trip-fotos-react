@@ -27,8 +27,8 @@ Use this agent when you need to create a new Redux slice with reducers, async lo
 
 4. **Async Logic Implementation**
     - Create thunks using `createAsyncThunk`, reading `token`/`userId` via the authentication selectors
-    - Use the shared request helper if it exists (#396); otherwise copy the `loadMessages` shape in `messagesSlice.js`
-    - Check `!response.ok` and throw `ERROR_MESSAGES.REQUEST_ERROR` or a user-facing message; reject with `rejectWithValue(error.message)`
+    - Call the Realtime Database through `databaseRequest` (`src/store/databaseRequest.js`), never a raw `fetch`; copy the `loadMessages` shape in `messagesSlice.js`
+    - `databaseRequest` throws `ERROR_MESSAGES.REQUEST_ERROR` on `!response.ok`; reject with `rejectWithValue(handleApiError(error, ...))`
     - Do NOT perform granular status code checks (e.g., 404, 500) unless specific UI behaviour depends on them
     - Add extra reducers for pending, fulfilled, and rejected states
     - If the slice holds private data, clear it on `logout.fulfilled` and `logout.rejected` and keep it out of redux-persist
@@ -68,7 +68,7 @@ Use this agent when you need to create a new Redux slice with reducers, async lo
 ## Notes
 
 - Thunks are the only async pattern; do not introduce `createApi`
-- Error handling must follow the `!response.ok` check pattern with generic `REQUEST_ERROR` or user-facing messages
+- Error handling comes from `databaseRequest` (generic `REQUEST_ERROR`) plus `handleApiError`; do not re-check `response.ok`
 - Slice tests must be created immediately when the slice is created
 - Persist configuration must be updated if the slice's state should survive page reloads
 - All generated files must end with a trailing newline at EOF to satisfy linting rules

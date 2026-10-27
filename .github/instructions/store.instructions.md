@@ -16,37 +16,41 @@ applyTo: 'src/store/**/*.{jsx,js}'
 
 Thunks (`createAsyncThunk`) are the single standard for server data. There is no RTK Query in this app; do not add `createApi` alongside them.
 
-- **Realtime Database** calls use `fetch` from inside a thunk.
-- **Auth and Storage** calls use the Firebase SDK from inside a thunk.
-- Components, hooks and pages never call `fetch` themselves; they dispatch a thunk (target: `useCitySearch` still does, see #396).
+- **Realtime Database** calls go through `databaseRequest` (`src/store/databaseRequest.js`) from inside a thunk.
+- **Auth and Storage** calls use the Firebase SDK from inside a thunk (`updateProfile` for the display name, not the Identity Toolkit REST API).
+- Components, hooks and pages never call the Realtime Database, Auth or Storage; they dispatch a thunk. The one exception is a third-party read-only lookup that is not app data, such as `useCitySearch` calling the Photon geocoder: it keeps its results in the hook, not Redux.
 - Each slice owns `status` and `error` for its thunks, set from `pending`/`fulfilled`/`rejected` extra reducers.
 
-### Shared Request Helper (target — #396)
+### Shared Request Helper
 
-Today each thunk repeats the `fetch(\`${API_DATABASE.BASE_URL}/...json?auth=${token}\`, { headers: COMMON_HEADERS.JSON })` block. New thunks must not add another copy: use the shared helper once it exists, and until then follow the shape below exactly so migration is mechanical.
+`databaseRequest(path, { method, token, params, body })` builds the URL (`BASE_URL` + path + `.json` + `?auth=` and any `params`), sets `COMMON_HEADERS.JSON`, JSON-encodes `body`, and throws `REQUEST_ERROR` when `!response.ok`. It returns the response so the thunk parses it (`await response.json()`), or ignores it for a DELETE. Never write a raw `fetch` to the database in a thunk.
 
 ### Error Handling Pattern
 
-Check `!response.ok` and throw a generic `REQUEST_ERROR` (or a user-facing message from `ERROR_MESSAGES`) rather than performing granular status code checks, **unless specific UI behaviour depends on the status code**. Always reject with a string: `rejectWithValue(error.message)`, never the error object.
+`databaseRequest` already throws a generic `REQUEST_ERROR` on `!response.ok`; thunks do not check the status again or perform granular status code checks, **unless specific UI behaviour depends on the status code**. Always reject with a string via `handleApiError`/`error.message`, never the error object.
 
 ```javascript
-export const fetchTravellersThunk = createAsyncThunk(
-	'travellers/fetchTravellersThunk',
-	async (_, { rejectWithValue }) => {
+export const loadMessages = createAsyncThunk(
+	MESSAGES_ACTION_TYPES.LOAD_MESSAGES,
+	async (_, { getState, rejectWithValue }) => {
 		try {
-			const response = await fetch(API_URL)
-			if (!response.ok) {
-				throw new Error(REQUEST_ERROR)
-			}
+			const userId = selectUserId(getState())
+			const token = selectAuthenticationToken(getState())
+
+			const response = await databaseRequest(`/messages/${userId}`, {
+				token,
+			})
 			return await response.json()
 		} catch (error) {
-			return rejectWithValue(error.message)
+			return rejectWithValue(
+				handleApiError(error, API_ERROR_MESSAGE.LOAD_MESSAGES_CATCH),
+			)
 		}
 	},
 )
 ```
 
-Reference implementations: `loadMessages` in `src/store/slices/messagesSlice.js` (fetch) and `login` in `src/store/slices/authenticationSlice.js` (Firebase SDK, where `error.code` is mapped to a message).
+Reference implementations: `loadMessages` in `src/store/slices/messagesSlice.js` (database) and `login` in `src/store/slices/authenticationSlice.js` (Firebase SDK, where `error.code` is mapped to a message).
 
 ## Constants & Error Messages
 

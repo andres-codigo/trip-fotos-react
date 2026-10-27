@@ -42,7 +42,7 @@ If adding to a folder with flat components, refactor existing components into th
 - Each component must have a `__tests__` directory in its folder.
 - Hooks specific to a component belong in a `hooks` subfolder within the component's folder, one folder per hook, default-exported from `index.js` (e.g., `hooks/useCitySearch/index.js`), with the test in that hook's own `__tests__/`. Hooks shared across components live in `src/utils/{useHookName}/index.js` (see `create-hook.agent.md`).
 - A hook returns an object (`{ value, action }`). A tuple is only for a `useState`-style pair.
-- Hooks do not read `localStorage`, call `fetch`, or define exported constants; use store selectors, thunks and `src/constants`. Target: `useFormField`, `useContactTravellerForm` and `useTravellerRegistration` (flat files, #399) and `useCitySearch`'s `fetch` (#396) still diverge.
+- Hooks do not read `localStorage`, call the database or define exported constants; use store selectors, thunks and `src/constants`. Target: `useFormField`, `useContactTravellerForm` and `useTravellerRegistration` (flat files, #399) still diverge.
 
 ### Prop Types
 
