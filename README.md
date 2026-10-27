@@ -53,10 +53,19 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 
 ## 🚧 Status
 
-Feature parity with the original Vue app is complete (epic [#274](https://github.com/andres-codigo/trip-fotos-react/issues/274)), and the app is live. Current work is polish, test reliability and tooling rather than new features. Next up:
+Feature parity with the original Vue app is complete (epic [#274](https://github.com/andres-codigo/trip-fotos-react/issues/274)), and the app is live. Current work is polish, consistency and tooling rather than new features.
 
-- [#344](https://github.com/andres-codigo/trip-fotos-react/issues/344) — fix the flaky E2E Register-link click
-- [#287](https://github.com/andres-codigo/trip-fotos-react/issues/287) — a reusable `/ui-review` skill for UI/UX audits
+**Recently shipped**
+
+- Consistency refactors: one Realtime Database request helper, one user-facing error path, session selectors, one hook layout, one form-error and loading pattern, and styles drift cleaned up ([#396](https://github.com/andres-codigo/trip-fotos-react/issues/396)–[#401](https://github.com/andres-codigo/trip-fotos-react/issues/401))
+- Test hygiene, axe-core accessibility checks in the Cypress tests, and an E2E for a stale persisted store
+- Fixes: the Messages nav count, the Register file input, the 404 page link spacing, stale traveller data after a cleared database, and the traveller Auth display name
+- Process: a browser check for UI-affecting changes, and Issue Intake enforcing the board order Triage → Backlog → Ready → In progress
+
+**Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
+
+- [#378](https://github.com/andres-codigo/trip-fotos-react/issues/378) — Epic: lean the repo (scripts, dependencies, config)
+- [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration
 - [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — optionally, run E2E against the Firebase Emulator Suite instead of the live project
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
