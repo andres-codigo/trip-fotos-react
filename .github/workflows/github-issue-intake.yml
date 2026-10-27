@@ -313,12 +313,23 @@ jobs:
                         if (action === 'labeled') {
                           if (labelName === BLOCKED_LABEL) return STATUS.BLOCKED
                           if (isBlocked) return null
+                          // Triage is an inbox: an issue is assessed (Backlog) before it is queued or started
+                          if ((labelName === READY_LABEL || labelName === IN_PROGRESS_LABEL) && currentStatus === STATUS.TRIAGE) {
+                            await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNumber, name: labelName })
+                            await github.rest.issues.createComment({
+                              owner,
+                              repo,
+                              issue_number: issueNumber,
+                              body: `Removed \`${labelName}\`: this issue is still in Triage. Assess it first (add its area or type labels, which moves it to Backlog), then add \`${labelName}\`.`,
+                            })
+                            return null
+                          }
                           if (labelName === READY_LABEL) {
-                            return [null, STATUS.TRIAGE, STATUS.BACKLOG].includes(currentStatus) ? STATUS.READY : null
+                            return [null, STATUS.BACKLOG].includes(currentStatus) ? STATUS.READY : null
                           }
                           // Never pulls an issue back from In review or Done (#302)
                           if (labelName === IN_PROGRESS_LABEL) {
-                            return [null, STATUS.TRIAGE, STATUS.BACKLOG, STATUS.READY].includes(currentStatus)
+                            return [null, STATUS.BACKLOG, STATUS.READY].includes(currentStatus)
                               ? STATUS.IN_PROGRESS
                               : null
                           }
