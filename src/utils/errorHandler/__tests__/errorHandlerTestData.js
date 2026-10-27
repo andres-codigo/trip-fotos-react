@@ -7,7 +7,6 @@ export const API_ERROR_MESSAGE = {
 	CUSTOM_DEFAULT: 'Custom default',
 	FALLBACK_MESSAGE: 'Fallback message',
 	DEFAULT_ERROR: 'Default error',
-	FALLBACK_ERROR: 'An unknown error occurred.',
 }
 
 export const ERROR_OBJECTS = {

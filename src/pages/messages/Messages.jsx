@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { ERROR_MESSAGES } from '@/constants/errors'
+import { handleApiError } from '@/utils/errorHandler'
 import { MESSAGES_PAGE } from '@/constants/test'
 import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
@@ -33,7 +33,7 @@ const Messages = () => {
 		dispatch(loadMessages()).then((result) => {
 			if (!isActive) return
 			if (loadMessages.rejected.match(result)) {
-				setError(result.payload || ERROR_MESSAGES.SOMETHING_WENT_WRONG)
+				setError(handleApiError(result.payload))
 			}
 			setIsLoading(false)
 		})

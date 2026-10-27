@@ -7,6 +7,14 @@ export const MOCK_API = Object.freeze({
 	METHOD_POST: 'POST',
 })
 
+// Error keys in the body of an Identity Toolkit response, which the Auth SDK turns into an auth/* code
+export const IDENTITY_TOOLKIT_ERRORS = Object.freeze({
+	EMAIL_EXISTS: 'EMAIL_EXISTS',
+	INVALID_LOGIN_CREDENTIALS: 'INVALID_LOGIN_CREDENTIALS',
+	TOO_MANY_ATTEMPTS_TRY_LATER: 'TOO_MANY_ATTEMPTS_TRY_LATER',
+	UNMAPPED: 'UNMAPPED_ERROR',
+})
+
 export const MOCK_API_RESPONSES = {
 	GENERIC_ERROR: { error: 'Error' },
 	TRAVELLERS_RESPONSE: {
@@ -35,10 +43,4 @@ export const MOCK_SIGNUP_ACTION = Object.freeze({
 		email: MOCK_KEYS.EMAIL,
 		password: MOCK_KEYS.PASSWORD,
 	},
-})
-
-export const MOCK_INVALID_LOGIN_ERROR = Object.freeze({
-	code: 'INVALID_LOGIN',
-	message: 'The email or password is incorrect.',
-	status: 401,
 })

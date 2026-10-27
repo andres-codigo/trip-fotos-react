@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import PropTypes from 'prop-types'
 
 import { GLOBAL } from '@/constants/ui'
-import { ERROR_MESSAGES } from '@/constants/errors'
+import { handleApiError } from '@/utils/errorHandler'
 import { PATHS } from '@/constants/ui'
 
 import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
@@ -64,15 +64,13 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				)
 
 				if (loadTravellers.rejected.match(result)) {
-					setError(
-						result.payload || ERROR_MESSAGES.SOMETHING_WENT_WRONG,
-					)
+					setError(handleApiError(result.payload))
 				}
 				if (!silent) {
 					setLoading(false)
 				}
 			} catch (error) {
-				setError(error.message || ERROR_MESSAGES.SOMETHING_WENT_WRONG)
+				setError(handleApiError(error))
 				if (!silent) {
 					setLoading(false)
 				}

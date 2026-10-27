@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import { ERROR_MESSAGES } from '@/constants/errors'
+import { handleApiError } from '@/utils/errorHandler'
 import { MESSAGE_ITEM } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 
@@ -26,7 +26,7 @@ const MessageItem = ({ id, email, message }) => {
 
 		// On success the slice removes this message, unmounting the item
 		if (deleteMessage.rejected.match(result)) {
-			setError(result.payload || ERROR_MESSAGES.SOMETHING_WENT_WRONG)
+			setError(handleApiError(result.payload))
 			setIsDeleting(false)
 		}
 	}
