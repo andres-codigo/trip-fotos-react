@@ -28,7 +28,7 @@ const validateField = (id, value) => {
 	return { isValid: true, message: '' }
 }
 
-export const useContactTravellerForm = (initialEmail = '') => {
+const useContactTravellerForm = (initialEmail = '') => {
 	const [formData, setFormData] = useState({
 		[EMAIL]: { value: initialEmail, message: '', isValid: true },
 		[MESSAGE]: { value: '', message: '', isValid: true },
@@ -67,3 +67,5 @@ export const useContactTravellerForm = (initialEmail = '') => {
 
 	return { formData, handleInputChange, submitHandler }
 }
+
+export default useContactTravellerForm

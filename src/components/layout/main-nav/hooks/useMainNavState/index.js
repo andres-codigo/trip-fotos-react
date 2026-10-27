@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-import { useLoggedInTravellerName } from '@/components/layout/main-nav/hooks/useLoggedInTravellerName/index'
+import useLoggedInTravellerName from '@/components/layout/main-nav/hooks/useLoggedInTravellerName'
 
-export function useMainNavState() {
+function useMainNavState() {
 	const [travellerName, setTravellerName] = useLoggedInTravellerName()
 	const [totalMessages, setTotalMessages] = useState(null)
 	const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -16,3 +16,5 @@ export function useMainNavState() {
 		setIsMenuOpen,
 	}
 }
+
+export default useMainNavState

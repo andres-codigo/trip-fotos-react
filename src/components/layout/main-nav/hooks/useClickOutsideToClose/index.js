@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 import { GLOBAL } from '@/constants/ui'
 
-export function useClickOutsideToClose(
+function useClickOutsideToClose(
 	isMenuOpen,
 	hamburgerRef,
 	navMenuRef,
@@ -25,3 +25,5 @@ export function useClickOutsideToClose(
 		return () => document.removeEventListener('click', handleClickOutside)
 	}, [isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen])
 }
+
+export default useClickOutsideToClose

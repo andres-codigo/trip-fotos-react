@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
-import useFormField from './useFormField'
+import useFormField from '@/components/forms/user-authentication/hooks/useFormField'
 
 /**
  * useFormField Hook Unit Tests

@@ -1,11 +1,6 @@
 import { useEffect } from 'react'
 
-export function useMobileMenu(
-	hamburgerRef,
-	navMenuRef,
-	setIsMenuOpen,
-	isLoggedIn,
-) {
+function useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn) {
 	useEffect(() => {
 		if (!isLoggedIn) return
 
@@ -29,3 +24,5 @@ export function useMobileMenu(
 		}
 	}, [hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn])
 }
+
+export default useMobileMenu

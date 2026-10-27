@@ -12,7 +12,7 @@ import AddFile from '@/components/forms/file-uploader/AddFile'
 
 import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
 import { formatCity, getCityId } from '@/utils/formatCity'
-import { useTravellerRegistration } from './hooks/useTravellerRegistration'
+import useTravellerRegistration from './hooks/useTravellerRegistration'
 import useCitySearch, {
 	CITY_SEARCH_STATUS,
 } from '@/components/forms/traveller-registration/hooks/useCitySearch'

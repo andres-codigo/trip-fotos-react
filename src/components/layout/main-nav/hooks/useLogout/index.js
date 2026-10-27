@@ -2,7 +2,7 @@ import { useDispatch } from 'react-redux'
 
 import { logout } from '@/store/slices/authenticationSlice'
 
-export function useLogout(setTravellerName, setTotalMessages, setIsMenuOpen) {
+function useLogout(setTravellerName, setTotalMessages, setIsMenuOpen) {
 	const dispatch = useDispatch()
 
 	const handleLogoutClick = (event) => {
@@ -17,3 +17,5 @@ export function useLogout(setTravellerName, setTotalMessages, setIsMenuOpen) {
 
 	return handleLogoutClick
 }
+
+export default useLogout
