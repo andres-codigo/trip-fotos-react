@@ -6,8 +6,6 @@ import { PATHS } from '@/constants/ui'
 // TODO: Remove and import hooks once store slices are implemented
 export const mockUseMainNavState = () => ({
 	travellerName: 'Test User',
-	// TODO: Add messages count when messages store is implemented
-	// totalMessages: 5,
 	useLogout: () => {},
 })
 

@@ -4,14 +4,11 @@ import useLoggedInTravellerName from '@/components/layout/main-nav/hooks/useLogg
 
 function useMainNavState() {
 	const [travellerName, setTravellerName] = useLoggedInTravellerName()
-	const [totalMessages, setTotalMessages] = useState(null)
 	const [isMenuOpen, setIsMenuOpen] = useState(false)
 
 	return {
 		travellerName,
 		setTravellerName,
-		totalMessages,
-		setTotalMessages,
 		isMenuOpen,
 		setIsMenuOpen,
 	}

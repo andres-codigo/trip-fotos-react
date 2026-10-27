@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
 import { PATHS } from '@/constants/ui'
+
+import { loadMessages, selectMessagesCount } from '@/store/slices/messagesSlice'
 
 import useClickOutsideToCloseDefault from './hooks/useClickOutsideToClose'
 import useLogoutDefault from './hooks/useLogout'
@@ -28,22 +30,17 @@ function MainNav({
 	useLogout = useLogoutDefault,
 }) {
 	const location = useLocation()
+	const dispatch = useDispatch()
 
 	const usersName = useSelector((state) => state.travellers.travellerName)
 	const isTravellerFromStore = useSelector(
 		(state) => state.travellers.isTraveller,
 	)
 	const isTraveller = isTravellerProp ?? isTravellerFromStore
-	// const messagesCount = useSelector((state) => state.messages.messagesCount);
+	const totalMessages = useSelector(selectMessagesCount)
 
-	const {
-		travellerName,
-		setTravellerName,
-		totalMessages,
-		setTotalMessages,
-		isMenuOpen,
-		setIsMenuOpen,
-	} = useMainNavState()
+	const { travellerName, setTravellerName, isMenuOpen, setIsMenuOpen } =
+		useMainNavState()
 
 	const hamburgerRef = useRef(null)
 	const navMenuRef = useRef(null)
@@ -51,38 +48,20 @@ function MainNav({
 	useClickOutsideToClose(isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen)
 	useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn)
 
-	//// START
-
-	/// TODO: ENSURE THIS IS WORKING CORRECTLY ONCE TRAVELLERS AND MESSAGES STORE IS ADDED
-
-	// useEffect(() => {
-	// 	setTotalMessages(messagesCount);
-	// }, [messagesCount]);
-
 	useEffect(() => {
 		if (isLoggedIn) {
 			setTravellerName(usersName)
-			// if (totalMessages === null) {
-			// 	setMessageCount();
-			// }
 		}
-		// add totalMessages to dependency array if using setMessageCount
-		// }, [isLoggedIn, totalMessages, usersName, setTravellerName]);
 	}, [isLoggedIn, usersName, setTravellerName])
 
-	// const setMessageCount = () => {
-	// 	dispatch({ type: 'messages/loadMessages' }).then(() => {
-	// 		setTotalMessages(messagesCount);
-	// 	});
-	// };
+	// Messages are traveller-only; loading here keeps the badge current without opening the Messages page
+	useEffect(() => {
+		if (isLoggedIn && isTraveller) {
+			dispatch(loadMessages())
+		}
+	}, [isLoggedIn, isTraveller, dispatch])
 
-	//// END
-
-	const handleLogoutClick = useLogout(
-		setTravellerName,
-		setTotalMessages,
-		setIsMenuOpen,
-	)
+	const handleLogoutClick = useLogout(setTravellerName, setIsMenuOpen)
 
 	const handleMenuItemClick = () => {
 		setIsMenuOpen(false)

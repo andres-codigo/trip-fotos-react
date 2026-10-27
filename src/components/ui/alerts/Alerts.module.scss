@@ -34,6 +34,11 @@
 		background-color: variables.$color-mojo; // Reddish
 		color: variables.$color-white;
 	}
+
+	&.info {
+		background-color: variables.$color-ripe-plum;
+		color: variables.$color-white;
+	}
 }
 
 .closeButton {
