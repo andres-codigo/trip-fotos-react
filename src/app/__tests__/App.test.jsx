@@ -34,10 +34,11 @@ import App from '@/app/App'
  * - Authorisation: Public vs protected route access control
  */
 
-vi.mock('react-redux', () => ({
-	useDispatch: () => vi.fn(),
-	useSelector: vi.fn(),
-}))
+vi.mock('react-redux', async () => {
+	const { createReactReduxMock } =
+		await import('@/testUtils/vitest/mockReactRedux')
+	return createReactReduxMock()
+})
 
 vi.mock('react-router-dom', async () => {
 	const actual = await vi.importActual('react-router-dom')

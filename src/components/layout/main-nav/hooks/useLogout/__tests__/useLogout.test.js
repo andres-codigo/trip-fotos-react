@@ -5,9 +5,11 @@ import { useDispatch } from 'react-redux'
 import useLogout from '@/components/layout/main-nav/hooks/useLogout'
 import { logout } from '@/store/slices/authenticationSlice'
 
-vi.mock('react-redux', () => ({
-	useDispatch: vi.fn(),
-}))
+vi.mock('react-redux', async () => {
+	const { createReactReduxMock } =
+		await import('@/testUtils/vitest/mockReactRedux')
+	return createReactReduxMock()
+})
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
 	logout: vi.fn(),

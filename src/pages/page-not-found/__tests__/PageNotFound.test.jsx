@@ -21,9 +21,11 @@ import pageNotFoundStyles from '@/pages/page-not-found/PageNotFound.module.scss'
  * - Uses mocks for redux, routing, and UI components to isolate logic
  */
 
-vi.mock('react-redux', () => ({
-	useSelector: vi.fn(),
-}))
+vi.mock('react-redux', async () => {
+	const { createReactReduxMock } =
+		await import('@/testUtils/vitest/mockReactRedux')
+	return createReactReduxMock()
+})
 
 vi.mock('@/components/ui/card/BaseCard', () => ({
 	__esModule: true,

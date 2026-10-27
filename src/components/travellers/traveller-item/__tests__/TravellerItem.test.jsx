@@ -9,8 +9,9 @@ import { GLOBAL } from '@/constants/ui'
 import { BADGE, IMAGE, TRAVELLER_ITEM } from '@/constants/test'
 
 vi.mock('react-redux', async () => {
-	const actual = await vi.importActual('react-redux')
-	return { ...actual, useDispatch: vi.fn(), useSelector: vi.fn() }
+	const { createReactReduxMock } =
+		await import('@/testUtils/vitest/mockReactRedux')
+	return createReactReduxMock()
 })
 
 vi.mock('@/store/slices/authenticationSlice', () => ({

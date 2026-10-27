@@ -19,7 +19,7 @@ Use existing project paths for shared testing assets:
 - **Test constants and mock data**: `src/constants/test` (`mock-data/` for data, `selectors/` for `getByDataCy` selectors). A colocated `*TestData.js` is acceptable only for data used by that one test folder.
 - **Cypress helper utilities**: `cypress/support/utils`
 - **Cypress provider mounts**: `cypress/support/commands-support-files/mountWithProviders.jsx`
-- **General test helpers**: `src/testUtils` (`vitest/` polyfills, setup and `mockClassNames`; `cypress/` `selectors.js` and `TestLocationDisplay`). Put a helper used by more than one test folder here rather than beside a single test; a shared `react-redux` mock belongs here too (today it is hand-mocked per test, #402).
+- **General test helpers**: `src/testUtils` (`vitest/` polyfills, setup and `mockClassNames`; `cypress/` `selectors.js` and `TestLocationDisplay`). Put a helper used by more than one test folder here rather than beside a single test; `vitest/mockReactRedux.js` is the shared `react-redux` mock (real `Provider`, `useSelector` and `useDispatch` as spies), used as `vi.mock('react-redux', async () => (await import('@/testUtils/vitest/mockReactRedux')).createReactReduxMock())` rather than hand-mocking it per test.
 
 Do not introduce `cypress/support/constants` unless explicitly adopted in a future refactor.
 

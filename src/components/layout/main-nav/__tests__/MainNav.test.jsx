@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { useSelector } from 'react-redux'
 
 /**
  * MainNav Unit Tests
@@ -21,15 +22,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
  */
 
 const mockUseLocation = vi.fn()
-const mockUseSelector = vi.fn()
 
 vi.mock('react-router-dom', () => ({
 	useLocation: () => mockUseLocation(),
 }))
 
-vi.mock('react-redux', () => ({
-	useSelector: (selector) => mockUseSelector(selector),
-}))
+vi.mock('react-redux', async () => {
+	const { createReactReduxMock } =
+		await import('@/testUtils/vitest/mockReactRedux')
+	return createReactReduxMock()
+})
 
 import MainNav from '@/components/layout/main-nav/MainNav'
 
@@ -133,7 +135,7 @@ describe('<MainNav />', () => {
 		})
 
 		// Default selector mock
-		mockUseSelector.mockImplementation((selector) =>
+		vi.mocked(useSelector).mockImplementation((selector) =>
 			selector({
 				travellers: {
 					travellerName: mockTravellerName,
@@ -169,7 +171,7 @@ describe('<MainNav />', () => {
 		})
 
 		it('should clear the displayed name when the store name is empty', () => {
-			mockUseSelector.mockImplementation((selector) =>
+			vi.mocked(useSelector).mockImplementation((selector) =>
 				selector({
 					travellers: { travellerName: '', isTraveller: true },
 				}),
