@@ -28,6 +28,7 @@ vi.mock('@/store/slices/travellersSlice', async (importOriginal) => {
 		selectHasTravellers: vi.fn(),
 		selectIsTraveller: vi.fn(),
 		selectIsTravellerKnown: vi.fn(),
+		selectLastFetch: vi.fn(),
 	}
 })
 
@@ -87,6 +88,7 @@ const renderTravellers = (props = {}, locationState = null) => {
 describe('Travellers', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
+		vi.mocked(travellersSlice.selectLastFetch).mockReturnValue(1)
 	})
 
 	const setupMocksForHasTravellers = () => {

@@ -43,6 +43,7 @@ vi.mock('@/store/slices/travellersSlice', () => ({
 	selectHasTravellers: vi.fn(),
 	selectIsTraveller: vi.fn(),
 	selectIsTravellerKnown: vi.fn(),
+	selectLastFetch: vi.fn(),
 }))
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
@@ -118,6 +119,7 @@ describe('<TravellersList />', () => {
 		vi.mocked(authenticationSlice.selectUserName).mockReturnValue(null)
 		vi.mocked(authenticationSlice.selectUserEmail).mockReturnValue(null)
 		vi.mocked(travellersSlice.selectIsTravellerKnown).mockReturnValue(true)
+		vi.mocked(travellersSlice.selectLastFetch).mockReturnValue(1)
 	})
 
 	const setupMocksForHasTravellers = () => {
@@ -507,6 +509,20 @@ describe('<TravellersList />', () => {
 		})
 
 		describe('component lifecycle', () => {
+			it('should load behind the spinner when the cached travellers have not been fetched this page load', () => {
+				setupMocksForHasTravellers()
+				vi.mocked(travellersSlice.selectLastFetch).mockReturnValue(null)
+
+				renderTravellersList()
+
+				expect(
+					screen.getByRole(SPINNER.ROLE_STATUS),
+				).toBeInTheDocument()
+				expect(
+					screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
+				).not.toBeInTheDocument()
+			})
+
 			it('should revalidate cached travellers on mount without showing the spinner', () => {
 				setupMocksForHasTravellers()
 
@@ -514,7 +530,7 @@ describe('<TravellersList />', () => {
 
 				expect(mockDispatch).toHaveBeenCalledTimes(1)
 				expect(travellersSlice.loadTravellers).toHaveBeenCalledWith({
-					forceRefresh: true,
+					forceRefresh: false,
 				})
 				expect(
 					screen.queryByRole(SPINNER.ROLE_STATUS),

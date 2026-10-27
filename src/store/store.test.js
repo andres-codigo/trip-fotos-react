@@ -26,6 +26,11 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 const persistConfigs = vi.hoisted(() => [])
 
 vi.mock('redux-persist', () => ({
+	createTransform: vi.fn((inbound, outbound, config) => ({
+		inbound,
+		outbound,
+		config,
+	})),
 	persistStore: vi.fn(() => ({ dispatch: vi.fn() })),
 	persistReducer: vi.fn((config, reducer) => {
 		persistConfigs.push(config)
@@ -90,6 +95,16 @@ describe('Store Configuration', () => {
 	it('should have messages slice in store', () => {
 		const state = store.getState()
 		expect(state.messages).toBeDefined()
+	})
+
+	it('should drop lastFetch from the travellers slice on rehydrate', () => {
+		const [{ outbound, config }] = persistConfigs[0].transforms
+
+		expect(config.whitelist).toEqual(['travellers'])
+		expect(outbound({ travellers: [], lastFetch: 123 })).toEqual({
+			travellers: [],
+			lastFetch: null,
+		})
 	})
 
 	it('should exclude messages from persistence', () => {
