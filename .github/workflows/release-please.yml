@@ -1,0 +1,23 @@
+name: Release - Release Please
+
+on:
+    push:
+        branches:
+            - main
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    release-please:
+        runs-on: ubuntu-latest
+
+        steps:
+            # PRs opened with the default token do not trigger the test workflows, so the release PR needs the PAT
+            - name: Open or update the release PR
+              uses: googleapis/release-please-action@v4
+              with:
+                  token: ${{ secrets['PROJECT_AUTOMATION_TOKEN'] || github.token }}
+                  config-file: release-please-config.json
+                  manifest-file: .release-please-manifest.json

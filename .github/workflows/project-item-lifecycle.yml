@@ -277,7 +277,8 @@ jobs:
                       }
 
                       const resolveIssueNumbers = async () => {
-                        if (isDependabotPR) return []
+                        // Release PRs have no issue to close and should not get a tracking issue
+                        if (isDependabotPR || pr.head?.ref?.startsWith('release-please--')) return []
 
                         const livePr = await getLivePullRequest()
                         const liveBody = livePr.body || ''

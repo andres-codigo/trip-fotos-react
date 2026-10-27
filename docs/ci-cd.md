@@ -177,6 +177,16 @@ Fetch the current README first with `gh project view 2 --owner andres-codigo --f
 - **Purpose:** Scans JavaScript/TypeScript and the GitHub Actions workflows for security vulnerabilities. Results appear under **Security → Code scanning**.
 - **Note:** Code scanning requires the repository to be **public** — on a private personal repository it is unavailable and the check will fail.
 
+## 9. Release Please
+
+- **Workflow File:** `.github/workflows/release-please.yml` (config in `release-please-config.json`, current version in `.release-please-manifest.json`)
+- **Triggers:** On **push** to `main`
+- **Purpose:** Works out the version from the conventional-commit titles of the squash-merged PRs and keeps one release PR open. The release PR bumps `version` in `package.json` and `package-lock.json` and updates `CHANGELOG.md`; merging it tags the release and publishes a GitHub Release. While the app is 0.x, `feat:` and `feature:` bump the minor version; `enhancement:`, `fix:` and `perf:` bump the patch. `chore`, `docs`, `test` and `refactor` PRs are hidden from the changelog and do not release on their own. The type list is `changelog-sections` in `release-please-config.json`; a type missing from it is ignored.
+- **Token:** The release PR is opened with `PROJECT_AUTOMATION_TOKEN` (see [Token Rotation](#token-rotation--recovery-guide)), because PRs opened with the default token do not trigger the test workflows the `main` ruleset requires. Project Item Lifecycle skips branches starting `release-please--`, so a release PR gets no tracking issue.
+- **Never edit `version` by hand.** After merging a `feat` or `fix` PR, merge the open release PR once its checks are green.
+
+---
+
 ## 🔒 Branch Protection
 
 The **Protect main** repository ruleset (**Settings → Rules → Rulesets**) applies to `main`, with no bypass list:
@@ -217,6 +227,7 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 | GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`    | Automation       | Issue Events     |
 | GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml` | Automation       | PR Target Events |
 | GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`      | Automation       | Push/Manual      |
+| Release - Release Please          | `.github/workflows/release-please.yml`         | Automation       | Push             |
 
 ---
 
