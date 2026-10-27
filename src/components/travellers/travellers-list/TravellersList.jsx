@@ -49,10 +49,12 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 		useCityFilter(travellers)
 
 	const loadTravellersHandler = useCallback(
-		async (refresh = false) => {
+		async (refresh = false, silent = false) => {
 			try {
-				setLoading(true)
-				setError(null)
+				if (!silent) {
+					setLoading(true)
+					setError(null)
+				}
 
 				const result = await dispatch(
 					loadTravellers({ forceRefresh: refresh }),
@@ -63,20 +65,24 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 						result.payload || ERROR_MESSAGES.SOMETHING_WENT_WRONG,
 					)
 				}
-				setLoading(false)
+				if (!silent) {
+					setLoading(false)
+				}
 			} catch (error) {
 				setError(error.message || ERROR_MESSAGES.SOMETHING_WENT_WRONG)
-				setLoading(false)
+				if (!silent) {
+					setLoading(false)
+				}
 			}
 		},
 		[dispatch],
 	)
 
-	// Load travellers on mount if not already cached in Redux
+	// The persisted list (and its lastFetch) can outlive the database, so a cached list is always re-fetched without hiding it behind the spinner
 	useEffect(() => {
-		if (shouldLoadOnMount && !hasInitialisedRef.current) {
+		if (!hasInitialisedRef.current) {
 			hasInitialisedRef.current = true
-			loadTravellersHandler()
+			loadTravellersHandler(!shouldLoadOnMount, !shouldLoadOnMount)
 		}
 		// Intentionally only run on mount
 		// eslint-disable-next-line react-hooks/exhaustive-deps

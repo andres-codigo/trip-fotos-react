@@ -518,6 +518,25 @@ describe('travellersSlice', () => {
 				expect(state.status).toBe('failed')
 			})
 
+			it('should clear a persisted selected traveller that no longer exists', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => mockTravellerData,
+				})
+				await store.dispatch(loadTraveller(mockId))
+				expect(
+					store.getState().travellers.selectedTraveller,
+				).not.toBeNull()
+
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => null,
+				})
+				await store.dispatch(loadTraveller(mockId))
+
+				expect(store.getState().travellers.selectedTraveller).toBeNull()
+			})
+
 			it('should handle network errors', async () => {
 				const networkError = new Error('Network Error')
 				fetch.mockRejectedValueOnce(networkError)
@@ -841,6 +860,18 @@ describe('travellersSlice', () => {
 	})
 
 	describe('checkIsTraveller', () => {
+		it('should clear a stale travellerName when the record no longer exists', async () => {
+			store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
+			global.fetch.mockResolvedValueOnce({
+				ok: true,
+				json: async () => null,
+			})
+
+			await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
+
+			expect(store.getState().travellers.travellerName).toBe('')
+		})
+
 		describe('success scenarios', () => {
 			it('should set isTraveller to true when the traveller record exists', async () => {
 				global.fetch.mockResolvedValueOnce({
@@ -900,20 +931,25 @@ describe('travellersSlice', () => {
 			['clearUser', () => authActions.clearUser()],
 			['logout fulfilled', () => logout.fulfilled(undefined, 'req')],
 			['logout rejected', () => logout.rejected(null, 'req')],
-		])('should reset isTraveller on %s', async (_, action) => {
-			global.fetch.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({ firstName: true }),
-			})
-			await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
+		])(
+			'should reset isTraveller and travellerName on %s',
+			async (_, action) => {
+				store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
+				global.fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ firstName: true }),
+				})
+				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
 
-			store.dispatch(action())
+				store.dispatch(action())
 
-			expect(store.getState().travellers).toMatchObject({
-				isTraveller: false,
-				isTravellerCheckedFor: null,
-			})
-		})
+				expect(store.getState().travellers).toMatchObject({
+					isTraveller: false,
+					isTravellerCheckedFor: null,
+					travellerName: '',
+				})
+			},
+		)
 	})
 
 	describe('reducer actions', () => {
