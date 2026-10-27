@@ -20,7 +20,7 @@ Rotate the token when any of the following happens:
 5. Grant required scopes:
 
 - `project`
-- `repo` (required if the repository is private)
+- `repo` (`public_repo` is enough on a public repository) — also needed by the Release Please workflow to open and update its release PR
 
 6. Generate the token and copy it immediately.
 

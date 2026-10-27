@@ -311,6 +311,7 @@ Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools 
 | GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`    | Issue Events     |
 | GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml` | PR Target Events |
 | GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`      | Push/Manual      |
+| Release - Release Please          | `.github/workflows/release-please.yml`         | Push             |
 
 The workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` repository secrets; E2E also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
 
@@ -357,6 +358,7 @@ trip-fotos-react/
 │   ├── copilot-instructions.md # Workspace-level Copilot guidelines
 │   └── labels.json             # Single source of truth for every label
 ├── .vscode/                     # Shared VS Code editor settings
+├── .release-please-manifest.json # Current version, maintained by release-please
 ├── _ai-assisted-dev-story/      # How Copilot and Claude Code are used, and the archived Vue parity programme
 ├── cypress/                    # Cypress tests
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS
@@ -385,6 +387,7 @@ trip-fotos-react/
 ├── .nvmrc                       # Specifies the Node.js version for Node Version Manager (nvm)
 ├── .prettierignore              # Prettier ignore rules
 ├── .prettierrc.json             # Prettier configuration
+├── CHANGELOG.md                 # Release notes, created by the first release-please release
 ├── CLAUDE.md                    # Workspace-level Claude Code guidelines
 ├── cypress.config.js            # Cypress testing configuration
 ├── database.rules.json          # Realtime Database security rules
@@ -395,6 +398,7 @@ trip-fotos-react/
 ├── jsconfig.json                # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
 ├── package.json                 # Project dependencies and scripts
 ├── README.md                    # Project documentation
+├── release-please-config.json   # release-please settings (version and changelog from commit titles)
 ├── storage.rules                # Cloud Storage security rules
 ├── stylelint.config.mjs         # Stylelint configuration (scoped style modules)
 ├── vercel.json                  # Vercel deployment configuration
