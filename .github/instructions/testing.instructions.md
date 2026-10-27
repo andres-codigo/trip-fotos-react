@@ -53,6 +53,19 @@ CI runs the full E2E suite on every pull request, so a local run is for earlier 
 
 `/verify` prints an `E2E advised` line for these paths. For other changes, leave E2E to CI. To run one spec, pass it through: `node .claude/skills/verify/run-e2e.mjs --spec <path>`. The runner reuses a dev server already on port 3000, so a Vite error overlay left from an earlier compile failure there will fail every spec; restart that server first.
 
+## Visual Check For UI Changes
+
+Do this for any change that can alter how a page looks (SCSS, layout, spacing, markup), before the PR is marked ready. Passing tests do not show a visual regression: a shared class overridden by a page module's own rule passed everything and was only visible on screen.
+
+- Write a throwaway Cypress E2E spec under `cypress/e2e/tmp/` (never committed) that visits the affected pages at 1280px and 400px wide and calls `cy.screenshot`. Run it on your branch and on `main`, then compare the images; byte-identical files mean no change, and any difference must be one you intended.
+- Cover every page that uses the changed styles, **including pages behind login**: sign in with `performLogin()` from `cypress/support/utils/authHelpers`. Do not assume a logged-in page is fine because a shared style works on a public one.
+- Keep the run read-only. Never submit a form or register a traveller against the live Firebase project. Stub the data instead with `cy.intercept` (the travellers list and detail, the messages inbox) and `cy.stubTravellerCheck(true)` for pages that need a registered traveller. The test database may have no travellers.
+- Wait for the content, not just the page shell: assert the data and images have rendered before the screenshot, or it captures the spinner.
+- Run it through `node .claude/skills/verify/run-e2e.mjs --spec <path>`, or start your own Vite server. Never kill whatever is on port 3000: it may be a developer's own server.
+- Delete the spec and its screenshots (`cypress/screenshots/` is gitignored) afterwards.
+
+Case-only renames of files (such as `register.module.scss` to `Register.module.scss`) can leave files missing when you `git switch` on a case-insensitive filesystem; `git restore` the affected folder if so.
+
 ## Required Updates
 
 Whenever components, pages, or store logic are modified, update the related tests in the same change.
