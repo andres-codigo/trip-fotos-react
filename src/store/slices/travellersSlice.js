@@ -85,7 +85,7 @@ export const travellerName = createAsyncThunk(
 
 export const registerTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.REGISTER_TRAVELLER,
-	async (data, { getState, rejectWithValue }) => {
+	async (data, { getState, dispatch, rejectWithValue }) => {
 		const userId = localStorage.getItem('userId')
 		const token = selectAuthenticationToken(getState())
 
@@ -179,6 +179,11 @@ export const registerTraveller = createAsyncThunk(
 					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${userId}.`,
 				)
 			}
+
+			// The record is already saved, so a failed name update must not report the registration as failed
+			await dispatch(
+				travellerName({ first: data.firstName, last: data.lastName }),
+			)
 
 			return {
 				...travellerData,
