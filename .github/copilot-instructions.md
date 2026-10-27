@@ -22,7 +22,7 @@
 - **Constants**: Strictly use centralised constants from `src/constants`. Do not hardcode strings for paths, API URLs, or error messages.
 - **Validation**: Use `src/utils/validation` for common checks (email, password).
 - **Error Handling**: Use `src/utils/errorHandler` for API error extraction.
-- **Data**: Server data goes through store thunks only (no RTK Query, no `fetch` in components or hooks); session data is read through the authentication selectors, never `localStorage`.
+- **Data**: Server data goes through store thunks only (no RTK Query; database calls go through `databaseRequest`, never from components or hooks); session data is read through the authentication selectors, never `localStorage`.
 - **One pattern per concern**: before adding a new way to do something (errors, loading, hooks, spacing, test selectors), find the existing one in the matching instruction file and use it. If the instruction file is wrong, fix it in the same change.
 - **Linting and Formatting**: Ensure every edited or newly created file is ESLint-clean and Prettier-formatted before finishing work.
 

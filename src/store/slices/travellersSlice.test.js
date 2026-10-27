@@ -33,13 +33,21 @@ import travellersReducer, {
 } from './travellersSlice'
 
 import { handleApiError } from '@/utils/errorHandler'
+import { updateProfile } from 'firebase/auth'
 import { deleteObject, ref } from 'firebase/storage'
 import { getFirebaseStorage } from '@/services/firebase/firebase'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
+const MOCK_AUTH_USER = { uid: 'mock-auth-user' }
+
 vi.mock('@/services/firebase/firebase', () => ({
+	getFirebaseAuth: vi.fn(() => ({ currentUser: MOCK_AUTH_USER })),
 	getFirebaseStorage: vi.fn(),
+}))
+
+vi.mock('firebase/auth', () => ({
+	updateProfile: vi.fn(() => Promise.resolve()),
 }))
 
 // Mock Firebase Storage
@@ -170,13 +178,7 @@ describe('travellersSlice', () => {
 					expect(state.travellerName).toBe(MOCK_USER.FULL_NAME)
 				})
 
-				it('should update travellerName and set status to succeeded on successful API call', async () => {
-					fetch.mockResolvedValueOnce({
-						ok: true,
-						json: async () =>
-							MOCK_API_RESPONSES.DISPLAY_NAME_SUCCESS,
-					})
-
+				it('should update the Auth display name and travellerName on success', async () => {
 					await store.dispatch(
 						travellerName({
 							first: MOCK_USER.FIRST_NAME,
@@ -184,6 +186,10 @@ describe('travellersSlice', () => {
 						}),
 					)
 
+					expect(updateProfile).toHaveBeenCalledWith(MOCK_AUTH_USER, {
+						displayName: MOCK_USER.FULL_NAME,
+					})
+					expect(fetch).not.toHaveBeenCalled()
 					const state = store.getState().travellers
 					expect(state.travellerName).toBe(MOCK_USER.FULL_NAME)
 					expect(state.status).toBe('succeeded')
@@ -191,11 +197,10 @@ describe('travellersSlice', () => {
 			})
 
 			describe('failure scenarios', () => {
-				it('should set error and reset travellerName on failed API call', async () => {
-					fetch.mockResolvedValueOnce({
-						ok: false,
-						json: async () => MOCK_API_RESPONSES.GENERIC_ERROR,
-					})
+				it('should set error and reset travellerName when the profile update fails', async () => {
+					updateProfile.mockRejectedValueOnce(
+						new Error(API_ERROR_MESSAGE.NETWORK_ERROR),
+					)
 
 					await store.dispatch(
 						travellerName({
@@ -211,7 +216,7 @@ describe('travellersSlice', () => {
 
 				it('should call handleApiError on API error', async () => {
 					const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
-					fetch.mockRejectedValueOnce(mockError)
+					updateProfile.mockRejectedValueOnce(mockError)
 
 					await store.dispatch(
 						travellerName({
@@ -411,17 +416,10 @@ describe('travellersSlice', () => {
 
 		describe('success scenarios', () => {
 			it('should upload images and register traveller successfully', async () => {
-				fetch
-					.mockResolvedValueOnce({
-						ok: true,
-						json: async () => ({ name: MOCK_USER.USER_ID }),
-					})
-					.mockResolvedValueOnce({
-						ok: true,
-						json: async () => ({
-							displayName: `${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`,
-						}),
-					})
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
 
 				const result = await store.dispatch(
 					registerTraveller(mockRegistrationData),
@@ -460,22 +458,15 @@ describe('travellersSlice', () => {
 
 			it('should set the Auth display name and userName to the registered name', async () => {
 				const fullName = `${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`
-				fetch
-					.mockResolvedValueOnce({
-						ok: true,
-						json: async () => ({ name: MOCK_USER.USER_ID }),
-					})
-					.mockResolvedValueOnce({
-						ok: true,
-						json: async () => ({ displayName: fullName }),
-					})
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
 
 				await store.dispatch(registerTraveller(mockRegistrationData))
 
-				expect(fetch).toHaveBeenCalledTimes(2)
-				const [url, options] = fetch.mock.calls[1]
-				expect(url).toContain('update?key=')
-				expect(JSON.parse(options.body)).toMatchObject({
+				expect(fetch).toHaveBeenCalledTimes(1)
+				expect(updateProfile).toHaveBeenCalledWith(MOCK_AUTH_USER, {
 					displayName: fullName,
 				})
 				expect(localStorage.setItem).toHaveBeenCalledWith(
@@ -486,15 +477,11 @@ describe('travellersSlice', () => {
 			})
 
 			it('should still register the traveller when the name update fails', async () => {
-				fetch
-					.mockResolvedValueOnce({
-						ok: true,
-						json: async () => ({ name: MOCK_USER.USER_ID }),
-					})
-					.mockResolvedValueOnce({
-						ok: false,
-						json: async () => MOCK_API_RESPONSES.GENERIC_ERROR,
-					})
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+				updateProfile.mockRejectedValueOnce(new Error('profile failed'))
 
 				const result = await store.dispatch(
 					registerTraveller(mockRegistrationData),
@@ -522,7 +509,9 @@ describe('travellersSlice', () => {
 				expect(result.meta.requestStatus).toBe('rejected')
 				expect(fetch).toHaveBeenCalledTimes(1)
 				expect(handleApiError).toHaveBeenCalledWith(
-					expect.any(Error),
+					expect.objectContaining({
+						message: ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER,
+					}),
 					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
 				)
 
@@ -532,9 +521,10 @@ describe('travellersSlice', () => {
 				expect(state.travellers).toEqual([])
 			})
 
-			it('should call handleApiError on network error', async () => {
-				const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
-				fetch.mockRejectedValueOnce(mockError)
+			it('should report the registration as failed when the connection drops', async () => {
+				fetch.mockRejectedValueOnce(
+					new Error(API_ERROR_MESSAGE.NETWORK_ERROR),
+				)
 
 				const result = await store.dispatch(
 					registerTraveller(mockRegistrationData),
@@ -542,7 +532,9 @@ describe('travellersSlice', () => {
 
 				expect(result.meta.requestStatus).toBe('rejected')
 				expect(handleApiError).toHaveBeenCalledWith(
-					mockError,
+					expect.objectContaining({
+						message: ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER,
+					}),
 					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
 				)
 

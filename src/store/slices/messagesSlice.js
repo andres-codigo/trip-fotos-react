@@ -6,11 +6,7 @@ import {
 } from '@reduxjs/toolkit'
 
 import { MESSAGES_ACTION_TYPES } from '@/constants/redux'
-import {
-	API_DATABASE,
-	API_ERROR_MESSAGE,
-	COMMON_HEADERS,
-} from '@/constants/api'
+import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
 
 import {
@@ -18,6 +14,8 @@ import {
 	selectAuthenticationToken,
 	selectUserId,
 } from './authenticationSlice'
+
+import { databaseRequest } from '@/store/databaseRequest'
 
 import { handleApiError } from '@/utils/errorHandler'
 
@@ -37,18 +35,10 @@ export const contactTraveller = createAsyncThunk(
 		}
 
 		try {
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/messages/${travellerId}.json`,
-				{
-					method: API_DATABASE.POST,
-					headers: COMMON_HEADERS.JSON,
-					body: JSON.stringify({ userEmail: email, message }),
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
-			}
+			const response = await databaseRequest(`/messages/${travellerId}`, {
+				method: API_DATABASE.POST,
+				body: { userEmail: email, message },
+			})
 
 			const responseData = await response.json()
 
@@ -76,17 +66,9 @@ export const loadMessages = createAsyncThunk(
 			const userId = selectUserId(getState())
 			const token = selectAuthenticationToken(getState())
 
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/messages/${userId}.json?auth=${token}`,
-				{
-					method: API_DATABASE.GET,
-					headers: COMMON_HEADERS.JSON,
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
-			}
+			const response = await databaseRequest(`/messages/${userId}`, {
+				token,
+			})
 
 			const responseData = await response.json()
 
@@ -115,17 +97,10 @@ export const deleteMessage = createAsyncThunk(
 			const userId = selectUserId(getState())
 			const token = selectAuthenticationToken(getState())
 
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/messages/${userId}/${messageId}.json?auth=${token}`,
-				{
-					method: API_DATABASE.DELETE,
-					headers: COMMON_HEADERS.JSON,
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
-			}
+			await databaseRequest(`/messages/${userId}/${messageId}`, {
+				method: API_DATABASE.DELETE,
+				token,
+			})
 
 			return messageId
 		} catch (error) {
@@ -145,17 +120,10 @@ export const deleteTravellerMessages = createAsyncThunk(
 		try {
 			const token = selectAuthenticationToken(getState())
 
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/messages/${travellerId}.json?auth=${token}`,
-				{
-					method: API_DATABASE.DELETE,
-					headers: COMMON_HEADERS.JSON,
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
-			}
+			await databaseRequest(`/messages/${travellerId}`, {
+				method: API_DATABASE.DELETE,
+				token,
+			})
 
 			return travellerId
 		} catch (error) {

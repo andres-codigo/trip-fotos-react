@@ -8,7 +8,8 @@ import {
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../../src/constants/travellers'
-import { API_DATABASE, API_ERROR_MESSAGE } from '../../../src/constants/api'
+import { API_DATABASE } from '../../../src/constants/api'
+import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-travellers'
 
 import { performLogin } from '../../support/utils/authHelpers'
@@ -268,7 +269,7 @@ describe('Register Page', () => {
 						DIALOG_SELECTORS.MESSAGES.ERROR.TITLE,
 					)
 					cy.contains(
-						API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH,
+						ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER,
 					).should('exist')
 					// Close the dialog
 					cy.get(DIALOG_SELECTORS.CLOSE_BUTTON).click()

@@ -5,6 +5,7 @@ import {
 	isAnyOf,
 } from '@reduxjs/toolkit'
 import imageCompression from 'browser-image-compression'
+import { updateProfile } from 'firebase/auth'
 import {
 	deleteObject,
 	getDownloadURL,
@@ -12,14 +13,13 @@ import {
 	uploadBytesResumable,
 } from 'firebase/storage'
 
-import { getFirebaseStorage } from '@/services/firebase/firebase'
+import {
+	getFirebaseAuth,
+	getFirebaseStorage,
+} from '@/services/firebase/firebase'
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
-import {
-	API_DATABASE,
-	API_ERROR_MESSAGE,
-	COMMON_HEADERS,
-} from '@/constants/api'
+import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
 
 import {
@@ -29,6 +29,8 @@ import {
 	selectUserId,
 } from './authenticationSlice'
 import { deleteTravellerMessages } from './messagesSlice'
+
+import { databaseRequest } from '@/store/databaseRequest'
 
 import { handleApiError } from '@/utils/errorHandler'
 
@@ -43,35 +45,17 @@ const shouldUpdate = (state) => {
 
 export const travellerName = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.TRAVELLER_NAME,
-	async (data, { getState, rejectWithValue, dispatch }) => {
+	async (data, { rejectWithValue, dispatch }) => {
 		const fullName = `${data.first} ${data.last}`
 
 		try {
-			const token = selectAuthenticationToken(getState())
+			await updateProfile(getFirebaseAuth().currentUser, {
+				displayName: fullName,
+			})
 
-			const response = await fetch(
-				`${API_DATABASE.URL}update?key=${API_DATABASE.KEY}`,
-				{
-					method: API_DATABASE.POST,
-					headers: COMMON_HEADERS.JSON,
-					body: JSON.stringify({
-						idToken: token,
-						displayName: fullName,
-					}),
-				},
-			)
-
-			const updateResponse = await response.json()
-
-			if (!response.ok) {
-				return rejectWithValue(
-					`${API_ERROR_MESSAGE.UPDATE_TRAVELLER_NAME_CATCH}${fullName}.`,
-				)
-			}
-
-			localStorage.setItem('userName', updateResponse.displayName)
-			dispatch(setTravellerName(updateResponse.displayName))
-			return updateResponse.displayName
+			localStorage.setItem('userName', fullName)
+			dispatch(setTravellerName(fullName))
+			return fullName
 		} catch (error) {
 			return rejectWithValue(
 				handleApiError(
@@ -165,19 +149,15 @@ export const registerTraveller = createAsyncThunk(
 				registered: new Date().toISOString(),
 			}
 
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/travellers/${userId}.json?auth=${token}`,
-				{
+			try {
+				await databaseRequest(`/travellers/${userId}`, {
 					method: API_DATABASE.PUT,
-					headers: COMMON_HEADERS.JSON,
-					body: JSON.stringify(travellerData),
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(
-					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${userId}.`,
-				)
+					token,
+					body: travellerData,
+				})
+			} catch {
+				// A bad status and a dropped connection both mean the record was not saved, which is what the user needs to hear
+				throw new Error(ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER)
 			}
 
 			// The record is already saved, so a failed name update must not report the registration as failed
@@ -204,17 +184,7 @@ export const updateTravellers = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.UPDATE_TRAVELLERS,
 	async (_, { rejectWithValue, dispatch }) => {
 		try {
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/travellers.json`,
-				{
-					method: API_DATABASE.GET,
-					headers: COMMON_HEADERS.JSON,
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
-			}
+			const response = await databaseRequest('/travellers')
 
 			const responseData = await response.json()
 
@@ -287,17 +257,7 @@ export const loadTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLER,
 	async (travellerId, { rejectWithValue }) => {
 		try {
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/travellers/${travellerId}.json`,
-				{
-					method: API_DATABASE.GET,
-					headers: COMMON_HEADERS.JSON,
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
-			}
+			const response = await databaseRequest(`/travellers/${travellerId}`)
 
 			const responseData = await response.json()
 
@@ -326,17 +286,9 @@ export const checkIsTraveller = createAsyncThunk(
 	async (userId, { rejectWithValue }) => {
 		try {
 			// shallow avoids downloading the whole record just to test it exists
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/travellers/${userId}.json?shallow=true`,
-				{
-					method: API_DATABASE.GET,
-					headers: COMMON_HEADERS.JSON,
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
-			}
+			const response = await databaseRequest(`/travellers/${userId}`, {
+				params: { shallow: true },
+			})
 
 			const responseData = await response.json()
 
@@ -384,17 +336,10 @@ export const deleteTraveller = createAsyncThunk(
 		try {
 			const token = selectAuthenticationToken(getState())
 
-			const response = await fetch(
-				`${API_DATABASE.BASE_URL}/travellers/${travellerId}.json?auth=${token}`,
-				{
-					method: API_DATABASE.DELETE,
-					headers: COMMON_HEADERS.JSON,
-				},
-			)
-
-			if (!response.ok) {
-				throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
-			}
+			await databaseRequest(`/travellers/${travellerId}`, {
+				method: API_DATABASE.DELETE,
+				token,
+			})
 
 			const storage = getFirebaseStorage()
 			await Promise.all(

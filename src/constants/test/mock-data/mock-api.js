@@ -1,5 +1,5 @@
 import { API_DATABASE } from '../../api'
-import { MOCK_USER, MOCK_KEYS } from './mock-user'
+import { MOCK_KEYS } from './mock-user'
 
 export const MOCK_API = Object.freeze({
 	URL: 'https://mock-api-url.com/',
@@ -8,7 +8,6 @@ export const MOCK_API = Object.freeze({
 })
 
 export const MOCK_API_RESPONSES = {
-	DISPLAY_NAME_SUCCESS: { displayName: MOCK_USER.FULL_NAME },
 	GENERIC_ERROR: { error: 'Error' },
 	TRAVELLERS_RESPONSE: {
 		user1: {

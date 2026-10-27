@@ -25,7 +25,7 @@ Use this agent when you need a new custom React hook with tests.
 4. **Hook Boilerplate**
     - Default-export the hook from `index.js` (no flat `hooks/useX.js` files, no named export)
     - Return a stable object (`{ value, action }`) with callbacks wrapped in `useCallback` where consumers may pass them to children; a tuple only for a `useState`-style pair
-    - Read session data through store selectors, never `localStorage`; dispatch thunks for server data, never call `fetch`
+    - Read session data through store selectors, never `localStorage`; dispatch thunks for app data (a read-only third-party lookup such as the city search may `fetch` inside its hook)
     - Do not export constants from the hook file; put them in `src/constants/**`
     - Put magic values in `src/constants/**` and import them from the subdirectory barrel
     - Use the `@/` alias for every import
