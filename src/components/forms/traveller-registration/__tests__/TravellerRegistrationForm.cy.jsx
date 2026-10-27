@@ -83,7 +83,7 @@ describe('<TravellerRegistrationForm />', () => {
 			)
 			cy.get(COMBOBOX_SELECTORS.INPUT)
 				.should('have.attr', 'aria-invalid', 'true')
-				.and('have.css', 'background-color', 'rgb(255, 204, 204)')
+				.and('have.css', 'background-color', 'rgb(251, 233, 231)')
 
 			cy.selectCity()
 			cy.contains(VALIDATION_MESSAGES.CITIES_REQUIRED).should('not.exist')

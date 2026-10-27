@@ -1,10 +1,9 @@
 @use '@/styles/setup/variables' as variables;
 
 .message {
-	border: 1px solid variables.$color-tundora;
-	border-radius: 12px;
-	margin: 1rem 0;
-	padding: 1rem;
+	border-top: 1px solid variables.$color-border;
+	margin: 0;
+	padding: 1.5rem 0;
 	list-style: none;
 	text-align: left;
 }
@@ -23,13 +22,13 @@
 	}
 
 	a {
-		color: variables.$color-pigment-indigo;
+		color: variables.$color-accent-text;
 		font-weight: bold;
 		text-decoration: none;
 
 		&:hover,
 		&:active {
-			color: variables.$color-fresh-eggplant;
+			color: variables.$color-accent-hover;
 		}
 	}
 }

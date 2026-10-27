@@ -12,12 +12,12 @@
 	@include valid.default-styles;
 
 	&:focus {
-		border-color: variables.$color-pigment-indigo;
-		background-color: variables.$color-magnolia;
+		border-color: variables.$color-accent-text;
+		background-color: variables.$color-surface-accent;
 		outline: none;
 	}
 }
 
 .required {
-	color: variables.$color-red;
+	color: variables.$color-danger-text;
 }

@@ -29,9 +29,9 @@
 
 			li {
 				align-items: center;
-				background: variables.$color-selago;
+				background: variables.$color-surface-accent;
 				border-radius: 30px;
-				color: variables.$color-pigment-indigo;
+				color: variables.$color-accent-text;
 				display: inline-flex;
 				gap: 0.25rem;
 				padding: 0.25rem 0.25rem 0.25rem 0.75rem;
@@ -49,11 +49,11 @@
 				width: 1.75rem;
 
 				&:hover {
-					background: variables.$color-blue-chalk;
+					background: variables.$color-surface-sunken;
 				}
 
 				&:focus-visible {
-					outline: 3px solid variables.$color-lavender-magenta;
+					outline: 3px solid variables.$color-focus;
 					outline-offset: 2px;
 				}
 			}

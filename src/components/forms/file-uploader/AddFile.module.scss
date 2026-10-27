@@ -17,7 +17,7 @@
 	}
 
 	&:focus-within {
-		outline: 3px solid variables.$color-lavender-magenta;
+		outline: 3px solid variables.$color-focus;
 		outline-offset: 2px;
 	}
 }
@@ -27,8 +27,8 @@
 }
 
 .fileList {
-	background-color: variables.$color-azure;
-	border: 1px solid variables.$color-white;
+	background-color: variables.$color-surface-sunken;
+	border: 1px solid variables.$color-border;
 	display: flex;
 	flex-wrap: wrap;
 	list-style: none;
@@ -37,7 +37,7 @@
 }
 
 .errors {
-	color: variables.$color-el-salva;
+	color: variables.$color-danger-text;
 
 	p {
 		margin: 0.25rem 0;

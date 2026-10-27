@@ -1,0 +1,63 @@
+@use '@/styles/setup/variables' as variables;
+@use '@/styles/setup/mixins/helpers' as helpers;
+
+.toggle {
+	border: 1px solid currentColor;
+	border-radius: 999px;
+	color: inherit;
+	display: inline-flex;
+	gap: 0.125rem;
+	margin: 0;
+	min-width: 0;
+	padding: 0.1875rem;
+}
+
+.legend {
+	@include helpers.visually-hidden;
+}
+
+.option {
+	display: inline-flex;
+}
+
+.input {
+	@include helpers.visually-hidden;
+}
+
+.label {
+	align-items: center;
+	border-radius: 999px;
+	cursor: pointer;
+	display: inline-flex;
+	gap: 0.375rem;
+	justify-content: center;
+	min-height: 2.25rem;
+	min-width: 2.25rem;
+	padding: 0 0.5rem;
+
+	.input:checked + & {
+		background-color: variables.$color-on-header;
+		color: variables.$color-header;
+	}
+
+	.input:focus-visible + & {
+		outline: 3px solid variables.$color-focus-header;
+		outline-offset: 2px;
+	}
+}
+
+// Label text shows on desktop; below that the icon and the radio group name each option
+.text {
+	@include helpers.visually-hidden;
+}
+
+@media only screen and (min-width: 1025px) {
+	.text {
+		clip-path: none;
+		height: auto;
+		margin: 0;
+		overflow: visible;
+		position: static;
+		width: auto;
+	}
+}

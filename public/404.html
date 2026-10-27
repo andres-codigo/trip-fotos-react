@@ -10,7 +10,7 @@
 			content="noindex" />
 		<meta
 			name="color-scheme"
-			content="light" />
+			content="light dark" />
 		<title>Page not found · Trip Fotos</title>
 		<link
 			rel="icon"
@@ -21,20 +21,38 @@
 			href="/icon.svg"
 			type="image/svg+xml" />
 		<style>
+			:root {
+				color-scheme: light dark;
+				--bg: #faf9f5;
+				--text: #1f1e1d;
+				--border: #e3dfd3;
+				--link: #9a3f22;
+				--focus: #1d5fa8;
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--bg: #1f1e1d;
+					--text: #f0eee6;
+					--border: #3d3b37;
+					--link: #e8967a;
+					--focus: #7db4ee;
+				}
+			}
 			body {
 				margin: 0;
 				font-family: system-ui, sans-serif;
-				background: #ffffff;
-				color: #333333;
+				background: var(--bg);
+				color: var(--text);
 			}
 			header {
 				padding: 1.5rem 2rem;
-				background: #3d008d;
+				border-bottom: 1px solid var(--border);
 			}
 			header a {
-				color: #ffffff;
-				font-size: 1.5rem;
-				font-weight: 700;
+				color: var(--text);
+				font-family: 'Iowan Old Style', Georgia, serif;
+				font-size: 1.625rem;
+				font-weight: 500;
 				text-decoration: none;
 			}
 			main {
@@ -44,10 +62,10 @@
 				text-align: center;
 			}
 			main a {
-				color: #3d008d;
+				color: var(--link);
 			}
 			a:focus-visible {
-				outline: 3px solid #f391e3;
+				outline: 3px solid var(--focus);
 				outline-offset: 2px;
 			}
 		</style>

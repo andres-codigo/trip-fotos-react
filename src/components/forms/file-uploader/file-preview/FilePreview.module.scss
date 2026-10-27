@@ -45,8 +45,8 @@
 }
 
 .removeButton {
-	background: variables.$color-el-salva;
-	color: variables.$color-white;
+	background: variables.$color-danger;
+	color: variables.$color-on-danger;
 	cursor: pointer;
 	font-size: var(--size);
 	top: 0.25rem;
@@ -54,7 +54,7 @@
 	z-index: 1;
 
 	&:focus-visible {
-		outline: 3px solid variables.$color-lavender-magenta;
+		outline: 3px solid variables.$color-focus;
 		outline-offset: 2px;
 	}
 }
@@ -67,32 +67,32 @@
 
 .loading {
 	animation: pulse 1.5s linear infinite;
-	color: variables.$color-black;
+	color: variables.$color-text;
 
 	@media (prefers-reduced-motion: reduce) {
 		animation: none;
-		background: variables.$color-alto;
+		background: variables.$color-surface-sunken;
 	}
 }
 
 .uploaded {
-	background: variables.$color-mantis;
-	color: variables.$color-black;
+	background: variables.$color-success;
+	color: variables.$color-on-success;
 }
 
 .error {
-	background: variables.$color-el-salva;
-	color: variables.$color-white;
+	background: variables.$color-danger;
+	color: variables.$color-on-danger;
 }
 
 @keyframes pulse {
 	0%,
 	100% {
-		background: variables.$color-white;
+		background: variables.$color-surface;
 	}
 
 	50% {
-		background: variables.$color-alto;
+		background: variables.$color-surface-sunken;
 	}
 }
 

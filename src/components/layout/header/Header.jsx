@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 
 import { PATHS } from '@/constants/ui'
 
+import ThemeToggle from '@/components/ui/theme-toggle/ThemeToggle'
+
 const MainNav = lazy(() => import('@/components/layout/main-nav/MainNav'))
 
 import headerStyles from './Header.module.scss'
@@ -28,9 +30,12 @@ function Header() {
 					Trip Fotos
 				</Link>
 			</p>
-			<Suspense fallback={null}>
-				<MainNav isLoggedIn={isLoggedIn} />
-			</Suspense>
+			<div className={headerStyles.siteHeaderActions}>
+				<ThemeToggle />
+				<Suspense fallback={null}>
+					<MainNav isLoggedIn={isLoggedIn} />
+				</Suspense>
+			</div>
 		</header>
 	)
 }

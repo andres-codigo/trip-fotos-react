@@ -43,6 +43,7 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 - **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the admin can remove a traveller, with their database record, photos and messages, from the travellers list
 - **Routing and pages** — home, authentication, travellers, traveller details, contact traveller, register, messages, privacy policy and 404 pages
 - **Privacy policy** — a public `/privacy` page, linked from the footer, explains what data the app collects (account, traveller registration, Photon city search, browser storage and cookieless Vercel analytics) and where it is stored
+- **Light, dark and system themes** — a Light / Dark / System toggle in the header, remembered in `localStorage` and applied before first paint by `public/theme-init.js`, so the page never flashes the wrong theme; every colour is a semantic token in `src/styles/setup/_theme.scss`
 - **Accessibility** — skip link, landmark structure and per-page titles, following an audit against [The Website Specification](https://specification.website)
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request; CodeQL scanning and a ruleset protecting `main`
 - **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers; versioned Firebase security rules
@@ -323,7 +324,7 @@ The app deploys to [Vercel](https://vercel.com/) from the GitHub repository, wit
 - **Security headers** — `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` and `Cross-Origin-Opener-Policy` are set on every response. An enforced `Content-Security-Policy` limits scripts to the site itself and network requests to Firebase and the Photon city search. If you add a new third-party service (a CDN, an analytics provider or another Firebase product), add its origin to the matching directive in `vercel.json`, or the browser will block it. To trial a change safely, rename the header to `Content-Security-Policy-Report-Only` on a preview: violations are then logged to the console without blocking.
 - **Caching** — fingerprinted build output in `/assets/` is cached for a year as `immutable`; fonts are cached for a week.
 
-`public/` also holds `robots.txt`, `sitemap.xml`, `llms.txt`, `site.webmanifest` and `.well-known/security.txt`. These contain the production URL, so update them if the domain changes. `security.txt` has an `Expires` date that must be renewed before it passes.
+`public/` also holds `theme-init.js` (the render-blocking script that sets the saved theme; keep it in step with `src/constants/ui/theme.js`), `robots.txt`, `sitemap.xml`, `llms.txt`, `site.webmanifest` and `.well-known/security.txt`. These contain the production URL, so update them if the domain changes. `security.txt` has an `Expires` date that must be renewed before it passes.
 
 <a id="folder-structure"></a>
 

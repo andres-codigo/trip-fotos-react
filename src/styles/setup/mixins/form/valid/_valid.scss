@@ -10,7 +10,9 @@
 }
 
 @mixin default-styles() {
-	border: 1px solid variables.$color-silver;
+	background-color: variables.$color-surface;
+	border: 1px solid variables.$color-border-strong;
+	color: variables.$color-text;
 	display: block;
 	font: inherit;
 	min-height: 2.375rem;
@@ -18,8 +20,8 @@
 	width: 100%;
 
 	&:focus {
-		border-color: variables.$color-pigment-indigo;
-		background-color: variables.$color-selago;
+		border-color: variables.$color-accent-text;
+		background-color: variables.$color-surface-accent;
 		outline: none;
 	}
 }

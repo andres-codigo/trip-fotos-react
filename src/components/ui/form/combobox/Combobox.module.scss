@@ -5,8 +5,8 @@
 }
 
 .listbox {
-	background: variables.$color-white;
-	border: 1px solid variables.$color-alto;
+	background: variables.$color-surface;
+	border: 1px solid variables.$color-border-strong;
 	box-shadow: 0 2px 8px rgba(variables.$color-black, 0.15);
 	left: 0;
 	list-style: none;
@@ -25,23 +25,23 @@
 
 	&:hover,
 	&.active {
-		background: variables.$color-selago;
-		color: variables.$color-pigment-indigo;
+		background: variables.$color-surface-accent;
+		color: variables.$color-accent-text;
 	}
 
 	&.active {
-		outline: 2px solid variables.$color-pigment-indigo;
+		outline: 2px solid variables.$color-focus;
 		outline-offset: -2px;
 	}
 }
 
 .status {
-	color: variables.$color-tundora;
+	color: variables.$color-text-muted;
 	font-size: 0.875rem;
 	margin: 0.25rem 0 0;
 	min-height: 1.25rem;
 }
 
 .required {
-	color: variables.$color-red;
+	color: variables.$color-danger-text;
 }

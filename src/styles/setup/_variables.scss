@@ -1,40 +1,47 @@
-/*
-    Color naming convention taken from
-    'Name that Color' color wheel by
-    Chirag Mehta
-    https://chir.ag/projects/name-that-color/#6195ED
-*/
+// Semantic colours. The values live in _theme.scss and switch with the active theme.
+$color-bg: var(--color-bg);
+$color-surface: var(--color-surface);
+$color-surface-sunken: var(--color-surface-sunken);
+$color-surface-accent: var(--color-surface-accent);
 
-// Grays
-$color-alto: #cecece;
-$color-mine-shaft: #333333;
-$color-tundora: #424242;
-$color-silver: #eee8e8;
+$color-text: var(--color-text);
+$color-text-muted: var(--color-text-muted);
+
+$color-border: var(--color-border);
+$color-border-strong: var(--color-border-strong);
+
+$color-accent: var(--color-accent);
+$color-accent-hover: var(--color-accent-hover);
+$color-on-accent: var(--color-on-accent);
+$color-accent-text: var(--color-accent-text);
+
+$color-header: var(--color-header);
+$color-header-active: var(--color-header-active);
+$color-on-header: var(--color-on-header);
+$color-on-header-hover: var(--color-on-header-hover);
+
+$color-focus: var(--color-focus);
+$color-focus-header: var(--color-focus-header);
+
+$color-danger: var(--color-danger);
+$color-danger-hover: var(--color-danger-hover);
+$color-on-danger: var(--color-on-danger);
+$color-danger-surface: var(--color-danger-surface);
+$color-danger-text: var(--color-danger-text);
+
+$color-success: var(--color-success);
+$color-on-success: var(--color-on-success);
+
+$color-overlay: var(--color-overlay);
+
+$color-badge-tokyo: var(--color-badge-1);
+$color-badge-prague: var(--color-badge-2);
+$color-badge-sydney: var(--color-badge-3);
+$color-badge-canberra: var(--color-badge-4);
+
+// Fixed colours, for text over photographs, which do not follow the theme
 $color-black: #000000;
 $color-white: #ffffff;
 
-// Blues
-$color-azure: #f0ffff;
-$color-selago: #f0e6fd;
-$color-pigment-indigo: #3d008d;
-
-// Reds
-$color-cosmos: #ffcccc;
-$color-el-salva: #933933;
-$color-mojo: #df0d0d;
-$color-guardsman-red: #ba0101;
-$color-red: #ff0000;
-
-// Purples
-$color-blue-chalk: #edd2ff;
-$color-fresh-eggplant: #8d007a;
-$color-lavender-magenta: #f391e3;
-$color-magnolia: #faf6ff;
-$color-purple: #71008d;
-$color-ripe-eggplant: #640c9f;
-$color-ripe-plum: #3a0061;
-$color-violent-violet: #270041;
-
-// Greens
-$color-japanese-laurel: #088a00;
-$color-mantis: #66c360;
+// Typography
+$font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;

@@ -40,9 +40,15 @@ Prefer using **namespaced imports** for variables and mixins (e.g., `@use '@/sty
 
 Instead of re-implementing CSS patterns, use common helpers provided by the project (e.g., `helpers.visually-hidden` for screen-reader-only content).
 
-## Colour Naming
+## Colours And Themes
 
-New colour variables should follow the existing naming convention. When possible, reference the "Name that Colour" tool to maintain consistency with the project's colour palette.
+The app has light and dark themes. Colours are semantic tokens, defined once per theme in `src/styles/setup/_theme.scss` as `--color-*` custom properties and exposed to SCSS as `variables.$color-*` (e.g. `variables.$color-surface`, `variables.$color-accent-text`).
+
+- Never write a hex, `rgb()` or named colour in a component or page stylesheet. Use a token, or add one to both theme maps.
+- Pair every fill that carries text with its `on-*` token (`accent` + `on-accent`, `danger` + `on-danger`, `header` + `on-header`). Use `accent-text` for accent-coloured text or outlines, not `accent`.
+- Every new pairing needs at least 4.5:1 for text and 3:1 for borders and focus rings, in **both** themes.
+- Sass colour functions (`rgba()`, `darken()`) cannot take a `var()`. Use a second token instead, or the fixed `$color-black` / `$color-white` for text over photographs.
+- The design system, including the contrast checks behind the palette, is the Trip Fotos Design System artifact; change values there and in `_theme.scss` together.
 
 ## Global Styles
 

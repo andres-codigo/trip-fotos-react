@@ -1,37 +1,42 @@
 @use '@/styles/setup/variables' as variables;
 @use '@/styles/setup/mixins/helpers' as helpers;
 
+// The city marker is a dot, so the label stays in the body text colour
 .badge {
-	background-color: variables.$color-silver;
+	align-items: center;
+	background-color: variables.$color-surface-sunken;
 	border-radius: 30px;
-	color: variables.$color-mine-shaft;
-	display: inline-block;
+	color: variables.$color-text;
+	display: inline-flex;
+	gap: 0.5rem;
 	margin: 0 0.5rem 0.5rem 0;
-	padding: 0.5rem 1.5rem;
+	padding: 0.5rem 1.25rem;
 	text-transform: uppercase;
 	@include helpers.user-select(none);
 
-	&.tokyo,
-	&.prague,
-	&.sydney,
-	&.canberra {
-		color: variables.$color-white;
+	&::before {
+		background-color: var(--badge-marker, variables.$color-text-muted);
+		border-radius: 50%;
+		content: '';
+		flex: none;
+		height: 0.5625rem;
+		width: 0.5625rem;
 	}
 
 	&.tokyo {
-		background-color: variables.$color-pigment-indigo;
+		--badge-marker: #{variables.$color-badge-tokyo};
 	}
 
 	&.prague {
-		background-color: variables.$color-purple;
+		--badge-marker: #{variables.$color-badge-prague};
 	}
 
 	&.sydney {
-		background-color: variables.$color-fresh-eggplant;
+		--badge-marker: #{variables.$color-badge-sydney};
 	}
 
 	&.canberra {
-		background-color: variables.$color-mine-shaft;
+		--badge-marker: #{variables.$color-badge-canberra};
 	}
 }
 

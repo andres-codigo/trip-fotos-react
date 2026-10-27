@@ -6,7 +6,7 @@ a.navMenuButtonLink {
 		--size: 1.4rem;
 		--font-size: 0.75rem;
 		appearance: none;
-		border: 1px solid variables.$color-pigment-indigo;
+		border: 1px solid variables.$color-header;
 		color: inherit;
 		cursor: pointer;
 		height: var(--size);
@@ -29,42 +29,42 @@ a.navMenuButtonLink {
 
 	// TODO: remove vue router specific class and update with react router class names
 	&.routerLinkActive {
-		border: 1px solid variables.$color-white;
-		color: variables.$color-white;
+		border: 1px solid variables.$color-on-header;
+		color: variables.$color-on-header;
 
 		.totalMessagesContainer {
-			border: 1px solid variables.$color-pigment-indigo;
+			border: 1px solid variables.$color-header;
 		}
 
 		&:hover {
-			border: 1px solid variables.$color-lavender-magenta;
-			color: variables.$color-lavender-magenta;
+			border: 1px solid variables.$color-on-header-hover;
+			color: variables.$color-on-header-hover;
 
 			.totalMessagesContainer {
-				border: 1px solid variables.$color-pigment-indigo;
+				border: 1px solid variables.$color-header;
 			}
 		}
 	}
 }
 
 a.navMenuButtonLink {
-	color: variables.$color-white;
+	color: variables.$color-on-header;
 	padding: 0.75rem 1.5rem;
 	position: relative;
 
 	&:hover {
-		color: variables.$color-lavender-magenta;
+		color: variables.$color-on-header-hover;
 
 		.totalMessagesContainer {
-			border: 1px solid variables.$color-pigment-indigo;
+			border: 1px solid variables.$color-header;
 		}
 	}
 }
 
 @media only screen and (max-width: 768px) {
 	button.navMenuButtonLink {
-		background-color: variables.$color-pigment-indigo;
-		border: 1px solid variables.$color-pigment-indigo;
+		background-color: variables.$color-header;
+		border: 1px solid variables.$color-header;
 		border-radius: 0;
 		margin: 0;
 		padding: 1.25rem 0;
@@ -72,9 +72,9 @@ a.navMenuButtonLink {
 
 		&:active,
 		&:hover {
-			background-color: variables.$color-pigment-indigo;
-			border: 1px solid variables.$color-pigment-indigo;
-			color: variables.$color-lavender-magenta;
+			background-color: variables.$color-header;
+			border: 1px solid variables.$color-header;
+			color: variables.$color-on-header-hover;
 		}
 	}
 
@@ -103,7 +103,7 @@ a.navMenuButtonLink {
 
 		&:active,
 		&:hover {
-			color: variables.$color-lavender-magenta;
+			color: variables.$color-on-header-hover;
 
 			.totalMessagesContainer {
 				border: none;
@@ -112,7 +112,7 @@ a.navMenuButtonLink {
 
 		// TODO: remove vue router specific class and update with react router class names
 		&.routerLinkActive {
-			background-color: variables.$color-ripe-eggplant;
+			background-color: variables.$color-header-active;
 			border: none;
 			width: 100%;
 

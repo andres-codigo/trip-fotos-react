@@ -1,7 +1,7 @@
 @use '@/styles/setup/variables' as variables;
 
 .dropArea {
-	border: 1px dashed variables.$color-alto;
+	border: 1px dashed variables.$color-border-strong;
 	margin: 0 auto 15px;
 	max-width: 800px;
 	transition: 0.2s ease;
@@ -9,8 +9,8 @@
 
 	&:hover,
 	&.active {
-		background-color: variables.$color-silver;
-		border-color: variables.$color-pigment-indigo;
+		background-color: variables.$color-surface-sunken;
+		border-color: variables.$color-accent-text;
 	}
 
 	@media (prefers-reduced-motion: reduce) {

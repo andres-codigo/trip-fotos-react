@@ -41,11 +41,11 @@
 		}
 
 		.toggleLink {
-			color: variables.$color-ripe-plum;
+			color: variables.$color-accent-text;
 			padding-left: 0.5rem;
 
 			&:hover {
-				color: variables.$color-ripe-eggplant;
+				color: variables.$color-accent-hover;
 			}
 		}
 	}

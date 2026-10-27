@@ -1,7 +1,7 @@
 @use '@/styles/setup/variables' as variables;
 
 @mixin error-text() {
-	color: variables.$color-mojo;
+	color: variables.$color-danger-text;
 }
 
 @mixin error-message() {
@@ -10,6 +10,6 @@
 }
 
 @mixin invalid-border-and-background() {
-	background-color: variables.$color-cosmos;
-	border: 1px solid variables.$color-mojo;
+	background-color: variables.$color-danger-surface;
+	border: 1px solid variables.$color-danger-text;
 }

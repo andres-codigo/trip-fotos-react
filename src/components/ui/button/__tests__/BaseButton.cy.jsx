@@ -198,21 +198,21 @@ describe('<BaseButton />', () => {
 		it('keeps white text on a darker red when hovering a danger button', () => {
 			expectHover(BUTTON.MODE.DANGER, false, {
 				color: 'rgb(255, 255, 255)',
-				backgroundColor: 'rgb(186, 1, 1)',
+				backgroundColor: 'rgb(143, 29, 23)',
 			})
 		})
 
-		it('keeps purple text on the pale hover background of an outline link', () => {
+		it('keeps blue text on the pale hover background of an outline link', () => {
 			expectHover(BUTTON.MODE.OUTLINE, true, {
-				color: 'rgb(100, 12, 159)',
-				backgroundColor: 'rgb(237, 210, 255)',
+				color: 'rgb(23, 88, 127)',
+				backgroundColor: 'rgb(223, 236, 245)',
 			})
 		})
 
 		it('keeps white text when hovering a primary link', () => {
 			expectHover(BUTTON.MODE.PRIMARY, true, {
 				color: 'rgb(255, 255, 255)',
-				backgroundColor: 'rgb(100, 12, 159)',
+				backgroundColor: 'rgb(18, 74, 112)',
 			})
 		})
 	})

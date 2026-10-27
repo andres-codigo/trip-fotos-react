@@ -14,7 +14,7 @@ describe('<FileDrop />', () => {
 			.should('have.attr', 'data-active', 'false')
 			.trigger('dragenter')
 			.should('have.attr', 'data-active', 'true')
-			.and('have.css', 'border-color', 'rgb(61, 0, 141)')
+			.and('have.css', 'border-color', 'rgb(23, 88, 127)')
 			.trigger('dragleave')
 			.should('have.attr', 'data-active', 'false')
 	})

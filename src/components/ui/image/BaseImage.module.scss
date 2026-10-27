@@ -25,13 +25,13 @@
 	width: 100%;
 
 	&:focus-visible {
-		outline: 3px solid variables.$color-lavender-magenta;
+		outline: 3px solid variables.$color-focus;
 		outline-offset: 2px;
 	}
 }
 
 .fallback {
-	color: variables.$color-mine-shaft;
+	color: variables.$color-text;
 	display: block;
 	padding: 1rem;
 	text-align: center;

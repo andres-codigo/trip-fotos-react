@@ -157,3 +157,8 @@ export const MESSAGE_ITEM = Object.freeze({
 	SPINNER: 'message-item-spinner',
 	ERROR_DIALOG: 'message-item-error-dialog',
 })
+
+export const THEME_TOGGLE = Object.freeze({
+	ROOT: 'theme-toggle',
+	OPTION: (mode) => `theme-toggle-${mode}`,
+})

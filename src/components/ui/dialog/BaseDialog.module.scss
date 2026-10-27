@@ -1,7 +1,7 @@
 @use '@/styles/setup/variables' as variables;
 
 .backdrop {
-	background-color: rgba(0, 0, 0, 0.75);
+	background-color: variables.$color-overlay;
 	height: 100%;
 	left: 0;
 	position: fixed;
@@ -11,8 +11,9 @@
 }
 
 .dialog {
-	background-color: variables.$color-white;
-	border: none;
+	background-color: variables.$color-surface;
+	border: 1px solid variables.$color-border;
+	color: variables.$color-text;
 	border-radius: 0.75rem;
 	bottom: 0;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
@@ -26,8 +27,9 @@
 	z-index: 100;
 
 	.header {
-		background-color: variables.$color-ripe-plum;
-		color: variables.$color-white;
+		background-color: variables.$color-surface-sunken;
+		border-bottom: 1px solid variables.$color-border;
+		color: variables.$color-text;
 		padding: 1rem;
 		width: 100%;
 

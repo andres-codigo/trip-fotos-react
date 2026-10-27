@@ -5,10 +5,10 @@ a:where(.button),
 button:where(.button),
 span:where(.button) {
 	align-items: center;
-	background-color: variables.$color-ripe-plum;
-	border: 1px solid variables.$color-ripe-plum;
+	background-color: variables.$color-accent;
+	border: 1px solid variables.$color-accent;
 	border-radius: 30px;
-	color: variables.$color-white;
+	color: variables.$color-on-accent;
 	cursor: pointer;
 	display: inline-flex;
 	font: inherit;
@@ -19,8 +19,8 @@ span:where(.button) {
 
 	&:hover,
 	&:active {
-		background-color: variables.$color-ripe-eggplant;
-		border-color: variables.$color-ripe-eggplant;
+		background-color: variables.$color-accent-hover;
+		border-color: variables.$color-accent-hover;
 	}
 }
 
@@ -30,7 +30,7 @@ span:where(.button) {
 
 	&:hover,
 	&:active {
-		color: variables.$color-fresh-eggplant;
+		color: variables.$color-accent-hover;
 	}
 }
 
@@ -38,22 +38,23 @@ span:where(.button) {
 	&.flat {
 		background-color: transparent;
 		border-color: transparent;
-		color: variables.$color-ripe-plum;
+		color: variables.$color-accent-text;
 
 		&:hover,
 		&:active {
-			background-color: variables.$color-blue-chalk;
+			background-color: variables.$color-surface-accent;
 		}
 	}
 
 	&.danger {
-		background-color: variables.$color-mojo;
-		border-color: variables.$color-mojo;
+		background-color: variables.$color-danger;
+		border-color: variables.$color-danger;
+		color: variables.$color-on-danger;
 
 		&:hover,
 		&:active {
-			background-color: variables.$color-guardsman-red;
-			border-color: variables.$color-guardsman-red;
+			background-color: variables.$color-danger-hover;
+			border-color: variables.$color-danger-hover;
 		}
 	}
 
@@ -69,10 +70,14 @@ span:where(.button) {
 		}
 	}
 
-	&.outline,
+	&.outline {
+		border-color: variables.$color-accent-text;
+		color: variables.$color-accent-text;
+	}
+
 	&.disabled {
-		border-color: variables.$color-ripe-eggplant;
-		color: variables.$color-ripe-eggplant;
+		border-color: variables.$color-border-strong;
+		color: variables.$color-text-muted;
 	}
 
 	&.outline {
@@ -80,17 +85,17 @@ span:where(.button) {
 
 		&:hover,
 		&:active {
-			background-color: variables.$color-blue-chalk;
+			background-color: variables.$color-surface-accent;
 		}
 	}
 
 	&.disabled {
-		background-color: variables.$color-silver;
+		background-color: variables.$color-surface-sunken;
 		cursor: default;
 
 		&:hover,
 		&:active {
-			background-color: variables.$color-silver;
+			background-color: variables.$color-surface-sunken;
 		}
 	}
 }

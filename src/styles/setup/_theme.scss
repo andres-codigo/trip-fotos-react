@@ -1,0 +1,93 @@
+// Semantic colour tokens. Components read var(--color-*) via styles/setup/variables, never a raw hex.
+// Values mirror the "Parchment" option in the Trip Fotos design system; every text and fill pairing is >= 4.5:1
+// (3:1 for borders, focus rings and the success fill) in both themes.
+// No-JS fallback: the media query applies dark when public/theme-init.js has not set data-theme.
+
+$_light: (
+	'bg': #faf9f5,
+	'surface': #ffffff,
+	'surface-sunken': #f0eee6,
+	'surface-accent': #dfecf5,
+	'text': #1f1e1d,
+	'text-muted': #5e5d59,
+	'border': #e3dfd3,
+	'border-strong': #857f72,
+	'accent': #19608f,
+	'accent-hover': #124a70,
+	'on-accent': #ffffff,
+	'accent-text': #17587f,
+	'header': #faf9f5,
+	'header-active': #f0eee6,
+	'on-header': #1f1e1d,
+	'on-header-hover': #17587f,
+	'focus': #b3470a,
+	'focus-header': #b3470a,
+	'danger': #b3261e,
+	'on-danger': #ffffff,
+	'danger-hover': #8f1d17,
+	'danger-surface': #fbe9e7,
+	'danger-text': #a1221b,
+	'success': #2f6b3a,
+	'on-success': #ffffff,
+	'overlay': rgba(20, 19, 18, 0.6),
+	'badge-1': #3b3a37,
+	'badge-2': #8f3a23,
+	'badge-3': #2f5d62,
+	'badge-4': #6b4b8a,
+);
+
+$_dark: (
+	'bg': #1f1e1d,
+	'surface': #2a2927,
+	'surface-sunken': #181716,
+	'surface-accent': #1f3340,
+	'text': #f0eee6,
+	'text-muted': #b8b4a8,
+	'border': #3d3b37,
+	'border-strong': #8a867b,
+	'accent': #5fa8d8,
+	'accent-hover': #7dbbe4,
+	'on-accent': #1f1e1d,
+	'accent-text': #7dbbe4,
+	'header': #141413,
+	'header-active': #2a2927,
+	'on-header': #f0eee6,
+	'on-header-hover': #9cc9ea,
+	'focus': #f0a060,
+	'focus-header': #f0a060,
+	'danger': #e5675d,
+	'on-danger': #1f1e1d,
+	'danger-hover': #ee8279,
+	'danger-surface': #3d2422,
+	'danger-text': #f08a82,
+	'success': #6fbf7d,
+	'on-success': #1f1e1d,
+	'overlay': rgba(0, 0, 0, 0.7),
+	'badge-1': #d6d2c6,
+	'badge-2': #e8967a,
+	'badge-3': #7cc0c6,
+	'badge-4': #c3a6e3,
+);
+
+@mixin _emit($tokens) {
+	@each $name, $value in $tokens {
+		--color-#{$name}: #{$value};
+	}
+}
+
+:root {
+	color-scheme: light;
+	@include _emit($_light);
+}
+
+:root[data-theme='dark'] {
+	color-scheme: dark;
+	@include _emit($_dark);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme]) {
+		color-scheme: dark;
+		@include _emit($_dark);
+	}
+}

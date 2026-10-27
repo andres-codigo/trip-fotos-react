@@ -26,13 +26,13 @@
 	}
 
 	&.success {
-		background-color: variables.$color-japanese-laurel; // Greenish
-		color: white;
+		background-color: variables.$color-success;
+		color: variables.$color-on-success;
 	}
 
 	&.error {
-		background-color: variables.$color-mojo; // Reddish
-		color: white;
+		background-color: variables.$color-danger;
+		color: variables.$color-on-danger;
 	}
 }
 

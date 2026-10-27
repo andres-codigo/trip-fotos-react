@@ -22,10 +22,10 @@
 	.navMenuItem ul li {
 		margin: 0 0.5rem;
 		.active {
-			border: 1px solid variables.$color-white;
+			border: 1px solid variables.$color-on-header;
 
 			&:hover {
-				border: 1px solid variables.$color-lavender-magenta;
+				border: 1px solid variables.$color-on-header-hover;
 			}
 		}
 	}
@@ -35,7 +35,7 @@
 	}
 
 	.bar {
-		background-color: variables.$color-white;
+		background-color: variables.$color-on-header;
 		display: block;
 		height: 0.1875rem;
 		margin: 0.3125rem auto;
@@ -51,7 +51,8 @@
 			left: -100%;
 			top: 4.9rem;
 			flex-direction: column;
-			background-color: variables.$color-pigment-indigo;
+			background-color: variables.$color-header;
+			border-bottom: 1px solid variables.$color-border;
 			width: 100%;
 			text-align: center;
 			box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);

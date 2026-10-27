@@ -16,6 +16,9 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+// Components read colours from custom properties that the app's global stylesheet defines
+import '@/styles/setup/_theme.scss'
+
 import { mount } from 'cypress/react'
 
 Cypress.Commands.add('mount', mount)

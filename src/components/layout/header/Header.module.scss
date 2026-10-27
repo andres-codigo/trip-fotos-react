@@ -2,7 +2,8 @@
 
 .siteHeader {
 	align-items: center;
-	background-color: variables.$color-pigment-indigo;
+	background-color: variables.$color-header;
+	border-bottom: 1px solid variables.$color-border;
 	display: flex;
 	height: 5rem;
 	position: fixed;
@@ -10,16 +11,45 @@
 	width: 100%;
 	z-index: 1;
 
+	:focus-visible {
+		outline-color: variables.$color-focus-header;
+	}
+
 	.siteHeaderTitleLink {
-		font-size: 1.5rem;
-		font-weight: 700;
+		font-family: variables.$font-serif;
+		font-size: 1.625rem;
+		font-weight: 500;
+		letter-spacing: -0.01em;
 		margin: 0.67em 0;
 
 		a {
-			color: variables.$color-white;
+			color: variables.$color-on-header;
 			margin: 0;
 			padding: 0.75rem 1.5rem;
 			text-decoration: none;
+		}
+	}
+
+	.siteHeaderActions {
+		align-items: center;
+		display: flex;
+		gap: 1rem;
+		padding-right: 1rem;
+
+		// The toggle follows the nav links, then moves ahead of the hamburger on mobile
+		& > :first-child {
+			order: 1;
+		}
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	.siteHeader .siteHeaderActions {
+		gap: 0.25rem;
+		padding-right: 0.5rem;
+
+		& > :first-child {
+			order: 0;
 		}
 	}
 }

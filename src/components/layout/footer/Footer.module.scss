@@ -4,15 +4,15 @@
 	display: flex;
 	justify-content: center;
 	padding: 1.5rem 1.25rem;
-	border-top: 1px solid variables.$color-alto;
+	border-top: 1px solid variables.$color-border;
 
 	.siteFooterLink {
-		color: variables.$color-pigment-indigo;
+		color: variables.$color-accent-text;
 		display: inline-block;
 		padding: 0.75rem;
 
 		&:focus-visible {
-			outline: 3px solid variables.$color-lavender-magenta;
+			outline: 3px solid variables.$color-focus;
 			outline-offset: 2px;
 		}
 	}
