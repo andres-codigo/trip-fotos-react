@@ -120,7 +120,10 @@ export const TRAVELLERS_LIST_SELECTORS = {
 	TRAVELLERS_LIST: getByDataCy('travellers-list'),
 	TRAVELLER_ITEM: getByDataCy('traveller-item'),
 	REGISTER_LINK: getByDataCy('register-link'),
+	REFRESH_BUTTON: getByDataCy('refresh-button'),
 	CONTROLS: getByDataCy('controls'),
+	NO_TRAVELLERS: getByDataCy('no-travellers-list'),
+	NO_MATCHING_TRAVELLERS: getByDataCy('no-matching-travellers'),
 }
 
 /////
