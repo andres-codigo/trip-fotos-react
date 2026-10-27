@@ -72,6 +72,8 @@ describe('<BaseImage />', () => {
 
 		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).click()
 		cy.get(getByDataCy(DIALOG.TITLE)).should('contain', "Ada's photos")
+		// Axe measures colour contrast on what is painted, so wait for the dialog to finish fading in
+		cy.get('dialog').should('have.css', 'opacity', '1')
 		cy.checkA11y()
 	})
 })
