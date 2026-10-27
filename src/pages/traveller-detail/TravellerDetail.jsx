@@ -23,6 +23,7 @@ import BaseBadge from '@/components/ui/badge/BaseBadge'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseCard from '@/components/ui/card/BaseCard'
 import BaseImage from '@/components/ui/image/BaseImage'
+import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 import travellerDetailStyles from './travellerDetail.module.scss'
@@ -98,9 +99,9 @@ const TravellerDetail = () => {
 				<BaseCard>
 					{heading}
 					<div data-cy={TRAVELLER_DETAIL.NOT_FOUND}>
-						<p role="alert">
+						<ErrorMessage>
 							{TRAVELLER_DETAIL_CONFIG.NOT_FOUND_MESSAGE}
-						</p>
+						</ErrorMessage>
 						<BaseButton
 							isLink
 							to={PATHS.TRAVELLERS}

@@ -2,12 +2,13 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 
 import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
-import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
+import { GLOBAL } from '@/constants/ui'
 
 import Input from '@/components/ui/form/input/Input'
 import Textarea from '@/components/ui/form/textarea/Textarea'
 import Combobox from '@/components/ui/form/combobox/Combobox'
 import BaseButton from '@/components/ui/button/BaseButton'
+import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
 import AddFile from '@/components/forms/file-uploader/AddFile'
 
 import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
@@ -102,11 +103,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				data-cy="traveller-registration-form-title">
 				Register as a Traveller
 			</h1>
-			<div
-				aria-live="polite"
-				style={ACCESSIBILITY.ARIA_LIVE.POLITE.STYLE}>
-				{isLoading ? ACCESSIBILITY.ARIA_LIVE.POLITE.MESSAGE : ''}
-			</div>
+			<LoadingAnnouncement isLoading={isLoading} />
 			<div
 				className={`${travellerRegistrationFormStyles.formControl} ${!formData[FIRST_NAME].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
 				<Input {...getInputProps(FIRST_NAME)} />

@@ -69,8 +69,8 @@ Maintain **API consistency** (prop names, validation patterns) when creating sim
 
 - Ensure form components handle accessibility attributes (`aria-*`, `role`) for validation states.
 - Render a control only while it can do something. An error, empty or unavailable state (e.g. `BaseImage`'s "Image unavailable" fallback) should drop its button or link rather than stay clickable, focusable and lead nowhere.
-- **Form Errors**: When displaying form field errors, render both a visual error (if the design calls for one) AND a visually hidden error span with `role="alert"` for screen readers. Use the `renderVisuallyHiddenError` utility and the shared `Input`/`Textarea` error output; do not hand-roll another `<p role="alert">` or `<div role="alert">`. Page-level request errors use `Alerts`. (Target: converge the remaining hand-rolled error markup, #400.)
-- **Loading**: Show pending state with `BaseSpinner`; forms also set `aria-busy` from an `isLoading` prop. Do not hand-roll an `aria-live` loading span or repeat `BaseSpinner`-inside-`BaseCard` markup (#400).
+- **Form Errors**: When displaying form field errors, render both a visual error (if the design calls for one) AND a visually hidden error span with `role="alert"` for screen readers. Use the `renderVisuallyHiddenError` utility and `ErrorMessage` (`ui/error-message`, which `Input`/`Textarea` already use) for a single message; do not hand-roll another `<p role="alert">`. `AddFile` keeps one `<div role="alert">` because it announces several messages as a single region. Page-level request errors use `Alerts`.
+- **Loading**: Show pending state with `BaseSpinner`; forms also set `aria-busy` from an `isLoading` prop. Forms announce loading with `LoadingAnnouncement` (`ui/loading-announcement`); do not hand-roll an `aria-live` loading span. Where a card shows a spinner, reuse `LoadingFallback`.
 
 ## Testing
 

@@ -6,11 +6,11 @@ import {
 	CONTACT_TRAVELLER_CONFIG,
 	CONTACT_TRAVELLER_FIELDS,
 } from '@/constants/travellers'
-import { ACCESSIBILITY } from '@/constants/ui'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
 import Textarea from '@/components/ui/form/textarea/Textarea'
+import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
 
 import useContactTravellerForm from './hooks/useContactTravellerForm'
 
@@ -49,11 +49,7 @@ const ContactTravellerForm = ({
 			autoComplete="on"
 			aria-busy={isLoading}
 			data-cy={CONTACT_TRAVELLER.FORM}>
-			<div
-				aria-live="polite"
-				style={ACCESSIBILITY.ARIA_LIVE.POLITE.STYLE}>
-				{isLoading ? ACCESSIBILITY.ARIA_LIVE.POLITE.MESSAGE : ''}
-			</div>
+			<LoadingAnnouncement isLoading={isLoading} />
 			<div className={getControlClassName(EMAIL)}>
 				<Input
 					{...getFieldProps(EMAIL)}

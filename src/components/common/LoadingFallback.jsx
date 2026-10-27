@@ -8,19 +8,21 @@ import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 import './LoadingFallback.module.scss'
 
 const LoadingFallback = ({ isComponent }) => {
-	return isComponent ? (
+	const card = (
 		<BaseCard className="loadingFallback">
 			<BaseSpinner />
 		</BaseCard>
+	)
+
+	return isComponent ? (
+		card
 	) : (
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
 			className="mainContainer loadingFallback"
 			data-cy="main-container">
-			<BaseCard className="loadingFallback">
-				<BaseSpinner />
-			</BaseCard>
+			{card}
 		</main>
 	)
 }

@@ -1,6 +1,8 @@
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
+import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
+
 import textareaStyles from './Textarea.module.scss'
 
 const Textarea = ({
@@ -47,12 +49,11 @@ const Textarea = ({
 			{...rest}
 		/>
 		{!isValid && message && (
-			<p
+			<ErrorMessage
 				id={`${id}-error`}
-				role="alert"
 				data-cy-error={dataCyError}>
 				{message}
-			</p>
+			</ErrorMessage>
 		)}
 	</div>
 )

@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types'
 
+import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
+
 import inputStyles from './Input.module.scss'
 
 const Input = ({
@@ -44,12 +46,11 @@ const Input = ({
 			{...rest}
 		/>
 		{!isValid && message && (
-			<p
+			<ErrorMessage
 				id={`${id}-error`}
-				role="alert"
 				data-cy-error={dataCyError}>
 				{message}
-			</p>
+			</ErrorMessage>
 		)}
 	</div>
 )
