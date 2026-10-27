@@ -14,7 +14,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
  */
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
-import { FILE_DROP, MOCK_CITIES, UI_TEXT } from '@/constants/test'
+import {
+	FILE_DROP,
+	MOCK_CITIES,
+	TRAVELLER_REGISTRATION_FORM_SELECTORS,
+	UI_TEXT,
+} from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
 
@@ -253,7 +258,7 @@ describe('<TravellerRegistrationForm />', () => {
 
 			// Verify form renders successfully
 			const form = container.querySelector(
-				`[data-cy="${FORM_SELECTORS.FORM}"]`,
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM,
 			)
 			expect(form).toBeInTheDocument()
 		})
@@ -276,7 +281,7 @@ describe('<TravellerRegistrationForm />', () => {
 
 			// Check that form rendered successfully
 			const form = container.querySelector(
-				`[data-cy="${FORM_SELECTORS.FORM}"]`,
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM,
 			)
 			expect(form).toBeInTheDocument()
 		})

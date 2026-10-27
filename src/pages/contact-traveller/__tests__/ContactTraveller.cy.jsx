@@ -8,7 +8,10 @@ import messagesReducer from '@/store/slices/messagesSlice'
 import travellersReducer from '@/store/slices/travellersSlice'
 
 import { CONTACT_TRAVELLER_SELECTORS } from '@/constants/test'
+import { getByDataCy } from '@/testUtils/cypress/selectors'
 import { CONTACT_TRAVELLER_CONFIG } from '@/constants/travellers'
+
+const TRAVELLERS_STUB = 'travellers-stub'
 
 describe('<ContactTraveller />', () => {
 	const mountPage = () => {
@@ -44,7 +47,7 @@ describe('<ContactTraveller />', () => {
 						<Route
 							path="/travellers"
 							element={
-								<p data-cy="travellers-stub">Travellers</p>
+								<p data-cy={TRAVELLERS_STUB}>Travellers</p>
 							}
 						/>
 					</Routes>
@@ -82,7 +85,7 @@ describe('<ContactTraveller />', () => {
 			userEmail: 'me@example.com',
 			message: 'Hello',
 		})
-		cy.get('[data-cy="travellers-stub"]').should('exist')
+		cy.get(getByDataCy(TRAVELLERS_STUB)).should('exist')
 	})
 
 	it('shows an error dialog and keeps the form when sending fails', () => {

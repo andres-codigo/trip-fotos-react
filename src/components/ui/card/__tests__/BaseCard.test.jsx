@@ -4,6 +4,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 
 import BaseCard from '@/components/ui/card/BaseCard'
+import { COMMON_SELECTORS } from '@/constants/test'
 
 /**
  * BaseCard Unit Tests
@@ -80,9 +81,7 @@ describe('<BaseCard />', () => {
 				<BaseCard className="custom-class">Content</BaseCard>,
 			)
 
-			const card = container.querySelector(
-				`[data-cy="${BASE_CARD_SELECTOR}"]`,
-			)
+			const card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
 
 			expect(mockClassNames).toHaveBeenCalledWith(
 				'custom-class',
@@ -95,9 +94,7 @@ describe('<BaseCard />', () => {
 		it('applies card styles when no custom className provided', () => {
 			const { container } = render(<BaseCard>Content</BaseCard>)
 
-			const card = container.querySelector(
-				`[data-cy="${BASE_CARD_SELECTOR}"]`,
-			)
+			const card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
 
 			expect(mockClassNames).toHaveBeenCalledWith(
 				undefined,
@@ -112,7 +109,7 @@ describe('<BaseCard />', () => {
 				<BaseCard className="">Content</BaseCard>,
 			)
 
-			container.querySelector(`[data-cy="${BASE_CARD_SELECTOR}"]`)
+			container.querySelector(COMMON_SELECTORS.BASE_CARD)
 
 			expect(mockClassNames).toHaveBeenCalledWith('', 'mocked-card-class')
 		})
@@ -122,7 +119,7 @@ describe('<BaseCard />', () => {
 				<BaseCard className="class-one class-two">Content</BaseCard>,
 			)
 
-			container.querySelector(`[data-cy="${BASE_CARD_SELECTOR}"]`)
+			container.querySelector(COMMON_SELECTORS.BASE_CARD)
 
 			expect(mockClassNames).toHaveBeenCalledWith(
 				'class-one class-two',
@@ -142,9 +139,7 @@ describe('<BaseCard />', () => {
 				</BaseCard>,
 			)
 
-			const card = container.querySelector(
-				`[data-cy="${BASE_CARD_SELECTOR}"]`,
-			)
+			const card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
 			// BaseCard only accepts className and children props, others are not spread
 			expect(card).not.toHaveAttribute('id')
 			expect(card).not.toHaveAttribute('role')
@@ -229,15 +224,13 @@ describe('<BaseCard />', () => {
 		it('always applies card style class', () => {
 			const { rerender, container } = render(<BaseCard>Content</BaseCard>)
 
-			let card = container.querySelector(
-				`[data-cy="${BASE_CARD_SELECTOR}"]`,
-			)
+			let card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
 			expect(card).toHaveClass('mocked-card-class')
 
 			// Rerender with different className
 			rerender(<BaseCard className="new-class">New Content</BaseCard>)
 
-			card = container.querySelector(`[data-cy="${BASE_CARD_SELECTOR}"]`)
+			card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
 			expect(card).toHaveClass('mocked-card-class')
 		})
 	})
