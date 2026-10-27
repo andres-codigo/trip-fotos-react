@@ -290,6 +290,52 @@ jobs:
                         return nodes.filter((node) => node?.state === 'OPEN')
                       }
 
+                      const getAssessmentFields = async (itemId) => {
+                        const data = await projectGraphql(
+                          `query($itemId: ID!) {
+                            node(id: $itemId) {
+                              ... on ProjectV2Item {
+                                fieldValues(first: 50) {
+                                  nodes {
+                                    ... on ProjectV2ItemFieldSingleSelectValue {
+                                      name
+                                      field {
+                                        ... on ProjectV2SingleSelectField { name }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }`,
+                          { itemId },
+                        )
+                        const values = data?.node?.fieldValues?.nodes || []
+                        const valueOf = (fieldName) => values.find((entry) => entry?.field?.name === fieldName)?.name || null
+                        return { Kind: valueOf('Kind'), Workstream: valueOf('Workstream') }
+                      }
+
+                      const getOpenBlockers = async () => {
+                        const response = await github.request('GET /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by', {
+                          owner,
+                          repo,
+                          issue_number: issueNumber,
+                        })
+                        return response.data.filter((blocker) => blocker.state === 'open').map((blocker) => blocker.number)
+                      }
+
+                      // Pulling work out of order is refused by removing the label, so the board never reflects it
+                      const reject = async (labelName, reason) => {
+                        await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNumber, name: labelName })
+                        await github.rest.issues.createComment({
+                          owner,
+                          repo,
+                          issue_number: issueNumber,
+                          body: `Removed \`${labelName}\`. ${reason}`,
+                        })
+                        return null
+                      }
+
                       const resolveUnblockedStatus = async () => {
                         const openPullRequests = await getOpenLinkedPullRequests()
                         if (openPullRequests.some((pull) => !pull.isDraft)) return STATUS.IN_REVIEW
@@ -299,7 +345,7 @@ jobs:
                         return STATUS.BACKLOG
                       }
 
-                      const resolveNextStatus = async (currentStatus) => {
+                      const resolveNextStatus = async (currentStatus, itemId) => {
                         if (!isLabelEvent) {
                           if (!currentStatus) return STATUS.TRIAGE
                           if (action === 'reopened' && currentStatus === STATUS.DONE) return STATUS.BACKLOG
@@ -313,31 +359,47 @@ jobs:
                         if (action === 'labeled') {
                           if (labelName === BLOCKED_LABEL) return STATUS.BLOCKED
                           if (isBlocked) return null
-                          // Triage is an inbox: an issue is assessed (Backlog) before it is queued or started
-                          if ((labelName === READY_LABEL || labelName === IN_PROGRESS_LABEL) && currentStatus === STATUS.TRIAGE) {
-                            await github.rest.issues.removeLabel({ owner, repo, issue_number: issueNumber, name: labelName })
-                            await github.rest.issues.createComment({
-                              owner,
-                              repo,
-                              issue_number: issueNumber,
-                              body: `Removed \`${labelName}\`: this issue is still in Triage. Assess it first (add its area or type labels, which moves it to Backlog), then add \`${labelName}\`.`,
-                            })
-                            return null
-                          }
+                          const isEpic = /^epic:/i.test(issue.title)
+
                           if (labelName === READY_LABEL) {
-                            return [null, STATUS.BACKLOG].includes(currentStatus) ? STATUS.READY : null
+                            if (currentStatus === STATUS.TRIAGE) {
+                              return reject(labelName, 'This issue is still in Triage. Assess it first: set Kind and Workstream on the board, then add any label to move it to Backlog.')
+                            }
+                            if (![null, STATUS.BACKLOG].includes(currentStatus)) return null
+                            const openBlockers = await getOpenBlockers()
+                            if (openBlockers.length > 0) {
+                              return reject(labelName, `It is blocked by open ${openBlockers.map((number) => `#${number}`).join(', ')}.`)
+                            }
+                            return STATUS.READY
                           }
                           // Never pulls an issue back from In review or Done (#302)
                           if (labelName === IN_PROGRESS_LABEL) {
-                            return [null, STATUS.BACKLOG, STATUS.READY].includes(currentStatus)
-                              ? STATUS.IN_PROGRESS
-                              : null
+                            if (currentStatus === STATUS.TRIAGE) {
+                              return reject(labelName, 'This issue is still in Triage. Assess it first, then mark it `ready`, then start it.')
+                            }
+                            if (currentStatus === STATUS.BACKLOG && !isEpic) {
+                              return reject(labelName, 'Work is pulled from Ready. Add `ready` first (epics are the only exception).')
+                            }
+                            return [null, STATUS.BACKLOG, STATUS.READY].includes(currentStatus) ? STATUS.IN_PROGRESS : null
                           }
                           // Labels picked on the new-issue form arrive with the opened event; they are not a triage decision
                           const isJustCreated = Date.now() - new Date(issue.created_at).getTime() < 60_000
                           if (isJustCreated) return null
-                          // Any later manual label counts as the issue having been triaged
-                          return [null, STATUS.TRIAGE].includes(currentStatus) ? STATUS.BACKLOG : null
+                          if (![null, STATUS.TRIAGE].includes(currentStatus)) return null
+                          // A label alone is not an assessment: the board item needs its Kind and Workstream
+                          const missing = Object.entries(await getAssessmentFields(itemId))
+                            .filter(([, value]) => !value)
+                            .map(([name]) => name)
+                          if (missing.length > 0) {
+                            await github.rest.issues.createComment({
+                              owner,
+                              repo,
+                              issue_number: issueNumber,
+                              body: `Staying in Triage: set ${missing.join(' and ')} on the board, then add or re-add a label to move it to Backlog.`,
+                            })
+                            return null
+                          }
+                          return STATUS.BACKLOG
                         }
 
                         if (labelName === BLOCKED_LABEL) return resolveUnblockedStatus()
@@ -356,7 +418,7 @@ jobs:
                         }
 
                         const currentStatus = await getStatusOptionId(projectItemId)
-                        const nextStatus = await resolveNextStatus(currentStatus)
+                        const nextStatus = await resolveNextStatus(currentStatus, projectItemId)
                         if (nextStatus && nextStatus !== currentStatus) {
                           await setStatus(projectItemId, nextStatus)
                           core.info(`Issue #${issueNumber} status: ${currentStatus || 'empty'} -> ${nextStatus}.`)
