@@ -83,26 +83,52 @@ The runbook includes expiry handling, recreation steps, secret update instructio
 
 Every Status is set by the two workflows above. Items also carry **Kind** (Epic / Feature / Bug / Chore / Deps) and **Workstream** (Vue parity / Tooling & AI / Maintenance / Lean repo / Design system) fields, set by hand.
 
-| Status      | Meaning                                         | Moved there when                                                               |
-| ----------- | ----------------------------------------------- | ------------------------------------------------------------------------------ |
-| Triage      | New, not yet assessed                           | An issue is opened                                                             |
-| Backlog     | Accepted, not scheduled                         | You add any label to an issue in Triage, or reopen a Done issue                |
-| Ready       | Queued, dependencies met                        | You add the `ready` label, or a linked PR is closed without merging            |
-| In progress | Being built                                     | You add the `in-progress` label, or a draft PR that closes the issue is opened |
-| Blocked     | Waiting on a decision or an external dependency | You add the `blocked` label; removing it restores the status                   |
-| In review   | PR open for review                              | The PR is opened (not as a draft) or marked ready for review                   |
-| Done        | Merged                                          | The PR is merged                                                               |
+| Status      | Meaning                                         | Moved there when                                                                                                                |
+| ----------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Triage      | New, not yet assessed                           | An issue is opened                                                                                                              |
+| Backlog     | Accepted, not scheduled                         | You add any label to a Triage issue whose Kind and Workstream are set, or reopen a Done issue                                   |
+| Ready       | Queued, dependencies met                        | You add the `ready` label to a Backlog issue with no open blocker, or a linked PR is closed without merging                     |
+| In progress | Being built                                     | You add the `in-progress` label to a Ready issue (an epic may come from Backlog), or a draft PR that closes the issue is opened |
+| Blocked     | Waiting on a decision or an external dependency | You add the `blocked` label; removing it restores the status                                                                    |
+| In review   | PR open for review                              | The PR is opened (not as a draft) or marked ready for review                                                                    |
+| Done        | Merged                                          | The PR is merged                                                                                                                |
 
 While an issue has the `blocked` label its PR events leave it in Blocked; only a merge moves it on.
 
-Add the `in-progress` label when you start work, before any PR exists. It moves an issue in Triage, Backlog or Ready to In progress, never one already In review or Done. Removing it restores the status. An issue that keeps the label returns to In progress, not Ready, when its PR is closed without merging, and a merge removes the label.
+**Work is pulled in order: Triage → Backlog → Ready → In progress.** Triage is an inbox, not a work queue.
 
-Epics (Kind = Epic, titled `Epic: ...`) group sub-issues in order and have no PR, so no workflow moves them. They stay in Backlog until you add `in-progress` when the first sub-issue starts, and you close the epic when its last sub-issue closes.
+- **Assess (Triage → Backlog):** set **Kind** and **Workstream** on the board item, then add any label. A label on an issue missing either field leaves it in Triage and the workflow comments with what is missing.
+- **Queue (Backlog → Ready):** add `ready`. Refused if the issue is still in Triage or has an open blocked-by link.
+- **Start (Ready → In progress):** add `in-progress` before any PR exists. Refused from Triage, and from Backlog unless the issue is an epic.
+
+A refused label is removed again with a comment saying why. The Issue Intake workflow enforces all of this. Removing `in-progress` restores the status. An issue that keeps the label returns to In progress, not Ready, when its PR is closed without merging, and a merge removes the label. A draft PR that closes the issue also moves it to In progress; that path is not guarded.
+
+Epics (Kind = Epic, titled `Epic: ...`) group sub-issues in order and have no PR, so no workflow moves them. They are the one exception to Ready: they stay in Backlog until you add `in-progress` when the first sub-issue starts, and you close the epic when its last sub-issue closes.
 
 Order within an epic:
 
 - Hard dependencies are **blocked-by** links on the issue (`POST /repos/{owner}/{repo}/issues/{n}/dependencies/blocked_by`). They show a marker on the issue and board but never change Status, so Blocked keeps its meaning above. Start the body of a dependent issue with `Do after #N.`
-- Keep one `ready` issue per workstream, and never add `ready` to an issue with an open blocker.
+- Keep one `ready` issue per workstream. The workflow already refuses `ready` on an issue with an open blocker.
+
+### Starting an issue
+
+"Start #N" runs this sequence end to end, without asking. Read the Status first (`gh issue view N --json projectItems -q '.projectItems[].status.name'`), skip steps already satisfied, and stop only on a hard blocker.
+
+1. **Done, In review or In progress by someone else:** stop and report.
+2. **Triage → Backlog:** set **Kind** and **Workstream** on the board item, choosing the closest option from the title prefix, labels and body, then add the area labels the PR will carry (any label triggers the move). Fields first, label second, because field edits fire no event. Report the values chosen.
+3. **Backlog → Ready:** read the open blockers (`gh api repos/andres-codigo/trip-fotos-react/issues/N/dependencies/blocked_by --jq '[.[]|select(.state=="open")|.number]'`) and the `Do after` line. If any are open, stop and name them. Otherwise add `ready`. Keep one Ready issue per workstream; if another is already Ready, say so and ask which goes first.
+4. **Ready → In progress:** add `in-progress`, branch off `main` with the type prefix, make the first commit (`--allow-empty` if needed), push and open a draft PR with `Closes #N`.
+5. **Confirm:** re-read the Status. If Issue Intake refused a label (the label is gone and there is a comment), fix the cause and repeat the step. Never move Status by hand to get round a refusal.
+
+Epics skip step 3 and go from Backlog straight to In progress.
+
+Field edit commands:
+
+```bash
+gh project field-list 2 --owner andres-codigo --format json
+gh project item-list 2 --owner andres-codigo --limit 200 --format json -q '.items[]|select(.content.number==N)|.id'
+gh project item-edit --project-id PVT_kwHOAybMeM4BCojE --id <item> --field-id <Kind or Workstream field id> --single-select-option-id <option id>
+```
 
 ### Project README and status updates
 
