@@ -24,10 +24,11 @@
 	}
 }
 
+// A file input is visually hidden by its own component, so it must not get the text-field box
 @mixin input() {
 	@include label();
 
-	input {
+	input:not([type='file']) {
 		@include default-styles();
 	}
 }
@@ -35,7 +36,7 @@
 @mixin input-textarea() {
 	@include label();
 
-	input,
+	input:not([type='file']),
 	textarea {
 		@include default-styles();
 	}
