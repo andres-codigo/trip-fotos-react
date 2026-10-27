@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types'
 
 import { API_DATABASE } from '@/constants/api'
-import { ACCESSIBILITY } from '@/constants/ui'
 import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
+import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
 
 import userAuthStyles from './UserAuthenticationForm.module.scss'
 
@@ -82,11 +82,7 @@ const UserAuthenticationForm = ({
 					</>
 				)}
 			</h1>
-			<div
-				aria-live="polite"
-				style={ACCESSIBILITY.ARIA_LIVE.POLITE.STYLE}>
-				{isLoading ? ACCESSIBILITY.ARIA_LIVE.POLITE.MESSAGE : ''}
-			</div>
+			<LoadingAnnouncement isLoading={isLoading} />
 			<div
 				className={`${userAuthStyles.formControl} ${
 					!email.isValid ? userAuthStyles.invalidForm : ''

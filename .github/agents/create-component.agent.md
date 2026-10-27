@@ -31,7 +31,7 @@ Use this agent when you need to create a new React component with full structure
     - Include a placeholder SCSS import with the correct naming convention
     - Add accessibility attributes if appropriate (form components, interactive elements)
     - Add `data-cy` attributes to meaningful DOM elements (buttons, form inputs, containers, labels, values) for testability
-    - Reuse the shared error and loading output (`renderVisuallyHiddenError`, `Input`/`Textarea` errors, `BaseSpinner`); do not hand-roll `role="alert"` or `aria-live` markup
+    - Reuse the shared error and loading output (`renderVisuallyHiddenError`, `ErrorMessage`, `LoadingAnnouncement`, `BaseSpinner`); do not hand-roll `role="alert"` or `aria-live` markup
 
 5. **Test File Setup**
     - Create `{ComponentName}.cy.jsx` (Cypress component test) with mount setup
