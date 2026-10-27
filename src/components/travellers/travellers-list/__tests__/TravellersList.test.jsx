@@ -29,12 +29,9 @@ import {
  */
 
 vi.mock('react-redux', async () => {
-	const actual = await vi.importActual('react-redux')
-	return {
-		...actual,
-		useDispatch: vi.fn(),
-		useSelector: vi.fn(),
-	}
+	const { createReactReduxMock } =
+		await import('@/testUtils/vitest/mockReactRedux')
+	return createReactReduxMock()
 })
 
 vi.mock('@/store/slices/travellersSlice', () => ({
