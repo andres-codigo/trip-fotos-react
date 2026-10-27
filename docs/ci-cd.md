@@ -110,6 +110,26 @@ Order within an epic:
 - Hard dependencies are **blocked-by** links on the issue (`POST /repos/{owner}/{repo}/issues/{n}/dependencies/blocked_by`). They show a marker on the issue and board but never change Status, so Blocked keeps its meaning above. Start the body of a dependent issue with `Do after #N.`
 - Keep one `ready` issue per workstream. The workflow already refuses `ready` on an issue with an open blocker.
 
+### Starting an issue
+
+"Start #N" runs this sequence end to end, without asking. Read the Status first (`gh issue view N --json projectItems -q '.projectItems[].status.name'`), skip steps already satisfied, and stop only on a hard blocker.
+
+1. **Done, In review or In progress by someone else:** stop and report.
+2. **Triage → Backlog:** set **Kind** and **Workstream** on the board item, choosing the closest option from the title prefix, labels and body, then add the area labels the PR will carry (any label triggers the move). Fields first, label second, because field edits fire no event. Report the values chosen.
+3. **Backlog → Ready:** read the open blockers (`gh api repos/andres-codigo/trip-fotos-react/issues/N/dependencies/blocked_by --jq '[.[]|select(.state=="open")|.number]'`) and the `Do after` line. If any are open, stop and name them. Otherwise add `ready`. Keep one Ready issue per workstream; if another is already Ready, say so and ask which goes first.
+4. **Ready → In progress:** add `in-progress`, branch off `main` with the type prefix, make the first commit (`--allow-empty` if needed), push and open a draft PR with `Closes #N`.
+5. **Confirm:** re-read the Status. If Issue Intake refused a label (the label is gone and there is a comment), fix the cause and repeat the step. Never move Status by hand to get round a refusal.
+
+Epics skip step 3 and go from Backlog straight to In progress.
+
+Field edit commands:
+
+```bash
+gh project field-list 2 --owner andres-codigo --format json
+gh project item-list 2 --owner andres-codigo --limit 200 --format json -q '.items[]|select(.content.number==N)|.id'
+gh project item-edit --project-id PVT_kwHOAybMeM4BCojE --id <item> --field-id <Kind or Workstream field id> --single-select-option-id <option id>
+```
+
 ### Project README and status updates
 
 The project's short description and README (Project > Settings) and its status updates are written by hand — no workflow touches them. Keep them current:
