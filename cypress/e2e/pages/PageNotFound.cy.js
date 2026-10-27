@@ -43,6 +43,16 @@ describe('Logged in > PageNotFound page', () => {
 	})
 })
 
+describe('Not logged in > PageNotFound page styling', () => {
+	it('shows the home link as a link, not plain text', () => {
+		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
+
+		cy.get(PAGE_NOT_FOUND_SELECTORS.HOME_LINK)
+			.should('have.css', 'text-decoration-line', 'underline')
+			.and('not.have.css', 'color', 'rgb(0, 0, 0)')
+	})
+})
+
 describe('Not logged in > PageNotFound page accessibility', () => {
 	it('has no axe violations', () => {
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })

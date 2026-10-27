@@ -18,7 +18,6 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 describe('useLogout', () => {
 	const mockDispatch = vi.fn()
 	const mockSetTravellerName = vi.fn()
-	const mockSetTotalMessages = vi.fn()
 	const mockSetIsMenuOpen = vi.fn()
 	const mockEvent = {
 		preventDefault: vi.fn(),
@@ -30,11 +29,7 @@ describe('useLogout', () => {
 
 	it('should return a function', () => {
 		const { result } = renderHook(() =>
-			useLogout(
-				mockSetTravellerName,
-				mockSetTotalMessages,
-				mockSetIsMenuOpen,
-			),
+			useLogout(mockSetTravellerName, mockSetIsMenuOpen),
 		)
 
 		expect(typeof result.current).toBe('function')
@@ -42,11 +37,7 @@ describe('useLogout', () => {
 
 	it('should call preventDefault on event', () => {
 		const { result } = renderHook(() =>
-			useLogout(
-				mockSetTravellerName,
-				mockSetTotalMessages,
-				mockSetIsMenuOpen,
-			),
+			useLogout(mockSetTravellerName, mockSetIsMenuOpen),
 		)
 
 		result.current(mockEvent)
@@ -56,11 +47,7 @@ describe('useLogout', () => {
 
 	it('should call setTravellerName with empty string', () => {
 		const { result } = renderHook(() =>
-			useLogout(
-				mockSetTravellerName,
-				mockSetTotalMessages,
-				mockSetIsMenuOpen,
-			),
+			useLogout(mockSetTravellerName, mockSetIsMenuOpen),
 		)
 
 		result.current(mockEvent)
@@ -68,27 +55,9 @@ describe('useLogout', () => {
 		expect(mockSetTravellerName).toHaveBeenCalledWith('')
 	})
 
-	it('should call setTotalMessages with null', () => {
-		const { result } = renderHook(() =>
-			useLogout(
-				mockSetTravellerName,
-				mockSetTotalMessages,
-				mockSetIsMenuOpen,
-			),
-		)
-
-		result.current(mockEvent)
-
-		expect(mockSetTotalMessages).toHaveBeenCalledWith(null)
-	})
-
 	it('should call setIsMenuOpen with false', () => {
 		const { result } = renderHook(() =>
-			useLogout(
-				mockSetTravellerName,
-				mockSetTotalMessages,
-				mockSetIsMenuOpen,
-			),
+			useLogout(mockSetTravellerName, mockSetIsMenuOpen),
 		)
 
 		result.current(mockEvent)
@@ -98,11 +67,7 @@ describe('useLogout', () => {
 
 	it('should dispatch logout action', () => {
 		const { result } = renderHook(() =>
-			useLogout(
-				mockSetTravellerName,
-				mockSetTotalMessages,
-				mockSetIsMenuOpen,
-			),
+			useLogout(mockSetTravellerName, mockSetIsMenuOpen),
 		)
 
 		result.current(mockEvent)
@@ -112,26 +77,19 @@ describe('useLogout', () => {
 
 	it('should call all functions in correct order', () => {
 		const { result } = renderHook(() =>
-			useLogout(
-				mockSetTravellerName,
-				mockSetTotalMessages,
-				mockSetIsMenuOpen,
-			),
+			useLogout(mockSetTravellerName, mockSetIsMenuOpen),
 		)
 
 		result.current(mockEvent)
 
 		expect(mockEvent.preventDefault).toHaveBeenCalledOnce()
 		expect(mockSetTravellerName).toHaveBeenCalledOnce()
-		expect(mockSetTotalMessages).toHaveBeenCalledOnce()
 		expect(mockSetIsMenuOpen).toHaveBeenCalledOnce()
 		expect(mockDispatch).toHaveBeenCalledOnce()
 	})
 
 	it('should handle missing setter functions gracefully', () => {
-		const { result } = renderHook(() =>
-			useLogout(undefined, undefined, undefined),
-		)
+		const { result } = renderHook(() => useLogout(undefined, undefined))
 
 		expect(() => result.current(mockEvent)).toThrow()
 	})
@@ -141,11 +99,7 @@ describe('useLogout', () => {
 		useDispatch.mockReturnValue(customDispatch)
 
 		const { result } = renderHook(() =>
-			useLogout(
-				mockSetTravellerName,
-				mockSetTotalMessages,
-				mockSetIsMenuOpen,
-			),
+			useLogout(mockSetTravellerName, mockSetIsMenuOpen),
 		)
 
 		result.current(mockEvent)

@@ -20,7 +20,6 @@ export const TestMainNav = ({
 			useMainNavState={() => ({
 				travellerName: 'Test User',
 				setTravellerName: () => {},
-				setTotalMessages: () => {},
 				isMenuOpen,
 				setIsMenuOpen,
 			})}

@@ -1,3 +1,4 @@
+@use '@/styles/setup/variables' as variables;
 @use '@/styles/setup/mixins/helpers' as helpers;
 
 .pageNotFoundContainer {
@@ -5,5 +6,10 @@
 
 	h1 {
 		@include helpers.page-heading;
+	}
+
+	p a {
+		color: variables.$color-ripe-plum;
+		text-decoration: underline;
 	}
 }

@@ -30,14 +30,18 @@ describe('<NavMenuMessagesLink />', () => {
 		mountLink({ totalMessages: 3 })
 
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('have.text', '3')
-		cy.get('li a').should('have.attr', 'aria-label', 'Messages 3')
+		cy.get('li a')
+			.should('have.attr', 'aria-label', 'Messages 3')
+			.and('have.prop', 'innerText', 'Messages 3')
 	})
 
 	it('shows no count and a plain name when there are no messages', () => {
 		mountLink({ totalMessages: 0 })
 
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('not.exist')
-		cy.get('li a').should('have.attr', 'aria-label', 'Messages')
+		cy.get('li a')
+			.should('have.attr', 'aria-label', 'Messages')
+			.and('have.prop', 'innerText', 'Messages')
 	})
 
 	it('shows no count when the total is not known yet', () => {
@@ -46,11 +50,17 @@ describe('<NavMenuMessagesLink />', () => {
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('not.exist')
 	})
 
-	// The count badge is not reachable yet (MainNav never sets totalMessages), and its accessible name does not contain its visible text; see the follow-up issue
 	it('has no axe violations', () => {
 		mountLink({ totalMessages: 0 })
 
 		cy.get('li a').should('exist')
+		cy.checkA11y()
+	})
+
+	it('has no axe violations with the count shown', () => {
+		mountLink({ totalMessages: 3 })
+
+		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('be.visible')
 		cy.checkA11y()
 	})
 })

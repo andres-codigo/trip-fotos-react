@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
 /**
  * MainNav Unit Tests
@@ -121,9 +121,12 @@ import NavMenuMessagesLink from '@/components/layout/main-nav/nav-menu/NavMenuMe
 describe('<MainNav />', () => {
 	const mockTravellerName = 'John Doe'
 	const mockTotalMessages = 5
+	const mockMessages = Array.from({ length: mockTotalMessages }, (_, id) => ({
+		id,
+	}))
 
 	const mockSetTravellerName = vi.fn()
-	const mockSetTotalMessages = vi.fn()
+	const mockDispatch = vi.fn()
 	const mockSetIsMenuOpen = vi.fn()
 
 	const mockHandleLogoutClick = vi.fn()
@@ -141,6 +144,7 @@ describe('<MainNav />', () => {
 					travellerName: mockTravellerName,
 					isTraveller: true,
 				},
+				messages: { messages: mockMessages },
 			}),
 		)
 
@@ -148,12 +152,12 @@ describe('<MainNav />', () => {
 		vi.mocked(useMainNavState).mockReturnValue({
 			travellerName: mockTravellerName,
 			setTravellerName: mockSetTravellerName,
-			totalMessages: mockTotalMessages,
-			setTotalMessages: mockSetTotalMessages,
 			isMenuOpen: false,
 			setIsMenuOpen: mockSetIsMenuOpen,
 		})
 
+		vi.mocked(useDispatch).mockReturnValue(mockDispatch)
+		mockDispatch.mockClear()
 		vi.mocked(useClickOutsideToClose).mockReturnValue(undefined)
 		vi.mocked(useMobileMenu).mockReturnValue(undefined)
 		vi.mocked(useLogout).mockReturnValue(mockHandleLogoutClick)
@@ -174,12 +178,28 @@ describe('<MainNav />', () => {
 			vi.mocked(useSelector).mockImplementation((selector) =>
 				selector({
 					travellers: { travellerName: '', isTraveller: true },
+					messages: { messages: [] },
 				}),
 			)
 
 			render(<MainNav {...defaultProps} />)
 
 			expect(mockSetTravellerName).toHaveBeenCalledWith('')
+		})
+
+		it('should load the messages for a logged-in traveller', () => {
+			render(<MainNav {...defaultProps} />)
+
+			expect(mockDispatch).toHaveBeenCalledWith(expect.any(Function))
+		})
+
+		it.each([
+			['logged out', { isLoggedIn: false }],
+			['not a traveller', { isLoggedIn: true, isTraveller: false }],
+		])('should not load the messages when %s', (_label, props) => {
+			render(<MainNav {...props} />)
+
+			expect(mockDispatch).not.toHaveBeenCalled()
 		})
 
 		it('should not touch the displayed name when logged out', () => {
@@ -330,7 +350,6 @@ describe('<MainNav />', () => {
 			)
 			expect(vi.mocked(useLogout)).toHaveBeenCalledWith(
 				mockSetTravellerName,
-				mockSetTotalMessages,
 				mockSetIsMenuOpen,
 			)
 		})

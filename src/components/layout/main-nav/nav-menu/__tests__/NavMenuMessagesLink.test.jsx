@@ -1,19 +1,16 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-
-import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
+import { describe, it, expect, vi } from 'vitest'
 
 /**
  * NavMenuMessagesLink Unit Tests
  *
  * Mocks:
  * - NavMenuButtonLink: Simplified mock that renders button with forwarded props
- * - classNames: Utility function mock for CSS class combination
  * - CSS Module: Provides stable mock class names for styling tests
  *
  * Test Coverage:
  * - Message count display: Conditional rendering based on totalMessages prop
- * - Class name combination: CSS class merging with NavMenuButtonLink styles
+ * - Class name: passed through unchanged, so the module's key names never leak in as global classes
  * - Prop forwarding: Ensures all required props are passed to NavMenuButtonLink
  * - Structure: Proper list item wrapper and data attributes
  *
@@ -46,10 +43,6 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
 	),
 }))
 
-vi.mock('classnames', () => ({
-	default: createClassNamesMock(),
-}))
-
 vi.mock(
 	'@/components/layout/main-nav/nav-menu/NavMenuButtonLink.module.scss',
 	() => ({
@@ -61,27 +54,10 @@ vi.mock(
 )
 
 import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
-import classNames from 'classnames'
 
 const mockNavMenuButtonLink = vi.mocked(NavMenuButtonLink)
-const mockClassNames = vi.mocked(classNames)
 
 describe('<NavMenuMessagesLink />', () => {
-	beforeEach(() => {
-		mockClassNames.mockImplementation((...args) => {
-			return args
-				.filter(Boolean)
-				.map((arg) => {
-					// Handle CSS module objects
-					if (typeof arg === 'object' && arg !== null) {
-						return Object.values(arg).join(' ')
-					}
-					return arg
-				})
-				.join(' ')
-		})
-	})
-
 	const defaultProps = {
 		isLink: true,
 		to: '/messages',
@@ -110,8 +86,6 @@ describe('<NavMenuMessagesLink />', () => {
 				{
 					ariaLabel: 'Messages',
 					children: ['Messages', false],
-					className:
-						'mocked-total-messages-container mocked-total-messages',
 					'data-cy': 'messages-link',
 					isLink: true,
 					onMenuItemClick: defaultProps.onMenuItemClick,
@@ -121,9 +95,7 @@ describe('<NavMenuMessagesLink />', () => {
 			)
 		})
 
-		it('should combine className with navMenuButtonLinkStyles', () => {
-			mockClassNames.mockReturnValue('custom-class combined-styles')
-
+		it('should pass className through without the styles object', () => {
 			render(
 				<NavMenuMessagesLink
 					{...defaultProps}
@@ -131,26 +103,13 @@ describe('<NavMenuMessagesLink />', () => {
 				/>,
 			)
 
-			expect(mockClassNames).toHaveBeenCalledWith(
-				'custom-class',
-				expect.anything(),
-			)
-
 			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
-				{
-					ariaLabel: 'Messages',
-					children: ['Messages', false],
-					className: 'custom-class combined-styles',
-					'data-cy': 'messages-link',
-					isLink: true,
-					onMenuItemClick: defaultProps.onMenuItemClick,
-					to: '/messages',
-				},
+				expect.objectContaining({ className: 'custom-class' }),
 				undefined,
 			)
 		})
 
-		it('should include the unread count in the accessible name', () => {
+		it('should keep the visible text and the accessible name in step', () => {
 			render(
 				<NavMenuMessagesLink
 					{...defaultProps}
@@ -162,6 +121,7 @@ describe('<NavMenuMessagesLink />', () => {
 				expect.objectContaining({ ariaLabel: 'Messages 3' }),
 				undefined,
 			)
+			expect(screen.getByRole('button')).toHaveTextContent('Messages 3')
 		})
 
 		it('should handle missing optional props gracefully', () => {
@@ -177,8 +137,6 @@ describe('<NavMenuMessagesLink />', () => {
 				{
 					ariaLabel: 'Messages',
 					children: ['Messages', false],
-					className:
-						'mocked-total-messages-container mocked-total-messages',
 					'data-cy': undefined,
 					isLink: true,
 					onMenuItemClick: undefined,

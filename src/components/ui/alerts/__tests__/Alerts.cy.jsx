@@ -21,7 +21,9 @@ describe('<Alerts />', () => {
 				/>,
 			)
 
-			cy.get(ALERT).should('have.class', alertsStyles[type])
+			cy.get(ALERT)
+				.should('have.class', alertsStyles[type])
+				.and('not.have.css', 'background-color', 'rgba(0, 0, 0, 0)')
 		})
 	})
 
@@ -75,7 +77,7 @@ describe('<Alerts />', () => {
 		cy.get(ALERT).should('exist')
 	})
 
-	;['success', 'error'].forEach((type) => {
+	;['success', 'error', 'info'].forEach((type) => {
 		it(`has no axe violations for the ${type} type`, () => {
 			cy.mount(
 				<Alerts
