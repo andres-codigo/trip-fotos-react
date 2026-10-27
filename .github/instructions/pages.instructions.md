@@ -75,7 +75,7 @@ When creating or modifying pages, keep both local and end-to-end coverage aligne
 
 ### E2E tests (`cypress/e2e/pages`)
 
-- Create or update page flows as `[PageName].page.cy.js`. App-wide flows are `*.e2e.cy.js` (`cypress/e2e/app`) and shared-component flows `*.component.cy.js` (`cypress/e2e/components`).
+- Create or update page flows as `cypress/e2e/pages/[PageName].cy.js`.
 - Use shared constants from `src/constants/test` and helper utilities from `cypress/support/utils`.
 
 ### Run commands

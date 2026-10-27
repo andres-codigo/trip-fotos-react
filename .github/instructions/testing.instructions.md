@@ -10,7 +10,7 @@ applyTo: '{**/__tests__/**/*,cypress/e2e/**/*.cy.js}'
 
 - **Vitest tests**: `*.test.jsx` for components and pages, `*.test.js` for hooks, utils and store slices, colocated in `__tests__` folders (slice tests sit beside the slice).
 - **Cypress component tests**: `*.cy.jsx` colocated in component/page `__tests__` folders.
-- **Cypress E2E tests**: `cypress/e2e/pages/[PageName].page.cy.js`, `cypress/e2e/app/*.e2e.cy.js` for app-wide flows and `cypress/e2e/components/*.component.cy.js` for shared-component flows.
+- **Cypress E2E tests**: `cypress/e2e/{pages,app,components}/[Name].cy.js` with no further suffix: the folder says what it covers (`pages` per route, `app` for app-wide flows, `components` for shared components).
 
 ## Test Data & Utilities
 

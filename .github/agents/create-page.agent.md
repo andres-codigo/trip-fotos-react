@@ -40,7 +40,7 @@ Use this agent when creating a new route-level page with structure, styling, and
 6. **Test Scaffolding**
     - Create `{PageName}.test.jsx` (Vitest page test).
     - Create `{PageName}.cy.jsx` (Cypress component test) when the page has non-trivial interaction.
-    - Create `cypress/e2e/pages/{PageName}.page.cy.js` (E2E flow test).
+    - Create `cypress/e2e/pages/{PageName}.cy.js` (E2E flow test).
     - Use `src/constants/test` for test constants and `cypress/support/utils` for E2E helpers.
 
 7. **Output**
