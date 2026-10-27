@@ -1,5 +1,5 @@
 import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
-import { FIREBASE_ERRORS } from '../../../src/constants/auth'
+import { IDENTITY_TOOLKIT_ERRORS } from '../../../src/constants/test/mock-data/mock-api'
 import {
 	AUTHENTICATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
@@ -287,21 +287,15 @@ describe('UI error dialog', () => {
 	}
 
 	it('shows an invalid login credentials error dialog', () => {
-		logInUsingIntercept(
-			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
-				.INVALID_LOGIN_CREDENTIALS,
-		)
+		logInUsingIntercept(IDENTITY_TOOLKIT_ERRORS.INVALID_LOGIN_CREDENTIALS)
 	})
 
 	it('shows too many unsuccessful login attempts error dialog', () => {
-		logInUsingIntercept(
-			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
-				.TOO_MANY_ATTEMPTS_TRY_LATER,
-		)
+		logInUsingIntercept(IDENTITY_TOOLKIT_ERRORS.TOO_MANY_ATTEMPTS_TRY_LATER)
 	})
 
 	it('shows the default error dialog', () => {
-		logInUsingIntercept(FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.DEFAULT)
+		logInUsingIntercept(IDENTITY_TOOLKIT_ERRORS.UNMAPPED)
 	})
 
 	it('shows an email already in use error dialog on signup', () => {
@@ -310,7 +304,7 @@ describe('UI error dialog', () => {
 		cy.interceptLoginError(
 			API_DATABASE.POST,
 			`${API_DATABASE.URL}signUp?key=${API_DATABASE.KEY}`,
-			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.EMAIL_EXISTS,
+			IDENTITY_TOOLKIT_ERRORS.EMAIL_EXISTS,
 		)
 
 		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
@@ -323,17 +317,14 @@ describe('UI error dialog', () => {
 
 		cy.wait('@loginErrorRequest', { timeout: REQUEST_TIMEOUT })
 
-		assertErrorDialog(
-			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES.EMAIL_EXISTS,
-		)
+		assertErrorDialog(IDENTITY_TOOLKIT_ERRORS.EMAIL_EXISTS)
 	})
 
 	it('closes the error dialog when the Escape key is pressed', () => {
 		cy.interceptLoginError(
 			API_DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
-			FIREBASE_ERRORS.AUTHENTICATION_ACTION_TYPES
-				.INVALID_LOGIN_CREDENTIALS,
+			IDENTITY_TOOLKIT_ERRORS.INVALID_LOGIN_CREDENTIALS,
 		)
 		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
 		cy.wait('@loginErrorRequest', { timeout: REQUEST_TIMEOUT })

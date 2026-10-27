@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
+import { ERROR_MESSAGES } from '@/constants/errors'
 import { handleApiError } from '@/utils/errorHandler/index'
 import {
 	API_ERROR_MESSAGE,
@@ -29,7 +30,7 @@ describe('handleApiError', () => {
 	it('should return fallback message when error and defaultMessage are undefined', () => {
 		const result = handleApiError(undefined, undefined)
 
-		expect(result).toBe(API_ERROR_MESSAGE.FALLBACK_ERROR)
+		expect(result).toBe(ERROR_MESSAGES.SOMETHING_WENT_WRONG)
 	})
 
 	it('should handle null error gracefully', () => {
@@ -72,9 +73,24 @@ describe('handleApiError', () => {
 		expect(result).toBe(API_ERROR_MESSAGE.JAVASCRIPT_ERROR)
 	})
 
+	it('should return a string error as the message', () => {
+		const result = handleApiError(
+			API_ERROR_MESSAGE.API_ERROR,
+			API_ERROR_MESSAGE.DEFAULT_MESSAGE,
+		)
+
+		expect(result).toBe(API_ERROR_MESSAGE.API_ERROR)
+	})
+
+	it('should fall back for an empty string error', () => {
+		const result = handleApiError('', API_ERROR_MESSAGE.DEFAULT_MESSAGE)
+
+		expect(result).toBe(API_ERROR_MESSAGE.DEFAULT_MESSAGE)
+	})
+
 	it('should handle no parameters', () => {
 		const result = handleApiError()
 
-		expect(result).toBe(API_ERROR_MESSAGE.FALLBACK_ERROR)
+		expect(result).toBe(ERROR_MESSAGES.SOMETHING_WENT_WRONG)
 	})
 })

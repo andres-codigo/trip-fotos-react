@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { handleApiError } from '@/utils/errorHandler'
 import { CONTACT_TRAVELLER } from '@/constants/test'
 import { CONTACT_TRAVELLER_CONFIG } from '@/constants/travellers'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
@@ -75,7 +76,12 @@ const ContactTraveller = () => {
 				},
 			})
 		} catch (error) {
-			setError(error || ERROR_MESSAGES.FAILED_TO_CONTACT_TRAVELLER)
+			setError(
+				handleApiError(
+					error,
+					ERROR_MESSAGES.FAILED_TO_CONTACT_TRAVELLER,
+				),
+			)
 			setIsLoading(false)
 		}
 	}

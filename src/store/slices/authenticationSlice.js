@@ -56,13 +56,9 @@ export const login = createAsyncThunk(
 				isAdmin,
 			}
 		} catch (error) {
-			if (error.code) {
-				return rejectWithValue(
-					FIREBASE_ERRORS.SDK_ERROR_CODES[error.code] ?? error.code,
-				)
-			}
 			return rejectWithValue(
-				error.message || ERROR_MESSAGES.LOGIN_FAILED_FALLBACK,
+				FIREBASE_ERRORS.SDK_ERROR_CODES[error.code] ??
+					ERROR_MESSAGES.LOGIN_FAILED,
 			)
 		}
 	},

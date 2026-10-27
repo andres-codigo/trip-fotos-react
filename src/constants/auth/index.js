@@ -1,32 +1,15 @@
-const AUTHENTICATION_ACTION_TYPES = Object.freeze({
-	DEFAULT: 'DEFAULT',
-	DEFAULT_MESSAGE: 'An unexpected error occurred. Please try again.',
-	EMAIL_EXISTS: 'EMAIL_EXISTS',
-	EMAIL_EXISTS_MESSAGE:
-		'This e-mail address is already in use. Try signing in or use a different e-mail address.',
-	INVALID_LOGIN_CREDENTIALS: 'INVALID_LOGIN_CREDENTIALS',
-	INVALID_LOGIN_CREDENTIALS_MESSAGE:
-		'The email or password you entered is incorrect.',
-	TOO_MANY_ATTEMPTS_TRY_LATER: 'TOO_MANY_ATTEMPTS_TRY_LATER',
-	TOO_MANY_ATTEMPTS_TRY_LATER_MESSAGE:
-		'Too many unsuccessful login attempts. Please try again later.',
-})
+import { ERROR_MESSAGES } from '../errors'
 
 export const FIREBASE_ERRORS = Object.freeze({
-	// FIREBASE ERROR MESSAGES
-	AUTHENTICATION_ACTION_TYPES,
-	// Firebase Auth SDK codes mapped to the REST error keys the UI already handles
+	// Firebase Auth SDK codes mapped to the user-facing message shown in the UI
 	SDK_ERROR_CODES: Object.freeze({
-		'auth/email-already-in-use': AUTHENTICATION_ACTION_TYPES.EMAIL_EXISTS,
-		'auth/invalid-credential':
-			AUTHENTICATION_ACTION_TYPES.INVALID_LOGIN_CREDENTIALS,
+		'auth/email-already-in-use': ERROR_MESSAGES.EMAIL_ALREADY_IN_USE,
+		'auth/invalid-credential': ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
 		'auth/invalid-login-credentials':
-			AUTHENTICATION_ACTION_TYPES.INVALID_LOGIN_CREDENTIALS,
-		'auth/user-not-found':
-			AUTHENTICATION_ACTION_TYPES.INVALID_LOGIN_CREDENTIALS,
-		'auth/wrong-password':
-			AUTHENTICATION_ACTION_TYPES.INVALID_LOGIN_CREDENTIALS,
-		'auth/too-many-requests':
-			AUTHENTICATION_ACTION_TYPES.TOO_MANY_ATTEMPTS_TRY_LATER,
+			ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
+		'auth/user-not-found': ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
+		'auth/wrong-password': ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
+		'auth/too-many-requests': ERROR_MESSAGES.TOO_MANY_LOGIN_ATTEMPTS,
+		'auth/network-request-failed': ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 	}),
 })

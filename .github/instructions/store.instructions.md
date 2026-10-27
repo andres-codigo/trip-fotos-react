@@ -59,8 +59,9 @@ Reference implementations: `loadMessages` in `src/store/slices/messagesSlice.js`
 - **Error Constants separation**:
     - Use `API_ERROR_MESSAGE` for internal/technical log messages and logic checks (e.g., 'Failed to fetch').
     - Use `ERROR_MESSAGES` for user-facing UI strings.
-    - Firebase Auth messages currently sit under `AUTHENTICATION_ACTION_TYPES.*_MESSAGE` in `src/constants/auth`; do not add a further location (target: fold into `ERROR_MESSAGES`, #397).
-    - Use `handleApiError` from `src/utils/errorHandler` to turn a caught error into a message; do not repeat `error.message || '...'` inline.
+    - Firebase Auth failures are mapped once, in the thunk, from the SDK `error.code` to an `ERROR_MESSAGES` string via `FIREBASE_ERRORS.SDK_ERROR_CODES`; the thunk rejects with that user-facing text and the UI shows it as is. An unmapped code or a non-SDK error becomes `ERROR_MESSAGES.LOGIN_FAILED`, never a raw `auth/*` code or technical message.
+    - Use `handleApiError(error, fallback)` from `src/utils/errorHandler` wherever an error or a rejected payload (a string) becomes UI text; do not write `x || ERROR_MESSAGES...` inline. It falls back to `ERROR_MESSAGES.SOMETHING_WENT_WRONG`.
+    - A user-facing message says what failed and what to do next ("We couldn't complete your registration. Please try again."), contains no ids, codes or technical wording, and ends in a full stop. Check any message you add or change against this.
 
 ## State Persistence
 

@@ -3,13 +3,14 @@ import { useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { API_DATABASE } from '@/constants/api'
+import { ERROR_MESSAGES } from '@/constants/errors'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import { login } from '@/store/slices/authenticationSlice'
 
 import useFormField from '@/components/forms/user-authentication/hooks/useFormField'
 
-import { getFirebaseAuthErrorMessage } from '@/utils/getFirebaseAuthErrorMessage'
+import { handleApiError } from '@/utils/errorHandler'
 import { validateEmail, validatePassword } from '@/utils/validation'
 
 import BaseCard from '@/components/ui/card/BaseCard'
@@ -82,8 +83,7 @@ const Authentication = () => {
 			const result = await dispatch(login(actionPayload))
 
 			if (result.meta && result.meta.rejectedWithValue) {
-				const errorMessage = getFirebaseAuthErrorMessage(result.payload)
-				throw new Error(errorMessage || getFirebaseAuthErrorMessage())
+				throw new Error(result.payload)
 			}
 
 			setEmail('')
@@ -95,7 +95,7 @@ const Authentication = () => {
 
 			navigate(redirectUrl)
 		} catch (error) {
-			setError(error.message || getFirebaseAuthErrorMessage())
+			setError(handleApiError(error, ERROR_MESSAGES.LOGIN_FAILED))
 		} finally {
 			setIsLoading(false)
 		}

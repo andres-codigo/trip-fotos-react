@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
-import { ERROR_MESSAGES } from '@/constants/errors'
+import { handleApiError } from '@/utils/errorHandler'
 import { TRAVELLER_ITEM } from '@/constants/test'
 import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
 import { GLOBAL, PATHS } from '@/constants/ui'
@@ -81,7 +81,7 @@ const TravellerItem = ({
 		)
 
 		if (deleteTraveller.rejected.match(result)) {
-			setError(result.payload || ERROR_MESSAGES.SOMETHING_WENT_WRONG)
+			setError(handleApiError(result.payload))
 			setIsDeleting(false)
 		}
 	}

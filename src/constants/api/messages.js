@@ -19,5 +19,4 @@ export const API_ERROR_MESSAGE = Object.freeze({
 
 	// API Response Codes/Strings
 	STORAGE_OBJECT_NOT_FOUND: 'storage/object-not-found',
-	INVALID_PASSWORD: 'INVALID_PASSWORD',
 })

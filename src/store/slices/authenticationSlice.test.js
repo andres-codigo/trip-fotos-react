@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 
 import { API_DATABASE } from '@/constants/api'
-import { FIREBASE_ERRORS } from '@/constants/auth'
 import {
 	MOCK_KEYS,
 	MOCK_STORAGE_KEYS,
@@ -373,25 +372,22 @@ describe('authenticationSlice', () => {
 			})
 
 			describe('failure scenarios', () => {
-				const { AUTHENTICATION_ACTION_TYPES: authTypes } =
-					FIREBASE_ERRORS
-
 				it.each([
 					[
 						'auth/invalid-credential',
-						authTypes.INVALID_LOGIN_CREDENTIALS,
+						ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
 					],
 					[
 						'auth/wrong-password',
-						authTypes.INVALID_LOGIN_CREDENTIALS,
+						ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
 					],
 					[
 						'auth/user-not-found',
-						authTypes.INVALID_LOGIN_CREDENTIALS,
+						ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
 					],
 					[
 						'auth/too-many-requests',
-						authTypes.TOO_MANY_ATTEMPTS_TRY_LATER,
+						ERROR_MESSAGES.TOO_MANY_LOGIN_ATTEMPTS,
 					],
 				])(
 					'maps SDK code %s to %s on login',
@@ -412,7 +408,7 @@ describe('authenticationSlice', () => {
 					},
 				)
 
-				it('maps an existing email on signup to EMAIL_EXISTS', async () => {
+				it('maps an existing email on signup to the email-in-use message', async () => {
 					createUserWithEmailAndPassword.mockRejectedValueOnce({
 						code: 'auth/email-already-in-use',
 					})
@@ -424,10 +420,12 @@ describe('authenticationSlice', () => {
 						}),
 					)
 
-					expect(result.payload).toBe(authTypes.EMAIL_EXISTS)
+					expect(result.payload).toBe(
+						ERROR_MESSAGES.EMAIL_ALREADY_IN_USE,
+					)
 				})
 
-				it('passes an unmapped SDK code through', async () => {
+				it('shows the generic sign-in message for an unmapped SDK code', async () => {
 					signInWithEmailAndPassword.mockRejectedValueOnce({
 						code: 'auth/user-disabled',
 					})
@@ -439,7 +437,7 @@ describe('authenticationSlice', () => {
 						}),
 					)
 
-					expect(result.payload).toBe('auth/user-disabled')
+					expect(result.payload).toBe(ERROR_MESSAGES.LOGIN_FAILED)
 				})
 
 				it('should handle autoLogout.rejected and set error state', async () => {
@@ -474,12 +472,27 @@ describe('authenticationSlice', () => {
 						}),
 					)
 
+					expect(result.payload).toBe(ERROR_MESSAGES.LOGIN_FAILED)
+				})
+
+				it('tells the user to check their connection when the network is down', async () => {
+					signInWithEmailAndPassword.mockRejectedValueOnce({
+						code: 'auth/network-request-failed',
+					})
+
+					const result = await store.dispatch(
+						login({
+							mode: API_DATABASE.AUTH_LOGIN_MODE,
+							...credentials,
+						}),
+					)
+
 					expect(result.payload).toBe(
-						ERROR_MESSAGES.LOGIN_FAILED_FALLBACK,
+						ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 					)
 				})
 
-				it('should handle network errors without changing state', async () => {
+				it('should hide a raw error message and leave state unchanged', async () => {
 					const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
 					signInWithEmailAndPassword.mockRejectedValueOnce(mockError)
 
@@ -496,7 +509,7 @@ describe('authenticationSlice', () => {
 					expect(state.userName).toBeNull()
 					expect(state.userEmail).toBeNull()
 
-					expect(result.payload).toBe(mockError.message)
+					expect(result.payload).toBe(ERROR_MESSAGES.LOGIN_FAILED)
 					expect(result.meta.rejectedWithValue).toBe(true)
 				})
 			})

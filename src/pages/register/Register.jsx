@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { registerTraveller } from '@/store/slices/travellersSlice'
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { handleApiError } from '@/utils/errorHandler'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
@@ -37,7 +38,12 @@ const Register = () => {
 				},
 			})
 		} catch (error) {
-			setError(error || ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER)
+			setError(
+				handleApiError(
+					error,
+					ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER,
+				),
+			)
 		} finally {
 			setIsLoading(false)
 		}
