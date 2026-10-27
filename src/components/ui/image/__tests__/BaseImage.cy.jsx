@@ -52,4 +52,26 @@ describe('<BaseImage />', () => {
 		)
 		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should('not.exist')
 	})
+
+	it('has no axe violations', () => {
+		mountImage()
+
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should('exist')
+		cy.checkA11y()
+	})
+
+	it('has no axe violations in its fallback state', () => {
+		mountImage('/missing-image.jpg')
+
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_FALLBACK).should('exist')
+		cy.checkA11y()
+	})
+
+	it('has no axe violations with the dialog open', () => {
+		mountImage()
+
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).click()
+		cy.get(getByDataCy(DIALOG.TITLE)).should('contain', "Ada's photos")
+		cy.checkA11y()
+	})
 })
