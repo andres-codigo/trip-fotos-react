@@ -251,6 +251,9 @@ export const updateTravellers = createAsyncThunk(
 				)
 				return filteredTravellers
 			} else {
+				if (userId) {
+					dispatch(setTravellerName(''))
+				}
 				return travellers
 			}
 		} catch (error) {
@@ -504,6 +507,10 @@ const travellersSlice = createSlice({
 			.addCase(loadTraveller.rejected, (state, action) => {
 				state.status = 'failed'
 				state.error = action.payload
+				// The persisted copy may be of a record that no longer exists
+				if (state.selectedTraveller?.id === action.meta.arg) {
+					state.selectedTraveller = null
+				}
 			})
 
 			// REGISTER_TRAVELLER async thunk handlers
@@ -547,6 +554,9 @@ const travellersSlice = createSlice({
 			.addCase(checkIsTraveller.fulfilled, (state, action) => {
 				state.isTraveller = action.payload
 				state.isTravellerCheckedFor = action.meta.arg
+				if (!action.payload) {
+					state.travellerName = ''
+				}
 			})
 			.addCase(checkIsTraveller.rejected, (state, action) => {
 				state.isTravellerCheckedFor = action.meta.arg
@@ -563,6 +573,7 @@ const travellersSlice = createSlice({
 				(state) => {
 					state.isTraveller = false
 					state.isTravellerCheckedFor = null
+					state.travellerName = ''
 				},
 			)
 	},

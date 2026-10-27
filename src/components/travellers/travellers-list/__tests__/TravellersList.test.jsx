@@ -507,12 +507,18 @@ describe('<TravellersList />', () => {
 		})
 
 		describe('component lifecycle', () => {
-			it('should not dispatch loadTravellers on mount when travellers exist', () => {
+			it('should revalidate cached travellers on mount without showing the spinner', () => {
 				setupMocksForHasTravellers()
 
 				const { mockDispatch } = renderTravellersList()
 
-				expect(mockDispatch).not.toHaveBeenCalled()
+				expect(mockDispatch).toHaveBeenCalledTimes(1)
+				expect(travellersSlice.loadTravellers).toHaveBeenCalledWith({
+					forceRefresh: true,
+				})
+				expect(
+					screen.queryByRole(SPINNER.ROLE_STATUS),
+				).not.toBeInTheDocument()
 			})
 		})
 
