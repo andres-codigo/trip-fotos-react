@@ -411,10 +411,17 @@ describe('travellersSlice', () => {
 
 		describe('success scenarios', () => {
 			it('should upload images and register traveller successfully', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch
+					.mockResolvedValueOnce({
+						ok: true,
+						json: async () => ({ name: MOCK_USER.USER_ID }),
+					})
+					.mockResolvedValueOnce({
+						ok: true,
+						json: async () => ({
+							displayName: `${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`,
+						}),
+					})
 
 				const result = await store.dispatch(
 					registerTraveller(mockRegistrationData),
@@ -450,6 +457,56 @@ describe('travellersSlice', () => {
 					}),
 				)
 			})
+
+			it('should set the Auth display name and userName to the registered name', async () => {
+				const fullName = `${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`
+				fetch
+					.mockResolvedValueOnce({
+						ok: true,
+						json: async () => ({ name: MOCK_USER.USER_ID }),
+					})
+					.mockResolvedValueOnce({
+						ok: true,
+						json: async () => ({ displayName: fullName }),
+					})
+
+				await store.dispatch(registerTraveller(mockRegistrationData))
+
+				expect(fetch).toHaveBeenCalledTimes(2)
+				const [url, options] = fetch.mock.calls[1]
+				expect(url).toContain('update?key=')
+				expect(JSON.parse(options.body)).toMatchObject({
+					displayName: fullName,
+				})
+				expect(localStorage.setItem).toHaveBeenCalledWith(
+					'userName',
+					fullName,
+				)
+				expect(store.getState().travellers.travellerName).toBe(fullName)
+			})
+
+			it('should still register the traveller when the name update fails', async () => {
+				fetch
+					.mockResolvedValueOnce({
+						ok: true,
+						json: async () => ({ name: MOCK_USER.USER_ID }),
+					})
+					.mockResolvedValueOnce({
+						ok: false,
+						json: async () => MOCK_API_RESPONSES.GENERIC_ERROR,
+					})
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				const state = store.getState().travellers
+				expect(state.isTraveller).toBe(true)
+				expect(state.travellerName).toBe(
+					`${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`,
+				)
+			})
 		})
 
 		describe('failure scenarios', () => {
@@ -463,6 +520,7 @@ describe('travellersSlice', () => {
 				)
 
 				expect(result.meta.requestStatus).toBe('rejected')
+				expect(fetch).toHaveBeenCalledTimes(1)
 				expect(handleApiError).toHaveBeenCalledWith(
 					expect.any(Error),
 					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
