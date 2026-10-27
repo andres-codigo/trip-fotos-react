@@ -301,6 +301,44 @@ describe('travellersSlice', () => {
 				global.localStorage.getItem = originalGetItem
 			})
 
+			it('should clear a stale travellerName when the logged-in record is missing', async () => {
+				store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({
+						other: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO,
+					}),
+				})
+				const originalGetItem = global.localStorage.getItem
+				global.localStorage.getItem = vi.fn((key) =>
+					key === 'userId' ? 'user1' : null,
+				)
+
+				await store.dispatch(updateTravellers())
+
+				expect(store.getState().travellers.travellerName).toBe('')
+				global.localStorage.getItem = originalGetItem
+			})
+
+			it('should keep travellerName when nobody is logged in', async () => {
+				store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({
+						other: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO,
+					}),
+				})
+				const originalGetItem = global.localStorage.getItem
+				global.localStorage.getItem = vi.fn(() => null)
+
+				await store.dispatch(updateTravellers())
+
+				expect(store.getState().travellers.travellerName).toBe(
+					MOCK_USER.FULL_NAME,
+				)
+				global.localStorage.getItem = originalGetItem
+			})
+
 			it('should return empty array when response is null', async () => {
 				fetch.mockResolvedValueOnce({
 					ok: true,

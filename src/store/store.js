@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { persistStore, persistReducer } from 'redux-persist'
+import { persistStore, persistReducer, createTransform } from 'redux-persist'
 import { combineReducers } from 'redux'
 
 import storage from './storage'
@@ -13,11 +13,19 @@ const rootReducer = combineReducers({
 	messages: messagesReducer,
 })
 
+// A persisted list can outlive the database, so a reload must not trust it until it has been fetched again
+const resetLastFetch = createTransform(
+	(inboundState) => inboundState,
+	(outboundState) => ({ ...outboundState, lastFetch: null }),
+	{ whitelist: ['travellers'] },
+)
+
 const persistConfig = {
 	key: 'root',
 	storage,
 	// Messages are private and fetched fresh on the Messages page, so they must not sit in localStorage
 	blacklist: ['messages'],
+	transforms: [resetLastFetch],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

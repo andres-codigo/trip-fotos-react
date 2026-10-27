@@ -14,6 +14,7 @@ import {
 	selectHasTravellers,
 	selectIsTraveller,
 	selectIsTravellerKnown,
+	selectLastFetch,
 } from '@/store/slices/travellersSlice'
 
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
@@ -29,11 +30,13 @@ import travellersListStyles from './TravellersList.module.scss'
 
 const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const travellers = useSelector(selectTravellers)
+	const lastFetch = useSelector(selectLastFetch)
 	const [error, setError] = useState(initialError)
 	const [shouldLoadOnMount] = useState(
 		() =>
 			!travellers ||
-			(Array.isArray(travellers) && travellers.length === 0),
+			(Array.isArray(travellers) && travellers.length === 0) ||
+			!lastFetch,
 	)
 	// Start in the loading state when a mount load is due, so the first paint never shows an enabled Register link that the load then disables
 	const [loading, setLoading] = useState(isLoading || shouldLoadOnMount)
@@ -78,11 +81,11 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 		[dispatch],
 	)
 
-	// The persisted list (and its lastFetch) can outlive the database, so a cached list is always re-fetched without hiding it behind the spinner
+	// lastFetch is cleared on rehydrate, so a list not yet fetched this page load is loaded behind the spinner; a fetched one is revalidated quietly
 	useEffect(() => {
 		if (!hasInitialisedRef.current) {
 			hasInitialisedRef.current = true
-			loadTravellersHandler(!shouldLoadOnMount, !shouldLoadOnMount)
+			loadTravellersHandler(false, !shouldLoadOnMount)
 		}
 		// Intentionally only run on mount
 		// eslint-disable-next-line react-hooks/exhaustive-deps

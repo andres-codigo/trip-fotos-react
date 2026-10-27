@@ -162,6 +162,35 @@ describe('<MainNav />', () => {
 	}
 
 	describe('Behaviour tests', () => {
+		it('should sync the store traveller name when logged in', () => {
+			render(<MainNav {...defaultProps} />)
+
+			expect(mockSetTravellerName).toHaveBeenCalledWith(mockTravellerName)
+		})
+
+		it('should clear the displayed name when the store name is empty', () => {
+			mockUseSelector.mockImplementation((selector) =>
+				selector({
+					travellers: { travellerName: '', isTraveller: true },
+				}),
+			)
+
+			render(<MainNav {...defaultProps} />)
+
+			expect(mockSetTravellerName).toHaveBeenCalledWith('')
+		})
+
+		it('should not touch the displayed name when logged out', () => {
+			render(
+				<MainNav
+					{...defaultProps}
+					isLoggedIn={false}
+				/>,
+			)
+
+			expect(mockSetTravellerName).not.toHaveBeenCalled()
+		})
+
 		it('should call setIsMenuOpen with false when handleMenuItemClick is invoked', () => {
 			render(<MainNav {...defaultProps} />)
 

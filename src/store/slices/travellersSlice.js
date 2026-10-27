@@ -586,6 +586,11 @@ export const selectTravellers = createSelector(
 	(travellersState) => travellersState.travellers,
 )
 
+export const selectLastFetch = createSelector(
+	[selectTravellersState],
+	(travellersState) => travellersState.lastFetch,
+)
+
 export const selectHasTravellers = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.hasTravellers,
