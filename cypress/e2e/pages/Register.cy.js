@@ -268,7 +268,9 @@ describe('Register Page', () => {
 						'contain',
 						DIALOG_SELECTORS.MESSAGES.ERROR.TITLE,
 					)
-					cy.contains(ERROR_MESSAGES.REQUEST_ERROR).should('exist')
+					cy.contains(
+						ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER,
+					).should('exist')
 					// Close the dialog
 					cy.get(DIALOG_SELECTORS.CLOSE_BUTTON).click()
 				},

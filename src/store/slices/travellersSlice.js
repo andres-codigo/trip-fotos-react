@@ -149,11 +149,16 @@ export const registerTraveller = createAsyncThunk(
 				registered: new Date().toISOString(),
 			}
 
-			await databaseRequest(`/travellers/${userId}`, {
-				method: API_DATABASE.PUT,
-				token,
-				body: travellerData,
-			})
+			try {
+				await databaseRequest(`/travellers/${userId}`, {
+					method: API_DATABASE.PUT,
+					token,
+					body: travellerData,
+				})
+			} catch {
+				// A bad status and a dropped connection both mean the record was not saved, which is what the user needs to hear
+				throw new Error(ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER)
+			}
 
 			// The record is already saved, so a failed name update must not report the registration as failed
 			await dispatch(

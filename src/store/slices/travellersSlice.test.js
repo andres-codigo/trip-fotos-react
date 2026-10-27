@@ -510,7 +510,7 @@ describe('travellersSlice', () => {
 				expect(fetch).toHaveBeenCalledTimes(1)
 				expect(handleApiError).toHaveBeenCalledWith(
 					expect.objectContaining({
-						message: ERROR_MESSAGES.REQUEST_ERROR,
+						message: ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER,
 					}),
 					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
 				)
@@ -521,9 +521,10 @@ describe('travellersSlice', () => {
 				expect(state.travellers).toEqual([])
 			})
 
-			it('should call handleApiError on network error', async () => {
-				const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
-				fetch.mockRejectedValueOnce(mockError)
+			it('should report the registration as failed when the connection drops', async () => {
+				fetch.mockRejectedValueOnce(
+					new Error(API_ERROR_MESSAGE.NETWORK_ERROR),
+				)
 
 				const result = await store.dispatch(
 					registerTraveller(mockRegistrationData),
@@ -531,7 +532,9 @@ describe('travellersSlice', () => {
 
 				expect(result.meta.requestStatus).toBe('rejected')
 				expect(handleApiError).toHaveBeenCalledWith(
-					mockError,
+					expect.objectContaining({
+						message: ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER,
+					}),
 					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
 				)
 
