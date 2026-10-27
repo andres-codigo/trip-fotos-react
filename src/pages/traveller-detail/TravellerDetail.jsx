@@ -26,7 +26,7 @@ import BaseImage from '@/components/ui/image/BaseImage'
 import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-import travellerDetailStyles from './travellerDetail.module.scss'
+import travellerDetailStyles from './TravellerDetail.module.scss'
 
 const TravellerDetail = () => {
 	const { id } = useParams()
@@ -83,6 +83,7 @@ const TravellerDetail = () => {
 			tabIndex={-1}
 			className={classNames(
 				'mainContainer',
+				'cardPage',
 				travellerDetailStyles.travellerDetailContainer,
 			)}
 			data-cy={TRAVELLER_DETAIL.ROOT}>

@@ -6,7 +6,7 @@ import { GLOBAL } from '@/constants/ui'
 
 import Home from '@/pages/home/Home'
 
-import homeStyles from '@/pages/home/home.module.scss'
+import homeStyles from '@/pages/home/Home.module.scss'
 
 /**
  * Home Unit Tests

@@ -27,12 +27,12 @@
 
 	&.success {
 		background-color: variables.$color-japanese-laurel; // Greenish
-		color: white;
+		color: variables.$color-white;
 	}
 
 	&.error {
 		background-color: variables.$color-mojo; // Reddish
-		color: white;
+		color: variables.$color-white;
 	}
 }
 

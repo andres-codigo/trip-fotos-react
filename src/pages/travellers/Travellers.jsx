@@ -8,7 +8,7 @@ import TravellersList from '@/components/travellers/travellers-list/TravellersLi
 import BaseCard from '@/components/ui/card/BaseCard'
 import Alerts from '@/components/ui/alerts/Alerts'
 
-import travellersStyles from './travellers.module.scss'
+import travellersStyles from './Travellers.module.scss'
 
 const Travellers = () => {
 	const location = useLocation()
@@ -29,7 +29,7 @@ const Travellers = () => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className={`mainContainer ${travellersStyles.travellersContainer}`}
+			className={`mainContainer cardPage ${travellersStyles.travellersContainer}`}
 			data-cy="main-container"
 			data-cy-alt="travellers-main-container">
 			<title>{`Travellers · ${GLOBAL.SITE_NAME}`}</title>

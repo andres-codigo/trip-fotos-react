@@ -3,10 +3,9 @@
 
 .badge {
 	background-color: variables.$color-silver;
-	border-radius: 30px;
+	border-radius: 1.875rem;
 	color: variables.$color-mine-shaft;
 	display: inline-block;
-	margin: 0 0.5rem 0.5rem 0;
 	padding: 0.5rem 1.5rem;
 	text-transform: uppercase;
 	@include helpers.user-select(none);

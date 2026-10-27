@@ -7,7 +7,7 @@ import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
-import pageNotFoundStyles from '@/pages/page-not-found/pageNotFound.module.scss'
+import pageNotFoundStyles from '@/pages/page-not-found/PageNotFound.module.scss'
 
 /**
  * PageNotFound Unit Tests

@@ -17,7 +17,7 @@ import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-import messagesStyles from './messages.module.scss'
+import messagesStyles from './Messages.module.scss'
 
 const Messages = () => {
 	const [isLoading, setIsLoading] = useState(true)
@@ -47,7 +47,7 @@ const Messages = () => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className={`mainContainer ${messagesStyles.messagesContainer}`}
+			className={`mainContainer cardPage ${messagesStyles.messagesContainer}`}
 			data-cy="main-container"
 			data-cy-alt="messages-main-container">
 			<title>{`Messages · ${GLOBAL.SITE_NAME}`}</title>

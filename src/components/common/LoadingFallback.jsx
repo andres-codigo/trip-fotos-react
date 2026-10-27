@@ -5,11 +5,11 @@ import { ACCESSIBILITY } from '@/constants/ui'
 import BaseCard from '@/components/ui/card/BaseCard'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-import './LoadingFallback.module.scss'
+import loadingFallbackStyles from './LoadingFallback.module.scss'
 
 const LoadingFallback = ({ isComponent }) => {
 	const card = (
-		<BaseCard className="loadingFallback">
+		<BaseCard className={loadingFallbackStyles.card}>
 			<BaseSpinner />
 		</BaseCard>
 	)
@@ -20,7 +20,7 @@ const LoadingFallback = ({ isComponent }) => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className="mainContainer loadingFallback"
+			className="mainContainer"
 			data-cy="main-container">
 			{card}
 		</main>
