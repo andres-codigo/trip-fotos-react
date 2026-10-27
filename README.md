@@ -61,6 +61,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Test hygiene, axe-core accessibility checks in the Cypress tests, and an E2E for a stale persisted store
 - Fixes: the Messages nav count, the Register file input, the 404 page link spacing, stale traveller data after a cleared database, and the traveller Auth display name
 - Process: a browser check for UI-affecting changes, and Issue Intake enforcing the board order Triage → Backlog → Ready → In progress
+- Leaner `package.json` scripts: unused scripts and their dev dependencies removed, `preview` renamed `build:preview` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
@@ -118,6 +119,15 @@ Below are the available npm scripts for this project:
 # Start the development server with linting
 npm run dev
 
+# Build the project for production
+npm run build
+
+# Preview the production build locally
+npm run build:preview
+
+# Visual Vite bundle analysis
+npm run analyse
+
 # Run ESLint and Stylelint to check for issues
 npm run lint
 
@@ -127,17 +137,17 @@ npm run lint:styles
 # Automatically fix linting issues and format files
 npm run lint:fix
 
-# Format files using Prettier
-npm run format
+# Run all tests in CI mode (single run)
+npm run vitest:run
 
-# NPM package dependency check
-npm run check:dependencies
+# Run tests quickly without coverage using dot reporter
+npm run vitest:run:fast
 
-# Deploy Realtime Database and Storage security rules
-npm run firebase:rules
+# Run Vitest in watch mode
+npm run vitest:watch
 
-# Grant or remove the admin custom claim (see Setup > Admin Role)
-npm run admin:claim -- <email> [--remove]
+# Run tests with coverage reporting enabled
+npm run vitest:coverage
 
 # Open the Cypress E2E Test Runner in interactive mode
 npm run cy:open:e2e
@@ -151,35 +161,14 @@ npm run cy:run:e2e
 # Run Cypress Component tests in headless mode
 npm run cy:run:ct
 
-# Run a specific test file (E2E or component based on path)
-npm run cy:run:one
-
 # Smart test runner - automatically detects component vs E2E tests
 npm run cy:run:auto [file-path]
 
-# File watcher - automatically runs tests when files change
-npm run cy:watch
+# Deploy Realtime Database and Storage security rules
+npm run firebase:rules
 
-# Run all tests in CI mode (single run)
-npm run vitest:run
-
-# Run Vitest in watch mode
-npm run vitest:watch
-
-# Run tests quickly without coverage using dot reporter
-npm run vitest:run:fast
-
-# Run tests with coverage reporting enabled
-npm run vitest:coverage
-
-# Visual Vite bundle analysis
-npm run analyse
-
-# Build the project for production
-npm run build
-
-# Preview the production build locally
-npm run preview
+# Grant or remove the admin custom claim (see Setup > Admin Role)
+npm run admin:claim -- <email> [--remove]
 ```
 
 <a id="setup"></a>
@@ -321,7 +310,7 @@ Details: [docs/testing.md](docs/testing.md) (test layout and utilities) and [doc
 
 ## 📦 Build and Deployment
 
-`npm run build` writes the production build to `dist/`; `npm run preview` serves it, and `npm run analyse` opens a bundle-size report at `https://localhost:3001/stats.html`.
+`npm run build` writes the production build to `dist/`; `npm run build:preview` serves it, and `npm run analyse` opens a bundle-size report at `https://localhost:3001/stats.html`.
 
 The app deploys to [Vercel](https://vercel.com/) from the GitHub repository, with the environment variables set in the Vercel dashboard. Deploy rule changes with `npm run firebase:rules` before the production deploy.
 
