@@ -143,6 +143,24 @@ describe('<TravellerRegistrationForm />', () => {
 			)
 		})
 
+		it('keeps the photo file input hidden and inside the drop zone', () => {
+			render()
+
+			// `.formControl input` must not un-hide the visually hidden native input
+			cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT)
+				.should('have.css', 'width', '1px')
+				.and('have.css', 'border-top-width', '0px')
+				.then(($input) => {
+					cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP).then(($drop) => {
+						const input = $input[0].getBoundingClientRect()
+						const drop = $drop[0].getBoundingClientRect()
+
+						expect(input.right).to.be.at.most(drop.right)
+						expect(input.left).to.be.at.least(drop.left)
+					})
+				})
+		})
+
 		it('renders the form with correct styling', () => {
 			render()
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should(
