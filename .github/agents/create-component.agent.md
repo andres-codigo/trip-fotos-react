@@ -18,10 +18,10 @@ Use this agent when you need to create a new React component with full structure
     - Create the component file: `{ComponentName}.jsx` (PascalCase)
     - Create the SCSS module: `{ComponentName}.module.scss`
     - Create the `__tests__` directory
-    - Create hooks subfolder if the component needs custom hooks
+    - Create `hooks/{useHookName}/index.js` (default export) if the component needs custom hooks; see `create-hook.agent.md`
 
 3. **Check for Reusable Patterns**
-    - Review `src/components/ui` and `src/components/common` for existing reusable components (e.g., `Button`, `Input`, `Dialog`)
+    - Review `src/components/ui` and `src/components/common` for existing reusable components (e.g., `BaseButton`, `Input`, `BaseDialog`, `BaseSpinner`, `Alerts`)
     - Advise the user to use existing components if they match the requirements
     - If creating a new reusable component, implement it and flag for immediate refactoring of similar patterns elsewhere
 
@@ -30,18 +30,20 @@ Use this agent when you need to create a new React component with full structure
     - Scaffold prop-types validation
     - Include a placeholder SCSS import with the correct naming convention
     - Add accessibility attributes if appropriate (form components, interactive elements)
-    - Add `data-cy` attributes to all meaningful DOM elements (buttons, form inputs, containers, labels, values) for testability
+    - Add `data-cy` attributes to meaningful DOM elements (buttons, form inputs, containers, labels, values) for testability
+    - Reuse the shared error and loading output (`renderVisuallyHiddenError`, `Input`/`Textarea` errors, `BaseSpinner`); do not hand-roll `role="alert"` or `aria-live` markup
 
 5. **Test File Setup**
     - Create `{ComponentName}.cy.jsx` (Cypress component test) with mount setup
-    - Create `{ComponentName}.test.js` (Vitest unit test) with render setup
+    - Create `{ComponentName}.test.jsx` (Vitest unit test) with render setup
     - Both test files should import the component and define placeholder test cases
     - Reference `src/testUtils` for mocking if needed
     - For Cypress tests, do not use inline string selectors like `cy.get('[data-cy="..."]')`; create and use exported selector constants in `src/constants/test/selectors/components.js` using `getByDataCy`, following the `Header` and `Header.cy.jsx` pattern
 
 6. **Styling**
     - Review `src/styles` for available variables and mixins
-    - Add SCSS module with proper imports and namespace usage for helpers/utilities
+    - Add SCSS module with proper imports and namespace usage for helpers/utilities; import it as `{componentName}Styles`
+    - Use colour variables from `src/styles/setup/_variables.scss` (add one, named per the Name that Colour convention, rather than a literal `white`/`rgba(...)`)
     - Scope every rule to a class — no top-level element selectors, no plain `.scss` side-effect imports (see `styles.instructions.md` → Scope Every Selector To A Class)
     - Space sibling items with `gap` on the parent, never an outer margin on a reusable component
     - For buttons and links, follow `components.instructions.md` → Buttons And Links: navigation is `BaseButton isLink` with a `modeType`, actions are `<button>`

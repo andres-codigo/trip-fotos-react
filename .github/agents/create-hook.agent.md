@@ -23,13 +23,15 @@ Use this agent when you need a new custom React hook with tests.
     - If unsure, start component-scoped — promoting later is cheap
 
 4. **Hook Boilerplate**
-    - Default-export the hook from `index.js`
-    - Return a stable object (`{ value, action }`) with callbacks wrapped in `useCallback` where consumers may pass them to children
+    - Default-export the hook from `index.js` (no flat `hooks/useX.js` files, no named export)
+    - Return a stable object (`{ value, action }`) with callbacks wrapped in `useCallback` where consumers may pass them to children; a tuple only for a `useState`-style pair
+    - Read session data through store selectors, never `localStorage`; dispatch thunks for server data, never call `fetch`
+    - Do not export constants from the hook file; put them in `src/constants/**`
     - Put magic values in `src/constants/**` and import them from the subdirectory barrel
     - Use the `@/` alias for every import
 
 5. **Test File Setup**
-    - Create `__tests__/{useHookName}.test.js` next to `index.js`
+    - Create `__tests__/{useHookName}.test.js` in the hook's own folder, next to `index.js`
     - Use `renderHook` and `act` from `@testing-library/react`
     - Cover the initial state, every returned action, and edge cases (duplicates, empty input, cleanup on unmount)
     - Put reusable test data in a sibling `__tests__/*TestData.js` file, following `src/utils/useViewport/__tests__/viewportTestData.js`

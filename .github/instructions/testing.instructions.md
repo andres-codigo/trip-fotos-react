@@ -8,18 +8,18 @@ applyTo: '{**/__tests__/**/*,cypress/e2e/**/*.cy.js}'
 
 ## Test Organisation
 
-- **Vitest tests**: `*.test.js` files colocated in source-level `__tests__` folders.
+- **Vitest tests**: `*.test.jsx` for components and pages, `*.test.js` for hooks, utils and store slices, colocated in `__tests__` folders (slice tests sit beside the slice).
 - **Cypress component tests**: `*.cy.jsx` colocated in component/page `__tests__` folders.
-- **Cypress E2E tests**: `cypress/e2e/**/[PageName].page.cy.js` and related app/component flows.
+- **Cypress E2E tests**: `cypress/e2e/{pages,app,components}/[Name].cy.js` with no further suffix: the folder says what it covers (`pages` per route, `app` for app-wide flows, `components` for shared components).
 
 ## Test Data & Utilities
 
 Use existing project paths for shared testing assets:
 
-- **Test constants and mock data**: `src/constants/test`
+- **Test constants and mock data**: `src/constants/test` (`mock-data/` for data, `selectors/` for `getByDataCy` selectors). A colocated `*TestData.js` is acceptable only for data used by that one test folder.
 - **Cypress helper utilities**: `cypress/support/utils`
 - **Cypress provider mounts**: `cypress/support/commands-support-files/mountWithProviders.jsx`
-- **General test helpers**: `src/testUtils`
+- **General test helpers**: `src/testUtils` (`vitest/` polyfills, setup and `mockClassNames`; `cypress/` `selectors.js` and `TestLocationDisplay`). Put a helper used by more than one test folder here rather than beside a single test; a shared `react-redux` mock belongs here too (today it is hand-mocked per test, #402).
 
 Do not introduce `cypress/support/constants` unless explicitly adopted in a future refactor.
 
@@ -32,13 +32,13 @@ Do not introduce `cypress/support/constants` unless explicitly adopted in a futu
 
 ## Cypress Rules
 
-- Prefer resilient selectors (`data-testid`, semantic roles) over fragile class selectors.
+- Select with `data-cy` through the `getByDataCy` constants in `src/constants/test/selectors`, or semantic roles; never an inline `[data-cy="…"]` string or a class selector. If a needed constant is missing, add it.
 - Avoid arbitrary waits; rely on Cypress retry behaviour and explicit route aliases when needed.
 - Keep E2E flows user-centred and scenario-driven.
 - Reset or isolate state in `beforeEach` to prevent cross-test leakage.
 - E2E tests that upload to Storage must delete their uploads afterwards.
 - After logging in, wait for the stored session before reloading — the Auth SDK persists it asynchronously.
-- Run `cy.checkA11y()` once per route in the E2E page specs (signed in where the spec signs in) and in component tests for forms and shared UI. It runs the WCAG 2.2 AA axe rules only.
+- Run `cy.checkA11y()` once per route in the E2E page specs (signed in where the spec signs in) and in component tests for forms and shared UI (`src/components/ui`, e.g. `BaseBadge`, `BaseImage`). It runs the WCAG 2.2 AA axe rules only.
 - Fix axe violations rather than excluding them; if a rule must be disabled, pass `{ rules: { 'rule-id': { enabled: false } } }` for that call with a one-line reason.
 - If an E2E spec fails in a full run, re-run it on its own before treating it as a regression; specs can flake under load.
 

@@ -1,6 +1,6 @@
 ---
 name: create-redux-slice
-description: Use when creating a new Redux slice. Automates slice structure, reducer and thunk/RTK Query generation with proper error handling, test file setup, and store configuration updates.
+description: Use when creating a new Redux slice. Automates slice structure, reducer and thunk generation with proper error handling, test file setup, and store configuration updates.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: sonnet
 ---

@@ -41,13 +41,13 @@ Work from a Claude Design session (design system or UI redesign) never lands on 
 
 Detailed conventions live in `.github/instructions/` — the single source of truth shared with GitHub Copilot. Read the relevant file when working in that area, rather than expecting it to be summarised here:
 
-| File                                                                          | Applies to                          | Covers                                                             |
-| ----------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------ |
-| [components.instructions.md](.github/instructions/components.instructions.md) | `src/components/**`                 | Folder structure, prop-types, reusability, accessibility, testing  |
-| [pages.instructions.md](.github/instructions/pages.instructions.md)           | `src/pages/**`                      | Route composition, data loading, testing                           |
-| [store.instructions.md](.github/instructions/store.instructions.md)           | `src/store/**`                      | RTK Query vs. thunks, error handling pattern, persistence, testing |
-| [styles.instructions.md](.github/instructions/styles.instructions.md)         | `src/**/*.scss`                     | SCSS modules, class-scoped selectors, spacing, colour naming       |
-| [testing.instructions.md](.github/instructions/testing.instructions.md)       | `**/__tests__/**`, `cypress/e2e/**` | Vitest/Cypress organisation, test data, anti-flakiness             |
+| File                                                                          | Applies to                          | Covers                                                            |
+| ----------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------- |
+| [components.instructions.md](.github/instructions/components.instructions.md) | `src/components/**`                 | Folder structure, prop-types, reusability, accessibility, testing |
+| [pages.instructions.md](.github/instructions/pages.instructions.md)           | `src/pages/**`                      | Route composition, data loading, testing                          |
+| [store.instructions.md](.github/instructions/store.instructions.md)           | `src/store/**`                      | Thunks, error handling pattern, persistence, testing              |
+| [styles.instructions.md](.github/instructions/styles.instructions.md)         | `src/**/*.scss`                     | SCSS modules, class-scoped selectors, spacing, colour naming      |
+| [testing.instructions.md](.github/instructions/testing.instructions.md)       | `**/__tests__/**`, `cypress/e2e/**` | Vitest/Cypress organisation, test data, anti-flakiness            |
 
 ## Key conventions
 

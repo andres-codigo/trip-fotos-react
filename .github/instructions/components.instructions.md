@@ -10,7 +10,7 @@ Page-level guidance is maintained separately in [pages.instructions.md](./pages.
 
 ## Folder Structure
 
-Each component must reside in its own contextual folder. Components are located in `src/components`, categorised by type: `common`, `forms`, `layout`, `messages`, `travellers`, `ui`.
+Each component must reside in its own contextual folder. Components are located in `src/components`, categorised by type: `ui` (generic, app-agnostic building blocks such as `BaseButton`, `Input`), `common` (app-wide pieces that are not generic UI, e.g. `LoadingFallback`), `forms`, `layout`, `messages`, `travellers`.
 
 ### Naming & Location
 
@@ -23,10 +23,12 @@ Each component must reside in its own contextual folder. Components are located 
       UserAuthenticationForm.module.scss
       __tests__/
         UserAuthenticationForm.cy.jsx
-        UserAuthenticationForm.test.js
-        useUserAuthentication.test.js
+        UserAuthenticationForm.test.jsx
       hooks/
-        useUserAuthentication.js
+        useUserAuthentication/
+          index.js
+          __tests__/
+            useUserAuthentication.test.js
     ```
 
 ### Refactoring Rule
@@ -38,11 +40,13 @@ If adding to a folder with flat components, refactor existing components into th
 - Use **functional components with hooks**.
 - Use **default exports** for the component.
 - Each component must have a `__tests__` directory in its folder.
-- Hooks specific to a component belong in a `hooks` subfolder within the component's folder (e.g., `src/components/forms/user-authentication/hooks/useUserAuthentication.js`).
+- Hooks specific to a component belong in a `hooks` subfolder within the component's folder, one folder per hook, default-exported from `index.js` (e.g., `hooks/useCitySearch/index.js`), with the test in that hook's own `__tests__/`. Hooks shared across components live in `src/utils/{useHookName}/index.js` (see `create-hook.agent.md`).
+- A hook returns an object (`{ value, action }`). A tuple is only for a `useState`-style pair.
+- Hooks do not read `localStorage`, call `fetch`, or define exported constants; use store selectors, thunks and `src/constants`. Target: `useFormField`, `useContactTravellerForm` and `useTravellerRegistration` (flat files, #399) and `useCitySearch`'s `fetch` (#396) still diverge.
 
 ### Prop Types
 
-Use `prop-types` for **all component props**. Define type-checking for each prop to maintain consistency and catch bugs early.
+Use `prop-types` for **all component props** (a component that takes none, such as `Footer`, needs none). Define type-checking for each prop to maintain consistency and catch bugs early.
 
 ## Reusability
 
@@ -65,7 +69,8 @@ Maintain **API consistency** (prop names, validation patterns) when creating sim
 
 - Ensure form components handle accessibility attributes (`aria-*`, `role`) for validation states.
 - Render a control only while it can do something. An error, empty or unavailable state (e.g. `BaseImage`'s "Image unavailable" fallback) should drop its button or link rather than stay clickable, focusable and lead nowhere.
-- **Form Errors**: When displaying form field errors, render both a visual error (if the design calls for one) AND a visually hidden error span with `role="alert"` for screen readers. Use the `renderVisuallyHiddenError` utility where applicable.
+- **Form Errors**: When displaying form field errors, render both a visual error (if the design calls for one) AND a visually hidden error span with `role="alert"` for screen readers. Use the `renderVisuallyHiddenError` utility and the shared `Input`/`Textarea` error output; do not hand-roll another `<p role="alert">` or `<div role="alert">`. Page-level request errors use `Alerts`. (Target: converge the remaining hand-rolled error markup, #400.)
+- **Loading**: Show pending state with `BaseSpinner`; forms also set `aria-busy` from an `isLoading` prop. Do not hand-roll an `aria-live` loading span or repeat `BaseSpinner`-inside-`BaseCard` markup (#400).
 
 ## Testing
 
@@ -74,7 +79,7 @@ When creating a new component, always create corresponding test files:
 ### Local Tests (in `__tests__` directory)
 
 - **Cypress component test** (`*.cy.jsx`) for UI interaction and visual behaviour.
-- **Vitest unit test** (`*.test.js`) for component logic and hooks.
+- **Vitest unit test** (`*.test.jsx` for a component, `*.test.js` for a hook or plain module) for component logic.
 
 ### Running Tests
 
@@ -95,7 +100,7 @@ See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypr
 ## Styling
 
 - Use **SCSS modules** for component-specific styles.
-- Import as `[componentName]Styles` (e.g., `import userAuthenticationFormStyles from './UserAuthenticationForm.module.scss'`).
+- Import as `[componentName]Styles` (e.g., `import userAuthenticationFormStyles from './UserAuthenticationForm.module.scss'`), never a bare `styles`.
 - When creating a new SCSS file, review `src/styles` for available variables and mixins to ensure consistency.
 - Never use a bare element selector at the top level of a style module, and never import a plain `.scss` file from a component — both leak globally. `npm run lint:styles` enforces the first.
 
