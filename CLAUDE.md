@@ -112,9 +112,14 @@ Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 - Add, remove, or rename a top-level folder, or a `src/` subfolder (update the Folder Structure tree)
 - Add or change a GitHub Actions workflow (update `docs/ci-cd.md` and the README Testing and CI summary table)
 - Add, remove, or materially change a user-facing feature (update the Features section)
+- **Finish any change** (Dependabot PRs excepted): refresh the Status section — move what shipped into Recently shipped, drop closed issues from Next up — and bump the version (see "Versioning"). A change is not done until both are in the PR
 - Add or restructure `.claude/` or `.github/` guidance files (update `docs/ai-assistance.md` and the README AI Assistance summary)
 - Change the README's About, Features, Stack or Status sections (update the GitHub Project README to match)
 - Merge a PR that ships user-visible work or changes the "Next up" list (post a Project status update) — see [Project README and status updates](docs/ci-cd.md#project-readme-and-status-updates)
+
+## Versioning
+
+Every PR (Dependabot excepted) bumps `version` in `package.json` and `package-lock.json` in the same change, with `npm version <minor|patch> --no-git-tag-version`. While the app is 0.x: **minor** (`0.N.0`) for a `feat`, `feature` or `enhancement` PR; **patch** for `fix`, `refactor`, `chore`, `docs` and `test`. Check the current version on `main` before bumping, because concurrent PRs conflict on it.
 
 ## Things to avoid
 
