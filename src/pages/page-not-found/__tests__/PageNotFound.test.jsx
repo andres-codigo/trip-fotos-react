@@ -57,6 +57,16 @@ describe('PageNotFound', () => {
 			expect(main).toHaveAttribute('tabindex', '-1')
 		})
 
+		it('separates the home link from the surrounding sentence with spaces', () => {
+			render(<PageNotFound />)
+
+			expect(
+				screen.getByRole('link', { name: 'Trip Fotos' }).parentElement,
+			).toHaveTextContent(
+				/^Best return to the Trip Fotos home page to get back on track\.$/,
+			)
+		})
+
 		it('sets the document title', () => {
 			render(<PageNotFound />)
 

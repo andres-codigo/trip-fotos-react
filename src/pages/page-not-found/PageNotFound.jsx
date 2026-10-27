@@ -27,7 +27,7 @@ const PageNotFound = () => {
 			<BaseCard>
 				<h1>This page is not available. Sorry about that.</h1>
 				<p>
-					Best return to the
+					Best return to the{' '}
 					<BaseButton
 						isLink
 						to={
@@ -35,7 +35,7 @@ const PageNotFound = () => {
 						}
 						data-cy="home-link">
 						Trip Fotos
-					</BaseButton>
+					</BaseButton>{' '}
 					home page to get back on track.
 				</p>
 			</BaseCard>
