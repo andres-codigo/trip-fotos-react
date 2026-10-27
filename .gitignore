@@ -41,7 +41,6 @@ cypress/screenshots
 .playwright-mcp
 
 # DEPCHECK ANALYSIS FILES
-scripts/dependency-check
 
 # BASH SCRIPTS
 .bash-scripts
