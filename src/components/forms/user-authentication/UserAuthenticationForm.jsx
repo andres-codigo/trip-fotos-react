@@ -7,7 +7,7 @@ import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
 import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
 
-import userAuthStyles from './UserAuthenticationForm.module.scss'
+import userAuthenticationFormStyles from './UserAuthenticationForm.module.scss'
 
 const UserAuthenticationForm = ({
 	email,
@@ -56,7 +56,7 @@ const UserAuthenticationForm = ({
 
 	return (
 		<form
-			className={userAuthStyles.userAuthentication}
+			className={userAuthenticationFormStyles.userAuthentication}
 			onSubmit={onSubmit}
 			noValidate
 			data-cy="user-authentication-form"
@@ -64,19 +64,25 @@ const UserAuthenticationForm = ({
 			aria-labelledby="user-authentication-form-title">
 			<h1
 				id="user-authentication-form-title"
-				className={userAuthStyles.userAuthenticationTitle}
+				className={userAuthenticationFormStyles.userAuthenticationTitle}
 				data-cy="user-authentication-form-title">
 				{mode === API_DATABASE.AUTH_LOGIN_MODE ? (
 					<>
 						Login{' '}
-						<span className={userAuthStyles.visuallyHidden}>
+						<span
+							className={
+								userAuthenticationFormStyles.visuallyHidden
+							}>
 							Form
 						</span>
 					</>
 				) : (
 					<>
 						Signup{' '}
-						<span className={userAuthStyles.visuallyHidden}>
+						<span
+							className={
+								userAuthenticationFormStyles.visuallyHidden
+							}>
 							Form
 						</span>
 					</>
@@ -84,33 +90,37 @@ const UserAuthenticationForm = ({
 			</h1>
 			<LoadingAnnouncement isLoading={isLoading} />
 			<div
-				className={`${userAuthStyles.formControl} ${
-					!email.isValid ? userAuthStyles.invalidForm : ''
+				className={`${userAuthenticationFormStyles.formControl} ${
+					!email.isValid
+						? userAuthenticationFormStyles.invalidForm
+						: ''
 				}`}>
 				<Input {...getInputProps(EMAIL_ID)} />
 				{renderVisuallyHiddenError(
 					email,
 					'email-error',
-					userAuthStyles.visuallyHidden,
+					userAuthenticationFormStyles.visuallyHidden,
 				)}
 			</div>
 			<div
-				className={`${userAuthStyles.formControl} ${
-					!password.isValid ? userAuthStyles.invalidForm : ''
+				className={`${userAuthenticationFormStyles.formControl} ${
+					!password.isValid
+						? userAuthenticationFormStyles.invalidForm
+						: ''
 				}`}>
 				<Input {...getInputProps(PASSWORD_ID)} />
 				{renderVisuallyHiddenError(
 					password,
 					'password-error',
-					userAuthStyles.visuallyHidden,
+					userAuthenticationFormStyles.visuallyHidden,
 				)}
 			</div>
-			<div className={userAuthStyles.formActions}>
+			<div className={userAuthenticationFormStyles.formActions}>
 				<BaseButton
 					id="login-button"
 					type="submit"
 					mode="flat"
-					className={userAuthStyles.formSubmitButton}
+					className={userAuthenticationFormStyles.formSubmitButton}
 					data-cy="login-submit-button"
 					isDisabled={isLoading}>
 					{mode === API_DATABASE.AUTH_LOGIN_MODE
@@ -121,7 +131,7 @@ const UserAuthenticationForm = ({
 					id="login-signup-toggle-link"
 					isLink
 					onClick={handleSignUpClick}
-					className={userAuthStyles.toggleLink}
+					className={userAuthenticationFormStyles.toggleLink}
 					data-cy="login-signup-toggle-link"
 					isDisabled={isLoading}>
 					{mode === API_DATABASE.AUTH_LOGIN_MODE

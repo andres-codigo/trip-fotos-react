@@ -5,7 +5,7 @@ import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 import BaseCard from '@/components/ui/card/BaseCard'
 import BaseButton from '@/components/ui/button/BaseButton'
 
-import pageNotFoundStyles from './pageNotFound.module.scss'
+import pageNotFoundStyles from './PageNotFound.module.scss'
 
 const PageNotFound = () => {
 	const isLoggedIn = useSelector(
@@ -18,6 +18,7 @@ const PageNotFound = () => {
 			tabIndex={-1}
 			className={[
 				'mainContainer',
+				'cardPage',
 				pageNotFoundStyles.pageNotFoundContainer,
 			].join(' ')}
 			data-cy="main-container"

@@ -115,7 +115,7 @@ const Authentication = () => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className="mainContainer authenticationContainer"
+			className="mainContainer cardPage authenticationContainer"
 			data-cy="main-container"
 			data-cy-alt="authentication-main-container">
 			<title>{`${mode === API_DATABASE.AUTH_LOGIN_MODE ? 'Login' : 'Signup'} · ${GLOBAL.SITE_NAME}`}</title>

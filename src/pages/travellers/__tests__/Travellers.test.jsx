@@ -8,7 +8,7 @@ import { MOCK_TRAVELLERS, TEST_IDS } from '@/constants/test'
 
 import Travellers from '@/pages/travellers/Travellers'
 
-import travellersStyles from '@/pages/travellers/travellers.module.scss'
+import travellersStyles from '@/pages/travellers/Travellers.module.scss'
 
 vi.mock('react-redux', async () => {
 	const actual = await vi.importActual('react-redux')

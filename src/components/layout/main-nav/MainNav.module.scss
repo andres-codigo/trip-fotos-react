@@ -54,7 +54,7 @@
 			background-color: variables.$color-pigment-indigo;
 			width: 100%;
 			text-align: center;
-			box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+			box-shadow: variables.$shadow-menu;
 			// Off-screen alone leaves the closed menu's links keyboard-focusable
 			visibility: hidden;
 		}

@@ -1,7 +1,7 @@
 @use '@/styles/setup/variables' as variables;
 
 .backdrop {
-	background-color: rgba(0, 0, 0, 0.75);
+	background-color: variables.$overlay-backdrop;
 	height: 100%;
 	left: 0;
 	position: fixed;
@@ -15,7 +15,7 @@
 	border: none;
 	border-radius: 0.75rem;
 	bottom: 0;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+	box-shadow: variables.$shadow-elevated;
 	left: 0;
 	overflow: hidden;
 	padding: 0;

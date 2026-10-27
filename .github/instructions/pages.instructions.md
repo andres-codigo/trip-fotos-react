@@ -21,7 +21,7 @@ Pages are located in `src/pages` and should be grouped by route or feature area.
       __tests__/
         Authentication.test.jsx
     ```
-    A page that needs its own styles adds `{PageName}.module.scss` (PascalCase, matching the page file; target: the existing lowercase `register.module.scss`-style names, #401). Add `{PageName}.cy.jsx` when the page has non-trivial interaction.
+    A page that needs its own styles adds `{PageName}.module.scss` (PascalCase, matching the page file). Add `{PageName}.cy.jsx` when the page has non-trivial interaction.
 
 ## Page Responsibilities
 

@@ -2,10 +2,7 @@
 @use '@/styles/setup/mixins/helpers' as helpers;
 
 .image-preview {
-	margin: 1rem 2.5%;
-	overflow: hidden;
-	position: relative;
-	width: 28%;
+	@include helpers.image-tile;
 
 	img {
 		cursor: pointer;
@@ -61,13 +58,6 @@
 	90%,
 	'landscape'
 );
-
-@media only screen and (max-width: 480px) {
-	.image-preview {
-		margin: 0.5rem 2.5%;
-		width: 45%;
-	}
-}
 
 @media only screen and (max-height: 430px) {
 	.image {

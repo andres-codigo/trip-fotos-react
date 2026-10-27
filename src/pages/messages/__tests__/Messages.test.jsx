@@ -11,7 +11,7 @@ import Messages from '@/pages/messages/Messages'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 import messagesReducer from '@/store/slices/messagesSlice'
 
-import messagesStyles from '@/pages/messages/messages.module.scss'
+import messagesStyles from '@/pages/messages/Messages.module.scss'
 
 const { SAMPLE_MESSAGE_ONE, SAMPLE_MESSAGE_TWO } = MOCK_INBOX
 

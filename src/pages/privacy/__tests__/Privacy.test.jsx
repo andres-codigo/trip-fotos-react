@@ -7,7 +7,7 @@ import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import Privacy from '@/pages/privacy/Privacy'
 
-import privacyStyles from '@/pages/privacy/privacy.module.scss'
+import privacyStyles from '@/pages/privacy/Privacy.module.scss'
 
 vi.mock('@/components/ui/card/BaseCard', () => ({
 	__esModule: true,

@@ -3,16 +3,18 @@ import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 
-import privacyStyles from './privacy.module.scss'
+import privacyStyles from './Privacy.module.scss'
 
 const Privacy = () => {
 	return (
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className={['mainContainer', privacyStyles.privacyContainer].join(
-				' ',
-			)}
+			className={[
+				'mainContainer',
+				'cardPage',
+				privacyStyles.privacyContainer,
+			].join(' ')}
 			data-cy="main-container"
 			data-cy-alt="privacy-main-container">
 			<title>{`Privacy policy · ${GLOBAL.SITE_NAME}`}</title>

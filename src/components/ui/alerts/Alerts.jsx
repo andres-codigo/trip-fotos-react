@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 
-import styles from './Alerts.module.scss'
+import alertsStyles from './Alerts.module.scss'
 
 const Alerts = ({ message, type = 'success', duration = 5000, onClose }) => {
 	const [isVisible, setIsVisible] = useState(true)
@@ -39,13 +39,13 @@ const Alerts = ({ message, type = 'success', duration = 5000, onClose }) => {
 
 	return (
 		<div
-			className={`${styles.container} ${styles[type]} ${isClosing ? styles.fadeOut : ''}`}
+			className={`${alertsStyles.container} ${alertsStyles[type]} ${isClosing ? alertsStyles.fadeOut : ''}`}
 			onAnimationEnd={handleAnimationEnd}
 			role="alert">
 			<p>{message}</p>
 			<BaseButton
 				onClick={handleClose}
-				className={styles.closeButton}
+				className={alertsStyles.closeButton}
 				aria-label="Close message"
 				modeType="text">
 				&times;

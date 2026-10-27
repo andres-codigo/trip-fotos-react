@@ -26,7 +26,7 @@ import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 import ContactTravellerForm from '@/components/forms/contact-traveller/ContactTravellerForm'
 
-import contactTravellerStyles from './contactTraveller.module.scss'
+import contactTravellerStyles from './ContactTraveller.module.scss'
 
 const ContactTraveller = () => {
 	const { id } = useParams()
@@ -103,7 +103,7 @@ const ContactTraveller = () => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className={`mainContainer ${contactTravellerStyles.contactTravellerContainer}`}
+			className={`mainContainer cardPage ${contactTravellerStyles.contactTravellerContainer}`}
 			data-cy={CONTACT_TRAVELLER.ROOT}>
 			<title>{`${title} · ${GLOBAL.SITE_NAME}`}</title>
 			{error && (

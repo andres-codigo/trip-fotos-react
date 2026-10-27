@@ -1,0 +1,9 @@
+@use '@/styles/setup/mixins/helpers' as helpers;
+
+.pageNotFoundContainer {
+	text-align: center;
+
+	h1 {
+		@include helpers.page-heading;
+	}
+}

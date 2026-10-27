@@ -1,6 +1,6 @@
 import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
-import homeStyles from './home.module.scss'
+import homeStyles from './Home.module.scss'
 
 const Home = () => {
 	return (
