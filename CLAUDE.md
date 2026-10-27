@@ -119,7 +119,7 @@ Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 
 ## Versioning
 
-release-please works the version out from PR titles on `main` — never edit `version` by hand. Features and enhancements use a `feat:` title (minor, `0.N.0`); fixes use `fix:` (patch). `chore`, `docs`, `test` and `refactor` PRs do not release on their own. After merging a `feat` or `fix` PR, merge the open release PR once its checks are green. Detail in [docs/ci-cd.md](docs/ci-cd.md#9-release-please).
+release-please works the version out from PR titles on `main` — never edit `version` by hand. `feat:` or `feature:` bumps the minor version (`0.N.0`); `enhancement:`, `fix:` and `perf:` bump the patch. `chore`, `docs`, `test` and `refactor` PRs do not release on their own. After merging a releasing PR (any type above that bumps), merge the open release PR once its checks are green. Detail in [docs/ci-cd.md](docs/ci-cd.md#9-release-please).
 
 ## Things to avoid
 
