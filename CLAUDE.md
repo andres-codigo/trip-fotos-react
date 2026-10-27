@@ -24,6 +24,8 @@ Branches must use a type prefix:
 
 Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
 
+Work from a Claude Design session (design system or UI redesign) never lands on `main` directly: create an issue and a `feature/` or `enhancement/` branch first, and reference the design artifact link in the issue.
+
 ## Merging PRs
 
 - **Squash-merge** by default — one PR, one commit on `main`, titled with the PR's conventional-commit title
