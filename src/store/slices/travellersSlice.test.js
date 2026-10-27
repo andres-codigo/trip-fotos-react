@@ -11,7 +11,7 @@ import {
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { API_ERROR_MESSAGE } from '@/constants/api'
 
-import { authActions, logout } from './authenticationSlice'
+import { authActions, logout, selectUserId } from './authenticationSlice'
 import travellersReducer, {
 	registerTraveller,
 	travellerName,
@@ -291,19 +291,13 @@ describe('travellersSlice', () => {
 					json: async () => responseData,
 				})
 
-				const originalGetItem = global.localStorage.getItem
-				global.localStorage.getItem = vi.fn((key) => {
-					if (key === 'userId') return userId
-					return null
-				})
+				selectUserId.mockReturnValueOnce(userId)
 
 				const result = await store.dispatch(updateTravellers())
 				expect(result.payload[0]).toEqual(loggedInTraveller)
 
 				const state = store.getState().travellers
 				expect(state.travellerName).toBe(MOCK_USER.FULL_NAME)
-
-				global.localStorage.getItem = originalGetItem
 			})
 
 			it('should clear a stale travellerName when the logged-in record is missing', async () => {
@@ -314,15 +308,11 @@ describe('travellersSlice', () => {
 						other: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO,
 					}),
 				})
-				const originalGetItem = global.localStorage.getItem
-				global.localStorage.getItem = vi.fn((key) =>
-					key === 'userId' ? 'user1' : null,
-				)
+				selectUserId.mockReturnValueOnce('user1')
 
 				await store.dispatch(updateTravellers())
 
 				expect(store.getState().travellers.travellerName).toBe('')
-				global.localStorage.getItem = originalGetItem
 			})
 
 			it('should keep travellerName when nobody is logged in', async () => {
@@ -333,15 +323,13 @@ describe('travellersSlice', () => {
 						other: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO,
 					}),
 				})
-				const originalGetItem = global.localStorage.getItem
-				global.localStorage.getItem = vi.fn(() => null)
+				selectUserId.mockReturnValueOnce(null)
 
 				await store.dispatch(updateTravellers())
 
 				expect(store.getState().travellers.travellerName).toBe(
 					MOCK_USER.FULL_NAME,
 				)
-				global.localStorage.getItem = originalGetItem
 			})
 
 			it('should return empty array when response is null', async () => {
@@ -405,14 +393,6 @@ describe('travellersSlice', () => {
 			cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
 			files: [{ name: 'test.jpg', file: new Blob() }],
 		}
-
-		beforeEach(() => {
-			localStorage.getItem.mockReturnValue(MOCK_USER.USER_ID)
-		})
-
-		afterEach(() => {
-			localStorage.getItem.mockReset()
-		})
 
 		describe('success scenarios', () => {
 			it('should upload images and register traveller successfully', async () => {

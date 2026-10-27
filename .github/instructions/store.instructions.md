@@ -71,7 +71,7 @@ Persisted state is configured in `src/store/store.js`. When modifying which slic
 - A `resetLastFetch` transform nulls `travellers.lastFetch` on rehydrate so a persisted list is always reconciled with the database.
 - `src/store/storage.js` is a Vite CommonJS interop shim for `redux-persist`'s storage; import storage from it, not from `redux-persist/lib/storage`.
 - Non-serialisable action arguments (e.g. `meta.arg.files`) are listed in `ignoredActionPaths` in the serialisable check; add to it rather than disabling the check.
-- The session is also mirrored to `localStorage` (`token`, `userId`, `userName`, `userEmail`, `tokenExpiration`, `isAdmin`). Read it through the selectors in `authenticationSlice.js` (`selectUserId`, `selectAuthenticationToken`, …), never `localStorage.getItem` (target: key constant and call-site cleanup, #398).
+- The session is also mirrored to `localStorage` (`token`, `userId`, `userName`, `userEmail`, `tokenExpiration`, `isAdmin`). Read it through the selectors in `authenticationSlice.js` (`selectUserId`, `selectAuthenticationToken`, …), never `localStorage.getItem`. The keys live in `SESSION_STORAGE_KEYS` (`@/constants/auth`); only `authenticationSlice.js` reads or writes them, plus `travellerName` (display name) and `useLoggedInTravellerName`, which needs the `storage` event to follow another tab.
 
 - Keep private data (e.g. messages) out of redux-persist, and clear it on logout — including when logout is rejected.
 

@@ -9,7 +9,7 @@ import { getFirebaseAuth } from '@/services/firebase/firebase'
 
 import { AUTHENTICATION_ACTION_TYPES } from '@/constants/redux'
 import { API_DATABASE } from '@/constants/api'
-import { FIREBASE_ERRORS } from '@/constants/auth'
+import { FIREBASE_ERRORS, SESSION_STORAGE_KEYS } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
 
 let timer
@@ -37,12 +37,15 @@ export const login = createAsyncThunk(
 			const userName = user.displayName || ''
 			const isAdmin = claims?.admin === true
 
-			localStorage.setItem('token', token)
-			localStorage.setItem('userId', user.uid)
-			localStorage.setItem('userName', userName)
-			localStorage.setItem('userEmail', user.email)
-			localStorage.setItem('tokenExpiration', expirationDate)
-			localStorage.setItem('isAdmin', isAdmin)
+			localStorage.setItem(SESSION_STORAGE_KEYS.TOKEN, token)
+			localStorage.setItem(SESSION_STORAGE_KEYS.USER_ID, user.uid)
+			localStorage.setItem(SESSION_STORAGE_KEYS.USER_NAME, userName)
+			localStorage.setItem(SESSION_STORAGE_KEYS.USER_EMAIL, user.email)
+			localStorage.setItem(
+				SESSION_STORAGE_KEYS.TOKEN_EXPIRATION,
+				expirationDate,
+			)
+			localStorage.setItem(SESSION_STORAGE_KEYS.IS_ADMIN, isAdmin)
 
 			timer = setTimeout(() => {
 				dispatch(autoLogout())
@@ -68,12 +71,19 @@ export const tryLogin = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.TRY_LOGIN,
 	async (_, { dispatch, rejectWithValue }) => {
 		try {
-			const token = localStorage.getItem('token')
-			const userId = localStorage.getItem('userId')
-			const userName = localStorage.getItem('userName')
-			const userEmail = localStorage.getItem('userEmail')
-			const tokenExpiration = localStorage.getItem('tokenExpiration')
-			const isAdmin = localStorage.getItem('isAdmin') === 'true'
+			const token = localStorage.getItem(SESSION_STORAGE_KEYS.TOKEN)
+			const userId = localStorage.getItem(SESSION_STORAGE_KEYS.USER_ID)
+			const userName = localStorage.getItem(
+				SESSION_STORAGE_KEYS.USER_NAME,
+			)
+			const userEmail = localStorage.getItem(
+				SESSION_STORAGE_KEYS.USER_EMAIL,
+			)
+			const tokenExpiration = localStorage.getItem(
+				SESSION_STORAGE_KEYS.TOKEN_EXPIRATION,
+			)
+			const isAdmin =
+				localStorage.getItem(SESSION_STORAGE_KEYS.IS_ADMIN) === 'true'
 
 			if (
 				!token ||
@@ -118,12 +128,12 @@ export const logout = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.LOGOUT,
 	async (_, { dispatch, rejectWithValue }) => {
 		try {
-			localStorage.removeItem('token')
-			localStorage.removeItem('userId')
-			localStorage.removeItem('userName')
-			localStorage.removeItem('userEmail')
-			localStorage.removeItem('tokenExpiration')
-			localStorage.removeItem('isAdmin')
+			localStorage.removeItem(SESSION_STORAGE_KEYS.TOKEN)
+			localStorage.removeItem(SESSION_STORAGE_KEYS.USER_ID)
+			localStorage.removeItem(SESSION_STORAGE_KEYS.USER_NAME)
+			localStorage.removeItem(SESSION_STORAGE_KEYS.USER_EMAIL)
+			localStorage.removeItem(SESSION_STORAGE_KEYS.TOKEN_EXPIRATION)
+			localStorage.removeItem(SESSION_STORAGE_KEYS.IS_ADMIN)
 
 			clearTimeout(timer)
 
