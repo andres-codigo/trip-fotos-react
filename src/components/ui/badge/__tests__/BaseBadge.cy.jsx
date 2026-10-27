@@ -35,4 +35,18 @@ describe('<BaseBadge />', () => {
 			'rgb(51, 51, 51)',
 		)
 	})
+
+	;[undefined, ...TRAVELLER_AREAS].forEach((area) => {
+		it(`has no axe violations for the ${area ?? 'default'} type`, () => {
+			cy.mount(
+				<BaseBadge
+					type={area}
+					title="Prague"
+				/>,
+			)
+
+			cy.get(COMMON_SELECTORS.BASE_BADGE).should('exist')
+			cy.checkA11y()
+		})
+	})
 })
