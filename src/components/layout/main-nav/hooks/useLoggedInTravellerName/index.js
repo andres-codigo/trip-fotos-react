@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 
 import { SESSION_STORAGE_KEYS } from '@/constants/auth'
 
-export function useLoggedInTravellerName() {
+function useLoggedInTravellerName() {
 	const [travellerName, setTravellerName] = useState(
 		() => localStorage.getItem(SESSION_STORAGE_KEYS.USER_NAME) || '',
 	)
@@ -24,3 +24,5 @@ export function useLoggedInTravellerName() {
 
 	return [travellerName, setTravellerName]
 }
+
+export default useLoggedInTravellerName

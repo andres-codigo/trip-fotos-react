@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { CONTACT_TRAVELLER_FIELDS } from '@/constants/travellers'
 import { CONTACT_MESSAGE, VALIDATION_MESSAGES } from '@/constants/validation'
 
-import { useContactTravellerForm } from './useContactTravellerForm'
+import useContactTravellerForm from '@/components/forms/contact-traveller/hooks/useContactTravellerForm'
 
 const { EMAIL, MESSAGE } = CONTACT_TRAVELLER_FIELDS
 

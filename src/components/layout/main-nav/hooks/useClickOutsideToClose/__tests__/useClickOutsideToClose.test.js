@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { GLOBAL } from '@/constants/ui'
 
-import { useClickOutsideToClose } from '@/components/layout/main-nav/hooks/useClickOutsideToClose/index'
+import useClickOutsideToClose from '@/components/layout/main-nav/hooks/useClickOutsideToClose'
 
 const mockAddEventListener = vi.fn()
 const mockRemoveEventListener = vi.fn()

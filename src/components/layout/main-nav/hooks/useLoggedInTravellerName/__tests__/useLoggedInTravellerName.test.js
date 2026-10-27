@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
-import { useLoggedInTravellerName } from '@/components/layout/main-nav/hooks/useLoggedInTravellerName/index'
+import useLoggedInTravellerName from '@/components/layout/main-nav/hooks/useLoggedInTravellerName'
 
 const localStorageMock = {
 	getItem: vi.fn(),

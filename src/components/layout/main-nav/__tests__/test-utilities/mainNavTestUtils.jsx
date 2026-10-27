@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 
-import { useClickOutsideToClose as useCloseHamburgerMenuDefault } from '@/components/layout/main-nav/hooks/useClickOutsideToClose'
-import { useMobileMenu as useMobileMenuDefault } from '@/components/layout/main-nav/hooks/useMobileMenu'
+import useCloseHamburgerMenuDefault from '@/components/layout/main-nav/hooks/useClickOutsideToClose'
+import useMobileMenuDefault from '@/components/layout/main-nav/hooks/useMobileMenu'
 
 import MainNav from '@/components/layout/main-nav/MainNav'
 

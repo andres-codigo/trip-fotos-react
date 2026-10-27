@@ -35,19 +35,19 @@ import MainNav from '@/components/layout/main-nav/MainNav'
 
 // Mock custom hooks
 vi.mock('@/components/layout/main-nav/hooks/useMainNavState', () => ({
-	useMainNavState: vi.fn(),
+	default: vi.fn(),
 }))
 
 vi.mock('@/components/layout/main-nav/hooks/useClickOutsideToClose', () => ({
-	useClickOutsideToClose: vi.fn(),
+	default: vi.fn(),
 }))
 
 vi.mock('@/components/layout/main-nav/hooks/useMobileMenu', () => ({
-	useMobileMenu: vi.fn(),
+	default: vi.fn(),
 }))
 
 vi.mock('@/components/layout/main-nav/hooks/useLogout', () => ({
-	useLogout: vi.fn(),
+	default: vi.fn(),
 }))
 
 // Mock child components
@@ -103,10 +103,10 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuMessagesLink', () => ({
 	),
 }))
 
-import { useMainNavState } from '@/components/layout/main-nav/hooks/useMainNavState'
-import { useClickOutsideToClose } from '@/components/layout/main-nav/hooks/useClickOutsideToClose'
-import { useMobileMenu } from '@/components/layout/main-nav/hooks/useMobileMenu'
-import { useLogout } from '@/components/layout/main-nav/hooks/useLogout'
+import useMainNavState from '@/components/layout/main-nav/hooks/useMainNavState'
+import useClickOutsideToClose from '@/components/layout/main-nav/hooks/useClickOutsideToClose'
+import useMobileMenu from '@/components/layout/main-nav/hooks/useMobileMenu'
+import useLogout from '@/components/layout/main-nav/hooks/useLogout'
 
 import { PATHS } from '@/constants/ui'
 

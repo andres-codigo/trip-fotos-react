@@ -12,7 +12,7 @@ import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
 import Textarea from '@/components/ui/form/textarea/Textarea'
 
-import { useContactTravellerForm } from './hooks/useContactTravellerForm'
+import useContactTravellerForm from './hooks/useContactTravellerForm'
 
 import contactTravellerFormStyles from './ContactTravellerForm.module.scss'
 

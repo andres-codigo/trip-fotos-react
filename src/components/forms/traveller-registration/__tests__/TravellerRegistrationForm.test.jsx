@@ -32,7 +32,7 @@ const FORM_SELECTORS = {
 vi.mock(
 	'@/components/forms/traveller-registration/hooks/useTravellerRegistration',
 	() => ({
-		useTravellerRegistration: vi.fn(),
+		default: vi.fn(),
 	}),
 )
 
@@ -50,7 +50,7 @@ vi.mock(
 )
 
 import useCitySearch from '@/components/forms/traveller-registration/hooks/useCitySearch'
-import { useTravellerRegistration } from '@/components/forms/traveller-registration/hooks/useTravellerRegistration'
+import useTravellerRegistration from '@/components/forms/traveller-registration/hooks/useTravellerRegistration'
 
 describe('<TravellerRegistrationForm />', () => {
 	const mockOnSubmit = vi.fn()

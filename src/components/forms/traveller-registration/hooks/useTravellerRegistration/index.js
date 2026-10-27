@@ -5,7 +5,7 @@ import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
 
 import { getCityId } from '@/utils/formatCity'
 
-export const useTravellerRegistration = () => {
+const useTravellerRegistration = () => {
 	const { FIRST_NAME, LAST_NAME, DESCRIPTION, DAYS, CITIES, FILES } =
 		TRAVELLER_REGISTRATION_FIELDS
 
@@ -160,3 +160,5 @@ export const useTravellerRegistration = () => {
 		submitHandler,
 	}
 }
+
+export default useTravellerRegistration

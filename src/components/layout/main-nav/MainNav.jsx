@@ -6,10 +6,10 @@ import PropTypes from 'prop-types'
 
 import { PATHS } from '@/constants/ui'
 
-import { useClickOutsideToClose as useClickOutsideToCloseDefault } from './hooks/useClickOutsideToClose'
-import { useLogout as useLogoutDefault } from './hooks/useLogout'
-import { useMainNavState as useMainNavStateDefault } from './hooks/useMainNavState'
-import { useMobileMenu as useMobileMenuDefault } from './hooks/useMobileMenu'
+import useClickOutsideToCloseDefault from './hooks/useClickOutsideToClose'
+import useLogoutDefault from './hooks/useLogout'
+import useMainNavStateDefault from './hooks/useMainNavState'
+import useMobileMenuDefault from './hooks/useMobileMenu'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 
