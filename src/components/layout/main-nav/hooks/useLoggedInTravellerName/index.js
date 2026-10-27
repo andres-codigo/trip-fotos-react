@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 
+import { SESSION_STORAGE_KEYS } from '@/constants/auth'
+
 export function useLoggedInTravellerName() {
 	const [travellerName, setTravellerName] = useState(
-		() => localStorage.getItem('userName') || '',
+		() => localStorage.getItem(SESSION_STORAGE_KEYS.USER_NAME) || '',
 	)
 
 	const syncTravellerName = useCallback(() => {
-		const newValue = localStorage.getItem('userName')
+		const newValue = localStorage.getItem(SESSION_STORAGE_KEYS.USER_NAME)
 		setTravellerName(newValue || '')
 	}, [])
 

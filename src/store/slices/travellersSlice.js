@@ -20,6 +20,7 @@ import {
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
+import { SESSION_STORAGE_KEYS } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
 
 import {
@@ -53,7 +54,7 @@ export const travellerName = createAsyncThunk(
 				displayName: fullName,
 			})
 
-			localStorage.setItem('userName', fullName)
+			localStorage.setItem(SESSION_STORAGE_KEYS.USER_NAME, fullName)
 			dispatch(setTravellerName(fullName))
 			return fullName
 		} catch (error) {
@@ -70,7 +71,7 @@ export const travellerName = createAsyncThunk(
 export const registerTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.REGISTER_TRAVELLER,
 	async (data, { getState, dispatch, rejectWithValue }) => {
-		const userId = localStorage.getItem('userId')
+		const userId = selectUserId(getState())
 		const token = selectAuthenticationToken(getState())
 
 		try {
@@ -182,7 +183,7 @@ export const registerTraveller = createAsyncThunk(
 
 export const updateTravellers = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.UPDATE_TRAVELLERS,
-	async (_, { rejectWithValue, dispatch }) => {
+	async (_, { getState, rejectWithValue, dispatch }) => {
 		try {
 			const response = await databaseRequest('/travellers')
 
@@ -208,7 +209,7 @@ export const updateTravellers = createAsyncThunk(
 				registered: responseData[key].registered,
 			}))
 
-			const userId = localStorage.getItem('userId')
+			const userId = selectUserId(getState())
 			const loggedInTraveller = travellers.find(
 				(traveller) => traveller.id === userId,
 			)

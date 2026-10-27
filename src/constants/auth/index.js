@@ -13,3 +13,13 @@ export const FIREBASE_ERRORS = Object.freeze({
 		'auth/network-request-failed': ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 	}),
 })
+
+// Keys the session is mirrored under in localStorage; changing one signs out every existing session
+export const SESSION_STORAGE_KEYS = Object.freeze({
+	TOKEN: 'token',
+	USER_ID: 'userId',
+	USER_NAME: 'userName',
+	USER_EMAIL: 'userEmail',
+	TOKEN_EXPIRATION: 'tokenExpiration',
+	IS_ADMIN: 'isAdmin',
+})

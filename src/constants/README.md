@@ -29,7 +29,7 @@ src/constants/
 │   ├── headers.js
 │   └── messages.js
 ├── auth/
-│   └── index.js               # FIREBASE_ERRORS (Auth SDK code → ERROR_MESSAGES text)
+│   └── index.js               # FIREBASE_ERRORS (Auth SDK code → ERROR_MESSAGES text), SESSION_STORAGE_KEYS
 ├── config/
 │   ├── index.js
 │   ├── users.js
