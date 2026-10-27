@@ -50,7 +50,7 @@ describe('globToRegExp', () => {
 		['vite.config.*', 'vite.config.js', true],
 		['vite.config.*', 'sub/vite.config.js', false],
 		['**/*.{png,svg}', 'public/logo.svg', true],
-		['*.d.ts', 'eslint-plugin-react-hooks.d.ts', true],
+		['*.d.ts', 'a.d.ts', true],
 		['src/*.js', 'src/a/b.js', false],
 	])('%s matches %s: %s', (glob, file, expected) => {
 		expect(globToRegExp(glob).test(file)).toBe(expected)
@@ -109,7 +109,7 @@ describe('areasForFiles', () => {
 			areasForFiles(config, [
 				'.devcontainer/devcontainer.json',
 				'.claude/settings.json',
-				'database.rules.json',
+				'firebase/database.rules.json',
 			]),
 		).toEqual(['firebase', 'config'])
 	})

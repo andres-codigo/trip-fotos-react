@@ -69,7 +69,7 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
     - Correct: `import Foo from '@/components/ui/foo/Foo'`
     - Wrong: `import Foo from '../../../components/ui/foo/Foo'`
 - `@/` maps to `src/` (configured in Vite)
-- Enforced by ESLint (`rules/imports.js`). `src/constants/**` and `src/testUtils/cypress/**` are exempt and keep relative imports, because the Cypress E2E bundle loads them and cannot resolve `@/`
+- Enforced by ESLint (`config/rules/imports.js`). `src/constants/**` and `src/testUtils/cypress/**` are exempt and keep relative imports, because the Cypress E2E bundle loads them and cannot resolve `@/`
 
 ## UI changes
 
@@ -99,8 +99,8 @@ Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 - **Agents** (`.claude/agents/`, wrappers around `.github/agents/*.agent.md` — edit the workflow there): `create-component`, `create-page`, `create-redux-slice`, `create-hook`
 - **`.claude/settings.json`** — shared permissions and a `PostToolUse` hook (`.claude/hooks/lint-edited-file.mjs`) that lints every edited file
 - **`/verify`** — runs the lint, Vitest, Cypress component test and build gates the change can affect (picked by `changed-gates.mjs`), as a pass/fail table; run before committing. `/verify all` forces every gate fresh; `/verify e2e` adds the live-Firebase E2E suite. Passes are cached per working-tree hash, so repeat runs on unchanged code are cheap. If the code changes while a run is in progress, stop it and start a fresh one — its result would describe stale code
-- **Issue order** — before recommending an issue or adding `ready`, check its blocked-by links and `Do after` line; never start one with an open blocker. Work is pulled in order Triage → Backlog (set Kind and Workstream, then label) → Ready → In progress; only epics may start from Backlog. Issue Intake removes out-of-order labels. On "start #N" run the full sequence in [Starting an issue](docs/ci-cd.md#starting-an-issue) yourself, without asking. Detail in [docs/ci-cd.md](docs/ci-cd.md#project-board-statuses)
-- **Vue parity programme** — archived in `_ai-assisted-dev-story/vue-parity-programme/`; not loaded
+- **Issue order** — before recommending an issue or adding `ready`, check its blocked-by links and `Do after` line; never start one with an open blocker. Work is pulled in order Triage → Backlog (set Kind and Workstream, then label) → Ready → In progress; only epics may start from Backlog. Issue Intake removes out-of-order labels. On "start #N" run the full sequence in [Starting an issue](docs/ci-cd.md#starting-an-issue) yourself, without asking. A new issue you create is in Triage like any other: run the same sequence before the first file change, never branch and edit straight from creating it. Detail in [docs/ci-cd.md](docs/ci-cd.md#project-board-statuses)
+- **Vue parity programme** — archived in `docs/ai-assisted-dev-story/vue-parity-programme/`; not loaded
 - Personal overrides go in the gitignored `.claude/settings.local.json`
 
 ## Keeping README.md in sync
@@ -128,7 +128,7 @@ release-please works the version out from PR titles on `main` — never edit `ve
 - Do not add comments that describe what the code does — only why
 - Do not create new top-level `src/` folders without updating the README Folder Structure tree
 - Do not add a route to `PATHS` without adding it to the `rewrites` allow-list in `vercel.json` — unlisted paths return a real 404 in production
-- Do not add a database or Storage field, or a write limit, without updating `database.rules.json` / `storage.rules` to match — client-side validation must mirror the rules. Deploy rule changes with `npm run firebase:rules` before the production deploy
+- Do not add a database or Storage field, or a write limit, without updating `firebase/database.rules.json` / `firebase/storage.rules` to match — client-side validation must mirror the rules. Deploy rule changes with `npm run firebase:rules` before the production deploy
 - Do not call a new external origin without adding it to the CSP `connect-src` in `vercel.json`
 - Do not re-inline domain-specific detail here — extend the relevant `.github/instructions/*.instructions.md` file instead
 - Do not let `README.md` go stale — see "Keeping README.md in sync" above

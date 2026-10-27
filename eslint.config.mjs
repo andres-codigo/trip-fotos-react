@@ -13,10 +13,10 @@ import pluginCypress from 'eslint-plugin-cypress'
 
 import vitest from '@vitest/eslint-plugin'
 
-import languageOptions from './rules/language-options.js'
-import reactRules from './rules/react.js'
-import cypressRules from './rules/cypress.js'
-import importRules from './rules/imports.js'
+import languageOptions from './config/rules/language-options.js'
+import reactRules from './config/rules/react.js'
+import cypressRules from './config/rules/cypress.js'
+import importRules from './config/rules/imports.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

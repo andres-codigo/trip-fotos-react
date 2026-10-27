@@ -36,9 +36,9 @@ The project is a React and Firebase application using Vite, React Router, Redux,
 
 GitHub Copilot is integrated through repository-level and path-specific guidance:
 
-- [`.github/copilot-instructions.md`](../.github/copilot-instructions.md) provides the overall project conventions.
-- [`.github/instructions`](../.github/instructions) contains focused guidance for components, pages, Redux, styling, and testing.
-- [`.github/agents`](../.github/agents) contains reusable workflows for creating components, pages, Redux slices and hooks.
+- [`.github/copilot-instructions.md`](../../.github/copilot-instructions.md) provides the overall project conventions.
+- [`.github/instructions`](../../.github/instructions) contains focused guidance for components, pages, Redux, styling, and testing.
+- [`.github/agents`](../../.github/agents) contains reusable workflows for creating components, pages, Redux slices and hooks.
 
 The guidance gives Copilot knowledge of the project structure and preferred implementation patterns, including:
 
@@ -85,12 +85,12 @@ This means the assistant can improve speed without becoming the authority on cor
 
 Claude Code is integrated as a persistent, repository-aware coding environment:
 
-- [`CLAUDE.md`](../CLAUDE.md) provides stable project context for sessions.
-- [`.github/instructions`](../.github/instructions) is shared with Copilot, so both tools follow one source of truth for components, pages, Redux, styling, and testing.
-- [`.claude/agents`](../.claude/agents) contains thin subagent wrappers that delegate to the shared [`.github/agents`](../.github/agents) scaffolding workflows (component, page, Redux slice and hook). They run on Sonnet, because scaffolding is mechanical and doesn't need the most capable model.
-- [`.claude/settings.json`](../.claude/settings.json) commits team-wide permissions and a `PostToolUse` hook that formats and lints every file Claude edits, feeding remaining ESLint errors straight back so they are fixed in the same turn.
-- [`.claude/skills/verify`](../.claude/skills/verify/SKILL.md) provides a `/verify` skill that runs the local quality gates (lint, Vitest, Cypress component tests, build) and reports a pass/fail summary. `/verify e2e` opts into the Cypress E2E suite, managing the local dev server lifecycle itself.
-- [`.devcontainer/devcontainer.json`](../.devcontainer/devcontainer.json) installs the Claude Code extension and CLI in the development container.
+- [`CLAUDE.md`](../../CLAUDE.md) provides stable project context for sessions.
+- [`.github/instructions`](../../.github/instructions) is shared with Copilot, so both tools follow one source of truth for components, pages, Redux, styling, and testing.
+- [`.claude/agents`](../../.claude/agents) contains thin subagent wrappers that delegate to the shared [`.github/agents`](../../.github/agents) scaffolding workflows (component, page, Redux slice and hook). They run on Sonnet, because scaffolding is mechanical and doesn't need the most capable model.
+- [`.claude/settings.json`](../../.claude/settings.json) commits team-wide permissions and a `PostToolUse` hook that formats and lints every file Claude edits, feeding remaining ESLint errors straight back so they are fixed in the same turn.
+- [`.claude/skills/verify`](../../.claude/skills/verify/SKILL.md) provides a `/verify` skill that runs the local quality gates (lint, Vitest, Cypress component tests, build) and reports a pass/fail summary. `/verify e2e` opts into the Cypress E2E suite, managing the local dev server lifecycle itself.
+- [`.devcontainer/devcontainer.json`](../../.devcontainer/devcontainer.json) installs the Claude Code extension and CLI in the development container.
 
 The split is deliberate: conventions that both assistants need live once in `.github/instructions`, while `.claude/` holds only what is specific to Claude Code — hooks, permissions, skills, and subagents. This keeps the guidance from drifting between tools while still using Claude Code's harness features to enforce quality rather than relying on prompts alone.
 

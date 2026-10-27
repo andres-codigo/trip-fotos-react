@@ -33,7 +33,7 @@ export const FILE_UPLOAD = Object.freeze({
 	MAX_SIZE_MEGABYTES: 5,
 })
 
-// Must match the messages limit in database.rules.json, or messages the form accepts are rejected on save
+// Must match the messages limit in firebase/database.rules.json, or messages the form accepts are rejected on save
 export const CONTACT_MESSAGE = Object.freeze({
 	MAX_LENGTH: 5000,
 })
