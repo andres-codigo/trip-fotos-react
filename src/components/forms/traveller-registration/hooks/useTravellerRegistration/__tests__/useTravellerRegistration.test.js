@@ -151,6 +151,9 @@ describe('useTravellerRegistration', () => {
 		)
 		expect(result.current.formData.lastName.isValid).toBe(false)
 		expect(result.current.formData.description.isValid).toBe(false)
+		expect(result.current.formData.description.message).toBe(
+			VALIDATION_MESSAGES.DESCRIPTION_REQUIRED,
+		)
 		expect(result.current.formData.days.isValid).toBe(false)
 		expect(result.current.formData.cities.isValid).toBe(false)
 		expect(mockOnSuccess).not.toHaveBeenCalled()

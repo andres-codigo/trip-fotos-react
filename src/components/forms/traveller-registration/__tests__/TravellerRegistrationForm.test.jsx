@@ -470,6 +470,14 @@ describe('<TravellerRegistrationForm />', () => {
 			const textarea = container.querySelector('textarea')
 			expect(textarea).toBeInTheDocument()
 		})
+
+		it('labels the description textarea "About your trip"', () => {
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+
+			expect(screen.getByLabelText(/About your trip/)).toBe(
+				screen.getByTestId(FORM_SELECTORS.DESCRIPTION_INPUT),
+			)
+		})
 	})
 
 	describe('Error message rendering', () => {

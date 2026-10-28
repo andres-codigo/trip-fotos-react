@@ -35,7 +35,7 @@ const Privacy = () => {
 
 				<h2>Traveller registration</h2>
 				<p>
-					If you register as a traveller, the name, description,
+					If you register as a traveller, the name, trip description,
 					travel days, cities and photos you provide are stored in
 					Firebase Realtime Database and Cloud Storage, and are shown
 					to other signed-in users.
