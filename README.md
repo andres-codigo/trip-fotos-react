@@ -66,11 +66,12 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Process: a `/start-issue` skill and a hook that blocks edits on `main` or a branch with no open PR, so work cannot start without an issue ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460))
 - Fixes: the Messages nav count, the Register file input, stale traveller data after a cleared database, and the traveller Auth display name
 
-**Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
+**Next up** — in this order:
 
 - [#378](https://github.com/andres-codigo/trip-fotos-react/issues/378) — Epic: lean the repo (scripts, dependencies, config)
-- [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration
-- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — optionally, run E2E against the Firebase Emulator Suite instead of the live project
+- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — run E2E against the Firebase Emulator Suite instead of the live project (optional, after #378)
+- [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration (after #292)
+- [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark-only Claude-inspired redesign, with a multi-column Travellers grid (last step of #379)
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
 <a id="stack"></a>
