@@ -51,6 +51,18 @@
 					}
 				]
 			}
+		],
+		"PreToolUse": [
+			{
+				"matcher": "Edit|MultiEdit|Write",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/require-open-pr.mjs\"",
+						"timeout": 20
+					}
+				]
+			}
 		]
 	}
 }
