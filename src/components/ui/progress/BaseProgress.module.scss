@@ -1,0 +1,38 @@
+@use '@/styles/setup/variables' as variables;
+
+.progress {
+	margin-top: 1rem;
+	width: 100%;
+}
+
+.bar {
+	appearance: none;
+	background-color: variables.$color-silver;
+	border: 0;
+	border-radius: 0.5rem;
+	display: block;
+	height: 0.75rem;
+	overflow: hidden;
+	width: 100%;
+
+	&::-webkit-progress-bar {
+		background-color: variables.$color-silver;
+	}
+
+	&::-webkit-progress-value {
+		background-color: variables.$color-pigment-indigo;
+		transition: width 0.2s ease;
+	}
+
+	&::-moz-progress-bar {
+		background-color: variables.$color-pigment-indigo;
+	}
+}
+
+.label {
+	color: variables.$color-mine-shaft;
+	display: block;
+	font-size: 0.875rem;
+	margin-top: 0.5rem;
+	text-align: center;
+}

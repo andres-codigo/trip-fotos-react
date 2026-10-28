@@ -62,6 +62,12 @@ export const INPUT = Object.freeze({
 	TYPES: ['text', 'password', 'email', 'number'],
 })
 
+export const PROGRESS = Object.freeze({
+	ID: 'base-progress',
+	BAR: 'base-progress-bar',
+	LABEL: 'base-progress-label',
+})
+
 export const SPINNER = Object.freeze({
 	MOCK_SVG: 'mock-spinner.svg',
 	ROLE_STATUS: 'status',

@@ -30,11 +30,12 @@ import travellersReducer, {
 	selectIsTravellerKnown,
 	selectTravellerName,
 	selectSelectedTraveller,
+	selectUploadProgress,
 } from './travellersSlice'
 
 import { handleApiError } from '@/utils/errorHandler'
 import { updateProfile } from 'firebase/auth'
-import { deleteObject, ref } from 'firebase/storage'
+import { deleteObject, ref, uploadBytesResumable } from 'firebase/storage'
 import { getFirebaseStorage } from '@/services/firebase/firebase'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
@@ -163,6 +164,7 @@ describe('travellersSlice', () => {
 					lastFetch: null,
 					status: 'idle',
 					error: null,
+					uploadProgress: null,
 				})
 			})
 		})
@@ -473,6 +475,136 @@ describe('travellersSlice', () => {
 				expect(state.travellerName).toBe(
 					`${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`,
 				)
+			})
+		})
+
+		describe('upload progress', () => {
+			const twoFiles = {
+				...mockRegistrationData,
+				files: [
+					{ name: 'one.jpg', file: new Blob() },
+					{ name: 'two.jpg', file: new Blob() },
+				],
+			}
+
+			const stubUpload = ({ snapshots = [], fail = false } = {}) =>
+				uploadBytesResumable.mockImplementationOnce(() => ({
+					on: (event, progress, error, complete) => {
+						if (fail) {
+							error(new Error('boom'))
+							return
+						}
+						snapshots.forEach((snapshot) => progress(snapshot))
+						complete()
+					},
+					snapshot: { ref: 'mock-ref' },
+				}))
+
+			const collectProgress = () => {
+				const seen = []
+				store.subscribe(() => {
+					const progress = selectUploadProgress(store.getState())
+					if (progress) seen.push(progress)
+				})
+				return seen
+			}
+
+			it('should report the file count and percentage as files upload, then clear it', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+				stubUpload({
+					snapshots: [{ bytesTransferred: 50, totalBytes: 100 }],
+				})
+				stubUpload({
+					snapshots: [{ bytesTransferred: 100, totalBytes: 100 }],
+				})
+				const seen = collectProgress()
+
+				await store.dispatch(registerTraveller(twoFiles))
+
+				expect(seen[0]).toEqual({
+					uploadedFiles: 0,
+					totalFiles: 2,
+					percent: 0,
+				})
+				expect(seen).toContainEqual({
+					uploadedFiles: 0,
+					totalFiles: 2,
+					percent: 25,
+				})
+				expect(seen.at(-1)).toEqual({
+					uploadedFiles: 2,
+					totalFiles: 2,
+					percent: 100,
+				})
+				expect(selectUploadProgress(store.getState())).toBeNull()
+			})
+
+			it('should not count a file as uploaded before its download URL is ready', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+				stubUpload({
+					snapshots: [{ bytesTransferred: 100, totalBytes: 100 }],
+				})
+				const seen = collectProgress()
+
+				await store.dispatch(registerTraveller(mockRegistrationData))
+
+				const beforeUrl = seen.find(({ percent }) => percent === 99)
+				expect(beforeUrl).toEqual({
+					uploadedFiles: 0,
+					totalFiles: 1,
+					percent: 99,
+				})
+			})
+
+			it('should only dispatch when the visible value changes', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+				stubUpload({
+					snapshots: [
+						{ bytesTransferred: 10, totalBytes: 100 },
+						{ bytesTransferred: 10, totalBytes: 100 },
+						{ bytesTransferred: 10, totalBytes: 100 },
+					],
+				})
+				const seen = collectProgress()
+
+				await store.dispatch(registerTraveller(mockRegistrationData))
+
+				const tens = seen.filter(({ percent }) => percent === 10)
+				expect(tens).toHaveLength(1)
+			})
+
+			it('should not report progress when there are no photos', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+				const seen = collectProgress()
+
+				await store.dispatch(
+					registerTraveller({ ...mockRegistrationData, files: [] }),
+				)
+
+				expect(seen).toEqual([])
+			})
+
+			it('should clear the progress when an upload fails', async () => {
+				stubUpload({ fail: true })
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(selectUploadProgress(store.getState())).toBeNull()
 			})
 		})
 

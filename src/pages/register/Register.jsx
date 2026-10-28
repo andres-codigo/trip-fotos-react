@@ -1,8 +1,11 @@
 import { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-import { registerTraveller } from '@/store/slices/travellersSlice'
+import {
+	registerTraveller,
+	selectUploadProgress,
+} from '@/store/slices/travellersSlice'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { handleApiError } from '@/utils/errorHandler'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
@@ -11,6 +14,7 @@ import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 import BaseCard from '@/components/ui/card/BaseCard'
 
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
+import BaseProgress from '@/components/ui/progress/BaseProgress'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
@@ -20,6 +24,7 @@ import registerStyles from './Register.module.scss'
 const Register = () => {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
+	const uploadProgress = useSelector(selectUploadProgress)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState(null)
 
@@ -74,7 +79,18 @@ const Register = () => {
 					fixed
 					data-cy="registering-dialog">
 					Registering your details, one moment please...
-					<BaseSpinner />
+					{uploadProgress ? (
+						<BaseProgress
+							value={uploadProgress.percent}
+							label={GLOBAL.UPLOAD_PROGRESS_LABEL(
+								uploadProgress.uploadedFiles,
+								uploadProgress.totalFiles,
+								uploadProgress.percent,
+							)}
+						/>
+					) : (
+						<BaseSpinner />
+					)}
 				</BaseDialog>
 			)}
 			<section>

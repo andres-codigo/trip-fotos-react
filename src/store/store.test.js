@@ -97,13 +97,24 @@ describe('Store Configuration', () => {
 		expect(state.messages).toBeDefined()
 	})
 
-	it('should drop lastFetch from the travellers slice on rehydrate', () => {
+	it('should drop lastFetch and uploadProgress from the travellers slice on rehydrate', () => {
 		const [{ outbound, config }] = persistConfigs[0].transforms
 
 		expect(config.whitelist).toEqual(['travellers'])
-		expect(outbound({ travellers: [], lastFetch: 123 })).toEqual({
+		expect(
+			outbound({
+				travellers: [],
+				lastFetch: 123,
+				uploadProgress: {
+					uploadedFiles: 1,
+					totalFiles: 3,
+					percent: 40,
+				},
+			}),
+		).toEqual({
 			travellers: [],
 			lastFetch: null,
+			uploadProgress: null,
 		})
 	})
 
