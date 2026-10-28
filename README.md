@@ -47,7 +47,7 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request; CodeQL scanning and a ruleset protecting `main`
 - **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers; versioned Firebase security rules
 - **Project automation** — issues and pull requests are labelled from one `labels.json` and moved across the GitHub Project board by workflows
-- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook and a `/verify` skill (see [AI Assistance](#ai-assistance))
+- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook, an issue-before-edit hook, and `/verify` and `/start-issue` skills (see [AI Assistance](#ai-assistance))
 
 <a id="status"></a>
 
@@ -61,6 +61,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Test hygiene, axe-core accessibility checks in the Cypress tests, and an E2E for a stale persisted store
 - Fixes: the Messages nav count, the Register file input, the 404 page link spacing, stale traveller data after a cleared database, and the traveller Auth display name
 - Process: a browser check for UI-affecting changes, and Issue Intake enforcing the board order Triage → Backlog → Ready → In progress
+- Process: a `/start-issue` skill and a hook that blocks edits on `main` or a branch with no open PR, so work cannot start without an issue ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460))
 - Leaner `package.json` scripts: unused scripts and their dev dependencies removed, `preview` renamed `build:preview` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430))
 - Tidier repo root: Firebase rules moved to `firebase/`, the ESLint and Stylelint configs, rule modules and type shims to `config/`, and the AI development story into `docs/` ([#432](https://github.com/andres-codigo/trip-fotos-react/issues/432))
 - The release-please config and manifest moved into `config/` ([#434](https://github.com/andres-codigo/trip-fotos-react/issues/434))
@@ -344,9 +345,9 @@ trip-fotos-react/
 ├── .devcontainer/               # VS Code Dev Container configuration
 ├── .claude/
 │   ├── agents/                 # Claude Code subagent wrappers (delegate to .github/agents)
-│   ├── hooks/                  # Claude Code hook scripts (lint/format after edits)
+│   ├── hooks/                  # Claude Code hook scripts (lint/format after edits, issue-before-edit guard)
 │   ├── plans/                  # Committed work plans (e.g. deferred Firebase emulator plan)
-│   ├── skills/                 # Claude Code skills (e.g. /verify)
+│   ├── skills/                 # Claude Code skills (/verify, /start-issue)
 │   ├── settings.json           # Shared Claude Code permissions and hooks
 │   └── settings.local.json     # Personal Claude Code overrides (gitignored)
 ├── .github/
