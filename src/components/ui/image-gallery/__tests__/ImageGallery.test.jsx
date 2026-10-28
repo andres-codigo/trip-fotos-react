@@ -16,13 +16,14 @@ const urls = ['/a.jpg', '/b.jpg', '/c.jpg']
 
 const Search = () => <output data-cy="search">{useLocation().search}</output>
 
-const renderGallery = ({ urlParam, initialEntry = '/' } = {}) =>
+const renderGallery = ({ urlParam, initialEntry = '/', dimensions } = {}) =>
 	render(
 		<MemoryRouter initialEntries={[initialEntry]}>
 			<ul>
 				<ImageGallery
 					title="Ada"
 					urls={urls}
+					dimensions={dimensions}
 					urlParam={urlParam}
 				/>
 			</ul>
@@ -44,6 +45,24 @@ describe('<ImageGallery />', () => {
 			screen.getAllByRole('button', { name: /View Ada/ }),
 		).toHaveLength(3)
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+	})
+
+	it('passes each photo its own dimensions, with a placeholder for a missing one', () => {
+		renderGallery({
+			dimensions: [{ width: 1600, height: 900 }, null],
+		})
+		const thumbnails = screen.getAllByTestId(IMAGE.THUMBNAIL)
+		expect(thumbnails[0]).toHaveAttribute('width', '1600')
+		expect(thumbnails[0]).toHaveAttribute('height', '900')
+		expect(thumbnails[1]).toHaveAttribute('width', '4')
+		expect(thumbnails[2]).toHaveAttribute('height', '3')
+	})
+
+	it('reads dimensions Firebase returned as an index-keyed object', () => {
+		renderGallery({ dimensions: { 2: { width: 600, height: 800 } } })
+		const thumbnails = screen.getAllByTestId(IMAGE.THUMBNAIL)
+		expect(thumbnails[2]).toHaveAttribute('width', '600')
+		expect(thumbnails[0]).toHaveAttribute('width', '4')
 	})
 
 	it('opens the clicked photo with its position', () => {

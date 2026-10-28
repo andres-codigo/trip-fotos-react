@@ -170,6 +170,7 @@ const TravellerDetail = () => {
 								<ImageGallery
 									title={fullName}
 									urls={files}
+									dimensions={traveller?.fileDimensions}
 									urlParam={
 										TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
 									}

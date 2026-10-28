@@ -47,6 +47,7 @@ const TravellerItem = ({
 	daysInCity,
 	cities = [],
 	files = [],
+	fileDimensions,
 	registered,
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false)
@@ -178,6 +179,7 @@ const TravellerItem = ({
 							data-cy={TRAVELLER_ITEM.IMAGES_LIST}>
 							<ImageGallery
 								title={fullName}
+								dimensions={fileDimensions}
 								urls={files.slice(
 									0,
 									TRAVELLER_ITEM_CONFIG.MAX_IMAGES,
@@ -252,6 +254,10 @@ TravellerItem.propTypes = {
 		]),
 	),
 	files: PropTypes.arrayOf(PropTypes.string),
+	fileDimensions: PropTypes.oneOfType([
+		PropTypes.arrayOf(PropTypes.object),
+		PropTypes.object,
+	]),
 	registered: PropTypes.string,
 }
 

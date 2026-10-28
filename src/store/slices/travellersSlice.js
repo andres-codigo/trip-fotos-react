@@ -34,6 +34,7 @@ import { deleteTravellerMessages } from './messagesSlice'
 import { databaseRequest } from '@/store/databaseRequest'
 
 import { handleApiError } from '@/utils/errorHandler'
+import { measureImage } from '@/utils/measureImage'
 
 const shouldUpdate = (state) => {
 	const lastFetch = state.lastFetch
@@ -81,6 +82,7 @@ export const registerTraveller = createAsyncThunk(
 
 			const totalFiles = imageQueue.length
 			const fractions = new Array(totalFiles).fill(0)
+			const fileDimensions = new Array(totalFiles).fill(null)
 			let lastReported = ''
 
 			// Snapshots arrive many times a second, so only a change the user can see reaches the store
@@ -127,6 +129,8 @@ export const registerTraveller = createAsyncThunk(
 						useWebWorker: true,
 					},
 				)
+
+				fileDimensions[index] = await measureImage(compressedFile)
 
 				const uploadTask = uploadBytesResumable(
 					storageRef,
@@ -183,6 +187,7 @@ export const registerTraveller = createAsyncThunk(
 				daysInCity: data.daysInCity,
 				cities: data.cities,
 				files: imageUrls,
+				fileDimensions,
 				registered: new Date().toISOString(),
 			}
 
@@ -242,6 +247,7 @@ export const updateTravellers = createAsyncThunk(
 				daysInCity: responseData[key].daysInCity,
 				cities: responseData[key].cities,
 				files: responseData[key].files,
+				fileDimensions: responseData[key].fileDimensions,
 				registered: responseData[key].registered,
 			}))
 

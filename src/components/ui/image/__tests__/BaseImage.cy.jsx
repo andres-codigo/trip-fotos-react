@@ -27,6 +27,37 @@ describe('<BaseImage />', () => {
 		)
 	})
 
+	it('reserves its height before the image loads and keeps it after', () => {
+		cy.intercept('/slow-photo.svg', (req) =>
+			req.reply({
+				delay: 1000,
+				headers: { 'content-type': 'image/svg+xml' },
+				body: '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100"></svg>',
+			}),
+		)
+		cy.mount(
+			<ul style={{ width: 600 }}>
+				<BaseImage
+					title="Ada"
+					url="/slow-photo.svg"
+					dimensions={{ width: 200, height: 100 }}
+					onOpen={() => {}}
+				/>
+			</ul>,
+		)
+
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_THUMBNAIL).then(($img) => {
+			const before = $img[0].getBoundingClientRect().height
+			expect(before).to.be.greaterThan(0)
+			cy.wrap($img).should(($loaded) => {
+				expect($loaded[0].complete).to.be.true
+			})
+			cy.wrap($img).then(() => {
+				expect($img[0].getBoundingClientRect().height).to.equal(before)
+			})
+		})
+	})
+
 	it('calls onOpen on click', () => {
 		const onOpen = cy.stub().as('onOpen')
 		mountImage(url, onOpen)

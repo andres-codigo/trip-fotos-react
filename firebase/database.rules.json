@@ -3,7 +3,21 @@
 		"travellers": {
 			".read": true,
 			"$uid": {
-				".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)"
+				".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)",
+				"fileDimensions": {
+					"$index": {
+						".validate": "$index.matches(/^[0-9]+$/) && newData.hasChildren(['width', 'height'])",
+						"width": {
+							".validate": "newData.isNumber() && newData.val() > 0"
+						},
+						"height": {
+							".validate": "newData.isNumber() && newData.val() > 0"
+						},
+						"$other": {
+							".validate": false
+						}
+					}
+				}
 			}
 		},
 		"messages": {
