@@ -22,7 +22,7 @@ import {
 import BaseBadge from '@/components/ui/badge/BaseBadge'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseCard from '@/components/ui/card/BaseCard'
-import BaseImage from '@/components/ui/image/BaseImage'
+import ImageGallery from '@/components/ui/image-gallery/ImageGallery'
 import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
@@ -169,13 +169,13 @@ const TravellerDetail = () => {
 								ref={photosRef}
 								className={travellerDetailStyles.imagesList}
 								data-cy={TRAVELLER_DETAIL.IMAGES_LIST}>
-								{files.map((file) => (
-									<BaseImage
-										key={file}
-										title={fullName}
-										url={file}
-									/>
-								))}
+								<ImageGallery
+									title={fullName}
+									urls={files}
+									urlParam={
+										TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
+									}
+								/>
 							</ul>
 						</BaseCard>
 					)}

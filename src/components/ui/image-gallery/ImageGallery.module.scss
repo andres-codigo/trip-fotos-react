@@ -1,0 +1,77 @@
+@use '@/styles/setup/variables' as variables;
+
+// Header, footer and the dialog's own padding take about 13rem of the viewport height
+$chrome-height: 13rem;
+
+.viewer {
+	align-items: center;
+	box-sizing: border-box;
+	display: flex;
+	gap: 0.5rem;
+	justify-content: center;
+	padding: 0 0.5rem;
+	width: 100%;
+}
+
+.figure {
+	align-items: center;
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	margin: 0;
+	min-width: 0;
+
+	img {
+		display: block;
+		height: auto;
+		margin: 0 auto;
+		max-height: calc(100dvh - #{$chrome-height});
+		max-width: 100%;
+		object-fit: contain;
+		padding: 0;
+		width: auto;
+	}
+
+	figcaption {
+		color: variables.$color-mine-shaft;
+		font-size: 0.875rem;
+		margin-top: 0.5rem;
+	}
+}
+
+.fallback {
+	color: variables.$color-mine-shaft;
+	display: block;
+	padding: 1rem;
+	text-align: center;
+}
+
+.nav {
+	background: variables.$color-ripe-plum;
+	border: 0;
+	border-radius: 50%;
+	color: variables.$color-white;
+	cursor: pointer;
+	flex: none;
+	font-size: 1.75rem;
+	height: 2.5rem;
+	line-height: 1;
+	padding: 0 0 0.2rem;
+	width: 2.5rem;
+
+	&:focus-visible {
+		outline: 3px solid variables.$color-lavender-magenta;
+		outline-offset: 2px;
+	}
+
+	&:disabled {
+		cursor: default;
+		opacity: 0.3;
+	}
+
+	@media only screen and (max-width: 480px) {
+		font-size: 1.5rem;
+		height: 2rem;
+		width: 2rem;
+	}
+}

@@ -89,44 +89,6 @@ $prefixes: '-moz-', '-webkit-', '-o-', '-ms-', '';
 // END fadeIn
 // ********************
 
-// ********************
-// START dialog image resizing media queries
-// ********************
-@mixin media-query-portrait-landscape($query, $max-image-width, $orientation) {
-	@media only screen and #{$query} {
-		.image {
-			img {
-				@if $orientation == 'portrait' {
-					&.portrait {
-						max-width: $max-image-width;
-					}
-				} @else if $orientation == 'landscape' {
-					&.landscape {
-						max-width: $max-image-width;
-					}
-				}
-			}
-		}
-	}
-}
-
-// min/max width media resizing
-@mixin dialog-min-max-width-image-resizing(
-	$min-width,
-	$max-width,
-	$max-image-width,
-	$orientation
-) {
-	@include media-query-portrait-landscape(
-		'(min-width: #{$min-width}) and (max-width: #{$max-width})',
-		$max-image-width,
-		$orientation
-	);
-}
-// ********************
-// END dialog image resizing media queries
-// ********************
-
 // Heading at the top of a page card
 @mixin page-heading {
 	font-size: 1.5rem;

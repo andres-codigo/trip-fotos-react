@@ -36,6 +36,7 @@ export const TRAVELLER_DETAIL_CONFIG = Object.freeze({
 	FALLBACK_TITLE: 'Traveller',
 	NOT_FOUND_MESSAGE: 'Traveller not found.',
 	BACK_LABEL: 'Back to travellers',
+	PHOTO_PARAM: 'photo',
 })
 
 export const CONTACT_TRAVELLER_FIELDS = Object.freeze({
