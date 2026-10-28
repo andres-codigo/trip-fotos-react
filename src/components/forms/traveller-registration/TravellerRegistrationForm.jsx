@@ -58,7 +58,10 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 	const fieldConfig = {
 		[FIRST_NAME]: { label: 'First name', testId: 'first-name-input' },
 		[LAST_NAME]: { label: 'Last name', testId: 'last-name-input' },
-		[DESCRIPTION]: { label: 'Description', testId: 'description-input' },
+		[DESCRIPTION]: {
+			label: 'About your trip',
+			testId: 'description-input',
+		},
 		[DAYS]: {
 			label: 'Days spent in city',
 			testId: 'days-spent-in-city-input',

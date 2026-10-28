@@ -69,12 +69,13 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - "See all N photos" on a traveller card now opens the details page scrolled to the photos ([#440](https://github.com/andres-codigo/trip-fotos-react/issues/440))
 - The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
 - The photo dialog fits the screen at any width, centres the image, adds next/previous buttons and arrow-key navigation, and reflects the open photo in the URL as `?photo=N` ([#445](https://github.com/andres-codigo/trip-fotos-react/issues/445))
+- The Register textarea can be resized vertically and is labelled "About your trip" ([#439](https://github.com/andres-codigo/trip-fotos-react/issues/439))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
 - [#378](https://github.com/andres-codigo/trip-fotos-react/issues/378) — Epic: lean the repo (scripts, dependencies, config)
 - [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration
-- [#439](https://github.com/andres-codigo/trip-fotos-react/issues/439) — enhancement: make the register description resizable and rename its label
+- [#451](https://github.com/andres-codigo/trip-fotos-react/issues/451) — refactor: rename the traveller description to tripDescription everywhere (after #439)
 - [#441](https://github.com/andres-codigo/trip-fotos-react/issues/441) — enhancement: give city badges colour variety, with a distinct colour per city
 - [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — optionally, run E2E against the Firebase Emulator Suite instead of the live project
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
