@@ -57,24 +57,14 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
-- Consistency refactors: one Realtime Database request helper, one user-facing error path, session selectors, one hook layout, one form-error and loading pattern, and styles drift cleaned up ([#396](https://github.com/andres-codigo/trip-fotos-react/issues/396)–[#401](https://github.com/andres-codigo/trip-fotos-react/issues/401))
-- Test hygiene, axe-core accessibility checks in the Cypress tests, and an E2E for a stale persisted store
-- Fixes: the Messages nav count, the Register file input, the 404 page link spacing, stale traveller data after a cleared database, and the traveller Auth display name
-- Process: a browser check for UI-affecting changes, and Issue Intake enforcing the board order Triage → Backlog → Ready → In progress
-- Process: a `/start-issue` skill and a hook that blocks edits on `main` or a branch with no open PR, so work cannot start without an issue ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460))
-- Leaner `package.json` scripts: unused scripts and their dev dependencies removed, `preview` renamed `build:preview` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430))
-- Tidier repo root: Firebase rules moved to `firebase/`, the ESLint and Stylelint configs, rule modules and type shims to `config/`, and the AI development story into `docs/` ([#432](https://github.com/andres-codigo/trip-fotos-react/issues/432))
-- The release-please config and manifest moved into `config/` ([#434](https://github.com/andres-codigo/trip-fotos-react/issues/434))
-- Dev Container: Claude Code's config now lives in the mounted `~/.claude` directory, fixing the recurring "configuration file not found" error ([#436](https://github.com/andres-codigo/trip-fotos-react/issues/436))
-- Process: the browser check for UI changes now includes tablet widths ([#444](https://github.com/andres-codigo/trip-fotos-react/issues/444))
-- "See all N photos" on a traveller card now opens the details page scrolled to the photos ([#440](https://github.com/andres-codigo/trip-fotos-react/issues/440))
-- The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
-- The photo dialog fits the screen at any width, centres the image, adds next/previous buttons and arrow-key navigation, and reflects the open photo in the URL as `?photo=N` ([#445](https://github.com/andres-codigo/trip-fotos-react/issues/445))
-- The Register textarea can be resized vertically and is labelled "About your trip" ([#439](https://github.com/andres-codigo/trip-fotos-react/issues/439))
-- Browserslist data (`caniuse-lite`) refreshed, clearing the "10 months old" build warning ([#454](https://github.com/andres-codigo/trip-fotos-react/issues/454))
-- The traveller description is stored and named `tripDescription` end to end ([#451](https://github.com/andres-codigo/trip-fotos-react/issues/451))
-- City badges get a distinct colour per city from an eight-colour palette, instead of all rendering grey ([#441](https://github.com/andres-codigo/trip-fotos-react/issues/441))
 - Gallery thumbnails reserve their space before the image loads: each photo's dimensions are stored at upload (`fileDimensions`) so the page no longer jumps; photos registered earlier shift once ([#452](https://github.com/andres-codigo/trip-fotos-react/issues/452))
+- The photo dialog fits the screen at any width, adds next/previous buttons and arrow-key navigation, and reflects the open photo in the URL as `?photo=N` ([#445](https://github.com/andres-codigo/trip-fotos-react/issues/445))
+- The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
+- City badges get a distinct colour per city instead of all rendering grey ([#441](https://github.com/andres-codigo/trip-fotos-react/issues/441))
+- Consistency refactors: one Realtime Database request helper, one user-facing error path, one hook layout and one form-error and loading pattern ([#396](https://github.com/andres-codigo/trip-fotos-react/issues/396)–[#401](https://github.com/andres-codigo/trip-fotos-react/issues/401))
+- Leaner repo: unused scripts removed, and the Firebase rules, lint configs and release-please config moved into `firebase/` and `config/` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430), [#432](https://github.com/andres-codigo/trip-fotos-react/issues/432), [#434](https://github.com/andres-codigo/trip-fotos-react/issues/434))
+- Process: a `/start-issue` skill and a hook that blocks edits on `main` or a branch with no open PR, so work cannot start without an issue ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460))
+- Fixes: the Messages nav count, the Register file input, stale traveller data after a cleared database, and the traveller Auth display name
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
