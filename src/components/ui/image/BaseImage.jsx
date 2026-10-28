@@ -6,10 +6,13 @@ import { GLOBAL } from '@/constants/ui'
 
 import baseImageStyles from './BaseImage.module.scss'
 
-const BaseImage = ({ title, url, onOpen }) => {
+const PLACEHOLDER_DIMENSIONS = { width: 4, height: 3 }
+
+const BaseImage = ({ title, url, dimensions, onOpen }) => {
 	const [hasError, setHasError] = useState(false)
 
 	const alt = `${title}'s photo`
+	const { width, height } = dimensions ?? PLACEHOLDER_DIMENSIONS
 
 	return (
 		<li
@@ -34,6 +37,8 @@ const BaseImage = ({ title, url, onOpen }) => {
 					<img
 						src={url}
 						alt={alt}
+						width={width}
+						height={height}
 						loading="lazy"
 						onError={() => setHasError(true)}
 						data-cy={IMAGE.THUMBNAIL}
@@ -47,6 +52,10 @@ const BaseImage = ({ title, url, onOpen }) => {
 BaseImage.propTypes = {
 	title: PropTypes.string.isRequired,
 	url: PropTypes.string.isRequired,
+	dimensions: PropTypes.shape({
+		width: PropTypes.number.isRequired,
+		height: PropTypes.number.isRequired,
+	}),
 	onOpen: PropTypes.func.isRequired,
 }
 

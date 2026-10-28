@@ -74,6 +74,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Browserslist data (`caniuse-lite`) refreshed, clearing the "10 months old" build warning ([#454](https://github.com/andres-codigo/trip-fotos-react/issues/454))
 - The traveller description is stored and named `tripDescription` end to end ([#451](https://github.com/andres-codigo/trip-fotos-react/issues/451))
 - City badges get a distinct colour per city from an eight-colour palette, instead of all rendering grey ([#441](https://github.com/andres-codigo/trip-fotos-react/issues/441))
+- Gallery thumbnails reserve their space before the image loads: each photo's dimensions are stored at upload (`fileDimensions`) so the page no longer jumps; photos registered earlier shift once ([#452](https://github.com/andres-codigo/trip-fotos-react/issues/452))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 

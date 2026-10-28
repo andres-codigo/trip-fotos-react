@@ -11,7 +11,7 @@ import BaseImage from '@/components/ui/image/BaseImage'
 import imageGalleryStyles from './ImageGallery.module.scss'
 
 // With a `urlParam` the open photo lives in the URL as a 1-based number, so it can be shared and Back closes it
-const ImageGallery = ({ title, urls, urlParam }) => {
+const ImageGallery = ({ title, urls, dimensions, urlParam }) => {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const [localIndex, setLocalIndex] = useState(null)
 	const [failed, setFailed] = useState(() => new Set())
@@ -70,6 +70,7 @@ const ImageGallery = ({ title, urls, urlParam }) => {
 					key={url}
 					title={title}
 					url={url}
+					dimensions={dimensions?.[position]}
 					onOpen={() => goTo(position, { replace: false })}
 				/>
 			))}
@@ -136,6 +137,10 @@ const ImageGallery = ({ title, urls, urlParam }) => {
 ImageGallery.propTypes = {
 	title: PropTypes.string.isRequired,
 	urls: PropTypes.arrayOf(PropTypes.string).isRequired,
+	dimensions: PropTypes.oneOfType([
+		PropTypes.arrayOf(PropTypes.object),
+		PropTypes.object,
+	]),
 	urlParam: PropTypes.string,
 }
 

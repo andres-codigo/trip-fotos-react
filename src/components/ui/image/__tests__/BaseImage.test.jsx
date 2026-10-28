@@ -11,12 +11,13 @@ vi.mock('@/components/ui/image/BaseImage.module.scss', () => ({
 
 const url = 'https://example.com/ada.jpg'
 
-const renderImage = (onOpen = vi.fn()) => {
+const renderImage = (onOpen = vi.fn(), dimensions) => {
 	render(
 		<ul>
 			<BaseImage
 				title="Ada"
 				url={url}
+				dimensions={dimensions}
 				onOpen={onOpen}
 			/>
 		</ul>,
@@ -30,6 +31,20 @@ describe('<BaseImage />', () => {
 		const img = screen.getByAltText("Ada's photo")
 		expect(img).toHaveAttribute('src', url)
 		expect(img).toHaveAttribute('loading', 'lazy')
+	})
+
+	it('sets the stored dimensions so the tile reserves its space', () => {
+		renderImage(vi.fn(), { width: 1600, height: 900 })
+		const img = screen.getByAltText("Ada's photo")
+		expect(img).toHaveAttribute('width', '1600')
+		expect(img).toHaveAttribute('height', '900')
+	})
+
+	it('falls back to a 4:3 placeholder ratio for a legacy photo', () => {
+		renderImage()
+		const img = screen.getByAltText("Ada's photo")
+		expect(img).toHaveAttribute('width', '4')
+		expect(img).toHaveAttribute('height', '3')
 	})
 
 	it('calls onOpen when the thumbnail is clicked', () => {

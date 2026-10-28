@@ -166,7 +166,13 @@ describe('Register Page', () => {
 
 		cy.wait('@uploadImage', { timeout: REQUEST_TIMEOUT })
 		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
-			.its('request.body.files')
+			.its('request.body')
+			.then((body) => {
+				expect(body.fileDimensions).to.have.length(body.files.length)
+				expect(body.fileDimensions[0].width).to.be.greaterThan(0)
+				expect(body.fileDimensions[0].height).to.be.greaterThan(0)
+			})
+			.its('files')
 			.should('have.length', 1)
 			.its('0')
 			.should('include', 'firebasestorage.googleapis.com')

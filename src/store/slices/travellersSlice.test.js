@@ -439,6 +439,51 @@ describe('travellersSlice', () => {
 				)
 			})
 
+			it('should store the measured dimensions of each compressed file, aligned with files', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+				vi.stubGlobal(
+					'createImageBitmap',
+					vi.fn().mockResolvedValue({ width: 1600, height: 900 }),
+				)
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				const body = JSON.parse(fetch.mock.calls[0][1].body)
+				expect(body.files).toHaveLength(1)
+				expect(body.fileDimensions).toEqual([
+					{ width: 1600, height: 900 },
+				])
+				expect(result.payload.fileDimensions).toEqual(
+					body.fileDimensions,
+				)
+				vi.unstubAllGlobals()
+			})
+
+			it('should still upload with a null dimension when measuring fails', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+				vi.stubGlobal(
+					'createImageBitmap',
+					vi.fn().mockRejectedValue(new Error('undecodable')),
+				)
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(result.payload.files).toHaveLength(1)
+				expect(result.payload.fileDimensions).toEqual([null])
+				vi.unstubAllGlobals()
+			})
+
 			it('should set the Auth display name and userName to the registered name', async () => {
 				const fullName = `${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`
 				fetch.mockResolvedValueOnce({
