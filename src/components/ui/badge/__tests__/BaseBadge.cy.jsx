@@ -27,6 +27,29 @@ describe('<BaseBadge />', () => {
 		})
 	})
 
+	it('gives different cities different background colours', () => {
+		cy.mount(
+			<>
+				<BaseBadge
+					type="tokyo"
+					title="Tokyo"
+				/>
+				<BaseBadge
+					type="prague"
+					title="Prague"
+				/>
+			</>,
+		)
+		cy.get(COMMON_SELECTORS.BASE_BADGE)
+			.first()
+			.invoke('css', 'background-color')
+			.then((first) => {
+				cy.get(COMMON_SELECTORS.BASE_BADGE)
+					.last()
+					.should('not.have.css', 'background-color', first)
+			})
+	})
+
 	it('uses the default colour without a type', () => {
 		cy.mount(<BaseBadge title="Other" />)
 		cy.get(COMMON_SELECTORS.BASE_BADGE).should(

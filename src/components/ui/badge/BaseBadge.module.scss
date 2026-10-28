@@ -1,6 +1,17 @@
 @use '@/styles/setup/variables' as variables;
 @use '@/styles/setup/mixins/helpers' as helpers;
 
+$tones: (
+	'tone0': variables.$color-pigment-indigo,
+	'tone1': variables.$color-purple,
+	'tone2': variables.$color-rich-raspberry,
+	'tone3': variables.$color-guardsman-red,
+	'tone4': variables.$color-rust,
+	'tone5': variables.$color-fun-green,
+	'tone6': variables.$color-deep-teal,
+	'tone7': variables.$color-jewel-blue,
+);
+
 .badge {
 	background-color: variables.$color-silver;
 	border-radius: 1.875rem;
@@ -10,27 +21,11 @@
 	text-transform: uppercase;
 	@include helpers.user-select(none);
 
-	&.tokyo,
-	&.prague,
-	&.sydney,
-	&.canberra {
-		color: variables.$color-white;
-	}
-
-	&.tokyo {
-		background-color: variables.$color-pigment-indigo;
-	}
-
-	&.prague {
-		background-color: variables.$color-purple;
-	}
-
-	&.sydney {
-		background-color: variables.$color-fresh-eggplant;
-	}
-
-	&.canberra {
-		background-color: variables.$color-mine-shaft;
+	@each $tone, $colour in $tones {
+		&.#{$tone} {
+			background-color: $colour;
+			color: variables.$color-white;
+		}
 	}
 }
 

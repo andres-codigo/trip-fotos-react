@@ -135,16 +135,14 @@ describe('<TravellerItem />', () => {
 	})
 
 	describe('Badges', () => {
-		it('renders legacy and object cities with type class only for legacy', () => {
+		it('gives legacy and object cities a tone class', () => {
 			renderItem()
 			const badges = screen.getAllByTestId(BADGE.ID)
 			expect(badges).toHaveLength(2)
 			expect(badges[0]).toHaveTextContent('Tokyo, Japan')
-			expect(badges[0].className).toMatch(/tokyo/)
+			expect(badges[0].className).toMatch(/tone\d/)
 			expect(badges[1]).toHaveTextContent('Paris, France')
-			expect(badges[1].className).not.toMatch(
-				/tokyo|prague|sydney|canberra/,
-			)
+			expect(badges[1].className).toMatch(/tone\d/)
 		})
 	})
 
