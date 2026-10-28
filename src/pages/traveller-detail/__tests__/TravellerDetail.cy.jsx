@@ -25,6 +25,7 @@ describe('<TravellerDetail />', () => {
 		id = 'abc',
 		userId = 'me',
 		isTraveller = false,
+		hash = '',
 	} = {}) => {
 		const store = configureStore({
 			reducer: {
@@ -45,7 +46,7 @@ describe('<TravellerDetail />', () => {
 
 		cy.mount(
 			<Provider store={store}>
-				<MemoryRouter initialEntries={[`/travellers/${id}`]}>
+				<MemoryRouter initialEntries={[`/travellers/${id}${hash}`]}>
 					<Routes>
 						<Route
 							path="/travellers/:id"
@@ -100,6 +101,17 @@ describe('<TravellerDetail />', () => {
 			.first()
 			.should('contain.text', 'Tokyo, Japan')
 		cy.get(COMMON_SELECTORS.BASE_IMAGE).should('have.length', 7)
+	})
+
+	it('brings the photos into view when opened from the see-all link', () => {
+		const viewportHeight = 200
+		cy.viewport(390, viewportHeight)
+		mountPage({ hash: '#photos' })
+		// The profile card alone is taller than the viewport, so the list is only on screen if the page scrolled to it
+		cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should(($list) => {
+			const { top } = $list[0].getBoundingClientRect()
+			expect(top).to.be.within(0, viewportHeight)
+		})
 	})
 
 	it('shows the contact link for a traveller viewing someone else', () => {
