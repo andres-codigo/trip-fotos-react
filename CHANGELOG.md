@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.4](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.3...v0.20.4) (2026-10-28)
+
+
+### Enhancements
+
+* give city badges colour variety, with a distinct colour per city ([#455](https://github.com/andres-codigo/trip-fotos-react/issues/455)) ([eb3c3a7](https://github.com/andres-codigo/trip-fotos-react/commit/eb3c3a79a38b5ab59acf8f5e3b164892b52dbe70))
+
 ## [0.20.3](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.2...v0.20.3) (2026-10-28)
 
 
