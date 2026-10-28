@@ -169,7 +169,7 @@ describe('<TravellerItem />', () => {
 			expect(screen.getAllByTestId(IMAGE.ID)).toHaveLength(5)
 			const link = screen.getByTestId(TRAVELLER_ITEM.SEE_ALL_LINK)
 			expect(link).toHaveTextContent('See all 7 photos')
-			expect(link).toHaveAttribute('href', '/travellers/abc')
+			expect(link).toHaveAttribute('href', '/travellers/abc#photos')
 		})
 	})
 
