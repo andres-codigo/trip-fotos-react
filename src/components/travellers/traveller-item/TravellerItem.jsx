@@ -167,9 +167,7 @@ const TravellerItem = ({
 						{cities.map((city) => (
 							<BaseBadge
 								key={getCityId(city)}
-								type={
-									typeof city === 'string' ? city : undefined
-								}
+								type={getCityId(city)}
 								title={formatCity(city)}
 							/>
 						))}

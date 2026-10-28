@@ -149,8 +149,9 @@ describe('<TravellerDetail />', () => {
 		const badges = screen.getAllByTestId(BADGE.ID)
 		expect(badges).toHaveLength(2)
 		expect(badges[0]).toHaveTextContent('Tokyo, Japan')
-		expect(badges[0].className).toMatch(/tokyo/)
+		expect(badges[0].className).toMatch(/tone\d/)
 		expect(badges[1]).toHaveTextContent('Paris, France')
+		expect(badges[1].className).toMatch(/tone\d/)
 	})
 
 	it('shows the contact link for a traveller viewing someone else', async () => {
