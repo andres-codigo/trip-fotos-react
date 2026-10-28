@@ -64,6 +64,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Leaner `package.json` scripts: unused scripts and their dev dependencies removed, `preview` renamed `build:preview` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430))
 - Tidier repo root: Firebase rules moved to `firebase/`, the ESLint and Stylelint configs, rule modules and type shims to `config/`, and the AI development story into `docs/` ([#432](https://github.com/andres-codigo/trip-fotos-react/issues/432))
 - The release-please config and manifest moved into `config/` ([#434](https://github.com/andres-codigo/trip-fotos-react/issues/434))
+- Dev Container: Claude Code's config now lives in the mounted `~/.claude` directory, fixing the recurring "configuration file not found" error ([#436](https://github.com/andres-codigo/trip-fotos-react/issues/436))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
@@ -109,7 +110,7 @@ npm run dev       # http://localhost:3000
 
 The app needs a Firebase project and a `.env` file first — see [Setup](#setup).
 
-A [VS Code Dev Container](.devcontainer/devcontainer.json) is included. It bind-mounts `~/.gitconfig`, `~/.config/gh`, `~/.claude` and `~/.claude.json` from the host, so set those up first; if they are missing, Docker creates empty placeholders and the matching tool is unauthenticated inside the container.
+A [VS Code Dev Container](.devcontainer/devcontainer.json) is included. It bind-mounts `~/.gitconfig`, `~/.config/gh` and `~/.claude` from the host, so set those up first; if they are missing, Docker creates empty placeholders and the matching tool is unauthenticated inside the container. Claude Code keeps its config in `~/.claude/.claude.json` (via `CLAUDE_CONFIG_DIR`) rather than a bind-mounted `~/.claude.json`, because a single-file mount breaks when Claude Code replaces the file on save.
 
 <a id="scripts"></a>
 
