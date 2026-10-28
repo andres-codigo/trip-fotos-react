@@ -65,6 +65,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Tidier repo root: Firebase rules moved to `firebase/`, the ESLint and Stylelint configs, rule modules and type shims to `config/`, and the AI development story into `docs/` ([#432](https://github.com/andres-codigo/trip-fotos-react/issues/432))
 - The release-please config and manifest moved into `config/` ([#434](https://github.com/andres-codigo/trip-fotos-react/issues/434))
 - Dev Container: Claude Code's config now lives in the mounted `~/.claude` directory, fixing the recurring "configuration file not found" error ([#436](https://github.com/andres-codigo/trip-fotos-react/issues/436))
+- Process: the browser check for UI changes now includes tablet widths ([#444](https://github.com/andres-codigo/trip-fotos-react/issues/444))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
