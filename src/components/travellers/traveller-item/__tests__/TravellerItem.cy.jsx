@@ -96,7 +96,7 @@ describe('<TravellerItem />', () => {
 		cy.get(COMMON_SELECTORS.BASE_IMAGE).should('have.length', 5)
 		cy.get(TRAVELLER_ITEM_SELECTORS.SEE_ALL_LINK)
 			.should('contain.text', 'See all 7 photos')
-			.and('have.attr', 'href', '/travellers/abc')
+			.and('have.attr', 'href', '/travellers/abc#photos')
 	})
 
 	it('omits the see-all link for five photos', () => {

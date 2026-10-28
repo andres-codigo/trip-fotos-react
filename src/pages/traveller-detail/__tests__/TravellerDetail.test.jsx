@@ -32,6 +32,7 @@ const renderPage = ({
 	id = 'abc',
 	userId = 'me',
 	isTraveller = false,
+	hash = '',
 } = {}) => {
 	const store = configureStore({
 		reducer: {
@@ -52,7 +53,7 @@ const renderPage = ({
 
 	return render(
 		<Provider store={store}>
-			<MemoryRouter initialEntries={[`/travellers/${id}`]}>
+			<MemoryRouter initialEntries={[`/travellers/${id}${hash}`]}>
 				<Routes>
 					<Route
 						path="/travellers/:id"
@@ -98,6 +99,39 @@ describe('<TravellerDetail />', () => {
 		expect(
 			screen.queryByTestId(TRAVELLER_DETAIL.SPINNER),
 		).not.toBeInTheDocument()
+	})
+
+	describe('Photos anchor', () => {
+		const scrollIntoView = vi.fn()
+
+		beforeEach(() => {
+			scrollIntoView.mockClear()
+			Element.prototype.scrollIntoView = scrollIntoView
+		})
+
+		afterEach(() => {
+			delete Element.prototype.scrollIntoView
+		})
+
+		it('scrolls to the photos once the traveller has loaded', async () => {
+			renderPage({ hash: '#photos' })
+			const list = await screen.findByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
+			expect(list).toHaveAttribute('id', 'photos')
+			expect(scrollIntoView).toHaveBeenCalledTimes(1)
+			expect(scrollIntoView.mock.contexts[0]).toBe(list)
+		})
+
+		it('does not scroll without the photos hash', async () => {
+			renderPage()
+			await screen.findByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
+			expect(scrollIntoView).not.toHaveBeenCalled()
+		})
+
+		it('does not scroll for an unrelated hash', async () => {
+			renderPage({ hash: '#other' })
+			await screen.findByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
+			expect(scrollIntoView).not.toHaveBeenCalled()
+		})
 	})
 
 	it('omits the photo list without files', async () => {

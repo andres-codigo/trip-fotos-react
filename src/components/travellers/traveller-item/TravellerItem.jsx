@@ -61,6 +61,7 @@ const TravellerItem = ({
 
 	const fullName = `${firstName} ${lastName}`
 	const detailsLink = `${PATHS.TRAVELLERS}/${id}`
+	const photosLink = `${detailsLink}#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
 	const contactLink = `${detailsLink}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`
 	const isOwnRecord = id === userId
 	const canContact = !isOwnRecord && isTraveller
@@ -193,7 +194,7 @@ const TravellerItem = ({
 										travellerItemStyles.imageCounter
 									}>
 									<Link
-										to={detailsLink}
+										to={photosLink}
 										data-cy={TRAVELLER_ITEM.SEE_ALL_LINK}>
 										<span>
 											See all {files.length} photos

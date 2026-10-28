@@ -37,6 +37,8 @@
 
 .imagesList {
 	@include helpers.image-grid;
+	// Clears the sticky header when scrolled to via the photos anchor
+	scroll-margin-top: 6rem;
 }
 
 .actions {

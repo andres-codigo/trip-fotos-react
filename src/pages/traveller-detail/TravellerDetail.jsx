@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import classNames from 'classnames'
 
 import { TRAVELLER_DETAIL } from '@/constants/test'
@@ -26,10 +26,13 @@ import BaseImage from '@/components/ui/image/BaseImage'
 import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
+import useScrollToAnchor from '@/pages/traveller-detail/hooks/useScrollToAnchor'
+
 import travellerDetailStyles from './TravellerDetail.module.scss'
 
 const TravellerDetail = () => {
 	const { id } = useParams()
+	const { hash } = useLocation()
 	const dispatch = useDispatch()
 	const userId = useSelector(selectUserId)
 	const isTraveller = useSelector(selectIsTraveller)
@@ -66,6 +69,14 @@ const TravellerDetail = () => {
 	const canContact = !isOwnRecord && isTraveller
 	const cities = traveller?.cities ?? []
 	const files = traveller?.files ?? []
+
+	const shouldScrollToPhotos =
+		showProfile && hash === `#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
+
+	// The photos render after the fetch, so the browser's own hash scrolling has nothing to land on
+	const { ref: photosRef } = useScrollToAnchor({
+		isActive: shouldScrollToPhotos,
+	})
 
 	const heading = (
 		<h1
@@ -154,6 +165,8 @@ const TravellerDetail = () => {
 								{ [travellerDetailStyles.own]: isOwnRecord },
 							)}>
 							<ul
+								id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
+								ref={photosRef}
 								className={travellerDetailStyles.imagesList}
 								data-cy={TRAVELLER_DETAIL.IMAGES_LIST}>
 								{files.map((file) => (
