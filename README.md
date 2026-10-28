@@ -63,6 +63,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Process: a browser check for UI-affecting changes, and Issue Intake enforcing the board order Triage → Backlog → Ready → In progress
 - Leaner `package.json` scripts: unused scripts and their dev dependencies removed, `preview` renamed `build:preview` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430))
 - Tidier repo root: Firebase rules moved to `firebase/`, the ESLint and Stylelint configs, rule modules and type shims to `config/`, and the AI development story into `docs/` ([#432](https://github.com/andres-codigo/trip-fotos-react/issues/432))
+- The release-please config and manifest moved into `config/` ([#434](https://github.com/andres-codigo/trip-fotos-react/issues/434))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
@@ -348,8 +349,7 @@ trip-fotos-react/
 │   ├── copilot-instructions.md # Workspace-level Copilot guidelines
 │   └── labels.json             # Single source of truth for every label
 ├── .vscode/                     # Shared VS Code editor settings
-├── .release-please-manifest.json # Current version, maintained by release-please
-├── config/                     # ESLint and Stylelint configuration, ESLint rule modules and the React Hooks type shim
+├── config/                     # ESLint, Stylelint and release-please configuration, ESLint rule modules and the React Hooks type shim
 ├── cypress/                    # Cypress tests
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
@@ -384,7 +384,6 @@ trip-fotos-react/
 ├── jsconfig.json                # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
 ├── package.json                 # Project dependencies and scripts
 ├── README.md                    # Project documentation
-├── release-please-config.json   # release-please settings (version and changelog from commit titles)
 ├── vercel.json                  # Vercel deployment configuration
 └── vite.config.js               # Vite build tool configuration
 ```
