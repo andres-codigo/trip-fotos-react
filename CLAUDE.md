@@ -112,7 +112,7 @@ Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 - Add, remove, or rename a top-level folder, or a `src/` subfolder (update the Folder Structure tree)
 - Add or change a GitHub Actions workflow (update `docs/ci-cd.md` and the README Testing and CI summary table)
 - Add, remove, or materially change a user-facing feature (update the Features section)
-- **Finish any change** (Dependabot PRs excepted): refresh the Status section — move what shipped into Recently shipped, drop closed issues from Next up (version bumps are automatic, see "Versioning"). A change is not done until the Status is in the PR
+- **Finish any change** (Dependabot PRs excepted): refresh the Status section — move what shipped into Recently shipped, drop closed issues from Next up (version bumps are automatic, see "Versioning"). Keep Recently shipped to 5–8 headline items, not every change, and copy the same list into the GitHub Project README with `gh project edit` ([how](docs/ci-cd.md#project-readme-and-status-updates)). A change is not done until the Status is in the PR and the Project README matches
 - Add or restructure `.claude/` or `.github/` guidance files (update `docs/ai-assistance.md` and the README AI Assistance summary)
 - Change the README's About, Features, Stack or Status sections (update the GitHub Project README to match)
 - Merge a PR that ships user-visible work or changes the "Next up" list (post a Project status update) — see [Project README and status updates](docs/ci-cd.md#project-readme-and-status-updates)

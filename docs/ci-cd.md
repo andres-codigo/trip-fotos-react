@@ -135,7 +135,7 @@ gh project item-edit --project-id PVT_kwHOAybMeM4BCojE --id <item> --field-id <K
 The project's short description and README (Project > Settings) and its status updates are written by hand — no workflow touches them. Keep them current:
 
 - **Status update** — post one after a PR merges that ships user-visible work, closes a backlog item or changes the "Next up" list, and when the overall status changes (On track / At risk / Off track). List what shipped with PR numbers and what is next.
-- **Project README** — edit it when the repo README's About, Features, Stack or Status sections change.
+- **Project README** — edit it when the repo README's About, Features, Stack or Status sections change. Every PR refreshes the repo Status, so every PR also updates the Project README's **Recently shipped** line to match. Both carry the same 5–8 headline items (issue numbers, no per-fix detail); drop the oldest or smallest when adding one. It is edited with `gh`, outside git, so no PR diff shows it as missing: check it before marking the PR ready.
 - **Short description** — edit it only if the app's purpose changes.
 
 ```bash
