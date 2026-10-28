@@ -7,7 +7,7 @@ export const VALIDATION_MESSAGES = {
 	// TRAVELLER REGISTRATION FORM
 	FIRST_NAME_REQUIRED: 'First name must not be empty.',
 	LAST_NAME_REQUIRED: 'Last name must not be empty.',
-	DESCRIPTION_REQUIRED: 'About your trip must not be empty.',
+	TRIP_DESCRIPTION_REQUIRED: 'About your trip must not be empty.',
 	DAYS_REQUIRED: 'Number of days spent in the city cannot be empty.',
 	CITIES_REQUIRED: 'At least one city must be selected.',
 

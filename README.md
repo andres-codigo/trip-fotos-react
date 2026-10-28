@@ -36,7 +36,7 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 - **Authentication** — email/password sign-up and log-in with Firebase Authentication, session persistence and auto-logout
 - **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database; cities visited are chosen through an accessible type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data) that stores each city with its country
 - **Photo uploads** — drag-and-drop or file-picker uploader with previews and type/size validation on the registration form; photos are compressed and uploaded to Cloud Storage as the signed-in user; a progress bar shows how many photos have uploaded while registering
-- **Traveller cards** — the travellers list shows each traveller's name, registration date, description, days in city, city badges and up to five photos, with contact and details links and an admin-only delete button
+- **Traveller cards** — the travellers list shows each traveller's name, registration date, trip description, days in city, city badges and up to five photos, with contact and details links and an admin-only delete button
 - **Traveller details** — `/travellers/:id` shows a traveller's full profile, cities and every photo (each opens in a dialog that fits the screen, with next/previous buttons and a shareable `?photo=N` link), with a contact link for other travellers; unknown ids show a not-found message
 - **Messaging** — `/travellers/:id/contact` (signed-in users only) sends a traveller a message from the user's email address, with email and message validation, a success alert on the travellers list and an error dialog if sending fails; travellers read and delete the messages they have received on the messages page
 - **City filter** — checkboxes above the travellers list, built from the cities the loaded travellers have visited, narrow the list by city; all cities start selected
@@ -71,13 +71,13 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - The photo dialog fits the screen at any width, centres the image, adds next/previous buttons and arrow-key navigation, and reflects the open photo in the URL as `?photo=N` ([#445](https://github.com/andres-codigo/trip-fotos-react/issues/445))
 - The Register textarea can be resized vertically and is labelled "About your trip" ([#439](https://github.com/andres-codigo/trip-fotos-react/issues/439))
 - Browserslist data (`caniuse-lite`) refreshed, clearing the "10 months old" build warning ([#454](https://github.com/andres-codigo/trip-fotos-react/issues/454))
+- The traveller description is stored and named `tripDescription` end to end ([#451](https://github.com/andres-codigo/trip-fotos-react/issues/451))
 - City badges get a distinct colour per city from an eight-colour palette, instead of all rendering grey ([#441](https://github.com/andres-codigo/trip-fotos-react/issues/441))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
 - [#378](https://github.com/andres-codigo/trip-fotos-react/issues/378) — Epic: lean the repo (scripts, dependencies, config)
 - [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration
-- [#451](https://github.com/andres-codigo/trip-fotos-react/issues/451) — refactor: rename the traveller description to tripDescription everywhere (after #439)
 - [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — optionally, run E2E against the Firebase Emulator Suite instead of the live project
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 

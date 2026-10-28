@@ -52,15 +52,15 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 		city,
 	}))
 
-	const { FIRST_NAME, LAST_NAME, DESCRIPTION, DAYS, CITIES, FILES } =
+	const { FIRST_NAME, LAST_NAME, TRIP_DESCRIPTION, DAYS, CITIES, FILES } =
 		TRAVELLER_REGISTRATION_FIELDS
 
 	const fieldConfig = {
 		[FIRST_NAME]: { label: 'First name', testId: 'first-name-input' },
 		[LAST_NAME]: { label: 'Last name', testId: 'last-name-input' },
-		[DESCRIPTION]: {
+		[TRIP_DESCRIPTION]: {
 			label: 'About your trip',
-			testId: 'description-input',
+			testId: 'trip-description-input',
 		},
 		[DAYS]: {
 			label: 'Days spent in city',
@@ -128,14 +128,14 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			</div>
 
 			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData[DESCRIPTION].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+				className={`${travellerRegistrationFormStyles.formControl} ${!formData[TRIP_DESCRIPTION].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
 				<Textarea
 					rows={5}
-					{...getInputProps(DESCRIPTION)}
+					{...getInputProps(TRIP_DESCRIPTION)}
 				/>
 				{renderVisuallyHiddenError(
-					formData[DESCRIPTION],
-					'description-error',
+					formData[TRIP_DESCRIPTION],
+					'trip-description-error',
 					travellerRegistrationFormStyles.visuallyHidden,
 				)}
 			</div>

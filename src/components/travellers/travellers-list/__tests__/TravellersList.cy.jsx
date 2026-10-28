@@ -20,7 +20,7 @@ const TRAVELLERS_URL = '**/travellers.json*'
 const record = (firstName, cities) => ({
 	firstName,
 	lastName: 'Lovelace',
-	description: 'Loves analytical engines.',
+	tripDescription: 'Loves analytical engines.',
 	daysInCity: 7,
 	cities,
 	files: [],

@@ -11,7 +11,7 @@ export const TRAVELLER_AREAS = TRAVELLER_REGISTRATION_CITIES.map(({ id }) => id)
 export const TRAVELLER_REGISTRATION_FIELDS = Object.freeze({
 	FIRST_NAME: 'firstName',
 	LAST_NAME: 'lastName',
-	DESCRIPTION: 'description',
+	TRIP_DESCRIPTION: 'tripDescription',
 	DAYS: 'days',
 	CITIES: 'cities',
 	FILES: 'files',
@@ -21,7 +21,7 @@ export const TRAVELLER_REGISTRATION_SUCCESS_MESSAGE =
 	'You have been successfully registered as a traveller!'
 
 export const TRAVELLER_ITEM_CONFIG = Object.freeze({
-	DESCRIPTION_MAX_LENGTH: 250,
+	TRIP_DESCRIPTION_MAX_LENGTH: 250,
 	MAX_IMAGES: 5,
 	CONTACT_PATH_SEGMENT: '/contact',
 	PHOTOS_ANCHOR: 'photos',

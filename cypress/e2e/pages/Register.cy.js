@@ -55,9 +55,9 @@ describe('Register Page', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).should(
 			'be.visible',
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).should(
-			'be.visible',
-		)
+		cy.get(
+			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+		).should('be.visible')
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).should('be.visible')
@@ -73,7 +73,7 @@ describe('Register Page', () => {
 			'be.visible',
 		)
 		cy.contains(VALIDATION_MESSAGES.LAST_NAME_REQUIRED).should('be.visible')
-		cy.contains(VALIDATION_MESSAGES.DESCRIPTION_REQUIRED).should(
+		cy.contains(VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED).should(
 			'be.visible',
 		)
 		cy.contains(VALIDATION_MESSAGES.DAYS_REQUIRED).should('be.visible')
@@ -81,7 +81,7 @@ describe('Register Page', () => {
 	})
 
 	it('successfully registers a traveller', () => {
-		const { firstName, lastName, description, daysInCity } =
+		const { firstName, lastName, tripDescription, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept the registration API call
@@ -100,9 +100,9 @@ describe('Register Page', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
 			lastName,
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
-			description,
-		)
+		cy.get(
+			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+		).type(tripDescription)
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).type(daysInCity)
@@ -126,7 +126,7 @@ describe('Register Page', () => {
 	})
 
 	it('registers a traveller with a photo uploaded to Storage', () => {
-		const { firstName, lastName, description, daysInCity } =
+		const { firstName, lastName, tripDescription, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Storage is live (the upload is deleted in afterEach); the DB write is stubbed
@@ -148,9 +148,9 @@ describe('Register Page', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
 			lastName,
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
-			description,
-		)
+		cy.get(
+			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+		).type(tripDescription)
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).type(daysInCity)
@@ -178,7 +178,7 @@ describe('Register Page', () => {
 	})
 
 	it('shows a loading dialog while registering', () => {
-		const { firstName, lastName, description, daysInCity } =
+		const { firstName, lastName, tripDescription, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept with delay
@@ -198,9 +198,9 @@ describe('Register Page', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
 			lastName,
 		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT).type(
-			description,
-		)
+		cy.get(
+			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+		).type(tripDescription)
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 		).type(daysInCity)
@@ -225,7 +225,7 @@ describe('Register Page', () => {
 
 	describe('Error Handling', () => {
 		it('shows an error dialog when registration fails', () => {
-			const { firstName, lastName, description, daysInCity } =
+			const { firstName, lastName, tripDescription, daysInCity } =
 				MOCK_TRAVELLERS.NEW_TRAVELLER
 
 			// Intercept failure
@@ -242,8 +242,8 @@ describe('Register Page', () => {
 				lastName,
 			)
 			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT,
-			).type(description)
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+			).type(tripDescription)
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 			).type(daysInCity)

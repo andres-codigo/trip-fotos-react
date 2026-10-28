@@ -6,13 +6,13 @@ import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
 import { getCityId } from '@/utils/formatCity'
 
 const useTravellerRegistration = () => {
-	const { FIRST_NAME, LAST_NAME, DESCRIPTION, DAYS, CITIES, FILES } =
+	const { FIRST_NAME, LAST_NAME, TRIP_DESCRIPTION, DAYS, CITIES, FILES } =
 		TRAVELLER_REGISTRATION_FIELDS
 
 	const [formData, setFormData] = useState({
 		[FIRST_NAME]: { value: '', message: '', isValid: true },
 		[LAST_NAME]: { value: '', message: '', isValid: true },
-		[DESCRIPTION]: { value: '', message: '', isValid: true },
+		[TRIP_DESCRIPTION]: { value: '', message: '', isValid: true },
 		[DAYS]: { value: '', message: '', isValid: true },
 		[CITIES]: { value: [], message: '', isValid: true },
 	})
@@ -37,10 +37,10 @@ const useTravellerRegistration = () => {
 			}
 		}
 
-		if (id === DESCRIPTION && value.trim() === '') {
+		if (id === TRIP_DESCRIPTION && value.trim() === '') {
 			return {
 				isValid: false,
-				message: VALIDATION_MESSAGES.DESCRIPTION_REQUIRED,
+				message: VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED,
 			}
 		}
 
@@ -139,7 +139,7 @@ const useTravellerRegistration = () => {
 		const dataToSubmit = {
 			[FIRST_NAME]: formData[FIRST_NAME].value,
 			[LAST_NAME]: formData[LAST_NAME].value,
-			[DESCRIPTION]: formData[DESCRIPTION].value,
+			[TRIP_DESCRIPTION]: formData[TRIP_DESCRIPTION].value,
 			daysInCity: formData[DAYS].value,
 			[CITIES]: formData[CITIES].value,
 			[FILES]: files,

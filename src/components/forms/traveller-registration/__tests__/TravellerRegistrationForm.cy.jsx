@@ -53,7 +53,7 @@ describe('<TravellerRegistrationForm />', () => {
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT,
 			).should('exist')
 			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT,
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 			).should('exist')
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
@@ -178,7 +178,7 @@ describe('<TravellerRegistrationForm />', () => {
 			).click()
 			cy.contains(VALIDATION_MESSAGES.FIRST_NAME_REQUIRED).should('exist')
 			cy.contains(VALIDATION_MESSAGES.LAST_NAME_REQUIRED).should('exist')
-			cy.contains(VALIDATION_MESSAGES.DESCRIPTION_REQUIRED).should(
+			cy.contains(VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED).should(
 				'exist',
 			)
 			cy.contains(VALIDATION_MESSAGES.DAYS_REQUIRED).should('exist')
@@ -225,7 +225,7 @@ describe('<TravellerRegistrationForm />', () => {
 			)
 			// Other errors should still exist
 			cy.contains(VALIDATION_MESSAGES.LAST_NAME_REQUIRED).should('exist')
-			cy.contains(VALIDATION_MESSAGES.DESCRIPTION_REQUIRED).should(
+			cy.contains(VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED).should(
 				'exist',
 			)
 			cy.contains(VALIDATION_MESSAGES.DAYS_REQUIRED).should('exist')
@@ -257,8 +257,8 @@ describe('<TravellerRegistrationForm />', () => {
 				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
 			)
 			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT,
-			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description)
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription)
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString())
@@ -298,8 +298,8 @@ describe('<TravellerRegistrationForm />', () => {
 				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
 			)
 			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DESCRIPTION_INPUT,
-			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description)
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription)
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
 			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString())

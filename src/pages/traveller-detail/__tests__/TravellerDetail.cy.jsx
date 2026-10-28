@@ -11,7 +11,7 @@ import { COMMON_SELECTORS, TRAVELLER_DETAIL_SELECTORS } from '@/constants/test'
 const traveller = {
 	firstName: 'Ada',
 	lastName: 'Lovelace',
-	description: 'Loves analytical engines',
+	tripDescription: 'Loves analytical engines',
 	daysInCity: 7,
 	cities: [
 		'tokyo',
@@ -90,7 +90,7 @@ describe('<TravellerDetail />', () => {
 			'have.text',
 			'Ada Lovelace',
 		)
-		cy.get(TRAVELLER_DETAIL_SELECTORS.DESCRIPTION).should(
+		cy.get(TRAVELLER_DETAIL_SELECTORS.TRIP_DESCRIPTION).should(
 			'contain.text',
 			'Loves analytical engines',
 		)
