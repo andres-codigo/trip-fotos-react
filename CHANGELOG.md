@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.5](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.4...v0.20.5) (2026-10-28)
+
+
+### Bug Fixes
+
+* reserve space for gallery thumbnails to prevent layout shift (store image dimensions) ([#459](https://github.com/andres-codigo/trip-fotos-react/issues/459)) ([a525d6c](https://github.com/andres-codigo/trip-fotos-react/commit/a525d6cde6904b2f9507fcf995504734093f6810)), closes [#452](https://github.com/andres-codigo/trip-fotos-react/issues/452)
+
 ## [0.20.4](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.3...v0.20.4) (2026-10-28)
 
 
