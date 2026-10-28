@@ -20,7 +20,7 @@ import {
 import BaseBadge from '@/components/ui/badge/BaseBadge'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
-import BaseImage from '@/components/ui/image/BaseImage'
+import ImageGallery from '@/components/ui/image-gallery/ImageGallery'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 import travellerItemStyles from './TravellerItem.module.scss'
@@ -178,15 +178,13 @@ const TravellerItem = ({
 						<ul
 							className={travellerItemStyles.imagesList}
 							data-cy={TRAVELLER_ITEM.IMAGES_LIST}>
-							{files
-								.slice(0, TRAVELLER_ITEM_CONFIG.MAX_IMAGES)
-								.map((file) => (
-									<BaseImage
-										key={file}
-										title={fullName}
-										url={file}
-									/>
-								))}
+							<ImageGallery
+								title={fullName}
+								urls={files.slice(
+									0,
+									TRAVELLER_ITEM_CONFIG.MAX_IMAGES,
+								)}
+							/>
 							{files.length >
 								TRAVELLER_ITEM_CONFIG.MAX_IMAGES && (
 								<li

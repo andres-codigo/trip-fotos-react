@@ -25,6 +25,7 @@ describe('<TravellerDetail />', () => {
 		id = 'abc',
 		userId = 'me',
 		isTraveller = false,
+		search = '',
 		hash = '',
 	} = {}) => {
 		const store = configureStore({
@@ -46,7 +47,8 @@ describe('<TravellerDetail />', () => {
 
 		cy.mount(
 			<Provider store={store}>
-				<MemoryRouter initialEntries={[`/travellers/${id}${hash}`]}>
+				<MemoryRouter
+					initialEntries={[`/travellers/${id}${search}${hash}`]}>
 					<Routes>
 						<Route
 							path="/travellers/:id"
@@ -112,6 +114,19 @@ describe('<TravellerDetail />', () => {
 			const { top } = $list[0].getBoundingClientRect()
 			expect(top).to.be.within(0, viewportHeight)
 		})
+	})
+
+	it('opens the photo named in the URL', () => {
+		mountPage({ search: '?photo=3' })
+		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
+			'contain',
+			'3 of 7',
+		)
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL).should(
+			'have.attr',
+			'src',
+			'https://example.com/2.jpg',
+		)
 	})
 
 	it('shows the contact link for a traveller viewing someone else', () => {

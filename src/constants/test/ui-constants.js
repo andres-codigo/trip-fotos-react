@@ -54,6 +54,9 @@ export const IMAGE = Object.freeze({
 	THUMBNAIL: 'base-image-thumbnail',
 	FULL: 'base-image-full',
 	FALLBACK: 'base-image-fallback',
+	PREVIOUS: 'image-gallery-previous',
+	NEXT: 'image-gallery-next',
+	COUNTER: 'image-gallery-counter',
 })
 
 export const INPUT = Object.freeze({

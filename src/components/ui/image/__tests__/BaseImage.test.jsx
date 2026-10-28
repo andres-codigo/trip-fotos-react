@@ -1,86 +1,51 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 
-import { DIALOG, IMAGE } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 
 import BaseImage from '@/components/ui/image/BaseImage'
 
 vi.mock('@/components/ui/image/BaseImage.module.scss', () => ({
-	default: {
-		'image-preview': 'image-preview',
-		landscape: 'landscape',
-		portrait: 'portrait',
-		square: 'square',
-	},
+	default: { 'image-preview': 'image-preview' },
 }))
 
-vi.mock('react-dom', async () => {
-	const actual = await vi.importActual('react-dom')
-	return { ...actual, createPortal: (node) => node }
-})
+const url = 'https://example.com/ada.jpg'
 
-const props = { title: 'Ada', url: 'https://example.com/ada.jpg' }
-
-const openDialog = () =>
-	fireEvent.click(screen.getByRole('button', { name: "View Ada's photo" }))
+const renderImage = (onOpen = vi.fn()) => {
+	render(
+		<ul>
+			<BaseImage
+				title="Ada"
+				url={url}
+				onOpen={onOpen}
+			/>
+		</ul>,
+	)
+	return onOpen
+}
 
 describe('<BaseImage />', () => {
 	it('renders a lazy thumbnail with alt text', () => {
-		render(<BaseImage {...props} />)
+		renderImage()
 		const img = screen.getByAltText("Ada's photo")
-		expect(img).toHaveAttribute('src', props.url)
+		expect(img).toHaveAttribute('src', url)
 		expect(img).toHaveAttribute('loading', 'lazy')
 	})
 
-	it('opens the dialog with a title on click', () => {
-		render(<BaseImage {...props} />)
-		expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-		openDialog()
-		expect(screen.getByRole('dialog')).toBeInTheDocument()
-		expect(screen.getByTestId(DIALOG.TITLE)).toHaveTextContent(
-			"Ada's photos",
+	it('calls onOpen when the thumbnail is clicked', () => {
+		const onOpen = renderImage()
+		fireEvent.click(
+			screen.getByRole('button', { name: "View Ada's photo" }),
 		)
-	})
-
-	it('closes the dialog when Close is clicked', async () => {
-		render(<BaseImage {...props} />)
-		openDialog()
-		fireEvent.click(screen.getByRole('button', { name: /close/i }))
-		await waitFor(() =>
-			expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
-		)
-	})
-
-	it.each([
-		[200, 100, 'landscape'],
-		[100, 200, 'portrait'],
-		[100, 100, 'square'],
-	])('sets orientation for %ix%i as %s', (w, h, expected) => {
-		render(<BaseImage {...props} />)
-		openDialog()
-		const full = screen.getByTestId(IMAGE.FULL)
-		Object.defineProperty(full, 'naturalWidth', { value: w })
-		Object.defineProperty(full, 'naturalHeight', { value: h })
-		fireEvent.load(full)
-		expect(full).toHaveClass(expected)
+		expect(onOpen).toHaveBeenCalledTimes(1)
 	})
 
 	it('shows a non-clickable fallback when the image fails to load', () => {
-		render(<BaseImage {...props} />)
+		renderImage()
 		fireEvent.error(screen.getByAltText("Ada's photo"))
 		expect(
 			screen.getByRole('img', { name: "Ada's photo is unavailable" }),
 		).toHaveTextContent(GLOBAL.IMAGE_UNAVAILABLE)
 		expect(screen.queryByRole('button')).not.toBeInTheDocument()
-	})
-
-	it('keeps the dialog open with the fallback when the full image fails', () => {
-		render(<BaseImage {...props} />)
-		openDialog()
-		fireEvent.error(screen.getByTestId(IMAGE.FULL))
-		expect(screen.getByRole('dialog')).toHaveTextContent(
-			GLOBAL.IMAGE_UNAVAILABLE,
-		)
 	})
 })
