@@ -16,6 +16,7 @@ const landscapeAgain = svg(2400, 1201)
 const viewports = [
 	['mobile', 390, 844],
 	['tablet', 768, 1024],
+	['mobile-landscape', 844, 390],
 	['laptop', 1024, 768],
 	['desktop', 1280, 800],
 ]
@@ -99,6 +100,15 @@ describe('<ImageGallery />', () => {
 					expect(image.top, 'inside top').to.be.at.least(dialog.top)
 					expect(image.bottom, 'inside bottom').to.be.at.most(
 						dialog.bottom,
+					)
+					expect(dialog.top, 'dialog top in viewport').to.be.at.least(
+						0,
+					)
+					expect(
+						dialog.bottom,
+						'dialog bottom in viewport',
+					).to.be.at.most(
+						$img[0].ownerDocument.defaultView.innerHeight,
 					)
 					const leftGap = image.left - dialog.left
 					const rightGap = dialog.right - image.right

@@ -1,7 +1,7 @@
 @use '@/styles/setup/variables' as variables;
 
-// Header, footer and the dialog's own padding take about 13rem of the viewport height
-$chrome-height: 13rem;
+// Header, caption, footer and the dialog's own padding take about 14rem of the viewport height, plus room to breathe
+$chrome-height: 16rem;
 
 .viewer {
 	align-items: center;
