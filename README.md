@@ -70,6 +70,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
 - The photo dialog fits the screen at any width, centres the image, adds next/previous buttons and arrow-key navigation, and reflects the open photo in the URL as `?photo=N` ([#445](https://github.com/andres-codigo/trip-fotos-react/issues/445))
 - The Register textarea can be resized vertically and is labelled "About your trip" ([#439](https://github.com/andres-codigo/trip-fotos-react/issues/439))
+- Browserslist data (`caniuse-lite`) refreshed, clearing the "10 months old" build warning ([#454](https://github.com/andres-codigo/trip-fotos-react/issues/454))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
