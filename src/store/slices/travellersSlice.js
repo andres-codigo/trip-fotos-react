@@ -79,7 +79,33 @@ export const registerTraveller = createAsyncThunk(
 			const imageQueue = [...(data.files || [])]
 			const imageUrls = []
 
+			const totalFiles = imageQueue.length
+			const fractions = new Array(totalFiles).fill(0)
+			let lastReported = ''
+
+			// Snapshots arrive many times a second, so only a change the user can see reaches the store
+			const reportProgress = () => {
+				const uploadedFiles = fractions.filter(
+					(fraction) => fraction === 1,
+				).length
+				const percent = Math.round(
+					(fractions.reduce((sum, fraction) => sum + fraction, 0) /
+						totalFiles) *
+						100,
+				)
+				const key = `${uploadedFiles}/${percent}`
+				if (key === lastReported) return
+				lastReported = key
+				dispatch(
+					setUploadProgress({ uploadedFiles, totalFiles, percent }),
+				)
+			}
+
+			if (totalFiles > 0) reportProgress()
+
+			let nextIndex = 0
 			const uploadImage = async (image) => {
+				const index = nextIndex++
 				const storage = getFirebaseStorage()
 				const storageRef = ref(
 					storage,
@@ -111,7 +137,15 @@ export const registerTraveller = createAsyncThunk(
 				return new Promise((resolve, reject) => {
 					uploadTask.on(
 						'state_changed',
-						null,
+						(snapshot) => {
+							// A finished file is only counted once its download URL is in hand
+							fractions[index] = Math.min(
+								snapshot.bytesTransferred /
+									(snapshot.totalBytes || 1),
+								0.99,
+							)
+							reportProgress()
+						},
 						() => {
 							reject(
 								new Error(
@@ -123,6 +157,8 @@ export const registerTraveller = createAsyncThunk(
 							const url = await getDownloadURL(
 								uploadTask.snapshot.ref,
 							)
+							fractions[index] = 1
+							reportProgress()
 							resolve(url)
 						},
 					)
@@ -387,6 +423,7 @@ const travellersSlice = createSlice({
 		lastFetch: null,
 		status: 'idle',
 		error: null,
+		uploadProgress: null,
 	},
 	reducers: {
 		setTravellerName(state, action) {
@@ -401,6 +438,9 @@ const travellersSlice = createSlice({
 		},
 		setFetchTimestamp(state) {
 			state.lastFetch = new Date().getTime()
+		},
+		setUploadProgress(state, action) {
+			state.uploadProgress = action.payload
 		},
 	},
 	extraReducers: (builder) => {
@@ -467,9 +507,11 @@ const travellersSlice = createSlice({
 			// REGISTER_TRAVELLER async thunk handlers
 			.addCase(registerTraveller.pending, (state) => {
 				state.status = 'loading'
+				state.uploadProgress = null
 			})
 			.addCase(registerTraveller.fulfilled, (state, action) => {
 				state.status = 'succeeded'
+				state.uploadProgress = null
 				state.travellers.unshift(action.payload)
 				state.isTraveller = true
 				state.hasTravellers = true
@@ -477,6 +519,7 @@ const travellersSlice = createSlice({
 			})
 			.addCase(registerTraveller.rejected, (state, action) => {
 				state.status = 'failed'
+				state.uploadProgress = null
 				state.error = action.payload
 			})
 
@@ -579,6 +622,11 @@ export const selectTravellersStatus = createSelector(
 	(travellersState) => travellersState.status,
 )
 
+export const selectUploadProgress = createSelector(
+	[selectTravellersState],
+	(travellersState) => travellersState.uploadProgress,
+)
+
 export const selectTravellersError = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.error,
@@ -594,5 +642,6 @@ export const {
 	setIsTraveller,
 	setTravellers,
 	setFetchTimestamp,
+	setUploadProgress,
 } = travellersSlice.actions
 export default travellersSlice.reducer

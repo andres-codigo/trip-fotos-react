@@ -65,7 +65,9 @@ vi.mock(
 const createMockStore = (initialState) => {
 	return configureStore({
 		reducer: {
-			travellers: (state = { status: 'idle', error: null }) => state,
+			travellers: (
+				state = { status: 'idle', error: null, uploadProgress: null },
+			) => state,
 		},
 		preloadedState: initialState,
 	})
@@ -150,6 +152,44 @@ describe('Register', () => {
 
 			const form = screen.getByTestId('traveller-registration-form')
 			expect(form).toHaveAttribute('data-loading', 'false')
+		})
+	})
+
+	describe('Upload progress', () => {
+		const submitWhilePending = async (uploadProgress) => {
+			store = createMockStore({
+				travellers: { status: 'loading', error: null, uploadProgress },
+			})
+			store.dispatch = vi
+				.fn()
+				.mockReturnValue({ unwrap: () => new Promise(() => {}) })
+			renderRegister()
+			fireEvent.click(screen.getByTestId('mock-submit-button'))
+			await screen.findByTestId('registering-dialog')
+		}
+
+		it('shows the spinner while no upload has started', async () => {
+			await submitWhilePending(null)
+
+			expect(screen.getByTestId('base-spinner')).toBeInTheDocument()
+			expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+		})
+
+		it('shows the progress bar and file count once uploading', async () => {
+			await submitWhilePending({
+				uploadedFiles: 2,
+				totalFiles: 5,
+				percent: 45,
+			})
+
+			expect(screen.getByRole('progressbar')).toHaveAttribute(
+				'value',
+				'45',
+			)
+			expect(
+				screen.getByText('Uploading photos: 2 of 5 done (45%)'),
+			).toBeInTheDocument()
+			expect(screen.queryByTestId('base-spinner')).not.toBeInTheDocument()
 		})
 	})
 

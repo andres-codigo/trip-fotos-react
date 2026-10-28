@@ -13,10 +13,14 @@ const rootReducer = combineReducers({
 	messages: messagesReducer,
 })
 
-// A persisted list can outlive the database, so a reload must not trust it until it has been fetched again
+// A persisted list can outlive the database, so a reload must not trust it until it has been fetched again; an upload cannot survive a reload either
 const resetLastFetch = createTransform(
 	(inboundState) => inboundState,
-	(outboundState) => ({ ...outboundState, lastFetch: null }),
+	(outboundState) => ({
+		...outboundState,
+		lastFetch: null,
+		uploadProgress: null,
+	}),
 	{ whitelist: ['travellers'] },
 )
 
