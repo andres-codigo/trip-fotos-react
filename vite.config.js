@@ -56,6 +56,7 @@ export default defineConfig({
 			eslint({
 				include: ['src/**/*.js', 'src/**/*.jsx'],
 				exclude: ['node_modules', 'dist'],
+				overrideConfigFile: 'config/eslint.config.mjs',
 			}),
 	].filter(Boolean),
 	resolve: {
@@ -131,8 +132,8 @@ export default defineConfig({
 				'node_modules/**',
 				'dist/**',
 				'cypress/**',
-				'declarations/**',
-				'rules/**',
+				'config/declarations/**',
+				'config/rules/**',
 				'**/*.config.*',
 				'**/*.cy.jsx',
 				'**/index.jsx',

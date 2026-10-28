@@ -12,7 +12,7 @@ const RULES = [
 	[/^cypress\/e2e\//, ['lint']],
 	[/^cypress\//, ['lint', 'ct']],
 	[/^cypress\.config\./, ['ct']],
-	[/^((eslint|stylelint)\.config\.mjs|rules\/|declarations\/|.*\.d\.ts$)/, ['lint']],
+	[/^(config\/|.*\.d\.ts$)/, ['lint']],
 	[/^(index\.html|public\/)/, ['build']],
 ]
 

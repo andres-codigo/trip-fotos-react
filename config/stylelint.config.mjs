@@ -10,7 +10,7 @@ export default {
 	overrides: [
 		{
 			// Global element defaults and the form mixins target elements by design
-			files: ['src/styles/**/*.scss'],
+			files: ['../src/styles/**/*.scss'],
 			rules: { 'selector-max-type': null },
 		},
 	],

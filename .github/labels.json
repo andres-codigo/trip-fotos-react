@@ -96,8 +96,7 @@
 			"description": "Area: Firebase services, rules and config",
 			"paths": [
 				"src/services/firebase/**",
-				"database.rules.json",
-				"storage.rules",
+				"firebase/**",
 				"firebase.json",
 				".firebaserc",
 				"scripts/set-admin-claim.mjs"
@@ -148,10 +147,7 @@
 			"description": "Area: build, lint, editor and tooling config",
 			"paths": [
 				"vite.config.*",
-				"eslint.config.*",
-				"rules/**",
-				"declarations/**",
-				"*.d.ts",
+				"config/**",
 				".prettierrc*",
 				".prettierignore",
 				"jsconfig.json",

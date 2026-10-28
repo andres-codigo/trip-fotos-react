@@ -69,4 +69,4 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 
 ### Archived: Vue parity programme
 
-The tooling that ported the remaining Vue features (epic #274, delivered in #291) — the `parity-auditor` agent, the `/backlog-sync`, `/implement-item` and `/parity-run` skills, and the `Stop` hook guard — has been retired from `.claude/` so it no longer loads in every session. It is kept for reference, with the plan, gap report and a write-up, in [`_ai-assisted-dev-story/vue-parity-programme/`](../_ai-assisted-dev-story/vue-parity-programme/README.md).
+The tooling that ported the remaining Vue features (epic #274, delivered in #291) — the `parity-auditor` agent, the `/backlog-sync`, `/implement-item` and `/parity-run` skills, and the `Stop` hook guard — has been retired from `.claude/` so it no longer loads in every session. It is kept for reference, with the plan, gap report and a write-up, in [`ai-assisted-dev-story/vue-parity-programme/`](ai-assisted-dev-story/vue-parity-programme/README.md).

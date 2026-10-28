@@ -27,7 +27,7 @@ This project is a UI and functional conversion from Vue to React and extends the
 
 **Live:** [trip-fotos-project-react.vercel.app](https://trip-fotos-project-react.vercel.app)
 
-It is also a working example of AI-assisted development: GitHub Copilot and Claude Code share one set of repository instructions, and hooks, a `/verify` skill and CI enforce the quality gates. The Vue port was largely delivered by an agent pipeline under human review — see [AI-Assisted Development Story](_ai-assisted-dev-story/README.md).
+It is also a working example of AI-assisted development: GitHub Copilot and Claude Code share one set of repository instructions, and hooks, a `/verify` skill and CI enforce the quality gates. The Vue port was largely delivered by an agent pipeline under human review — see [AI-Assisted Development Story](docs/ai-assisted-dev-story/README.md).
 
 <a id="features"></a>
 
@@ -62,6 +62,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Fixes: the Messages nav count, the Register file input, the 404 page link spacing, stale traveller data after a cleared database, and the traveller Auth display name
 - Process: a browser check for UI-affecting changes, and Issue Intake enforcing the board order Triage → Backlog → Ready → In progress
 - Leaner `package.json` scripts: unused scripts and their dev dependencies removed, `preview` renamed `build:preview` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430))
+- Tidier repo root: Firebase rules moved to `firebase/`, the ESLint and Stylelint configs, rule modules and type shims to `config/`, and the AI development story into `docs/` ([#432](https://github.com/andres-codigo/trip-fotos-react/issues/432))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
@@ -192,7 +193,7 @@ npm run admin:claim -- <email> [--remove]
     - **Realtime Database**
         - Set the location to **United States (us-central1, us-east1, or us-west1)**.
         - Copy the database URL and add it to your `.env` file under `VITE_BACKEND_BASE_URL`.
-        - Rules live in [`database.rules.json`](database.rules.json) and are deployed with `npm run firebase:rules` (see [Firebase Security Rules](#firebase-security-rules)).
+        - Rules live in [`database.rules.json`](firebase/database.rules.json) and are deployed with `npm run firebase:rules` (see [Firebase Security Rules](#firebase-security-rules)).
           Travellers can only change their own record, and only the recipient (or an admin) can read or delete messages; anyone can send a new message, but not edit an existing one.
 
     - **Authentication**
@@ -200,7 +201,7 @@ npm run admin:claim -- <email> [--remove]
 
     - **Cloud Storage**
         - Set up a [Blaze Plan](https://firebase.google.com/pricing?hl=en) to enable storage capabilities.
-        - Rules live in [`storage.rules`](storage.rules): signed-in users write only to their own `images/{uid}/` folder (the app signs in through the Firebase Auth SDK, so uploads carry the user's ID token), and an admin (see [Admin Role](#admin-role)) can delete other travellers' photos.
+        - Rules live in [`firebase/storage.rules`](firebase/storage.rules): signed-in users write only to their own `images/{uid}/` folder (the app signs in through the Firebase Auth SDK, so uploads carry the user's ID token), and an admin (see [Admin Role](#admin-role)) can delete other travellers' photos.
 
 3. **Add Firebase to Your Web App**
     - Register your app in the Firebase Console.
@@ -210,7 +211,7 @@ npm run admin:claim -- <email> [--remove]
 
 #### Firebase Security Rules
 
-`firebase.json` points the Firebase CLI at `database.rules.json` and `storage.rules`, so the rules are versioned with the code. Edit them there, never in the Console, then deploy to the project in `.firebaserc`:
+`firebase.json` points the Firebase CLI at `firebase/database.rules.json` and `firebase/storage.rules`, so the rules are versioned with the code. Edit them there, never in the Console, then deploy to the project in `.firebaserc`:
 
 ```bash
 npx firebase-tools login      # once
@@ -281,7 +282,7 @@ GitHub Copilot and Claude Code share one set of guidance, so the two tools do no
 - **Enforced quality** — a Claude Code `PostToolUse` hook formats and lints every edited file, and the `/verify` skill runs only the lint, Vitest, Cypress component and build gates a change can affect, caching passes per working-tree hash. `/verify e2e` adds the live-Firebase E2E suite.
 - **Permissions** — `.claude/settings.json` allows routine checks, commits, pushes and draft PRs, asks before merges, installs and E2E runs, and denies force-pushes and reading `.env` or `certs/`.
 
-Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools are used day to day, and the agent pipeline that delivered the Vue port, are written up in the [AI-Assisted Development Story](_ai-assisted-dev-story/README.md).
+Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools are used day to day, and the agent pipeline that delivered the Vue port, are written up in the [AI-Assisted Development Story](docs/ai-assisted-dev-story/README.md).
 
 <a id="testing-and-ci"></a>
 
@@ -348,12 +349,11 @@ trip-fotos-react/
 │   └── labels.json             # Single source of truth for every label
 ├── .vscode/                     # Shared VS Code editor settings
 ├── .release-please-manifest.json # Current version, maintained by release-please
-├── _ai-assisted-dev-story/      # How Copilot and Claude Code are used, and the archived Vue parity programme
+├── config/                     # ESLint and Stylelint configuration, ESLint rule modules and the React Hooks type shim
 ├── cypress/                    # Cypress tests
-├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS
-├── declarations/               # Breaking issue fix when using ESLint V9
+├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
+├── firebase/                   # Realtime Database and Cloud Storage security rules
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
-├── rules/                      # ESLint configuration rules
 ├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, dependency-check output)
 ├── src/
 │   ├── app/            # Main application component
@@ -379,17 +379,12 @@ trip-fotos-react/
 ├── CHANGELOG.md                 # Release notes, created by the first release-please release
 ├── CLAUDE.md                    # Workspace-level Claude Code guidelines
 ├── cypress.config.js            # Cypress testing configuration
-├── database.rules.json          # Realtime Database security rules
-├── eslint-plugin-react-hooks.d.ts # Type declaration shim for the ESLint React Hooks plugin
-├── eslint.config.mjs            # ESLint configuration
-├── firebase.json                # Firebase CLI config (points at the rules files)
+├── firebase.json                # Firebase CLI config (points at the rules in `firebase/`)
 ├── index.html                   # Vite HTML entry point
 ├── jsconfig.json                # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
 ├── package.json                 # Project dependencies and scripts
 ├── README.md                    # Project documentation
 ├── release-please-config.json   # release-please settings (version and changelog from commit titles)
-├── storage.rules                # Cloud Storage security rules
-├── stylelint.config.mjs         # Stylelint configuration (scoped style modules)
 ├── vercel.json                  # Vercel deployment configuration
 └── vite.config.js               # Vite build tool configuration
 ```

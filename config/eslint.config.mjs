@@ -26,7 +26,7 @@ const compat = new FlatCompat({
 })
 
 const resolvePath = (file) => path.resolve(__dirname, file)
-const gitignorePath = resolvePath('.gitignore')
+const gitignorePath = resolvePath('../.gitignore')
 
 export default [
 	// Cypress global configurations
