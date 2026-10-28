@@ -32,7 +32,7 @@ const baseProps = {
 	id: 'abc',
 	firstName: 'Ada',
 	lastName: 'Lovelace',
-	description: 'Loves analytical engines',
+	tripDescription: 'Loves analytical engines',
 	daysInCity: 7,
 	cities: [
 		'tokyo',
@@ -80,7 +80,7 @@ describe('<TravellerItem />', () => {
 	})
 
 	describe('Rendering', () => {
-		it('renders name, date, description and days', () => {
+		it('renders name, date, trip description and days', () => {
 			renderItem()
 			expect(screen.getByTestId(TRAVELLER_ITEM.NAME)).toHaveTextContent(
 				'Ada Lovelace',
@@ -89,7 +89,7 @@ describe('<TravellerItem />', () => {
 				screen.getByTestId(TRAVELLER_ITEM.REGISTERED),
 			).toHaveTextContent('05 Mar 2024')
 			expect(
-				screen.getByTestId(TRAVELLER_ITEM.DESCRIPTION),
+				screen.getByTestId(TRAVELLER_ITEM.TRIP_DESCRIPTION),
 			).toHaveTextContent('Loves analytical engines')
 			expect(screen.getByTestId(TRAVELLER_ITEM.DAYS)).toHaveTextContent(
 				'Days in city: 7 days',
@@ -119,18 +119,20 @@ describe('<TravellerItem />', () => {
 		})
 	})
 
-	describe('Description truncation', () => {
+	describe('Trip description truncation', () => {
 		it.each([
 			[249, false],
 			[250, true],
 			[300, true],
 		])('handles %i characters (truncated: %s)', (length, truncated) => {
-			const description = 'a'.repeat(length)
-			renderItem({ description })
+			const tripDescription = 'a'.repeat(length)
+			renderItem({ tripDescription })
 			const text = screen.getByTestId(
-				TRAVELLER_ITEM.DESCRIPTION,
+				TRAVELLER_ITEM.TRIP_DESCRIPTION,
 			).textContent
-			expect(text).toBe(truncated ? `${'a'.repeat(250)}...` : description)
+			expect(text).toBe(
+				truncated ? `${'a'.repeat(250)}...` : tripDescription,
+			)
 		})
 	})
 

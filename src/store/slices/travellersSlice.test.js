@@ -390,7 +390,8 @@ describe('travellersSlice', () => {
 		const mockRegistrationData = {
 			firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
 			lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
-			description: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description,
+			tripDescription:
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription,
 			daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity,
 			cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
 			files: [{ name: 'test.jpg', file: new Blob() }],
@@ -415,8 +416,8 @@ describe('travellersSlice', () => {
 					id: MOCK_USER.USER_ID,
 					firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
 					lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
-					description:
-						MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.description,
+					tripDescription:
+						MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription,
 					daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity,
 					cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
 					files: ['https://mock-url.com/image.jpg'],

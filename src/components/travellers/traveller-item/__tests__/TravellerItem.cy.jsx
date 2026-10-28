@@ -16,7 +16,7 @@ const traveller = {
 	id: 'abc',
 	firstName: 'Ada',
 	lastName: 'Lovelace',
-	description: 'Loves analytical engines',
+	tripDescription: 'Loves analytical engines',
 	daysInCity: 7,
 	cities: [
 		'tokyo',
@@ -73,7 +73,7 @@ describe('<TravellerItem />', () => {
 			'have.text',
 			'05 Mar 2024',
 		)
-		cy.get(TRAVELLER_ITEM_SELECTORS.DESCRIPTION).should(
+		cy.get(TRAVELLER_ITEM_SELECTORS.TRIP_DESCRIPTION).should(
 			'contain.text',
 			'Loves analytical engines',
 		)

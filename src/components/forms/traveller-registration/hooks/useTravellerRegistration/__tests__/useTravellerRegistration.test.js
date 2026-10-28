@@ -24,7 +24,7 @@ describe('useTravellerRegistration', () => {
 		expect(result.current.formData).toEqual({
 			firstName: { value: '', message: '', isValid: true },
 			lastName: { value: '', message: '', isValid: true },
-			description: { value: '', message: '', isValid: true },
+			tripDescription: { value: '', message: '', isValid: true },
 			days: { value: '', message: '', isValid: true },
 			cities: { value: [], message: '', isValid: true },
 		})
@@ -150,9 +150,9 @@ describe('useTravellerRegistration', () => {
 			VALIDATION_MESSAGES.FIRST_NAME_REQUIRED,
 		)
 		expect(result.current.formData.lastName.isValid).toBe(false)
-		expect(result.current.formData.description.isValid).toBe(false)
-		expect(result.current.formData.description.message).toBe(
-			VALIDATION_MESSAGES.DESCRIPTION_REQUIRED,
+		expect(result.current.formData.tripDescription.isValid).toBe(false)
+		expect(result.current.formData.tripDescription.message).toBe(
+			VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED,
 		)
 		expect(result.current.formData.days.isValid).toBe(false)
 		expect(result.current.formData.cities.isValid).toBe(false)
@@ -165,7 +165,7 @@ describe('useTravellerRegistration', () => {
 		const mockOnSuccess = vi.fn()
 		const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-		const { firstName, lastName, description, daysInCity } =
+		const { firstName, lastName, tripDescription, daysInCity } =
 			MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE
 
 		act(() => {
@@ -176,7 +176,7 @@ describe('useTravellerRegistration', () => {
 				target: { id: 'lastName', value: lastName },
 			})
 			result.current.handleInputChange({
-				target: { id: 'description', value: description },
+				target: { id: 'tripDescription', value: tripDescription },
 			})
 			result.current.handleInputChange({
 				target: { id: 'days', value: daysInCity.toString() },
@@ -192,7 +192,7 @@ describe('useTravellerRegistration', () => {
 		expect(mockOnSuccess).toHaveBeenCalledWith({
 			firstName,
 			lastName,
-			description,
+			tripDescription,
 			daysInCity: daysInCity.toString(),
 			cities: [MOCK_CITIES.TOKYO],
 			files: [],
@@ -278,7 +278,7 @@ describe('useTravellerRegistration', () => {
 				target: { id: 'lastName', value: 'Lovelace' },
 			})
 			result.current.handleInputChange({
-				target: { id: 'description', value: 'Hi' },
+				target: { id: 'tripDescription', value: 'Hi' },
 			})
 			result.current.handleInputChange({
 				target: { id: 'days', value: '3' },

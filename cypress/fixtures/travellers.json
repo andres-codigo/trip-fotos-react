@@ -2,7 +2,7 @@
 	"user1": {
 		"firstName": "Test",
 		"lastName": "Traveller",
-		"description": "Test description",
+		"tripDescription": "Test description",
 		"daysInCity": 5,
 		"cities": ["City 1"],
 		"files": [],
@@ -11,7 +11,7 @@
 	"user2": {
 		"firstName": "Another",
 		"lastName": "Traveller",
-		"description": "Another description",
+		"tripDescription": "Another description",
 		"daysInCity": 3,
 		"cities": ["City 2"],
 		"files": [],

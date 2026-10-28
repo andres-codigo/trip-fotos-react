@@ -13,7 +13,7 @@ import travellersReducer from '@/store/slices/travellersSlice'
 const traveller = {
 	firstName: 'Ada',
 	lastName: 'Lovelace',
-	description: 'a'.repeat(300),
+	tripDescription: 'a'.repeat(300),
 	daysInCity: 7,
 	cities: [
 		'tokyo',
@@ -90,7 +90,7 @@ describe('<TravellerDetail />', () => {
 			}),
 		).toBeInTheDocument()
 		expect(
-			screen.getByTestId(TRAVELLER_DETAIL.DESCRIPTION).textContent,
+			screen.getByTestId(TRAVELLER_DETAIL.TRIP_DESCRIPTION).textContent,
 		).toBe('a'.repeat(300))
 		expect(screen.getByTestId(TRAVELLER_DETAIL.DAYS)).toHaveTextContent(
 			'Days in city: 7 days',

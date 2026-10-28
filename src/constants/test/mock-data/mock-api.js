@@ -21,7 +21,7 @@ export const MOCK_API_RESPONSES = {
 		user1: {
 			firstName: 'John',
 			lastName: 'Doe',
-			description: 'Test description',
+			tripDescription: 'Test description',
 			daysInCity: 5,
 			cities: ['City1'],
 			files: [],

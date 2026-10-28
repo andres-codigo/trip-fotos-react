@@ -34,16 +34,16 @@ const formatRegistered = (registered) =>
 			})
 		: ''
 
-const shortenDescription = (description = '') =>
-	description.length >= TRAVELLER_ITEM_CONFIG.DESCRIPTION_MAX_LENGTH
-		? `${description.slice(0, TRAVELLER_ITEM_CONFIG.DESCRIPTION_MAX_LENGTH)}...`
-		: description
+const shortenTripDescription = (tripDescription = '') =>
+	tripDescription.length >= TRAVELLER_ITEM_CONFIG.TRIP_DESCRIPTION_MAX_LENGTH
+		? `${tripDescription.slice(0, TRAVELLER_ITEM_CONFIG.TRIP_DESCRIPTION_MAX_LENGTH)}...`
+		: tripDescription
 
 const TravellerItem = ({
 	id,
 	firstName,
 	lastName,
-	description,
+	tripDescription,
 	daysInCity,
 	cities = [],
 	files = [],
@@ -154,9 +154,9 @@ const TravellerItem = ({
 						{formatRegistered(registered)}
 					</span>
 					<p
-						className={travellerItemStyles.description}
-						data-cy={TRAVELLER_ITEM.DESCRIPTION}>
-						{shortenDescription(description)}
+						className={travellerItemStyles.tripDescription}
+						data-cy={TRAVELLER_ITEM.TRIP_DESCRIPTION}>
+						{shortenTripDescription(tripDescription)}
 					</p>
 					<p data-cy={TRAVELLER_ITEM.DAYS}>
 						<strong>Days in city:</strong> {daysInCity} days
@@ -238,7 +238,7 @@ TravellerItem.propTypes = {
 	id: PropTypes.string.isRequired,
 	firstName: PropTypes.string,
 	lastName: PropTypes.string,
-	description: PropTypes.string,
+	tripDescription: PropTypes.string,
 	daysInCity: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 	cities: PropTypes.arrayOf(
 		PropTypes.oneOfType([

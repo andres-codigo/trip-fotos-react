@@ -179,7 +179,7 @@ export const registerTraveller = createAsyncThunk(
 			const travellerData = {
 				firstName: data.firstName,
 				lastName: data.lastName,
-				description: data.description,
+				tripDescription: data.tripDescription,
 				daysInCity: data.daysInCity,
 				cities: data.cities,
 				files: imageUrls,
@@ -238,7 +238,7 @@ export const updateTravellers = createAsyncThunk(
 				id: key,
 				firstName: responseData[key].firstName,
 				lastName: responseData[key].lastName,
-				description: responseData[key].description,
+				tripDescription: responseData[key].tripDescription,
 				daysInCity: responseData[key].daysInCity,
 				cities: responseData[key].cities,
 				files: responseData[key].files,

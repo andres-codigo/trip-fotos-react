@@ -17,7 +17,7 @@ const STALE_TRAVELLER = {
 	id: STALE_ID,
 	firstName: 'Stale',
 	lastName: 'Traveller',
-	description: 'Left behind in localStorage',
+	tripDescription: 'Left behind in localStorage',
 	daysInCity: '3',
 	cities: ['Nowhere'],
 	registered: '2020-01-01T00:00:00.000Z',

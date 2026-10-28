@@ -28,7 +28,7 @@ const FORM_SELECTORS = {
 	FORM: 'traveller-registration-form',
 	FIRST_NAME_INPUT: 'first-name-input',
 	LAST_NAME_INPUT: 'last-name-input',
-	DESCRIPTION_INPUT: 'description-input',
+	TRIP_DESCRIPTION_INPUT: 'trip-description-input',
 	DAYS_SPENT_IN_CITY_INPUT: 'days-spent-in-city-input',
 	REGISTER_BUTTON: 'register-button',
 }
@@ -64,7 +64,7 @@ describe('<TravellerRegistrationForm />', () => {
 		formData: {
 			firstName: { value: '', message: '', isValid: true },
 			lastName: { value: '', message: '', isValid: true },
-			description: { value: '', message: '', isValid: true },
+			tripDescription: { value: '', message: '', isValid: true },
 			days: { value: '', message: '', isValid: true },
 			cities: { value: [], message: '', isValid: true },
 		},
@@ -78,7 +78,7 @@ describe('<TravellerRegistrationForm />', () => {
 			onSuccess?.({
 				firstName: '',
 				lastName: '',
-				description: '',
+				tripDescription: '',
 				daysInCity: '',
 				cities: [],
 				files: [],
@@ -110,7 +110,7 @@ describe('<TravellerRegistrationForm />', () => {
 				screen.getByTestId(FORM_SELECTORS.LAST_NAME_INPUT),
 			).toBeInTheDocument()
 			expect(
-				screen.getByTestId(FORM_SELECTORS.DESCRIPTION_INPUT),
+				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
 			).toBeInTheDocument()
 			expect(
 				screen.getByTestId(FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT),
@@ -155,7 +155,7 @@ describe('<TravellerRegistrationForm />', () => {
 						isValid: false,
 					},
 					lastName: { value: '', message: '', isValid: true },
-					description: { value: '', message: '', isValid: true },
+					tripDescription: { value: '', message: '', isValid: true },
 					days: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
@@ -185,7 +185,7 @@ describe('<TravellerRegistrationForm />', () => {
 				screen.getByTestId(FORM_SELECTORS.LAST_NAME_INPUT),
 			).toBeDisabled()
 			expect(
-				screen.getByTestId(FORM_SELECTORS.DESCRIPTION_INPUT),
+				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
 			).toBeDisabled()
 			expect(
 				screen.getByTestId(FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT),
@@ -246,7 +246,7 @@ describe('<TravellerRegistrationForm />', () => {
 						isValid: false,
 					},
 					lastName: { value: '', message: '', isValid: true },
-					description: { value: '', message: '', isValid: true },
+					tripDescription: { value: '', message: '', isValid: true },
 					days: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
@@ -269,7 +269,7 @@ describe('<TravellerRegistrationForm />', () => {
 				formData: {
 					firstName: { value: 'John', message: '', isValid: true },
 					lastName: { value: '', message: '', isValid: true },
-					description: { value: '', message: '', isValid: true },
+					tripDescription: { value: '', message: '', isValid: true },
 					days: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
@@ -296,7 +296,7 @@ describe('<TravellerRegistrationForm />', () => {
 				formData: {
 					firstName: { value: '', message: '', isValid: true },
 					lastName: { value: '', message: '', isValid: true },
-					description: { value: '', message: '', isValid: true },
+					tripDescription: { value: '', message: '', isValid: true },
 					days: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
@@ -360,7 +360,7 @@ describe('<TravellerRegistrationForm />', () => {
 					e.preventDefault()
 					onSuccess?.({
 						firstName: 'John',
-						description: 'Test',
+						tripDescription: 'Test',
 						daysInCity: '5',
 						cities: ['Tokyo'],
 						files: [],
@@ -419,7 +419,7 @@ describe('<TravellerRegistrationForm />', () => {
 				screen.getByTestId(FORM_SELECTORS.LAST_NAME_INPUT),
 			).toHaveAttribute('required')
 			expect(
-				screen.getByTestId(FORM_SELECTORS.DESCRIPTION_INPUT),
+				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
 			).toHaveAttribute('required')
 			expect(
 				screen.getByTestId(FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT),
@@ -444,7 +444,7 @@ describe('<TravellerRegistrationForm />', () => {
 				screen.getByTestId(FORM_SELECTORS.LAST_NAME_INPUT),
 			).toBeInTheDocument()
 			expect(
-				screen.getByTestId(FORM_SELECTORS.DESCRIPTION_INPUT),
+				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
 			).toBeInTheDocument()
 			expect(
 				screen.getByTestId(FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT),
@@ -462,7 +462,7 @@ describe('<TravellerRegistrationForm />', () => {
 			expect(daysInput).toHaveAttribute('type', 'number')
 		})
 
-		it('renders Textarea component for description field', () => {
+		it('renders Textarea component for trip description field', () => {
 			const { container } = render(
 				<TravellerRegistrationForm onSubmit={mockOnSubmit} />,
 			)
@@ -471,11 +471,11 @@ describe('<TravellerRegistrationForm />', () => {
 			expect(textarea).toBeInTheDocument()
 		})
 
-		it('labels the description textarea "About your trip"', () => {
+		it('labels the trip description textarea "About your trip"', () => {
 			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 
 			expect(screen.getByLabelText(/About your trip/)).toBe(
-				screen.getByTestId(FORM_SELECTORS.DESCRIPTION_INPUT),
+				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
 			)
 		})
 	})
@@ -491,7 +491,7 @@ describe('<TravellerRegistrationForm />', () => {
 						isValid: false,
 					},
 					lastName: { value: '', message: '', isValid: true },
-					description: { value: '', message: '', isValid: true },
+					tripDescription: { value: '', message: '', isValid: true },
 					days: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
@@ -513,7 +513,7 @@ describe('<TravellerRegistrationForm />', () => {
 				formData: {
 					firstName: { value: '', message: '', isValid: true },
 					lastName: { value: '', message: '', isValid: true },
-					description: { value: '', message: '', isValid: true },
+					tripDescription: { value: '', message: '', isValid: true },
 					days: { value: '', message: '', isValid: true },
 					cities: {
 						value: [],

@@ -133,9 +133,11 @@ const TravellerDetail = () => {
 						{heading}
 						<section data-cy={TRAVELLER_DETAIL.PROFILE}>
 							<p
-								className={travellerDetailStyles.description}
-								data-cy={TRAVELLER_DETAIL.DESCRIPTION}>
-								{traveller.description}
+								className={
+									travellerDetailStyles.tripDescription
+								}
+								data-cy={TRAVELLER_DETAIL.TRIP_DESCRIPTION}>
+								{traveller.tripDescription}
 							</p>
 							<p data-cy={TRAVELLER_DETAIL.DAYS}>
 								<strong>Days in city:</strong>{' '}
