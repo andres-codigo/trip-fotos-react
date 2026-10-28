@@ -62,7 +62,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Fixes: the Messages nav count, the Register file input, the 404 page link spacing, stale traveller data after a cleared database, and the traveller Auth display name
 - Process: a browser check for UI-affecting changes, and Issue Intake enforcing the board order Triage → Backlog → Ready → In progress
 - Leaner `package.json` scripts: unused scripts and their dev dependencies removed, `preview` renamed `build:preview` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430))
-- Tidier repo root: Firebase rules moved to `firebase/`, ESLint rule modules and type shims to `config/`, and the AI development story into `docs/` ([#432](https://github.com/andres-codigo/trip-fotos-react/issues/432))
+- Tidier repo root: Firebase rules moved to `firebase/`, the ESLint and Stylelint configs, rule modules and type shims to `config/`, and the AI development story into `docs/` ([#432](https://github.com/andres-codigo/trip-fotos-react/issues/432))
 
 **Next up** — nothing is queued as Ready while new issues are written. The Backlog holds:
 
@@ -349,7 +349,7 @@ trip-fotos-react/
 │   └── labels.json             # Single source of truth for every label
 ├── .vscode/                     # Shared VS Code editor settings
 ├── .release-please-manifest.json # Current version, maintained by release-please
-├── config/                     # ESLint rule modules and the ESLint React Hooks type shim
+├── config/                     # ESLint and Stylelint configuration, ESLint rule modules and the React Hooks type shim
 ├── cypress/                    # Cypress tests
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
@@ -379,14 +379,12 @@ trip-fotos-react/
 ├── CHANGELOG.md                 # Release notes, created by the first release-please release
 ├── CLAUDE.md                    # Workspace-level Claude Code guidelines
 ├── cypress.config.js            # Cypress testing configuration
-├── eslint.config.mjs            # ESLint configuration
 ├── firebase.json                # Firebase CLI config (points at the rules in `firebase/`)
 ├── index.html                   # Vite HTML entry point
 ├── jsconfig.json                # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
 ├── package.json                 # Project dependencies and scripts
 ├── README.md                    # Project documentation
 ├── release-please-config.json   # release-please settings (version and changelog from commit titles)
-├── stylelint.config.mjs         # Stylelint configuration (scoped style modules)
 ├── vercel.json                  # Vercel deployment configuration
 └── vite.config.js               # Vite build tool configuration
 ```

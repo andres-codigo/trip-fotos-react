@@ -56,6 +56,7 @@ export default defineConfig({
 			eslint({
 				include: ['src/**/*.js', 'src/**/*.jsx'],
 				exclude: ['node_modules', 'dist'],
+				overrideConfigFile: 'config/eslint.config.mjs',
 			}),
 	].filter(Boolean),
 	resolve: {

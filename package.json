@@ -9,9 +9,9 @@
 		"build": "vite build",
 		"build:preview": "vite preview",
 		"analyse": "vite-bundle-visualizer -o dist/stats.html --open false && vite preview --open /stats.html",
-		"lint": "eslint src cypress --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0 && npm run lint:styles",
-		"lint:styles": "stylelint 'src/**/*.scss'",
-		"lint:fix": "eslint src cypress --fix --config eslint.config.mjs --report-unused-disable-directives --max-warnings 0 && prettier --write '**/*.{js,jsx,ts,tsx,config.js,config.mjs,css,scss,json,md}' '.devcontainer/**/*.json' '.github/**/*.{yml,yaml,md}'",
+		"lint": "eslint src cypress --config config/eslint.config.mjs --report-unused-disable-directives --max-warnings 0 && npm run lint:styles",
+		"lint:styles": "stylelint --config config/stylelint.config.mjs 'src/**/*.scss'",
+		"lint:fix": "eslint src cypress --fix --config config/eslint.config.mjs --report-unused-disable-directives --max-warnings 0 && prettier --write '**/*.{js,jsx,ts,tsx,config.js,config.mjs,css,scss,json,md}' '.devcontainer/**/*.json' '.github/**/*.{yml,yaml,md}'",
 		"vitest:run": "vitest run",
 		"vitest:run:fast": "vitest run --reporter=dot --no-coverage",
 		"vitest:watch": "vitest watch",
@@ -24,7 +24,6 @@
 		"firebase:rules": "npx firebase-tools deploy --only database,storage",
 		"admin:claim": "node scripts/set-admin-claim.mjs"
 	},
-
 	"dependencies": {
 		"@reduxjs/toolkit": "^2.9.0",
 		"@vercel/analytics": "^2.0.1",

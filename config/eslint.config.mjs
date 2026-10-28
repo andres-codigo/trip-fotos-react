@@ -13,10 +13,10 @@ import pluginCypress from 'eslint-plugin-cypress'
 
 import vitest from '@vitest/eslint-plugin'
 
-import languageOptions from './config/rules/language-options.js'
-import reactRules from './config/rules/react.js'
-import cypressRules from './config/rules/cypress.js'
-import importRules from './config/rules/imports.js'
+import languageOptions from './rules/language-options.js'
+import reactRules from './rules/react.js'
+import cypressRules from './rules/cypress.js'
+import importRules from './rules/imports.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -26,7 +26,7 @@ const compat = new FlatCompat({
 })
 
 const resolvePath = (file) => path.resolve(__dirname, file)
-const gitignorePath = resolvePath('.gitignore')
+const gitignorePath = resolvePath('../.gitignore')
 
 export default [
 	// Cypress global configurations

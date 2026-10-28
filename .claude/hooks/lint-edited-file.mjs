@@ -21,7 +21,11 @@ const run = (command, args) =>
 run('prettier', ['--write', '--ignore-unknown', relativePath])
 
 if (/^src\/(components|pages)\/.*\.scss$/.test(relativePath)) {
-	const stylelint = run('stylelint', [relativePath])
+	const stylelint = run('stylelint', [
+		'--config',
+		'config/stylelint.config.mjs',
+		relativePath,
+	])
 
 	if (stylelint.status !== 0) {
 		process.stderr.write(
@@ -35,7 +39,13 @@ if (/^src\/(components|pages)\/.*\.scss$/.test(relativePath)) {
 
 if (!/\.(js|jsx|mjs)$/.test(relativePath)) process.exit(0)
 
-const eslint = run('eslint', ['--fix', '--no-warn-ignored', relativePath])
+const eslint = run('eslint', [
+	'--config',
+	'config/eslint.config.mjs',
+	'--fix',
+	'--no-warn-ignored',
+	relativePath,
+])
 
 if (eslint.status !== 0) {
 	// Exit code 2 feeds stderr back to Claude so it fixes what --fix could not

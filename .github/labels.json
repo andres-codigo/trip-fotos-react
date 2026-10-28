@@ -147,7 +147,6 @@
 			"description": "Area: build, lint, editor and tooling config",
 			"paths": [
 				"vite.config.*",
-				"eslint.config.*",
 				"config/**",
 				".prettierrc*",
 				".prettierignore",
