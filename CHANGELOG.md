@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.3](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.2...v0.20.3) (2026-10-28)
+
+
+### Enhancements
+
+* make the register description resizable and rename its label ([#450](https://github.com/andres-codigo/trip-fotos-react/issues/450)) ([7de1f71](https://github.com/andres-codigo/trip-fotos-react/commit/7de1f719301f39c6109b9d4eca3db3adc1e859be))
+
 ## [0.20.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.1...v0.20.2) (2026-10-28)
 
 
