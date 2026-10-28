@@ -1,6 +1,6 @@
 {
 	"name": "trip-fotos-react",
-	"version": "0.20.1",
+	"version": "0.20.2",
 	"private": true,
 	"description": "Conversion to React and extension of Udemy's Vue - The Complete Guide (incl. Router & Composition API) 'Find a coach' project.",
 	"type": "module",
