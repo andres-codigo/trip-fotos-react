@@ -112,7 +112,7 @@ Order within an epic:
 
 ### Starting an issue
 
-"Start #N" runs this sequence end to end, without asking. It also applies to an issue just created for the work in hand: it starts in Triage, so run steps 2–4 before changing any file. Read the Status first (`gh issue view N --json projectItems -q '.projectItems[].status.name'`), skip steps already satisfied, and stop only on a hard blocker.
+"Start #N" runs this sequence end to end, without asking. It also applies to an issue just created for the work in hand: it starts in Triage, so run steps 2–4 before changing any file. Create the issue with no labels and add them afterwards: Issue Intake ignores labels added in the first 60 seconds, and an issue created with `--label` can be left with an empty Status, which makes every later label event fail with "issue has no project status". To recover, run `gh workflow run github-issue-intake.yml -f issue_number=N`, which sets Triage, then re-add a label. Read the Status first (`gh issue view N --json projectItems -q '.projectItems[].status.name'`), skip steps already satisfied, and stop only on a hard blocker.
 
 1. **Done, In review or In progress by someone else:** stop and report.
 2. **Triage → Backlog:** set **Kind** and **Workstream** on the board item, choosing the closest option from the title prefix, labels and body, then add the area labels the PR will carry (any label triggers the move). Fields first, label second, because field edits fire no event. Report the values chosen; never ask, even when the fit is ambiguous (pick the closest and say so).
