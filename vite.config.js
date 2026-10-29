@@ -119,8 +119,6 @@ export default defineConfig({
 				'node_modules/**',
 				'dist/**',
 				'cypress/**',
-				'config/declarations/**',
-				'config/rules/**',
 				'**/*.config.*',
 				'**/*.cy.jsx',
 				'**/index.jsx',
