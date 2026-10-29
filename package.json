@@ -23,6 +23,7 @@
 		"cy:run:auto": "bash -c 'if [[ \"$0\" == *\"src/components\"* ]]; then cypress run --component --spec \"$0\"; else cypress run --spec \"$0\"; fi'",
 		"firebase:rules": "npx firebase-tools@15.34.2 deploy --only database,storage",
 		"emulators": "npx firebase-tools@15.34.2 emulators:start --project demo-trip-fotos",
+		"emulators:seed": "node scripts/seed-emulators.mjs",
 		"admin:claim": "node scripts/set-admin-claim.mjs"
 	},
 	"dependencies": {

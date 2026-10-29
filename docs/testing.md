@@ -48,7 +48,7 @@ Reusable test utilities are located in [testingLibrarySetup.js](../src/testUtils
 
 Cypress is already configured in the project (both E2E and component testing) and included in the project dependencies — `npm install` is all that's needed. Feel free to customise [cypress.config.js](../cypress.config.js) as needed. See [Scripts](../README.md#scripts) for the `cy:*` commands.
 
-The E2E suite still signs in to the live Firebase project. The local emulators (`npm run emulators`, see [Firebase Emulators](../README.md#firebase-emulators)) are in place for the epic that moves it onto a seeded backend; the specs do not use them yet.
+The E2E suite still signs in to the live Firebase project. The local emulators (`npm run emulators`, see [Firebase Emulators](../README.md#firebase-emulators)) are in place for the epic that moves it onto a seeded backend; `npm run emulators:seed` loads deterministic data (and `cy.task('seedEmulators')` resets it from a spec); the specs do not use them yet.
 
 **Cypress Directory Structure**
 
