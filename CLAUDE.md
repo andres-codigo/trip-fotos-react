@@ -33,23 +33,12 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
 
 ## Key conventions
 
+Imports (`@/` alias, no parent-relative paths) are enforced by ESLint and listed in `.github/copilot-instructions.md`; comment style is in `.claude/rules/comments.md`.
+
 ### Constants
 
 - Import from the subdirectory barrel (`@/constants/travellers`), never a file inside it; ESLint enforces this
 - Domain constants (auth, travellers) are separate from UI constants
-
-### Comments
-
-- Minimal — only add a comment when the WHY is non-obvious
-- No multi-line docblocks; no "what this does" comments
-
-### Imports
-
-- Always use the `@/` alias for imports within `src/` — never use relative paths (`../../`)
-    - Correct: `import Foo from '@/components/ui/foo/Foo'`
-    - Wrong: `import Foo from '../../../components/ui/foo/Foo'`
-- `@/` maps to `src/` (configured in Vite)
-- Enforced by ESLint (`config/eslint.config.mjs`). `src/constants/**` and `src/testUtils/cypress/**` are exempt and keep relative imports, because the Cypress E2E bundle loads them and cannot resolve `@/`
 
 ## UI changes
 
@@ -97,7 +86,6 @@ release-please works the version out from PR titles on `main`; never edit `versi
 
 - Do not commit `.env` or `certs/`
 - Do not mock the Firebase Realtime Database in integration tests
-- Do not add comments that describe what the code does — only why
 - Do not create new top-level `src/` folders without updating the README Folder Structure tree
 - Do not add a route to `PATHS` without adding it to the `rewrites` allow-list in `vercel.json` (a Vitest drift check enforces it)
 - Do not add a database or Storage field, or a write limit, without updating `firebase/database.rules.json` / `firebase/storage.rules` to match — client-side validation must mirror the rules. Deploy rule changes with `npm run firebase:rules` before the production deploy

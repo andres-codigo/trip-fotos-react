@@ -60,6 +60,7 @@ Scaffolding subagents in `.claude/agents/` (invoke via the Agent tool). Each is 
 
 - **File**: `.claude/settings.json` (committed; personal overrides go in the gitignored `.claude/settings.local.json`)
 - **Hook**: a `PostToolUse` hook runs `.claude/hooks/lint-edited-file.mjs` after every edit, applying Prettier and `eslint --fix`, and Stylelint to edited component and page stylesheets. Any remaining ESLint or Stylelint errors are fed back to Claude so they are fixed in the same turn.
+- **Rules** (`.claude/rules/`): conventions that load only when Claude works on matching files, via `paths:` frontmatter, instead of in every session through `CLAUDE.md`. `comments.md` holds the comment style for source, Cypress and CI-script files. Import style needs no rule: ESLint enforces it and `.github/copilot-instructions.md` lists it.
 - **Permissions**: routine checks (lint, Vitest, component tests, build, read-only git), staging, committing and pushing, read-only `gh issue`/`gh project` queries and opening draft PRs run without prompting; PR merges, installs, and E2E runs ask first, and opening a non-draft PR prompts by default; reading `.env`/`certs/`, force-pushes and hard resets are denied. Pushing is safe to allow because GitHub rejects direct pushes to `main` — see [Branch Protection](ci-cd.md#-branch-protection).
 
 ### Skills
