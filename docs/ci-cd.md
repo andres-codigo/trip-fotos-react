@@ -83,7 +83,7 @@ The runbook includes expiry handling, recreation steps, secret update instructio
 
 ### Project Board Statuses
 
-Every Status is set by the two workflows above. Items also carry **Kind** (Epic / Feature / Bug / Chore / Deps) and **Workstream** (Vue parity / Tooling & AI / Maintenance / Lean repo / Design system) fields, set by hand.
+Every Status is set by the two workflows above. Items also carry **Kind** (Epic / Feature / Bug / Chore / Deps / Test / Docs) and **Workstream** (Vue parity / Tooling & AI / Maintenance / Lean repo / Design system / E2E emulators) fields, set by hand.
 
 | Status      | Meaning                                         | Moved there when                                                                                                                |
 | ----------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
