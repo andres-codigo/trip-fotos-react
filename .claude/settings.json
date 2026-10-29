@@ -62,6 +62,17 @@
 					}
 				]
 			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/require-status-refresh.mjs\"",
+						"timeout": 20
+					}
+				]
+			}
 		]
 	}
 }
