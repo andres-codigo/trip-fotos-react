@@ -5,12 +5,19 @@
 		"ghcr.io/devcontainers/features/node:1": {
 			"version": "24"
 		},
-		"ghcr.io/devcontainers/features/github-cli:1": {}
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/java:1": {
+			"version": "21"
+		}
 	},
 	"remoteUser": "vscode",
-	"forwardPorts": [3000],
+	"forwardPorts": [3000, 4000, 9000, 9099, 9199],
 	"portsAttributes": {
-		"3000": { "label": "Vite dev server" }
+		"3000": { "label": "Vite dev server" },
+		"4000": { "label": "Firebase Emulator UI" },
+		"9000": { "label": "Realtime Database emulator" },
+		"9099": { "label": "Auth emulator" },
+		"9199": { "label": "Storage emulator" }
 	},
 	"otherPortsAttributes": {
 		"onAutoForward": "silent"

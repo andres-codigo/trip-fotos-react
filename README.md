@@ -68,7 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Next up** — in this order:
 
-- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504); the #499 spike is done and says go, next is #500)
+- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504); the #499 spike says go and #500 added the local emulators and the app flag; next is #501, the seed script)
 - [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration (after #292)
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark-only Claude-inspired redesign, with a multi-column Travellers grid (last step of #379)
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
@@ -170,6 +170,9 @@ npm run cy:run:auto [file-path]
 # Deploy Realtime Database and Storage security rules
 npm run firebase:rules
 
+# Start the Firebase emulators (Auth, Realtime Database, Storage) with the real rules
+npm run emulators
+
 # Grant or remove the admin custom claim (see Setup > Admin Role)
 npm run admin:claim -- <email> [--remove]
 ```
@@ -222,6 +225,19 @@ npm run firebase:rules        # firebase-tools deploy --only database,storage
 
 Use the Console's Rules Playground to try a rule before deploying it.
 
+<a id="firebase-emulators"></a>
+
+#### Firebase Emulators
+
+The Auth, Realtime Database and Storage emulators run locally against the same rules files, with no credentials (the `demo-trip-fotos` project never touches real resources). They need Java 21, which the dev container installs (rebuild it after pulling).
+
+```bash
+npm run emulators                 # Auth 9099, Database 9000, Storage 9199, UI http://127.0.0.1:4000
+npm run dev -- --mode emulators   # in a second terminal: the app against them
+```
+
+`--mode emulators` loads [`.env.emulators`](.env.emulators), which sets `VITE_USE_FIREBASE_EMULATORS` (the dev server only; a production build ignores it) and `VITE_DATABASE_NAMESPACE`. The namespace is added to every Realtime Database request as `?ns=`, because the emulator serves a request without one from a namespace that has no rules. **Never set either variable in Vercel.**
+
 <a id="admin-role"></a>
 
 #### Admin Role
@@ -254,6 +270,8 @@ cp .env.example .env
 | `VITE_ROOT_URL`                               | Cypress `baseUrl`                                                        |
 | `CYPRESS_USER_EMAIL`, `CYPRESS_USER_PASSWORD` | An existing test account the E2E suite signs in with                     |
 | `VITE_OPEN` (optional)                        | `true` opens the browser when the dev server starts                      |
+
+[`.env.emulators`](.env.emulators) is committed (no secrets) and holds the emulator values; see [Firebase Emulators](#firebase-emulators).
 
 `.env` is gitignored — never commit it. When you add, rename or remove a variable, update `.env.example` and this table together.
 
@@ -371,6 +389,7 @@ trip-fotos-react/
 │   └── index.jsx       # Root application entry point
 ├── .dockerignore                # Files excluded from the dev container build context
 ├── .env                         # Environment variables (gitignored; copy from .env.example)
+├── .env.emulators               # Environment variables for the local Firebase emulators (no secrets)
 ├── .env.example                 # Template listing every environment variable
 ├── .firebaserc                  # Firebase project configuration
 ├── .gitignore                   # Git ignore rules
@@ -381,7 +400,7 @@ trip-fotos-react/
 ├── CHANGELOG.md                 # Release notes, created by the first release-please release
 ├── CLAUDE.md                    # Workspace-level Claude Code guidelines
 ├── cypress.config.js            # Cypress testing configuration
-├── firebase.json                # Firebase CLI config (points at the rules in `firebase/`)
+├── firebase.json                # Firebase CLI config (the rules in `firebase/` and the emulator ports)
 ├── index.html                   # Vite HTML entry point
 ├── jsconfig.json                # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
 ├── package.json                 # Project dependencies and scripts

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 import { API_DATABASE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
@@ -68,6 +68,32 @@ describe('databaseRequest', () => {
 		await expect(databaseRequest('/travellers')).rejects.toThrow(
 			ERROR_MESSAGES.REQUEST_ERROR,
 		)
+	})
+
+	describe('database namespace', () => {
+		afterEach(() => {
+			vi.unstubAllEnvs()
+			vi.resetModules()
+		})
+
+		it('adds no ns parameter when no namespace is configured', async () => {
+			await databaseRequest('/travellers', { token: 'abc' })
+
+			expect(fetch.mock.calls[0][0]).not.toContain('ns=')
+		})
+
+		it('adds the configured namespace for the emulators', async () => {
+			vi.stubEnv('VITE_DATABASE_NAMESPACE', 'demo-default-rtdb')
+			vi.resetModules()
+			const { databaseRequest: request } =
+				await import('./databaseRequest')
+
+			await request('/travellers', { token: 'abc' })
+
+			expect(fetch.mock.calls[0][0]).toContain(
+				'?ns=demo-default-rtdb&auth=abc',
+			)
+		})
 	})
 
 	it('lets a network failure through unchanged', async () => {

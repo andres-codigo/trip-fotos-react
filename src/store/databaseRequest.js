@@ -7,6 +7,7 @@ export const databaseRequest = async (
 	{ method = API_DATABASE.GET, token, params, body } = {},
 ) => {
 	const query = new URLSearchParams({
+		...(API_DATABASE.NAMESPACE && { ns: API_DATABASE.NAMESPACE }),
 		...(token && { auth: token }),
 		...params,
 	}).toString()

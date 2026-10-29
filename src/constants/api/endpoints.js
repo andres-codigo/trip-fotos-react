@@ -18,6 +18,11 @@ export const API_DATABASE = Object.freeze({
 		isCypress && Cypress.expose('VITE_DATABASE_URL')
 			? Cypress.expose('VITE_DATABASE_URL')
 			: import.meta.env.VITE_BACKEND_BASE_URL,
+	// Set only for the Firebase emulators, which serve requests without it from a namespace with no rules
+	// Not the ternary used above: an unexposed value would fall through to import.meta.env, which Cypress's bundler leaves undefined
+	NAMESPACE: isCypress
+		? Cypress.expose('VITE_DATABASE_NAMESPACE')
+		: import.meta.env.VITE_DATABASE_NAMESPACE,
 	GET: 'GET',
 	POST: 'POST',
 	PUT: 'PUT',

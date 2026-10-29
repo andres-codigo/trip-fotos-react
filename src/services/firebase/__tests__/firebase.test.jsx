@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { initializeApp } from 'firebase/app'
-import { browserLocalPersistence, initializeAuth } from 'firebase/auth'
-import { getStorage } from 'firebase/storage'
+import {
+	browserLocalPersistence,
+	connectAuthEmulator,
+	initializeAuth,
+} from 'firebase/auth'
+import { connectStorageEmulator, getStorage } from 'firebase/storage'
 
 vi.mock('firebase/app', () => ({
 	initializeApp: vi.fn(),
@@ -10,13 +14,23 @@ vi.mock('firebase/app', () => ({
 vi.mock('firebase/auth', () => ({
 	browserLocalPersistence: { type: 'LOCAL' },
 	initializeAuth: vi.fn(() => ({ name: 'mock-auth' })),
+	connectAuthEmulator: vi.fn(),
 }))
 
 vi.mock('firebase/storage', () => ({
 	getStorage: vi.fn(() => ({ name: 'mock-storage' })),
+	connectStorageEmulator: vi.fn(),
+}))
+
+const emulators = vi.hoisted(() => ({
+	ENABLED: false,
+	AUTH_URL: 'http://127.0.0.1:9099',
+	STORAGE_HOST: '127.0.0.1',
+	STORAGE_PORT: 9199,
 }))
 
 vi.mock('@/constants/firebase', () => ({
+	FIREBASE_EMULATORS: emulators,
 	FIREBASE: {
 		API_KEY: 'test-api-key',
 		AUTH_DOMAIN: 'test-auth-domain',
@@ -37,6 +51,9 @@ describe('Firebase Configuration', () => {
 		mockApp = { name: '[DEFAULT]' }
 		vi.mocked(initializeApp).mockReturnValue(mockApp)
 		vi.mocked(initializeAuth).mockClear()
+		vi.mocked(connectAuthEmulator).mockClear()
+		vi.mocked(connectStorageEmulator).mockClear()
+		emulators.ENABLED = false
 	})
 
 	afterEach(() => {
@@ -101,6 +118,51 @@ describe('Firebase Configuration', () => {
 
 			expect(firebaseApp).toBeDefined()
 			expect(firebaseApp).toBe(mockApp)
+		})
+	})
+
+	describe('Emulator wiring', () => {
+		it('does not connect the emulators when the flag is off', async () => {
+			const { getFirebaseAuth, getFirebaseStorage } =
+				await import('@/services/firebase/firebase.js')
+
+			getFirebaseAuth()
+			getFirebaseStorage()
+
+			expect(connectAuthEmulator).not.toHaveBeenCalled()
+			expect(connectStorageEmulator).not.toHaveBeenCalled()
+		})
+
+		it('connects the Auth emulator once when the flag is on', async () => {
+			emulators.ENABLED = true
+			const { getFirebaseAuth } =
+				await import('@/services/firebase/firebase.js')
+
+			getFirebaseAuth()
+			getFirebaseAuth()
+
+			expect(connectAuthEmulator).toHaveBeenCalledTimes(1)
+			expect(connectAuthEmulator).toHaveBeenCalledWith(
+				{ name: 'mock-auth' },
+				'http://127.0.0.1:9099',
+				{ disableWarnings: true },
+			)
+		})
+
+		it('connects the Storage emulator once when the flag is on', async () => {
+			emulators.ENABLED = true
+			const { getFirebaseStorage } =
+				await import('@/services/firebase/firebase.js')
+
+			getFirebaseStorage()
+			getFirebaseStorage()
+
+			expect(connectStorageEmulator).toHaveBeenCalledTimes(1)
+			expect(connectStorageEmulator).toHaveBeenCalledWith(
+				{ name: 'mock-storage' },
+				'127.0.0.1',
+				9199,
+			)
 		})
 	})
 
