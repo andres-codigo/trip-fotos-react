@@ -53,7 +53,7 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
 
 ## UI changes
 
-A change that can alter how the UI looks (SCSS, layout, spacing, markup) is checked in a real browser before it merges: full-page screenshots at mobile, tablet and desktop widths (390, 768, 1024 and 1280px), compared with `main`, **including the pages behind login and their states** (errors, dialogs, menus, long lists), and **every image is opened and looked at**: nothing is assumed from a passing test or a matching file. Lint, Vitest, component tests and the build do not show visual regressions. How: [testing.instructions.md](.github/instructions/testing.instructions.md#visual-check-for-ui-changes).
+A change that can alter how the UI looks (SCSS, layout, spacing, markup) is checked in a real browser before it merges: run `/ui-check`. Lint, Vitest, component tests and the build do not show visual regressions; nothing is assumed from a passing test or a matching file. The checklist is in [testing.instructions.md](.github/instructions/testing.instructions.md#visual-check-for-ui-changes).
 
 ## Dev commands
 
