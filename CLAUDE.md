@@ -113,7 +113,7 @@ release-please works the version out from PR titles on `main`; never edit `versi
 - Do not mock the Firebase Realtime Database in integration tests
 - Do not add comments that describe what the code does — only why
 - Do not create new top-level `src/` folders without updating the README Folder Structure tree
-- Do not add a route to `PATHS` without adding it to the `rewrites` allow-list in `vercel.json` — unlisted paths return a real 404 in production
+- Do not add a route to `PATHS` without adding it to the `rewrites` allow-list in `vercel.json` (a Vitest drift check enforces it)
 - Do not add a database or Storage field, or a write limit, without updating `firebase/database.rules.json` / `firebase/storage.rules` to match — client-side validation must mirror the rules. Deploy rule changes with `npm run firebase:rules` before the production deploy
 - Do not call a new external origin without adding it to the CSP `connect-src` in `vercel.json`
 - Do not re-inline domain-specific detail here — extend the relevant `.github/instructions/*.instructions.md` file instead

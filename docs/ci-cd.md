@@ -15,6 +15,8 @@ This project uses GitHub Actions to automate key development and monitoring task
 
 Runs `npm run vitest:coverage -- --run`, which executes the suite once with coverage — see [Scripts](../README.md#scripts) for other Vitest commands.
 
+It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, which fail when a route in `PATHS` is missing from the `vercel.json` rewrites, a collection the store requests has no rule in `firebase/database.rules.json`, or the README Scripts and Environment Variables sections drift from `package.json` and `.env.example`. A README-only change does not trigger the job (Markdown is excluded), so a script entry deleted from the README alone is caught on the next code change; field-level rules still need the manual check below.
+
 ---
 
 ## 2. Cypress E2E Tests
