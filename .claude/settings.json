@@ -23,7 +23,11 @@
 			"Bash(gh label list *)",
 			"Bash(gh project item-list *)",
 			"Bash(gh project field-list *)",
-			"Bash(gh pr create --draft *)"
+			"Bash(gh pr create --draft *)",
+			"Bash(gh pr checks *)",
+			"Bash(gh pr view *)",
+			"Bash(gh pr list *)",
+			"Bash(gh pr ready *)"
 		],
 		"ask": [
 			"Bash(npm install *)",
