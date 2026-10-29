@@ -21,7 +21,7 @@ describe('labels.json', () => {
 		expect(new Set(names).size).toBe(names.length)
 	})
 
-	it('maps every branch prefix in CLAUDE.md to a type', () => {
+	it('maps every allowed branch prefix to a type', () => {
 		for (const prefix of [
 			'feature',
 			'fix',
