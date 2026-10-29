@@ -79,7 +79,7 @@ A change that can alter how the UI looks (SCSS, layout, spacing, markup) is chec
 
 ```bash
 npm run lint             # ESLint + Stylelint check
-npm run vitest:run:fast  # Unit/integration tests, no coverage
+npm run vitest:run       # Unit/integration tests, no coverage
 npm run cy:run:ct        # Cypress component tests (headless)
 npm run build            # Production build → dist/
 npm run analyse          # Bundle size visualiser

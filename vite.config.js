@@ -116,7 +116,6 @@ export default defineConfig({
 		testTimeout: 10000,
 		hookTimeout: 10000,
 		coverage: {
-			enabled: process.env.COVERAGE === 'true',
 			provider: 'v8',
 			reportsDirectory: './coverage',
 			reporter: ['text', 'html'],

@@ -4,7 +4,7 @@ description: Run the project's local quality gates (ESLint, Vitest, Cypress comp
 argument-hint: '[e2e] [all]'
 model: haiku
 context: fork
-allowed-tools: Bash(npm run lint), Bash(npm run lint *), Bash(npm run vitest:run:fast), Bash(npm run vitest:run:fast *), Bash(npm run cy:run:ct), Bash(npm run cy:run:ct *), Bash(npm run build), Bash(npm run build *), Bash(tail *), Bash(grep *), Bash(git status *), Bash(git diff *), Bash(node .claude/skills/verify/changed-gates.mjs), Bash(node .claude/skills/verify/changed-gates.mjs *), Bash(node .claude/skills/verify/run-gates.mjs *)
+allowed-tools: Bash(npm run lint), Bash(npm run lint *), Bash(npm run vitest:run), Bash(npm run vitest:run *), Bash(npm run cy:run:ct), Bash(npm run cy:run:ct *), Bash(npm run build), Bash(npm run build *), Bash(tail *), Bash(grep *), Bash(git status *), Bash(git diff *), Bash(node .claude/skills/verify/changed-gates.mjs), Bash(node .claude/skills/verify/changed-gates.mjs *), Bash(node .claude/skills/verify/run-gates.mjs *)
 ---
 
 # Verify
