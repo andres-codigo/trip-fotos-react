@@ -10,7 +10,7 @@ on:
         paths:
             - 'src/**'
             - 'package.json'
-            - 'vitest.config.*'
+            - 'vite.config.*'
             - '**/*.test.{js,jsx,ts,tsx}'
             - '**/*.spec.{js,jsx,ts,tsx}'
     pull_request:
@@ -71,11 +71,8 @@ jobs:
                       exit 1
                   fi
 
-            - name: Run Vitest Unit Tests
-              run: npm run vitest:run
-              timeout-minutes: 3
-
-            - name: Generate Coverage Report
+            # Runs the whole suite once, with coverage
+            - name: Run Vitest Unit Tests with Coverage
               run: npm run vitest:coverage -- --run
               timeout-minutes: 8
 

@@ -6,14 +6,14 @@ This project uses GitHub Actions to automate key development and monitoring task
 
 - **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
 - **Triggers:**
-    - On **push** to `main` (for changes in `src/**`, `package.json`, or `vitest.config.*`)
+    - On **push** to `main` (for changes in `src/**`, `package.json`, or `vite.config.*`)
     - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files, `.github/labels.json` and `.github/scripts/**` still trigger it)
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
 - **Merge Blocking:** Not a required check — see [Branch Protection](#-branch-protection). Don't merge a pull request whose run failed.
 
-Runs `npm run vitest:run` — see [Scripts](../README.md#scripts) for other Vitest commands.
+Runs `npm run vitest:coverage -- --run`, which executes the suite once with coverage — see [Scripts](../README.md#scripts) for other Vitest commands.
 
 ---
 
