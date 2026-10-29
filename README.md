@@ -47,7 +47,7 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request; CodeQL scanning and a ruleset protecting `main`
 - **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers; versioned Firebase security rules
 - **Project automation** — issues and pull requests are labelled from one `labels.json` and moved across the GitHub Project board by workflows
-- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook, an issue-before-edit hook, and `/verify` and `/start-issue` skills (see [AI Assistance](#ai-assistance))
+- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook, an issue-before-edit hook, and `/verify`, `/start-issue` and `/finish-pr` skills (see [AI Assistance](#ai-assistance))
 
 <a id="status"></a>
 
@@ -63,7 +63,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - City badges get a distinct colour per city instead of all rendering grey ([#441](https://github.com/andres-codigo/trip-fotos-react/issues/441))
 - Consistency refactors: one Realtime Database request helper, one user-facing error path, one hook layout and one form-error and loading pattern ([#396](https://github.com/andres-codigo/trip-fotos-react/issues/396)–[#401](https://github.com/andres-codigo/trip-fotos-react/issues/401))
 - Leaner repo: unused scripts, dependencies and a duplicate CI test run removed, `vitest:run:fast` folded into `vitest:run`, a shared `format` script, a faster dev server (no ESLint on transform, no forced dependency re-optimisation) and a single-file ESLint config on native flat config, and the Firebase rules, lint configs and release-please config moved into `firebase/` and `config/` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430), [#432](https://github.com/andres-codigo/trip-fotos-react/issues/432), [#434](https://github.com/andres-codigo/trip-fotos-react/issues/434), [#361](https://github.com/andres-codigo/trip-fotos-react/issues/361), [#363](https://github.com/andres-codigo/trip-fotos-react/issues/363), [#364](https://github.com/andres-codigo/trip-fotos-react/issues/364), [#365](https://github.com/andres-codigo/trip-fotos-react/issues/365))
-- Process: a `/start-issue` skill and a hook that blocks edits on `main` or a branch with no open PR, so work cannot start without an issue, plus documented steps for finishing an issue and closing an epic ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460), [#473](https://github.com/andres-codigo/trip-fotos-react/issues/473), [#475](https://github.com/andres-codigo/trip-fotos-react/issues/475), [#477](https://github.com/andres-codigo/trip-fotos-react/issues/477))
+- Process: `/start-issue` and `/finish-pr` skills and a hook that blocks edits on `main` or a branch with no open PR, so work cannot start without an issue, plus documented steps for finishing an issue and closing an epic ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460), [#473](https://github.com/andres-codigo/trip-fotos-react/issues/473), [#475](https://github.com/andres-codigo/trip-fotos-react/issues/475), [#477](https://github.com/andres-codigo/trip-fotos-react/issues/477), [#480](https://github.com/andres-codigo/trip-fotos-react/issues/480))
 - Fixes: the Messages nav count, the Register file input, stale traveller data after a cleared database, and the traveller Auth display name
 
 **Next up** — in this order:
@@ -338,7 +338,7 @@ trip-fotos-react/
 │   ├── agents/                 # Claude Code subagent wrappers (delegate to .github/agents)
 │   ├── hooks/                  # Claude Code hook scripts (lint/format after edits, issue-before-edit guard)
 │   ├── plans/                  # Committed work plans (e.g. deferred Firebase emulator plan)
-│   ├── skills/                 # Claude Code skills (/verify, /start-issue)
+│   ├── skills/                 # Claude Code skills (/verify, /start-issue, /finish-pr)
 │   ├── settings.json           # Shared Claude Code permissions and hooks
 │   └── settings.local.json     # Personal Claude Code overrides (gitignored)
 ├── .github/
