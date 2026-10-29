@@ -4,6 +4,8 @@ Status: **Epic #292, optional but ordered**; children #499 to #504, grouped by t
 
 Updated 2026-10-29: the plan became epic #292 with six children, one PR each, and the review findings and decisions below were folded in.
 
+Updated 2026-10-29: the #499 spike is done (go); its findings are in Phase 0.
+
 ## Epic structure and decisions
 
 | Child | Phase                                          | Do after |
@@ -45,30 +47,48 @@ The emulators give each run a fresh, seeded Auth + Realtime Database + Storage b
 
 ## How the app talks to Firebase today
 
-| Service           | Access                                                                                | Emulator change                                              |
-| ----------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| Auth (sign-in)    | SDK — `getFirebaseAuth()` in `src/services/firebase/firebase.js`                      | `connectAuthEmulator` behind a flag                          |
-| Auth (profile)    | REST — `${API_DATABASE.URL}update?key=` in `travellersSlice.js`                       | Env only: `VITE_API_URL` → emulator identitytoolkit URL      |
-| Realtime Database | REST `fetch` — `API_DATABASE.BASE_URL` in `travellersSlice.js`, `messagesSlice.js`    | Env only: `VITE_BACKEND_BASE_URL` → emulator URL (see spike) |
-| Storage           | SDK — `getFirebaseStorage()` in `src/services/firebase/firebase.js` (upload + delete) | `connectStorageEmulator` behind a flag                       |
+| Service           | Access                                                                                | Emulator change                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Auth (sign-in)    | SDK — `getFirebaseAuth()` in `src/services/firebase/firebase.js`                      | `connectAuthEmulator` behind a flag                                                        |
+| Auth (profile)    | REST — `${API_DATABASE.URL}update?key=` in `travellersSlice.js`                       | Env only: `VITE_API_URL` → emulator identitytoolkit URL                                    |
+| Realtime Database | REST `fetch` — `API_DATABASE.BASE_URL` in `travellersSlice.js`, `messagesSlice.js`    | Env: `VITE_BACKEND_BASE_URL` → `http://127.0.0.1:9000`, plus `?ns=` in `databaseRequest()` |
+| Storage           | SDK — `getFirebaseStorage()` in `src/services/firebase/firebase.js` (upload + delete) | `connectStorageEmulator` behind a flag                                                     |
 
 E2E intercepts match `SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD` (`${API_URL}signInWithPassword`). Setting `VITE_API_URL=http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:` keeps those aliases matching the SDK's emulator requests.
 
-## Phase 0 — spike (#499; half a day, decides Phase 2 detail)
+## Phase 0 — spike (#499; done 2026-10-29): go
 
-1. Confirm how the RTDB emulator resolves the namespace for REST calls without a `?ns=` param. Options in order of preference:
-    - `http://127.0.0.1:9000/` with the emulator's default namespace for a `demo-` project (`<projectId>-default-rtdb`)
-    - `http://demo-trip-fotos-default-rtdb.localhost:9000/` (Chromium/Electron resolve `*.localhost` to loopback)
-    - Last resort: add a `DATABASE_QUERY` constant (`ns=…`) that the slices append — touches every URL builder
-2. Confirm the RTDB and Storage emulators accept the Auth emulator's ID tokens and evaluate `auth.uid` / `auth.token.admin` in `database.rules.json` and `storage.rules`.
-3. Confirm Cypress's Electron browser reaches all three ports from the Vite app, including from the HTTPS dev server (`docs/local-https.md`): the app is HTTPS and the emulators are HTTP, so check for mixed-content blocking.
-4. Measure the install size and start-up time of `firebase-tools` as a dev dependency against a pinned `npx firebase-tools@<version>`.
+Run with `firebase-tools@15.34.2`, Java 21 (`openjdk-21-jre-headless`), the repo's real `firebase/database.rules.json` and `firebase/storage.rules`, the `demo-trip-fotos` project and Cypress 16 (Electron 146). Verdict: **go**. The only app change the spike found is one query parameter in one URL builder.
 
-Record the answers in this plan. If the namespace needs changes to every URL builder, re-plan before #500.
+1. **Namespace: add `?ns=demo-trip-fotos-default-rtdb`.**
+    - A request with no `ns` is not served from the default namespace: it lands in a separate `fake-server` namespace that has **no rules loaded**, so every read and write succeeds, unauthenticated writes included. Pointing the app at plain `http://127.0.0.1:9000/` would silently skip the rules.
+    - `http://demo-trip-fotos-default-rtdb.localhost:9000/` enforces the rules from `curl`, but **fails in Cypress's Electron** (`Failed to fetch`; Node's resolver does not resolve `*.localhost`). Ruled out.
+    - `http://127.0.0.1:9000/<path>.json?ns=demo-trip-fotos-default-rtdb&auth=<token>` enforces the rules from the browser. Use it.
+    - Cost is small: every Realtime Database call goes through `databaseRequest()` in `src/store/databaseRequest.js`, which already merges a `params` object into the query string. #500 adds a `DATABASE_NAMESPACE` constant (from an env var, unset in production) merged there; no thunk changes. Cypress intercepts for these URLs need to allow the extra parameter (#502).
+    - The seed script uses `firebase-admin`, which derives the namespace from its `databaseURL`, so it needs no parameter (#501).
+2. **Tokens and rules: confirmed.** The Auth emulator's ID tokens (unsigned, `alg: none`) are accepted by the Database and Storage emulators.
+    - Database: a user can write `travellers/<own uid>` but not another uid (`Permission denied`); an unauthenticated write is denied; `messages/<uid>` is readable by that uid and by an `admin: true` token but not by another user; an anonymous message `POST` for a traveller is allowed.
+    - Storage: an own-uid upload to `images/<uid>/` returns 200; unauthenticated and other-uid uploads return 403. Admin may delete other users' files but cannot create them, as the rules say.
+    - `auth.token.admin` works: set `customAttributes: {"admin":true}` through the Auth emulator's `POST /identitytoolkit.googleapis.com/v1/projects/demo-trip-fotos/accounts:update` (`Authorization: Bearer owner`) and sign in again; the claim appears in the token. #501 can use `firebase-admin`'s `setCustomUserClaims` instead.
+    - Default Storage bucket for a `demo-` project: `demo-trip-fotos.appspot.com`.
+3. **Browser reach: confirmed, no mixed-content blocking.** From a page served over HTTPS (self-signed, as in `docs/local-https.md`) and from plain HTTP, Electron reached the Auth (9099), Database (9000) and Storage (9199) emulators on `127.0.0.1`, including `PUT`/`POST` with `Authorization` headers (the emulators answer CORS preflights). Chromium treats `127.0.0.1` as potentially trustworthy. Cypress runs already serve the app over HTTP (`vite.config.js` skips HTTPS when `isCypress`), so only manual `/ui-check` runs meet HTTPS. Use `127.0.0.1`, not `localhost`, in the emulator URLs. Forward ports 9000, 9099, 9199 and 4000 in the devcontainer.
+    - Two traps for #502: `Cypress.env()` no longer exists in Cypress 16 (use `Cypress.expose()` for values the app reads), and a JWT passed as a `CYPRESS_*` variable reached the browser corrupted, so specs should sign in through the app or the Auth emulator rather than receive a token from the environment.
+4. **`firebase-tools` cost.**
+
+    | Option                                  | Cost                                                                            |
+    | --------------------------------------- | ------------------------------------------------------------------------------- |
+    | Pinned devDependency                    | 445 packages, 263 MB in `node_modules`, 58 s to install; paid by every `npm ci` |
+    | `npx firebase-tools@15.34.2`            | 63 s cold (432 MB npm cache), 3 s warm; paid only by jobs that call it          |
+    | Emulator jars (database + storage)      | 84 MB in `~/.cache/firebase/emulators`, downloaded on first start               |
+    | Emulator start-up (Auth + DB + Storage) | 35 s with jars downloading, 26 s warm                                           |
+
+    **Recommendation for #500: a pinned `npx`** (also pin `firebase:rules`, which is unpinned today). A devDependency would add 58 s and Dependabot noise to every job, Vitest and component jobs included, for a tool only the E2E job runs. Cache `~/.npm` and `~/.cache/firebase/emulators` in the E2E job.
+
+Not covered by the spike, for #500 to confirm: the profile-update REST call (`${API_DATABASE.URL}update?key=`) against the Auth emulator's `accounts:update`.
 
 ## Phase 1 — tooling and config (#500)
 
-- Add `firebase-tools` as a pinned devDependency or a pinned `npx` call, whichever the spike shows is lighter (it is currently only used ad hoc via `npx` in `firebase:rules`, and as a dev dependency it adds a large install to every CI job and Dependabot noise). Check #363 and #361 first: the lean-repo issues prune scripts and dependencies, so add only what the plan needs.
+- Use a pinned `npx firebase-tools@<version>` call (the spike measured it lighter than a devDependency; see Phase 0) (it is currently only used ad hoc via `npx` in `firebase:rules`, and as a dev dependency it adds a large install to every CI job and Dependabot noise). Check #363 and #361 first: the lean-repo issues prune scripts and dependencies, so add only what the plan needs.
 - Use a `demo-trip-fotos` project ID: `demo-` projects never touch real resources and need no credentials.
 - `firebase.json` — add an `emulators` block: auth 9099, database 9000, storage 9199, UI 4000, `singleProjectMode: true`. Rules files stay shared, so emulator runs also exercise the real rules.
 - Scripts (`package.json` was slimmed in #431; keep the same ordering and add nothing else; sync README Scripts, CLAUDE.md Dev commands and `docs/testing.md`):
@@ -124,7 +144,7 @@ Record the answers in this plan. If the namespace needs changes to every URL bui
 
 ## Risks
 
-- RTDB REST namespace addressing (Phase 0) — the only change that might touch every URL builder
+- RTDB REST namespace addressing — resolved by the spike: one query parameter in `databaseRequest()`; without it requests silently bypass the rules
 - Emulator start-up adds ~20–40 s to the E2E job; mitigated by caching the emulator JARs
 - Emulator and `firebase-tools` versions drift from production Firebase: pin the version and bump it on purpose
 - E2E on every PR adds Actions minutes, Dependabot PRs included
