@@ -1,12 +1,8 @@
 # CLAUDE.md — trip-fotos-react
 
-## What this app does
-
-A React/Firebase app for finding popular travel destinations tied to registered travellers. Converted from a Vue Udemy course project ("Find a Coach") — reimagined as "Trip Fotos". Deployed on Vercel.
-
 ## Stack and src/ structure
 
-See the README [Stack](README.md#stack) and [Folder Structure](README.md#folder-structure) sections.
+Trip Fotos: a React/Firebase app for finding popular travel destinations tied to registered travellers, deployed on Vercel. See the README [Stack](README.md#stack) and [Folder Structure](README.md#folder-structure) sections.
 
 ## Branch naming
 
@@ -26,11 +22,9 @@ Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
 
 Work from a Claude Design session (design system or UI redesign) never lands on `main` directly: create an issue and a `feature/` or `enhancement/` branch first, and reference the design artifact link in the issue.
 
-## Merging PRs
+## Finishing a PR
 
-- **Squash-merge** by default — one PR, one commit on `main`, titled with the PR's conventional-commit title
-- **Rebase-merge** multi-commit PRs whose commits are individually meaningful (e.g. one commit per issue), so `git log`, `blame` and `bisect` keep them distinct
-- Merge commits are disabled; head branches are auto-deleted on merge
+Run `/finish-pr` when the work passes `/verify`: README Status and Project README, ready for review, poll CI, merge (squash by default; rebase-merge multi-commit PRs whose commits are individually meaningful), prune, release PR, status update. Merge commits are disabled.
 
 ## Language & Tone
 
@@ -77,15 +71,7 @@ A change that can alter how the UI looks (SCSS, layout, spacing, markup) is chec
 
 ## Dev commands
 
-```bash
-npm run lint             # ESLint + Stylelint check
-npm run vitest:run       # Unit/integration tests, no coverage
-npm run cy:run:ct        # Cypress component tests (headless)
-npm run build            # Production build → dist/
-npm run analyse          # Bundle size visualiser
-```
-
-Full list in the README [Scripts](README.md#scripts) section.
+`npm run lint`, `vitest:run`, `cy:run:ct` and `build` are the gates `/verify` runs; full list in the README [Scripts](README.md#scripts) section.
 
 ## Environment
 
@@ -105,21 +91,21 @@ Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 
 ## Keeping README.md in sync
 
-`README.md` is the user-facing source of truth for setup, scripts, and structure — it drifts easily. It stays a summary; detail lives in `docs/` (`ci-cd.md`, `testing.md`, `ai-assistance.md`, `local-https.md`). Update both in the same change whenever you:
+`README.md` is the user-facing source of truth for setup, scripts, and structure; it stays a summary, with detail in `docs/` (`ci-cd.md`, `testing.md`, `ai-assistance.md`, `local-https.md`). Update both in the same change whenever you:
 
-- Add, remove, or rename an `npm run` script (update the Scripts section)
-- Add, remove, or rename a `.env` variable (update `.env.example` and the Environment Variables table)
-- Add, remove, or rename a top-level folder, or a `src/` subfolder (update the Folder Structure tree)
-- Add or change a GitHub Actions workflow (update `docs/ci-cd.md` and the README Testing and CI summary table)
-- Add, remove, or materially change a user-facing feature (update the Features section)
-- **Finish any change** (Dependabot PRs excepted): refresh the Status section — move what shipped into Recently shipped, drop closed issues from Next up (version bumps are automatic, see "Versioning"). Keep Recently shipped to 5–8 headline items, not every change, and copy the same list into the GitHub Project README with `gh project edit` ([how](docs/ci-cd.md#project-readme-and-status-updates)). A change is not done until the Status is in the PR and the Project README matches
-- Add or restructure `.claude/` or `.github/` guidance files (update `docs/ai-assistance.md` and the README AI Assistance summary)
-- Change the README's About, Features, Stack or Status sections (update the GitHub Project README to match)
-- Merge a PR that ships user-visible work or changes the "Next up" list (post a Project status update) — see [Project README and status updates](docs/ci-cd.md#project-readme-and-status-updates)
+- Add, remove, or rename an `npm run` script (Scripts section)
+- Add, remove, or rename a `.env` variable (`.env.example` and the Environment Variables table)
+- Add, remove, or rename a top-level folder, or a `src/` subfolder (Folder Structure tree)
+- Add or change a GitHub Actions workflow (`docs/ci-cd.md` and the README Testing and CI table)
+- Add, remove, or materially change a user-facing feature (Features section)
+- Add or restructure `.claude/` or `.github/` guidance files (`docs/ai-assistance.md` and the README AI Assistance summary)
+- Change the README's About, Features, Stack or Status sections (the GitHub Project README too)
+
+The Status refresh, Project README and status update at the end of a change are in `/finish-pr`.
 
 ## Versioning
 
-release-please works the version out from PR titles on `main` — never edit `version` by hand. `feat:` or `feature:` bumps the minor version (`0.N.0`); `enhancement:`, `fix:` and `perf:` bump the patch. `chore`, `docs`, `test` and `refactor` PRs do not release on their own. After merging a releasing PR (any type above that bumps), merge the open release PR once its checks are green. Detail in [docs/ci-cd.md](docs/ci-cd.md#9-release-please).
+release-please works the version out from PR titles on `main`; never edit `version` by hand. `feat:`/`feature:` bumps minor, `enhancement:`, `fix:` and `perf:` bump patch, and `chore`, `docs`, `test` and `refactor` do not release. `/finish-pr` covers merging the release PR ([details](docs/ci-cd.md#9-release-please)).
 
 ## Things to avoid
 
