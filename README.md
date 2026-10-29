@@ -68,7 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Next up** — in this order:
 
-- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — run E2E against the Firebase Emulator Suite instead of the live project (optional)
+- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504))
 - [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration (after #292)
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark-only Claude-inspired redesign, with a multi-column Travellers grid (last step of #379)
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
