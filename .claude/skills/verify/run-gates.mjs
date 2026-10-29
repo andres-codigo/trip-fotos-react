@@ -17,7 +17,7 @@ const GATES = {
 		failure: /^\/\S+\.\w+$|^\s*\d+:\d+\s+(error|warning)/,
 	},
 	vitest: {
-		command: 'npm run vitest:run:fast',
+		command: 'npm run vitest:run',
 		summary: /Tests\s+(.*)/,
 		failure: /FAIL|AssertionError|Error:|❯ \S+:\d+:\d+/,
 	},

@@ -62,7 +62,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
 - City badges get a distinct colour per city instead of all rendering grey ([#441](https://github.com/andres-codigo/trip-fotos-react/issues/441))
 - Consistency refactors: one Realtime Database request helper, one user-facing error path, one hook layout and one form-error and loading pattern ([#396](https://github.com/andres-codigo/trip-fotos-react/issues/396)–[#401](https://github.com/andres-codigo/trip-fotos-react/issues/401))
-- Leaner repo: unused scripts, dependencies and a duplicate CI test run removed, and the Firebase rules, lint configs and release-please config moved into `firebase/` and `config/` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430), [#432](https://github.com/andres-codigo/trip-fotos-react/issues/432), [#434](https://github.com/andres-codigo/trip-fotos-react/issues/434), [#361](https://github.com/andres-codigo/trip-fotos-react/issues/361))
+- Leaner repo: unused scripts, dependencies and a duplicate CI test run removed, `vitest:run:fast` folded into `vitest:run` and a shared `format` script, and the Firebase rules, lint configs and release-please config moved into `firebase/` and `config/` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430), [#432](https://github.com/andres-codigo/trip-fotos-react/issues/432), [#434](https://github.com/andres-codigo/trip-fotos-react/issues/434), [#361](https://github.com/andres-codigo/trip-fotos-react/issues/361), [#363](https://github.com/andres-codigo/trip-fotos-react/issues/363))
 - Process: a `/start-issue` skill and a hook that blocks edits on `main` or a branch with no open PR, so work cannot start without an issue ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460))
 - Fixes: the Messages nav count, the Register file input, stale traveller data after a cleared database, and the traveller Auth display name
 
@@ -138,14 +138,14 @@ npm run lint
 # Run Stylelint only (component and page stylesheets)
 npm run lint:styles
 
+# Format files with Prettier
+npm run format
+
 # Automatically fix linting issues and format files
 npm run lint:fix
 
-# Run all tests in CI mode (single run)
+# Run all tests once with the dot reporter (no coverage)
 npm run vitest:run
-
-# Run tests quickly without coverage using dot reporter
-npm run vitest:run:fast
 
 # Run Vitest in watch mode
 npm run vitest:watch
