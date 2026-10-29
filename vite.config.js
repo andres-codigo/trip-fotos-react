@@ -5,7 +5,6 @@ import fs from 'fs'
 import os from 'os'
 
 import react from '@vitejs/plugin-react'
-import eslint from 'vite-plugin-eslint2'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -50,23 +49,12 @@ export default defineConfig({
 		open: true,
 		https: httpsConfig,
 	},
-	plugins: [
-		react(),
-		!process.env.VITEST &&
-			eslint({
-				include: ['src/**/*.js', 'src/**/*.jsx'],
-				exclude: ['node_modules', 'dist'],
-				overrideConfigFile: 'config/eslint.config.mjs',
-			}),
-	].filter(Boolean),
+	plugins: [react()],
 	resolve: {
 		alias: {
 			'@': resolve(__dirname, 'src'),
 		},
 		extensions: ['.js', '.jsx', '.json', '.mjs', '.vue', '.svg', '.scss'],
-	},
-	optimizeDeps: {
-		force: true,
 	},
 	build: {
 		sourcemap: false,
