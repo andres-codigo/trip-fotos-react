@@ -4,6 +4,8 @@ import viteConfig from './vite.config.js'
 
 import { PATHS } from './src/constants/ui/paths.js'
 
+import { seedEmulators } from './scripts/seed-emulators.mjs'
+
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -32,6 +34,9 @@ export default defineConfig({
 	},
 	e2e: {
 		baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',
+		setupNodeEvents(on) {
+			on('task', { seedEmulators })
+		},
 	},
 
 	component: {
