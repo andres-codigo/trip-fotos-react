@@ -1,9 +1,9 @@
 import eslintJs from '@eslint/js'
 import { includeIgnoreFile } from '@eslint/compat'
 import { fileURLToPath } from 'node:url'
-import { FlatCompat } from '@eslint/eslintrc'
 import globals from 'globals'
 import path from 'node:path'
+import prettierRecommended from 'eslint-plugin-prettier/recommended'
 
 import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -13,18 +13,8 @@ import pluginCypress from 'eslint-plugin-cypress'
 
 import vitest from '@vitest/eslint-plugin'
 
-import languageOptions from './rules/language-options.js'
-import reactRules from './rules/react.js'
-import cypressRules from './rules/cypress.js'
-import importRules from './rules/imports.js'
-
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-	baseDirectory: __dirname,
-	recommendedConfig: eslintJs.configs.recommended,
-})
-
 const resolvePath = (file) => path.resolve(__dirname, file)
 const gitignorePath = resolvePath('../.gitignore')
 
@@ -36,18 +26,16 @@ export default [
 	includeIgnoreFile(gitignorePath),
 
 	// Base ESLint and Prettier configurations
-	...compat.extends(
-		'eslint:recommended',
-		'plugin:react/recommended',
-		'plugin:prettier/recommended',
-	),
+	eslintJs.configs.recommended,
+	react.configs.flat.recommended,
+	prettierRecommended,
 
 	// Environment settings
-	...compat.env({
-		es2022: true,
-		node: true,
-		vitest: true,
-	}),
+	{
+		languageOptions: {
+			globals: { ...globals.es2022, ...globals.node },
+		},
+	},
 
 	// Global ignores
 	{
@@ -65,7 +53,15 @@ export default [
 	// React configurations
 	{
 		files: ['**/*.{js,jsx}'],
-		languageOptions,
+		languageOptions: {
+			ecmaVersion: 2022,
+			sourceType: 'module',
+			globals: {
+				...globals.browser,
+				...globals.node,
+				...globals.es2022,
+			},
+		},
 		plugins: {
 			react,
 			'react-hooks': reactHooks,
@@ -76,8 +72,15 @@ export default [
 			...react.configs['jsx-runtime'].rules,
 			...reactHooks.configs.recommended.rules,
 
-			// Custom project rules
-			...reactRules,
+			'react/jsx-no-target-blank': 'off',
+			'react-refresh/only-export-components': [
+				'warn',
+				{ allowConstantExport: true },
+			],
+			'no-unused-vars': 'warn',
+			'react/prop-types': 'error',
+			'no-console': ['error', { allow: ['warn', 'error', 'log'] }],
+			'no-debugger': 'warn',
 		},
 		settings: { react: { version: '19' } },
 	},
@@ -87,7 +90,26 @@ export default [
 		files: ['src/**/*.{js,jsx}'],
 		// Loaded by the Cypress E2E webpack bundle, which has no '@/' alias
 		ignores: ['src/constants/**', 'src/testUtils/cypress/**'],
-		rules: importRules,
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							regex: '^\\.\\./',
+							message:
+								"Use the '@/' alias instead of parent-relative imports.",
+						},
+						{
+							// test/selectors and test/utilities are nested barrels in their own right
+							regex: '^@/constants/(?!test/(selectors|utilities)$)[^/]+/.+',
+							message:
+								"Import constants from the subdirectory barrel, e.g. '@/constants/ui'.",
+						},
+					],
+				},
+			],
+		},
 	},
 
 	// cypress
@@ -99,7 +121,16 @@ export default [
 			sourceType: 'module',
 			globals: { ...globals.node, ...globals.amd },
 		},
-		rules: cypressRules,
+		rules: {
+			// https://github.com/cypress-io/eslint-plugin-cypress
+			'cypress/no-assigning-return-values': 'error',
+			'cypress/no-unnecessary-waiting': 'error',
+			'cypress/assertion-before-screenshot': 'warn',
+			'cypress/no-force': 'warn',
+			'cypress/no-async-tests': 'error',
+			'cypress/no-async-before': 'error',
+			'cypress/no-pause': 'error',
+		},
 	},
 
 	// Vitest

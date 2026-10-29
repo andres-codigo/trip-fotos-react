@@ -62,14 +62,13 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
 - City badges get a distinct colour per city instead of all rendering grey ([#441](https://github.com/andres-codigo/trip-fotos-react/issues/441))
 - Consistency refactors: one Realtime Database request helper, one user-facing error path, one hook layout and one form-error and loading pattern ([#396](https://github.com/andres-codigo/trip-fotos-react/issues/396)–[#401](https://github.com/andres-codigo/trip-fotos-react/issues/401))
-- Leaner repo: unused scripts, dependencies and a duplicate CI test run removed, `vitest:run:fast` folded into `vitest:run` a shared `format` script and a faster dev server (no ESLint on transform, no forced dependency re-optimisation), and the Firebase rules, lint configs and release-please config moved into `firebase/` and `config/` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430), [#432](https://github.com/andres-codigo/trip-fotos-react/issues/432), [#434](https://github.com/andres-codigo/trip-fotos-react/issues/434), [#361](https://github.com/andres-codigo/trip-fotos-react/issues/361), [#363](https://github.com/andres-codigo/trip-fotos-react/issues/363), [#364](https://github.com/andres-codigo/trip-fotos-react/issues/364))
+- Leaner repo: unused scripts, dependencies and a duplicate CI test run removed, `vitest:run:fast` folded into `vitest:run`, a shared `format` script, a faster dev server (no ESLint on transform, no forced dependency re-optimisation) and a single-file ESLint config on native flat config, and the Firebase rules, lint configs and release-please config moved into `firebase/` and `config/` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430), [#432](https://github.com/andres-codigo/trip-fotos-react/issues/432), [#434](https://github.com/andres-codigo/trip-fotos-react/issues/434), [#361](https://github.com/andres-codigo/trip-fotos-react/issues/361), [#363](https://github.com/andres-codigo/trip-fotos-react/issues/363), [#364](https://github.com/andres-codigo/trip-fotos-react/issues/364), [#365](https://github.com/andres-codigo/trip-fotos-react/issues/365))
 - Process: a `/start-issue` skill and a hook that blocks edits on `main` or a branch with no open PR, so work cannot start without an issue ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460))
 - Fixes: the Messages nav count, the Register file input, stale traveller data after a cleared database, and the traveller Auth display name
 
 **Next up** — in this order:
 
-- [#378](https://github.com/andres-codigo/trip-fotos-react/issues/378) — Epic: lean the repo (scripts, dependencies, config)
-- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — run E2E against the Firebase Emulator Suite instead of the live project (optional, after #378)
+- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — run E2E against the Firebase Emulator Suite instead of the live project (optional)
 - [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration (after #292)
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark-only Claude-inspired redesign, with a multi-column Travellers grid (last step of #379)
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
@@ -351,7 +350,7 @@ trip-fotos-react/
 │   ├── copilot-instructions.md # Workspace-level Copilot guidelines
 │   └── labels.json             # Single source of truth for every label
 ├── .vscode/                     # Shared VS Code editor settings
-├── config/                     # ESLint, Stylelint and release-please configuration, ESLint rule modules and the React Hooks type shim
+├── config/                     # ESLint, Stylelint and release-please configuration
 ├── cypress/                    # Cypress tests
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
