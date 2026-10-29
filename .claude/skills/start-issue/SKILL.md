@@ -13,4 +13,4 @@ Ask only when a hard blocker leaves no sensible default:
 - another issue in the same workstream is already `ready` (ask which goes first)
 - the issue is Done, In review or In progress by someone else, or has an open blocker (stop and report)
 
-Never ask about Kind, Workstream or labels: pick the closest option and report what you chose. Finish by re-reading the Status.
+Never ask about Kind, Workstream or labels: pick the closest option and report what you chose. Finish by re-reading the Status. When the issue is the last child of an epic, finishing it ends with [Closing an epic](../../../docs/ci-cd.md#closing-an-epic).

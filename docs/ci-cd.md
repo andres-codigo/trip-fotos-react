@@ -91,7 +91,7 @@ Every Status is set by the two workflows above. Items also carry **Kind** (Epic 
 | In progress | Being built                                     | You add the `in-progress` label to a Ready issue (an epic may come from Backlog), or a draft PR that closes the issue is opened |
 | Blocked     | Waiting on a decision or an external dependency | You add the `blocked` label; removing it restores the status                                                                    |
 | In review   | PR open for review                              | The PR is opened (not as a draft) or marked ready for review                                                                    |
-| Done        | Merged                                          | The PR is merged                                                                                                                |
+| Done        | Merged                                          | The PR is merged; for an epic, you set it by hand when closing it ([Closing an epic](#closing-an-epic))                         |
 
 While an issue has the `blocked` label its PR events leave it in Blocked; only a merge moves it on.
 
@@ -103,7 +103,7 @@ While an issue has the `blocked` label its PR events leave it in Blocked; only a
 
 A refused label is removed again with a comment saying why. The Issue Intake workflow enforces all of this. Removing `in-progress` restores the status. An issue that keeps the label returns to In progress, not Ready, when its PR is closed without merging, and a merge removes the label. A draft PR that closes the issue also moves it to In progress; that path is not guarded.
 
-Epics (Kind = Epic, titled `Epic: ...`) group sub-issues in order and have no PR, so no workflow moves them. They are the one exception to Ready: they stay in Backlog until you add `in-progress` when the first sub-issue starts, and you close the epic when its last sub-issue closes.
+Epics (Kind = Epic, titled `Epic: ...`) group sub-issues in order. They are the one exception to Ready: they stay in Backlog until you add `in-progress` when the first sub-issue starts. An epic may carry an empty draft tracking PR that closes it; merging that PR would add nothing to `main`, so close it unmerged as part of [Closing an epic](#closing-an-epic).
 
 Order within an epic:
 
@@ -121,6 +121,23 @@ Order within an epic:
 5. **Confirm:** re-read the Status. If Issue Intake refused a label (the label is gone and there is a comment), fix the cause and repeat the step. Never move Status by hand to get round a refusal.
 
 Epics skip step 3 and go from Backlog straight to In progress.
+
+### Finishing an issue
+
+Once the change passes `/verify` and the PR is ready for review:
+
+1. Poll `gh pr checks <PR>` a few minutes apart until every check has passed (a skipped Dependabot job is fine). If a check fails, stop and report it.
+2. Squash-merge (or rebase-merge a multi-commit PR whose commits are individually meaningful) and delete the head branch, then delete the merged local branch.
+3. Re-read the Status; the merge sets Done.
+
+### Closing an epic
+
+When the last child issue is closed, and only then:
+
+1. Tick every box in the epic's checklist.
+2. Close the epic's draft tracking PR, if it has one, unmerged (`gh pr close <PR> --delete-branch`), with a note that the work landed through the children.
+3. Close the epic as completed (`gh issue close <N> --reason completed`).
+4. Set its Status to Done by hand. Closing a PR unmerged or an issue never sets Done, so no workflow does it (`gh project item-edit` on the Status field).
 
 Field edit commands:
 
