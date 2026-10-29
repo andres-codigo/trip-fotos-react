@@ -51,7 +51,7 @@ A change that can alter how the UI looks (SCSS, layout, spacing, markup) is chec
 ## Environment
 
 Requires `.env` with Firebase config — see `.env.example` or README Setup section.
-Required keys: `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `CYPRESS_USER_*`. The admin role is a Firebase custom claim (`npm run admin:claim`), not an env value.
+Required keys: `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FIREBASE_*`, `CYPRESS_USER_*`. The admin role is a Firebase custom claim (`npm run admin:claim`), not an env value. `.env.emulators` (committed, no secrets) points the app at the local Firebase emulators (`npm run emulators`, then `npm run dev -- --mode emulators`); never set its `VITE_USE_FIREBASE_EMULATORS` or `VITE_DATABASE_NAMESPACE` in Vercel.
 
 ## Workflow automation
 
