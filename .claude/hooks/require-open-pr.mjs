@@ -3,6 +3,16 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
+const BRANCH_PREFIXES = [
+	'feature',
+	'fix',
+	'docs',
+	'refactor',
+	'enhancement',
+	'chore',
+	'test',
+]
+
 const input = JSON.parse(readFileSync(0, 'utf8'))
 const filePath = input.tool_input?.file_path
 
@@ -29,6 +39,15 @@ const block = (reason) => {
 
 if (branch === 'main') block('Edits on main are blocked.')
 if (!branch) process.exit(0)
+
+// Bot branches are never edited here, but must not be locked out if they are
+if (
+	!BRANCH_PREFIXES.some((prefix) => branch.startsWith(`${prefix}/`)) &&
+	!/^(dependabot\/|release-please--)/.test(branch)
+)
+	block(
+		`Branch ${branch} has no type prefix (${BRANCH_PREFIXES.join(', ')}).`,
+	)
 
 const marker = path.join(
 	os.tmpdir(),

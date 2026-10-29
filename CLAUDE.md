@@ -6,19 +6,7 @@ Trip Fotos: a React/Firebase app for finding popular travel destinations tied to
 
 ## Branch naming
 
-Branches must use a type prefix:
-
-| Prefix         | Use for                                 |
-| -------------- | --------------------------------------- |
-| `feature/`     | New user-facing feature                 |
-| `fix/`         | Bug fix                                 |
-| `docs/`        | Documentation only                      |
-| `refactor/`    | Code restructuring, no behaviour change |
-| `enhancement/` | Improvement to an existing feature      |
-| `chore/`       | Maintenance — deps, config, CI          |
-| `test/`        | Test additions or changes only          |
-
-Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`
+Branches must use a type prefix, enforced by the `require-open-pr` hook: `feature/` (new user-facing feature), `fix/` (bug fix), `docs/`, `refactor/` (no behaviour change), `enhancement/` (improvement to an existing feature), `chore/` (deps, config, CI) or `test/`. Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`.
 
 Work from a Claude Design session (design system or UI redesign) never lands on `main` directly: create an issue and a `feature/` or `enhancement/` branch first, and reference the design artifact link in the issue.
 
