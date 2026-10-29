@@ -35,9 +35,7 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
 
 ### Constants
 
-- Always import from the subdirectory barrel (`index.js`), never from individual files within a subdirectory
-    - Correct: `import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'`
-    - Wrong: `import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers/registration'`
+- Import from the subdirectory barrel (`@/constants/travellers`), never a file inside it; ESLint enforces this
 - Domain constants (auth, travellers) are separate from UI constants
 
 ### Comments
