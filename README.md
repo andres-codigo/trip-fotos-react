@@ -62,7 +62,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
 - City badges get a distinct colour per city instead of all rendering grey ([#441](https://github.com/andres-codigo/trip-fotos-react/issues/441))
 - Consistency refactors: one Realtime Database request helper, one user-facing error path, one hook layout and one form-error and loading pattern ([#396](https://github.com/andres-codigo/trip-fotos-react/issues/396)–[#401](https://github.com/andres-codigo/trip-fotos-react/issues/401))
-- Leaner repo: unused scripts, dependencies and a duplicate CI test run removed, `vitest:run:fast` folded into `vitest:run` and a shared `format` script, and the Firebase rules, lint configs and release-please config moved into `firebase/` and `config/` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430), [#432](https://github.com/andres-codigo/trip-fotos-react/issues/432), [#434](https://github.com/andres-codigo/trip-fotos-react/issues/434), [#361](https://github.com/andres-codigo/trip-fotos-react/issues/361), [#363](https://github.com/andres-codigo/trip-fotos-react/issues/363))
+- Leaner repo: unused scripts, dependencies and a duplicate CI test run removed, `vitest:run:fast` folded into `vitest:run` a shared `format` script and a faster dev server (no ESLint on transform, no forced dependency re-optimisation), and the Firebase rules, lint configs and release-please config moved into `firebase/` and `config/` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430), [#432](https://github.com/andres-codigo/trip-fotos-react/issues/432), [#434](https://github.com/andres-codigo/trip-fotos-react/issues/434), [#361](https://github.com/andres-codigo/trip-fotos-react/issues/361), [#363](https://github.com/andres-codigo/trip-fotos-react/issues/363), [#364](https://github.com/andres-codigo/trip-fotos-react/issues/364))
 - Process: a `/start-issue` skill and a hook that blocks edits on `main` or a branch with no open PR, so work cannot start without an issue ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460))
 - Fixes: the Messages nav count, the Register file input, stale traveller data after a cleared database, and the traveller Auth display name
 
@@ -120,7 +120,7 @@ A [VS Code Dev Container](.devcontainer/devcontainer.json) is included. It bind-
 Below are the available npm scripts for this project:
 
 ```bash
-# Start the development server with linting
+# Start the development server
 npm run dev
 
 # Build the project for production
