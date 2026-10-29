@@ -417,7 +417,12 @@ jobs:
                           return
                         }
 
-                        const currentStatus = await getStatusOptionId(projectItemId)
+                        let currentStatus = await getStatusOptionId(projectItemId)
+                        // Labels set at creation can fire before the opened event has given the item a status
+                        if (!currentStatus && isLabelEvent) {
+                          await setStatus(projectItemId, STATUS.TRIAGE)
+                          currentStatus = STATUS.TRIAGE
+                        }
                         const nextStatus = await resolveNextStatus(currentStatus, projectItemId)
                         if (nextStatus && nextStatus !== currentStatus) {
                           await setStatus(projectItemId, nextStatus)
