@@ -57,7 +57,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
-- Local Firebase emulators with a deterministic seed, and `npm run cy:run:e2e:emulators`, which runs the E2E specs against them with real registration, photo upload and Messages round trips ([#500](https://github.com/andres-codigo/trip-fotos-react/issues/500), [#501](https://github.com/andres-codigo/trip-fotos-react/issues/501), [#502](https://github.com/andres-codigo/trip-fotos-react/issues/502))
+- Local Firebase emulators with a deterministic seed, and `npm run cy:run:e2e:emulators`, which runs the E2E specs against them with real registration, photo upload and Messages round trips, and run in CI beside the live E2E job with no secrets ([#500](https://github.com/andres-codigo/trip-fotos-react/issues/500), [#501](https://github.com/andres-codigo/trip-fotos-react/issues/501), [#502](https://github.com/andres-codigo/trip-fotos-react/issues/502), [#503](https://github.com/andres-codigo/trip-fotos-react/issues/503))
 - Gallery thumbnails reserve their space before the image loads: each photo's dimensions are stored at upload (`fileDimensions`) so the page no longer jumps; photos registered earlier shift once ([#452](https://github.com/andres-codigo/trip-fotos-react/issues/452))
 - The photo dialog fits the screen at any width, adds next/previous buttons and arrow-key navigation, and reflects the open photo in the URL as `?photo=N` ([#445](https://github.com/andres-codigo/trip-fotos-react/issues/445))
 - The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
@@ -68,7 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Next up** — in this order:
 
-- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504); the #499 spike says go and #500 added the local emulators and the app flag; #501 added the seed script; #502 added the emulator E2E run)
+- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504); the #499 spike says go and #500 added the local emulators and the app flag; #501 added the seed script; #502 added the emulator E2E run; #503 runs it in CI)
 - [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration (after #292)
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark-only Claude-inspired redesign, with a multi-column Travellers grid (last step of #379)
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
