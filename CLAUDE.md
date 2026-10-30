@@ -18,6 +18,7 @@ Run `/finish-pr` when the work passes `/verify`: README Status and Project READM
 
 - Use British English (`en-GB`) for all code comments, documentation, and strings (e.g., `colour`, `behaviour`, `optimise`).
 - Commit messages follow `en-GB` spelling conventions.
+- Label every issue, epic or PR number with a few words, even in one-line progress notes: `ISSUE#438(#442) (upload progress)` for a piece of work, `#378 (lean the repo)` otherwise. Never write a bare `#N`.
 
 ## Domain-Specific Guidance
 
