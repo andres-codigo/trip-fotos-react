@@ -57,6 +57,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- Local Firebase emulators with a deterministic seed, and `npm run cy:run:e2e:emulators`, which runs the E2E specs against them with real registration, photo upload and Messages round trips ([#500](https://github.com/andres-codigo/trip-fotos-react/issues/500), [#501](https://github.com/andres-codigo/trip-fotos-react/issues/501), [#502](https://github.com/andres-codigo/trip-fotos-react/issues/502))
 - Gallery thumbnails reserve their space before the image loads: each photo's dimensions are stored at upload (`fileDimensions`) so the page no longer jumps; photos registered earlier shift once ([#452](https://github.com/andres-codigo/trip-fotos-react/issues/452))
 - The photo dialog fits the screen at any width, adds next/previous buttons and arrow-key navigation, and reflects the open photo in the URL as `?photo=N` ([#445](https://github.com/andres-codigo/trip-fotos-react/issues/445))
 - The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
@@ -64,11 +65,10 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Consistency refactors: one Realtime Database request helper, one user-facing error path, one hook layout and one form-error and loading pattern ([#396](https://github.com/andres-codigo/trip-fotos-react/issues/396)–[#401](https://github.com/andres-codigo/trip-fotos-react/issues/401))
 - Leaner repo: unused scripts, dependencies and a duplicate CI test run removed, `vitest:run:fast` folded into `vitest:run`, a shared `format` script, a faster dev server (no ESLint on transform, no forced dependency re-optimisation) and a single-file ESLint config on native flat config, and the Firebase rules, lint configs and release-please config moved into `firebase/` and `config/` ([#430](https://github.com/andres-codigo/trip-fotos-react/issues/430), [#432](https://github.com/andres-codigo/trip-fotos-react/issues/432), [#434](https://github.com/andres-codigo/trip-fotos-react/issues/434), [#361](https://github.com/andres-codigo/trip-fotos-react/issues/361), [#363](https://github.com/andres-codigo/trip-fotos-react/issues/363), [#364](https://github.com/andres-codigo/trip-fotos-react/issues/364), [#365](https://github.com/andres-codigo/trip-fotos-react/issues/365))
 - Process: `/start-issue`, `/finish-pr` and `/ui-check` skills and a hook that blocks edits on `main`, a branch without a type prefix or a branch with no open PR, a stop check that a ready PR has refreshed the README Status, and a weekly cloud sweep for stale release PRs and docs drift, so work cannot start without an issue, plus documented steps for finishing an issue and closing an epic, and CI drift checks that fail when a route lacks a Vercel rewrite, a store collection lacks a database rule, or the README scripts and env tables drift ([#460](https://github.com/andres-codigo/trip-fotos-react/issues/460), [#473](https://github.com/andres-codigo/trip-fotos-react/issues/473), [#475](https://github.com/andres-codigo/trip-fotos-react/issues/475), [#477](https://github.com/andres-codigo/trip-fotos-react/issues/477), [#480](https://github.com/andres-codigo/trip-fotos-react/issues/480), [#481](https://github.com/andres-codigo/trip-fotos-react/issues/481), [#482](https://github.com/andres-codigo/trip-fotos-react/issues/482), [#484](https://github.com/andres-codigo/trip-fotos-react/issues/484), [#485](https://github.com/andres-codigo/trip-fotos-react/issues/485), [#486](https://github.com/andres-codigo/trip-fotos-react/issues/486), [#487](https://github.com/andres-codigo/trip-fotos-react/issues/487), [#488](https://github.com/andres-codigo/trip-fotos-react/issues/488))
-- Fixes: the Messages nav count, the Register file input, stale traveller data after a cleared database, and the traveller Auth display name
 
 **Next up** — in this order:
 
-- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504); the #499 spike says go and #500 added the local emulators and the app flag; #501 added the seed script; next is #502, the emulator E2E run)
+- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504); the #499 spike says go and #500 added the local emulators and the app flag; #501 added the seed script; #502 added the emulator E2E run)
 - [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration (after #292)
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark-only Claude-inspired redesign, with a multi-column Travellers grid (last step of #379)
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
@@ -160,6 +160,9 @@ npm run cy:open:ct
 
 # Run Cypress E2E tests in headless mode
 npm run cy:run:e2e
+
+# Run the same E2E specs against the local Firebase emulators (no live project or secrets)
+npm run cy:run:e2e:emulators
 
 # Run Cypress Component tests in headless mode
 npm run cy:run:ct

@@ -8,9 +8,17 @@ const getCypressExposed = (key) => {
 
 export const TEST_USERS = {
 	STANDARD: {
-		ID: 'cypress-mock-user-id',
+		ID:
+			getCypressExposed('EMULATOR_STANDARD_UID') ??
+			'cypress-mock-user-id',
 		NAME: 'Cypress Test User',
 		EMAIL: getCypressExposed('CYPRESS_USER_EMAIL'),
+		PASSWORD: getCypressExposed('CYPRESS_USER_PASSWORD'),
+	},
+	// Seeded traveller with an inbox; emulator runs only, undefined on the live run
+	TRAVELLER: {
+		ID: getCypressExposed('EMULATOR_TRAVELLER_UID'),
+		EMAIL: getCypressExposed('EMULATOR_TRAVELLER_EMAIL'),
 		PASSWORD: getCypressExposed('CYPRESS_USER_PASSWORD'),
 	},
 }

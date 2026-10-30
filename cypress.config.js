@@ -4,10 +4,28 @@ import viteConfig from './vite.config.js'
 
 import { PATHS } from './src/constants/ui/paths.js'
 
-import { seedEmulators } from './scripts/seed-emulators.mjs'
+import {
+	seedEmulators,
+	SEED_USERS,
+	SEED_PASSWORD,
+} from './scripts/seed-emulators.mjs'
 
 import dotenv from 'dotenv'
 dotenv.config()
+
+// `npm run cy:run:e2e:emulators` sets this. Cypress reads only `.env` here, so
+// Vite's `--mode emulators` does not reach it: load the emulator values over it
+const useEmulators = process.env.E2E_EMULATORS === 'true'
+if (useEmulators) {
+	dotenv.config({ path: '.env.emulators', override: true })
+}
+
+const testUser = useEmulators
+	? { email: SEED_USERS.STANDARD.email, password: SEED_PASSWORD }
+	: {
+			email: process.env.CYPRESS_USER_EMAIL,
+			password: process.env.CYPRESS_USER_PASSWORD,
+		}
 
 export default defineConfig({
 	env: {
@@ -29,8 +47,12 @@ export default defineConfig({
 		API_KEY: process.env.VITE_API_KEY,
 		VITE_DATABASE_URL: process.env.VITE_BACKEND_BASE_URL,
 		VITE_DATABASE_NAMESPACE: process.env.VITE_DATABASE_NAMESPACE,
-		CYPRESS_USER_EMAIL: process.env.CYPRESS_USER_EMAIL,
-		CYPRESS_USER_PASSWORD: process.env.CYPRESS_USER_PASSWORD,
+		USE_EMULATORS: String(useEmulators),
+		EMULATOR_TRAVELLER_EMAIL: SEED_USERS.TRAVELLER_ONE.email,
+		EMULATOR_TRAVELLER_UID: SEED_USERS.TRAVELLER_ONE.uid,
+		EMULATOR_STANDARD_UID: SEED_USERS.STANDARD.uid,
+		CYPRESS_USER_EMAIL: testUser.email,
+		CYPRESS_USER_PASSWORD: testUser.password,
 	},
 	e2e: {
 		baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',

@@ -12,6 +12,8 @@ import { API_DATABASE } from '../../../src/constants/api'
 import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-travellers'
 
+import { TEST_USERS } from '../../../src/constants/config/users'
+
 import { performLogin } from '../../support/utils/authHelpers'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
@@ -21,6 +23,7 @@ describe('Register Page', () => {
 	let uploadedImageUrl
 
 	beforeEach(() => {
+		cy.resetEmulators()
 		cy.visit(loginUrl)
 		performLogin()
 		cy.visit(PATHS.REGISTER)
@@ -85,7 +88,7 @@ describe('Register Page', () => {
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept the registration API call
-		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
+		cy.stubLiveOnly(API_DATABASE.PUT, '**/travellers/*.json*', {
 			statusCode: 200,
 			body: {
 				...MOCK_TRAVELLERS.NEW_TRAVELLER,
@@ -123,18 +126,19 @@ describe('Register Page', () => {
 		cy.get('[role="alert"]')
 			.should('be.visible')
 			.and('contain', TRAVELLER_REGISTRATION_SUCCESS_MESSAGE)
+		cy.assertTravellerPersisted(TEST_USERS.STANDARD.ID, {
+			firstName,
+			lastName,
+		})
 	})
 
 	it('registers a traveller with a photo uploaded to Storage', () => {
 		const { firstName, lastName, tripDescription, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
-		// Storage is live (the upload is deleted in afterEach); the DB write is stubbed
-		cy.intercept({
-			method: 'POST',
-			hostname: 'firebasestorage.googleapis.com',
-		}).as('uploadImage')
-		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
+		// A real Storage upload, live or emulated (deleted in afterEach); the DB write is stubbed
+		cy.intercept('POST', '**/v0/b/*/o*').as('uploadImage')
+		cy.stubLiveOnly(API_DATABASE.PUT, '**/travellers/*.json*', {
 			statusCode: 200,
 			body: {
 				...MOCK_TRAVELLERS.NEW_TRAVELLER,
@@ -175,12 +179,16 @@ describe('Register Page', () => {
 			.its('files')
 			.should('have.length', 1)
 			.its('0')
-			.should('include', 'firebasestorage.googleapis.com')
+			.should('include', '/v0/b/')
 			.then((url) => {
 				uploadedImageUrl = url
 			})
 
 		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)
+		cy.assertTravellerPersisted(TEST_USERS.STANDARD.ID, {
+			firstName,
+			lastName,
+		})
 	})
 
 	it('shows a loading dialog while registering', () => {
@@ -188,7 +196,7 @@ describe('Register Page', () => {
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept with delay
-		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
+		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*', {
 			delay: 1000,
 			statusCode: 200,
 			body: {
@@ -235,7 +243,7 @@ describe('Register Page', () => {
 				MOCK_TRAVELLERS.NEW_TRAVELLER
 
 			// Intercept failure
-			cy.intercept(API_DATABASE.PUT, '**/travellers/*.json?auth=*', {
+			cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*', {
 				statusCode: 500,
 				body: { error: 'Internal Server Error' },
 			}).as('registerTravellerFailed')
