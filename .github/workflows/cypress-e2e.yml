@@ -130,12 +130,14 @@ jobs:
                   distribution: temurin
                   java-version: '21'
 
-            - name: Cache Firebase emulators
+            - name: Cache Firebase emulators and CLI
               uses: actions/cache@v4
               with:
-                  path: ~/.cache/firebase/emulators
-                  key: firebase-emulators-${{ runner.os }}-${{ hashFiles('package.json') }}
-                  restore-keys: firebase-emulators-${{ runner.os }}-
+                  path: |
+                      ~/.cache/firebase/emulators
+                      ~/.npm/_npx
+                  key: firebase-cli-emulators-${{ runner.os }}-${{ hashFiles('package.json') }}
+                  restore-keys: firebase-cli-emulators-${{ runner.os }}-
 
             - name: Install dependencies
               run: npm ci
