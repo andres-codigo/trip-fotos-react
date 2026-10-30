@@ -679,6 +679,110 @@ describe('travellersSlice', () => {
 				expect(state.travellers).toEqual([])
 			})
 
+			describe('cleaning up uploads', () => {
+				const sixFiles = {
+					...mockRegistrationData,
+					files: Array.from({ length: 6 }, (_, i) => ({
+						name: `${i}.jpg`,
+						file: new Blob(),
+					})),
+				}
+
+				const uploaded = (name) => ({
+					on: (event, progress, error, complete) => complete(),
+					snapshot: { ref: name },
+				})
+
+				it('should delete every uploaded file when the database write fails', async () => {
+					fetch.mockResolvedValueOnce({ ok: false })
+
+					const result = await store.dispatch(
+						registerTraveller(mockRegistrationData),
+					)
+
+					expect(result.meta.requestStatus).toBe('rejected')
+					expect(deleteObject).toHaveBeenCalledTimes(1)
+					expect(deleteObject).toHaveBeenCalledWith('mock-ref')
+				})
+
+				it('should delete the earlier batch and the settled uploads of the failing batch', async () => {
+					// The sixth file is the only one in the second batch and fails
+					Array.from({ length: 6 }, (_, i) => `ref-${i}`).forEach(
+						(name) =>
+							uploadBytesResumable.mockImplementationOnce(() =>
+								name === 'ref-5'
+									? {
+											on: (event, progress, error) =>
+												error(new Error('boom')),
+											snapshot: { ref: name },
+										}
+									: uploaded(name),
+							),
+					)
+
+					const result = await store.dispatch(
+						registerTraveller(sixFiles),
+					)
+
+					expect(result.meta.requestStatus).toBe('rejected')
+					expect(fetch).not.toHaveBeenCalled()
+					expect(
+						deleteObject.mock.calls.map(([target]) => target),
+					).toHaveLength(5)
+					expect(
+						new Set(
+							deleteObject.mock.calls.map(([target]) => target),
+						),
+					).toEqual(
+						new Set(['ref-0', 'ref-1', 'ref-2', 'ref-3', 'ref-4']),
+					)
+				})
+
+				it('should still report the registration error when a cleanup delete fails', async () => {
+					fetch.mockResolvedValueOnce({ ok: false })
+					deleteObject.mockRejectedValueOnce(new Error('denied'))
+
+					const result = await store.dispatch(
+						registerTraveller(mockRegistrationData),
+					)
+
+					expect(result.meta.requestStatus).toBe('rejected')
+					expect(handleApiError).toHaveBeenCalledWith(
+						expect.objectContaining({
+							message:
+								ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER,
+						}),
+						`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${MOCK_USER.USER_ID}.`,
+					)
+				})
+
+				it('should delete nothing when nothing was uploaded', async () => {
+					fetch.mockResolvedValueOnce({ ok: false })
+
+					await store.dispatch(
+						registerTraveller({
+							...mockRegistrationData,
+							files: [],
+						}),
+					)
+
+					expect(deleteObject).not.toHaveBeenCalled()
+				})
+
+				it('should not delete anything after a successful registration', async () => {
+					fetch.mockResolvedValueOnce({
+						ok: true,
+						json: async () => ({ name: MOCK_USER.USER_ID }),
+					})
+
+					await store.dispatch(
+						registerTraveller(mockRegistrationData),
+					)
+
+					expect(deleteObject).not.toHaveBeenCalled()
+				})
+			})
+
 			it('should report the registration as failed when the connection drops', async () => {
 				fetch.mockRejectedValueOnce(
 					new Error(API_ERROR_MESSAGE.NETWORK_ERROR),

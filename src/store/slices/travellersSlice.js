@@ -75,6 +75,9 @@ export const registerTraveller = createAsyncThunk(
 		const userId = selectUserId(getState())
 		const token = selectAuthenticationToken(getState())
 
+		// Every finished upload, so a failed registration can remove the files it left behind
+		const uploadedRefs = []
+
 		try {
 			const MAX_CONCURRENT_UPLOADS = 5
 			const imageQueue = [...(data.files || [])]
@@ -158,12 +161,17 @@ export const registerTraveller = createAsyncThunk(
 							)
 						},
 						async () => {
-							const url = await getDownloadURL(
-								uploadTask.snapshot.ref,
-							)
-							fractions[index] = 1
-							reportProgress()
-							resolve(url)
+							uploadedRefs.push(uploadTask.snapshot.ref)
+							try {
+								const url = await getDownloadURL(
+									uploadTask.snapshot.ref,
+								)
+								fractions[index] = 1
+								reportProgress()
+								resolve(url)
+							} catch (error) {
+								reject(error)
+							}
 						},
 					)
 				})
@@ -171,9 +179,15 @@ export const registerTraveller = createAsyncThunk(
 
 			const uploadNextBatch = async () => {
 				const batch = imageQueue.splice(0, MAX_CONCURRENT_UPLOADS)
-				const batchPromises = batch.map(uploadImage)
-				const batchResults = await Promise.all(batchPromises)
-				imageUrls.push(...batchResults)
+				// Waiting for the whole batch to settle means no upload can land after the cleanup below
+				const batchResults = await Promise.allSettled(
+					batch.map(uploadImage),
+				)
+				const failed = batchResults.find(
+					(result) => result.status === 'rejected',
+				)
+				if (failed) throw failed.reason
+				imageUrls.push(...batchResults.map((result) => result.value))
 			}
 
 			while (imageQueue.length > 0) {
@@ -212,6 +226,11 @@ export const registerTraveller = createAsyncThunk(
 				id: userId,
 			}
 		} catch (error) {
+			// Best effort: the registration error is the one the user needs, and a retry uploads fresh copies
+			await Promise.allSettled(
+				uploadedRefs.map((uploadedRef) => deleteObject(uploadedRef)),
+			)
+
 			return rejectWithValue(
 				handleApiError(
 					error,
