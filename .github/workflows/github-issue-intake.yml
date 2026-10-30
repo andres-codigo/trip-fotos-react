@@ -25,12 +25,12 @@ jobs:
 
         steps:
             - name: Checkout label config
-              uses: actions/checkout@v4
+              uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
               with:
                   sparse-checkout: .github
 
             - name: Intake issue and sync its board status
-              uses: actions/github-script@v9
+              uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
               env:
                   PROJECT_ID: PVT_kwHOAybMeM4BCojE
                   PROJECT_STATUS_FIELD_ID: PVTSSF_lAHOAybMeM4BCojEzg0yW4g

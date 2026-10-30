@@ -16,7 +16,7 @@ jobs:
         steps:
             # PRs opened with the default token do not trigger the test workflows, so the release PR needs the PAT
             - name: Open or update the release PR
-              uses: googleapis/release-please-action@v4
+              uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
               with:
                   token: ${{ secrets['PROJECT_AUTOMATION_TOKEN'] || github.token }}
                   config-file: config/release-please-config.json

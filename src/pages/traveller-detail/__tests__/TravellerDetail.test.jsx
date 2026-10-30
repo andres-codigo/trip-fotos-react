@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
@@ -117,7 +117,8 @@ describe('<TravellerDetail />', () => {
 			renderPage({ hash: '#photos' })
 			const list = await screen.findByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
 			expect(list).toHaveAttribute('id', 'photos')
-			expect(scrollIntoView).toHaveBeenCalledTimes(1)
+			// The scroll runs in an effect, which can flush after the list appears
+			await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1))
 			expect(scrollIntoView.mock.contexts[0]).toBe(list)
 		})
 
