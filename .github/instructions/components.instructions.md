@@ -38,7 +38,8 @@ Each component must reside in its own contextual folder. Components are located 
 - Move the generated file to `src/components/ui/<name>/<Name>.jsx` (PascalCase file, lowercase-hyphen folder) and give it a `__tests__/` folder with a test.
 - Add `prop-types` for every prop, as the generated file has none.
 - Keep the generated `cn` import (`@/utils/cn`) and fix any other import to the `@/` alias.
-- If a component of that name already exists (e.g. `ui/badge/BaseBadge`), do not let the CLI overwrite or sit beside it: migrate the existing component to the shadcn one in the same change.
+- Name and folder follow the existing component, so call sites and the folder-per-component rule stay consistent: when a shadcn component replaces one (e.g. `ui/badge/BaseBadge`), keep its exported name, folder and file name (`BaseBadge`) and put the shadcn code inside it, in the same change. A shadcn component with no counterpart takes the shadcn name in PascalCase (`Tooltip` in `ui/tooltip/Tooltip.jsx`).
+- Generated components are styled with Tailwind classes through `cn()`, not an SCSS module. Existing components keep their SCSS modules until each is migrated.
 - Add `lucide-react` and Radix packages only when a component needs them.
 
 ### Refactoring Rule
