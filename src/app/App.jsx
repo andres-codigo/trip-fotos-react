@@ -24,8 +24,6 @@ import Footer from '@/components/layout/footer/Footer'
 const Authentication = lazy(
 	() => import('@/pages/authentication/Authentication'),
 )
-// TODO: Review requirement for Home page at a later stage
-// const Home = lazy(() => import('@/pages/home/Home'))
 const Register = lazy(() => import('@/pages/register/Register'))
 const Travellers = lazy(() => import('@/pages/travellers/Travellers'))
 const TravellerDetail = lazy(

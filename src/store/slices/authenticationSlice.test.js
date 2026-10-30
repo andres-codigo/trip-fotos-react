@@ -440,7 +440,7 @@ describe('authenticationSlice', () => {
 					expect(result.payload).toBe(ERROR_MESSAGES.LOGIN_FAILED)
 				})
 
-				it('should handle autoLogout.rejected and set error state', async () => {
+				it('records the error when the autoLogout action is rejected', async () => {
 					const mockErrorMessage =
 						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR
 
@@ -660,7 +660,7 @@ describe('authenticationSlice', () => {
 					expect(state.didAutoLogout).toBe(false)
 				})
 
-				it('should clear user details and set didAutoLogout to true', async () => {
+				it('should clear user details and set didAutoLogout when autoLogout is dispatched after tryLogin', async () => {
 					await store.dispatch(autoLogout())
 
 					const state = store.getState().authentication
@@ -746,7 +746,7 @@ describe('authenticationSlice', () => {
 
 		describe('autoLogout', () => {
 			describe('success scenarios', () => {
-				it('should clear user details and set didAutoLogout to true', async () => {
+				it('should clear user details and set didAutoLogout when autoLogout is dispatched after tryLogin', async () => {
 					await store.dispatch(autoLogout())
 
 					const state = store.getState().authentication

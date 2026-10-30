@@ -1,6 +1,8 @@
 import { API_DATABASE } from '../../../src/constants/api'
 import {
 	TRAVELLERS_LIST_SELECTORS,
+	TRAVELLER_FILTER_SELECTORS,
+	TRAVELLER_ITEM_SELECTORS,
 	DIALOG_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { TEST_IDS } from '../../../src/constants/test/selectors/_ids'
@@ -8,13 +10,14 @@ import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 
+import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-travellers'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
-describe('Travellers Page - WIP', () => {
+describe('Travellers page', () => {
 	beforeEach(() => {
 		cy.visit(loginUrl)
 	})
@@ -402,5 +405,95 @@ describe('Travellers Page - WIP', () => {
 				'not.exist',
 			)
 		})
+	})
+})
+
+describe('Travellers page > city filter', () => {
+	const { SAMPLE_TRAVELLER_ONE: FIRST, SAMPLE_TRAVELLER_TWO: SECOND } =
+		MOCK_TRAVELLERS
+
+	beforeEach(() => {
+		cy.resetEmulators()
+		performLogin()
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+			'have.length',
+			2,
+		)
+	})
+
+	it('hides a traveller with no selected city and shows them again when it is re-checked', () => {
+		// Only the second traveller has Tokyo as their sole city
+		cy.contains(TRAVELLER_FILTER_SELECTORS.OPTION, 'Tokyo')
+			.find(TRAVELLER_FILTER_SELECTORS.CHECKBOX)
+			.uncheck()
+
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+			'have.length',
+			1,
+		)
+		cy.contains(FIRST.firstName).should('exist')
+		cy.contains(SECOND.firstName).should('not.exist')
+
+		cy.contains(TRAVELLER_FILTER_SELECTORS.OPTION, 'Tokyo')
+			.find(TRAVELLER_FILTER_SELECTORS.CHECKBOX)
+			.check()
+
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+			'have.length',
+			2,
+		)
+	})
+
+	it('shows the empty state when every city is unchecked', () => {
+		cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX).uncheck()
+
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('not.exist')
+		cy.get(TRAVELLERS_LIST_SELECTORS.NO_MATCHING_TRAVELLERS).should(
+			'be.visible',
+		)
+	})
+})
+
+describe('Travellers page > admin and standard users', () => {
+	const { SAMPLE_TRAVELLER_TWO: SECOND } = MOCK_TRAVELLERS
+
+	beforeEach(() => {
+		cy.resetEmulators()
+	})
+
+	it('does not offer delete to a standard user', () => {
+		performLogin()
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+			'have.length',
+			2,
+		)
+
+		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).should('not.exist')
+	})
+
+	it('lets an admin delete a traveller after confirming', () => {
+		performLogin(TEST_USERS.ADMIN.EMAIL, TEST_USERS.ADMIN.PASSWORD)
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+			'have.length',
+			2,
+		)
+		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).should('have.length', 2)
+
+		cy.contains(TRAVELLER_ITEM_SELECTORS.ROOT, SECOND.firstName)
+			.find(TRAVELLER_ITEM_SELECTORS.DELETE)
+			.click()
+		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_CONFIRM).click()
+
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+			'have.length',
+			1,
+		)
+		cy.contains(SECOND.firstName).should('not.exist')
+
+		cy.reload()
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+			'have.length',
+			1,
+		)
 	})
 })

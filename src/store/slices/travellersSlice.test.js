@@ -216,7 +216,7 @@ describe('travellersSlice', () => {
 					expect(state.status).toBe('failed')
 				})
 
-				it('should call handleApiError on API error', async () => {
+				it('should pass the profile update error and traveller name to handleApiError', async () => {
 					const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
 					updateProfile.mockRejectedValueOnce(mockError)
 
@@ -1178,8 +1178,15 @@ describe('travellersSlice', () => {
 			['logout fulfilled', () => logout.fulfilled(undefined, 'req')],
 			['logout rejected', () => logout.rejected(null, 'req')],
 		])(
-			'should reset isTraveller and travellerName on %s',
+			'should reset isTraveller, travellerName and selectedTraveller on %s',
 			async (_, action) => {
+				store.dispatch(
+					loadTraveller.fulfilled(
+						{ id: 'other', firstName: 'Ada' },
+						'req',
+						'other',
+					),
+				)
 				store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
 				global.fetch.mockResolvedValueOnce({
 					ok: true,
@@ -1193,6 +1200,7 @@ describe('travellersSlice', () => {
 					isTraveller: false,
 					isTravellerCheckedFor: null,
 					travellerName: '',
+					selectedTraveller: null,
 				})
 			},
 		)

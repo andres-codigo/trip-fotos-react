@@ -201,4 +201,42 @@ describe('<TravellerDetail />', () => {
 			screen.queryByTestId(TRAVELLER_DETAIL.PROFILE),
 		).not.toBeInTheDocument()
 	})
+
+	// There is no separate error view yet, so a failed load shares the not-found state
+	describe('when the load is rejected', () => {
+		it.each([
+			['a server error', () => stubFetch({ ok: false, data: {} })],
+			[
+				'a network failure',
+				() =>
+					vi.stubGlobal(
+						'fetch',
+						vi
+							.fn()
+							.mockRejectedValue(
+								new TypeError('Failed to fetch'),
+							),
+					),
+			],
+		])(
+			'shows the not-found state with a way back after %s',
+			async (_, arrange) => {
+				arrange()
+				renderPage()
+
+				expect(
+					await screen.findByTestId(TRAVELLER_DETAIL.NOT_FOUND),
+				).toHaveTextContent('Traveller not found.')
+				expect(
+					screen.getByTestId(TRAVELLER_DETAIL.BACK_LINK),
+				).toHaveAttribute('href', '/travellers')
+				expect(
+					screen.queryByTestId(TRAVELLER_DETAIL.PROFILE),
+				).not.toBeInTheDocument()
+				expect(
+					screen.queryByTestId(TRAVELLER_DETAIL.SPINNER),
+				).not.toBeInTheDocument()
+			},
+		)
+	})
 })

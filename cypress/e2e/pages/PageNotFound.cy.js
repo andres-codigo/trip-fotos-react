@@ -15,7 +15,7 @@ describe('Logged in > PageNotFound page', () => {
 			PATHS.HOME,
 			PATHS.TRAVELLERS,
 		])
-		// // Visit a non-existent route
+		// Visit a non-existent route
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
 
 		// Check the 404 Page Not Found Page URL is correct
@@ -40,6 +40,7 @@ describe('Logged in > PageNotFound page', () => {
 
 		// Revisit a non-existent route
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
+		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.PAGE_NOT_FOUND)
 	})
 })
 
@@ -71,7 +72,7 @@ describe('Not logged in > PageNotFound page', () => {
 
 		cy.visit(BASE_URL_CYPRESS)
 
-		// // Visit a non-existent route
+		// Visit a non-existent route
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
 
 		// Check the 404 Page Not Found Page URL is correct
@@ -95,5 +96,6 @@ describe('Not logged in > PageNotFound page', () => {
 
 		// Revisit a non-existent route
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
+		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.PAGE_NOT_FOUND)
 	})
 })

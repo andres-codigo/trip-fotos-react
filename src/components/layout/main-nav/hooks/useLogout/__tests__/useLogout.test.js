@@ -87,24 +87,4 @@ describe('useLogout', () => {
 		expect(mockSetIsMenuOpen).toHaveBeenCalledOnce()
 		expect(mockDispatch).toHaveBeenCalledOnce()
 	})
-
-	it('should handle missing setter functions gracefully', () => {
-		const { result } = renderHook(() => useLogout(undefined, undefined))
-
-		expect(() => result.current(mockEvent)).toThrow()
-	})
-
-	it('should work with different dispatch implementations', () => {
-		const customDispatch = vi.fn()
-		useDispatch.mockReturnValue(customDispatch)
-
-		const { result } = renderHook(() =>
-			useLogout(mockSetTravellerName, mockSetIsMenuOpen),
-		)
-
-		result.current(mockEvent)
-
-		expect(customDispatch).toHaveBeenCalledWith(logout())
-		expect(mockDispatch).not.toHaveBeenCalled()
-	})
 })

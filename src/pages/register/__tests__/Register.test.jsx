@@ -262,6 +262,74 @@ describe('Register', () => {
 			})
 		})
 
+		it('keeps the form busy while the upload is pending and navigates once it resolves', async () => {
+			let resolveUpload
+			store.dispatch.mockReturnValue({
+				unwrap: () =>
+					new Promise((resolve) => {
+						resolveUpload = resolve
+					}),
+			})
+
+			renderRegister()
+			fireEvent.click(screen.getByTestId('mock-submit-button'))
+
+			await screen.findByTestId('registering-dialog')
+			expect(
+				screen.getByTestId('traveller-registration-form'),
+			).toHaveAttribute('data-loading', 'true')
+			expect(mockNavigate).not.toHaveBeenCalled()
+
+			resolveUpload({})
+
+			await waitFor(() => expect(mockNavigate).toHaveBeenCalledOnce())
+			expect(
+				screen.queryByTestId('registering-dialog'),
+			).not.toBeInTheDocument()
+		})
+
+		it('shows the error and frees the form when the upload fails part-way', async () => {
+			const errorMsg = 'Upload interrupted'
+			let rejectUpload
+			store = createMockStore({
+				travellers: {
+					status: 'loading',
+					error: null,
+					uploadProgress: {
+						uploadedFiles: 1,
+						totalFiles: 3,
+						percent: 33,
+					},
+				},
+			})
+			store.dispatch = vi.fn().mockReturnValue({
+				unwrap: () =>
+					new Promise((_, reject) => {
+						rejectUpload = reject
+					}),
+			})
+
+			renderRegister()
+			fireEvent.click(screen.getByTestId('mock-submit-button'))
+			await screen.findByTestId('registering-dialog')
+			expect(screen.getByRole('progressbar')).toBeInTheDocument()
+
+			rejectUpload(errorMsg)
+
+			expect(
+				await screen.findByTestId(
+					'invalid-traveller-registration-dialog',
+				),
+			).toHaveTextContent(errorMsg)
+			expect(
+				screen.queryByTestId('registering-dialog'),
+			).not.toBeInTheDocument()
+			expect(
+				screen.getByTestId('traveller-registration-form'),
+			).toHaveAttribute('data-loading', 'false')
+			expect(mockNavigate).not.toHaveBeenCalled()
+		})
+
 		it('should close error dialog when close button is clicked', async () => {
 			const errorMsg = 'Registration Failed'
 			const mockUnwrap = vi.fn().mockRejectedValue(errorMsg)

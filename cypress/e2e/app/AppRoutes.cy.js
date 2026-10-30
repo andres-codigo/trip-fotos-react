@@ -1,7 +1,10 @@
 import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
+import { TOP_NAVIGATION_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { TEST_USERS } from '../../../src/constants/config/users'
+
+import { performLogin } from '../../support/utils/authHelpers'
 
 const REQUEST_TIMEOUT = 10000
 
@@ -53,13 +56,12 @@ describe('App Routing', () => {
 		cy.url().should('include', PATHS.MESSAGES)
 	})
 
-	it('shows 404 page for unknown routes', () => {
-		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
+	it('redirects a protected route to the authentication page after logout', () => {
+		performLogin()
+		cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT).click()
+		cy.url().should('include', PATHS.AUTHENTICATION)
 
-		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.PAGE_NOT_FOUND)
-
-		cy.contains('This page is not available. Sorry about that.').should(
-			'be.visible',
-		)
+		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)
+		cy.url().should('include', PATHS.AUTHENTICATION)
 	})
 })

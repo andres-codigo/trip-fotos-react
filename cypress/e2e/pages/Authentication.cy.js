@@ -3,6 +3,7 @@ import { IDENTITY_TOOLKIT_ERRORS } from '../../../src/constants/test/mock-data/m
 import {
 	AUTHENTICATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
+	TRAVELLERS_LIST_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
@@ -336,5 +337,39 @@ describe('UI error dialog', () => {
 		cy.get('body').type('{esc}')
 
 		cy.get(DIALOG_SELECTORS.INVALID_EMAIL_OR_PASSWORD).should('not.exist')
+	})
+})
+
+describe('Sign-up journey', () => {
+	beforeEach(() => {
+		cy.resetEmulators()
+		cy.visit(loginUrl)
+	})
+
+	it('signs a new user up and lets them reach the registration form', () => {
+		cy.interceptLogin(
+			API_DATABASE.POST,
+			`${API_DATABASE.URL}signUp?key=${API_DATABASE.KEY}`,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK).click()
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			`new-user-${Date.now()}@example.com`,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
+			TEST_USERS.STANDARD.PASSWORD,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+
+		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
+			'eq',
+			PATHS.TRAVELLERS,
+		)
+		// The link is aria-disabled while the list loads
+		cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK)
+			.should('not.have.attr', 'aria-disabled', 'true')
+			.click()
+
+		cy.location('pathname').should('eq', PATHS.REGISTER)
 	})
 })

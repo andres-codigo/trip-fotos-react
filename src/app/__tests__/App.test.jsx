@@ -94,9 +94,6 @@ vi.mock('@/components/layout/footer/Footer', () => ({
 vi.mock('@/pages/authentication/Authentication', () => ({
 	default: () => <div>UserAuthPage</div>,
 }))
-vi.mock('@/pages/home/Home', () => ({
-	default: () => <div>HomePage</div>,
-}))
 vi.mock('@/pages/travellers/Travellers', () => ({
 	default: () => <div>TravellersPage</div>,
 }))
@@ -342,6 +339,45 @@ describe('App', () => {
 
 			await waitFor(() => {
 				expect(navigateMock).toHaveBeenCalledWith(PATHS.AUTHENTICATION)
+			})
+		})
+
+		it('keeps a restored session on the protected URL it was opened at', async () => {
+			const dispatch = vi.fn()
+			useDispatchMock.mockReturnValue(dispatch)
+			setAuthState('restored-token', false, 'user-1')
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.MESSAGES,
+			})
+
+			renderWithRoute(PATHS.MESSAGES)
+
+			await waitFor(() => {
+				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
+			})
+			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
+		it('sends the user to /authentication when tryLogin finds no session on a protected URL', async () => {
+			const dispatch = vi.fn().mockResolvedValue({
+				type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN_ASYNC.REJECTED,
+				meta: { rejectedWithValue: true },
+			})
+			useDispatchMock.mockReturnValue(dispatch)
+			setAuthState(null, false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.MESSAGES,
+			})
+
+			renderWithRoute(PATHS.MESSAGES)
+
+			await waitFor(() => {
+				expect(navigateMock).toHaveBeenCalledWith(
+					PATHS.AUTHENTICATION,
+					{ replace: true },
+				)
 			})
 		})
 

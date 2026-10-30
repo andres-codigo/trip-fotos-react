@@ -574,6 +574,7 @@ const travellersSlice = createSlice({
 					state.isTraveller = false
 					state.isTravellerCheckedFor = null
 					state.travellerName = ''
+					state.selectedTraveller = null
 				},
 			)
 	},
