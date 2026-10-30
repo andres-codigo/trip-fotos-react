@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.6](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.5...v0.20.6) (2026-10-30)
+
+
+### Bug Fixes
+
+* clean up Storage uploads when registering a traveller fails ([#528](https://github.com/andres-codigo/trip-fotos-react/issues/528)) ([8d31dd7](https://github.com/andres-codigo/trip-fotos-react/commit/8d31dd7219c29e1d49b984ce533040df10324747))
+
 ## [0.20.5](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.4...v0.20.5) (2026-10-28)
 
 
