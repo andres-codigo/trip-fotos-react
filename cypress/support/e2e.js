@@ -16,6 +16,10 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+import { failOnConsole } from './utils/failOnConsole'
+
+failOnConsole()
+
 beforeEach(() => {
 	cy.clearAllCookies()
 	cy.clearAllLocalStorage()

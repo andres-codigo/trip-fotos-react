@@ -105,7 +105,7 @@ describe('<Input />', () => {
 					isValid={false}
 					message="Error!"
 					data-cy={INPUT.ID}
-					dataCypressError={INPUT.ERROR_ID}
+					data-cy-error={INPUT.ERROR_ID}
 				/>,
 			)
 			cy.get(getByDataCy(INPUT.ID))
@@ -210,7 +210,7 @@ describe('<Input />', () => {
 					isValid={false}
 					message="Error!"
 					data-cy={INPUT.ID}
-					dataCypressError={INPUT.ERROR_ID}
+					data-cy-error={INPUT.ERROR_ID}
 				/>,
 			)
 			cy.get(getByDataCy(INPUT.ID))

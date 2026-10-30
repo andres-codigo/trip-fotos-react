@@ -44,6 +44,10 @@ Reusable test utilities are located in [testingLibrarySetup.js](../src/testUtils
 
 - **Mock Setup**: `setupMocks()` mocks `fetch` and `localStorage`, and runs automatically when the module is imported (e.g. via the Vitest `setupFiles` config).
 
+## Console output fails tests
+
+Vitest ([failOnConsole.js](../src/testUtils/vitest/failOnConsole.js)) and Cypress, both component and E2E ([failOnConsole.js](../cypress/support/utils/failOnConsole.js), loaded from `component.js` and `e2e.js`), fail a test that logs an unexpected `console.error` or `console.warn`, so React warnings (an unknown DOM prop, an update outside `act()`, an invalid ARIA attribute) surface in the test run instead of only in a log. To let a known third-party message through, add a pattern to `ALLOWED_MESSAGES` (Vitest) or `ALLOWED_CONSOLE_MESSAGES` (Cypress) with a one-line reason; fix our own warnings instead. A test that expects a message spies on `console` itself.
+
 ## 2. Cypress Setup
 
 Cypress is already configured in the project (both E2E and component testing) and included in the project dependencies — `npm install` is all that's needed. Feel free to customise [cypress.config.js](../cypress.config.js) as needed. See [Scripts](../README.md#scripts) for the `cy:*` commands.

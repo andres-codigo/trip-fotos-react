@@ -473,9 +473,11 @@ describe('<TravellersList />', () => {
 				).not.toBeDisabled()
 			})
 
-			it('should enable refresh button when travellers exist', () => {
+			it('should enable refresh button when travellers exist', async () => {
 				setupMocksForHasTravellers()
-				renderTravellersList()
+				await act(async () => {
+					renderTravellersList()
+				})
 
 				expect(
 					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
@@ -506,7 +508,7 @@ describe('<TravellersList />', () => {
 		})
 
 		describe('component lifecycle', () => {
-			it('should load behind the spinner when the cached travellers have not been fetched this page load', () => {
+			it('should load behind the spinner when the cached travellers have not been fetched this page load', async () => {
 				setupMocksForHasTravellers()
 				vi.mocked(travellersSlice.selectLastFetch).mockReturnValue(null)
 
@@ -518,12 +520,17 @@ describe('<TravellersList />', () => {
 				expect(
 					screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 				).not.toBeInTheDocument()
+
+				await act(async () => {})
 			})
 
-			it('should revalidate cached travellers on mount without showing the spinner', () => {
+			it('should revalidate cached travellers on mount without showing the spinner', async () => {
 				setupMocksForHasTravellers()
 
-				const { mockDispatch } = renderTravellersList()
+				let mockDispatch
+				await act(async () => {
+					;({ mockDispatch } = renderTravellersList())
+				})
 
 				expect(mockDispatch).toHaveBeenCalledTimes(1)
 				expect(travellersSlice.loadTravellers).toHaveBeenCalledWith({
@@ -577,12 +584,14 @@ describe('<TravellersList />', () => {
 	})
 
 	describe('Accessibility tests', () => {
-		it('should have proper role for error dialog', () => {
+		it('should have proper role for error dialog', async () => {
 			setupMocksForErrorState()
 
-			renderTravellersList({
-				initialError: MOCK_ERROR_MESSAGES.INITIAL_ERROR,
-				isLoading: false,
+			await act(async () => {
+				renderTravellersList({
+					initialError: MOCK_ERROR_MESSAGES.INITIAL_ERROR,
+					isLoading: false,
+				})
 			})
 
 			expect(
@@ -590,18 +599,22 @@ describe('<TravellersList />', () => {
 			).toBeInTheDocument()
 		})
 
-		it('should have proper role for refresh button', () => {
+		it('should have proper role for refresh button', async () => {
 			setupMocksForHasTravellers()
-			renderTravellersList()
+			await act(async () => {
+				renderTravellersList()
+			})
 
 			expect(
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
 			).toBeInTheDocument()
 		})
 
-		it('should have proper list structure for travellers', () => {
+		it('should have proper list structure for travellers', async () => {
 			setupMocksForHasTravellers()
-			renderTravellersList()
+			await act(async () => {
+				renderTravellersList()
+			})
 
 			expect(
 				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
@@ -636,9 +649,11 @@ describe('<TravellersList />', () => {
 				name: `${city.city}, ${city.country}`,
 			})
 
-		it('should render one active checkbox per distinct city', () => {
+		it('should render one active checkbox per distinct city', async () => {
 			setupMocksForTravellersWithCities()
-			renderTravellersList()
+			await act(async () => {
+				renderTravellersList()
+			})
 
 			const checkboxes = screen.getAllByRole('checkbox')
 			expect(checkboxes).toHaveLength(2)
@@ -648,9 +663,11 @@ describe('<TravellersList />', () => {
 			).toHaveLength(2)
 		})
 
-		it('should hide travellers whose cities are all filtered out', () => {
+		it('should hide travellers whose cities are all filtered out', async () => {
 			setupMocksForTravellersWithCities()
-			renderTravellersList()
+			await act(async () => {
+				renderTravellersList()
+			})
 
 			fireEvent.click(getCheckbox(MOCK_CITIES.PRAGUE))
 			expect(
@@ -671,9 +688,11 @@ describe('<TravellersList />', () => {
 			).toHaveLength(1)
 		})
 
-		it('should not render the filter when no traveller has a city', () => {
+		it('should not render the filter when no traveller has a city', async () => {
 			setupMocksForHasTravellers()
-			renderTravellersList()
+			await act(async () => {
+				renderTravellersList()
+			})
 
 			expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
 		})

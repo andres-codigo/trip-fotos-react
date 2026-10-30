@@ -29,12 +29,14 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
 			'data-cy': dataCy,
 			onMenuItemClick: _onMenuItemClick,
 			className,
+			ariaLabel,
 			...props
 		}) => {
 			return (
 				<button
 					className={className}
 					data-cy={dataCy}
+					aria-label={ariaLabel}
 					{...props}>
 					{children}
 				</button>
