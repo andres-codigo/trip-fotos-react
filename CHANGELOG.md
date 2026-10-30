@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.7...v0.21.0) (2026-10-30)
+
+
+### Features
+
+* add Tailwind v4 with semantic design tokens ([#536](https://github.com/andres-codigo/trip-fotos-react/issues/536)) ([534339e](https://github.com/andres-codigo/trip-fotos-react/commit/534339ec40474b0776c77bfa5b611672ce1292c3))
+
 ## [0.20.7](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.6...v0.20.7) (2026-10-30)
 
 
