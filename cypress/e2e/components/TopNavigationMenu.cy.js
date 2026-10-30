@@ -5,6 +5,8 @@ import {
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
+import { performLogin } from '../../support/utils/authHelpers'
+
 describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
 		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
@@ -25,12 +27,11 @@ describe('Viewport Desktop > Not Logged in > Top Navigation Rendering Tests', ()
 
 describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	beforeEach(() => {
-		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
-		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
+		performLogin()
+		cy.setViewportToMobile()
 	})
 
 	it('Displays the title as a link and renders the hamburger menu', () => {
-		cy.setViewportToMobile()
 		cy.assertHeaderTitleLink()
 
 		cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should('exist')
@@ -42,8 +43,6 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 	})
 
 	it('Toggles the hamburger menu open and closed on mobile viewports', () => {
-		cy.setViewportToMobile()
-
 		cy.get(HEADER_SELECTORS.SITE_HEADER).as('header')
 		cy.get('@header')
 			.find(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
@@ -58,6 +57,24 @@ describe('Viewport Mobile > Logged in > Top Navigation Rendering Tests', () => {
 
 		// Click to close the menu
 		cy.get('@hamburgerMenu').click()
+		cy.assertHamburgerMenuState(false)
+	})
+})
+
+describe('Viewport Mobile > Logged in as a traveller > Top Navigation', () => {
+	beforeEach(() => {
+		cy.resetEmulators()
+		performLogin(TEST_USERS.TRAVELLER.EMAIL, TEST_USERS.TRAVELLER.PASSWORD)
+		cy.setViewportToMobile()
+	})
+
+	it('Opens the menu, navigates to Messages and closes the menu', () => {
+		cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).click()
+		cy.assertHamburgerMenuState(true)
+
+		cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES).click()
+
+		cy.url().should('include', PATHS.MESSAGES)
 		cy.assertHamburgerMenuState(false)
 	})
 })

@@ -2,6 +2,9 @@ import {
 	CONTACT_TRAVELLER_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
+import { API_DATABASE } from '../../../src/constants/api'
+import { CONTACT_TRAVELLER_CONFIG } from '../../../src/constants/travellers'
+import { TEST_USERS } from '../../../src/constants/config/users'
 import { PATHS } from '../../../src/constants/ui/paths'
 
 import { performLogin } from '../../support/utils/authHelpers'
@@ -87,5 +90,65 @@ describe('Contact Traveller Page', () => {
 		assertRedirectedToDetail(OTHER_TRAVELLER_ID)
 
 		cy.checkA11y()
+	})
+})
+
+describe('Contact Traveller page > sending a message', () => {
+	const MESSAGE = 'Which month did you travel in?'
+	const MESSAGE_URL = '**/messages/*.json*'
+	const recipientPath = contactPath(TEST_USERS.OTHER_TRAVELLER.ID)
+
+	beforeEach(() => {
+		cy.resetEmulators()
+		performLogin(TEST_USERS.TRAVELLER.EMAIL, TEST_USERS.TRAVELLER.PASSWORD)
+		cy.visit(recipientPath)
+		cy.get(CONTACT_TRAVELLER_SELECTORS.FORM).should('be.visible')
+	})
+
+	it('sends the message and returns to the travellers list with a confirmation', () => {
+		cy.intercept(API_DATABASE.POST, MESSAGE_URL).as('sendMessage')
+
+		cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_INPUT).type(MESSAGE)
+		cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()
+
+		cy.wait('@sendMessage', { timeout: REQUEST_TIMEOUT }).then(
+			({ request, response }) => {
+				expect(request.url).to.include(
+					`/messages/${TEST_USERS.OTHER_TRAVELLER.ID}.json`,
+				)
+				expect(request.body).to.include({
+					userEmail: TEST_USERS.TRAVELLER.EMAIL,
+					message: MESSAGE,
+				})
+				expect(response.statusCode).to.eq(200)
+			},
+		)
+
+		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
+			'eq',
+			PATHS.TRAVELLERS,
+		)
+		cy.contains(CONTACT_TRAVELLER_CONFIG.SUCCESS_MESSAGE).should(
+			'be.visible',
+		)
+	})
+
+	it('shows an error dialog and keeps the typed message when sending fails', () => {
+		cy.intercept(API_DATABASE.POST, MESSAGE_URL, {
+			statusCode: 500,
+			body: {},
+		}).as('sendMessage')
+
+		cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_INPUT).type(MESSAGE)
+		cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()
+		cy.wait('@sendMessage', { timeout: REQUEST_TIMEOUT })
+
+		cy.get(CONTACT_TRAVELLER_SELECTORS.ERROR_DIALOG).should('be.visible')
+		cy.location('pathname').should('eq', recipientPath)
+		cy.get(CONTACT_TRAVELLER_SELECTORS.SENDING_DIALOG).should('not.exist')
+		cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_INPUT).should(
+			'have.value',
+			MESSAGE,
+		)
 	})
 })

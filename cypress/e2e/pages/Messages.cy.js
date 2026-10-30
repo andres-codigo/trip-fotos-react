@@ -70,6 +70,23 @@ describe('Logged in > Messages page', () => {
 		cy.contains(SAMPLE_MESSAGE_ONE.message).should('not.exist')
 	})
 
+	it('keeps the message and shows an error dialog when deleting fails', () => {
+		cy.intercept(API_DATABASE.GET, MESSAGES_URL).as('loadMessages')
+		cy.intercept(API_DATABASE.DELETE, MESSAGE_URL, {
+			statusCode: 500,
+			body: {},
+		}).as('deleteMessage')
+		cy.visit(PATHS.MESSAGES)
+		cy.wait('@loadMessages', { timeout: REQUEST_TIMEOUT })
+
+		cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+		cy.wait('@deleteMessage')
+
+		cy.get(MESSAGE_ITEM_SELECTORS.ERROR_DIALOG).should('be.visible')
+		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 2)
+		cy.contains(SAMPLE_MESSAGE_ONE.message).should('be.visible')
+	})
+
 	it('shows an error dialog when loading fails', () => {
 		cy.intercept(API_DATABASE.GET, MESSAGES_URL, {
 			statusCode: 500,

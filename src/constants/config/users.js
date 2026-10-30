@@ -21,6 +21,15 @@ export const TEST_USERS = {
 		EMAIL: getCypressExposed('EMULATOR_TRAVELLER_EMAIL'),
 		PASSWORD: getCypressExposed('CYPRESS_USER_PASSWORD'),
 	},
+	// Seeded traveller with no inbox, for contacting from the other accounts
+	OTHER_TRAVELLER: {
+		ID: getCypressExposed('EMULATOR_OTHER_TRAVELLER_UID'),
+	},
+	// Seeded account with the admin custom claim
+	ADMIN: {
+		EMAIL: getCypressExposed('EMULATOR_ADMIN_EMAIL'),
+		PASSWORD: getCypressExposed('CYPRESS_USER_PASSWORD'),
+	},
 }
 
 export const AUTH_TEST_DATA = {
