@@ -84,11 +84,11 @@ describe('<ImageGallery />', () => {
 				cy.viewport(width, height)
 				mountGallery()
 				openAt(position)
-				cy.get('dialog').should('have.css', 'opacity', '1')
+				cy.get('[role="dialog"]').should('have.css', 'opacity', '1')
 				cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL).then(($img) => {
 					const image = $img[0].getBoundingClientRect()
 					const dialog = $img
-						.closest('dialog')[0]
+						.closest('[role="dialog"]')[0]
 						.getBoundingClientRect()
 					expect(image.width, 'image width').to.be.greaterThan(0)
 					expect(image.left, 'inside left').to.be.at.least(
@@ -134,7 +134,7 @@ describe('<ImageGallery />', () => {
 	it('has no axe violations with the dialog open', () => {
 		mountGallery()
 		openAt(0)
-		cy.get('dialog').should('have.css', 'opacity', '1')
+		cy.get('[role="dialog"]').should('have.css', 'opacity', '1')
 		cy.checkA11y()
 	})
 })

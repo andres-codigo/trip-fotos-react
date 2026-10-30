@@ -35,7 +35,10 @@ vi.mock('react-redux', async () => {
 })
 
 vi.mock('@/store/slices/travellersSlice', () => ({
-	loadTravellers: vi.fn(),
+	// A real thunk has rejected.match; without it the happy path throws and opens the error dialog
+	loadTravellers: Object.assign(vi.fn(), {
+		rejected: { match: () => false },
+	}),
 	selectTravellers: vi.fn(),
 	selectHasTravellers: vi.fn(),
 	selectIsTraveller: vi.fn(),
@@ -106,6 +109,9 @@ const renderTravellersList = (props = {}, options = {}) => {
 describe('<TravellersList />', () => {
 	beforeEach(() => {
 		vi.clearAllMocks()
+		vi.mocked(travellersSlice.loadTravellers).rejected = {
+			match: () => false,
+		}
 		vi.mocked(authenticationSlice.selectIsAuthenticated).mockReturnValue(
 			false,
 		)
