@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.7](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.6...v0.20.7) (2026-10-30)
+
+
+### Enhancements
+
+* redirect a logged-in user away from the authentication page ([#530](https://github.com/andres-codigo/trip-fotos-react/issues/530)) ([aca7eff](https://github.com/andres-codigo/trip-fotos-react/commit/aca7effcd3c04a1c9a1fcc88d94b53591224da62))
+
 ## [0.20.6](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.5...v0.20.6) (2026-10-30)
 
 
