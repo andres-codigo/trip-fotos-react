@@ -31,6 +31,15 @@ Each component must reside in its own contextual folder. Components are located 
             useUserAuthentication.test.js
     ```
 
+### shadcn/ui components
+
+`components.json` points the shadcn CLI at `@/components/ui`, which writes a flat `ui/<name>.jsx`. That breaks the folder-per-component rule, so after `npx shadcn@latest add <name>`:
+
+- Move the generated file to `src/components/ui/<name>/<Name>.jsx` (PascalCase file, lowercase-hyphen folder) and give it a `__tests__/` folder with a test.
+- Keep the generated `cn` import (`@/utils/cn`) and fix any other import to the `@/` alias.
+- If a component of that name already exists (e.g. `ui/badge/BaseBadge`), do not let the CLI overwrite or sit beside it: migrate the existing component to the shadcn one in the same change.
+- Add `lucide-react` and Radix packages only when a component needs them.
+
 ### Refactoring Rule
 
 If adding to a folder with flat components, refactor existing components into their own folders first. When a new reusable pattern emerges, create a new reusable component in the appropriate folder and immediately refactor existing code to utilise it.
