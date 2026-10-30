@@ -57,7 +57,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
-- Local Firebase emulators with a deterministic seed, and `npm run cy:run:e2e:emulators`, which runs the E2E specs against them with real registration, photo upload and Messages round trips, and run in CI beside the live E2E job with no secrets and a cached Firebase CLI download ([#500](https://github.com/andres-codigo/trip-fotos-react/issues/500), [#501](https://github.com/andres-codigo/trip-fotos-react/issues/501), [#502](https://github.com/andres-codigo/trip-fotos-react/issues/502), [#503](https://github.com/andres-codigo/trip-fotos-react/issues/503), [#516](https://github.com/andres-codigo/trip-fotos-react/issues/516), [#518](https://github.com/andres-codigo/trip-fotos-react/issues/518))
+- Local Firebase emulators with a deterministic seed, and `npm run cy:run:e2e:emulators`, which runs the E2E specs against them with real registration, photo upload and Messages round trips, and run in CI on every PR with no secrets and a cached Firebase CLI download, while the live Firebase run shrinks to one read-only smoke spec on pushes to `main` ([#500](https://github.com/andres-codigo/trip-fotos-react/issues/500), [#501](https://github.com/andres-codigo/trip-fotos-react/issues/501), [#502](https://github.com/andres-codigo/trip-fotos-react/issues/502), [#503](https://github.com/andres-codigo/trip-fotos-react/issues/503), [#516](https://github.com/andres-codigo/trip-fotos-react/issues/516), [#518](https://github.com/andres-codigo/trip-fotos-react/issues/518), [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504))
 - Gallery thumbnails reserve their space before the image loads: each photo's dimensions are stored at upload (`fileDimensions`) so the page no longer jumps; photos registered earlier shift once ([#452](https://github.com/andres-codigo/trip-fotos-react/issues/452))
 - The photo dialog fits the screen at any width, adds next/previous buttons and arrow-key navigation, and reflects the open photo in the URL as `?photo=N` ([#445](https://github.com/andres-codigo/trip-fotos-react/issues/445))
 - The Register dialog shows image upload progress (a progress bar with a photo count) instead of only a spinner ([#438](https://github.com/andres-codigo/trip-fotos-react/issues/438))
@@ -68,8 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Next up** — in this order:
 
-- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504); the #499 spike says go and #500 added the local emulators and the app flag; #501 added the seed script; #502 added the emulator E2E run; #503 runs it in CI; #516 caches the Firebase CLI download; #518 un-skipped the Travellers list render spec)
-- [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration (after #292)
+- [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark-only Claude-inspired redesign, with a multi-column Travellers grid (last step of #379)
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
@@ -158,11 +157,11 @@ npm run cy:open:e2e
 # Open the Cypress Component Test Runner in interactive mode
 npm run cy:open:ct
 
-# Run Cypress E2E tests in headless mode
-npm run cy:run:e2e
-
-# Run the same E2E specs against the local Firebase emulators (no live project or secrets)
+# Run the E2E specs against the local Firebase emulators (no live project or secrets)
 npm run cy:run:e2e:emulators
+
+# Run the read-only live smoke spec against the real Firebase project (needs the CYPRESS_USER_* credentials in .env)
+npm run cy:run:e2e:live
 
 # Run Cypress Component tests in headless mode
 npm run cy:run:ct
@@ -276,7 +275,7 @@ cp .env.example .env
 | `VITE_BACKEND_BASE_URL`                       | Realtime Database REST calls                                             |
 | `VITE_API_URL`, `VITE_API_KEY`                | Firebase Auth REST API — profile updates, and the E2E sign-in intercepts |
 | `VITE_ROOT_URL`                               | Cypress `baseUrl`                                                        |
-| `CYPRESS_USER_EMAIL`, `CYPRESS_USER_PASSWORD` | An existing test account the E2E suite signs in with                     |
+| `CYPRESS_USER_EMAIL`, `CYPRESS_USER_PASSWORD` | An existing test account the live smoke spec signs in with               |
 | `VITE_OPEN` (optional)                        | `true` opens the browser when the dev server starts                      |
 
 [`.env.emulators`](.env.emulators) is committed (no secrets) and holds the emulator values; see [Firebase Emulators](#firebase-emulators).
@@ -317,21 +316,21 @@ Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools 
 ## 🧪 Testing and CI
 
 - **Vitest** unit and integration tests sit beside the code they test, in `__tests__/` folders or as `*.test.js` next to store files.
-- **Cypress** component tests (`*.cy.jsx`) sit in the same `__tests__/` folders; E2E specs live in `cypress/e2e/` and run in CI against both the live Firebase project and the local emulators.
+- **Cypress** component tests (`*.cy.jsx`) sit in the same `__tests__/` folders; E2E specs live in `cypress/e2e/` and run in CI against the local Firebase emulators on every PR; one read-only smoke spec in `cypress/e2e-live/` runs against the real project on pushes to `main`.
 - **GitHub Actions** run Vitest, Cypress component and Cypress E2E tests on pull requests that touch code, label issues and PRs from [`.github/labels.json`](.github/labels.json) and move them across the project board. CodeQL scans every PR, and the **Protect main** ruleset requires a pull request to change `main`.
 
-| Workflow                          | File                                                         | Triggered On     |
-| --------------------------------- | ------------------------------------------------------------ | ---------------- |
-| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`                    | Push/PR/Manual   |
-| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml` (live and emulator jobs) | Push/PR/Manual   |
-| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`                    | Push/PR/Manual   |
-| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`                | PR Target Events |
-| GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`                  | Issue Events     |
-| GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml`               | PR Target Events |
-| GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`                    | Push/Manual      |
-| Release - Release Please          | `.github/workflows/release-please.yml`                       | Push             |
+| Workflow                          | File                                                               | Triggered On     |
+| --------------------------------- | ------------------------------------------------------------------ | ---------------- |
+| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`                          | Push/PR/Manual   |
+| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml` (emulator and live smoke jobs) | Push/PR/Manual   |
+| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`                          | Push/PR/Manual   |
+| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`                      | PR Target Events |
+| GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`                        | Issue Events     |
+| GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml`                     | PR Target Events |
+| GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`                          | Push/Manual      |
+| Release - Release Please          | `.github/workflows/release-please.yml`                             | Push             |
 
-The workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` repository secrets; E2E also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
+The workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` repository secrets; only the live smoke job also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
 
 Details: [docs/testing.md](docs/testing.md) (test layout and utilities) and [docs/ci-cd.md](docs/ci-cd.md) (each workflow's triggers, project board statuses, labels, branch protection and token rotation).
 

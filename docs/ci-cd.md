@@ -26,8 +26,9 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
     - On **push** to `main` (for changes in `src/**`, `cypress/**`, `package.json`, or `cypress.config.*`)
     - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files still trigger it)
     - Manually via **Actions → "Run workflow"**
-- **Purpose:** Runs Cypress end-to-end (E2E) tests against the running application to verify user flows and integration with backend services. Runs `npm run cy:run:e2e` — see [Scripts](../README.md#scripts). The dev server is awaited with a `curl` retry loop (up to 60 seconds) rather than the Cypress action's URL ping, which gave up on the first unexpected connection error.
-- **Emulator job:** a second job, `Run Cypress E2E Tests (Firebase emulators)`, runs `npm run cy:run:e2e:emulators` against the local Firebase emulators. It needs no secrets, so it also runs on Dependabot PRs, while the live job and its Dependabot skip stay as they are. It installs Java (`actions/setup-java`, Temurin 21), caches `~/.cache/firebase/emulators` and the `npx` download of the pinned Firebase CLI (`~/.npm/_npx`) and sets the Firebase CLI to non-interactive (`CI`, no update check). Expect 20 to 40 seconds of emulator start-up on top of the run; watch the added minutes per PR.
+- **Purpose:** Runs the Cypress end-to-end (E2E) specs against the local Firebase emulators on every pull request and push, to verify user flows and integration with the backend services. Runs `npm run cy:run:e2e:emulators` — see [Scripts](../README.md#scripts).
+- **Emulator job:** `Run Cypress E2E Tests (Firebase emulators)`. It needs no secrets, so it runs on every PR, Dependabot's included. It installs Java (`actions/setup-java`, Temurin 21), caches `~/.cache/firebase/emulators` and the `npx` download of the pinned Firebase CLI (`~/.npm/_npx`) and sets the Firebase CLI to non-interactive (`CI`, no update check). Expect 20 to 40 seconds of emulator start-up on top of the run.
+- **Live smoke job:** `Run Cypress Live Smoke Test` runs on pushes to `main` (and manual runs) only, never on a PR. It runs the one read-only spec in `cypress/e2e-live/` (sign in, read the travellers list) with the Firebase and `CYPRESS_USER_*` secrets, to catch drift the emulators cannot: keys, console settings, deployed rules and real token signing. The dev server is awaited with a `curl` retry loop (up to 60 seconds) rather than the Cypress action's URL ping, which gave up on the first unexpected connection error. The test user keeps a 1-day lifecycle rule on its `images/<uid>/` Storage prefix for as long as the live account exists.
 
 ---
 
@@ -258,4 +259,4 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 ---
 
-> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly. The Vitest, component and E2E workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` secrets; E2E also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
+> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly. The Vitest and component workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` secrets; only the live smoke job also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`. The emulator E2E job uses none.

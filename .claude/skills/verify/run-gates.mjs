@@ -32,7 +32,7 @@ const GATES = {
 		failure: /error|Error/,
 	},
 	e2e: {
-		command: 'node .claude/skills/verify/run-e2e.mjs',
+		command: 'npm run cy:run:e2e:emulators',
 		summary: /(All specs passed!.*|\d+ of \d+ failed.*)/,
 		failure: /^\s*\d+\) |AssertionError|Error:|✖|ECONNREFUSED/,
 	},

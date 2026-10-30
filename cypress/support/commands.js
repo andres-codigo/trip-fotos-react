@@ -67,7 +67,7 @@ Cypress.Commands.add('login', (email, password) => {
 //INTERCEPTORS
 ////
 
-// The app checks traveller registration against the live database, so pin the answer rather than depend on the shared E2E account's record
+// The app checks traveller registration against the database; specs sign in as a seeded account, so only a spec that needs another answer pins it
 Cypress.Commands.add('stubTravellerCheck', (isTraveller = false) => {
 	cy.intercept(
 		{
@@ -128,7 +128,7 @@ Cypress.Commands.add(
 ////
 // STORAGE CLEANUP
 ////
-// Live uploads get a unique path per run, so each test must remove its own;
+// Uploads get a unique path per run, so each test must remove its own;
 // the signed-in user's ID token satisfies the owner-delete Storage rule
 Cypress.Commands.add('deleteStorageObject', (downloadUrl) => {
 	const { origin, pathname } = new URL(downloadUrl)
@@ -146,33 +146,21 @@ Cypress.Commands.add('deleteStorageObject', (downloadUrl) => {
 	})
 })
 
-const isEmulated = () => Cypress.expose('USE_EMULATORS') === 'true'
-
-// Back to the seed data for specs that write; the live run has nothing to reset
+// Back to the seed data for specs that write
 Cypress.Commands.add('resetEmulators', () => {
-	if (isEmulated()) {
-		cy.task('seedEmulators')
-		// The seed recreates the users, which invalidates their cached sessions
-		Cypress.session.clearAllSavedSessions()
-	}
+	cy.task('seedEmulators')
+	// The seed recreates the users, which invalidates their cached sessions
+	Cypress.session.clearAllSavedSessions()
 })
 
-// Reads the record back from the emulator, so a pass means the write reached the database; nothing to read on the live run
+// Reads the record back from the emulator, so a pass means the write reached the database
 Cypress.Commands.add('assertTravellerPersisted', (uid, expected) => {
-	if (!isEmulated()) return
 	cy.request(
 		`${Cypress.expose('VITE_DATABASE_URL')}/travellers/${uid}.json?ns=${Cypress.expose('VITE_DATABASE_NAMESPACE')}`,
 	)
 		.its('body')
 		.should('include', expected)
 })
-
-// Emulator runs let the request through to the emulator; the live run stubs it so the shared project is never written
-Cypress.Commands.add('stubLiveOnly', (method, url, response) =>
-	isEmulated()
-		? cy.intercept(method, url)
-		: cy.intercept(method, url, response),
-)
 
 ////
 // VIEWPORTS

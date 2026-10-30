@@ -12,8 +12,8 @@ Container specifics the section does not cover:
 
 - No `chromium-cli` or Playwright is installed: use a throwaway Cypress E2E spec under `cypress/e2e/tmp/` with `cy.screenshot(name, { capture: 'fullPage' })`.
 - Lint errors in an untracked spec make it fail to load ("Failed to fetch dynamically imported module"): keep it ESLint-clean.
-- Port 3000 may be the user's own dev server: never kill it by port. Start your own Vite on another port and stop it by PID, or use `node .claude/skills/verify/run-e2e.mjs --spec <path>`.
-- Never read `.env`: the Cypress credentials reach the spec through the Cypress config and `performLogin()`.
+- Port 3000 may be the user's own dev server: never kill it by port. Start your own Vite on another port and stop it by PID, or run the spec against the emulators (see [testing.instructions.md](../../../.github/instructions/testing.instructions.md#when-to-run-e2e-locally)).
+- Never read `.env`: the seeded emulator accounts reach the spec through the Cypress config and `performLogin()`.
 - Case-only SCSS renames can leave files missing after `git switch`: `git restore` the affected folder, never anything with uncommitted work.
 
 Report, per image, what is on screen, and list what was not checked. Hold the merge while a visual question is open, even when CI is green. Delete the spec and screenshots afterwards.

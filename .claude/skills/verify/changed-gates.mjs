@@ -16,7 +16,7 @@ const RULES = [
 	[/^(index\.html|public\/)/, ['build']],
 ]
 
-// E2E stays opt-in (live Firebase, and CI runs it on every PR), so these only earn an advisory
+// E2E stays opt-in (CI runs it on every PR), so these only earn an advisory
 const E2E_ADVISED = [
 	[/^cypress\/(e2e|support)\//, 'E2E specs or support changed'],
 	[/^cypress\.config\./, 'Cypress config changed'],

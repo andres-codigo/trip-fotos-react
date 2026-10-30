@@ -55,6 +55,10 @@ export default defineConfig({
 		CYPRESS_USER_PASSWORD: testUser.password,
 	},
 	e2e: {
+		// The live smoke spec signs in to the real project, so only its own run picks it up
+		specPattern: useEmulators
+			? 'cypress/e2e/**/*.cy.js'
+			: 'cypress/e2e-live/**/*.cy.js',
 		baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',
 		setupNodeEvents(on) {
 			on('task', { seedEmulators })
@@ -77,6 +81,8 @@ export default defineConfig({
 			}),
 		},
 		specPattern: '**/*.cy.{js,jsx,ts,tsx}',
+		// Cypress only skips the E2E folder by matching the E2E pattern, which now varies by mode
+		excludeSpecPattern: ['cypress/e2e/**', 'cypress/e2e-live/**'],
 		// Fixed so specs never depend on .env or CI secrets, and an unstubbed
 		// request fails on the unresolvable .invalid host instead of reaching the live DB
 		expose: {
