@@ -64,4 +64,23 @@ describe('App Routing', () => {
 		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)
 		cy.url().should('include', PATHS.AUTHENTICATION)
 	})
+
+	it('redirects a logged-in user from the authentication page to the travellers list', () => {
+		performLogin()
+		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
+
+		cy.location('pathname').should('eq', PATHS.TRAVELLERS)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).should(
+			'not.exist',
+		)
+	})
+
+	it('sends a logged-in user to the redirect target on the authentication page', () => {
+		performLogin()
+		cy.visit(
+			`${BASE_URL_CYPRESS}${PATHS.AUTHENTICATION}?redirect=${PATHS.REGISTER}`,
+		)
+
+		cy.location('pathname').should('eq', PATHS.REGISTER)
+	})
 })
