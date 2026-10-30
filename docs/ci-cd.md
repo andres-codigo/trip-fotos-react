@@ -2,6 +2,8 @@
 
 This project uses GitHub Actions to automate key development and monitoring tasks.
 
+Every `uses:` in `.github/workflows` is pinned to a full commit SHA with the release tag as a trailing comment (`uses: actions/checkout@<sha> # v4.4.0`), because a tag can be moved. When adding or updating an action, resolve the SHA from the intended repository (not a fork) and keep the comment in step.
+
 ## 1. Vitest Unit Tests
 
 - **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
