@@ -5,10 +5,6 @@ import { GLOBAL } from '@/constants/ui'
 
 import BaseImage from '@/components/ui/image/BaseImage'
 
-vi.mock('@/components/ui/image/BaseImage.module.scss', () => ({
-	default: { 'image-preview': 'image-preview' },
-}))
-
 const url = 'https://example.com/ada.jpg'
 
 const renderImage = (onOpen = vi.fn(), dimensions) => {
