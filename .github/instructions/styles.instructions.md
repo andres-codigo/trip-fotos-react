@@ -55,3 +55,7 @@ Global styles are located in `src/styles/global.scss`, which forwards `src/style
 ## Linting And Formatting
 
 - Ensure every edited or newly created SCSS file is Prettier-formatted and remains compatible with the repository's linting rules before finishing work.
+
+## Tailwind
+
+`src/styles/tailwind.css` holds the semantic tokens (`--background`, `--primary`, `--border` and so on, at the app's current values) and imports only Tailwind's theme and utilities layers; preflight is left out while SCSS modules are in use. Use `cn()` from `@/utils/cn` to combine and de-conflict utility classes. The existing media queries (768, 480, 440, 767 and 1024px) are unchanged: each moves to the `sm` (640px), `md` (768px) and `lg` (1024px) breakpoints as its component migrates.
