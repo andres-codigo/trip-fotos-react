@@ -13,18 +13,6 @@ import Alerts from '@/components/ui/alerts/Alerts'
  * - Verifies correct ARIA roles and attributes
  */
 
-// Mock CSS Modules
-vi.mock('@/components/ui/alerts/Alerts.module.scss', () => ({
-	default: {
-		container: 'container',
-		success: 'success',
-		error: 'error',
-		info: 'info',
-		fadeOut: 'fadeOut',
-		closeButton: 'closeButton',
-	},
-}))
-
 // Mock BaseButton to focus on Alerts logic
 vi.mock('@/components/ui/button/BaseButton', () => ({
 	default: ({ children, onClick, className, 'aria-label': ariaLabel }) => (
@@ -58,8 +46,7 @@ describe('Alerts Component', () => {
 
 		const alert = screen.getByRole('alert')
 		expect(alert).toBeInTheDocument()
-		expect(alert).toHaveClass('container')
-		expect(alert).toHaveClass('success') // Default type
+		expect(alert).toHaveClass('bg-alert-success') // Default type
 		expect(screen.getByText('Test Alert Message')).toBeInTheDocument()
 	})
 
@@ -72,7 +59,7 @@ describe('Alerts Component', () => {
 		)
 
 		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('error')
+		expect(alert).toHaveClass('bg-destructive')
 	})
 
 	it('renders correctly with "info" type', () => {
@@ -84,7 +71,7 @@ describe('Alerts Component', () => {
 		)
 
 		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('info')
+		expect(alert).toHaveClass('bg-accent-foreground')
 	})
 
 	it('starts fade-out on close button click and unmounts after animation ends', () => {
@@ -94,7 +81,7 @@ describe('Alerts Component', () => {
 		fireEvent.click(closeButton)
 
 		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('fadeOut')
+		expect(alert).toHaveClass('animate-alert-out')
 		expect(defaultProps.onClose).not.toHaveBeenCalled()
 
 		act(() => {
@@ -123,7 +110,7 @@ describe('Alerts Component', () => {
 		})
 
 		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('fadeOut')
+		expect(alert).toHaveClass('animate-alert-out')
 		expect(defaultProps.onClose).not.toHaveBeenCalled()
 
 		act(() => {
@@ -150,7 +137,7 @@ describe('Alerts Component', () => {
 		})
 
 		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('fadeOut')
+		expect(alert).toHaveClass('animate-alert-out')
 		expect(defaultProps.onClose).not.toHaveBeenCalled()
 
 		act(() => {
@@ -175,7 +162,7 @@ describe('Alerts Component', () => {
 		fireEvent.click(closeButton)
 
 		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('fadeOut')
+		expect(alert).toHaveClass('animate-alert-out')
 
 		act(() => {
 			fireEvent.animationEnd(alert)

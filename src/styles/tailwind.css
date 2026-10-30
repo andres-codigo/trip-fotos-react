@@ -26,6 +26,7 @@
 	--tint: #edd2ff;
 	--link-hover: #8d007a;
 	--success: #1b5e20;
+	--alert-success: #088a00;
 	--border: #cecece;
 	--input: #cecece;
 	--ring: #3d008d;
@@ -62,6 +63,7 @@
 	--color-tint: var(--tint);
 	--color-link-hover: var(--link-hover);
 	--color-success: var(--success);
+	--color-alert-success: var(--alert-success);
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
@@ -88,4 +90,32 @@
 	--breakpoint-sm: 640px;
 	--breakpoint-md: 768px;
 	--breakpoint-lg: 1024px;
+}
+
+/* Alerts slide in on mount and drift out on close; Alerts waits for the fade-out animationend */
+@theme {
+	--animate-alert-in: alert-in 0.3s ease-out;
+	--animate-alert-out: alert-out 0.3s ease-out forwards;
+
+	@keyframes alert-in {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes alert-out {
+		from {
+			opacity: 1;
+			transform: translateY(0);
+		}
+		to {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+	}
 }

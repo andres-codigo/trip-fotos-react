@@ -1,8 +1,11 @@
 import Alerts from '@/components/ui/alerts/Alerts'
 
-import alertsStyles from '@/components/ui/alerts/Alerts.module.scss'
-
 const ALERT = '[role="alert"]'
+const TYPE_CLASSES = {
+	success: 'bg-alert-success',
+	error: 'bg-destructive',
+	info: 'bg-accent-foreground',
+}
 const CLOSE_BUTTON = '[aria-label="Close message"]'
 
 describe('<Alerts />', () => {
@@ -22,7 +25,7 @@ describe('<Alerts />', () => {
 			)
 
 			cy.get(ALERT)
-				.should('have.class', alertsStyles[type])
+				.should('have.class', TYPE_CLASSES[type])
 				.and('not.have.css', 'background-color', 'rgba(0, 0, 0, 0)')
 		})
 	})
