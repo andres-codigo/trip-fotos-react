@@ -35,17 +35,20 @@ describe('Travellers Page - WIP', () => {
 			cy.checkA11y()
 		})
 
-		/* TODO: revisit once travellers are implemented via registration*/
-		it.skip('should render the travellers list component', () => {
+		it('should render the travellers list component', () => {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
+				fixture: 'travellers.json',
+			})
 			performLogin()
 
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'be.visible',
 			)
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).within(() => {
-				cy.get(TRAVELLERS_LIST_SELECTORS.CONTROLS).should('exist')
-			})
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST)
+				.find(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+				.should('have.length', 2)
+			cy.get(TRAVELLERS_LIST_SELECTORS.CONTROLS).should('exist')
 		})
 	})
 
