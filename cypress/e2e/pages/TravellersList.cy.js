@@ -45,9 +45,10 @@ describe('Travellers Page - WIP', () => {
 				'be.visible',
 			)
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).within(() => {
-				cy.get(TRAVELLERS_LIST_SELECTORS.CONTROLS).should('exist')
-			})
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST)
+				.find(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+				.should('have.length', 2)
+			cy.get(TRAVELLERS_LIST_SELECTORS.CONTROLS).should('exist')
 		})
 	})
 
