@@ -198,9 +198,11 @@ describe('UI state and mode switching', () => {
 	})
 
 	it('shows a loading dialog with spinner while authenticating', () => {
-		cy.interceptLogin(
+		// The emulator answers too fast for the dialog to be seen without a delay
+		cy.interceptDelayedLogin(
 			API_DATABASE.POST,
 			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
+			1000,
 		)
 		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
 
@@ -222,7 +224,7 @@ describe('UI state and mode switching', () => {
 					.and('include', 'data:image/svg+xml')
 			})
 
-		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+		cy.wait('@delayedLogin', { timeout: REQUEST_TIMEOUT })
 	})
 
 	it('disables form fields and buttons while the loading dialog displayed', () => {
