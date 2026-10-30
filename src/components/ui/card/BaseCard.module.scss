@@ -1,9 +1,0 @@
-@use '@/styles/setup/variables' as variables;
-
-.card {
-	border-radius: 0.75rem;
-	box-shadow: variables.$shadow-elevated;
-	padding: 1rem;
-	margin-inline: auto;
-	max-width: 40rem;
-}
