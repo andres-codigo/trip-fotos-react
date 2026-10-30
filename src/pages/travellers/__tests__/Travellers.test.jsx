@@ -1,74 +1,71 @@
 import { render, screen, act, fireEvent } from '@testing-library/react'
-import { Provider, useDispatch, useSelector } from 'react-redux'
+import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
+import { configureStore } from '@reduxjs/toolkit'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 import { GLOBAL } from '@/constants/ui'
-import { MOCK_TRAVELLERS, TEST_IDS } from '@/constants/test'
+import { TEST_IDS } from '@/constants/test'
 
 import Travellers from '@/pages/travellers/Travellers'
+import authenticationReducer from '@/store/slices/authenticationSlice'
+import travellersReducer from '@/store/slices/travellersSlice'
 
 import travellersStyles from '@/pages/travellers/Travellers.module.scss'
 
-vi.mock('react-redux', async () => {
-	const { createReactReduxMock } =
-		await import('@/testUtils/vitest/mockReactRedux')
-	return createReactReduxMock()
-})
+const SAMPLE_RECORDS = {
+	'traveller-1': {
+		firstName: 'Ada',
+		lastName: 'Lovelace',
+		tripDescription: 'Paris in spring',
+		daysInCity: 4,
+		cities: ['tokyo'],
+		files: [],
+		registered: '2024-01-01T00:00:00.000Z',
+	},
+	'traveller-2': {
+		firstName: 'Grace',
+		lastName: 'Hopper',
+		tripDescription: 'A week in Lisbon',
+		daysInCity: 7,
+		cities: ['lisbon'],
+		files: [],
+		registered: '2024-02-01T00:00:00.000Z',
+	},
+}
 
-vi.mock('@/store/slices/travellersSlice', async (importOriginal) => {
-	const actual = await importOriginal()
-	return {
-		...actual,
-		loadTravellers: vi.fn(),
-		selectTravellers: vi.fn(),
-		selectHasTravellers: vi.fn(),
-		selectIsTraveller: vi.fn(),
-		selectIsTravellerKnown: vi.fn(),
-		selectLastFetch: vi.fn(),
-	}
-})
-
-vi.mock('@/store/slices/authenticationSlice', async (importOriginal) => {
-	const actual = await importOriginal()
-	return {
-		...actual,
-		selectIsAuthenticated: vi.fn(),
-		selectUserId: vi.fn(),
-		selectIsAdmin: vi.fn(),
-	}
-})
-
-import * as travellersSlice from '@/store/slices/travellersSlice'
+const stubTravellers = (records) =>
+	vi.stubGlobal(
+		'fetch',
+		vi.fn().mockResolvedValue({ ok: true, json: async () => records }),
+	)
 
 const renderTravellers = (props = {}, locationState = null) => {
-	let mockDispatch
-
-	mockDispatch = vi.fn().mockResolvedValue({})
-	const mockStore = {
-		getState: () => ({}),
-		dispatch: mockDispatch,
-		subscribe: () => () => {},
-	}
-
-	vi.mocked(useDispatch).mockReturnValue(mockDispatch)
-	vi.mocked(useSelector).mockImplementation((selector) => {
-		return selector()
+	const store = configureStore({
+		reducer: {
+			authentication: authenticationReducer,
+			travellers: travellersReducer,
+		},
+		preloadedState: {
+			authentication: {
+				...authenticationReducer(undefined, { type: '@@init' }),
+				token: 'token',
+				userId: 'me',
+			},
+		},
 	})
 
 	const initialEntries = locationState
 		? [{ pathname: '/travellers', state: locationState }]
 		: ['/travellers']
 
-	const result = render(
-		<Provider store={mockStore}>
+	return render(
+		<Provider store={store}>
 			<MemoryRouter initialEntries={initialEntries}>
 				<Travellers {...props} />
 			</MemoryRouter>
 		</Provider>,
 	)
-
-	return { ...result, mockDispatch }
 }
 
 /**
@@ -79,26 +76,17 @@ const renderTravellers = (props = {}, locationState = null) => {
  * - Verifies that the main container and heading are rendered as expected
  * - Ensures the <main> element has both global and module-specific classes
  * - Checks that the <h1> displays the correct text
- * - Uses isolated rendering to avoid external dependencies
+ * - Renders with a real store and a stubbed fetch, so no selector needs mocking
  */
 
 describe('Travellers', () => {
-	beforeEach(() => {
-		vi.clearAllMocks()
-		vi.mocked(travellersSlice.selectLastFetch).mockReturnValue(1)
+	afterEach(() => {
+		vi.unstubAllGlobals()
 	})
 
-	const setupMocksForHasTravellers = () => {
-		vi.mocked(travellersSlice.selectTravellers).mockReturnValue(
-			MOCK_TRAVELLERS.SAMPLE_TRAVELLERS,
-		)
-		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(true)
-	}
+	const setupMocksForHasTravellers = () => stubTravellers(SAMPLE_RECORDS)
 
-	const setupMocksForNoTravellers = () => {
-		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([])
-		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
-	}
+	const setupMocksForNoTravellers = () => stubTravellers(null)
 
 	describe('Rendering tests', () => {
 		it('renders the <main> element', async () => {
@@ -150,6 +138,8 @@ describe('Travellers', () => {
 			expect(
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 			).toBeInTheDocument()
+			expect(screen.getByText('Ada Lovelace')).toBeInTheDocument()
+			expect(screen.getByText('Grace Hopper')).toBeInTheDocument()
 		})
 
 		it('renders the TravellersList component if there are no travellers', async () => {
