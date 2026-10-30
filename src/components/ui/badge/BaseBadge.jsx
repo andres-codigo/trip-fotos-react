@@ -6,7 +6,7 @@ import { BADGE } from '@/constants/test'
 import { getToneIndex } from '@/utils/getToneIndex'
 
 const badgeVariants = cva(
-	'inline-block select-none rounded-pill px-6 py-2 uppercase max-[768px]:px-3',
+	'inline-block select-none rounded-pill px-6 py-2 uppercase [@media(max-width:768px)]:px-3',
 	{
 		variants: {
 			tone: {

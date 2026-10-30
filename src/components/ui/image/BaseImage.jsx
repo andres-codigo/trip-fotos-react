@@ -14,7 +14,7 @@ const BaseImage = ({ title, url, dimensions, onOpen }) => {
 
 	return (
 		<li
-			className="relative w-[48%] overflow-hidden min-[481px]:w-[32%] [&_img]:block [&_img]:h-auto [&_img]:w-full [&_img]:cursor-pointer [&_img]:object-scale-down"
+			className="relative w-[32%] overflow-hidden [@media(max-width:480px)]:w-[48%] [&_img]:block [&_img]:h-auto [&_img]:w-full [&_img]:cursor-pointer [&_img]:object-scale-down"
 			data-cy={IMAGE.ID}>
 			{/* Nothing to enlarge, so the fallback is not a button */}
 			{hasError ? (
