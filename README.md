@@ -85,7 +85,7 @@ This project uses the following technologies:
 - [React](https://react.dev/) as the front-end library.
 - [React Router](https://reactrouter.com/) for routing.
 - [Redux Toolkit](https://redux-toolkit.js.org/) for state management, with [Redux Persist](https://github.com/rt2zz/redux-persist) for session persistence.
-- [SASS](https://sass-lang.com/) for CSS preprocessing.
+- [Tailwind CSS](https://tailwindcss.com/) v4 for design tokens and utility classes (theme and utilities only, no preflight), alongside [SASS](https://sass-lang.com/) modules until the migration finishes.
 - [ESLint](https://eslint.org/) for JavaScript linting.
 - [Stylelint](https://stylelint.io/) to keep component and page styles scoped (no bare element selectors in CSS modules).
 - [Prettier](https://prettier.io/) for code formatting.
@@ -393,7 +393,7 @@ trip-fotos-react/
 │   ├── pages/          # Page components for routing
 │   ├── services/       # External service configurations (Firebase, APIs, etc.)
 │   ├── store/          # Redux store and slices
-│   ├── styles/         # SCSS stylesheets
+│   ├── styles/         # SCSS stylesheets and the Tailwind theme (`tailwind.css`)
 │   ├── testUtils/      # Testing environment configuration and Cypress and Vitest utility functions
 │   ├── utils/          # General utility functions
 │   └── index.jsx       # Root application entry point

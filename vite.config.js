@@ -5,6 +5,7 @@ import fs from 'fs'
 import os from 'os'
 
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -49,7 +50,7 @@ export default defineConfig({
 		open: true,
 		https: httpsConfig,
 	},
-	plugins: [react()],
+	plugins: [react(), tailwindcss()],
 	resolve: {
 		alias: {
 			'@': resolve(__dirname, 'src'),

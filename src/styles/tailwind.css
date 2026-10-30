@@ -1,0 +1,85 @@
+/*
+  Tailwind v4 theme and utilities only. Preflight is left out while the SCSS modules
+  are still in use, because its base reset would change existing styles.
+  The app is dark-only: the dark palette arrives in #383 as a change of the values below.
+*/
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* Semantic tokens at the app's current values */
+:root {
+	--background: #ffffff;
+	--foreground: #000000;
+	--card: #ffffff;
+	--card-foreground: #333333;
+	--primary: #3d008d;
+	--primary-foreground: #ffffff;
+	--secondary: #640c9f;
+	--secondary-foreground: #ffffff;
+	--muted: #eee8e8;
+	--muted-foreground: #424242;
+	--accent: #f391e3;
+	--accent-foreground: #3a0061;
+	--destructive: #df0d0d;
+	--destructive-foreground: #ffffff;
+	--success: #1b5e20;
+	--border: #cecece;
+	--input: #cecece;
+	--ring: #3d008d;
+
+	--overlay-backdrop: rgb(0 0 0 / 0.75);
+
+	/* City badge tones, in the order getToneIndex assigns them */
+	--badge-tone-0: #3d008d;
+	--badge-tone-1: #71008d;
+	--badge-tone-2: #ad1457;
+	--badge-tone-3: #37474f;
+	--badge-tone-4: #9c3d00;
+	--badge-tone-5: #1b5e20;
+	--badge-tone-6: #006064;
+	--badge-tone-7: #1565c0;
+}
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-success: var(--success);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+
+	--color-badge-0: var(--badge-tone-0);
+	--color-badge-1: var(--badge-tone-1);
+	--color-badge-2: var(--badge-tone-2);
+	--color-badge-3: var(--badge-tone-3);
+	--color-badge-4: var(--badge-tone-4);
+	--color-badge-5: var(--badge-tone-5);
+	--color-badge-6: var(--badge-tone-6);
+	--color-badge-7: var(--badge-tone-7);
+
+	--shadow-elevated: 0 2px 8px rgb(0 0 0 / 0.26);
+	--shadow-menu: 0 10px 27px rgb(0 0 0 / 0.05);
+
+	--radius-sm: 0.25rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+	--radius-pill: 1.875rem;
+
+	--font-sans: 'Roboto', sans-serif;
+
+	--breakpoint-sm: 640px;
+	--breakpoint-md: 768px;
+	--breakpoint-lg: 1024px;
+}
