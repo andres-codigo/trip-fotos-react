@@ -1,8 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
-
-import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
 
 import { BUTTON } from '@/constants/test'
 
@@ -19,55 +17,52 @@ import BaseButton from '@/components/ui/button/BaseButton'
  * - Verifies prop spreading and className handling
  */
 
-vi.mock('classnames', () => ({
-	default: createClassNamesMock(),
-}))
-
-vi.mock('@/components/ui/button/BaseButton.module.scss', () => ({
-	default: {
-		button: 'mocked-button-class',
-		link: 'mocked-link-class',
-		disabled: 'mocked-disabled-class',
-		flat: 'mocked-flat-class',
-		outlined: 'mocked-outlined-class',
-	},
-}))
-
-import classNames from 'classnames'
-
-const mockClassNames = vi.mocked(classNames)
-
 const renderWithRouter = (component) => {
 	return render(<MemoryRouter>{component}</MemoryRouter>)
 }
 
 describe('<BaseButton />', () => {
-	afterEach(() => {
-		vi.resetModules()
-	})
-
 	describe('Rendering tests', () => {
-		it('combines className with modeType styles using classNames utility', () => {
+		it('keeps a consumer className alongside the mode styles', () => {
 			render(
 				<BaseButton
 					className="custom-class"
-					modeType={BUTTON.MODE.OUTLINED}
+					modeType={BUTTON.MODE.OUTLINE}
 					data-cy="styled-button">
 					Styled Button
 				</BaseButton>,
 			)
 
 			const button = screen.getByTestId('styled-button')
+			expect(button).toHaveClass('custom-class')
+			expect(button.className).toContain('border-secondary')
+		})
 
-			expect(mockClassNames).toHaveBeenCalledWith(
-				'mocked-button-class',
-				'mocked-outlined-class',
-				{ 'mocked-disabled-class': false },
-				'custom-class',
+		it('lets a consumer className override a conflicting utility', () => {
+			render(
+				<BaseButton
+					className="px-2"
+					data-cy="override-button">
+					Override
+				</BaseButton>,
 			)
 
-			expect(button).toHaveClass(
-				'mocked-button-class mocked-outlined-class custom-class',
+			const button = screen.getByTestId('override-button')
+			expect(button).toHaveClass('px-2')
+			expect(button).not.toHaveClass('px-6')
+		})
+
+		it('falls back to the primary look for an unknown modeType', () => {
+			render(
+				<BaseButton
+					modeType="nonexistent"
+					data-cy="unknown-mode">
+					Unknown
+				</BaseButton>,
+			)
+
+			expect(screen.getByTestId('unknown-mode')).toHaveClass(
+				'bg-accent-foreground',
 			)
 		})
 
@@ -75,14 +70,14 @@ describe('<BaseButton />', () => {
 			renderWithRouter(
 				<BaseButton
 					isLink
-					modeType={BUTTON.MODE.OUTLINED}
+					modeType={BUTTON.MODE.OUTLINE}
 					data-cy="button-styled-link">
 					Contact
 				</BaseButton>,
 			)
 
 			expect(screen.getByTestId('button-styled-link')).toHaveClass(
-				'mocked-button-class mocked-outlined-class',
+				'inline-flex',
 			)
 		})
 
@@ -96,8 +91,8 @@ describe('<BaseButton />', () => {
 			)
 
 			const link = screen.getByTestId('text-link')
-			expect(link).toHaveClass('mocked-link-class')
-			expect(link).not.toHaveClass('mocked-button-class')
+			expect(link).toHaveClass('inline-block')
+			expect(link).not.toHaveClass('inline-flex')
 		})
 
 		it('greys out a disabled button-styled link', () => {
@@ -105,15 +100,15 @@ describe('<BaseButton />', () => {
 				<BaseButton
 					isLink
 					isDisabled
-					modeType={BUTTON.MODE.OUTLINED}
+					modeType={BUTTON.MODE.OUTLINE}
 					data-cy="disabled-button-link">
 					Register
 				</BaseButton>,
 			)
 
-			expect(screen.getByTestId('disabled-button-link')).toHaveClass(
-				'mocked-disabled-class',
-			)
+			const span = screen.getByTestId('disabled-button-link')
+			expect(span).toHaveAttribute('aria-disabled', 'true')
+			expect(span).toHaveClass('bg-muted', 'cursor-default')
 		})
 
 		it('spreads additional props to button element without conflicts', () => {

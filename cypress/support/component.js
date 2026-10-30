@@ -16,6 +16,9 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+// Tailwind utilities and tokens, which the converted ui components rely on
+import '@/styles/tailwind.css'
+
 import { mount } from 'cypress/react'
 
 Cypress.Commands.add('mount', mount)

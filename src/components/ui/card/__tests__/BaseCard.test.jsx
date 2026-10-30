@@ -1,7 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi, afterEach } from 'vitest'
-
-import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
+import { describe, it, expect } from 'vitest'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 import { COMMON_SELECTORS } from '@/constants/test'
@@ -19,25 +17,7 @@ import { COMMON_SELECTORS } from '@/constants/test'
 // Test selector constant
 const BASE_CARD_SELECTOR = 'base-card'
 
-vi.mock('classnames', () => ({
-	default: createClassNamesMock(),
-}))
-
-vi.mock('@/components/ui/card/BaseCard.module.scss', () => ({
-	default: {
-		card: 'mocked-card-class',
-	},
-}))
-
-import classNames from 'classnames'
-
-const mockClassNames = vi.mocked(classNames)
-
 describe('<BaseCard />', () => {
-	afterEach(() => {
-		vi.resetModules()
-	})
-
 	describe('Rendering tests', () => {
 		it('renders with children', () => {
 			render(
@@ -76,55 +56,27 @@ describe('<BaseCard />', () => {
 	})
 
 	describe('className composition tests', () => {
-		it('combines custom className with card styles using classNames utility', () => {
-			const { container } = render(
-				<BaseCard className="custom-class">Content</BaseCard>,
-			)
+		it('keeps a custom className alongside the card styles', () => {
+			render(<BaseCard className="custom-class">Content</BaseCard>)
 
-			const card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
-
-			expect(mockClassNames).toHaveBeenCalledWith(
-				'custom-class',
-				'mocked-card-class',
-			)
-
-			expect(card).toHaveClass('custom-class mocked-card-class')
+			const card = screen.getByTestId(BASE_CARD_SELECTOR)
+			expect(card).toHaveClass('custom-class', 'rounded-lg')
 		})
 
-		it('applies card styles when no custom className provided', () => {
-			const { container } = render(<BaseCard>Content</BaseCard>)
+		it('applies the card styles when no custom className is provided', () => {
+			render(<BaseCard>Content</BaseCard>)
 
-			const card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
-
-			expect(mockClassNames).toHaveBeenCalledWith(
-				undefined,
-				'mocked-card-class',
+			expect(screen.getByTestId(BASE_CARD_SELECTOR)).toHaveClass(
+				'rounded-lg',
 			)
-
-			expect(card).toHaveClass('mocked-card-class')
 		})
 
-		it('applies card styles with empty custom className', () => {
-			const { container } = render(
-				<BaseCard className="">Content</BaseCard>,
-			)
+		it('lets a custom className override a conflicting utility', () => {
+			render(<BaseCard className="p-8">Content</BaseCard>)
 
-			container.querySelector(COMMON_SELECTORS.BASE_CARD)
-
-			expect(mockClassNames).toHaveBeenCalledWith('', 'mocked-card-class')
-		})
-
-		it('combines multiple custom classes with card styles', () => {
-			const { container } = render(
-				<BaseCard className="class-one class-two">Content</BaseCard>,
-			)
-
-			container.querySelector(COMMON_SELECTORS.BASE_CARD)
-
-			expect(mockClassNames).toHaveBeenCalledWith(
-				'class-one class-two',
-				'mocked-card-class',
-			)
+			const card = screen.getByTestId(BASE_CARD_SELECTOR)
+			expect(card).toHaveClass('p-8')
+			expect(card).not.toHaveClass('p-4')
 		})
 	})
 
@@ -217,21 +169,6 @@ describe('<BaseCard />', () => {
 			)
 
 			expect(container.querySelector('div')).toBeInTheDocument()
-		})
-	})
-
-	describe('Style application', () => {
-		it('always applies card style class', () => {
-			const { rerender, container } = render(<BaseCard>Content</BaseCard>)
-
-			let card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
-			expect(card).toHaveClass('mocked-card-class')
-
-			// Rerender with different className
-			rerender(<BaseCard className="new-class">New Content</BaseCard>)
-
-			card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
-			expect(card).toHaveClass('mocked-card-class')
 		})
 	})
 })

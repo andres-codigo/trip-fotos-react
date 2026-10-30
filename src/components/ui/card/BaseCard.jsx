@@ -1,10 +1,12 @@
-import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
-import baseCardStyles from './BaseCard.module.scss'
+import { cn } from '@/utils/cn'
 
 const BaseCard = ({ className, children }) => {
-	const combinedClassName = classNames(className, baseCardStyles.card)
+	const combinedClassName = cn(
+		'mx-auto max-w-160 rounded-lg p-4 shadow-elevated',
+		className,
+	)
 
 	return (
 		<div

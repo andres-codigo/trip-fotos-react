@@ -51,8 +51,10 @@ li {
 	margin: 0;
 }
 
-// Zero specificity so BaseButton and any component class can recolour a link, whichever stylesheet loads first
-:where(a) {
-	text-decoration: none;
-	color: inherit;
+// Zero specificity so any component class can recolour a link, whichever stylesheet loads first; in the base layer so Tailwind utilities (a later layer) beat it too
+@layer base {
+	:where(a) {
+		text-decoration: none;
+		color: inherit;
+	}
 }

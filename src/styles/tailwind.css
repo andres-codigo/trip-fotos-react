@@ -22,6 +22,9 @@
 	--accent-foreground: #3a0061;
 	--destructive: #df0d0d;
 	--destructive-foreground: #ffffff;
+	--destructive-hover: #ba0101;
+	--tint: #edd2ff;
+	--link-hover: #8d007a;
 	--success: #1b5e20;
 	--border: #cecece;
 	--input: #cecece;
@@ -55,6 +58,9 @@
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
 	--color-destructive-foreground: var(--destructive-foreground);
+	--color-destructive-hover: var(--destructive-hover);
+	--color-tint: var(--tint);
+	--color-link-hover: var(--link-hover);
 	--color-success: var(--success);
 	--color-border: var(--border);
 	--color-input: var(--input);
