@@ -21,7 +21,8 @@ import '@/styles/tailwind.css'
 
 import { mount } from 'cypress/react'
 
+import { failOnConsole } from './utils/failOnConsole'
+
 Cypress.Commands.add('mount', mount)
 
-// Example use:
-// cy.mount(<MyComponent />)
+failOnConsole()

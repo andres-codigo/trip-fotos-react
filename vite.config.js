@@ -87,6 +87,7 @@ export default defineConfig({
 		setupFiles: [
 			'./src/testUtils/vitest/jsdomPolyfills.js',
 			'./src/testUtils/vitest/testingLibrarySetup.js',
+			'./src/testUtils/vitest/failOnConsole.js',
 		],
 		// Performance optimisations - uses worker threads for parallel test execution
 		// Dynamically sets thread count: 2 in CI, half of CPU cores locally (min 1)

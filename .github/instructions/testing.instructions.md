@@ -29,6 +29,8 @@ Do not introduce `cypress/support/constants` unless explicitly adopted in a futu
 - Use `src/testUtils` to reduce repeated setup.
 - Validate success, loading, and error states for async logic.
 - Keep mocks deterministic and local to each test scope when possible.
+- A test fails on any unexpected `console.error` or `console.warn` (`src/testUtils/vitest/failOnConsole.js`, and `cypress/support/utils/failOnConsole.js`, used by both the component and E2E support files), so React warnings such as an unknown DOM prop or an update outside `act()` are fixed, not ignored. A test that expects a message spies on `console` itself. Add a pattern to `ALLOWED_MESSAGES` (Vitest) or `ALLOWED_CONSOLE_MESSAGES` (Cypress component and E2E) only for noise we cannot fix, with a one-line reason.
+- A mocked child component must not spread props meant for the real one onto a DOM element (map `ariaLabel` to `aria-label`, drop `isLink`, `to` and the like).
 
 ## Cypress Rules
 
@@ -65,6 +67,8 @@ Do this for any change that can alter how a page looks (SCSS, layout, spacing, m
 - Wait for the content, not just the page shell: assert the data and images have rendered, that no `[data-cy="base-spinner"]` remains (unless the spinner is the subject), and freeze animation with an injected `animation: none` style, or the capture is a spinner at a random frame.
 - Run it through the emulators as above, or start your own Vite server in `emulators` mode. Never kill whatever is on port 3000: it may be a developer's own server.
 - When someone reports a visual problem, reproduce it on screen on `main` and on your branch before saying whether your change caused it. Hold the merge while a visual question is open, even when CI is green, and list in the PR what was not checked.
+- Capture the browser console in the spec (spy `console.error` and `console.warn` in `cy.on('window:before:load')`) and fail on any call: a page that renders but logs a React warning or an error is not "looks fine".
+- Enumerate every consumer, prop, mode, state and width of the changed component before capturing, and capture all of them; "not checked" is for what is impossible (live writes, unseedable data), never for what was skipped.
 - Delete the spec and its screenshots (`cypress/screenshots/` is gitignored) afterwards.
 
 Case-only renames of files (such as `register.module.scss` to `Register.module.scss`) can leave files missing when you `git switch` on a case-insensitive filesystem; `git restore` the affected folder if so.

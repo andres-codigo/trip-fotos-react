@@ -63,11 +63,13 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
 			// isLink and to are extracted but not used - this is intentional for prop filtering
 			isLink: _isLink,
 			to: _to,
+			ariaLabel,
 			children,
 			...props
 		}) => (
 			<div
 				className={className}
+				aria-label={ariaLabel}
 				onClick={onClick || onMenuItemClick}
 				data-cy="nav-menu-button-link"
 				{...(dataCy && { 'data-cy': dataCy })}
