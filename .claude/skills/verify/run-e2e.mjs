@@ -7,6 +7,9 @@ const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd()
 const bin = (name) => path.join(projectDir, 'node_modules', '.bin', name)
 const cypressArgs = process.argv.slice(2)
 
+// Emulator runs need a dev server in `emulators` mode, so never reuse whatever is on the port
+const useEmulators = process.env.E2E_EMULATORS === 'true'
+
 const PORT = 3000
 const STARTUP_TIMEOUT_MS = 60_000
 
@@ -63,7 +66,7 @@ process.on('SIGINT', () => {
 	process.exit(130)
 })
 
-let baseUrl = await findRunningServer()
+let baseUrl = useEmulators ? null : await findRunningServer()
 
 if (baseUrl) {
 	console.log(`Reusing dev server already running at ${baseUrl}`)
@@ -71,12 +74,21 @@ if (baseUrl) {
 	baseUrl = `http://localhost:${PORT}`
 	console.log(`Starting dev server at ${baseUrl}...`)
 	// CYPRESS=true makes vite.config.js skip HTTPS, matching CI
-	server = spawn(bin('vite'), ['--port', String(PORT), '--strictPort'], {
-		cwd: projectDir,
-		env: { ...process.env, CYPRESS: 'true' },
-		detached: true,
-		stdio: 'ignore',
-	})
+	server = spawn(
+		bin('vite'),
+		[
+			'--port',
+			String(PORT),
+			'--strictPort',
+			...(useEmulators ? ['--mode', 'emulators'] : []),
+		],
+		{
+			cwd: projectDir,
+			env: { ...process.env, CYPRESS: 'true' },
+			detached: true,
+			stdio: 'ignore',
+		},
+	)
 
 	if (!(await waitForServer(baseUrl))) {
 		console.error(

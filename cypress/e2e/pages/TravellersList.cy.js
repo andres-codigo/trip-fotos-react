@@ -133,7 +133,7 @@ describe('Travellers Page - WIP', () => {
 			}).should('not.exist')
 
 			// Make refresh loading deterministic so spinner assertion is stable in CI
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				fixture: 'travellers.json',
 				delay: 600,
 			}).as('refreshTravellers')
@@ -178,7 +178,7 @@ describe('Travellers Page - WIP', () => {
 
 	describe('Error Handling', () => {
 		it('should display server error dialog when API returns 500 status', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				statusCode: 500,
 				body: { message: 'Internal Server Error' },
 			}).as('getTravellers500Error')
@@ -200,7 +200,7 @@ describe('Travellers Page - WIP', () => {
 		})
 
 		it('should display client error dialog when API returns 400-499 status', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				statusCode: 403,
 				body: { message: 'Forbidden' },
 			}).as('getTravellers403Error')
@@ -217,7 +217,7 @@ describe('Travellers Page - WIP', () => {
 		})
 
 		it('should display network error dialog when network fails', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				forceNetworkError: true,
 			}).as('getTravellersNetworkError')
 
@@ -234,7 +234,7 @@ describe('Travellers Page - WIP', () => {
 
 		it('should display generic error for unexpected errors', () => {
 			// Mock a malformed response that would cause JSON parsing to fail
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				statusCode: 200,
 				body: 'invalid json response',
 				headers: {
@@ -254,7 +254,7 @@ describe('Travellers Page - WIP', () => {
 		})
 
 		it('should close error dialog when close button is clicked', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				statusCode: 500,
 				body: { message: 'Server error' },
 			}).as('getTravellersError')
@@ -275,7 +275,7 @@ describe('Travellers Page - WIP', () => {
 
 		it('should allow retry after error by clicking refresh button', () => {
 			// Start with fixture data so refresh button is enabled
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				fixture: 'travellers.json',
 			}).as('getTravellersInitialSuccess')
 
@@ -292,7 +292,7 @@ describe('Travellers Page - WIP', () => {
 			)
 
 			// Simulate error on manual refresh
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				statusCode: 500,
 				body: { message: 'Server error' },
 			}).as('getTravellersRefreshError')
@@ -309,7 +309,7 @@ describe('Travellers Page - WIP', () => {
 			})
 
 			// Setup successful retry
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				fixture: 'travellers.json',
 			}).as('getTravellersRetrySuccess')
 
@@ -328,7 +328,7 @@ describe('Travellers Page - WIP', () => {
 
 	describe('Loading States', () => {
 		it('should show loading spinner during initial load', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				fixture: 'travellers.json',
 				delay: 1000,
 			}).as('getTravellersWithDelay')
@@ -342,7 +342,7 @@ describe('Travellers Page - WIP', () => {
 		})
 
 		it('should hide content while loading', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				fixture: 'travellers.json',
 				delay: 500,
 			}).as('getTravellersWithDelay2')
@@ -363,7 +363,7 @@ describe('Travellers Page - WIP', () => {
 
 	describe('Content Display', () => {
 		it('should display travellers list when travellers exist', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				fixture: 'travellers.json',
 			}).as('getTravellersSuccess')
 
@@ -378,7 +378,7 @@ describe('Travellers Page - WIP', () => {
 		})
 
 		it('should display no travellers message when list is empty', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json', {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				statusCode: 200,
 				body: {},
 			}).as('getTravellersEmpty')

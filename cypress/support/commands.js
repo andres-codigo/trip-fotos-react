@@ -146,6 +146,34 @@ Cypress.Commands.add('deleteStorageObject', (downloadUrl) => {
 	})
 })
 
+const isEmulated = () => Cypress.expose('USE_EMULATORS') === 'true'
+
+// Back to the seed data for specs that write; the live run has nothing to reset
+Cypress.Commands.add('resetEmulators', () => {
+	if (isEmulated()) {
+		cy.task('seedEmulators')
+		// The seed recreates the users, which invalidates their cached sessions
+		Cypress.session.clearAllSavedSessions()
+	}
+})
+
+// Reads the record back from the emulator, so a pass means the write reached the database; nothing to read on the live run
+Cypress.Commands.add('assertTravellerPersisted', (uid, expected) => {
+	if (!isEmulated()) return
+	cy.request(
+		`${Cypress.expose('VITE_DATABASE_URL')}/travellers/${uid}.json?ns=${Cypress.expose('VITE_DATABASE_NAMESPACE')}`,
+	)
+		.its('body')
+		.should('include', expected)
+})
+
+// Emulator runs let the request through to the emulator; the live run stubs it so the shared project is never written
+Cypress.Commands.add('stubLiveOnly', (method, url, response) =>
+	isEmulated()
+		? cy.intercept(method, url)
+		: cy.intercept(method, url, response),
+)
+
 ////
 // VIEWPORTS
 ////

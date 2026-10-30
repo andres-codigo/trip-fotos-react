@@ -19,6 +19,7 @@
 		"cy:open:e2e": "cypress open --e2e",
 		"cy:open:ct": "cypress open --component",
 		"cy:run:e2e": "cypress run --e2e",
+		"cy:run:e2e:emulators": "npx firebase-tools@15.34.2 emulators:exec --project demo-trip-fotos \"npm run emulators:seed && E2E_EMULATORS=true node .claude/skills/verify/run-e2e.mjs\"",
 		"cy:run:ct": "cypress run --component",
 		"cy:run:auto": "bash -c 'if [[ \"$0\" == *\"src/components\"* ]]; then cypress run --component --spec \"$0\"; else cypress run --spec \"$0\"; fi'",
 		"firebase:rules": "npx firebase-tools@15.34.2 deploy --only database,storage",

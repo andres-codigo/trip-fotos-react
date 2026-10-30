@@ -68,7 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Next up** — in this order:
 
-- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504); the #499 spike says go and #500 added the local emulators and the app flag; #501 added the seed script; next is #502, the emulator E2E run)
+- [#292](https://github.com/andres-codigo/trip-fotos-react/issues/292) — Epic: run E2E against the Firebase Emulator Suite instead of the live project (optional; six children, [#499](https://github.com/andres-codigo/trip-fotos-react/issues/499) to [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504); the #499 spike says go and #500 added the local emulators and the app flag; #501 added the seed script; #502 added the emulator E2E run)
 - [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379) — Epic: Tailwind v4 + shadcn/ui design system migration (after #292)
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark-only Claude-inspired redesign, with a multi-column Travellers grid (last step of #379)
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
@@ -160,6 +160,9 @@ npm run cy:open:ct
 
 # Run Cypress E2E tests in headless mode
 npm run cy:run:e2e
+
+# Run the same E2E specs against the local Firebase emulators (no live project or secrets)
+npm run cy:run:e2e:emulators
 
 # Run Cypress Component tests in headless mode
 npm run cy:run:ct
