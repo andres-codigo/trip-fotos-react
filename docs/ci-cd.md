@@ -115,7 +115,13 @@ Order within an epic:
 
 ### Starting an issue
 
-"Start #N" runs this sequence end to end, without asking. It also applies to an issue just created for the work in hand: it starts in Triage, so run steps 2–4 before changing any file. Labels set at creation are ignored for the first 60 seconds, and a label event that finds the item with no Status sets Triage first. If an issue is still left with no Status (every label event then fails with "issue has no project status"), run `gh workflow run github-issue-intake.yml -f issue_number=N`, which sets Triage, then re-add a label. Read the Status first (`gh issue view N --json projectItems -q '.projectItems[].status.name'`), skip steps already satisfied, and stop only on a hard blocker.
+"Start #N" runs this sequence end to end, without asking. It also applies to an issue just created for the work in hand: it starts in Triage, so run steps 2–4 before changing any file. Read the Status first (`gh issue view N --json projectItems -q '.projectItems[].status.name'`), skip steps already satisfied, and stop only on a hard blocker.
+
+For a just-created issue:
+
+- The `opened` Issue Intake run takes 10 to 30 seconds to give the item its Triage Status, so an empty Status straight after `gh issue create` is normal. Wait for that run. Only if the Status is still empty after about a minute (every label event then fails with "issue has no project status"), run `gh workflow run github-issue-intake.yml -f issue_number=N`, which sets Triage, then re-add a label.
+- Labels given to `gh issue create --label` arrive inside the first 60 seconds and are ignored by design. After setting Kind and Workstream, add an area label that is not already on the issue (or remove one and re-add it), because re-adding one that is present does nothing.
+- Never add `ready` while the item is in Triage: Intake refuses it, removes the label and leaves a comment.
 
 1. **Done, In review or In progress by someone else:** stop and report.
 2. **Triage → Backlog:** set **Kind** and **Workstream** on the board item, choosing the closest option from the title prefix, labels and body, then add the area labels the PR will carry (any label triggers the move). Fields first, label second, because field edits fire no event. Report the values chosen; never ask, even when the fit is ambiguous (pick the closest and say so).
