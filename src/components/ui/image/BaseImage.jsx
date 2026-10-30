@@ -4,8 +4,6 @@ import PropTypes from 'prop-types'
 import { IMAGE } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 
-import baseImageStyles from './BaseImage.module.scss'
-
 const PLACEHOLDER_DIMENSIONS = { width: 4, height: 3 }
 
 const BaseImage = ({ title, url, dimensions, onOpen }) => {
@@ -16,12 +14,12 @@ const BaseImage = ({ title, url, dimensions, onOpen }) => {
 
 	return (
 		<li
-			className={baseImageStyles['image-preview']}
+			className="relative w-[48%] overflow-hidden min-[481px]:w-[32%] [&_img]:block [&_img]:h-auto [&_img]:w-full [&_img]:cursor-pointer [&_img]:object-scale-down"
 			data-cy={IMAGE.ID}>
 			{/* Nothing to enlarge, so the fallback is not a button */}
 			{hasError ? (
 				<span
-					className={baseImageStyles.fallback}
+					className="block p-4 text-center text-card-foreground"
 					role="img"
 					aria-label={`${alt} is unavailable`}
 					data-cy={IMAGE.FALLBACK}>
@@ -30,7 +28,7 @@ const BaseImage = ({ title, url, dimensions, onOpen }) => {
 			) : (
 				<button
 					type="button"
-					className={baseImageStyles.trigger}
+					className="block w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
 					aria-label={`View ${title}'s photo`}
 					onClick={onOpen}
 					data-cy={IMAGE.BUTTON}>

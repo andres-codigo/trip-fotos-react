@@ -1,12 +1,11 @@
 import { GLOBAL } from '@/constants/ui'
 
-import baseSpinnerStyles from './BaseSpinner.module.scss'
 import loadingSpinner from '@/assets/loading-spinner.svg'
 
 const BaseSpinner = () => {
 	return (
 		<div
-			className={baseSpinnerStyles.spinner}
+			className="flex h-full w-full items-center justify-center"
 			data-cy="base-spinner"
 			role="status"
 			aria-live="polite"
