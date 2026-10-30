@@ -381,6 +381,40 @@ describe('App', () => {
 			})
 		})
 
+		it('redirects a logged-in user from /authentication to the travellers list', async () => {
+			setAuthState('token', false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTHENTICATION,
+				search: '',
+			})
+
+			renderWithRoute(PATHS.AUTHENTICATION)
+
+			await waitFor(() => {
+				expect(navigateMock).toHaveBeenCalledWith(PATHS.TRAVELLERS, {
+					replace: true,
+				})
+			})
+		})
+
+		it('sends a logged-in user on /authentication to the redirect target when there is one', async () => {
+			setAuthState('token', false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTHENTICATION,
+				search: '?redirect=/messages',
+			})
+
+			renderWithRoute(PATHS.AUTHENTICATION)
+
+			await waitFor(() => {
+				expect(navigateMock).toHaveBeenCalledWith('/messages', {
+					replace: true,
+				})
+			})
+		})
+
 		it('dispatches tryLogin on mount', async () => {
 			const dispatch = vi.fn()
 			useDispatchMock.mockReturnValue(dispatch)

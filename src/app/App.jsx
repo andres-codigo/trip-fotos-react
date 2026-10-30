@@ -69,6 +69,16 @@ function AppRoutes() {
 		}
 	}, [didAutoLogout, navigate])
 
+	// A signed-in user has no use for the login form; the login page honours the same redirect target
+	useEffect(() => {
+		if (isLoggedIn && location.pathname === PATHS.AUTHENTICATION) {
+			const redirectUrl =
+				new URLSearchParams(location.search).get('redirect') ||
+				PATHS.TRAVELLERS
+			navigate(redirectUrl, { replace: true })
+		}
+	}, [isLoggedIn, location.pathname, location.search, navigate])
+
 	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
 	useEffect(() => {
 		const publicPaths = [
