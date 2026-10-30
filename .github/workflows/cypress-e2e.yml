@@ -103,3 +103,58 @@ jobs:
                   name: cypress-videos
                   path: cypress/videos
                   retention-days: 7
+
+    run-e2e-emulator-tests:
+        name: Run Cypress E2E Tests (Firebase emulators)
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        # No secrets are needed, so this also runs on Dependabot PRs
+        env:
+            CI: 'true'
+            FIREBASE_CLI_DISABLE_UPDATE_CHECK: 'true'
+            NO_UPDATE_NOTIFIER: '1'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '24'
+                  cache: 'npm'
+
+            - name: Setup Java (Firebase emulators)
+              uses: actions/setup-java@v4
+              with:
+                  distribution: temurin
+                  java-version: '21'
+
+            - name: Cache Firebase emulators
+              uses: actions/cache@v4
+              with:
+                  path: ~/.cache/firebase/emulators
+                  key: firebase-emulators-${{ runner.os }}-${{ hashFiles('package.json') }}
+                  restore-keys: firebase-emulators-${{ runner.os }}-
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run Cypress E2E Page Tests against the emulators
+              run: npm run cy:run:e2e:emulators
+
+            - name: Upload Cypress screenshots on failure
+              uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: cypress-emulator-screenshots
+                  path: cypress/screenshots
+                  retention-days: 7
+
+            - name: Upload Cypress videos on failure
+              uses: actions/upload-artifact@v4
+              if: failure()
+              with:
+                  name: cypress-emulator-videos
+                  path: cypress/videos
+                  retention-days: 7

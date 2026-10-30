@@ -27,6 +27,7 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
     - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files still trigger it)
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs Cypress end-to-end (E2E) tests against the running application to verify user flows and integration with backend services. Runs `npm run cy:run:e2e` — see [Scripts](../README.md#scripts). The dev server is awaited with a `curl` retry loop (up to 60 seconds) rather than the Cypress action's URL ping, which gave up on the first unexpected connection error.
+- **Emulator job:** a second job, `Run Cypress E2E Tests (Firebase emulators)`, runs `npm run cy:run:e2e:emulators` against the local Firebase emulators. It needs no secrets, so it also runs on Dependabot PRs, while the live job and its Dependabot skip stay as they are. It installs Java (`actions/setup-java`, Temurin 21), caches `~/.cache/firebase/emulators` and sets the Firebase CLI to non-interactive (`CI`, no update check). Expect 20 to 40 seconds of emulator start-up on top of the run; watch the added minutes per PR.
 
 ---
 

@@ -86,6 +86,12 @@ describe('Travellers Page - WIP', () => {
 
 	describe('Data Loading & API Integration', () => {
 		it('should disable register link when loading', () => {
+			// The emulator answers too fast for the loading state to be seen without a delay
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', (req) => {
+				req.on('response', (res) => {
+					res.setDelay(1000)
+				})
+			})
 			performLogin()
 
 			// Should show loading state initially
@@ -98,6 +104,12 @@ describe('Travellers Page - WIP', () => {
 		})
 
 		it('should load travellers on initial page visit', () => {
+			// The emulator answers too fast for the loading state to be seen without a delay
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', (req) => {
+				req.on('response', (res) => {
+					res.setDelay(1000)
+				})
+			})
 			performLogin()
 
 			// Should show loading state initially
