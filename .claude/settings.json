@@ -29,11 +29,7 @@
 			"Bash(gh pr list *)",
 			"Bash(gh pr ready *)"
 		],
-		"ask": [
-			"Bash(npm install *)",
-			"Bash(npm run cy:run:e2e)",
-			"Bash(node .claude/skills/verify/run-e2e.mjs*)"
-		],
+		"ask": ["Bash(npm install *)", "Bash(npm run cy:run:e2e:live)"],
 		"deny": [
 			"Read(./.env)",
 			"Read(./certs/**)",

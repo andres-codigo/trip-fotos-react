@@ -44,14 +44,14 @@ Do not introduce `cypress/support/constants` unless explicitly adopted in a futu
 
 ## When to Run E2E Locally
 
-CI runs the full E2E suite on every pull request, so a local run is for earlier feedback, not the safety net. It uses the live Firebase project, so it stays opt-in (`/verify e2e`). Run it before pushing when:
+CI runs the full E2E suite on every pull request, so a local run is for earlier feedback, not the safety net. It runs against the local Firebase emulators (`/verify e2e`), which need Java and add start-up time, so it stays opt-in. Run it before pushing when:
 
 - An E2E spec or `cypress/support/` file is added or changed — otherwise its first run is in CI
 - Routing, route guards or redirects change (`src/app/`, `src/pages/`, `PATHS`)
 - Store logic or persisted state changes (`src/store/`) — Vitest and component tests build their own store without redux-persist, so only E2E sees rehydration
 - Firebase services or API constants change
 
-`/verify` prints an `E2E advised` line for these paths. For other changes, leave E2E to CI. To run one spec, pass it through: `node .claude/skills/verify/run-e2e.mjs --spec <path>`. The runner reuses a dev server already on port 3000, so a Vite error overlay left from an earlier compile failure there will fail every spec; restart that server first.
+`/verify` prints an `E2E advised` line for these paths. For other changes, leave E2E to CI. To run one spec, start `npm run emulators` and `npm run emulators:seed` in another terminal, then run `E2E_EMULATORS=true node .claude/skills/verify/run-e2e.mjs --spec <path>`. The runner reuses a dev server already on port 3000, so a Vite error overlay left from an earlier compile failure there will fail every spec; restart that server first.
 
 ## Visual Check For UI Changes
 
@@ -61,9 +61,9 @@ Do this for any change that can alter how a page looks (SCSS, layout, spacing, m
 - **Open and look at every image**, and say what is on screen. Byte-identical files only prove nothing changed; they hide defects that already exist on `main` and pages that never rendered (two identical spinner frames passed as "identical" for a page that had not loaded). Any difference between the two sets must be one you intended.
 - Capture the states the change can touch, not just the resting page: validation errors, error dialogs and backdrops, the open mobile menu, file previews and rejected files, the image dialog, long lists (such as the "See all N photos" tile) and empty states.
 - Cover every page that uses the changed styles, **including pages behind login**: sign in with `performLogin()` from `cypress/support/utils/authHelpers`. Do not assume a logged-in page is fine because a shared style works on a public one.
-- Keep the run read-only. Never submit a form or register a traveller against the live Firebase project. Stub the data instead with `cy.intercept` (the travellers list and detail, the messages inbox) and `cy.stubTravellerCheck(true)` for pages that need a registered traveller. The test database may have no travellers.
+- Run against the emulators, signed in as a seeded account (`TEST_USERS.STANDARD`, or `TEST_USERS.TRAVELLER` for a registered traveller with an inbox). Never point it at the live Firebase project.
 - Wait for the content, not just the page shell: assert the data and images have rendered, that no `[data-cy="base-spinner"]` remains (unless the spinner is the subject), and freeze animation with an injected `animation: none` style, or the capture is a spinner at a random frame.
-- Run it through `node .claude/skills/verify/run-e2e.mjs --spec <path>`, or start your own Vite server. Never kill whatever is on port 3000: it may be a developer's own server.
+- Run it through the emulators as above, or start your own Vite server in `emulators` mode. Never kill whatever is on port 3000: it may be a developer's own server.
 - When someone reports a visual problem, reproduce it on screen on `main` and on your branch before saying whether your change caused it. Hold the merge while a visual question is open, even when CI is green, and list in the PR what was not checked.
 - Delete the spec and its screenshots (`cypress/screenshots/` is gitignored) afterwards.
 

@@ -15,38 +15,15 @@ const MESSAGES_URL = '**/messages/*.json*'
 const MESSAGE_URL = '**/messages/*/*.json*'
 const { SAMPLE_MESSAGE_ONE, SAMPLE_MESSAGE_TWO } = MOCK_INBOX
 
-const inbox = {
-	[SAMPLE_MESSAGE_ONE.id]: {
-		userEmail: SAMPLE_MESSAGE_ONE.userEmail,
-		message: SAMPLE_MESSAGE_ONE.message,
-	},
-	[SAMPLE_MESSAGE_TWO.id]: {
-		userEmail: SAMPLE_MESSAGE_TWO.userEmail,
-		message: SAMPLE_MESSAGE_TWO.message,
-	},
-}
-
-const isEmulated = Cypress.expose('USE_EMULATORS') === 'true'
-
-// The live inbox is stubbed so the test user's real messages are never read or deleted;
-// the emulator run signs in as the seeded traveller and uses its real inbox
+// Signs in as the seeded traveller and uses its real inbox
 describe('Logged in > Messages page', () => {
 	beforeEach(() => {
 		cy.resetEmulators()
-		if (isEmulated) {
-			performLogin(
-				TEST_USERS.TRAVELLER.EMAIL,
-				TEST_USERS.TRAVELLER.PASSWORD,
-			)
-		} else {
-			performLogin()
-		}
+		performLogin(TEST_USERS.TRAVELLER.EMAIL, TEST_USERS.TRAVELLER.PASSWORD)
 	})
 
 	it('lists received messages', () => {
-		cy.stubLiveOnly(API_DATABASE.GET, MESSAGES_URL, inbox).as(
-			'loadMessages',
-		)
+		cy.intercept(API_DATABASE.GET, MESSAGES_URL).as('loadMessages')
 		cy.visit(PATHS.MESSAGES)
 		cy.wait('@loadMessages', { timeout: REQUEST_TIMEOUT })
 
@@ -57,9 +34,7 @@ describe('Logged in > Messages page', () => {
 	})
 
 	it('has no axe violations', () => {
-		cy.stubLiveOnly(API_DATABASE.GET, MESSAGES_URL, inbox).as(
-			'loadMessages',
-		)
+		cy.intercept(API_DATABASE.GET, MESSAGES_URL).as('loadMessages')
 		cy.visit(PATHS.MESSAGES)
 		cy.wait('@loadMessages', { timeout: REQUEST_TIMEOUT })
 		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 2)
@@ -76,12 +51,8 @@ describe('Logged in > Messages page', () => {
 	})
 
 	it('removes a message when it is deleted', () => {
-		cy.stubLiveOnly(API_DATABASE.GET, MESSAGES_URL, inbox).as(
-			'loadMessages',
-		)
-		cy.stubLiveOnly(API_DATABASE.DELETE, MESSAGE_URL, 'null').as(
-			'deleteMessage',
-		)
+		cy.intercept(API_DATABASE.GET, MESSAGES_URL).as('loadMessages')
+		cy.intercept(API_DATABASE.DELETE, MESSAGE_URL).as('deleteMessage')
 		cy.visit(PATHS.MESSAGES)
 		cy.wait('@loadMessages', { timeout: REQUEST_TIMEOUT })
 
@@ -93,12 +64,10 @@ describe('Logged in > Messages page', () => {
 		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 1)
 		cy.contains(SAMPLE_MESSAGE_ONE.message).should('not.exist')
 
-		if (isEmulated) {
-			cy.reload()
-			cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 1)
-			cy.contains(SAMPLE_MESSAGE_TWO.message).should('be.visible')
-			cy.contains(SAMPLE_MESSAGE_ONE.message).should('not.exist')
-		}
+		cy.reload()
+		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 1)
+		cy.contains(SAMPLE_MESSAGE_TWO.message).should('be.visible')
+		cy.contains(SAMPLE_MESSAGE_ONE.message).should('not.exist')
 	})
 
 	it('shows an error dialog when loading fails', () => {

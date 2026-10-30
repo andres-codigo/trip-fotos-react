@@ -31,28 +31,12 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    check-dependabot:
+    run-live-smoke-test:
+        name: Run Cypress Live Smoke Test
+        # Only the merged code meets the real project: PRs run the emulator job alone, which needs no secrets
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         runs-on: ubuntu-latest
-        outputs:
-            is-dependabot: ${{ github.actor == 'dependabot[bot]' }}
-        steps:
-            - name: Check if PR is from Dependabot
-              run: echo "Checking if actor is Dependabot - ${{ github.actor }}"
-
-    skip-e2e-tests:
-        name: Skip Cypress E2E Tests (Dependabot)
-        needs: check-dependabot
-        if: needs.check-dependabot.outputs.is-dependabot == 'true'
-        runs-on: ubuntu-latest
-        steps:
-            - run: echo "🟡 Skipping Cypress E2E tests – Dependabot PRs do not have access to secrets."
-
-    run-e2e-tests:
-        name: Run Cypress E2E Tests
-        needs: check-dependabot
-        if: needs.check-dependabot.outputs.is-dependabot == 'false'
-        runs-on: ubuntu-latest
-        timeout-minutes: 120
+        timeout-minutes: 15
 
         steps:
             - name: Checkout code
@@ -67,7 +51,7 @@ jobs:
             - name: Install dependencies
               run: npm ci
 
-            - name: Start app & run Cypress E2E Page Tests
+            - name: Start app & run the live smoke spec
               uses: cypress-io/github-action@c541a95ea92d9239347a2355f2e895cd4b3f8060 # v7.4.6
               env:
                   VITE_API_URL: ${{ secrets.VITE_API_URL }}
@@ -84,7 +68,7 @@ jobs:
                   CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
               with:
                   start: npm run dev
-                  # The action's URL ping only retries a fixed list of error codes and failed at once on the runner (#317)
+                  # The action's URL ping only retries a fixed list of error codes and failed at once on the runner (ISSUE#317 (wait-on retries))
                   wait-on: 'curl --silent --fail --output /dev/null --retry 30 --retry-delay 2 --retry-max-time 60 --retry-all-errors http://localhost:3000'
                   browser: chrome
 
@@ -92,23 +76,15 @@ jobs:
               uses: actions/upload-artifact@v4
               if: failure()
               with:
-                  name: cypress-screenshots
+                  name: cypress-live-screenshots
                   path: cypress/screenshots
-                  retention-days: 7
-
-            - name: Upload Cypress videos on failure
-              uses: actions/upload-artifact@v4
-              if: failure()
-              with:
-                  name: cypress-videos
-                  path: cypress/videos
                   retention-days: 7
 
     run-e2e-emulator-tests:
         name: Run Cypress E2E Tests (Firebase emulators)
         runs-on: ubuntu-latest
         timeout-minutes: 30
-        # No secrets are needed, so this also runs on Dependabot PRs
+        # No secrets are needed, so this runs on every PR, Dependabot's included
         env:
             CI: 'true'
             FIREBASE_CLI_DISABLE_UPDATE_CHECK: 'true'

@@ -8,6 +8,8 @@ import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 
+import { TEST_USERS } from '../../../src/constants/config/users'
+
 import { performLogin } from '../../support/utils/authHelpers'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
@@ -63,8 +65,17 @@ describe('Travellers Page - WIP', () => {
 			)
 		})
 
-		// TODO: Update when traveller user is available
-		// it('should not show register link when user is logged in and is a traveller', () => {})
+		it('should not show register link when user is logged in and is a traveller', () => {
+			performLogin(
+				TEST_USERS.TRAVELLER.EMAIL,
+				TEST_USERS.TRAVELLER.PASSWORD,
+			)
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
+				'be.visible',
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should('not.exist')
+		})
 
 		it('should navigate to register page when register link is clicked', () => {
 			performLogin()
@@ -123,20 +134,10 @@ describe('Travellers Page - WIP', () => {
 				timeout: REQUEST_TIMEOUT,
 			}).should('not.exist')
 
-			// Should show either travellers list or no travellers message
-			cy.get('body').then(($body) => {
-				const hasTravellersList =
-					$body.find(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST)
-						.length > 0
-				const hasEmptyState = $body
-					.text()
-					.includes('No travellers listed.')
-
-				expect(
-					hasTravellersList || hasEmptyState,
-					'expected either travellers list or empty-state message',
-				).to.equal(true)
-			})
+			// The seed holds two travellers
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST)
+				.find(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+				.should('have.length', 2)
 		})
 
 		it('should refresh travellers when refresh button is clicked', () => {
@@ -168,6 +169,10 @@ describe('Travellers Page - WIP', () => {
 		})
 
 		it('should show refresh button when no travellers exist', () => {
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
+				statusCode: 200,
+				body: {},
+			})
 			performLogin()
 
 			// Wait for loading to complete
@@ -175,19 +180,9 @@ describe('Travellers Page - WIP', () => {
 				timeout: REQUEST_TIMEOUT,
 			}).should('not.exist')
 
-			// If no travellers message is shown, refresh button should exist and be enabled
-			cy.get('body').then(($body) => {
-				if (
-					$body.find('h2:contains("No travellers listed.")').length >
-					0
-				) {
-					cy.get(
-						`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`,
-					)
-						.should('exist')
-						.and('not.be.disabled')
-				}
-			})
+			cy.get(`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`)
+				.should('exist')
+				.and('not.be.disabled')
 		})
 	})
 

@@ -88,13 +88,9 @@ describe('Register Page', () => {
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept the registration API call
-		cy.stubLiveOnly(API_DATABASE.PUT, '**/travellers/*.json*', {
-			statusCode: 200,
-			body: {
-				...MOCK_TRAVELLERS.NEW_TRAVELLER,
-				registered: new Date().toISOString(),
-			},
-		}).as('registerTraveller')
+		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*').as(
+			'registerTraveller',
+		)
 
 		// Fill in the form
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
@@ -136,15 +132,11 @@ describe('Register Page', () => {
 		const { firstName, lastName, tripDescription, daysInCity } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
-		// A real Storage upload, live or emulated (deleted in afterEach); the DB write is stubbed
+		// A real Storage upload to the emulator (deleted in afterEach)
 		cy.intercept('POST', '**/v0/b/*/o*').as('uploadImage')
-		cy.stubLiveOnly(API_DATABASE.PUT, '**/travellers/*.json*', {
-			statusCode: 200,
-			body: {
-				...MOCK_TRAVELLERS.NEW_TRAVELLER,
-				registered: new Date().toISOString(),
-			},
-		}).as('registerTraveller')
+		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*').as(
+			'registerTraveller',
+		)
 
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
 			firstName,

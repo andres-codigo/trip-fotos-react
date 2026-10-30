@@ -21,7 +21,7 @@ Arguments: `$ARGUMENTS`
     - The script runs the gates in order, continuing after a failure, writes each full log to `node_modules/.cache/verify/<gate>.log` and prints one line per gate: `pass <counts>`, `FAIL` followed by the first error lines, or `cached`.
     - `cached` means the gate already passed on a byte-identical working tree (committed, uncommitted and untracked files alike), so it was not run again. Any edit invalidates the cache.
     - If the call times out, run the identical command once more: gates that passed are cached, so only the rest run.
-    - `e2e` runs `run-e2e.mjs`, which reuses a dev server on port 3000 or starts one over HTTP (as CI does) and always stops any server it started. These tests log in and read/write the live Firebase project using the credentials in `.env`, which is why they are opt-in. Never run `npm run cy:run:e2e` directly — without a server it fails on connection errors, not real bugs.
+    - `e2e` runs `npm run cy:run:e2e:emulators`: the Firebase emulators start, the seed loads and the specs run against them (needs Java; no credentials or live project). It always stops the emulators and any dev server it started. Never run `cypress run --e2e` directly — without a server and the emulators it fails on connection errors, not real bugs.
     - Do not run the npm scripts yourself or read the logs unless the printed error lines are not enough to name the failing file and message.
 3. Do not fix anything unless the user asks; this skill reports, it does not change code.
 
