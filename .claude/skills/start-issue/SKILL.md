@@ -2,6 +2,7 @@
 name: start-issue
 description: Start a GitHub issue end to end (Triage → Backlog → Ready → In progress, branch, draft PR). Use on "start #N", or after creating an issue for work in hand, before changing any file.
 argument-hint: '<issue number>'
+model: sonnet
 ---
 
 # Start issue
