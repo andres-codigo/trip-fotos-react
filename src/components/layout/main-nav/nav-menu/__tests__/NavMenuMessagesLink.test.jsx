@@ -28,6 +28,7 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
 			to: _to,
 			'data-cy': dataCy,
 			onMenuItemClick: _onMenuItemClick,
+			isActive: _isActive,
 			className,
 			ariaLabel,
 			...props
@@ -44,16 +45,6 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
 		},
 	),
 }))
-
-vi.mock(
-	'@/components/layout/main-nav/nav-menu/NavMenuButtonLink.module.scss',
-	() => ({
-		default: {
-			totalMessagesContainer: 'mocked-total-messages-container',
-			totalMessages: 'mocked-total-messages',
-		},
-	}),
-)
 
 import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
 
@@ -78,7 +69,7 @@ describe('<NavMenuMessagesLink />', () => {
 			render(<NavMenuMessagesLink {...defaultProps} />)
 
 			const listItem = screen.getByRole('listitem')
-			expect(listItem).toHaveClass('navMenuItemMessages')
+			expect(listItem).toContainElement(screen.getByText('Messages'))
 		})
 
 		it('should forward all props to NavMenuButtonLink', () => {
@@ -181,7 +172,7 @@ describe('<NavMenuMessagesLink />', () => {
 			expect(messageCount).toHaveTextContent('5')
 		})
 
-		it('should apply correct CSS classes to message count elements', () => {
+		it('should nest the count inside the link', () => {
 			render(
 				<NavMenuMessagesLink
 					{...defaultProps}
@@ -189,11 +180,9 @@ describe('<NavMenuMessagesLink />', () => {
 				/>,
 			)
 
-			const messageElement = screen.getByTestId('total-messages')
-			const container = messageElement.parentElement
-
-			expect(container).toHaveClass('mocked-total-messages-container')
-			expect(messageElement).toHaveClass('mocked-total-messages')
+			expect(screen.getByRole('button')).toContainElement(
+				screen.getByTestId('total-messages'),
+			)
 		})
 
 		it('should display large message counts correctly', () => {
