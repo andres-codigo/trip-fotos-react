@@ -38,7 +38,7 @@ const BaseDialog = ({
 					data-cy={DIALOG.BACKDROP}
 				/>
 				<RadixDialog.Content
-					className="fixed inset-0 z-100 m-auto h-fit w-4/5 overflow-hidden rounded-lg bg-background shadow-elevated md:w-1/2 data-[state=open]:animate-dialog-in data-[state=closed]:animate-dialog-out"
+					className="fixed inset-0 z-100 m-auto h-fit outline-none w-4/5 overflow-hidden rounded-lg bg-background shadow-elevated md:w-1/2 data-[state=open]:animate-dialog-in data-[state=closed]:animate-dialog-out"
 					data-cy={dataCy}
 					aria-modal="true"
 					role={
