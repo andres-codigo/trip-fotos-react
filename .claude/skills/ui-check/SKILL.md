@@ -1,6 +1,6 @@
 ---
 name: ui-check
-description: Check a UI-affecting change (SCSS, layout, spacing, markup) in a real browser with full-page screenshots at 390, 768, 1024 and 1280px, compared with main, including logged-in pages and their states. Use before marking a UI change ready, or when someone reports a visual problem.
+description: Check a UI-affecting change (SCSS, layout, spacing, markup) in a real browser with full-page screenshots at 390, 768 and 1280px (plus either side of any breakpoint the change defines), compared with main, including logged-in pages and their states. Use before marking a UI change ready, or when someone reports a visual problem.
 argument-hint: '[pages or components affected]'
 ---
 
