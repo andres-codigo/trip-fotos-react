@@ -81,7 +81,12 @@ fs.mkdirSync(cacheDir, { recursive: true })
 const writeStatus = (state) =>
 	fs.writeFileSync(
 		statusFile,
-		JSON.stringify({ state, pid: process.pid, updated: Date.now() }),
+		JSON.stringify({
+			state,
+			pid: process.pid,
+			tree: hash,
+			updated: Date.now(),
+		}),
 	)
 writeStatus('running')
 
