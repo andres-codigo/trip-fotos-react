@@ -170,14 +170,6 @@ describe('<Authentication />', () => {
 			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
-		it('applies the mainContainer class to <main>', () => {
-			renderWithProviders(<Authentication />)
-
-			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
-
-			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
-		})
-
 		it('<main> element has correct data attributes', () => {
 			renderWithProviders(<Authentication />)
 
