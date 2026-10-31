@@ -195,7 +195,7 @@ Fetch the current README first with `gh project view 2 --owner andres-codigo --f
 | Type   | `feature`, `fix`, `enhancement`, `refactor`, `docs`, `test`, `chore` (the [branch prefixes](../CLAUDE.md#branch-naming))                                 | Title or branch prefix — PR labeller and issue intake       |
 | Area   | `ui`, `styling`, `redux/state`, `constants`, `utilities`, `firebase`, `assets`, `testing`, `documentation`, `dependencies`, `config`, `build/deployment` | Changed files — PR labeller; copied to the issue on merge   |
 | Status | `ready`, `in-progress`, `blocked`                                                                                                                        | You — see [Project Board Statuses](#project-board-statuses) |
-| Other  | `javascript`, `duplicate`                                                                                                                                | Dependabot / you                                            |
+| Other  | `javascript`, `duplicate`, `script-reviewed`                                                                                                             | Dependabot / you                                            |
 
 ---
 
@@ -216,6 +216,12 @@ Fetch the current README first with `gh project view 2 --owner andres-codigo --f
 - **Never edit `version` by hand.** After merging a `feat` or `fix` PR, merge the open release PR once its checks are green.
 
 ---
+
+### Start-issue script guard
+
+- **Workflow File:** `.github/workflows/start-issue-guard.yml`
+- **Triggers:** pull request events that change `scripts/start-issue.mjs` or `scripts/__tests__/start-issue.test.js`
+- **Purpose:** `/start-issue` runs that script with no permission prompt, and the test pins the commands it may run. A change to either fails this check until a person reviews the diff and adds the `script-reviewed` label; a new push removes the label again. The check is advisory (not a required status check), so do not merge while it is red.
 
 ## 🔒 Branch Protection
 
@@ -258,6 +264,7 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 | GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml` | Automation       | PR Target Events |
 | GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`      | Automation       | Push/Manual      |
 | Release - Release Please          | `.github/workflows/release-please.yml`         | Automation       | Push             |
+| Guard - start-issue script        | `.github/workflows/start-issue-guard.yml`      | Automation       | PR Events        |
 
 ---
 

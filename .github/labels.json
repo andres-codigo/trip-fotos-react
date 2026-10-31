@@ -188,6 +188,11 @@
 	],
 	"other": [
 		{
+			"name": "script-reviewed",
+			"color": "fbca04",
+			"description": "A person has reviewed a change to the start-issue script"
+		},
+		{
 			"name": "javascript",
 			"color": "168700",
 			"description": "Added by Dependabot to JavaScript dependency updates"

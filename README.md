@@ -339,6 +339,7 @@ Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools 
 | GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml`                     | PR Target Events |
 | GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`                          | Push/Manual      |
 | Release - Release Please          | `.github/workflows/release-please.yml`                             | Push             |
+| Guard - start-issue script        | `.github/workflows/start-issue-guard.yml`                          | PR Events        |
 
 The workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` repository secrets; only the live smoke job also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
 

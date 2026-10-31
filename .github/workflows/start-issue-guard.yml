@@ -1,0 +1,38 @@
+name: Guard - start-issue script
+
+# /start-issue runs scripts/start-issue.mjs with no permission prompt, so a change to it (or to the test that pins what it may run) needs a human review.
+# The check fails until the script-reviewed label is added, and a new push removes the label again so an approval never covers later commits.
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, labeled, unlabeled]
+        paths:
+            - scripts/start-issue.mjs
+            - scripts/__tests__/start-issue.test.js
+
+permissions:
+    contents: read
+    pull-requests: write
+    issues: write
+
+jobs:
+    require-review:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Require the script-reviewed label
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR: ${{ github.event.pull_request.number }}
+                  ACTION: ${{ github.event.action }}
+                  LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+              run: |
+                  gh label create script-reviewed --color fbca04 --description "A person has reviewed a change to the start-issue script" --repo "$GITHUB_REPOSITORY" 2>/dev/null || true
+                  if [ "$ACTION" = synchronize ] || [ "$ACTION" = opened ] || [ "$ACTION" = reopened ]; then
+                    gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --remove-label script-reviewed 2>/dev/null || true
+                    echo "::error::scripts/start-issue.mjs or its test changed. Review the diff, then add the script-reviewed label."
+                    exit 1
+                  fi
+                  case ",$LABELS," in
+                    *,script-reviewed,*) echo "Reviewed" ;;
+                    *) echo "::error::scripts/start-issue.mjs or its test changed. Review the diff, then add the script-reviewed label."; exit 1 ;;
+                  esac
