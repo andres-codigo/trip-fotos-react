@@ -17,3 +17,5 @@ Container specifics the section does not cover:
 - Case-only SCSS renames can leave files missing after `git switch`: `git restore` the affected folder, never anything with uncommitted work.
 
 Report, per image, what is on screen, and list what was not checked. Hold the merge while a visual question is open, even when CI is green. Delete the spec and screenshots afterwards.
+
+Status line: run `node .claude/skills/ui-check/status.mjs capturing` when the run starts, `reviewing` while you open the images, then `pass` or `hold` (a visual question is open). The status line shows it next to the `/verify` state.

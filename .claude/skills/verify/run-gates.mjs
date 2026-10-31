@@ -8,6 +8,8 @@ const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd()
 // node_modules is gitignored and shared by every worktree that links it, so the cache survives branch switches
 const cacheDir = path.join(projectDir, 'node_modules', '.cache', 'verify')
 const cacheFile = path.join(cacheDir, 'passed.json')
+// Read by the status line to show whether a run is in flight and how the last one ended
+const statusFile = path.join(cacheDir, 'status.json')
 
 const GATES = {
 	lint: {
@@ -76,6 +78,13 @@ const passed = new Set(
 
 fs.mkdirSync(cacheDir, { recursive: true })
 
+const writeStatus = (state) =>
+	fs.writeFileSync(
+		statusFile,
+		JSON.stringify({ state, pid: process.pid, updated: Date.now() }),
+	)
+writeStatus('running')
+
 for (const gate of requested) {
 	if (passed.has(gate)) {
 		console.log(`${gate}: cached (passed on this exact tree)`)
@@ -117,3 +126,5 @@ fs.writeFileSync(
 	cacheFile,
 	JSON.stringify({ tree: hash, passed: [...passed] }, null, '\t'),
 )
+
+writeStatus(requested.every((gate) => passed.has(gate)) ? 'pass' : 'fail')
