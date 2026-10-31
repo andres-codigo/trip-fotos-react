@@ -9,13 +9,12 @@ import { useDispatch, useSelector } from 'react-redux'
  * - Custom hooks: All navigation-related hooks with controlled return values for state management
  * - NavMenuButtonLink: Mock component that renders as div for testing prop forwarding
  * - NavMenuMessagesLink: Mock component that renders as li for testing message functionality
- * - CSS Modules: Stable mock class names for NavMenuButtonLink styling tests
  *
  * Test Coverage:
  * - Rendering: Hook integration, prop forwarding, conditional rendering based on isLoggedIn
  * - Component Integration: Verification that child components receive correct props
  * - Hook Parameters: Ensures hooks are called with proper arguments and dependencies
- * - Active Class: Tests that active class is applied when location matches path
+ * - Active link: Tests that isActive is set when location matches path
  * - Accessibility: N/A (covered in MainNav.cy.jsx)
  *
  * Note: User interactions, DOM events, and accessibility are covered in MainNav.cy.jsx
@@ -44,10 +43,6 @@ vi.mock('@/components/layout/main-nav/hooks/useClickOutsideToClose', () => ({
 	default: vi.fn(),
 }))
 
-vi.mock('@/components/layout/main-nav/hooks/useMobileMenu', () => ({
-	default: vi.fn(),
-}))
-
 vi.mock('@/components/layout/main-nav/hooks/useLogout', () => ({
 	default: vi.fn(),
 }))
@@ -57,6 +52,7 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
 	default: vi.fn(
 		({
 			className,
+			isActive: _isActive,
 			onClick,
 			onMenuItemClick,
 			'data-cy': dataCy,
@@ -85,6 +81,7 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuMessagesLink', () => ({
 		({
 			onMenuItemClick,
 			className,
+			isActive: _isActive,
 			'data-cy': dataCy,
 			// isLink, to, and totalMessages are extracted but not used - this is intentional for prop filtering
 
@@ -109,13 +106,9 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuMessagesLink', () => ({
 
 import useMainNavState from '@/components/layout/main-nav/hooks/useMainNavState'
 import useClickOutsideToClose from '@/components/layout/main-nav/hooks/useClickOutsideToClose'
-import useMobileMenu from '@/components/layout/main-nav/hooks/useMobileMenu'
 import useLogout from '@/components/layout/main-nav/hooks/useLogout'
 
 import { PATHS } from '@/constants/ui'
-
-import navMenuButtonLinkStyles from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink.module.scss'
-import mainNavStyles from '@/components/layout/main-nav/MainNav.module.scss'
 
 import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
 import NavMenuMessagesLink from '@/components/layout/main-nav/nav-menu/NavMenuMessagesLink'
@@ -161,7 +154,6 @@ describe('<MainNav />', () => {
 		vi.mocked(useDispatch).mockReturnValue(mockDispatch)
 		mockDispatch.mockClear()
 		vi.mocked(useClickOutsideToClose).mockReturnValue(undefined)
-		vi.mocked(useMobileMenu).mockReturnValue(undefined)
 		vi.mocked(useLogout).mockReturnValue(mockHandleLogoutClick)
 	})
 
@@ -260,7 +252,7 @@ describe('<MainNav />', () => {
 			)
 		})
 
-		it('should apply active class to Messages link when location matches PATHS.MESSAGES', () => {
+		it('should mark as active to Messages link when location matches PATHS.MESSAGES', () => {
 			mockUseLocation.mockReturnValue({
 				pathname: PATHS.MESSAGES,
 			})
@@ -269,13 +261,13 @@ describe('<MainNav />', () => {
 
 			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
 				expect.objectContaining({
-					className: `${navMenuButtonLinkStyles.navMenuButtonLink} ${mainNavStyles.active}`,
+					isActive: true,
 				}),
 				undefined,
 			)
 		})
 
-		it('should not apply active class to Messages link when location does not match PATHS.MESSAGES', () => {
+		it('should not mark as active to Messages link when location does not match PATHS.MESSAGES', () => {
 			mockUseLocation.mockReturnValue({
 				pathname: '/other-path',
 			})
@@ -284,13 +276,13 @@ describe('<MainNav />', () => {
 
 			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
 				expect.objectContaining({
-					className: navMenuButtonLinkStyles.navMenuButtonLink,
+					isActive: false,
 				}),
 				undefined,
 			)
 		})
 
-		it('should apply active class to Travellers link when location matches PATHS.TRAVELLERS', () => {
+		it('should mark as active to Travellers link when location matches PATHS.TRAVELLERS', () => {
 			mockUseLocation.mockReturnValue({
 				pathname: PATHS.TRAVELLERS,
 			})
@@ -303,12 +295,12 @@ describe('<MainNav />', () => {
 
 			expect(travellersCall[0]).toEqual(
 				expect.objectContaining({
-					className: `${navMenuButtonLinkStyles.navMenuButtonLink} ${mainNavStyles.active}`,
+					isActive: true,
 				}),
 			)
 		})
 
-		it('should not apply active class to Travellers link when location does not match PATHS.TRAVELLERS', () => {
+		it('should not mark as active to Travellers link when location does not match PATHS.TRAVELLERS', () => {
 			mockUseLocation.mockReturnValue({
 				pathname: '/other-path',
 			})
@@ -321,7 +313,7 @@ describe('<MainNav />', () => {
 
 			expect(travellersCall[0]).toEqual(
 				expect.objectContaining({
-					className: navMenuButtonLinkStyles.navMenuButtonLink,
+					isActive: false,
 				}),
 			)
 		})
@@ -344,12 +336,6 @@ describe('<MainNav />', () => {
 				expect.any(Object),
 				mockSetIsMenuOpen,
 			)
-			expect(vi.mocked(useMobileMenu)).toHaveBeenCalledWith(
-				expect.any(Object),
-				expect.any(Object),
-				mockSetIsMenuOpen,
-				true,
-			)
 			expect(vi.mocked(useLogout)).toHaveBeenCalledWith(
 				mockSetTravellerName,
 				mockSetIsMenuOpen,
@@ -362,7 +348,7 @@ describe('<MainNav />', () => {
 			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
 				{
 					isLink: true,
-					className: navMenuButtonLinkStyles.navMenuButtonLink,
+					isActive: false,
 					to: PATHS.MESSAGES,
 					onMenuItemClick: expect.any(Function),
 					'data-cy': 'nav-menu-item-messages',
@@ -378,7 +364,7 @@ describe('<MainNav />', () => {
 			expect(vi.mocked(NavMenuButtonLink)).toHaveBeenCalledWith(
 				{
 					isLink: true,
-					className: navMenuButtonLinkStyles.navMenuButtonLink,
+					isActive: false,
 					to: PATHS.TRAVELLERS,
 					onMenuItemClick: expect.any(Function),
 					'data-cy': 'nav-menu-item-travellers',
@@ -395,7 +381,6 @@ describe('<MainNav />', () => {
 				expect.objectContaining({
 					isLink: true,
 					to: PATHS.AUTHENTICATION,
-					className: navMenuButtonLinkStyles.navMenuButtonLink,
 					'data-cy': 'nav-menu-item-logout',
 					onClick: mockHandleLogoutClick,
 					children: ['Logout ', mockTravellerName],
@@ -439,7 +424,7 @@ describe('<MainNav />', () => {
 			const hamburgerButton = screen.getByTestId('hamburger-menu')
 			expect(hamburgerButton).toHaveAttribute(
 				'aria-controls',
-				'hamburger-menu-items-container',
+				'nav-menu-items-container',
 			)
 		})
 	})

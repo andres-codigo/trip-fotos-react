@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
-import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
 import { PATHS } from '@/constants/ui'
@@ -11,22 +10,22 @@ import { loadMessages, selectMessagesCount } from '@/store/slices/messagesSlice'
 import useClickOutsideToCloseDefault from './hooks/useClickOutsideToClose'
 import useLogoutDefault from './hooks/useLogout'
 import useMainNavStateDefault from './hooks/useMainNavState'
-import useMobileMenuDefault from './hooks/useMobileMenu'
 
 import BaseButton from '@/components/ui/button/BaseButton'
+import { cn } from '@/utils/cn'
 
 import NavMenuButtonLink from './nav-menu/NavMenuButtonLink'
 import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink'
 
-import navMenuButtonLinkStyles from './nav-menu/NavMenuButtonLink.module.scss'
-import mainNavStyles from './MainNav.module.scss'
+// Three bars that the toggle button turns into a cross while the menu is open
+const barClasses =
+	'mx-auto my-[0.3125rem] block h-[0.1875rem] w-[1.5625rem] bg-primary-foreground transition-colors duration-300 ease-in-out group-aria-expanded:first:translate-y-2 group-aria-expanded:first:rotate-45 group-aria-expanded:nth-2:opacity-0 group-aria-expanded:last:-translate-y-2 group-aria-expanded:last:-rotate-45'
 
 function MainNav({
 	isLoggedIn,
 	isTraveller: isTravellerProp,
 	useMainNavState = useMainNavStateDefault,
 	useClickOutsideToClose = useClickOutsideToCloseDefault,
-	useMobileMenu = useMobileMenuDefault,
 	useLogout = useLogoutDefault,
 }) {
 	const location = useLocation()
@@ -46,7 +45,6 @@ function MainNav({
 	const navMenuRef = useRef(null)
 
 	useClickOutsideToClose(isMenuOpen, hamburgerRef, navMenuRef, setIsMenuOpen)
-	useMobileMenu(hamburgerRef, navMenuRef, setIsMenuOpen, isLoggedIn)
 
 	useEffect(() => {
 		if (isLoggedIn) {
@@ -67,57 +65,56 @@ function MainNav({
 		setIsMenuOpen(false)
 	}
 
+	const handleHamburgerClick = () => {
+		setIsMenuOpen((prev) => !prev)
+	}
+
 	return (
 		<>
 			{isLoggedIn && (
 				<>
 					<nav
-						className={mainNavStyles.navbar}
 						data-cy="nav-menu-container"
 						aria-label="Top navigation"
 						role="navigation">
 						<BaseButton
 							ref={hamburgerRef}
-							className={classNames(mainNavStyles.hamburger, {
-								[mainNavStyles.active]: isMenuOpen,
-							})}
+							modeType="text"
+							className="group hidden px-6 py-3 mobile:block"
+							onClick={handleHamburgerClick}
 							data-cy="hamburger-menu"
-							aria-controls="hamburger-menu-items-container"
+							aria-controls="nav-menu-items-container"
 							aria-expanded={isMenuOpen}
 							aria-label={
 								isMenuOpen
 									? 'Close navigation menu'
 									: 'Open navigation menu'
 							}>
-							<span className={mainNavStyles.bar}></span>
-							<span className={mainNavStyles.bar}></span>
-							<span className={mainNavStyles.bar}></span>
+							<span className={barClasses}></span>
+							<span className={barClasses}></span>
+							<span className={barClasses}></span>
 						</BaseButton>
 						<ul
 							id="nav-menu-items-container"
 							ref={navMenuRef}
-							className={classNames(
-								mainNavStyles.navMenuItemsContainer,
-								{
-									[mainNavStyles.active]: isMenuOpen,
-								},
+							className={cn(
+								'm-0 flex items-center justify-between p-0',
+								// Off-screen alone leaves the closed menu's links keyboard-focusable
+								'mobile:invisible mobile:absolute mobile:top-[4.9rem] mobile:left-[-100%] mobile:w-full mobile:flex-col mobile:bg-primary mobile:text-center mobile:shadow-menu',
+								isMenuOpen && 'mobile:visible mobile:left-0',
 							)}
 							data-cy="nav-menu-items-container"
 							aria-label="Main navigation menu">
-							<li className={mainNavStyles.navMenuItem}>
-								<ul>
+							<li className="mx-2! mobile:mx-0! mobile:w-full">
+								<ul className="m-0 flex items-center p-0 [&>li]:mx-2! mobile:block mobile:[&>li]:mx-0!">
 									{isTraveller && (
 										<NavMenuMessagesLink
 											isLink
 											to={PATHS.MESSAGES}
-											className={classNames(
-												navMenuButtonLinkStyles.navMenuButtonLink,
-												{
-													[mainNavStyles.active]:
-														location.pathname ===
-														PATHS.MESSAGES,
-												},
-											)}
+											isActive={
+												location.pathname ===
+												PATHS.MESSAGES
+											}
 											onMenuItemClick={
 												handleMenuItemClick
 											}
@@ -125,38 +122,27 @@ function MainNav({
 											totalMessages={totalMessages}
 										/>
 									)}
-									<li className="navMenuItemTravellers">
+									<li>
 										<NavMenuButtonLink
 											isLink
 											to={PATHS.TRAVELLERS}
 											onMenuItemClick={
 												handleMenuItemClick
 											}
-											className={classNames(
-												navMenuButtonLinkStyles.navMenuButtonLink,
-												{
-													[mainNavStyles.active]:
-														location.pathname ===
-														PATHS.TRAVELLERS,
-												},
-											)}
+											isActive={
+												location.pathname ===
+												PATHS.TRAVELLERS
+											}
 											data-cy="nav-menu-item-travellers">
 											Travellers
 										</NavMenuButtonLink>
 									</li>
 								</ul>
 							</li>
-							<li
-								className={classNames(
-									mainNavStyles.navMenuItem,
-									'nav-menu-item-logout',
-								)}>
+							<li className="mx-2! mobile:mx-0! mobile:w-full">
 								<NavMenuButtonLink
 									isLink
 									to={PATHS.AUTHENTICATION}
-									className={
-										navMenuButtonLinkStyles.navMenuButtonLink
-									}
 									data-cy="nav-menu-item-logout"
 									ariaLabel={`Logout ${travellerName}`}
 									onClick={handleLogoutClick}>
@@ -176,7 +162,6 @@ MainNav.propTypes = {
 	isTraveller: PropTypes.bool,
 	useMainNavState: PropTypes.func,
 	useClickOutsideToClose: PropTypes.func,
-	useMobileMenu: PropTypes.func,
 	useLogout: PropTypes.func,
 }
 

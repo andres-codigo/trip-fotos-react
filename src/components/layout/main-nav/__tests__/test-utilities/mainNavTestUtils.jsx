@@ -2,7 +2,6 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 
 import useCloseHamburgerMenuDefault from '@/components/layout/main-nav/hooks/useClickOutsideToClose'
-import useMobileMenuDefault from '@/components/layout/main-nav/hooks/useMobileMenu'
 
 import MainNav from '@/components/layout/main-nav/MainNav'
 
@@ -24,7 +23,6 @@ export const TestMainNav = ({
 				setIsMenuOpen,
 			})}
 			useClickOutsideToClose={useCloseHamburgerMenuDefault}
-			useMobileMenu={useMobileMenuDefault}
 			useLogout={() => {}}
 		/>
 	)

@@ -32,7 +32,9 @@ describe('<NavMenuMessagesLink />', () => {
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('have.text', '3')
 		cy.get('li a')
 			.should('have.attr', 'aria-label', 'Messages 3')
-			.and('have.prop', 'innerText', 'Messages 3')
+			.invoke('prop', 'innerText')
+			.then((text) => text.replace(/\s+/g, ' ').trim())
+			.should('eq', 'Messages 3')
 	})
 
 	it('shows no count and a plain name when there are no messages', () => {

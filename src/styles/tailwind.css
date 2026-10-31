@@ -46,6 +46,9 @@
 	--badge-tone-7: #1565c0;
 }
 
+/* Matches useViewport and GLOBAL.BREAKPOINT.MOBILE: the mobile layout includes 768px itself */
+@custom-variant mobile (@media (width <= 768px));
+
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -122,6 +125,11 @@
 			transform: translateY(10px);
 		}
 	}
+}
+
+/* Messages count badge fades in slowly so a new count draws the eye */
+@theme {
+	--animate-badge-in: fade-in 2s ease forwards;
 }
 
 /* Dialog scales in over a fading backdrop; Radix waits for the closed animations to end before unmounting */

@@ -20,8 +20,6 @@ import MessagesPage from '@/pages/messages/Messages'
 import TravellersPage from '@/pages/travellers/Travellers'
 import AuthenticationPage from '@/pages/authentication/Authentication'
 
-import mainNavStyles from '@/components/layout/main-nav/MainNav.module.scss'
-
 const assertMenuItemRedirectWithDefaults = (
 	routePath,
 	viewportType,
@@ -191,11 +189,39 @@ describe('<MainNav />', () => {
 						cy.setViewportToMobile()
 						cy.get(
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('have.class', mainNavStyles.active)
+						).should('be.visible')
 						cy.get('body').click(0, 0)
 						cy.get(
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('not.have.class', mainNavStyles.active)
+						).should('not.be.visible')
+					})
+				})
+
+				it('toggles the hamburger menu when the hamburger is clicked on mobile', () => {
+					cy.createMockStore('mock-token').then((store) => {
+						cy.mountWithProviders(
+							<TestMainNav
+								isLoggedIn={true}
+								isMenuOpen={false}
+							/>,
+							store,
+						)
+						cy.setViewportToMobile()
+						cy.get(
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
+						).should('not.be.visible')
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
+							.click()
+							.should('have.attr', 'aria-expanded', 'true')
+						cy.get(
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
+						).should('be.visible')
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
+							.click()
+							.should('have.attr', 'aria-expanded', 'false')
+						cy.get(
+							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
+						).should('not.be.visible')
 					})
 				})
 
@@ -213,7 +239,7 @@ describe('<MainNav />', () => {
 
 						cy.get(
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('have.class', mainNavStyles.active)
+						).should('be.visible')
 
 						cy.get(
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
@@ -221,7 +247,7 @@ describe('<MainNav />', () => {
 
 						cy.get(
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('not.have.class', mainNavStyles.active)
+						).should('not.be.visible')
 					})
 				})
 
@@ -238,7 +264,7 @@ describe('<MainNav />', () => {
 
 						cy.get(
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('have.class', mainNavStyles.active)
+						).should('be.visible')
 
 						cy.get(
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
@@ -246,7 +272,7 @@ describe('<MainNav />', () => {
 
 						cy.get(
 							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('not.have.class', mainNavStyles.active)
+						).should('not.be.visible')
 					})
 				})
 
@@ -384,7 +410,7 @@ describe('<MainNav />', () => {
 						.should(
 							'have.attr',
 							'aria-controls',
-							'hamburger-menu-items-container',
+							'nav-menu-items-container',
 						)
 						.and('have.attr', 'aria-expanded', 'true')
 						.and('have.attr', 'aria-label', 'Close navigation menu')

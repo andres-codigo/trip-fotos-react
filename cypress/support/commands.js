@@ -198,9 +198,11 @@ Cypress.Commands.add('assertHeaderTitleLink', () => {
 // TOP NAVIGATION HAMBURGER MENU
 ////
 Cypress.Commands.add('assertHamburgerMenuState', (isActive) => {
-	cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
-		.invoke('attr', 'class')
-		.should(isActive ? 'contain' : 'not.contain', '_active_')
+	cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
+		'have.attr',
+		'aria-expanded',
+		String(isActive),
+	)
 })
 
 ////

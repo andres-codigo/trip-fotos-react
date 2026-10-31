@@ -1,8 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
-
 /**
  * NavMenuButtonLink Unit Tests
  *
@@ -10,11 +8,9 @@ import { createClassNamesMock } from '@/testUtils/vitest/mockClassNames'
  * - BaseButton: Simplified version that filters out React-specific props (isLink, isError, isDisabled, to)
  *   and renders as native button element to prevent DOM attribute warnings
  * - useViewport: Mocked hook that controls mobile/desktop behavior for conditional click handling
- * - classNames: Utility function mock that combines CSS classes for styling tests
- * - CSS Module: Provides stable mock class names (primary, secondary) for modeType styling tests
  *
  * Test Coverage:
- * - Rendering: Component output, prop forwarding, default values, and CSS class application
+ * - Rendering: Component output, prop forwarding, default values, and active-link semantics
  * - Behaviour: Click handling logic, mobile vs desktop interactions, viewport responsiveness
  * - Accessibility: Focus management for error states and keyboard navigation support
  */
@@ -57,32 +53,13 @@ vi.mock('@/utils/useViewport', () => ({
 	default: vi.fn(),
 }))
 
-vi.mock('classnames', () => ({
-	default: createClassNamesMock(),
-}))
-
-vi.mock(
-	'@/components/layout/main-nav/nav-menu/NavMenuButtonLink.module.scss',
-	() => ({
-		default: {
-			primary: 'mocked-primary-class',
-			secondary: 'mocked-secondary-class',
-		},
-	}),
-)
-
 import useViewport from '@/utils/useViewport'
-import classNames from 'classnames'
 
 const mockUseViewport = vi.mocked(useViewport)
-const mockClassNames = vi.mocked(classNames)
 
 describe('<NavMenuButtonLink />', () => {
 	beforeEach(() => {
 		mockUseViewport.mockReturnValue({ isMobile: false })
-		mockClassNames.mockImplementation((...args) =>
-			args.filter(Boolean).join(' '),
-		)
 	})
 
 	const defaultProps = {
@@ -115,48 +92,46 @@ describe('<NavMenuButtonLink />', () => {
 			expect(button).toHaveAttribute('data-cy', 'base-button')
 		})
 
-		it('should apply className correctly with modeType', () => {
-			mockClassNames.mockReturnValue('combined-classes')
+		it('should add the link styling to a custom className', () => {
+			render(
+				<NavMenuButtonLink
+					{...defaultProps}
+					isLink
+					className="custom-class"
+				/>,
+			)
 
+			const link = screen.getByTestId('base-button')
+			expect(link).toHaveClass('custom-class')
+			expect(link).not.toHaveAttribute('aria-current')
+		})
+
+		it('should mark the link as the current page when active', () => {
+			render(
+				<NavMenuButtonLink
+					{...defaultProps}
+					isLink
+					isActive
+				/>,
+			)
+
+			expect(screen.getByTestId('base-button')).toHaveAttribute(
+				'aria-current',
+				'page',
+			)
+		})
+
+		it('should not add link styling to a non-link', () => {
 			render(
 				<NavMenuButtonLink
 					{...defaultProps}
 					className="custom-class"
-					modeType="primary"
 				/>,
 			)
 
-			expect(mockClassNames).toHaveBeenCalledWith(
+			expect(screen.getByTestId('base-button')).toHaveAttribute(
+				'class',
 				'custom-class',
-				'mocked-primary-class',
-			)
-		})
-
-		it('should handle modeType styling', () => {
-			render(
-				<NavMenuButtonLink
-					{...defaultProps}
-					modeType="secondary"
-				/>,
-			)
-
-			expect(mockClassNames).toHaveBeenCalledWith(
-				undefined, // no custom className
-				'mocked-secondary-class',
-			)
-		})
-
-		it('should handle undefined modeType', () => {
-			render(
-				<NavMenuButtonLink
-					{...defaultProps}
-					modeType="nonexistent"
-				/>,
-			)
-
-			expect(mockClassNames).toHaveBeenCalledWith(
-				undefined,
-				undefined, // mocked styles don't have 'nonexistent' key
 			)
 		})
 	})
