@@ -62,22 +62,6 @@ vi.mock('@/components/ui/button/BaseButton', () => ({
 	},
 }))
 
-vi.mock(
-	'@/components/forms/user-authentication/UserAuthenticationForm.module.scss',
-	() => ({
-		default: {
-			userAuthentication: 'userAuthentication',
-			userAuthenticationTitle: 'userAuthenticationTitle',
-			visuallyHidden: 'visuallyHidden',
-			formControl: 'formControl',
-			invalidForm: 'invalidForm',
-			formActions: 'formActions',
-			formSubmitButton: 'formSubmitButton',
-			toggleLink: 'toggleLink',
-		},
-	}),
-)
-
 const renderWithRouter = (component) => {
 	return render(<BrowserRouter>{component}</BrowserRouter>)
 }

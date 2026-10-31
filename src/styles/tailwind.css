@@ -30,6 +30,8 @@
 	--border: #cecece;
 	--input: #cecece;
 	--ring: #3d008d;
+	--field-focus: #f0e6fd;
+	--field-invalid: #ffcccc;
 
 	--overlay-backdrop: rgb(0 0 0 / 0.75);
 
@@ -67,6 +69,8 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	--color-field-focus: var(--field-focus);
+	--color-field-invalid: var(--field-invalid);
 
 	--color-badge-0: var(--badge-tone-0);
 	--color-badge-1: var(--badge-tone-1);
@@ -164,6 +168,21 @@
 		}
 		to {
 			opacity: 0;
+		}
+	}
+}
+
+/* The file-preview "uploading" badge pulses between white and grey; reduced motion gets a static grey */
+@theme {
+	--animate-file-pulse: file-pulse 1.5s linear infinite;
+
+	@keyframes file-pulse {
+		0%,
+		100% {
+			background: #ffffff;
+		}
+		50% {
+			background: #cecece;
 		}
 	}
 }

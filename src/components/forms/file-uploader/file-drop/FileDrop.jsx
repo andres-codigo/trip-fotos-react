@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import { FILE_DROP } from '@/constants/test'
 
-import fileDropStyles from './FileDrop.module.scss'
+import { cn } from '@/utils/cn'
 
 const DRAG_EVENTS = ['dragenter', 'dragover', 'dragleave', 'drop']
 // Dragging over a child fires dragleave on the parent; a short delay stops the active state flickering
@@ -55,7 +55,11 @@ const FileDrop = ({ onFilesDropped, className = '', children }) => {
 
 	return (
 		<div
-			className={`${fileDropStyles.dropArea} ${isActive ? fileDropStyles.active : ''} ${className}`.trim()}
+			className={cn(
+				'mx-auto mb-[15px] w-full max-w-200 border border-dashed border-border transition-colors duration-200 ease-in-out hover:border-primary hover:bg-muted motion-reduce:transition-none',
+				isActive && 'border-primary bg-muted',
+				className,
+			)}
 			data-active={isActive}
 			onDragEnter={setActive}
 			onDragOver={setActive}

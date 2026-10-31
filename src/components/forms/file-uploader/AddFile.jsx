@@ -9,8 +9,6 @@ import FileDrop from '@/components/forms/file-uploader/file-drop/FileDrop'
 import FilePreview from '@/components/forms/file-uploader/file-preview/FilePreview'
 import useFileList from '@/components/forms/file-uploader/hooks/useFileList'
 
-import addFileStyles from './AddFile.module.scss'
-
 const { FILE_DROP_TEXT } = GLOBAL
 
 const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
@@ -38,13 +36,13 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 	}
 
 	return (
-		<div className={addFileStyles.addFile}>
+		<div className="mx-auto text-center">
 			<FileDrop onFilesDropped={addFiles}>
 				{({ isActive }) => (
 					<>
 						<label
 							htmlFor={id}
-							className={addFileStyles.label}>
+							className="relative block cursor-pointer p-12 focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-accent [&>span]:block">
 							{isActive ? (
 								<>
 									<span>{FILE_DROP_TEXT.ACTIVE}</span>
@@ -71,7 +69,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 								type="file"
 								multiple
 								accept={FILE_UPLOAD.ACCEPTED_TYPES.join(',')}
-								className={addFileStyles.input}
+								className="sr-only"
 								aria-invalid={errors.length > 0}
 								aria-describedby={
 									errors.length > 0 ? errorId : undefined
@@ -82,7 +80,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 						</label>
 						{files.length > 0 && (
 							<ul
-								className={addFileStyles.fileList}
+								className="m-2.5 flex list-none flex-wrap border border-background bg-[#f0ffff] p-0"
 								aria-label={GLOBAL.FILE_LIST_LABEL}
 								data-cy={FILE_DROP.LIST}>
 								{files.map((file) => (
@@ -101,7 +99,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 				<div
 					id={errorId}
 					role="alert"
-					className={addFileStyles.errors}
+					className="text-[#933933] [&>p]:my-1"
 					data-cy={FILE_DROP.ERRORS}>
 					{errors.map((error) => (
 						<p key={error}>{error}</p>

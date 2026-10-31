@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types'
-import classNames from 'classnames'
 
 import { CONTACT_TRAVELLER } from '@/constants/test'
 import {
@@ -13,8 +12,6 @@ import Textarea from '@/components/ui/form/textarea/Textarea'
 import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
 
 import useContactTravellerForm from './hooks/useContactTravellerForm'
-
-import contactTravellerFormStyles from './ContactTravellerForm.module.scss'
 
 const ContactTravellerForm = ({
 	userEmail = '',
@@ -36,21 +33,15 @@ const ContactTravellerForm = ({
 		showRequiredMark: true,
 	})
 
-	const getControlClassName = (field) =>
-		classNames(contactTravellerFormStyles.formControl, {
-			[contactTravellerFormStyles.invalidForm]: !formData[field].isValid,
-		})
-
 	return (
 		<form
-			className={contactTravellerFormStyles.contactTraveller}
 			onSubmit={submitHandler(onSubmit)}
 			noValidate
 			autoComplete="on"
 			aria-busy={isLoading}
 			data-cy={CONTACT_TRAVELLER.FORM}>
 			<LoadingAnnouncement isLoading={isLoading} />
-			<div className={getControlClassName(EMAIL)}>
+			<div className="my-2">
 				<Input
 					{...getFieldProps(EMAIL)}
 					label="E-Mail"
@@ -62,7 +53,7 @@ const ContactTravellerForm = ({
 					data-cy-error={CONTACT_TRAVELLER.EMAIL_ERROR}
 				/>
 			</div>
-			<div className={getControlClassName(MESSAGE)}>
+			<div className="my-2">
 				<Textarea
 					{...getFieldProps(MESSAGE)}
 					label="Message"
@@ -72,7 +63,7 @@ const ContactTravellerForm = ({
 					data-cy-error={CONTACT_TRAVELLER.MESSAGE_ERROR}
 				/>
 			</div>
-			<div className={contactTravellerFormStyles.formActions}>
+			<div className="mx-auto text-center">
 				<BaseButton
 					type="submit"
 					isDisabled={isLoading}

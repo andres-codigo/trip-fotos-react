@@ -6,8 +6,6 @@ import { ATTRIBUTES, ACCESSIBILITY } from '@/constants/ui'
 
 import UserAuthenticationForm from '@/components/forms/user-authentication/UserAuthenticationForm'
 
-import userAuthStyles from '@/components/forms/user-authentication/UserAuthenticationForm.module.scss'
-
 describe('<UserAuthenticationForm />', () => {
 	const EMAIL_ID = 'email'
 	const EMAIL_SELECTOR = `#${EMAIL_ID}`
@@ -82,9 +80,6 @@ describe('<UserAuthenticationForm />', () => {
 			cy.get(
 				AUTHENTICATION_FORM_SELECTORS.USER_AUTHENTICATION_TITLE,
 			).should('exist')
-			cy.get(
-				AUTHENTICATION_FORM_SELECTORS.USER_AUTHENTICATION_TITLE,
-			).should('have.class', userAuthStyles.userAuthenticationTitle)
 		})
 		it('renders email and password inputs', () => {
 			render()
@@ -109,12 +104,9 @@ describe('<UserAuthenticationForm />', () => {
 				AUTHENTICATION_FORM_SELECTORS.SIGNUP_TEXT_TOGGLE_LINK,
 			)
 		})
-		it('renders the form controls with correct class', () => {
+		it('marks both inputs as required', () => {
 			render()
-			cy.get('.formControlInput').should('have.length', 2)
-			cy.get('.formControlInput').each(($el) => {
-				cy.wrap($el).should('have.class', 'formControlInput')
-			})
+			cy.get('input[aria-required="true"]').should('have.length', 2)
 		})
 	})
 

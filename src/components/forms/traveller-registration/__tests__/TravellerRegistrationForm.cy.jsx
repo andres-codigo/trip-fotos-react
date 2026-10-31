@@ -12,8 +12,6 @@ import {
 } from '@/constants/test'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
-import travellerRegistrationFormStyles from '@/components/forms/traveller-registration/TravellerRegistrationForm.module.scss'
-
 describe('<TravellerRegistrationForm />', () => {
 	let onSubmit
 
@@ -160,14 +158,6 @@ describe('<TravellerRegistrationForm />', () => {
 					})
 				})
 		})
-
-		it('renders the form with correct styling', () => {
-			render()
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should(
-				'have.class',
-				travellerRegistrationFormStyles.travellerRegistration,
-			)
-		})
 	})
 
 	describe('Behaviour tests', () => {
@@ -185,9 +175,11 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.contains('p', VALIDATION_MESSAGES.CITIES_REQUIRED).should(
 				'be.visible',
 			)
+			// The span is a screen-reader duplicate of the visible message
 			cy.contains('span', VALIDATION_MESSAGES.CITIES_REQUIRED).should(
-				'have.class',
-				travellerRegistrationFormStyles.visuallyHidden,
+				'have.attr',
+				'role',
+				'alert',
 			)
 		})
 
@@ -197,14 +189,9 @@ describe('<TravellerRegistrationForm />', () => {
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
 			).click()
 
-			// Check if the parent div of the input has the invalidForm class
-			// Note: We need to traverse up from the input to find the form control wrapper
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT)
-				.closest(`.${travellerRegistrationFormStyles.formControl}`)
-				.should(
-					'have.class',
-					travellerRegistrationFormStyles.invalidForm,
-				)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT,
+			).should('have.attr', 'aria-invalid', 'true')
 		})
 
 		it('clears validation error when input is corrected', () => {
