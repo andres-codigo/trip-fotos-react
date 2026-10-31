@@ -4,7 +4,7 @@ description: Run the project's local quality gates (ESLint, Vitest, Cypress comp
 argument-hint: '[e2e] [all]'
 model: haiku
 context: fork
-allowed-tools: Bash(npm run lint), Bash(npm run lint *), Bash(npm run vitest:run), Bash(npm run vitest:run *), Bash(npm run cy:run:ct), Bash(npm run cy:run:ct *), Bash(npm run build), Bash(npm run build *), Bash(tail *), Bash(grep *), Bash(git status *), Bash(git diff *), Bash(node .claude/skills/verify/changed-gates.mjs), Bash(node .claude/skills/verify/changed-gates.mjs *), Bash(node .claude/skills/verify/run-gates.mjs *)
+allowed-tools: Bash(npm run lint), Bash(npm run lint *), Bash(npm run vitest:run), Bash(npm run vitest:run *), Bash(npm run cy:run:ct), Bash(npm run cy:run:ct *), Bash(npm run build), Bash(npm run build *), Bash(tail *), Bash(grep *), Bash(git status *), Bash(git diff *), Bash(node .claude/skills/verify/reset-checks.mjs), Bash(node .claude/skills/verify/changed-gates.mjs), Bash(node .claude/skills/verify/changed-gates.mjs *), Bash(node .claude/skills/verify/run-gates.mjs *)
 ---
 
 # Verify
@@ -15,7 +15,7 @@ Arguments: `$ARGUMENTS`
 
 ## Steps
 
-1. Run `node .claude/skills/verify/changed-gates.mjs $ARGUMENTS`. It compares the branch, committed or not, with `main` and prints on its first line the arguments for the next step: some of `lint vitest ct build`, plus `e2e` when requested and `fresh` with `all` — or `none`. A second line, `e2e advised: <reasons>`, appears when E2E was not requested but the change touches routing, pages, the store, Firebase services, route or API constants, or the E2E specs. Do not second-guess it by reading the file list yourself.
+1. Run `node .claude/skills/verify/reset-checks.mjs` first, so a run that is stopped part-way and re-run never leaves an earlier tick on the status line. Then run `node .claude/skills/verify/changed-gates.mjs $ARGUMENTS`. It compares the branch, committed or not, with `main` and prints on its first line the arguments for the next step: some of `lint vitest ct build`, plus `e2e` when requested and `fresh` with `all` — or `none`. A second line, `e2e advised: <reasons>`, appears when E2E was not requested but the change touches routing, pages, the store, Firebase services, route or API constants, or the E2E specs. Do not second-guess it by reading the file list yourself.
     - If it prints `none`, reply that nothing `/verify` checks has changed (e.g. only docs, `.claude/` or `.github/`) and stop.
 2. Run `node .claude/skills/verify/run-gates.mjs <first line, verbatim>` in one Bash call with `timeout: 600000`. Report any of `lint vitest ct build` it was not given as `⏭ skipped`.
     - The script runs the gates in order, continuing after a failure, writes each full log to `node_modules/.cache/verify/<gate>.log` and prints one line per gate: `pass <counts>`, `FAIL` followed by the first error lines, or `cached`.

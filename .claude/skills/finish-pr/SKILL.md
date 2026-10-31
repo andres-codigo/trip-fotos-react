@@ -23,6 +23,7 @@ Follow [Finishing an issue](../../../docs/ci-cd.md#finishing-an-issue): mark rea
 
 ## After merging
 
+- Run `node .claude/skills/verify/reset-checks.mjs cache`: a squash merge leaves `main` with the verified tree, so the old `/verify` and `/ui-check` ticks would still match.
 - A releasing PR (a `feat`, `feature`, `enhancement`, `fix` or `perf` title): merge the open release-please PR once its checks are green ([details](../../../docs/ci-cd.md#9-release-please)).
 - A PR that shipped user-visible work or changed Next up: post a Project status update.
 - The last child of an epic ends with [Closing an epic](../../../docs/ci-cd.md#closing-an-epic).

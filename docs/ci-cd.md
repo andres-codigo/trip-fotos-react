@@ -140,7 +140,8 @@ Once the change passes `/verify` and the PR is ready for review:
 
 1. Poll `gh pr checks <PR>` a few minutes apart until every check has passed (a skipped Dependabot job is fine). If a check fails, stop and report it.
 2. Squash-merge (or rebase-merge a multi-commit PR whose commits are individually meaningful) and delete the head branch, then delete the merged local branch.
-3. Re-read the Status; the merge sets Done.
+3. Run `node .claude/skills/verify/reset-checks.mjs cache`: a squash merge leaves `main` with the verified tree, so the old `/verify` and `/ui-check` ticks would still match.
+4. Re-read the Status; the merge sets Done.
 
 ### Closing an epic
 
