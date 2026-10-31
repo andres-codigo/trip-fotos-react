@@ -26,8 +26,6 @@ import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
 
 import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
 
-import travellersListStyles from './TravellersList.module.scss'
-
 const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const travellers = useSelector(selectTravellers)
 	const lastFetch = useSelector(selectLastFetch)
@@ -103,9 +101,9 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					{error}
 				</BaseDialog>
 			)}
-			<h1 className={travellersListStyles.heading}>Travellers</h1>
+			<h1 className="mt-0">Travellers</h1>
 			<div
-				className={travellersListStyles.controls}
+				className="flex h-10 items-center justify-start [&>:nth-child(2)]:ml-auto [&>:nth-child(2)]:mr-2"
 				data-cy="controls">
 				<BaseButton
 					modeType="outline"
@@ -126,7 +124,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				)}
 			</div>
 			{loading && (
-				<div className={travellersListStyles.spinnerContainer}>
+				<div className="my-20 min-h-15">
 					<BaseSpinner />
 				</div>
 			)}
@@ -139,7 +137,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 			)}
 			{!loading && hasTravellers && filteredTravellers.length > 0 && (
 				<ul
-					className={travellersListStyles.travellersList}
+					className="m-0 list-none p-0"
 					data-cy="travellers-list">
 					{filteredTravellers.map((traveller) => (
 						<TravellerItem
@@ -151,18 +149,18 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 			)}
 			{!loading && hasTravellers && filteredTravellers.length === 0 && (
 				<div
-					className={travellersListStyles.noTravellersContainer}
+					className="my-20 flex min-h-15 items-center justify-center"
 					data-cy="no-matching-travellers">
-					<h2 className={travellersListStyles.message}>
+					<h2 className="my-[1em] text-center text-[1.17em]">
 						No travellers match the selected cities.
 					</h2>
 				</div>
 			)}
 			{!loading && !hasTravellers && (
 				<div
-					className={travellersListStyles.noTravellersContainer}
+					className="my-20 flex min-h-15 items-center justify-center"
 					data-cy="no-travellers-list">
-					<h2 className={travellersListStyles.message}>
+					<h2 className="my-[1em] text-center text-[1.17em]">
 						No travellers listed.
 					</h2>
 				</div>

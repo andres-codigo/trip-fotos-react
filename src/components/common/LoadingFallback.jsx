@@ -5,11 +5,9 @@ import { ACCESSIBILITY } from '@/constants/ui'
 import BaseCard from '@/components/ui/card/BaseCard'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-import loadingFallbackStyles from './LoadingFallback.module.scss'
-
 const LoadingFallback = ({ isComponent }) => {
 	const card = (
-		<BaseCard className={loadingFallbackStyles.card}>
+		<BaseCard className="my-8">
 			<BaseSpinner />
 		</BaseCard>
 	)

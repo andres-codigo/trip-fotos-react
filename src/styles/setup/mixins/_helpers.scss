@@ -26,15 +26,6 @@ $prefixes: '-moz-', '-webkit-', '-o-', '-ms-', '';
 	border: 0;
 }
 
-// Mixin for user-select
-@mixin user-select($value) {
-	-webkit-touch-callout: $value; /* iOS Safari */
-	-webkit-user-select: $value; /* Safari */
-	-moz-user-select: $value; /* Old versions of Firefox */
-	-ms-user-select: $value; /* Internet Explorer/Edge */
-	user-select: $value; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
-}
-
 // Mixin for background opacity
 @mixin background-opacity($color, $opacity: $default-opacity) {
 	background: $color;
@@ -114,15 +105,5 @@ $prefixes: '-moz-', '-webkit-', '-o-', '-ms-', '';
 	@media only screen and (max-width: 480px) {
 		gap: 1rem 4%;
 		padding: 0.5rem 0;
-	}
-}
-
-@mixin image-tile {
-	overflow: hidden;
-	position: relative;
-	width: 32%;
-
-	@media only screen and (max-width: 480px) {
-		width: 48%;
 	}
 }

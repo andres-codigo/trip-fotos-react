@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
-import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
+import { cn } from '@/utils/cn'
 import { handleApiError } from '@/utils/errorHandler'
 import { TRAVELLER_ITEM } from '@/constants/test'
 import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
@@ -22,8 +22,6 @@ import BaseButton from '@/components/ui/button/BaseButton'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import ImageGallery from '@/components/ui/image-gallery/ImageGallery'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
-
-import travellerItemStyles from './TravellerItem.module.scss'
 
 const formatRegistered = (registered) =>
 	registered
@@ -134,28 +132,30 @@ const TravellerItem = ({
 			)}
 			{isDeleting ? (
 				<li
-					className={travellerItemStyles.spinnerContainer}
+					className="my-2 list-none"
 					data-cy={TRAVELLER_ITEM.SPINNER}>
 					<BaseSpinner />
 				</li>
 			) : (
 				<li
-					className={classNames(travellerItemStyles.traveller, {
-						[travellerItemStyles.own]: isOwnRecord,
-					})}
+					className={cn(
+						'my-4 list-none rounded-lg border border-muted-foreground p-4',
+						isOwnRecord && 'border-2',
+					)}
+					data-own={isOwnRecord}
 					data-cy={TRAVELLER_ITEM.ROOT}>
 					<h3
-						className={travellerItemStyles.name}
+						className="m-0 text-2xl font-normal"
 						data-cy={TRAVELLER_ITEM.NAME}>
 						{fullName}
 					</h3>
 					<span
-						className={travellerItemStyles.registered}
+						className="inline text-xs"
 						data-cy={TRAVELLER_ITEM.REGISTERED}>
 						{formatRegistered(registered)}
 					</span>
 					<p
-						className={travellerItemStyles.tripDescription}
+						className="italic"
 						data-cy={TRAVELLER_ITEM.TRIP_DESCRIPTION}>
 						{shortenTripDescription(tripDescription)}
 					</p>
@@ -163,7 +163,7 @@ const TravellerItem = ({
 						<strong>Days in city:</strong> {daysInCity} days
 					</p>
 					<div
-						className={travellerItemStyles.badges}
+						className="flex flex-wrap gap-2 pt-1 pb-4"
 						data-cy={TRAVELLER_ITEM.BADGES}>
 						{cities.map((city) => (
 							<BaseBadge
@@ -175,7 +175,7 @@ const TravellerItem = ({
 					</div>
 					{files.length > 0 && (
 						<ul
-							className={travellerItemStyles.imagesList}
+							className="m-0 flex list-none flex-wrap gap-x-[2%] gap-y-8 py-4 pl-0 [@media(max-width:480px)]:mb-[0.9375rem] [@media(max-width:480px)]:gap-x-[4%] [@media(max-width:480px)]:gap-y-4 [@media(max-width:480px)]:py-2"
 							data-cy={TRAVELLER_ITEM.IMAGES_LIST}>
 							<ImageGallery
 								title={fullName}
@@ -187,14 +187,12 @@ const TravellerItem = ({
 							/>
 							{files.length >
 								TRAVELLER_ITEM_CONFIG.MAX_IMAGES && (
-								<li
-									className={
-										travellerItemStyles.imageCounter
-									}>
+								<li className="relative w-[32%] overflow-hidden bg-secondary/75 text-primary-foreground [@media(max-width:480px)]:w-[48%]">
 									<Link
+										className="block h-full text-primary-foreground"
 										to={photosLink}
 										data-cy={TRAVELLER_ITEM.SEE_ALL_LINK}>
-										<span>
+										<span className="flex h-full items-center justify-center p-5 text-center text-primary-foreground">
 											See all {files.length} photos
 										</span>
 									</Link>
@@ -202,7 +200,7 @@ const TravellerItem = ({
 							)}
 						</ul>
 					)}
-					<div className={travellerItemStyles.actions}>
+					<div className="flex flex-wrap items-center justify-end gap-2">
 						{canContact && (
 							<BaseButton
 								isLink

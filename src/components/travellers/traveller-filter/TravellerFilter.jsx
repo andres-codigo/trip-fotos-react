@@ -1,26 +1,24 @@
-import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
+import { cn } from '@/utils/cn'
 import { TRAVELLER_FILTER } from '@/constants/test'
 import { TRAVELLER_FILTER_CONFIG } from '@/constants/travellers'
 
-import travellerFilterStyles from './TravellerFilter.module.scss'
-
 const TravellerFilter = ({ options, inactiveIds = [], onChangeFilter }) => (
 	<fieldset
-		className={travellerFilterStyles.filter}
+		className="m-0 my-4 border-0 p-0"
 		data-cy={TRAVELLER_FILTER.ROOT}>
-		<legend className={travellerFilterStyles.legend}>
+		<legend className="my-2 p-0 text-2xl font-bold">
 			{TRAVELLER_FILTER_CONFIG.LEGEND}
 		</legend>
-		<div className={travellerFilterStyles.options}>
+		<div className="flex flex-wrap">
 			{options.map(({ id, label }) => {
 				const isActive = !inactiveIds.includes(id)
 
 				return (
 					<span
 						key={id}
-						className={travellerFilterStyles.option}
+						className="mr-4 [@media(max-width:440px)]:mr-0 [@media(max-width:440px)]:w-1/2"
 						data-cy={TRAVELLER_FILTER.OPTION}>
 						<input
 							type="checkbox"
@@ -33,9 +31,10 @@ const TravellerFilter = ({ options, inactiveIds = [], onChangeFilter }) => (
 						/>
 						<label
 							htmlFor={`filter-${id}`}
-							className={classNames(travellerFilterStyles.label, {
-								[travellerFilterStyles.active]: isActive,
-							})}>
+							className={cn(
+								'select-none',
+								isActive && 'font-bold',
+							)}>
 							{label}
 						</label>
 					</span>
