@@ -119,6 +119,13 @@ const main = async () => {
 			2,
 		)
 
+	if (
+		git('branch', '--show-current') !== 'main' ||
+		git('status', '--porcelain')
+	) {
+		stop('Run from a clean main: switch to main and commit or stash first')
+	}
+
 	const issue = json(
 		'issue',
 		'view',

@@ -1,3 +1,6 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
 import {
 	branchName,
 	doAfterNumbers,
@@ -37,5 +40,85 @@ describe('start-issue helpers', () => {
 		])
 		expect(doAfterNumbers('Do after #1 and #2.')).toEqual([1, 2])
 		expect(doAfterNumbers('No dependency line')).toEqual([])
+	})
+})
+
+// The allow list approves `node scripts/start-issue.mjs *`, not what the file does, so CI pins what it may run.
+// Adding a command here is a deliberate, reviewed change.
+describe('start-issue script guard', () => {
+	const source = fs.readFileSync(
+		path.resolve(__dirname, '../start-issue.mjs'),
+		'utf8',
+	)
+
+	const calls = () => {
+		const found = new Set()
+		for (const m of source.matchAll(
+			/\b(gh|git|json)\(\s*'([^']+)'(?:,\s*'([^']+)')?/g,
+		)) {
+			found.add([m[1], m[2], m[3]].filter(Boolean).join(' '))
+		}
+		return [...found].sort()
+	}
+
+	it('runs only the pinned gh and git commands', () => {
+		expect(calls()).toEqual(
+			[
+				'gh issue edit',
+				'gh pr create',
+				'gh project item-edit',
+				'git branch --show-current',
+				'git commit --allow-empty',
+				'git push -u',
+				'git status --porcelain',
+				'git switch -c',
+				'json api',
+				'json issue view',
+				'json project field-list',
+				'json project item-list',
+			].sort(),
+		)
+	})
+
+	it('only reads the blocked_by endpoint through gh api', () => {
+		const api = source.match(/'api',\s*`([^`]+)`/g)
+		expect(api).toHaveLength(1)
+		expect(api[0]).toMatch(
+			/issues\/\$\{number\}\/dependencies\/blocked_by`$/,
+		)
+	})
+
+	it.each([
+		'--force',
+		'--force-with-lease',
+		'--method',
+		'-X',
+		'--repo',
+		"'-R'",
+		'--delete',
+		'--admin',
+		"'merge'",
+		"'close'",
+		"'reset'",
+		"'rm'",
+		'shell:',
+		'spawn',
+		'execSync',
+		'fetch(',
+		'eval(',
+		'process.env',
+	])('does not contain %s', (needle) => {
+		expect(source).not.toContain(needle)
+	})
+
+	it('makes no network call of its own and never runs a shell command', () => {
+		expect(source).not.toMatch(/(?<![.\w])exec\(/)
+		expect(source).not.toMatch(/https?:\/\/(?!claude\.com\/claude-code)/)
+	})
+
+	it('imports nothing beyond execFileSync', () => {
+		expect(
+			[...source.matchAll(/^import .* from '(.+)'$/gm)].map((m) => m[1]),
+		).toEqual(['node:child_process'])
 	})
 })
