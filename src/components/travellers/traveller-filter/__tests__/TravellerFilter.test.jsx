@@ -61,11 +61,9 @@ describe('<TravellerFilter />', () => {
 		expect(onChangeFilter).toHaveBeenCalledWith('prague', true)
 	})
 
-	it('applies the active class only to checked options', () => {
+	it('checks only the active options', () => {
 		renderFilter({ inactiveIds: ['prague'] })
-		expect(screen.getByText('Tokyo, Japan').className).toMatch(/active/)
-		expect(screen.getByText('Prague, Czechia').className).not.toMatch(
-			/active/,
-		)
+		expect(screen.getByLabelText('Tokyo, Japan')).toBeChecked()
+		expect(screen.getByLabelText('Prague, Czechia')).not.toBeChecked()
 	})
 })

@@ -106,16 +106,18 @@ describe('<TravellerItem />', () => {
 		it('highlights the signed-in user record', () => {
 			setup({ userId: 'abc' })
 			renderItem()
-			expect(screen.getByTestId(TRAVELLER_ITEM.ROOT).className).toMatch(
-				/own/,
+			expect(screen.getByTestId(TRAVELLER_ITEM.ROOT)).toHaveAttribute(
+				'data-own',
+				'true',
 			)
 		})
 
 		it('does not highlight other records', () => {
 			renderItem()
-			expect(
-				screen.getByTestId(TRAVELLER_ITEM.ROOT).className,
-			).not.toMatch(/own/)
+			expect(screen.getByTestId(TRAVELLER_ITEM.ROOT)).toHaveAttribute(
+				'data-own',
+				'false',
+			)
 		})
 	})
 

@@ -12,7 +12,9 @@ import BaseButton from '@/components/ui/button/BaseButton'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-import messageItemStyles from './MessageItem.module.scss'
+const fieldClasses = 'mb-3'
+const fieldHeadingClasses = 'my-1 text-base'
+const fieldTextClasses = 'mb-1 mt-0 wrap-anywhere'
 
 const MessageItem = ({ id, email, message }) => {
 	const [isDeleting, setIsDeleting] = useState(false)
@@ -45,29 +47,34 @@ const MessageItem = ({ id, email, message }) => {
 			)}
 			{isDeleting ? (
 				<li
-					className={messageItemStyles.spinnerContainer}
+					className="my-2 list-none"
 					data-cy={MESSAGE_ITEM.SPINNER}>
 					<BaseSpinner />
 				</li>
 			) : (
 				<li
-					className={messageItemStyles.message}
+					className="my-4 list-none rounded-lg border border-muted-foreground p-4 text-left"
 					data-cy={MESSAGE_ITEM.ROOT}>
-					<div className={messageItemStyles.field}>
-						<h3>Email</h3>
-						<p>
+					<div className={fieldClasses}>
+						<h3 className={fieldHeadingClasses}>Email</h3>
+						<p className={fieldTextClasses}>
 							<a
+								className="font-bold text-primary no-underline hover:text-link-hover active:text-link-hover"
 								href={`mailto:${email}`}
 								data-cy={MESSAGE_ITEM.EMAIL}>
 								{email}
 							</a>
 						</p>
 					</div>
-					<div className={messageItemStyles.field}>
-						<h3>Message</h3>
-						<p data-cy={MESSAGE_ITEM.TEXT}>{message}</p>
+					<div className={fieldClasses}>
+						<h3 className={fieldHeadingClasses}>Message</h3>
+						<p
+							className={fieldTextClasses}
+							data-cy={MESSAGE_ITEM.TEXT}>
+							{message}
+						</p>
 					</div>
-					<div className={messageItemStyles.actions}>
+					<div className="flex justify-end">
 						<BaseButton
 							type="button"
 							modeType="danger"
