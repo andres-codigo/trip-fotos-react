@@ -170,15 +170,12 @@ describe('<Authentication />', () => {
 			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
-		it('applies both mainContainer and authenticationContainer classes to <main>', () => {
+		it('applies the mainContainer class to <main>', () => {
 			renderWithProviders(<Authentication />)
 
 			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
 
 			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
-			expect(main.className).toMatch(
-				new RegExp('authenticationContainer'),
-			)
 		})
 
 		it('<main> element has correct data attributes', () => {

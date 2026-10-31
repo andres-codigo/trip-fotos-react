@@ -14,8 +14,6 @@ import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
 import Register from '@/pages/register/Register'
 
-import registerStyles from '@/pages/register/Register.module.scss'
-
 // Mock react-router-dom's useNavigate
 vi.mock('react-router-dom', async (importOriginal) => {
 	const actual = await importOriginal()
@@ -109,15 +107,12 @@ describe('Register', () => {
 			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
-		it('applies both mainContainer and registerContainer classes to <main>', () => {
+		it('applies the mainContainer class to <main>', () => {
 			renderRegister()
 
 			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
 
 			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
-			expect(main.className).toMatch(
-				new RegExp(registerStyles.registerContainer),
-			)
 		})
 
 		it('<main> element has correct data attributes', () => {

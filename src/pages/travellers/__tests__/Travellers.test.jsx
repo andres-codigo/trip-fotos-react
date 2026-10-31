@@ -11,8 +11,6 @@ import Travellers from '@/pages/travellers/Travellers'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 import travellersReducer from '@/store/slices/travellersSlice'
 
-import travellersStyles from '@/pages/travellers/Travellers.module.scss'
-
 const SAMPLE_RECORDS = {
 	'traveller-1': {
 		firstName: 'Ada',
@@ -99,7 +97,7 @@ describe('Travellers', () => {
 			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
-		it('applies both mainContainer and travellersContainer classes to <main>', async () => {
+		it('applies the mainContainer class to <main>', async () => {
 			setupMocksForHasTravellers()
 
 			await act(async () => {
@@ -108,9 +106,6 @@ describe('Travellers', () => {
 
 			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
 			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
-			expect(main.className).toMatch(
-				new RegExp(travellersStyles.travellersContainer),
-			)
 		})
 
 		it('<main> element has correct data attributes', async () => {

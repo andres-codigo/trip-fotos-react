@@ -7,8 +7,6 @@ import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
-import pageNotFoundStyles from '@/pages/page-not-found/PageNotFound.module.scss'
-
 /**
  * PageNotFound Unit Tests
  *
@@ -81,7 +79,7 @@ describe('PageNotFound', () => {
 			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
-		it('applies both mainContainer and pageNotFoundContainer classes to <main>', () => {
+		it('applies the mainContainer class to <main>', () => {
 			useSelector.mockImplementation((fn) =>
 				fn({ authentication: { token: 'abc' } }),
 			)
@@ -91,9 +89,6 @@ describe('PageNotFound', () => {
 			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
 
 			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
-			expect(main.className).toMatch(
-				new RegExp(pageNotFoundStyles.pageNotFoundContainer),
-			)
 		})
 
 		it('<main> element has correct data attributes', () => {

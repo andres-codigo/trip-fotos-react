@@ -81,6 +81,42 @@ describe('<TravellerDetail />', () => {
 		)
 	})
 
+	it('hides the placeholder heading visually while loading and shows the name afterwards', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(() => new Promise(() => {})),
+		)
+		const { unmount } = renderPage()
+		expect(screen.getByTestId(TRAVELLER_DETAIL.NAME)).toHaveClass('sr-only')
+		unmount()
+
+		vi.unstubAllGlobals()
+		stubFetch()
+		renderPage()
+		await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+		expect(screen.getByTestId(TRAVELLER_DETAIL.NAME)).not.toHaveClass(
+			'sr-only',
+		)
+	})
+
+	it('marks the own record cards with a heavier border and not other travellers', async () => {
+		const { unmount } = renderPage({ userId: 'abc' })
+		const profile = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+		expect(profile.closest('[data-cy="base-card"]')).toHaveClass('border-2')
+		expect(
+			screen
+				.getByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
+				.closest('[data-cy="base-card"]'),
+		).toHaveClass('border-2')
+		unmount()
+
+		renderPage({ userId: 'someone-else' })
+		const other = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+		expect(other.closest('[data-cy="base-card"]')).not.toHaveClass(
+			'border-2',
+		)
+	})
+
 	it('renders the full profile and all photos', async () => {
 		renderPage()
 		expect(

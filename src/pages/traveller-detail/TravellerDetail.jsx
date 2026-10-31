@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useLocation, useParams } from 'react-router-dom'
-import classNames from 'classnames'
+import { cn } from '@/utils/cn'
 
 import { TRAVELLER_DETAIL } from '@/constants/test'
 import {
@@ -28,7 +28,12 @@ import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 import useScrollToAnchor from '@/pages/traveller-detail/hooks/useScrollToAnchor'
 
-import travellerDetailStyles from './TravellerDetail.module.scss'
+// Cards after the first are spaced apart; the record's own cards get a heavier border
+const SECTION = 'not-first:mt-8'
+const OWN = 'border-2 border-muted-foreground'
+// Three tiles across and two on narrow screens; scroll-mt clears the sticky header when scrolled to via the photos anchor
+const IMAGES_LIST =
+	'flex scroll-mt-24 list-none flex-wrap gap-x-[2%] gap-y-8 px-0 py-4 [@media(width<=480px)]:gap-x-[4%] [@media(width<=480px)]:gap-y-4 [@media(width<=480px)]:py-2'
 
 const TravellerDetail = () => {
 	const { id } = useParams()
@@ -80,9 +85,11 @@ const TravellerDetail = () => {
 
 	const heading = (
 		<h1
-			className={classNames(travellerDetailStyles.name, {
-				[travellerDetailStyles.visuallyHidden]: isLoading,
-			})}
+			className={cn(
+				'm-0 text-[1.5rem] font-normal',
+				// Hidden rather than removed while loading, so the page still has its <h1> without a placeholder flashing above the spinner
+				isLoading && 'sr-only',
+			)}
 			data-cy={TRAVELLER_DETAIL.NAME}>
 			{fullName}
 		</h1>
@@ -92,17 +99,13 @@ const TravellerDetail = () => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className={classNames(
-				'mainContainer',
-				'cardPage',
-				travellerDetailStyles.travellerDetailContainer,
-			)}
+			className="mainContainer cardPage text-left"
 			data-cy={TRAVELLER_DETAIL.ROOT}>
 			<title>{`${fullName} · ${GLOBAL.SITE_NAME}`}</title>
 			{isLoading && heading}
 			{isLoading && (
 				<div
-					className={travellerDetailStyles.spinnerContainer}
+					className="my-2"
 					data-cy={TRAVELLER_DETAIL.SPINNER}>
 					<BaseSpinner />
 				</div>
@@ -126,16 +129,11 @@ const TravellerDetail = () => {
 			)}
 			{showProfile && (
 				<>
-					<BaseCard
-						className={classNames(travellerDetailStyles.section, {
-							[travellerDetailStyles.own]: isOwnRecord,
-						})}>
+					<BaseCard className={cn(SECTION, isOwnRecord && OWN)}>
 						{heading}
 						<section data-cy={TRAVELLER_DETAIL.PROFILE}>
 							<p
-								className={
-									travellerDetailStyles.tripDescription
-								}
+								className="whitespace-pre-line italic"
 								data-cy={TRAVELLER_DETAIL.TRIP_DESCRIPTION}>
 								{traveller.tripDescription}
 							</p>
@@ -144,7 +142,7 @@ const TravellerDetail = () => {
 								{traveller.daysInCity} days
 							</p>
 							<div
-								className={travellerDetailStyles.badges}
+								className="flex flex-wrap gap-2 pt-1 pb-4"
 								data-cy={TRAVELLER_DETAIL.BADGES}>
 								{cities.map((city) => (
 									<BaseBadge
@@ -157,15 +155,11 @@ const TravellerDetail = () => {
 						</section>
 					</BaseCard>
 					{files.length > 0 && (
-						<BaseCard
-							className={classNames(
-								travellerDetailStyles.section,
-								{ [travellerDetailStyles.own]: isOwnRecord },
-							)}>
+						<BaseCard className={cn(SECTION, isOwnRecord && OWN)}>
 							<ul
 								id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
 								ref={photosRef}
-								className={travellerDetailStyles.imagesList}
+								className={IMAGES_LIST}
 								data-cy={TRAVELLER_DETAIL.IMAGES_LIST}>
 								<ImageGallery
 									title={fullName}
@@ -179,10 +173,10 @@ const TravellerDetail = () => {
 						</BaseCard>
 					)}
 					{canContact && (
-						<BaseCard className={travellerDetailStyles.section}>
+						<BaseCard className={SECTION}>
 							<section data-cy={TRAVELLER_DETAIL.CONTACT_SECTION}>
 								<h2>Send {traveller.firstName} a message</h2>
-								<div className={travellerDetailStyles.actions}>
+								<div className="flex justify-end">
 									<BaseButton
 										isLink
 										to={`${PATHS.TRAVELLERS}/${id}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`}
