@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.1...v0.21.2) (2026-10-31)
+
+
+### Bug Fixes
+
+* stop the open-PR hook blocking Bash commands that do not change the repo ([#560](https://github.com/andres-codigo/trip-fotos-react/issues/560)) ([7eb8b37](https://github.com/andres-codigo/trip-fotos-react/commit/7eb8b3717e58ec95d73edf828f7e89efb4542b95))
+
 ## [0.21.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.0...v0.21.1) (2026-10-31)
 
 
