@@ -34,7 +34,6 @@ const vendorChunks = {
 	firebase: ['firebase', '@firebase'],
 	analytics: ['@vercel/analytics'],
 	speedInsights: ['@vercel/speed-insights'],
-	transition: ['react-transition-group'],
 }
 
 export default defineConfig({

@@ -11,25 +11,8 @@ import { DIALOG } from '@/constants/test'
  * - Tests conditional rendering logic (show/hide, header, actions, fixed)
  * - Verifies correct role, aria attributes, and content rendering
  * - Tests event handling for backdrop click, close button, and Escape key
- * - Ensures prop spreading and custom class handling via sectionClasses
+ * - Ensures the title, description and focus wiring from Radix Dialog
  */
-
-// Mock CSS Modules
-vi.mock('@/components/ui/dialog/BaseDialog.module.scss', () => ({
-	default: {
-		image: 'image',
-		general: 'general',
-	},
-}))
-
-// Mock react-dom before importing the component
-vi.mock('react-dom', async () => {
-	const actual = await vi.importActual('react-dom')
-	return {
-		...actual,
-		createPortal: (node) => node,
-	}
-})
 
 import { render, screen, fireEvent } from '@testing-library/react'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
@@ -111,26 +94,26 @@ describe('<BaseDialog />', () => {
 
 		it('calls onClose when Escape key is pressed', () => {
 			renderDialog()
-			fireEvent.keyDown(window, { key: 'Escape' })
+			fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
 			expect(defaultProps.onClose).toHaveBeenCalled()
 		})
 
-		it('applies image class when sectionClasses is true', () => {
+		it('renders the children inside the text content region', () => {
 			renderDialog({ sectionClasses: true })
-			const mainElement = screen.getByTestId(DIALOG.TEXT_CONTENT)
-			expect(mainElement).toHaveClass('image')
+			expect(screen.getByTestId(DIALOG.TEXT_CONTENT)).toHaveTextContent(
+				defaultProps.children,
+			)
 		})
 
-		it('applies general class when sectionClasses is false', () => {
-			renderDialog({ sectionClasses: false })
-			const mainElement = screen.getByTestId(DIALOG.TEXT_CONTENT)
-			expect(mainElement).toHaveClass('general')
+		it('focuses the close button of an error dialog', () => {
+			renderDialog({ isError: true })
+			expect(screen.getByTestId(DIALOG.BUTTON)).toHaveFocus()
 		})
 
-		it('applies general class when sectionClasses is not provided (default)', () => {
+		it('does not call onClose on an outside pointer press, only on a backdrop click', () => {
 			renderDialog()
-			const mainElement = screen.getByTestId(DIALOG.TEXT_CONTENT)
-			expect(mainElement).toHaveClass('general')
+			fireEvent.pointerDown(document.body)
+			expect(defaultProps.onClose).not.toHaveBeenCalled()
 		})
 	})
 
@@ -140,6 +123,8 @@ describe('<BaseDialog />', () => {
 			const dialog = screen.getByRole('dialog')
 			expect(dialog).toHaveAttribute('aria-labelledby')
 			expect(dialog).toHaveAttribute('aria-describedby')
+			expect(dialog).toHaveAccessibleName(defaultProps.title)
+			expect(dialog).toHaveAccessibleDescription(defaultProps.children)
 		})
 	})
 })

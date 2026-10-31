@@ -262,7 +262,12 @@ describe('<TravellerItem />', () => {
 		it('cancels on Escape', async () => {
 			renderItem()
 			fireEvent.click(screen.getByTestId(TRAVELLER_ITEM.DELETE))
-			fireEvent.keyDown(window, { key: 'Escape' })
+			fireEvent.keyDown(
+				screen.getByTestId(TRAVELLER_ITEM.DELETE_DIALOG),
+				{
+					key: 'Escape',
+				},
+			)
 			await waitFor(() =>
 				expect(
 					screen.queryByTestId(TRAVELLER_ITEM.DELETE_DIALOG),

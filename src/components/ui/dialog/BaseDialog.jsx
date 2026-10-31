@@ -1,14 +1,10 @@
-import { useEffect, useRef, useId } from 'react'
-import ReactDOM from 'react-dom'
+import * as RadixDialog from '@radix-ui/react-dialog'
 import PropTypes from 'prop-types'
-
-import { CSSTransition } from 'react-transition-group'
 
 import { DIALOG } from '@/constants/test'
 
 import BaseButton from '@/components/ui/button/BaseButton'
-
-import baseDialogStyles from './BaseDialog.module.scss'
+import { cn } from '@/utils/cn'
 
 const BaseDialog = ({
 	container = document.body,
@@ -23,86 +19,60 @@ const BaseDialog = ({
 	'data-cy': dataCy,
 	children,
 }) => {
-	const titleId = useId()
-	const descId = useId()
-
-	const nodeRef = useRef(null)
-
 	const tryClose = () => {
 		if (!fixed) {
 			onClose()
 		}
 	}
 
-	useEffect(() => {
-		if (!show) return
-
-		const handleKeyDown = (e) => {
-			if (e.key === 'Escape') {
-				onClose?.()
-			}
-		}
-
-		window.addEventListener('keydown', handleKeyDown)
-		return () => window.removeEventListener('keydown', handleKeyDown)
-	}, [show, onClose])
-
-	return ReactDOM.createPortal(
-		<>
-			{show && (
-				<div
-					className={baseDialogStyles.backdrop}
+	return (
+		<RadixDialog.Root
+			open={show}
+			onOpenChange={(open) => {
+				if (!open) onClose?.()
+			}}>
+			<RadixDialog.Portal container={container}>
+				<RadixDialog.Overlay
+					className="fixed inset-0 z-10 bg-[var(--overlay-backdrop)] data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out"
 					onClick={tryClose}
-					data-cy={DIALOG.BACKDROP}></div>
-			)}
-			<CSSTransition
-				in={show}
-				appear={show}
-				nodeRef={nodeRef}
-				timeout={300}
-				classNames={{
-					appear: baseDialogStyles['dialog-appear'],
-					appearActive: baseDialogStyles['dialog-appear-active'],
-					enter: baseDialogStyles['dialog-enter'],
-					enterActive: baseDialogStyles['dialog-enter-active'],
-					exit: baseDialogStyles['dialog-exit'],
-					exitActive: baseDialogStyles['dialog-exit-active'],
-				}}
-				unmountOnExit>
-				<dialog
-					ref={nodeRef}
-					open
-					className={baseDialogStyles.dialog}
+					data-cy={DIALOG.BACKDROP}
+				/>
+				<RadixDialog.Content
+					className="fixed inset-0 z-100 m-auto h-fit outline-none w-4/5 overflow-hidden rounded-lg bg-background shadow-elevated md:w-1/2 data-[state=open]:animate-dialog-in data-[state=closed]:animate-dialog-out"
 					data-cy={dataCy}
 					aria-modal="true"
 					role={
 						isError ? DIALOG.ROLE_ALERTDIALOG : DIALOG.ROLE_DIALOG
 					}
-					aria-labelledby={titleId}
-					aria-describedby={descId}
-					tabIndex={-1}>
-					<div className={baseDialogStyles.header}>
+					// The backdrop's own click handler decides whether to close
+					onPointerDownOutside={(e) => e.preventDefault()}
+					onInteractOutside={(e) => e.preventDefault()}>
+					<div className="w-full bg-accent-foreground p-4 text-primary-foreground">
 						{header ? (
-							header
+							<RadixDialog.Title asChild>
+								<div>{header}</div>
+							</RadixDialog.Title>
 						) : (
-							<h2
-								id={titleId}
+							<RadixDialog.Title
+								className="m-0 text-[length:1.5em] font-bold"
 								data-cy={DIALOG.TITLE}>
 								{title}
-							</h2>
+							</RadixDialog.Title>
 						)}
 					</div>
 					<div
-						className={
+						className={cn(
 							sectionClasses
-								? baseDialogStyles.image
-								: baseDialogStyles.general
-						}
+								? 'flex items-center pt-10 pb-4 *:w-full'
+								: 'p-4 [&_p]:text-center [&_img]:mx-auto [&_img]:block [&_img]:object-cover [&_img]:p-2.5',
+						)}
 						data-cy={DIALOG.TEXT_CONTENT}>
-						<div id={descId}>{children}</div>
+						<RadixDialog.Description asChild>
+							<div>{children}</div>
+						</RadixDialog.Description>
 					</div>
 					{!fixed && (
-						<div className={baseDialogStyles.footer}>
+						<div className="m-0 flex justify-end gap-2 p-4">
 							{actions ? (
 								actions
 							) : (
@@ -115,10 +85,9 @@ const BaseDialog = ({
 							)}
 						</div>
 					)}
-				</dialog>
-			</CSSTransition>
-		</>,
-		container,
+				</RadixDialog.Content>
+			</RadixDialog.Portal>
+		</RadixDialog.Root>
 	)
 }
 
