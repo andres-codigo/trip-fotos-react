@@ -152,7 +152,8 @@ const Combobox = ({
 							id={optionId(index)}
 							role="option"
 							aria-selected={index === activeIndex}
-							className="cursor-pointer px-3 py-2 hover:bg-field-focus hover:text-primary aria-selected:bg-field-focus aria-selected:text-primary aria-selected:outline-2 aria-selected:-outline-offset-2 aria-selected:outline-primary"
+							// Important: the global li reset is unlayered, so it beats utilities
+							className="cursor-pointer px-3! py-2! hover:bg-field-focus hover:text-primary aria-selected:bg-field-focus aria-selected:text-primary aria-selected:outline-2 aria-selected:-outline-offset-2 aria-selected:outline-primary"
 							// Keeps focus in the input so blur does not close the list before the click lands
 							onMouseDown={(event) => event.preventDefault()}
 							onClick={() => selectOption(option)}
@@ -166,7 +167,7 @@ const Combobox = ({
 				id={statusId}
 				role="status"
 				aria-live="polite"
-				className="mt-1 mb-0 min-h-5 text-sm text-muted-foreground"
+				className="mt-1 mb-0 min-h-5 text-[0.875rem] text-muted-foreground"
 				data-cy={COMBOBOX.STATUS}>
 				{statusMessage}
 			</p>

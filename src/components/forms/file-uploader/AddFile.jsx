@@ -42,7 +42,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 					<>
 						<label
 							htmlFor={id}
-							className="relative block cursor-pointer p-12 focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-accent [&>span]:block">
+							className="relative mb-2 block cursor-pointer p-12 font-semibold focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-accent [&>span]:block">
 							{isActive ? (
 								<>
 									<span>{FILE_DROP_TEXT.ACTIVE}</span>

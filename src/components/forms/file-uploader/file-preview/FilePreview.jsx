@@ -5,8 +5,9 @@ import { GLOBAL } from '@/constants/ui'
 
 import { cn } from '@/utils/cn'
 
+// Line height follows the font size in each class list: tailwind-merge drops an earlier leading-* when a later text-size class is merged
 const badgeClasses =
-	'absolute right-1 size-6 appearance-none rounded-[24px] border-0 p-0 leading-6 shadow-[0_0_5px_currentColor]'
+	'absolute right-1 size-6 appearance-none rounded-[24px] border-0 p-0 shadow-[0_0_5px_currentColor]'
 
 const statusClasses = {
 	[GLOBAL.FILE_STATUS.LOADING]:
@@ -21,13 +22,14 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 
 	return (
 		<Tag
-			className="relative m-4 mx-[2.5%] aspect-square w-[20%] min-w-25 overflow-hidden max-[440px]:w-[45%]"
+			// Important margins: the global li reset is unlayered, so it beats utilities
+			className="relative my-4! mx-[2.5%]! aspect-square w-[20%] min-w-25 overflow-hidden [@media(max-width:440px)]:w-[45%]"
 			data-cy={FILE_PREVIEW.ID}>
 			<button
 				type="button"
 				className={cn(
 					badgeClasses,
-					'top-1 z-1 cursor-pointer bg-[#933933] text-[24px] text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent',
+					'top-1 z-1 cursor-pointer bg-[#933933] text-[24px] leading-6 text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent',
 				)}
 				aria-label={GLOBAL.REMOVE_FILE_LABEL(file.name)}
 				onClick={() => onRemove(file)}
@@ -43,7 +45,7 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 				/>
 			)}
 			<span
-				className="absolute inset-x-0 bottom-0 truncate bg-black/60 px-2 py-1 text-xs text-white"
+				className="absolute inset-x-0 bottom-0 truncate bg-black/60 px-2 py-1 text-[0.75rem] text-white"
 				title={file.name}
 				data-cy={FILE_PREVIEW.NAME}>
 				{file.name}
@@ -53,7 +55,7 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 					role="status"
 					className={cn(
 						badgeClasses,
-						'bottom-8 px-2.5 text-[14.4px]',
+						'bottom-8 px-2.5 text-[14.4px] leading-6',
 						statusClasses[file.status],
 					)}
 					data-cy={FILE_PREVIEW.STATUS}>

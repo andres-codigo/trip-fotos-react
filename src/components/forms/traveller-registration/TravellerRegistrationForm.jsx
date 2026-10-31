@@ -96,7 +96,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			aria-labelledby="traveller-registration-title">
 			<h1
 				id="traveller-registration-title"
-				className="mt-0 mb-[0.83em] text-2xl"
+				className="mt-0 mb-[0.83em] text-[1.5rem]"
 				data-cy="traveller-registration-form-title">
 				Register as a Traveller
 			</h1>
@@ -171,12 +171,12 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 							return (
 								<li
 									key={getCityId(city)}
-									className="inline-flex items-center gap-1 rounded-pill bg-field-focus py-1 pr-1 pl-3 text-primary"
+									className="inline-flex items-center gap-1 rounded-pill bg-field-focus py-1! pr-1! pl-3! text-primary"
 									data-cy="selected-city">
 									<span>{name}</span>
 									<button
 										type="button"
-										className="size-7 cursor-pointer rounded-full border-0 bg-transparent text-xl leading-none text-inherit hover:bg-tint focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
+										className="size-7 cursor-pointer rounded-full border-0 bg-transparent text-[1.25rem] leading-none text-inherit hover:bg-tint focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
 										aria-label={GLOBAL.REMOVE_CITY_LABEL(
 											name,
 										)}
@@ -208,7 +208,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				)}
 			</div>
 
-			<fieldset className="my-2 border-0 p-0">
+			<fieldset className="mx-0 my-2 border-0 p-0">
 				<legend className="mb-2 font-bold">Photos (optional)</legend>
 				<AddFile
 					id={FILES}

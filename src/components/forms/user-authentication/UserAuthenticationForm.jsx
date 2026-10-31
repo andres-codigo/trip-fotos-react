@@ -61,7 +61,7 @@ const UserAuthenticationForm = ({
 			aria-labelledby="user-authentication-form-title">
 			<h1
 				id="user-authentication-form-title"
-				className="mt-0 mb-[0.83em] text-2xl"
+				className="mt-0 mb-[0.83em] text-[1.5rem]"
 				data-cy="user-authentication-form-title">
 				{mode === API_DATABASE.AUTH_LOGIN_MODE ? (
 					<>
@@ -91,7 +91,7 @@ const UserAuthenticationForm = ({
 					id="login-button"
 					type="submit"
 					mode="flat"
-					className="w-full lg:w-[6.4375rem]"
+					className="w-[6.4375rem] [@media(max-width:1024px)]:w-full"
 					data-cy="login-submit-button"
 					isDisabled={isLoading}>
 					{mode === API_DATABASE.AUTH_LOGIN_MODE
@@ -102,7 +102,7 @@ const UserAuthenticationForm = ({
 					id="login-signup-toggle-link"
 					isLink
 					onClick={handleSignUpClick}
-					className="w-full pt-5 text-center text-accent-foreground hover:text-secondary lg:w-auto lg:pt-0 lg:pl-2"
+					className="pl-2 text-accent-foreground hover:text-secondary [@media(max-width:1024px)]:w-full [@media(max-width:1024px)]:pt-5 [@media(max-width:1024px)]:text-center"
 					data-cy="login-signup-toggle-link"
 					isDisabled={isLoading}>
 					{mode === API_DATABASE.AUTH_LOGIN_MODE
