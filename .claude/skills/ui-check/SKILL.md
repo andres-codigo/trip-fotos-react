@@ -16,6 +16,6 @@ Container specifics the section does not cover:
 - Never read `.env`: the seeded emulator accounts reach the spec through the Cypress config and `performLogin()`.
 - Case-only SCSS renames can leave files missing after `git switch`: `git restore` the affected folder, never anything with uncommitted work.
 
-Report, per image, what is on screen, and list what was not checked. Hold the merge while a visual question is open, even when CI is green. Delete the spec and screenshots afterwards.
+Before capturing, write down every page, state (dialogs, empty, loading, error, hover, focus, disabled, own/other record, admin) and width the change can touch, and capture all of them: the run is not finished while a reachable state is uncaptured, and "not checked" is for what is impossible, each with its reason, never for what was skipped. Compare each branch image with its `main` pair by hash first and open every pair that differs; for identical pairs open one image per page and state to confirm it rendered, since identical blank or spinner frames also hash equal. Report what is on screen for each image you opened. Hold the merge while a visual question is open, even when CI is green. Delete the spec and screenshots afterwards.
 
 Status line: run `node .claude/skills/ui-check/status.mjs capturing` when the run starts, `reviewing` while you open the images, then `pass` or `hold` (a visual question is open). The status line shows it next to the `/verify` state.
