@@ -27,7 +27,14 @@
 			"Bash(gh pr checks *)",
 			"Bash(gh pr view *)",
 			"Bash(gh pr list *)",
-			"Bash(gh pr ready *)"
+			"Bash(gh pr ready *)",
+			"Bash(gh run list *)",
+			"Bash(gh run view *)",
+			"Bash(gh project item-edit *)",
+			"Bash(git switch -c *)",
+			"Bash(node .claude/skills/verify/reset-checks.mjs)",
+			"Bash(node .claude/skills/verify/reset-checks.mjs cache)",
+			"Bash(gh api repos/andres-codigo/trip-fotos-react/issues/*/dependencies/blocked_by --jq *)"
 		],
 		"ask": ["Bash(npm install *)", "Bash(npm run cy:run:e2e:live)"],
 		"deny": [
