@@ -58,7 +58,6 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 **Recently shipped**
 
 - Local Firebase emulators with a deterministic seed, and `npm run cy:run:e2e:emulators`, which runs the E2E specs against them with real registration, photo upload and Messages round trips, and run in CI on every PR with no secrets and a cached Firebase CLI download, while the live Firebase run shrinks to one read-only smoke spec on pushes to `main` ([#500](https://github.com/andres-codigo/trip-fotos-react/issues/500), [#501](https://github.com/andres-codigo/trip-fotos-react/issues/501), [#502](https://github.com/andres-codigo/trip-fotos-react/issues/502), [#503](https://github.com/andres-codigo/trip-fotos-react/issues/503), [#516](https://github.com/andres-codigo/trip-fotos-react/issues/516), [#518](https://github.com/andres-codigo/trip-fotos-react/issues/518), [#504](https://github.com/andres-codigo/trip-fotos-react/issues/504))
-- Tailwind v4 added alongside the SCSS modules with semantic design tokens at the app's current values (no visual change), a `cn()` helper and the badge-tone tokens, as the first step of the Tailwind and shadcn/ui migration ([#366](https://github.com/andres-codigo/trip-fotos-react/issues/366), epic [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379))
 - shadcn/ui configured (`components.json`, JavaScript, `@/` aliases) with the folder-per-component convention for generated components documented, ready for component migration ([#368](https://github.com/andres-codigo/trip-fotos-react/issues/368), epic [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379))
 - Tests now fail on any unexpected `console.error` or `console.warn` (Vitest, Cypress component and E2E tests), so React warnings such as an unknown DOM prop or an update outside `act()` can no longer slip through, and the UI check captures the browser console ([#543](https://github.com/andres-codigo/trip-fotos-react/issues/543))
 - `BaseButton` and `BaseCard` moved from SCSS modules to Tailwind utilities (`BaseButton` keeps its `modeType` API as `class-variance-authority` variants), the first slice of migrating the ui primitives ([#369](https://github.com/andres-codigo/trip-fotos-react/issues/369), epic [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379))
@@ -69,6 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - The layout components (`Header`, `Footer`, `SkipLink`, `MainNav` and its nav links and Messages count badge) moved from SCSS modules to Tailwind utilities with no visual change, the menu state now drives the mobile menu directly (the `useMobileMenu` hook is gone), the hamburger's `aria-controls` points at the real menu id, and the tests assert behaviour and ARIA instead of style-module keys ([#371](https://github.com/andres-codigo/trip-fotos-react/issues/371), epic [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379))
 - The open-PR hook no longer blocks Bash commands that do not write inside the repository (a write to a path outside it, or write-like words in an issue or PR body), with its matching in `.claude/hooks/bash-writes.mjs` and Vitest cases ([#559](https://github.com/andres-codigo/trip-fotos-react/issues/559))
 - The UI check now has to cover every reachable state (dialogs, empty, loading, error, hover, focus, admin) and may list only what is impossible, branch and `main` screenshots are compared by hash first with every differing pair opened, and the open-PR hook also gates file writes made through Bash ([#556](https://github.com/andres-codigo/trip-fotos-react/issues/556))
+- SCSS, Sass and Stylelint removed now every component and page is on Tailwind: the global styles (fonts, page shell, resets) moved into `src/styles/tailwind.css`, `prettier-plugin-tailwindcss` sorts the utility classes, `classnames` and its test mock are gone, and the styling guidance, agents and docs describe Tailwind ([#374](https://github.com/andres-codigo/trip-fotos-react/issues/374))
 - The pages (Authentication, Register, Travellers, Traveller detail, Contact traveller, Messages, Privacy and Page not found) moved from SCSS modules to Tailwind utilities with no visual change, their `.module.scss` files and four unused SCSS mixins removed, and the page tests now assert behaviour instead of style-module class names ([#373](https://github.com/andres-codigo/trip-fotos-react/issues/373))
 - The travellers, messages and common components (`TravellerItem`, `TravellersList`, `TravellerFilter`, `MessageItem`, `LoadingFallback`) moved from SCSS modules to Tailwind utilities with no visual change, the global `li` reset now sits in the base layer so utilities beat it, and the tests assert checked state and a `data-own` attribute instead of style-module keys ([#372](https://github.com/andres-codigo/trip-fotos-react/issues/372), epic [#379](https://github.com/andres-codigo/trip-fotos-react/issues/379))
 - `/verify e2e` now starts its dev server on its own port (5190, `E2E_PORT` to change it) instead of 3000, so a developer's Vite server no longer stops the run ([#563](https://github.com/andres-codigo/trip-fotos-react/issues/563))
@@ -96,11 +96,10 @@ This project uses the following technologies:
 - [React](https://react.dev/) as the front-end library.
 - [React Router](https://reactrouter.com/) for routing.
 - [Redux Toolkit](https://redux-toolkit.js.org/) for state management, with [Redux Persist](https://github.com/rt2zz/redux-persist) for session persistence.
-- [Tailwind CSS](https://tailwindcss.com/) v4 for design tokens and utility classes (theme and utilities only, no preflight), with `class-variance-authority` for component variants, alongside [SASS](https://sass-lang.com/) modules until the migration finishes.
+- [Tailwind CSS](https://tailwindcss.com/) v4 for all styling: semantic design tokens and utility classes (theme and utilities only, no preflight) in `src/styles/tailwind.css`, with `class-variance-authority` for component variants. There are no SCSS or CSS modules.
 - [shadcn/ui](https://ui.shadcn.com/) configured through `components.json` (JavaScript, `@/` aliases); components are added with `npx shadcn@latest add` and moved into the folder-per-component layout.
 - [ESLint](https://eslint.org/) for JavaScript linting.
-- [Stylelint](https://stylelint.io/) to keep component and page styles scoped (no bare element selectors in CSS modules).
-- [Prettier](https://prettier.io/) for code formatting.
+- [Prettier](https://prettier.io/) for code formatting, with `prettier-plugin-tailwindcss` sorting the utility classes.
 - [Vitest](https://vitest.dev/) for unit and integration testing.
 - [Cypress](https://www.cypress.io/) for end-to-end and component testing.
 - [Firebase Realtime Database](https://firebase.google.com/docs/database) for storing travellers and messages.
@@ -145,11 +144,8 @@ npm run build:preview
 # Visual Vite bundle analysis
 npm run analyse
 
-# Run ESLint and Stylelint to check for issues
+# Run ESLint to check for issues
 npm run lint
-
-# Run Stylelint only (component and page stylesheets)
-npm run lint:styles
 
 # Format files with Prettier
 npm run format
@@ -391,7 +387,7 @@ trip-fotos-react/
 │   ├── copilot-instructions.md # Workspace-level Copilot guidelines
 │   └── labels.json             # Single source of truth for every label
 ├── .vscode/                     # Shared VS Code editor settings
-├── config/                     # ESLint, Stylelint and release-please configuration
+├── config/                     # ESLint and release-please configuration
 ├── cypress/                    # Cypress tests
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
@@ -405,7 +401,7 @@ trip-fotos-react/
 │   ├── pages/          # Page components for routing
 │   ├── services/       # External service configurations (Firebase, APIs, etc.)
 │   ├── store/          # Redux store and slices
-│   ├── styles/         # SCSS stylesheets and the Tailwind theme (`tailwind.css`)
+│   ├── styles/         # Tailwind theme, tokens and global styles (`tailwind.css`)
 │   ├── testUtils/      # Testing environment configuration and Cypress and Vitest utility functions
 │   ├── utils/          # General utility functions
 │   └── index.jsx       # Root application entry point

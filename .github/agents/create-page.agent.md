@@ -17,7 +17,6 @@ Use this agent when creating a new route-level page with structure, styling, and
 2. **Create Structure**
     - Create `src/pages/{page-name-kebab-case}/`.
     - Create `{PageName}.jsx`.
-    - Create `{PageName}.module.scss` (PascalCase) only if the page needs its own styles.
     - Create `__tests__/` folder.
 
 3. **Routing Integration**
@@ -35,7 +34,7 @@ Use this agent when creating a new route-level page with structure, styling, and
     - Keep reusable logic in hooks/components, not embedded deeply in page files.
     - Give page-level and custom container elements `data-cy` attributes and export matching selector constants via `getByDataCy` in `src/constants/test/selectors/`; tests use the constants, never inline strings.
     - Keep the `<h1>` inside the card or column it labels (see `pages.instructions.md` → Page Structure And Accessibility).
-    - Scope every rule in `{PageName}.module.scss` to a class and run `npm run lint:styles`.
+    - Style the page with Tailwind utilities (root `<main>` keeps `mainContainer cardPage`); see `styles.instructions.md`.
 
 6. **Test Scaffolding**
     - Create `{PageName}.test.jsx` (Vitest page test).
@@ -54,5 +53,5 @@ Use this agent when creating a new route-level page with structure, styling, and
 - Keep page responsibilities focused on orchestration and route-level concerns.
 - Update tests in the same task as page creation.
 - **All generated files must end with a trailing newline at EOF** — enforce this during file creation to satisfy linting rules
-- **Linting and formatting** — ensure all generated and edited files are ESLint-clean, Stylelint-clean and Prettier-formatted before handing off the page work.
+- **Linting and formatting** — ensure all generated and edited files are ESLint-clean and Prettier-formatted before handing off the page work.
 - Every page file includes `data-cy` attributes on page-level containers and custom elements, backed by selector constants

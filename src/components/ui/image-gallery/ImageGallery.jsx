@@ -97,7 +97,7 @@ const ImageGallery = ({ title, urls, dimensions, urlParam }) => {
 						</button>
 						<figure
 							className={
-								'm-0 flex min-w-0 flex-1 flex-col items-center [&_img]:mx-auto [&_img]:block [&_img]:h-auto [&_img]:max-h-[calc(100dvh-16rem)] [&_img]:w-auto [&_img]:max-w-full [&_img]:object-contain [&_img]:p-0 [&_figcaption]:mt-2 [&_figcaption]:text-[0.875rem] [&_figcaption]:text-card-foreground'
+								'm-0 flex min-w-0 flex-1 flex-col items-center [&_figcaption]:mt-2 [&_figcaption]:text-[0.875rem] [&_figcaption]:text-card-foreground [&_img]:mx-auto [&_img]:block [&_img]:h-auto [&_img]:max-h-[calc(100dvh-16rem)] [&_img]:w-auto [&_img]:max-w-full [&_img]:object-contain [&_img]:p-0'
 							}>
 							{failed.has(urls[index]) ? (
 								<span

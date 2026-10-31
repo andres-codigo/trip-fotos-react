@@ -23,7 +23,7 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 	return (
 		<Tag
 			// Important margins: the global li reset is unlayered, so it beats utilities
-			className="relative my-4! mx-[2.5%]! aspect-square w-[20%] min-w-25 overflow-hidden [@media(max-width:440px)]:w-[45%]"
+			className="relative mx-[2.5%]! my-4! aspect-square w-[20%] min-w-25 overflow-hidden [@media(max-width:440px)]:w-[45%]"
 			data-cy={FILE_PREVIEW.ID}>
 			<button
 				type="button"

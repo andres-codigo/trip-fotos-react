@@ -16,7 +16,6 @@ Use this agent when you need to create a new React component with full structure
 2. **Folder Structure Setup**
     - Create the component folder: `src/components/{category}/{component-name-kebab-case}/`
     - Create the component file: `{ComponentName}.jsx` (PascalCase)
-    - Create the SCSS module: `{ComponentName}.module.scss`
     - Create the `__tests__` directory
     - Create `hooks/{useHookName}/index.js` (default export) if the component needs custom hooks; see `create-hook.agent.md`
 
@@ -28,7 +27,7 @@ Use this agent when you need to create a new React component with full structure
 4. **Component Boilerplate**
     - Generate a functional component with hooks structure
     - Scaffold prop-types validation
-    - Include a placeholder SCSS import with the correct naming convention
+    - Style it with Tailwind utilities through `cn()` (no stylesheet)
     - Add accessibility attributes if appropriate (form components, interactive elements)
     - Add `data-cy` attributes to meaningful DOM elements (buttons, form inputs, containers, labels, values) for testability
     - Reuse the shared error and loading output (`renderVisuallyHiddenError`, `ErrorMessage`, `LoadingAnnouncement`, `BaseSpinner`); do not hand-roll `role="alert"` or `aria-live` markup
@@ -41,13 +40,10 @@ Use this agent when you need to create a new React component with full structure
     - For Cypress tests, do not use inline string selectors like `cy.get('[data-cy="..."]')`; create and use exported selector constants in `src/constants/test/selectors/components.js` using `getByDataCy`, following the `Header` and `Header.cy.jsx` pattern
 
 6. **Styling**
-    - Review `src/styles` for available variables and mixins
-    - Add SCSS module with proper imports and namespace usage for helpers/utilities; import it as `{componentName}Styles`
-    - Use colour variables from `src/styles/setup/_variables.scss` (add one, named per the Name that Colour convention, rather than a literal `white`/`rgba(...)`)
-    - Scope every rule to a class — no top-level element selectors, no plain `.scss` side-effect imports (see `styles.instructions.md` → Scope Every Selector To A Class)
+    - Review the tokens in `src/styles/tailwind.css` and use them (`bg-primary`, `text-muted-foreground`) rather than a literal `white` or `rgb(...)`
+    - Combine classes with `cn()` from `@/utils/cn`, use `cva` for variants, and accept a `className` prop merged last
     - Space sibling items with `gap` on the parent, never an outer margin on a reusable component
     - For buttons and links, follow `components.instructions.md` → Buttons And Links: navigation is `BaseButton isLink` with a `modeType`, actions are `<button>`
-    - Run `npm run lint:styles` on the new module
 
 7. **Output**
     - Summarise the created structure
@@ -60,6 +56,6 @@ Use this agent when you need to create a new React component with full structure
 - When a new reusable component is created, the agent should flag that existing similar components should be refactored to use it
 - All new components must have `prop-types` validation from the start
 - **All generated files must end with a trailing newline at EOF** — enforce this during file creation to satisfy linting rules
-- **Linting and formatting** — ensure all generated and edited files are ESLint-clean, Stylelint-clean and Prettier-formatted before handing off the component work.
+- **Linting and formatting** — ensure all generated and edited files are ESLint-clean and Prettier-formatted before handing off the component work.
 - Every new component file must include `data-cy` attributes on all meaningful elements (buttons, inputs, containers, labels, values)
 - When new component markup introduces `data-cy` attributes, add corresponding exported constants to `src/constants/test/selectors/components.js` via `getByDataCy` and use those constants in all new `*.cy.jsx` tests instead of literal selector strings

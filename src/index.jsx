@@ -8,7 +8,6 @@ import store from '@/store/store'
 
 import App from '@/app/App.jsx'
 
-import '@/styles/global.scss'
 import '@/styles/tailwind.css'
 
 createRoot(document.getElementById('app')).render(

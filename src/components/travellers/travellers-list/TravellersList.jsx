@@ -103,7 +103,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 			)}
 			<h1 className="mt-0">Travellers</h1>
 			<div
-				className="flex h-10 items-center justify-start [&>:nth-child(2)]:ml-auto [&>:nth-child(2)]:mr-2"
+				className="flex h-10 items-center justify-start [&>:nth-child(2)]:mr-2 [&>:nth-child(2)]:ml-auto"
 				data-cy="controls">
 				<BaseButton
 					modeType="outline"

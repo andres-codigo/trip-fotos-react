@@ -59,15 +59,14 @@
 				"**/__tests__/**",
 				"**/*.test.*",
 				"**/*.cy.*",
-				"**/*.css",
-				"**/*.scss"
+				"**/*.css"
 			]
 		},
 		{
 			"name": "styling",
 			"color": "e99695",
-			"description": "Area: CSS and SCSS",
-			"paths": ["**/*.css", "**/*.scss"]
+			"description": "Area: CSS and Tailwind",
+			"paths": ["**/*.css"]
 		},
 		{
 			"name": "redux/state",

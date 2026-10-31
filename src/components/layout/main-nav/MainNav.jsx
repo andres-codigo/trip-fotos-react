@@ -106,7 +106,7 @@ function MainNav({
 							data-cy="nav-menu-items-container"
 							aria-label="Main navigation menu">
 							<li className="mx-2! mobile:mx-0! mobile:w-full">
-								<ul className="m-0 flex items-center p-0 [&>li]:mx-2! mobile:block mobile:[&>li]:mx-0!">
+								<ul className="m-0 flex items-center p-0 mobile:block [&>li]:mx-2! mobile:[&>li]:mx-0!">
 									{isTraveller && (
 										<NavMenuMessagesLink
 											isLink

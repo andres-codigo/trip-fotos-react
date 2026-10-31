@@ -20,23 +20,6 @@ const run = (command, args) =>
 
 run('prettier', ['--write', '--ignore-unknown', relativePath])
 
-if (/^src\/(components|pages)\/.*\.scss$/.test(relativePath)) {
-	const stylelint = run('stylelint', [
-		'--config',
-		'config/stylelint.config.mjs',
-		relativePath,
-	])
-
-	if (stylelint.status !== 0) {
-		process.stderr.write(
-			`Stylelint errors remain in ${relativePath}:\n${stylelint.stdout}${stylelint.stderr}`,
-		)
-		process.exit(2)
-	}
-
-	process.exit(0)
-}
-
 if (!/\.(js|jsx|mjs)$/.test(relativePath)) process.exit(0)
 
 const eslint = run('eslint', [

@@ -33,12 +33,12 @@ const BaseDialog = ({
 			}}>
 			<RadixDialog.Portal container={container}>
 				<RadixDialog.Overlay
-					className="fixed inset-0 z-10 bg-[var(--overlay-backdrop)] data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out"
+					className="fixed inset-0 z-10 bg-[var(--overlay-backdrop)] data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
 					onClick={tryClose}
 					data-cy={DIALOG.BACKDROP}
 				/>
 				<RadixDialog.Content
-					className="fixed inset-0 z-100 m-auto h-fit outline-none w-4/5 overflow-hidden rounded-lg bg-background shadow-elevated md:w-1/2 data-[state=open]:animate-dialog-in data-[state=closed]:animate-dialog-out"
+					className="fixed inset-0 z-100 m-auto h-fit w-4/5 overflow-hidden rounded-lg bg-background shadow-elevated outline-none data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in md:w-1/2"
 					data-cy={dataCy}
 					aria-modal="true"
 					role={
@@ -64,7 +64,7 @@ const BaseDialog = ({
 						className={cn(
 							sectionClasses
 								? 'flex items-center pt-10 pb-4 *:w-full'
-								: 'p-4 [&_p]:text-center [&_img]:mx-auto [&_img]:block [&_img]:object-cover [&_img]:p-2.5',
+								: 'p-4 [&_img]:mx-auto [&_img]:block [&_img]:object-cover [&_img]:p-2.5 [&_p]:text-center',
 						)}
 						data-cy={DIALOG.TEXT_CONTENT}>
 						<RadixDialog.Description asChild>

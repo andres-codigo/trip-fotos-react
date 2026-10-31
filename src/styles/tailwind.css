@@ -1,8 +1,10 @@
 /*
-  Tailwind v4 theme and utilities only. Preflight is left out while the SCSS modules
-  are still in use, because its base reset would change existing styles.
+  Tailwind v4 theme and utilities, plus the app's global styles below. Preflight is left out
+  because its base reset would change existing styles (headings, lists, form controls).
   The app is dark-only: the dark palette arrives in #383 as a change of the values below.
 */
+/* Declared first so base ranks below the utilities whichever block appears first */
+@layer base, theme, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
@@ -192,5 +194,140 @@
 		50% {
 			background: #cecece;
 		}
+	}
+}
+
+/* Roboto, self-hosted from /public/fonts; index.html preloads the three most used weights */
+@font-face {
+	font-family: 'Roboto';
+	font-weight: 100;
+	font-style: normal;
+	font-display: swap;
+	src:
+		url('/fonts/Roboto-Thin.woff2') format('woff2'),
+		url('/fonts/Roboto-Thin.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-weight: 300;
+	font-style: normal;
+	font-display: swap;
+	src:
+		url('/fonts/Roboto-Light.woff2') format('woff2'),
+		url('/fonts/Roboto-Light.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+	src:
+		url('/fonts/Roboto-Regular.woff2') format('woff2'),
+		url('/fonts/Roboto-Regular.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+	src:
+		url('/fonts/Roboto-Medium.woff2') format('woff2'),
+		url('/fonts/Roboto-Medium.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+	src:
+		url('/fonts/Roboto-Bold.woff2') format('woff2'),
+		url('/fonts/Roboto-Bold.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'Roboto';
+	font-weight: 900;
+	font-style: normal;
+	font-display: swap;
+	src:
+		url('/fonts/Roboto-Black.woff2') format('woff2'),
+		url('/fonts/Roboto-Black.woff') format('woff');
+}
+
+/* Unlayered on purpose: these page-shell rules keep winning over the utilities, as the SCSS they replace did */
+html {
+	font-family: 'Roboto', sans-serif;
+	font-size: 16px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	color: var(--foreground);
+	font-size: 1rem;
+}
+
+#app {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+main {
+	flex: 1;
+	width: 100%;
+
+	/* Focused only programmatically by the skip link, so no ring is needed */
+	&:focus {
+		outline: none;
+	}
+}
+
+section {
+	display: block;
+	padding: 0 20px;
+	position: relative;
+	width: 100%;
+}
+
+.mainContainer {
+	display: inline-block;
+	padding: 5rem 1.25rem 0;
+	position: relative;
+}
+
+/* Padding, not margin: a page's own utility on the same element would otherwise be overridden */
+.cardPage {
+	padding-block: 7rem 2rem;
+}
+
+/* Zero specificity so any component class can recolour a link; in the base layer so utilities (a later layer) beat it too */
+@layer base {
+	:where(a) {
+		text-decoration: none;
+		color: inherit;
+	}
+}
+
+/* In the base layer so utilities beat the reset; an unlayered li rule would override p-4 and my-4 */
+@layer base {
+	:where(li) {
+		list-style: none;
+		padding: 0;
+		margin: 0;
 	}
 }
