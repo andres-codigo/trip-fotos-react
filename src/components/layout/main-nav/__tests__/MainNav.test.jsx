@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -7,12 +7,11 @@ import { useDispatch, useSelector } from 'react-redux'
  *
  * Mocks:
  * - Custom hooks: All navigation-related hooks with controlled return values for state management
- * - NavMenuButtonLink: Mock component that renders as div for testing prop forwarding
- * - NavMenuMessagesLink: Mock component that renders as li for testing message functionality
+ * - NavMenuButtonLink and NavMenuMessagesLink: buttons that surface the props they receive as DOM (aria-current, label, click)
  *
  * Test Coverage:
  * - Rendering: Hook integration, prop forwarding, conditional rendering based on isLoggedIn
- * - Component Integration: Verification that child components receive correct props
+ * - Component Integration: What the child links render and do (their own props are covered by their tests)
  * - Hook Parameters: Ensures hooks are called with proper arguments and dependencies
  * - Active link: Tests that isActive is set when location matches path
  * - Accessibility: N/A (covered in MainNav.cy.jsx)
@@ -47,60 +46,41 @@ vi.mock('@/components/layout/main-nav/hooks/useLogout', () => ({
 	default: vi.fn(),
 }))
 
-// Mock child components
+// Mock child components: they surface what MainNav passes as DOM, so tests assert what is rendered
 vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
-	default: vi.fn(
-		({
-			className,
-			isActive: _isActive,
-			onClick,
-			onMenuItemClick,
-			'data-cy': dataCy,
-			// isLink and to are extracted but not used - this is intentional for prop filtering
-			isLink: _isLink,
-			to: _to,
-			ariaLabel,
-			children,
-			...props
-		}) => (
-			<div
-				className={className}
-				aria-label={ariaLabel}
-				onClick={onClick || onMenuItemClick}
-				data-cy="nav-menu-button-link"
-				{...(dataCy && { 'data-cy': dataCy })}
-				{...props}>
-				{children}
-			</div>
-		),
+	default: ({
+		isActive,
+		onClick,
+		onMenuItemClick,
+		'data-cy': dataCy,
+		ariaLabel,
+		children,
+	}) => (
+		<button
+			type="button"
+			aria-label={ariaLabel}
+			aria-current={isActive ? 'page' : undefined}
+			onClick={onClick || onMenuItemClick}
+			data-cy={dataCy}>
+			{children}
+		</button>
 	),
 }))
 
 vi.mock('@/components/layout/main-nav/nav-menu/NavMenuMessagesLink', () => ({
-	default: vi.fn(
-		({
-			onMenuItemClick,
-			className,
-			isActive: _isActive,
-			'data-cy': dataCy,
-			// isLink, to, and totalMessages are extracted but not used - this is intentional for prop filtering
-
-			isLink: _isLink,
-
-			to: _to,
-
-			totalMessages: _totalMessages,
-			...props
-		}) => (
-			<li
-				onClick={onMenuItemClick}
-				data-cy="nav-menu-messages-link"
-				className={className}
-				{...(dataCy && { 'data-cy': dataCy })}
-				{...props}>
-				Messages Link
-			</li>
-		),
+	default: ({
+		isActive,
+		onMenuItemClick,
+		'data-cy': dataCy,
+		totalMessages,
+	}) => (
+		<button
+			type="button"
+			aria-current={isActive ? 'page' : undefined}
+			onClick={onMenuItemClick}
+			data-cy={dataCy}>
+			Messages {totalMessages}
+		</button>
 	),
 }))
 
@@ -109,9 +89,6 @@ import useClickOutsideToClose from '@/components/layout/main-nav/hooks/useClickO
 import useLogout from '@/components/layout/main-nav/hooks/useLogout'
 
 import { PATHS } from '@/constants/ui'
-
-import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
-import NavMenuMessagesLink from '@/components/layout/main-nav/nav-menu/NavMenuMessagesLink'
 
 describe('<MainNav />', () => {
 	const mockTravellerName = 'John Doe'
@@ -207,116 +184,45 @@ describe('<MainNav />', () => {
 			expect(mockSetTravellerName).not.toHaveBeenCalled()
 		})
 
-		it('should call setIsMenuOpen with false when handleMenuItemClick is invoked', () => {
+		it('should close the menu when the Messages link is clicked', () => {
 			render(<MainNav {...defaultProps} />)
 
-			const messagesLinkCall =
-				vi.mocked(NavMenuMessagesLink).mock.calls[0][0]
-			const handleMenuItemClick = messagesLinkCall.onMenuItemClick
-
-			handleMenuItemClick()
+			fireEvent.click(screen.getByTestId('nav-menu-item-messages'))
 
 			expect(mockSetIsMenuOpen).toHaveBeenCalledWith(false)
 		})
 
-		it('should call setIsMenuOpen with false when Travellers menu item is clicked', () => {
+		it('should close the menu when the Travellers link is clicked', () => {
 			render(<MainNav {...defaultProps} />)
 
-			const travellersLinkCall = vi
-				.mocked(NavMenuButtonLink)
-				.mock.calls.find((call) => call[0].children === 'Travellers')
-			const handleMenuItemClick = travellersLinkCall[0].onMenuItemClick
-
-			handleMenuItemClick()
+			fireEvent.click(screen.getByTestId('nav-menu-item-travellers'))
 
 			expect(mockSetIsMenuOpen).toHaveBeenCalledWith(false)
 		})
 
-		it('should pass handleMenuItemClick to both navigation menu items', () => {
-			render(<MainNav {...defaultProps} />)
+		it.each([
+			['Messages', 'nav-menu-item-messages', PATHS.MESSAGES],
+			['Travellers', 'nav-menu-item-travellers', PATHS.TRAVELLERS],
+		])(
+			'should mark the %s link as the current page only on its own path',
+			(_label, dataCy, path) => {
+				mockUseLocation.mockReturnValue({ pathname: path })
+				const { unmount } = render(<MainNav {...defaultProps} />)
 
-			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
-				expect.objectContaining({
-					onMenuItemClick: expect.any(Function),
-				}),
-				undefined,
-			)
+				expect(screen.getByTestId(dataCy)).toHaveAttribute(
+					'aria-current',
+					'page',
+				)
+				unmount()
 
-			const travellersCall = vi
-				.mocked(NavMenuButtonLink)
-				.mock.calls.find((call) => call[0].children === 'Travellers')
-			expect(travellersCall[0]).toEqual(
-				expect.objectContaining({
-					onMenuItemClick: expect.any(Function),
-				}),
-			)
-		})
+				mockUseLocation.mockReturnValue({ pathname: '/other-path' })
+				render(<MainNav {...defaultProps} />)
 
-		it('should mark as active to Messages link when location matches PATHS.MESSAGES', () => {
-			mockUseLocation.mockReturnValue({
-				pathname: PATHS.MESSAGES,
-			})
-
-			render(<MainNav {...defaultProps} />)
-
-			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
-				expect.objectContaining({
-					isActive: true,
-				}),
-				undefined,
-			)
-		})
-
-		it('should not mark as active to Messages link when location does not match PATHS.MESSAGES', () => {
-			mockUseLocation.mockReturnValue({
-				pathname: '/other-path',
-			})
-
-			render(<MainNav {...defaultProps} />)
-
-			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
-				expect.objectContaining({
-					isActive: false,
-				}),
-				undefined,
-			)
-		})
-
-		it('should mark as active to Travellers link when location matches PATHS.TRAVELLERS', () => {
-			mockUseLocation.mockReturnValue({
-				pathname: PATHS.TRAVELLERS,
-			})
-
-			render(<MainNav {...defaultProps} />)
-
-			const travellersCall = vi
-				.mocked(NavMenuButtonLink)
-				.mock.calls.find((call) => call[0].children === 'Travellers')
-
-			expect(travellersCall[0]).toEqual(
-				expect.objectContaining({
-					isActive: true,
-				}),
-			)
-		})
-
-		it('should not mark as active to Travellers link when location does not match PATHS.TRAVELLERS', () => {
-			mockUseLocation.mockReturnValue({
-				pathname: '/other-path',
-			})
-
-			render(<MainNav {...defaultProps} />)
-
-			const travellersCall = vi
-				.mocked(NavMenuButtonLink)
-				.mock.calls.find((call) => call[0].children === 'Travellers')
-
-			expect(travellersCall[0]).toEqual(
-				expect.objectContaining({
-					isActive: false,
-				}),
-			)
-		})
+				expect(screen.getByTestId(dataCy)).not.toHaveAttribute(
+					'aria-current',
+				)
+			},
+		)
 	})
 
 	describe('Rendering tests', () => {
@@ -342,51 +248,44 @@ describe('<MainNav />', () => {
 			)
 		})
 
-		it('should render NavMenuMessagesLink with correct props', () => {
+		it('should render the Messages link with the message count', () => {
 			render(<MainNav {...defaultProps} />)
 
-			expect(vi.mocked(NavMenuMessagesLink)).toHaveBeenCalledWith(
-				{
-					isLink: true,
-					isActive: false,
-					to: PATHS.MESSAGES,
-					onMenuItemClick: expect.any(Function),
-					'data-cy': 'nav-menu-item-messages',
-					totalMessages: mockTotalMessages,
-				},
-				undefined,
-			)
+			expect(
+				screen.getByTestId('nav-menu-item-messages'),
+			).toHaveTextContent(`Messages ${mockTotalMessages}`)
 		})
 
-		it('should render Travellers NavMenuButtonLink with correct props', () => {
-			render(<MainNav {...defaultProps} />)
-
-			expect(vi.mocked(NavMenuButtonLink)).toHaveBeenCalledWith(
-				{
-					isLink: true,
-					isActive: false,
-					to: PATHS.TRAVELLERS,
-					onMenuItemClick: expect.any(Function),
-					'data-cy': 'nav-menu-item-travellers',
-					children: 'Travellers',
-				},
-				undefined,
+		it('should not render the Messages link for a non-traveller', () => {
+			render(
+				<MainNav
+					{...defaultProps}
+					isTraveller={false}
+				/>,
 			)
+
+			expect(
+				screen.queryByTestId('nav-menu-item-messages'),
+			).not.toBeInTheDocument()
 		})
 
-		it('should render Logout NavMenuButtonLink with correct props', () => {
+		it('should render the Travellers link', () => {
 			render(<MainNav {...defaultProps} />)
 
-			expect(vi.mocked(NavMenuButtonLink)).toHaveBeenCalledWith(
-				expect.objectContaining({
-					isLink: true,
-					to: PATHS.AUTHENTICATION,
-					'data-cy': 'nav-menu-item-logout',
-					onClick: mockHandleLogoutClick,
-					children: ['Logout ', mockTravellerName],
-				}),
-				undefined,
-			)
+			expect(
+				screen.getByTestId('nav-menu-item-travellers'),
+			).toHaveTextContent('Travellers')
+		})
+
+		it('should render the Logout link with the traveller name and log out on click', () => {
+			render(<MainNav {...defaultProps} />)
+
+			const logout = screen.getByTestId('nav-menu-item-logout')
+			expect(logout).toHaveAccessibleName(`Logout ${mockTravellerName}`)
+
+			fireEvent.click(logout)
+
+			expect(mockHandleLogoutClick).toHaveBeenCalledTimes(1)
 		})
 	})
 

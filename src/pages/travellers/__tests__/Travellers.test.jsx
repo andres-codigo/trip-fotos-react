@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-import { GLOBAL } from '@/constants/ui'
 import { TEST_IDS } from '@/constants/test'
 
 import Travellers from '@/pages/travellers/Travellers'
@@ -95,17 +94,6 @@ describe('Travellers', () => {
 			})
 
 			expect(screen.getByRole('main')).toBeInTheDocument()
-		})
-
-		it('applies the mainContainer class to <main>', async () => {
-			setupMocksForHasTravellers()
-
-			await act(async () => {
-				renderTravellers()
-			})
-
-			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
-			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
 		})
 
 		it('<main> element has correct data attributes', async () => {

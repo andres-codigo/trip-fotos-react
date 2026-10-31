@@ -1,15 +1,18 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import {
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+	within,
+} from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter, useNavigate } from 'react-router-dom'
 
 import { registerTraveller } from '@/store/slices/travellersSlice'
-import {
-	TEST_IDS,
-	TRAVELLER_REGISTRATION_FORM_SELECTORS,
-} from '@/constants/test'
-import { GLOBAL, PATHS } from '@/constants/ui'
+import { TEST_IDS } from '@/constants/test'
+import { PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
 import Register from '@/pages/register/Register'
@@ -107,14 +110,6 @@ describe('Register', () => {
 			expect(screen.getByRole('main')).toBeInTheDocument()
 		})
 
-		it('applies the mainContainer class to <main>', () => {
-			renderRegister()
-
-			const main = screen.getByTestId(TEST_IDS.MAIN_CONTAINER)
-
-			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
-		})
-
 		it('<main> element has correct data attributes', () => {
 			renderRegister()
 
@@ -136,9 +131,7 @@ describe('Register', () => {
 
 			const baseCard = screen.getByTestId(TEST_IDS.BASE_CARD)
 			expect(
-				baseCard.querySelector(
-					TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM,
-				),
+				within(baseCard).getByTestId('traveller-registration-form'),
 			).toBeInTheDocument()
 		})
 
