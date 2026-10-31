@@ -3,6 +3,8 @@
   because its base reset would change existing styles (headings, lists, form controls).
   The app is dark-only: the dark palette arrives in #383 as a change of the values below.
 */
+/* Declared first so base ranks below the utilities whichever block appears first */
+@layer base, theme, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
