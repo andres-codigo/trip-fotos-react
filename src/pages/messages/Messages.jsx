@@ -17,8 +17,6 @@ import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-import messagesStyles from './Messages.module.scss'
-
 const Messages = () => {
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState(null)
@@ -47,7 +45,7 @@ const Messages = () => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className={`mainContainer cardPage ${messagesStyles.messagesContainer}`}
+			className={'mainContainer cardPage text-center'}
 			data-cy="main-container"
 			data-cy-alt="messages-main-container">
 			<title>{`Messages · ${GLOBAL.SITE_NAME}`}</title>
@@ -71,7 +69,7 @@ const Messages = () => {
 					)}
 					{!isLoading && hasMessages && (
 						<ul
-							className={messagesStyles.messages}
+							className="m-0 list-none p-0"
 							data-cy={MESSAGES_PAGE.LIST}>
 							{messages.map((item) => (
 								<MessageItem
@@ -85,7 +83,7 @@ const Messages = () => {
 					)}
 					{!isLoading && !hasMessages && (
 						<h2
-							className={messagesStyles.noMessages}
+							className="font-thin"
 							data-cy={MESSAGES_PAGE.EMPTY}>
 							You don&apos;t have any messages yet!
 						</h2>

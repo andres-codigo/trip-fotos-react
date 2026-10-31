@@ -16,8 +16,6 @@ import Messages from '@/pages/messages/Messages'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 import messagesReducer from '@/store/slices/messagesSlice'
 
-import messagesStyles from '@/pages/messages/Messages.module.scss'
-
 const { SAMPLE_MESSAGE_ONE, SAMPLE_MESSAGE_TWO } = MOCK_INBOX
 
 const stubFetch = (response) => {
@@ -71,9 +69,6 @@ describe('Messages', () => {
 				TEST_IDS.MESSAGES.CONTAINER,
 			)
 			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
-			expect(main.className).toMatch(
-				new RegExp(messagesStyles.messagesContainer),
-			)
 		})
 
 		it('sets the document title and renders the heading', async () => {

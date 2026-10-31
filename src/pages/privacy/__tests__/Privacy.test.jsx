@@ -7,8 +7,6 @@ import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import Privacy from '@/pages/privacy/Privacy'
 
-import privacyStyles from '@/pages/privacy/Privacy.module.scss'
-
 vi.mock('@/components/ui/card/BaseCard', () => ({
 	__esModule: true,
 	default: ({ children }) => <div data-cy="base-card">{children}</div>,
@@ -37,9 +35,6 @@ describe('Privacy', () => {
 			const main = screen.getByRole('main')
 
 			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
-			expect(main.className).toMatch(
-				new RegExp(privacyStyles.privacyContainer),
-			)
 		})
 
 		it('<main> element has correct data attributes', () => {

@@ -13,19 +13,6 @@ $prefixes: '-moz-', '-webkit-', '-o-', '-ms-', '';
 	-webkit-transition: $property $duration $ease;
 }
 
-// Mixin for visually hidden elements
-@mixin visually-hidden {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	clip-path: inset(0);
-	white-space: nowrap;
-	border: 0;
-}
-
 // Mixin for background opacity
 @mixin background-opacity($color, $opacity: $default-opacity) {
 	background: $color;
@@ -79,31 +66,3 @@ $prefixes: '-moz-', '-webkit-', '-o-', '-ms-', '';
 // ********************
 // END fadeIn
 // ********************
-
-// Heading at the top of a page card
-@mixin page-heading {
-	font-size: 1.5rem;
-	margin: 0.83em 0;
-}
-
-// Row of BaseBadge; the badges carry no margin of their own
-@mixin badge-list {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
-	padding: 0.25rem 0 1rem;
-}
-
-// Wrapping row of BaseImage tiles, three across and two on narrow screens
-@mixin image-grid {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 2rem 2%;
-	list-style: none;
-	padding: 1rem 0;
-
-	@media only screen and (max-width: 480px) {
-		gap: 1rem 4%;
-		padding: 0.5rem 0;
-	}
-}

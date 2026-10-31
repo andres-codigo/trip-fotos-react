@@ -19,8 +19,6 @@ import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
 
-import registerStyles from './Register.module.scss'
-
 const Register = () => {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
@@ -58,7 +56,7 @@ const Register = () => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className={`mainContainer cardPage ${registerStyles.registerContainer}`}
+			className={'mainContainer cardPage text-left'}
 			data-cy="main-container"
 			data-cy-alt="register-main-container">
 			<title>{`Register as a traveller · ${GLOBAL.SITE_NAME}`}</title>
