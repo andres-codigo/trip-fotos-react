@@ -10,7 +10,8 @@ const cypressArgs = process.argv.slice(2)
 // Emulator runs need a dev server in `emulators` mode, so never reuse whatever is on the port
 const useEmulators = process.env.E2E_EMULATORS === 'true'
 
-const PORT = 3000
+// Its own port, so a developer's Vite server on 3000 never blocks the run or gets reused; E2E_PORT overrides it
+const PORT = Number(process.env.E2E_PORT) || 5190
 const STARTUP_TIMEOUT_MS = 60_000
 
 const isUp = (url) =>
