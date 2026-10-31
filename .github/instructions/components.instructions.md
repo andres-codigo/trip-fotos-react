@@ -20,7 +20,6 @@ Each component must reside in its own contextual folder. Components are located 
     ```
     src/components/forms/user-authentication/
       UserAuthenticationForm.jsx
-      UserAuthenticationForm.module.scss
       __tests__/
         UserAuthenticationForm.cy.jsx
         UserAuthenticationForm.test.jsx
@@ -39,7 +38,7 @@ Each component must reside in its own contextual folder. Components are located 
 - Add `prop-types` for every prop, as the generated file has none.
 - Keep the generated `cn` import (`@/utils/cn`) and fix any other import to the `@/` alias.
 - Name and folder follow the existing component, so call sites and the folder-per-component rule stay consistent: when a shadcn component replaces one (e.g. `ui/badge/BaseBadge`), keep its exported name, folder and file name (`BaseBadge`) and put the shadcn code inside it, in the same change. A shadcn component with no counterpart takes the shadcn name in PascalCase (`Tooltip` in `ui/tooltip/Tooltip.jsx`).
-- Generated components are styled with Tailwind classes through `cn()`, not an SCSS module. Existing components keep their SCSS modules until each is migrated.
+- Generated components are styled with Tailwind classes through `cn()`; there are no style modules.
 - Add `lucide-react` and Radix packages only when a component needs them.
 
 ### Refactoring Rule
@@ -106,13 +105,12 @@ See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypr
 
 ## Linting And Formatting
 
-- Ensure every edited or newly created component file, hook, style module, and related test file is ESLint-clean and Prettier-formatted before finishing work.
+- Ensure every edited or newly created component file, hook and related test file is ESLint-clean and Prettier-formatted before finishing work.
 
 ## Styling
 
-- Use **SCSS modules** for component-specific styles.
-- Import as `[componentName]Styles` (e.g., `import userAuthenticationFormStyles from './UserAuthenticationForm.module.scss'`), never a bare `styles`.
-- When creating a new SCSS file, review `src/styles` for available variables and mixins to ensure consistency.
-- Never use a bare element selector at the top level of a style module, and never import a plain `.scss` file from a component — both leak globally. `npm run lint:styles` enforces the first.
+- Style components with Tailwind utilities through `cn()`; use `cva` for a component with variants. Never add a stylesheet beside a component.
+- Use semantic tokens (`bg-primary`, `text-muted-foreground`), not literal colours.
+- Accept a `className` prop and merge it last through `cn()`, so a caller can override a conflicting utility.
 
-See [styles.instructions.md](./styles.instructions.md) for full SCSS conventions.
+See [styles.instructions.md](./styles.instructions.md) for full styling conventions.

@@ -54,7 +54,7 @@ export default defineConfig({
 		alias: {
 			'@': resolve(__dirname, 'src'),
 		},
-		extensions: ['.js', '.jsx', '.json', '.mjs', '.vue', '.svg', '.scss'],
+		extensions: ['.js', '.jsx', '.json', '.mjs', '.vue', '.svg'],
 	},
 	build: {
 		sourcemap: false,

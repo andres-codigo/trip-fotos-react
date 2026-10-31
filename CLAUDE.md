@@ -29,7 +29,7 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
 | [components.instructions.md](.github/instructions/components.instructions.md) | `src/components/**`                 | Folder structure, prop-types, reusability, accessibility, testing |
 | [pages.instructions.md](.github/instructions/pages.instructions.md)           | `src/pages/**`                      | Route composition, data loading, testing                          |
 | [store.instructions.md](.github/instructions/store.instructions.md)           | `src/store/**`                      | Thunks, error handling pattern, persistence, testing              |
-| [styles.instructions.md](.github/instructions/styles.instructions.md)         | `src/**/*.scss`                     | SCSS modules, class-scoped selectors, spacing, colour naming      |
+| [styles.instructions.md](.github/instructions/styles.instructions.md)         | `src/**/*.{jsx,css}`                | Tailwind utilities, `cn()`, tokens, layers, spacing, states       |
 | [testing.instructions.md](.github/instructions/testing.instructions.md)       | `**/__tests__/**`, `cypress/e2e/**` | Vitest/Cypress organisation, test data, anti-flakiness            |
 
 ## Key conventions
@@ -43,7 +43,7 @@ Imports (`@/` alias, no parent-relative paths) are enforced by ESLint and listed
 
 ## UI changes
 
-A change that can alter how the UI looks (SCSS, layout, spacing, markup) is checked in a real browser before it merges: run `/ui-check`. Lint, Vitest, component tests and the build do not show visual regressions; nothing is assumed from a passing test or a matching file. The checklist is in [testing.instructions.md](.github/instructions/testing.instructions.md#visual-check-for-ui-changes).
+A change that can alter how the UI looks (styling, layout, spacing, markup) is checked in a real browser before it merges: run `/ui-check`. Lint, Vitest, component tests and the build do not show visual regressions; nothing is assumed from a passing test or a matching file. The checklist is in [testing.instructions.md](.github/instructions/testing.instructions.md#visual-check-for-ui-changes).
 
 ## Dev commands
 

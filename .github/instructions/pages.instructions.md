@@ -21,7 +21,7 @@ Pages are located in `src/pages` and should be grouped by route or feature area.
       __tests__/
         Authentication.test.jsx
     ```
-    A page that needs its own styles adds `{PageName}.module.scss` (PascalCase, matching the page file). Add `{PageName}.cy.jsx` when the page has non-trivial interaction.
+    Add `{PageName}.cy.jsx` when the page has non-trivial interaction.
 
 ## Page Responsibilities
 
@@ -88,11 +88,10 @@ See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypr
 
 ## Styling
 
-- Prefer page-specific SCSS modules for page layout concerns.
-- Reusable component styling must remain inside component-level style modules.
-- Scope every rule to a class — a bare `h1` or `a` in a page module restyles every page. `npm run lint:styles` enforces this.
-- Follow shared SCSS conventions in [styles.instructions.md](./styles.instructions.md).
+- Style the page's layout with Tailwind utilities on its own elements; the root `<main>` keeps the global `mainContainer` and `cardPage` classes.
+- Reusable component styling stays inside the component, not the page.
+- Follow the shared conventions in [styles.instructions.md](./styles.instructions.md).
 
 ## Linting And Formatting
 
-- Ensure every edited or newly created page file, style module, and related test file is ESLint-clean and Prettier-formatted before finishing work.
+- Ensure every edited or newly created page file and related test file is ESLint-clean and Prettier-formatted before finishing work.

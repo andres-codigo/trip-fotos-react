@@ -1,6 +1,6 @@
 ---
 paths:
-    - 'src/**/*.{js,jsx,scss}'
+    - 'src/**/*.{js,jsx,css}'
     - 'cypress/**/*.{js,jsx}'
     - '.github/scripts/**'
 ---

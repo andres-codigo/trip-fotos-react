@@ -19,7 +19,7 @@ Use existing project paths for shared testing assets:
 - **Test constants and mock data**: `src/constants/test` (`mock-data/` for data, `selectors/` for `getByDataCy` selectors). A colocated `*TestData.js` is acceptable only for data used by that one test folder.
 - **Cypress helper utilities**: `cypress/support/utils`
 - **Cypress provider mounts**: `cypress/support/commands-support-files/mountWithProviders.jsx`
-- **General test helpers**: `src/testUtils` (`vitest/` polyfills, setup and `mockClassNames`; `cypress/` `selectors.js` and `TestLocationDisplay`). Put a helper used by more than one test folder here rather than beside a single test; `vitest/mockReactRedux.js` is the shared `react-redux` mock (real `Provider`, `useSelector` and `useDispatch` as spies), used as `vi.mock('react-redux', async () => (await import('@/testUtils/vitest/mockReactRedux')).createReactReduxMock())` rather than hand-mocking it per test.
+- **General test helpers**: `src/testUtils` (`vitest/` polyfills, setup; `cypress/` `selectors.js` and `TestLocationDisplay`). Put a helper used by more than one test folder here rather than beside a single test; `vitest/mockReactRedux.js` is the shared `react-redux` mock (real `Provider`, `useSelector` and `useDispatch` as spies), used as `vi.mock('react-redux', async () => (await import('@/testUtils/vitest/mockReactRedux')).createReactReduxMock())` rather than hand-mocking it per test.
 
 Do not introduce `cypress/support/constants` unless explicitly adopted in a future refactor.
 
@@ -57,7 +57,7 @@ CI runs the full E2E suite on every pull request, so a local run is for earlier 
 
 ## Visual Check For UI Changes
 
-Do this for any change that can alter how a page looks (SCSS, layout, spacing, markup), before the PR is marked ready. Passing tests do not show a visual regression: a shared class overridden by a page module's own rule passed everything and was only visible on screen.
+Do this for any change that can alter how a page looks (styling, layout, spacing, markup), before the PR is marked ready. Passing tests do not show a visual regression: a shared class overridden by a page's own rule passed everything and was only visible on screen.
 
 - Write a throwaway Cypress E2E spec under `cypress/e2e/tmp/` (never committed) that visits the affected pages at the three standard widths, 390px (mobile), 768px (tablet) and 1280px (desktop), and calls `cy.screenshot(name, { capture: 'fullPage' })`. Add a width only when the changed CSS defines its own breakpoint: capture one just either side of it (for example 1023px and 1024px for a 1024px breakpoint). A viewport-only capture misses everything below the fold, such as the Register page's file input. Run it on your branch and on `main`.
 - **Compare branch and `main` images by hash first, and open every pair that differs**, saying what is on screen; any difference must be one you intended. For identical pairs, open one image per page and state: byte-identical files hide pages that never rendered (two identical spinner frames passed as "identical" for a page that had not loaded), so the spec must also assert the content is on screen.
@@ -71,7 +71,7 @@ Do this for any change that can alter how a page looks (SCSS, layout, spacing, m
 - Enumerate every consumer, prop, mode, state and width of the changed component before capturing, and capture all of them; "not checked" is for what is impossible (live writes, unseedable data), never for what was skipped.
 - Delete the spec and its screenshots (`cypress/screenshots/` is gitignored) afterwards.
 
-Case-only renames of files (such as `register.module.scss` to `Register.module.scss`) can leave files missing when you `git switch` on a case-insensitive filesystem; `git restore` the affected folder if so.
+Case-only renames of files (such as `register.jsx` to `Register.jsx`) can leave files missing when you `git switch` on a case-insensitive filesystem; `git restore` the affected folder if so.
 
 ## Required Updates
 

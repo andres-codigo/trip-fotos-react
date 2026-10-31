@@ -81,12 +81,10 @@ describe('areasForFiles', () => {
 		).toEqual(['testing'])
 	})
 
-	it('labels a component stylesheet as styling, not ui', () => {
-		expect(
-			areasForFiles(config, [
-				'src/components/layout/main-nav/MainNav.module.scss',
-			]),
-		).toEqual(['styling'])
+	it('labels a stylesheet as styling, not ui', () => {
+		expect(areasForFiles(config, ['src/styles/tailwind.css'])).toEqual([
+			'styling',
+		])
 	})
 
 	it('labels a workflow as build/deployment only', () => {

@@ -9,20 +9,20 @@ import { cn } from '@/utils/cn'
 const buttonVariants = cva('border border-solid', {
 	variants: {
 		shape: {
-			button: 'cursor-pointer items-center justify-center rounded-pill font-[family-name:inherit] text-[length:inherit] font-[weight:inherit] leading-tight no-underline inline-flex px-6 py-3',
+			button: 'inline-flex cursor-pointer items-center justify-center rounded-pill px-6 py-3 font-[family-name:inherit] text-[length:inherit] leading-tight font-[weight:inherit] no-underline',
 			link: 'inline-block border-transparent hover:text-link-hover active:text-link-hover',
 		},
 		mode: {
 			primary:
-				'bg-accent-foreground border-accent-foreground text-primary-foreground hover:bg-secondary hover:border-secondary active:bg-secondary active:border-secondary',
+				'border-accent-foreground bg-accent-foreground text-primary-foreground hover:border-secondary hover:bg-secondary active:border-secondary active:bg-secondary',
 			flat: 'border-transparent bg-transparent text-accent-foreground hover:bg-tint active:bg-tint',
-			danger: 'bg-destructive border-destructive text-primary-foreground hover:bg-destructive-hover hover:border-destructive-hover active:bg-destructive-hover active:border-destructive-hover',
+			danger: 'border-destructive bg-destructive text-primary-foreground hover:border-destructive-hover hover:bg-destructive-hover active:border-destructive-hover active:bg-destructive-hover',
 			text: 'border-none bg-transparent p-0 text-inherit hover:bg-transparent active:bg-transparent',
 			outline:
 				'border-secondary bg-transparent text-secondary hover:bg-tint active:bg-tint',
 		},
 		disabled: {
-			true: 'bg-muted border-secondary text-secondary cursor-default hover:bg-muted active:bg-muted',
+			true: 'cursor-default border-secondary bg-muted text-secondary hover:bg-muted active:bg-muted',
 			false: '',
 		},
 	},
