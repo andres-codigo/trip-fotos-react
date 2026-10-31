@@ -7,7 +7,7 @@ import { cn } from '@/utils/cn'
 
 // Line height follows the font size in each class list: tailwind-merge drops an earlier leading-* when a later text-size class is merged
 const badgeClasses =
-	'absolute right-1 size-6 appearance-none rounded-[24px] border-0 p-0 shadow-[0_0_5px_currentColor]'
+	'absolute right-1 h-6 appearance-none rounded-[24px] border-0 p-0 shadow-[0_0_5px_currentColor]'
 
 const statusClasses = {
 	[GLOBAL.FILE_STATUS.LOADING]:
@@ -29,7 +29,7 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 				type="button"
 				className={cn(
 					badgeClasses,
-					'top-1 z-1 cursor-pointer bg-[#933933] text-[24px] leading-6 text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent',
+					'top-1 z-1 w-6 cursor-pointer bg-[#933933] text-[24px] leading-6 text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent',
 				)}
 				aria-label={GLOBAL.REMOVE_FILE_LABEL(file.name)}
 				onClick={() => onRemove(file)}
