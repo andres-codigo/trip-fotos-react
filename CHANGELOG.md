@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.0...v0.21.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* make the UI check cover every reachable state ([#557](https://github.com/andres-codigo/trip-fotos-react/issues/557)) ([63faadb](https://github.com/andres-codigo/trip-fotos-react/commit/63faadb380f867c8e9906176cc31e68a656bae1e))
+
 ## [0.21.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.20.7...v0.21.0) (2026-10-30)
 
 
