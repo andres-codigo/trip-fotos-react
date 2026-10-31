@@ -3,7 +3,11 @@ import PropTypes from 'prop-types'
 
 import { COMBOBOX } from '@/constants/test'
 
-import comboboxStyles from './Combobox.module.scss'
+import {
+	fieldClasses,
+	labelClasses,
+	requiredMarkClasses,
+} from '@/components/ui/form/fieldClasses'
 
 const Combobox = ({
 	id,
@@ -89,12 +93,14 @@ const Combobox = ({
 	}
 
 	return (
-		<div className={comboboxStyles.combobox}>
-			<label htmlFor={id}>
+		<div className="relative">
+			<label
+				htmlFor={id}
+				className={labelClasses}>
 				{label + ' '}
 				{required && (
 					<span
-						className={comboboxStyles.required}
+						className={requiredMarkClasses}
 						aria-hidden="true">
 						*
 					</span>
@@ -129,6 +135,7 @@ const Combobox = ({
 					setIsOpen(false)
 					onBlur?.(event)
 				}}
+				className={fieldClasses}
 				data-cy={COMBOBOX.INPUT}
 			/>
 			{showListbox && (
@@ -137,7 +144,7 @@ const Combobox = ({
 					ref={listboxRef}
 					role="listbox"
 					aria-label={label}
-					className={comboboxStyles.listbox}
+					className="absolute inset-x-0 z-10 m-0 max-h-64 list-none overflow-y-auto border border-border bg-background p-0 shadow-[0_2px_8px_rgb(0_0_0/0.15)]"
 					data-cy={COMBOBOX.LISTBOX}>
 					{options.map((option, index) => (
 						<li
@@ -145,7 +152,8 @@ const Combobox = ({
 							id={optionId(index)}
 							role="option"
 							aria-selected={index === activeIndex}
-							className={`${comboboxStyles.option} ${index === activeIndex ? comboboxStyles.active : ''}`}
+							// Important: the global li reset is unlayered, so it beats utilities
+							className="cursor-pointer px-3! py-2! hover:bg-field-focus hover:text-primary aria-selected:bg-field-focus aria-selected:text-primary aria-selected:outline-2 aria-selected:-outline-offset-2 aria-selected:outline-primary"
 							// Keeps focus in the input so blur does not close the list before the click lands
 							onMouseDown={(event) => event.preventDefault()}
 							onClick={() => selectOption(option)}
@@ -159,7 +167,7 @@ const Combobox = ({
 				id={statusId}
 				role="status"
 				aria-live="polite"
-				className={comboboxStyles.status}
+				className="mt-1 mb-0 min-h-5 text-[0.875rem] text-muted-foreground"
 				data-cy={COMBOBOX.STATUS}>
 				{statusMessage}
 			</p>

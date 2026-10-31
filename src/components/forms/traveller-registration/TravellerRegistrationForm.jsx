@@ -18,8 +18,6 @@ import useCitySearch, {
 	CITY_SEARCH_STATUS,
 } from '@/components/forms/traveller-registration/hooks/useCitySearch'
 
-import travellerRegistrationFormStyles from './TravellerRegistrationForm.module.scss'
-
 const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 	const {
 		formData,
@@ -85,14 +83,12 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			disabled: isLoading,
 			required: true,
 			showRequiredMark: true,
-			className: 'formControlInput',
 			'data-cy': config.testId,
 		}
 	}
 
 	return (
 		<form
-			className={travellerRegistrationFormStyles.travellerRegistration}
 			onSubmit={submitHandler(onSubmit)}
 			noValidate
 			data-cy="traveller-registration-form"
@@ -100,35 +96,30 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			aria-labelledby="traveller-registration-title">
 			<h1
 				id="traveller-registration-title"
-				className={
-					travellerRegistrationFormStyles.travellerRegistrationTitle
-				}
+				className="mt-0 mb-[0.83em] text-[1.5rem]"
 				data-cy="traveller-registration-form-title">
 				Register as a Traveller
 			</h1>
 			<LoadingAnnouncement isLoading={isLoading} />
-			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData[FIRST_NAME].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+			<div className="my-2">
 				<Input {...getInputProps(FIRST_NAME)} />
 				{renderVisuallyHiddenError(
 					formData[FIRST_NAME],
 					'first-name-error',
-					travellerRegistrationFormStyles.visuallyHidden,
+					'sr-only',
 				)}
 			</div>
 
-			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData[LAST_NAME].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+			<div className="my-2">
 				<Input {...getInputProps(LAST_NAME)} />
 				{renderVisuallyHiddenError(
 					formData[LAST_NAME],
 					'last-name-error',
-					travellerRegistrationFormStyles.visuallyHidden,
+					'sr-only',
 				)}
 			</div>
 
-			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData[TRIP_DESCRIPTION].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+			<div className="my-2">
 				<Textarea
 					rows={5}
 					{...getInputProps(TRIP_DESCRIPTION)}
@@ -136,12 +127,11 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				{renderVisuallyHiddenError(
 					formData[TRIP_DESCRIPTION],
 					'trip-description-error',
-					travellerRegistrationFormStyles.visuallyHidden,
+					'sr-only',
 				)}
 			</div>
 
-			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData[DAYS].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+			<div className="my-2">
 				<Input
 					type="number"
 					{...getInputProps(DAYS)}
@@ -149,12 +139,11 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				{renderVisuallyHiddenError(
 					formData[DAYS],
 					'days-error',
-					travellerRegistrationFormStyles.visuallyHidden,
+					'sr-only',
 				)}
 			</div>
 
-			<div
-				className={`${travellerRegistrationFormStyles.formControl} ${!formData[CITIES].isValid ? travellerRegistrationFormStyles.invalidForm : ''}`}>
+			<div className="my-2">
 				<Combobox
 					id={CITIES}
 					label={CITY_SEARCH_TEXT.LABEL}
@@ -174,9 +163,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				/>
 				{formData[CITIES].value.length > 0 && (
 					<ul
-						className={
-							travellerRegistrationFormStyles.selectedCities
-						}
+						className="mt-2 mb-0 flex list-none flex-wrap gap-2 p-0"
 						aria-label={CITY_SEARCH_TEXT.SELECTED_LABEL}
 						data-cy="selected-cities">
 						{formData[CITIES].value.map((city) => {
@@ -184,10 +171,12 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 							return (
 								<li
 									key={getCityId(city)}
+									className="inline-flex items-center gap-1 rounded-pill bg-field-focus py-1! pr-1! pl-3! text-primary"
 									data-cy="selected-city">
 									<span>{name}</span>
 									<button
 										type="button"
+										className="size-7 cursor-pointer rounded-full border-0 bg-transparent text-[1.25rem] leading-none text-inherit hover:bg-tint focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
 										aria-label={GLOBAL.REMOVE_CITY_LABEL(
 											name,
 										)}
@@ -205,26 +194,29 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				)}
 				{!formData[CITIES].isValid && formData[CITIES].message && (
 					<>
-						<p id="cities-error">{formData[CITIES].message}</p>
+						<p
+							id="cities-error"
+							className="mt-1 text-destructive">
+							{formData[CITIES].message}
+						</p>
 						{renderVisuallyHiddenError(
 							formData[CITIES],
 							'cities-error-hidden',
-							travellerRegistrationFormStyles.visuallyHidden,
+							'sr-only',
 						)}
 					</>
 				)}
 			</div>
 
-			<fieldset
-				className={`${travellerRegistrationFormStyles.formControl} ${travellerRegistrationFormStyles.fieldset}`}>
-				<legend>Photos (optional)</legend>
+			<fieldset className="mx-0 my-2 border-0 p-0">
+				<legend className="mb-2 font-bold">Photos (optional)</legend>
 				<AddFile
 					id={FILES}
 					onFilesUpdated={handleFilesUpdated}
 				/>
 			</fieldset>
 
-			<div className={travellerRegistrationFormStyles.actions}>
+			<div>
 				<BaseButton
 					id="register-button"
 					type="submit"

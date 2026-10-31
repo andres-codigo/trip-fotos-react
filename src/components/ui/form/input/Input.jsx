@@ -2,7 +2,13 @@ import PropTypes from 'prop-types'
 
 import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 
-import inputStyles from './Input.module.scss'
+import { cn } from '@/utils/cn'
+
+import {
+	fieldClasses,
+	labelClasses,
+	requiredMarkClasses,
+} from '@/components/ui/form/fieldClasses'
 
 const Input = ({
 	id,
@@ -23,10 +29,12 @@ const Input = ({
 }) => (
 	<div>
 		{label && (
-			<label htmlFor={id}>
+			<label
+				htmlFor={id}
+				className={labelClasses}>
 				{label + ' '}
 				{(showRequiredMark || required) && (
-					<span className={inputStyles.required}>*</span>
+					<span className={requiredMarkClasses}>*</span>
 				)}
 			</label>
 		)}
@@ -39,7 +47,7 @@ const Input = ({
 			data-cy={dataCy}
 			disabled={disabled}
 			required={required}
-			className={className}
+			className={cn(fieldClasses, className)}
 			aria-required={required}
 			aria-invalid={!isValid}
 			aria-describedby={!isValid && message ? `${id}-error` : undefined}
@@ -48,6 +56,7 @@ const Input = ({
 		{!isValid && message && (
 			<ErrorMessage
 				id={`${id}-error`}
+				className="mt-1 text-destructive"
 				data-cy-error={dataCyError}>
 				{message}
 			</ErrorMessage>

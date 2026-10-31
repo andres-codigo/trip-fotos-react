@@ -1,9 +1,14 @@
-import classNames from 'classnames'
 import PropTypes from 'prop-types'
 
 import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 
-import textareaStyles from './Textarea.module.scss'
+import { cn } from '@/utils/cn'
+
+import {
+	fieldClasses,
+	labelClasses,
+	requiredMarkClasses,
+} from '@/components/ui/form/fieldClasses'
 
 const Textarea = ({
 	id,
@@ -26,10 +31,10 @@ const Textarea = ({
 		{label && (
 			<label
 				htmlFor={id}
-				className={textareaStyles.label}>
+				className={labelClasses}>
 				{label + ' '}
 				{(showRequiredMark || required) && (
-					<span className={textareaStyles.required}>*</span>
+					<span className={requiredMarkClasses}>*</span>
 				)}
 			</label>
 		)}
@@ -42,7 +47,7 @@ const Textarea = ({
 			data-cy={dataCy}
 			disabled={disabled}
 			required={required}
-			className={classNames(textareaStyles.textarea, className)}
+			className={cn(fieldClasses, 'h-[9.375rem] resize-y', className)}
 			aria-required={required}
 			aria-invalid={!isValid}
 			aria-describedby={!isValid && message ? `${id}-error` : undefined}
@@ -51,6 +56,7 @@ const Textarea = ({
 		{!isValid && message && (
 			<ErrorMessage
 				id={`${id}-error`}
+				className="mt-1 text-destructive"
 				data-cy-error={dataCyError}>
 				{message}
 			</ErrorMessage>
