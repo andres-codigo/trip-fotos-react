@@ -26,7 +26,7 @@ const PageNotFound = () => {
 					Best return to the{' '}
 					<BaseButton
 						isLink
-						className="text-primary underline"
+						className="text-accent-foreground underline"
 						to={
 							isLoggedIn ? PATHS.TRAVELLERS : PATHS.AUTHENTICATION
 						}
