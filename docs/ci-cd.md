@@ -118,19 +118,18 @@ Order within an epic:
 
 ### Starting an issue
 
-"Start #N" runs this sequence end to end, without asking. It also applies to an issue just created for the work in hand: it starts in Triage, so run steps 2–4 before changing any file. Read the Status first (`gh issue view N --json projectItems -q '.projectItems[].status.name'`), skip steps already satisfied, and stop only on a hard blocker.
+`node scripts/start-issue.mjs N` (the `/start-issue` skill) runs this sequence end to end, without asking, and prints one summary line. It applies to an issue just created for the work in hand too. This section is for the hard-blocker cases and manual recovery.
 
-For a just-created issue:
+The script stops (exit 1) when the issue is Done, In review or In progress, has an open blocked-by link or `Do after` line, or Issue Intake refused a label (the label is gone and a comment says why; fix the cause and re-run, never move Status by hand). It exits 2 when Kind, Workstream or an area label must be chosen (`--kind`, `--workstream`, `--label`) and 3 when another issue in the workstream is already Ready.
 
-- The `opened` Issue Intake run takes 10 to 30 seconds to give the item its Triage Status, so an empty Status straight after `gh issue create` is normal. Wait for that run. Only if the Status is still empty after about a minute (every label event then fails with "issue has no project status"), run `gh workflow run github-issue-intake.yml -f issue_number=N`, which sets Triage, then re-add a label.
-- Labels given to `gh issue create --label` arrive inside the first 60 seconds and are ignored by design. After setting Kind and Workstream, add an area label that is not already on the issue (or remove one and re-add it), because re-adding one that is present does nothing.
-- Never add `ready` while the item is in Triage: Intake refuses it, removes the label and leaves a comment.
+The steps, for doing it by hand:
 
-1. **Done, In review or In progress by someone else:** stop and report.
-2. **Triage → Backlog:** set **Kind** and **Workstream** on the board item, choosing the closest option from the title prefix, labels and body, then add the area labels the PR will carry (any label triggers the move). Fields first, label second, because field edits fire no event. Report the values chosen; never ask, even when the fit is ambiguous (pick the closest and say so).
-3. **Backlog → Ready:** read the open blockers (`gh api repos/andres-codigo/trip-fotos-react/issues/N/dependencies/blocked_by --jq '[.[]|select(.state=="open")|.number]'`) and the `Do after` line. If any are open, stop and name them. Otherwise add `ready`. Keep one Ready issue per workstream; if another is already Ready, say so and ask which goes first.
-4. **Ready → In progress:** add `in-progress`, branch off `main` with the type prefix, make the first commit (`--allow-empty` if needed), push and open a draft PR with `Closes #N`.
-5. **Confirm:** re-read the Status. If Issue Intake refused a label (the label is gone and there is a comment), fix the cause and repeat the step. Never move Status by hand to get round a refusal.
+1. **Triage → Backlog:** set **Kind** and **Workstream** on the board item, then add an area label (any label triggers the move). Fields first, label second, because field edits fire no event.
+2. **Backlog → Ready:** with no open blockers (`gh api repos/andres-codigo/trip-fotos-react/issues/N/dependencies/blocked_by --jq '[.[]|select(.state=="open")|.number]'`) and none named on the `Do after` line, add `ready`. Never add `ready` while the item is in Triage, and keep one Ready issue per workstream.
+3. **Ready → In progress:** add `in-progress`, branch off `main` with the type prefix, make the first commit (`--allow-empty` if needed), push and open a draft PR with `Closes #N`.
+4. **Confirm:** re-read the Status (`gh issue view N --json projectItems -q '.projectItems[].status.name'`).
+
+For a just-created issue, the `opened` Issue Intake run takes 10 to 30 seconds to give the item its Triage Status. Only if the Status is still empty after about a minute, run `gh workflow run github-issue-intake.yml -f issue_number=N`. Labels given to `gh issue create --label` arrive inside the first 60 seconds and are ignored by design, so add an area label afterwards that is not already on the issue.
 
 Epics skip step 3 and go from Backlog straight to In progress.
 

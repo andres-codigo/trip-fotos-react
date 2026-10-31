@@ -6,11 +6,10 @@ argument-hint: '<issue number>'
 
 # Start issue
 
-Run the sequence in [Starting an issue](../../../docs/ci-cd.md#starting-an-issue) for issue `$ARGUMENTS`, yourself and without asking. That section is the single source of truth; do not restate it here.
+Run `node scripts/start-issue.mjs $ARGUMENTS`, yourself and without asking. It reads the Status, stops on blockers, sets Kind and Workstream, adds the labels in order, branches, makes the empty commit, pushes, opens the draft PR and prints one summary line. Recovery and the manual steps are in [Starting an issue](../../../docs/ci-cd.md#starting-an-issue).
 
-Ask only when a hard blocker leaves no sensible default:
+- Exit 2 means a choice is needed: the script lists the options. Pick the closest Workstream, Kind and area label and re-run with `--workstream`, `--kind` and `--label`; never ask, and report what you chose.
+- Exit 3 means another issue in the workstream is already `ready`: ask which goes first.
+- Any other stop (Done, In review or In progress, or an open blocker, or a label Issue Intake refused) is reported as is.
 
-- another issue in the same workstream is already `ready` (ask which goes first)
-- the issue is Done, In review or In progress by someone else, or has an open blocker (stop and report)
-
-Never ask about Kind, Workstream or labels: pick the closest option and report what you chose. Finish by re-reading the Status. When the issue is the last child of an epic, finishing it ends with [Closing an epic](../../../docs/ci-cd.md#closing-an-epic).
+When the issue is the last child of an epic, finishing it ends with [Closing an epic](../../../docs/ci-cd.md#closing-an-epic).
