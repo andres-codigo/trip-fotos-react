@@ -45,16 +45,19 @@ section {
 	width: 100%;
 }
 
-li {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
-
 // Zero specificity so any component class can recolour a link, whichever stylesheet loads first; in the base layer so Tailwind utilities (a later layer) beat it too
 @layer base {
 	:where(a) {
 		text-decoration: none;
 		color: inherit;
+	}
+}
+
+// In the base layer so Tailwind utilities (a later layer) beat the reset; an unlayered li rule would override p-4 and my-4
+@layer base {
+	:where(li) {
+		list-style: none;
+		padding: 0;
+		margin: 0;
 	}
 }

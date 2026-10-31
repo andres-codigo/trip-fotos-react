@@ -8,7 +8,7 @@ const TravellerFilter = ({ options, inactiveIds = [], onChangeFilter }) => (
 	<fieldset
 		className="m-0 my-4 border-0 p-0"
 		data-cy={TRAVELLER_FILTER.ROOT}>
-		<legend className="my-2 p-0 text-2xl font-bold">
+		<legend className="my-2 p-0 text-2xl leading-normal font-bold">
 			{TRAVELLER_FILTER_CONFIG.LEGEND}
 		</legend>
 		<div className="flex flex-wrap">

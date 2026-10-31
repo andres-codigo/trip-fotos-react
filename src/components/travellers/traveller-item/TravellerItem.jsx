@@ -145,12 +145,12 @@ const TravellerItem = ({
 					data-own={isOwnRecord}
 					data-cy={TRAVELLER_ITEM.ROOT}>
 					<h3
-						className="m-0 text-2xl font-normal"
+						className="m-0 text-2xl leading-normal font-normal"
 						data-cy={TRAVELLER_ITEM.NAME}>
 						{fullName}
 					</h3>
 					<span
-						className="inline text-xs"
+						className="inline text-xs leading-normal"
 						data-cy={TRAVELLER_ITEM.REGISTERED}>
 						{formatRegistered(registered)}
 					</span>
