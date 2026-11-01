@@ -113,11 +113,10 @@ describe('start-issue script guard', () => {
 
 	it('makes no network call of its own and never runs a shell command', () => {
 		expect(source).not.toMatch(/(?<![.\w])exec\(/)
-		// The only URL allowed is the attribution link in the PR body
-		const withoutAttribution = source.replace(
-			'https://claude.com/claude-code',
-			'',
-		)
+		// The only URLs allowed are the attribution link in the PR body and the file: check that the script was run directly
+		const withoutAttribution = source
+			.replace('https://claude.com/claude-code', '')
+			.replace('`file://${process.argv[1]}`', '')
 		expect(withoutAttribution).not.toContain('://')
 	})
 
