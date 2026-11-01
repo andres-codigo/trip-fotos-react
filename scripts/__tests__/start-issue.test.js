@@ -113,7 +113,12 @@ describe('start-issue script guard', () => {
 
 	it('makes no network call of its own and never runs a shell command', () => {
 		expect(source).not.toMatch(/(?<![.\w])exec\(/)
-		expect(source).not.toMatch(/https?:\/\/(?!claude\.com\/claude-code)/)
+		// The only URL allowed is the attribution link in the PR body
+		const withoutAttribution = source.replace(
+			'https://claude.com/claude-code',
+			'',
+		)
+		expect(withoutAttribution).not.toContain('://')
 	})
 
 	it('imports nothing beyond execFileSync', () => {
