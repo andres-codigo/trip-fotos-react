@@ -184,6 +184,25 @@ const main = async () => {
 	const kind = flag('kind') ?? item?.kind ?? kindFor(issue.title)
 	const isEpic = String(kind).toLowerCase() === 'epic'
 
+	// A just-created issue has no Status until the opened Intake run finishes; nudge it only if it never arrives
+	if (!status) {
+		for (let attempt = 0; attempt < 12 && !status; attempt++) {
+			await sleep(5000)
+			status = await statusOf(number)
+		}
+		if (!status) {
+			gh(
+				'workflow',
+				'run',
+				'github-issue-intake.yml',
+				'-f',
+				`issue_number=${number}`,
+			)
+			await waitForStatus(number, 'Triage')
+			status = 'Triage'
+		}
+	}
+
 	if (status === 'Triage') {
 		if (!workstream || !kind) {
 			const options = fields
@@ -199,6 +218,10 @@ const main = async () => {
 		setField(item.id, fields, 'Workstream', workstream)
 		const label = flag('label') ?? parseTitle(issue.title).prefix
 		if (!label) stop('Pass an area label with --label', 2)
+		// Re-adding a label that is already present fires no event, so remove it first
+		if (issue.labels.some((l) => l.name === label)) {
+			gh('issue', 'edit', String(number), '--remove-label', label)
+		}
 		gh('issue', 'edit', String(number), '--add-label', label)
 		await waitForStatus(number, 'Backlog')
 		status = 'Backlog'

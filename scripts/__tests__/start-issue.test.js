@@ -67,6 +67,7 @@ describe('start-issue script guard', () => {
 				'gh issue edit',
 				'gh pr create',
 				'gh project item-edit',
+				'gh workflow run',
 				'git branch --show-current',
 				'git commit --allow-empty',
 				'git push -u',
