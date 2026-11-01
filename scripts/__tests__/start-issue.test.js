@@ -34,12 +34,19 @@ describe('start-issue helpers', () => {
 		expect(branchName('no prefix here')).toBe('chore/no-prefix-here')
 	})
 
-	it('reads only the issues named after "Do after"', () => {
-		expect(doAfterNumbers('Do after: #374 (a), before #383 (b).')).toEqual([
-			374,
-		])
-		expect(doAfterNumbers('Do after #1 and #2.')).toEqual([1, 2])
-		expect(doAfterNumbers('No dependency line')).toEqual([])
+	it('treats every number before "before" as a blocker and keeps the rest apart', () => {
+		expect(doAfterNumbers('Do after: #374 (a), before #383 (b).')).toEqual({
+			blockers: [374],
+			afterBefore: [383],
+		})
+		expect(doAfterNumbers('Do after #1 and #2.')).toEqual({
+			blockers: [1, 2],
+			afterBefore: [],
+		})
+		expect(doAfterNumbers('No dependency line')).toEqual({
+			blockers: [],
+			afterBefore: [],
+		})
 	})
 })
 

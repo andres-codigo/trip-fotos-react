@@ -49,11 +49,13 @@ export const branchName = (title) => {
 	return `${prefix ?? 'chore'}/${slug}`
 }
 
+// Every #N on the line blocks. Numbers after the word "before" are probably what this issue unblocks, but a wrong guess would hide a real blocker, so they are returned apart and stop the script unless --ignore names them
 export const doAfterNumbers = (body) => {
 	const line = /^Do after:?\s*(.*)$/im.exec(body ?? '')
-	// "before #N" names what this issue blocks, not what blocks it
-	const [blockers] = (line?.[1] ?? '').split(/\bbefore\b/i)
-	return [...blockers.matchAll(/#(\d+)/g)].map((m) => Number(m[1]))
+	const [head, ...rest] = (line?.[1] ?? '').split(/\bbefore\b/i)
+	const numbers = (text) =>
+		[...text.matchAll(/#(\d+)/g)].map((m) => Number(m[1]))
+	return { blockers: numbers(head), afterBefore: numbers(rest.join(' ')) }
 }
 
 const gh = (...args) => execFileSync('gh', args, { encoding: 'utf8' }).trim()
@@ -147,11 +149,17 @@ const main = async () => {
 	)
 		.filter((b) => b.state === 'open')
 		.map((b) => b.number)
-	for (const n of doAfterNumbers(issue.body)) {
-		if (
-			json('issue', 'view', String(n), '--json', 'state').state === 'OPEN'
+	const { blockers, afterBefore } = doAfterNumbers(issue.body)
+	const ignored = (flag('ignore') ?? '').split(',').map(Number)
+	const isOpen = (n) =>
+		json('issue', 'view', String(n), '--json', 'state').state === 'OPEN'
+	for (const n of blockers) if (isOpen(n)) open.push(n)
+	const unsure = afterBefore.filter((n) => !ignored.includes(n) && isOpen(n))
+	if (unsure.length) {
+		stop(
+			`${unsure.map((n) => `#${n}`).join(', ')} follows "before" on the Do after line, so it is probably what this issue unblocks, not a blocker. Read the line; if so, re-run with --ignore ${unsure.join(',')}`,
+			4,
 		)
-			open.push(n)
 	}
 	if (open.length)
 		stop(

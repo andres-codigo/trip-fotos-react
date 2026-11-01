@@ -120,7 +120,7 @@ Order within an epic:
 
 `node scripts/start-issue.mjs N` (the `/start-issue` skill) runs this sequence end to end, without asking, and prints one summary line. It applies to an issue just created for the work in hand too. This section is for the hard-blocker cases and manual recovery.
 
-The script stops (exit 1) when the issue is Done, In review or In progress, has an open blocked-by link or `Do after` line, or Issue Intake refused a label (the label is gone and a comment says why; fix the cause and re-run, never move Status by hand). It exits 2 when Kind, Workstream or an area label must be chosen (`--kind`, `--workstream`, `--label`) and 3 when another issue in the workstream is already Ready.
+The script stops (exit 1) when the issue is Done, In review or In progress, has an open blocked-by link or `Do after` line, or Issue Intake refused a label (the label is gone and a comment says why; fix the cause and re-run, never move Status by hand). It exits 2 when Kind, Workstream or an area label must be chosen (`--kind`, `--workstream`, `--label`) 3 when another issue in the workstream is already Ready, and 4 when an open `#N` follows "before" on the `Do after` line (it is probably what the issue unblocks; read the line, then re-run with `--ignore N` or treat it as a blocker). Every other `#N` on that line is a blocker.
 
 The steps, for doing it by hand:
 
