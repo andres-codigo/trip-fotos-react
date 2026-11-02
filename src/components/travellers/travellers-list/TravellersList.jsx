@@ -46,8 +46,13 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const isTraveller = useSelector(selectIsTraveller)
 	const isTravellerKnown = useSelector(selectIsTravellerKnown)
 	const hasTravellers = useSelector(selectHasTravellers)
-	const { options, inactiveIds, toggleCity, filteredTravellers } =
-		useCityFilter(travellers)
+	const {
+		options,
+		inactiveIds,
+		toggleCity,
+		setCitiesActive,
+		filteredTravellers,
+	} = useCityFilter(travellers)
 
 	const loadTravellersHandler = useCallback(
 		async (refresh = false, silent = false) => {
@@ -133,6 +138,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					options={options}
 					inactiveIds={inactiveIds}
 					onChangeFilter={toggleCity}
+					onChangeMany={setCitiesActive}
 				/>
 			)}
 			{!loading && hasTravellers && filteredTravellers.length > 0 && (

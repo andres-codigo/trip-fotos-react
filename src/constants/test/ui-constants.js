@@ -148,6 +148,12 @@ export const TRAVELLER_FILTER = Object.freeze({
 	ROOT: 'traveller-filter',
 	OPTION: 'traveller-filter-option',
 	CHECKBOX: 'traveller-filter-checkbox',
+	SEARCH: 'traveller-filter-search',
+	LIST: 'traveller-filter-list',
+	EMPTY: 'traveller-filter-empty',
+	SELECT_ALL: 'traveller-filter-select-all',
+	CLEAR: 'traveller-filter-clear',
+	STATUS: 'traveller-filter-status',
 })
 
 export const MESSAGES_PAGE = Object.freeze({

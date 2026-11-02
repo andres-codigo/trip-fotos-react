@@ -10,10 +10,12 @@ const options = [
 describe('<TravellerFilter />', () => {
 	const mountFilter = (props = {}) => {
 		const onChangeFilter = cy.stub().as('onChangeFilter')
+		const onChangeMany = cy.stub().as('onChangeMany')
 		cy.mount(
 			<TravellerFilter
 				options={options}
 				onChangeFilter={onChangeFilter}
+				onChangeMany={onChangeMany}
 				{...props}
 			/>,
 		)
@@ -68,5 +70,30 @@ describe('<TravellerFilter />', () => {
 					.invoke('width')
 					.should('be.closeTo', width * 2, 2)
 			})
+	})
+
+	it('caps the list height and scrolls', () => {
+		const many = Array.from({ length: 40 }, (_, i) => ({
+			id: `city-${i}`,
+			label: `City ${i}, Land`,
+		}))
+		mountFilter({ options: many })
+		cy.get(TRAVELLER_FILTER_SELECTORS.LIST)
+			.invoke('outerHeight')
+			.should('be.at.most', 192)
+		cy.get(TRAVELLER_FILTER_SELECTORS.LIST).focus().should('have.focus')
+	})
+
+	it('searches and bulk-selects the visible cities', () => {
+		const many = ['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo'].map(
+			(name) => ({ id: name.toLowerCase(), label: `${name}, Land` }),
+		)
+		mountFilter({ options: many })
+		cy.get(TRAVELLER_FILTER_SELECTORS.SEARCH).type('bra')
+		cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX).should('have.length', 1)
+		cy.get(TRAVELLER_FILTER_SELECTORS.CLEAR).click()
+		cy.get('@onChangeMany').should('have.been.calledWith', ['bravo'], false)
+		cy.get(TRAVELLER_FILTER_SELECTORS.SEARCH).clear().type('zzz')
+		cy.get(TRAVELLER_FILTER_SELECTORS.EMPTY).should('be.visible')
 	})
 })

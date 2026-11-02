@@ -99,6 +99,17 @@ describe('useCityFilter', () => {
 		)
 	})
 
+	it('sets several cities inactive and active at once', () => {
+		const { result } = renderHook(() => useCityFilter(TRAVELLERS))
+
+		act(() => result.current.toggleCity('tokyo', false))
+		act(() => result.current.setCitiesActive(['tokyo', PRAGUE.id], false))
+		expect(result.current.inactiveIds).toEqual(['tokyo', PRAGUE.id])
+
+		act(() => result.current.setCitiesActive([PRAGUE.id], true))
+		expect(result.current.inactiveIds).toEqual(['tokyo'])
+	})
+
 	it.each([undefined, null])('handles %s travellers', (value) => {
 		const { result } = renderHook(() => useCityFilter(value))
 

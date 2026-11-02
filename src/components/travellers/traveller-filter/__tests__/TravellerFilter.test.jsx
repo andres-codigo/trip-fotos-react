@@ -13,15 +13,26 @@ const options = [
 
 const renderFilter = (props = {}) => {
 	const onChangeFilter = vi.fn()
+	const onChangeMany = vi.fn()
 	render(
 		<TravellerFilter
-			options={options}
+			options={props.options ?? options}
 			onChangeFilter={onChangeFilter}
+			onChangeMany={onChangeMany}
 			{...props}
 		/>,
 	)
-	return onChangeFilter
+	return Object.assign(onChangeFilter, { onChangeMany })
 }
+
+const manyOptions = ['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo'].map(
+	(name) => ({ id: name.toLowerCase(), label: `${name}, Land` }),
+)
+
+const search = (value) =>
+	fireEvent.change(screen.getByTestId(TRAVELLER_FILTER.SEARCH), {
+		target: { value },
+	})
 
 describe('<TravellerFilter />', () => {
 	it('renders the legend and one checkbox per option', () => {
@@ -65,5 +76,69 @@ describe('<TravellerFilter />', () => {
 		renderFilter({ inactiveIds: ['prague'] })
 		expect(screen.getByLabelText('Tokyo, Japan')).toBeChecked()
 		expect(screen.getByLabelText('Prague, Czechia')).not.toBeChecked()
+	})
+
+	it('hides search and bulk buttons at or below the threshold', () => {
+		renderFilter({ options: manyOptions.slice(0, 4) })
+		expect(screen.queryByTestId(TRAVELLER_FILTER.SEARCH)).toBeNull()
+		expect(screen.queryByTestId(TRAVELLER_FILTER.SELECT_ALL)).toBeNull()
+		expect(screen.queryByTestId(TRAVELLER_FILTER.CLEAR)).toBeNull()
+	})
+
+	it('shows search above the threshold and filters by label', () => {
+		renderFilter({ options: manyOptions })
+		search('bra')
+		expect(screen.getAllByTestId(TRAVELLER_FILTER.CHECKBOX)).toHaveLength(1)
+		expect(screen.getByLabelText('Bravo, Land')).toBeInTheDocument()
+	})
+
+	it('shows an empty message when no city matches', () => {
+		renderFilter({ options: manyOptions })
+		search('zzz')
+		expect(screen.getByTestId(TRAVELLER_FILTER.EMPTY)).toHaveTextContent(
+			TRAVELLER_FILTER_CONFIG.NO_MATCH,
+		)
+	})
+
+	it('keeps the checked state of cities hidden by the search', () => {
+		renderFilter({ options: manyOptions, inactiveIds: ['alpha'] })
+		search('bra')
+		search('')
+		expect(screen.getByLabelText('Alpha, Land')).not.toBeChecked()
+		expect(screen.getByLabelText('Bravo, Land')).toBeChecked()
+	})
+
+	it('selects and clears every option without a search', () => {
+		const spy = renderFilter({ options: manyOptions })
+		const ids = manyOptions.map(({ id }) => id)
+		fireEvent.click(screen.getByTestId(TRAVELLER_FILTER.SELECT_ALL))
+		expect(spy.onChangeMany).toHaveBeenCalledWith(ids, true)
+		fireEvent.click(screen.getByTestId(TRAVELLER_FILTER.CLEAR))
+		expect(spy.onChangeMany).toHaveBeenCalledWith(ids, false)
+	})
+
+	it('acts only on the searched options in bulk', () => {
+		const spy = renderFilter({ options: manyOptions })
+		search('e')
+		fireEvent.click(screen.getByTestId(TRAVELLER_FILTER.CLEAR))
+		expect(spy.onChangeMany).toHaveBeenCalledWith(
+			['charlie', 'delta', 'echo'],
+			false,
+		)
+	})
+
+	it('announces how many cities are selected', () => {
+		renderFilter({ options: manyOptions, inactiveIds: ['alpha', 'echo'] })
+		const status = screen.getByTestId(TRAVELLER_FILTER.STATUS)
+		expect(status).toHaveTextContent('3 of 5 cities selected')
+		expect(status).toHaveAttribute('aria-live', 'polite')
+	})
+
+	it('makes the capped list keyboard-focusable', () => {
+		renderFilter()
+		expect(screen.getByTestId(TRAVELLER_FILTER.LIST)).toHaveAttribute(
+			'tabindex',
+			'0',
+		)
 	})
 })

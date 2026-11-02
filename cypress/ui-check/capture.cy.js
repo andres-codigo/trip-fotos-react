@@ -200,6 +200,78 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		it('captures the city filter with many cities, searched, empty and focused', () => {
+			;[
+				'oslo',
+				'lima',
+				'rome',
+				'paris',
+				'cairo',
+				'tokyo',
+				'prague',
+				'berlin',
+				'madrid',
+				'vienna',
+				'athens',
+				'dublin',
+				'warsaw',
+				'zagreb',
+				'sofia',
+				'riga',
+				'tallinn',
+				'bern',
+				'bruges',
+				'porto',
+				'seville',
+				'florence',
+			].forEach((city, index) => {
+				cy.request({
+					method: 'PUT',
+					url: emulatorDatabase(
+						`travellers/ui-check-many-cities-${index}`,
+					),
+					headers: { Authorization: 'Bearer owner' },
+					body: {
+						firstName: `Many${index}`,
+						lastName: 'Cities',
+						tripDescription: 'Seeded for the city filter.',
+						daysInCity: 2,
+						cities: [city],
+						files: [BROKEN_IMAGE_URL],
+						fileDimensions: [{ width: 640, height: 480 }],
+						registered: Date.now(),
+					},
+				})
+			})
+
+			// Literal selectors keep the script usable on main, which lacks the new ones
+			const filter = (name) => `[data-cy="traveller-filter-${name}"]`
+
+			eachWidth((width) => {
+				cy.visit(PATHS.TRAVELLERS)
+				cy.get(filter('checkbox')).should('have.length.at.least', 8)
+				assertSettled()
+				freezeAnimation()
+				shot(`city-filter-many-${width}`)
+
+				cy.get('body').then(($body) => {
+					if (!$body.find(filter('search')).length) return
+					cy.get(filter('list')).focus()
+					shot(`city-filter-list-focus-${width}`)
+					cy.get(filter('search')).type('o')
+					cy.get(filter('checkbox')).should('exist')
+					shot(`city-filter-searched-${width}`)
+					cy.get(filter('clear')).click()
+					cy.get(filter('status')).should('contain', 'selected')
+					shot(`city-filter-cleared-visible-${width}`)
+					cy.get(filter('select-all')).click()
+					cy.get(filter('search')).clear().type('zzz')
+					cy.get(filter('empty')).should('be.visible')
+					shot(`city-filter-empty-${width}`)
+				})
+			})
+		})
+
 		it('captures real hover and keyboard focus on the interactive controls', () => {
 			cy.viewport(1280, HEIGHT)
 			cy.visit(PATHS.TRAVELLERS)
