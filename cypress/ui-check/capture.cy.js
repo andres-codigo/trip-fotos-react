@@ -404,6 +404,24 @@ describe(`UI check capture (${LABEL})`, () => {
 			)
 		})
 
+		it('captures the travellers list and a profile with the Contact button', () => {
+			eachWidth((width) => {
+				cy.visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLER_ITEM_SELECTORS.CONTACT).should('exist')
+				assertSettled()
+				freezeAnimation()
+				shot(`travellers-contact-${width}`)
+
+				cy.visit(`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}`)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.CONTACT_SECTION).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`traveller-detail-contact-${width}`)
+			})
+		})
+
 		it('captures the messages page and a real delete', () => {
 			eachWidth((width) => {
 				cy.visit(PATHS.MESSAGES)
