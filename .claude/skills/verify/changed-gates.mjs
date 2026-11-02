@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process'
+import { pathToFileURL } from 'node:url'
 
 const ALL = ['lint', 'vitest', 'ct', 'build']
 
@@ -16,7 +17,7 @@ const RULES = [
 	[/^(index\.html|public\/)/, ['build']],
 ]
 
-// E2E stays opt-in (CI runs it on every PR), so these only earn an advisory
+// Changes that can break routing, auth, the store or forms: E2E runs for these without being asked (CI is the backstop for everything else)
 const E2E_ADVISED = [
 	[/^cypress\/(e2e|support)\//, 'E2E specs or support changed'],
 	[/^cypress\.config\./, 'Cypress config changed'],
@@ -29,34 +30,44 @@ const E2E_ADVISED = [
 const git = (args) =>
 	execSync(`git ${args}`, { encoding: 'utf8' }).split('\n').filter(Boolean)
 
-const forceAll = process.argv.includes('all')
-const base = git('merge-base origin/main HEAD')[0]
-const files = [
-	...new Set([
-		...git(`diff --name-only ${base}`),
-		...git('ls-files --others --exclude-standard'),
-	]),
-]
+// The agent passes `runArgs` straight to run-gates.mjs, so opt-ins are decided here rather than by the agent
+export const planGates = (files, { e2e = false, all = false } = {}) => {
+	const gates = new Set(all ? ALL : [])
+	for (const file of files) {
+		const rule = RULES.find(([pattern]) => pattern.test(file))
+		rule?.[1].forEach((gate) => gates.add(gate))
+	}
 
-const gates = new Set(forceAll ? ALL : [])
-for (const file of files) {
-	const rule = RULES.find(([pattern]) => pattern.test(file))
-	rule?.[1].forEach((gate) => gates.add(gate))
+	const reasons = [
+		...new Set(
+			files.flatMap((file) =>
+				E2E_ADVISED.filter(([pattern]) => pattern.test(file)).map(
+					([, reason]) => reason,
+				),
+			),
+		),
+	]
+
+	const runArgs = ALL.filter((gate) => gates.has(gate))
+	if (e2e || reasons.length) runArgs.push('e2e')
+	if (runArgs.length && all) runArgs.push('fresh')
+
+	return { runArgs, reasons: e2e ? [] : reasons }
 }
 
-const reasons = new Set(
-	files.flatMap((file) =>
-		E2E_ADVISED.filter(([pattern]) => pattern.test(file)).map(
-			([, reason]) => reason,
-		),
-	),
-)
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+	const base = git('merge-base origin/main HEAD')[0]
+	const files = [
+		...new Set([
+			...git(`diff --name-only ${base}`),
+			...git('ls-files --others --exclude-standard'),
+		]),
+	]
+	const { runArgs, reasons } = planGates(files, {
+		e2e: process.argv.includes('e2e'),
+		all: process.argv.includes('all'),
+	})
 
-// The agent passes this line straight to run-gates.mjs, so opt-ins are decided here rather than by the agent
-const runArgs = ALL.filter((gate) => gates.has(gate))
-if (process.argv.includes('e2e')) runArgs.push('e2e')
-if (runArgs.length && forceAll) runArgs.push('fresh')
-
-console.log(runArgs.join(' ') || 'none')
-if (reasons.size && !process.argv.includes('e2e'))
-	console.log(`e2e advised: ${[...reasons].join('; ')}`)
+	console.log(runArgs.join(' ') || 'none')
+	if (reasons.length) console.log(`e2e advised: ${reasons.join('; ')}`)
+}

@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Run the project's local quality gates (ESLint, Vitest, Cypress component tests, production build) and report a pass/fail summary. Pass `e2e` to also run the Cypress E2E suite against a local dev server. Use before committing, before opening a pull request, or when asked to check that a change is safe.
+description: Run the project's local quality gates (ESLint, Vitest, Cypress component tests, production build) and report a pass/fail summary. Pass `e2e` to force the Cypress E2E suite for any change; it runs on its own when the change touches routing, pages, the store, Firebase services or the E2E specs. Use before committing, before opening a pull request, or when asked to check that a change is safe.
 argument-hint: '[e2e] [all]'
 model: haiku
 context: fork
@@ -15,7 +15,7 @@ Arguments: `$ARGUMENTS`
 
 ## Steps
 
-1. Run `node .claude/skills/verify/reset-checks.mjs` first, so a run that is stopped part-way and re-run never leaves an earlier tick on the status line. Then run `node .claude/skills/verify/changed-gates.mjs $ARGUMENTS`. It compares the branch, committed or not, with `main` and prints on its first line the arguments for the next step: some of `lint vitest ct build`, plus `e2e` when requested and `fresh` with `all` — or `none`. A second line, `e2e advised: <reasons>`, appears when E2E was not requested but the change touches routing, pages, the store, Firebase services, route or API constants, or the E2E specs. Do not second-guess it by reading the file list yourself.
+1. Run `node .claude/skills/verify/reset-checks.mjs` first, so a run that is stopped part-way and re-run never leaves an earlier tick on the status line. Then run `node .claude/skills/verify/changed-gates.mjs $ARGUMENTS`. It compares the branch, committed or not, with `main` and prints on its first line the arguments for the next step: some of `lint vitest ct build`, plus `e2e` when requested or when the change touches routing, pages, the store, Firebase services, route or API constants, the Cypress config or the E2E specs, and `fresh` with `all` — or `none`. When `e2e` was added for that reason and not requested, a second line, `e2e advised: <reasons>`, says why. Do not second-guess it by reading the file list yourself.
     - If it prints `none`, reply that nothing `/verify` checks has changed (e.g. only docs, `.claude/` or `.github/`) and stop.
 2. Run `node .claude/skills/verify/run-gates.mjs <first line, verbatim>` in one Bash call with `timeout: 600000`. Report any of `lint vitest ct build` it was not given as `⏭ skipped`.
     - The script runs the gates in order, continuing after a failure, writes each full log to `node_modules/.cache/verify/<gate>.log` and prints one line per gate: `pass <counts>`, `FAIL` followed by the first error lines, or `cached`.
@@ -27,7 +27,7 @@ Arguments: `$ARGUMENTS`
 
 ## Report
 
-Reply with a table, then details for anything that failed. Show a cached gate as `✅ cached`. Include the E2E row only when it was requested:
+Reply with a table, then details for anything that failed. Show a cached gate as `✅ cached`. Include the E2E row whenever `e2e` was in the arguments, requested or advised:
 
 | Gate                    | Result  | Notes                |
 | ----------------------- | ------- | -------------------- |
@@ -37,6 +37,6 @@ Reply with a table, then details for anything that failed. Show a cached gate as
 | Build                   | ✅/❌/⏭ | any warnings of note |
 | Cypress E2E             | ✅/❌   | passed/total         |
 
-If the script printed `e2e advised` and `e2e` was not requested, end the report with: `E2E advised (<reasons>) — run \`/verify e2e\` before pushing, or leave it to CI on the PR.`
+If the script printed `e2e advised`, put the reasons in the E2E row's notes (for example `ran: routing or pages changed`).
 
 For each failure, quote the first relevant error (file, line, message) and say whether it is in a file touched by the current change. For E2E failures, also say whether the error looks environmental (server not reachable, Firebase auth or network) rather than a code regression.
