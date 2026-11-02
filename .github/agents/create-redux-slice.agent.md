@@ -39,6 +39,9 @@ Use this agent when you need to create a new Redux slice with reducers, async lo
         - Paths (`PATHS`)
         - Error messages (`API_ERROR_MESSAGE` technical, `ERROR_MESSAGES` user-facing)
     - Do not hardcode strings
+    - A user-facing message says what failed and what to do next, has no ids or codes, and ends in a full stop
+    - A new database field or write limit also updates `firebase/database.rules.json` (and `firebase/storage.rules` for Storage); deploy with `npm run firebase:rules`
+    - A new external origin goes in the CSP `connect-src` in `vercel.json`
 
 6. **Export Actions & Reducer**
     - Export auto-generated actions from the slice (e.g., `actions.setTravellers`)
@@ -58,6 +61,8 @@ Use this agent when you need to create a new Redux slice with reducers, async lo
 8. **Store Configuration Update** (`src/store/store.js`)
     - Add the new slice's reducer to the store's `combineReducers` or rootReducer
     - If the slice should be persisted, update the `redux-persist` configuration
+    - A thunk argument that is not serialisable (e.g. `files`) is added to `ignoredActionPaths` in the serialisable check, not disabled
+    - The session is mirrored to `localStorage`: read it through the authentication selectors, never `localStorage.getItem` (see `store.instructions.md`)
     - There is no store index; components import from the slice file directly
 
 9. **Output**
@@ -66,6 +71,8 @@ Use this agent when you need to create a new Redux slice with reducers, async lo
     - Provide next steps: use the thunks in components, write integration tests, and verify persistence
 
 ## Notes
+
+- Update the README Folder Structure tree for a new `src/` folder, and Features for a user-facing feature
 
 - Thunks are the only async pattern; do not introduce `createApi`
 - Error handling comes from `databaseRequest` (generic `REQUEST_ERROR`) plus `handleApiError`; do not re-check `response.ok`

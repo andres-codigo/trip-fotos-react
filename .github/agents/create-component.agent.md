@@ -10,7 +10,7 @@ Use this agent when you need to create a new React component with full structure
 ## Workflow Steps
 
 1. **Component Details**
-    - Get the component name and category (`forms`, `common`, `ui`, `layout`, `travellers`)
+    - Get the component name and category (`forms`, `common`, `ui`, `layout`, `messages`, `travellers`)
     - Confirm the component's purpose and whether it will contain form logic, be purely presentational, or manage internal state
 
 2. **Folder Structure Setup**
@@ -36,6 +36,9 @@ Use this agent when you need to create a new React component with full structure
     - Create `{ComponentName}.cy.jsx` (Cypress component test) with mount setup
     - Create `{ComponentName}.test.jsx` (Vitest unit test) with render setup
     - Both test files should import the component and define placeholder test cases
+    - Tests fail on an unexpected `console.error` or `console.warn`, so fix React warnings rather than ignoring them (see `testing.instructions.md`)
+    - Call `cy.checkA11y()` in the Cypress component test of a form or a shared `ui` component
+    - A shadcn component follows the move-and-rename rules in `components.instructions.md` → shadcn/ui components
     - Reference `src/testUtils` for mocking if needed
     - For Cypress tests, do not use inline string selectors like `cy.get('[data-cy="..."]')`; create and use exported selector constants in `src/constants/test/selectors/components.js` using `getByDataCy`, following the `Header` and `Header.cy.jsx` pattern
 
@@ -51,6 +54,8 @@ Use this agent when you need to create a new React component with full structure
     - Provide next steps: implement component logic, add tests, and check for refactoring opportunities
 
 ## Notes
+
+- Update the README Folder Structure tree for a new top-level or `src/` folder, and Features for a user-facing feature
 
 - Always check for reusable components already available in the UI and common folders
 - When a new reusable component is created, the agent should flag that existing similar components should be refactored to use it

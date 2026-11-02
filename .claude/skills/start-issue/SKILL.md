@@ -14,4 +14,6 @@ Run `node scripts/start-issue.mjs $ARGUMENTS`, yourself and without asking. It r
 - Exit 4 means an open `#N` follows "before" on the `Do after` line. Read the line: if that issue is what this one unblocks, re-run with `--ignore N`; if it is a real blocker, stop and report it.
 - Any other stop (Done, In review or In progress, or an open blocker, or a label Issue Intake refused) is reported as is.
 
+Once the script has printed its summary line, read the issue. If the work creates a new component, page, hook or Redux slice, scaffold it with the matching agent (`create-component`, `create-page`, `create-hook`, `create-redux-slice`), not by hand, then implement on top of the scaffold.
+
 When the issue is the last child of an epic, finishing it ends with [Closing an epic](../../../docs/ci-cd.md#closing-an-epic).
