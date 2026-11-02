@@ -22,7 +22,7 @@ Run `/finish-pr` when the work passes `/verify`: README Status and Project READM
 
 ## Domain-Specific Guidance
 
-Detailed conventions live in `.github/instructions/` — the single source of truth shared with GitHub Copilot. Read the relevant file when working in that area, rather than expecting it to be summarised here:
+Detailed conventions live in `.github/instructions/` — the single source of truth shared with GitHub Copilot. Read the relevant file when working in that area, rather than expecting it to be summarised here. A path-scoped rule in `.claude/rules/` per row loads a pointer to its file when matching files are touched (Claude Code ignores `applyTo`, so the rules are what make the files reach it):
 
 | File                                                                          | Applies to                          | Covers                                                            |
 | ----------------------------------------------------------------------------- | ----------------------------------- | ----------------------------------------------------------------- |
@@ -58,7 +58,7 @@ Required keys: `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL`, `VITE_FI
 
 Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 
-- **Agents** (`.claude/agents/`, wrappers around `.github/agents/*.agent.md` — edit the workflow there): `create-component`, `create-page`, `create-redux-slice`, `create-hook`
+- **Agents** (`.claude/agents/`, wrappers around `.github/agents/*.agent.md` — edit the workflow there): `create-component`, `create-page`, `create-redux-slice`, `create-hook`. Scaffold every new component, page, hook and Redux slice with its agent, not by hand; `/start-issue` prompts for it
 - **`.claude/settings.json`** — shared permissions and a `PostToolUse` hook (`.claude/hooks/lint-edited-file.mjs`) that lints every edited file
 - **`/verify`** — runs the gates the change can affect as a pass/fail table; run before committing. `/verify all` forces every gate, `/verify e2e` adds the emulator E2E suite. If the code changes mid-run, stop it and start a fresh one; never rely on a stale result ([details](docs/ai-assistance.md#skills))
 - **Issue order** — never start an issue with an open blocked-by link or `Do after` line; work is pulled Triage → Backlog → Ready → In progress, and only epics start from Backlog. On "start #N" run `/start-issue` yourself, without asking; ask only when another issue in the workstream is already Ready. A newly created issue goes through the same sequence before the first file change ([Starting an issue](docs/ci-cd.md#starting-an-issue), [board statuses](docs/ci-cd.md#project-board-statuses))

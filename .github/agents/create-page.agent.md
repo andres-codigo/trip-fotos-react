@@ -23,6 +23,7 @@ Use this agent when creating a new route-level page with structure, styling, and
     - Ensure route wiring is updated in `src/app/App.jsx`.
     - Use path constants from `src/constants` (no hardcoded route strings).
     - Apply protected route behaviour consistent with `PATHS.AUTHENTICATION` redirect patterns.
+    - Add the new route to the `rewrites` allow-list in `vercel.json`; a Vitest drift check fails without it.
 
 4. **Data Loading Pattern**
     - Dispatch a store thunk for reads and mutations (see `store.instructions.md`); add one if none fits.
@@ -33,13 +34,14 @@ Use this agent when creating a new route-level page with structure, styling, and
     - Compose reusable UI from `src/components`.
     - Keep reusable logic in hooks/components, not embedded deeply in page files.
     - Give page-level and custom container elements `data-cy` attributes and export matching selector constants via `getByDataCy` in `src/constants/test/selectors/`; tests use the constants, never inline strings.
-    - Keep the `<h1>` inside the card or column it labels (see `pages.instructions.md` → Page Structure And Accessibility).
+    - The root `<main>` has `id={ACCESSIBILITY.MAIN_CONTENT_ID}`, `tabIndex={-1}` and its own `<title>` (`Page name · ${GLOBAL.SITE_NAME}`).
+    - Exactly one `<h1>`, kept inside the card or column it labels; section headings start at `<h2>` (see `pages.instructions.md` → Page Structure And Accessibility).
     - Style the page with Tailwind utilities (root `<main>` keeps `mainContainer cardPage`); see `styles.instructions.md`.
 
 6. **Test Scaffolding**
     - Create `{PageName}.test.jsx` (Vitest page test).
     - Create `{PageName}.cy.jsx` (Cypress component test) when the page has non-trivial interaction.
-    - Create `cypress/e2e/pages/{PageName}.cy.js` (E2E flow test).
+    - Create `cypress/e2e/pages/{PageName}.cy.js` (E2E flow test) and call `cy.checkA11y()` once for the route.
     - Use `src/constants/test` for test constants and `cypress/support/utils` for E2E helpers.
 
 7. **Output**
@@ -49,6 +51,7 @@ Use this agent when creating a new route-level page with structure, styling, and
 
 ## Notes
 
+- Update the README Folder Structure tree for a new top-level or `src/` folder, and Features for a user-facing feature.
 - Follow British English in generated comments and strings.
 - Keep page responsibilities focused on orchestration and route-level concerns.
 - Update tests in the same task as page creation.
