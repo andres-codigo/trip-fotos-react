@@ -78,11 +78,19 @@ describe('<TravellerFilter />', () => {
 		expect(screen.getByLabelText('Prague, Czechia')).not.toBeChecked()
 	})
 
-	it('hides search and bulk buttons at or below the threshold', () => {
-		renderFilter({ options: manyOptions.slice(0, 4) })
+	it('hides search but keeps the bulk buttons at or below the threshold', () => {
+		const spy = renderFilter({ options: manyOptions.slice(0, 4) })
 		expect(screen.queryByTestId(TRAVELLER_FILTER.SEARCH)).toBeNull()
-		expect(screen.queryByTestId(TRAVELLER_FILTER.SELECT_ALL)).toBeNull()
-		expect(screen.queryByTestId(TRAVELLER_FILTER.CLEAR)).toBeNull()
+		fireEvent.click(screen.getByTestId(TRAVELLER_FILTER.CLEAR))
+		expect(spy.onChangeMany).toHaveBeenCalledWith(
+			['alpha', 'bravo', 'charlie', 'delta'],
+			false,
+		)
+		fireEvent.click(screen.getByTestId(TRAVELLER_FILTER.SELECT_ALL))
+		expect(spy.onChangeMany).toHaveBeenCalledWith(
+			['alpha', 'bravo', 'charlie', 'delta'],
+			true,
+		)
 	})
 
 	it('shows search above the threshold and filters by label', () => {

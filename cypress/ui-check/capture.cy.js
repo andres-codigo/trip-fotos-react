@@ -449,6 +449,44 @@ describe(`UI check capture (${LABEL})`, () => {
 			shot('admin-delete-dialog')
 		})
 	})
+	context('with a short city list', () => {
+		it('captures the city filter with three cities', () => {
+			cy.request({
+				method: 'DELETE',
+				url: emulatorDatabase('travellers'),
+				headers: { Authorization: 'Bearer owner' },
+			})
+			;['oslo', 'lima', 'rome'].forEach((city, index) => {
+				cy.request({
+					method: 'PUT',
+					url: emulatorDatabase(`travellers/ui-check-few-${index}`),
+					headers: { Authorization: 'Bearer owner' },
+					body: {
+						firstName: `Few${index}`,
+						lastName: 'Cities',
+						tripDescription: 'Seeded for the short city filter.',
+						daysInCity: 2,
+						cities: [city],
+						files: [BROKEN_IMAGE_URL],
+						fileDimensions: [{ width: 640, height: 480 }],
+						registered: Date.now(),
+					},
+				})
+			})
+			performLogin()
+
+			eachWidth((width) => {
+				cy.visit(PATHS.TRAVELLERS)
+				cy.get('[data-cy="traveller-filter-checkbox"]').should(
+					'have.length',
+					3,
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`city-filter-few-${width}`)
+			})
+		})
+	})
 })
 
 // Referenced so a rename of these selectors fails here rather than silently

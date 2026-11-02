@@ -72,6 +72,18 @@ describe('<TravellerFilter />', () => {
 			})
 	})
 
+	it('shows the bulk buttons but no search for a short list', () => {
+		mountFilter()
+		cy.get(TRAVELLER_FILTER_SELECTORS.SEARCH).should('not.exist')
+		cy.get(TRAVELLER_FILTER_SELECTORS.CLEAR).click()
+		cy.get('@onChangeMany').should(
+			'have.been.calledWith',
+			['tokyo', 'prague'],
+			false,
+		)
+		cy.get(TRAVELLER_FILTER_SELECTORS.SELECT_ALL).should('be.visible')
+	})
+
 	it('caps the list height and scrolls', () => {
 		const many = Array.from({ length: 40 }, (_, i) => ({
 			id: `city-${i}`,
