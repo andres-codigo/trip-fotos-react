@@ -57,12 +57,12 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- A tidier city filter on Travellers: a scrollable list, with city search and Select all / Clear once there are more than four cities
 - Every component and page now uses Tailwind, with SCSS and Stylelint removed and no visual change
 - Signed-in users who open the login page are sent to the travellers list
 - Failed registrations clean up the photos they had uploaded
 - A photo dialog with next/previous buttons, arrow keys and a `?photo=N` link
 - Upload progress when registering
-- Local Firebase emulators, with end-to-end tests running in CI on every PR
 - Developer tooling: issue-to-PR automation, CI drift checks and a leaner repo
 
 **Next up** — in this order:
