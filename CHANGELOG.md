@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.4](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.3...v0.21.4) (2026-11-02)
+
+
+### Enhancements
+
+* always show Select all and Clear in the city filter ([#593](https://github.com/andres-codigo/trip-fotos-react/issues/593)) ([e1bffe6](https://github.com/andres-codigo/trip-fotos-react/commit/e1bffe621c3cff7612833d6685fddcb22fe49c32))
+
 ## [0.21.3](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.2...v0.21.3) (2026-11-02)
 
 
