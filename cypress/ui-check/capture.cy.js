@@ -290,6 +290,31 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		it('captures the register file list with previews and a rejected file at each width', () => {
+			eachWidth((width) => {
+				cy.visit(PATHS.REGISTER)
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+					[
+						'cypress/fixtures/test-image.png',
+						{
+							contents: Cypress.Buffer.from('x'),
+							fileName: 'notes.pdf',
+							mimeType: 'application/pdf',
+						},
+					],
+					{ force: true },
+				)
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should(
+					'be.visible',
+				)
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_ERRORS).should(
+					'be.visible',
+				)
+				freezeAnimation()
+				shot(`register-files-rejected-${width}`)
+			})
+		})
+
 		it('captures the register page, previews, the remove buttons and a real upload', () => {
 			eachWidth((width) => {
 				cy.visit(PATHS.REGISTER)

@@ -62,4 +62,21 @@ describe('<FilePreview />', () => {
 			.click()
 		cy.get('@onRemove').should('have.been.calledWith', IMAGE_FILE)
 	})
+
+	it('has no axe violations for an image and a non-image file', () => {
+		cy.mount(
+			<ul>
+				<FilePreview
+					file={IMAGE_FILE}
+					onRemove={cy.stub()}
+				/>
+				<FilePreview
+					file={NON_IMAGE_FILE}
+					onRemove={cy.stub()}
+				/>
+			</ul>,
+		)
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should('have.length', 2)
+		cy.checkA11y()
+	})
 })

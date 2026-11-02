@@ -208,7 +208,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				)}
 			</div>
 
-			<fieldset className="mx-0 my-2 border-0 p-0">
+			<fieldset className="mx-0 mt-2 mb-6 border-0 p-0">
 				<legend className="mb-2 font-bold">Photos (optional)</legend>
 				<AddFile
 					id={FILES}

@@ -6,7 +6,7 @@ import { GLOBAL } from '@/constants/ui'
 import { cn } from '@/utils/cn'
 
 const badgeClasses =
-	'absolute right-1 h-6 appearance-none rounded-[24px] border-0 p-0 shadow-[0_0_5px_currentColor]'
+	'absolute right-1 h-6 appearance-none rounded-full border-0 p-0 shadow-[0_0_5px_currentColor]'
 
 const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 	const isImage = file.type?.startsWith('image/')
@@ -20,7 +20,7 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 				type="button"
 				className={cn(
 					badgeClasses,
-					'top-1 z-1 w-6 cursor-pointer bg-[#933933] text-[24px] leading-6 text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent',
+					'top-1 z-1 w-6 cursor-pointer bg-file-error text-2xl leading-6 text-primary-foreground focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent',
 				)}
 				aria-label={GLOBAL.REMOVE_FILE_LABEL(file.name)}
 				onClick={() => onRemove(file)}
@@ -36,7 +36,7 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 				/>
 			)}
 			<span
-				className="absolute inset-x-0 bottom-0 truncate bg-black/60 px-2 py-1 text-[0.75rem] text-white"
+				className="absolute inset-x-0 bottom-0 truncate bg-scrim px-2 py-1 text-[0.75rem] text-primary-foreground"
 				title={file.name}
 				data-cy={FILE_PREVIEW.NAME}>
 				{file.name}

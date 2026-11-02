@@ -36,7 +36,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 	}
 
 	return (
-		<div className="mx-auto text-center">
+		<div className="mx-auto flex flex-col gap-4 text-center">
 			<FileDrop onFilesDropped={addFiles}>
 				{({ isActive }) => (
 					<>
@@ -80,7 +80,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 						</label>
 						{files.length > 0 && (
 							<ul
-								className="m-2.5 flex list-none flex-wrap border border-background bg-[#f0ffff] p-0"
+								className="m-2.5 flex list-none flex-wrap border border-background bg-file-list p-0"
 								aria-label={GLOBAL.FILE_LIST_LABEL}
 								data-cy={FILE_DROP.LIST}>
 								{files.map((file) => (
@@ -99,7 +99,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 				<div
 					id={errorId}
 					role="alert"
-					className="text-[#933933] [&>p]:my-1"
+					className="text-file-error [&>p]:my-1"
 					data-cy={FILE_DROP.ERRORS}>
 					{errors.map((error) => (
 						<p key={error}>{error}</p>

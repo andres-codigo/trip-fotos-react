@@ -4,7 +4,7 @@ import { PROGRESS } from '@/constants/test'
 
 const BaseProgress = ({ value, label }) => (
 	<div
-		className={'mt-4 w-full'}
+		className="w-full"
 		data-cy={PROGRESS.ID}>
 		<progress
 			className={
