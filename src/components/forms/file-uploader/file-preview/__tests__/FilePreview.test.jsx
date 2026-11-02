@@ -76,29 +76,4 @@ describe('<FilePreview />', () => {
 		)
 		expect(onRemove).toHaveBeenCalledWith(IMAGE_FILE)
 	})
-
-	it('shows no status without one', () => {
-		render(
-			<FilePreview
-				file={IMAGE_FILE}
-				onRemove={vi.fn()}
-			/>,
-		)
-		expect(screen.queryByRole('status')).toBeNull()
-	})
-
-	it.each(Object.values(GLOBAL.FILE_STATUS))(
-		'announces the %s status',
-		(status) => {
-			render(
-				<FilePreview
-					file={{ ...IMAGE_FILE, status }}
-					onRemove={vi.fn()}
-				/>,
-			)
-			expect(screen.getByRole('status')).toHaveTextContent(
-				GLOBAL.FILE_STATUS_LABEL[status],
-			)
-		},
-	)
 })

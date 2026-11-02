@@ -182,21 +182,6 @@
 	}
 }
 
-/* The file-preview "uploading" badge pulses between white and grey; reduced motion gets a static grey */
-@theme {
-	--animate-file-pulse: file-pulse 1.5s linear infinite;
-
-	@keyframes file-pulse {
-		0%,
-		100% {
-			background: #ffffff;
-		}
-		50% {
-			background: #cecece;
-		}
-	}
-}
-
 /* Roboto, self-hosted from /public/fonts; index.html preloads the three most used weights */
 @font-face {
 	font-family: 'Roboto';

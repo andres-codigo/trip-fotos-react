@@ -45,7 +45,6 @@ export const FILE_PREVIEW = Object.freeze({
 	REMOVE_BUTTON: 'file-preview-remove',
 	THUMBNAIL: 'file-preview-thumbnail',
 	NAME: 'file-preview-name',
-	STATUS: 'file-preview-status',
 })
 
 export const IMAGE = Object.freeze({

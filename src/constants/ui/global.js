@@ -7,16 +7,6 @@ export const GLOBAL = Object.freeze({
 
 	// IMAGE UPLOAD
 	LOADING_IMAGE: 'loading',
-	FILE_STATUS: Object.freeze({
-		LOADING: 'loading',
-		UPLOADED: 'uploaded',
-		ERROR: 'error',
-	}),
-	FILE_STATUS_LABEL: Object.freeze({
-		loading: 'In progress',
-		uploaded: 'Uploaded',
-		error: 'Error',
-	}),
 	REMOVE_FILE_LABEL: (name) => `Remove ${name}`,
 	FILE_DROP_TEXT: Object.freeze({
 		ACTIVE: 'Drop your files here',

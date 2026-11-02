@@ -62,17 +62,4 @@ describe('<FilePreview />', () => {
 			.click()
 		cy.get('@onRemove').should('have.been.calledWith', IMAGE_FILE)
 	})
-
-	it('shows the error status with white text', () => {
-		cy.mount(
-			<FilePreview
-				file={{ ...IMAGE_FILE, status: GLOBAL.FILE_STATUS.ERROR }}
-				onRemove={cy.stub()}
-				tag="div"
-			/>,
-		)
-		cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW_STATUS)
-			.should('have.text', GLOBAL.FILE_STATUS_LABEL.error)
-			.and('have.css', 'color', 'rgb(255, 255, 255)')
-	})
 })

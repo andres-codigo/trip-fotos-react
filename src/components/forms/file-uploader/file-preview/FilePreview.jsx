@@ -5,20 +5,11 @@ import { GLOBAL } from '@/constants/ui'
 
 import { cn } from '@/utils/cn'
 
-// Line height follows the font size in each class list: tailwind-merge drops an earlier leading-* when a later text-size class is merged
 const badgeClasses =
 	'absolute right-1 h-6 appearance-none rounded-[24px] border-0 p-0 shadow-[0_0_5px_currentColor]'
 
-const statusClasses = {
-	[GLOBAL.FILE_STATUS.LOADING]:
-		'animate-file-pulse text-black motion-reduce:animate-none motion-reduce:bg-border',
-	[GLOBAL.FILE_STATUS.UPLOADED]: 'bg-[#66c360] text-black',
-	[GLOBAL.FILE_STATUS.ERROR]: 'bg-[#933933] text-white',
-}
-
 const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 	const isImage = file.type?.startsWith('image/')
-	const statusLabel = file.status && GLOBAL.FILE_STATUS_LABEL[file.status]
 
 	return (
 		<Tag
@@ -50,18 +41,6 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 				data-cy={FILE_PREVIEW.NAME}>
 				{file.name}
 			</span>
-			{statusLabel && (
-				<span
-					role="status"
-					className={cn(
-						badgeClasses,
-						'bottom-8 px-2.5 text-[14.4px] leading-6',
-						statusClasses[file.status],
-					)}
-					data-cy={FILE_PREVIEW.STATUS}>
-					{statusLabel}
-				</span>
-			)}
 		</Tag>
 	)
 }
@@ -72,7 +51,6 @@ FilePreview.propTypes = {
 		name: PropTypes.string.isRequired,
 		url: PropTypes.string,
 		type: PropTypes.string,
-		status: PropTypes.oneOf(Object.values(GLOBAL.FILE_STATUS)),
 	}).isRequired,
 	onRemove: PropTypes.func.isRequired,
 	tag: PropTypes.elementType,
