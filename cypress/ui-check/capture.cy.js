@@ -46,12 +46,12 @@ const shot = (name) => {
 	cy.screenshot(`${LABEL}/${name}`, { capture: 'fullPage' })
 }
 
-// Freezes CSS animation and the SMIL spinner so a capture is never a random frame
+// Freezes CSS animation, the text caret and the SMIL spinner so a capture is never a random frame
 const freezeAnimation = () => {
 	cy.document().then((doc) => {
 		const style = doc.createElement('style')
 		style.textContent =
-			'*, *::before, *::after { animation: none !important; transition: none !important; }'
+			'*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }'
 		doc.head.appendChild(style)
 		doc.querySelectorAll('svg').forEach((svg) => {
 			if (typeof svg.pauseAnimations === 'function') {
@@ -241,6 +241,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				{ force: true },
 			)
 			cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should('be.visible')
+			freezeAnimation()
 			;[
 				['file-remove', FILE_UPLOADER_SELECTORS.FILE_PREVIEW_REMOVE],
 				[
@@ -282,6 +283,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.get(COMMON_SELECTORS.BASE_PROGRESS, { timeout: TIMEOUT }).should(
 				'be.visible',
 			)
+			freezeAnimation()
 			shot('register-upload-progress')
 			cdp('Network.emulateNetworkConditions', {
 				offline: false,
@@ -356,6 +358,8 @@ describe(`UI check capture (${LABEL})`, () => {
 			)
 			cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()
 			cy.get(CONTACT_TRAVELLER_SELECTORS.ROOT).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
+			assertSettled()
 			shot('contact-sent')
 		})
 	})
