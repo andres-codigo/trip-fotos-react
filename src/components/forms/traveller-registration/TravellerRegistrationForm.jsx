@@ -220,7 +220,6 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				<BaseButton
 					id="register-button"
 					type="submit"
-					mode="flat"
 					data-cy="register-button"
 					isDisabled={isLoading}>
 					Register

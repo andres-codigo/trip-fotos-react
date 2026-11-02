@@ -112,5 +112,6 @@ See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypr
 - Style components with Tailwind utilities through `cn()`; use `cva` for a component with variants. Never add a stylesheet beside a component.
 - Use semantic tokens (`bg-primary`, `text-muted-foreground`), not literal colours.
 - Accept a `className` prop and merge it last through `cn()`, so a caller can override a conflicting utility.
+- Put `leading-*` after the `text-[size]` in a class list: `tailwind-merge` drops an earlier `leading-*` when a later `text-[size]` is merged.
 
 See [styles.instructions.md](./styles.instructions.md) for full styling conventions.

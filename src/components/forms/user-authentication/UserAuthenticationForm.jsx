@@ -90,7 +90,6 @@ const UserAuthenticationForm = ({
 				<BaseButton
 					id="login-button"
 					type="submit"
-					mode="flat"
 					className="w-[6.4375rem] [@media(max-width:1024px)]:w-full"
 					data-cy="login-submit-button"
 					isDisabled={isLoading}>
