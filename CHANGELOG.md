@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.3](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.2...v0.21.3) (2026-11-02)
+
+
+### Enhancements
+
+* bound, search and bulk-select the city filter list on Travellers ([#588](https://github.com/andres-codigo/trip-fotos-react/issues/588)) ([c3e54fc](https://github.com/andres-codigo/trip-fotos-react/commit/c3e54fc3dd41e89708741f3151fe6bbe77043db0))
+
 ## [0.21.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.1...v0.21.2) (2026-10-31)
 
 
