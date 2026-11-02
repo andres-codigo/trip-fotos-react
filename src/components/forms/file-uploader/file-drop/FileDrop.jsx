@@ -56,7 +56,7 @@ const FileDrop = ({ onFilesDropped, className = '', children }) => {
 	return (
 		<div
 			className={cn(
-				'mx-auto mb-[15px] w-full max-w-200 border border-dashed border-border transition-colors duration-200 ease-in-out hover:border-primary hover:bg-muted motion-reduce:transition-none',
+				'mx-auto w-full max-w-200 border border-dashed border-border transition-colors duration-200 ease-in-out hover:border-primary hover:bg-muted motion-reduce:transition-none',
 				isActive && 'border-primary bg-muted',
 				className,
 			)}

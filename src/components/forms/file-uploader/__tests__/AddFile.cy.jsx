@@ -86,4 +86,27 @@ describe('<AddFile />', () => {
 		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).focus()
 		cy.get('label').should('have.css', 'outline-style', 'solid')
 	})
+
+	it('has no axe violations empty, with previews and with an error', () => {
+		cy.mount(<AddFile />)
+		cy.checkA11y()
+
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+			pngFile('a.png'),
+			{ force: true },
+		)
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should('have.length', 1)
+		cy.checkA11y()
+
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+			{
+				contents: Cypress.Buffer.from('x'),
+				fileName: 'notes.pdf',
+				mimeType: 'application/pdf',
+			},
+			{ force: true },
+		)
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_ERRORS).should('be.visible')
+		cy.checkA11y()
+	})
 })

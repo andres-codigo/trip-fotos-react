@@ -35,6 +35,7 @@ export const GLOBAL = Object.freeze({
 	IMAGE_UNAVAILABLE: 'Image unavailable',
 
 	// UPLOAD PROGRESS
+	REGISTERING_MESSAGE: 'Registering your details, one moment please...',
 	UPLOAD_PROGRESS_LABEL: (uploadedFiles, totalFiles, percent) =>
 		`Uploading photos: ${uploadedFiles} of ${totalFiles} done (${percent}%)`,
 

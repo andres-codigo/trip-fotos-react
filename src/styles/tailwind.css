@@ -36,6 +36,11 @@
 	--field-invalid: #ffcccc;
 
 	--overlay-backdrop: rgb(0 0 0 / 0.75);
+	--scrim: rgb(0 0 0 / 0.6);
+
+	/* Register page file list */
+	--file-list: #f0ffff;
+	--file-error: #933933;
 
 	/* City badge tones, in the order getToneIndex assigns them */
 	--badge-tone-0: #3d008d;
@@ -76,6 +81,9 @@
 	--color-ring: var(--ring);
 	--color-field-focus: var(--field-focus);
 	--color-field-invalid: var(--field-invalid);
+	--color-scrim: var(--scrim);
+	--color-file-list: var(--file-list);
+	--color-file-error: var(--file-error);
 
 	--color-badge-0: var(--badge-tone-0);
 	--color-badge-1: var(--badge-tone-1);
@@ -88,6 +96,7 @@
 
 	--shadow-elevated: 0 2px 8px rgb(0 0 0 / 0.26);
 	--shadow-menu: 0 10px 27px rgb(0 0 0 / 0.05);
+	--shadow-dropdown: 0 2px 8px rgb(0 0 0 / 0.15);
 
 	--radius-sm: 0.25rem;
 	--radius-md: 0.5rem;

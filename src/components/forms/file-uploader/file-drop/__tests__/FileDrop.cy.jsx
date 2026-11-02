@@ -30,4 +30,19 @@ describe('<FileDrop />', () => {
 
 		cy.get('@onFilesDropped').should('have.been.calledOnce')
 	})
+
+	it('has no axe violations', () => {
+		cy.mount(
+			<FileDrop onFilesDropped={cy.stub()}>
+				<label htmlFor="drop-input">
+					Drop here
+					<input
+						id="drop-input"
+						type="file"
+					/>
+				</label>
+			</FileDrop>,
+		)
+		cy.checkA11y()
+	})
 })

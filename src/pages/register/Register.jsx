@@ -76,18 +76,23 @@ const Register = () => {
 					title="Registering"
 					fixed
 					data-cy="registering-dialog">
-					Registering your details, one moment please...
 					{uploadProgress ? (
-						<BaseProgress
-							value={uploadProgress.percent}
-							label={GLOBAL.UPLOAD_PROGRESS_LABEL(
-								uploadProgress.uploadedFiles,
-								uploadProgress.totalFiles,
-								uploadProgress.percent,
-							)}
-						/>
+						<div className="flex flex-col gap-4">
+							<span>{GLOBAL.REGISTERING_MESSAGE}</span>
+							<BaseProgress
+								value={uploadProgress.percent}
+								label={GLOBAL.UPLOAD_PROGRESS_LABEL(
+									uploadProgress.uploadedFiles,
+									uploadProgress.totalFiles,
+									uploadProgress.percent,
+								)}
+							/>
+						</div>
 					) : (
-						<BaseSpinner />
+						<>
+							{GLOBAL.REGISTERING_MESSAGE}
+							<BaseSpinner />
+						</>
 					)}
 				</BaseDialog>
 			)}
