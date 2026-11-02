@@ -34,8 +34,8 @@ const TravellerFilter = ({
 			<legend className="my-2 p-0 text-2xl leading-normal font-bold">
 				{TRAVELLER_FILTER_CONFIG.LEGEND}
 			</legend>
-			{hasSearch && (
-				<div className="mb-2 flex flex-wrap items-end gap-2">
+			<div className="mb-2 flex flex-wrap items-end gap-2">
+				{hasSearch && (
 					<Input
 						id="filter-search"
 						label={TRAVELLER_FILTER_CONFIG.SEARCH_LABEL}
@@ -44,22 +44,22 @@ const TravellerFilter = ({
 						onChange={(event) => setQuery(event.target.value)}
 						data-cy={TRAVELLER_FILTER.SEARCH}
 					/>
-					<BaseButton
-						type="button"
-						modeType="outline"
-						onClick={() => onChangeMany(visibleIds, true)}
-						data-cy={TRAVELLER_FILTER.SELECT_ALL}>
-						{TRAVELLER_FILTER_CONFIG.SELECT_ALL}
-					</BaseButton>
-					<BaseButton
-						type="button"
-						modeType="outline"
-						onClick={() => onChangeMany(visibleIds, false)}
-						data-cy={TRAVELLER_FILTER.CLEAR}>
-						{TRAVELLER_FILTER_CONFIG.CLEAR}
-					</BaseButton>
-				</div>
-			)}
+				)}
+				<BaseButton
+					type="button"
+					modeType="outline"
+					onClick={() => onChangeMany(visibleIds, true)}
+					data-cy={TRAVELLER_FILTER.SELECT_ALL}>
+					{TRAVELLER_FILTER_CONFIG.SELECT_ALL}
+				</BaseButton>
+				<BaseButton
+					type="button"
+					modeType="outline"
+					onClick={() => onChangeMany(visibleIds, false)}
+					data-cy={TRAVELLER_FILTER.CLEAR}>
+					{TRAVELLER_FILTER_CONFIG.CLEAR}
+				</BaseButton>
+			</div>
 			{/* Scrollable regions must be keyboard-focusable */}
 			<div
 				className="flex max-h-48 flex-wrap overflow-y-auto"
