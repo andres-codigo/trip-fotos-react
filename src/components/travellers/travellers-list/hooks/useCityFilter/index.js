@@ -33,6 +33,13 @@ const useCityFilter = (travellers = []) => {
 		})
 	}, [])
 
+	const setCitiesActive = useCallback((ids, isActive) => {
+		setInactiveIds((previous) => {
+			if (isActive) return previous.filter((item) => !ids.includes(item))
+			return [...new Set([...previous, ...ids])]
+		})
+	}, [])
+
 	const filteredTravellers = useMemo(() => {
 		if (inactiveIds.length === 0) return list
 
@@ -44,7 +51,13 @@ const useCityFilter = (travellers = []) => {
 		)
 	}, [list, inactiveIds])
 
-	return { options, inactiveIds, toggleCity, filteredTravellers }
+	return {
+		options,
+		inactiveIds,
+		toggleCity,
+		setCitiesActive,
+		filteredTravellers,
+	}
 }
 
 export default useCityFilter

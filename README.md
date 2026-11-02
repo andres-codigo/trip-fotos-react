@@ -39,7 +39,7 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 - **Traveller cards** — the travellers list shows each traveller's name, registration date, trip description, days in city, city badges and up to five photos, with contact and details links and an admin-only delete button
 - **Traveller details** — `/travellers/:id` shows a traveller's full profile, cities and every photo (each opens in a dialog that fits the screen, with next/previous buttons and a shareable `?photo=N` link), with a contact link for other travellers; unknown ids show a not-found message
 - **Messaging** — `/travellers/:id/contact` (signed-in users only) sends a traveller a message from the user's email address, with email and message validation, a success alert on the travellers list and an error dialog if sending fails; travellers read and delete the messages they have received on the messages page
-- **City filter** — checkboxes above the travellers list, built from the cities the loaded travellers have visited, narrow the list by city; all cities start selected
+- **City filter** — checkboxes above the travellers list, built from the cities the loaded travellers have visited, narrow the list by city; all cities start selected; the list is height-capped, and with more than four cities it gains a search box, Select all / Clear buttons and a "N of M cities selected" status
 - **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the admin can remove a traveller, with their database record, photos and messages, from the travellers list
 - **Routing and pages** — home, authentication, travellers, traveller details, contact traveller, register, messages, privacy policy and 404 pages
 - **Privacy policy** — a public `/privacy` page, linked from the footer, explains what data the app collects (account, traveller registration, Photon city search, browser storage and cookieless Vercel analytics) and where it is stored
@@ -57,12 +57,12 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- A tidier city filter on Travellers: a scrollable list, with city search and Select all / Clear once there are more than four cities
 - Every component and page now uses Tailwind, with SCSS and Stylelint removed and no visual change
 - Signed-in users who open the login page are sent to the travellers list
 - Failed registrations clean up the photos they had uploaded
 - A photo dialog with next/previous buttons, arrow keys and a `?photo=N` link
 - Upload progress when registering
-- Local Firebase emulators, with end-to-end tests running in CI on every PR
 - Developer tooling: issue-to-PR automation, CI drift checks and a leaner repo
 
 **Next up** — in this order:

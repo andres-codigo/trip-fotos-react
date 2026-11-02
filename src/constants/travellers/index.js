@@ -30,6 +30,12 @@ export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 
 export const TRAVELLER_FILTER_CONFIG = Object.freeze({
 	LEGEND: 'Filter by city',
+	SEARCH_LABEL: 'Search cities',
+	SEARCH_THRESHOLD: 4,
+	NO_MATCH: 'No cities match',
+	SELECT_ALL: 'Select all',
+	CLEAR: 'Clear',
+	LIST_LABEL: 'Cities',
 })
 
 export const TRAVELLER_DETAIL_CONFIG = Object.freeze({
