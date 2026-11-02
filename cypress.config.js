@@ -48,6 +48,9 @@ export default defineConfig({
 		VITE_DATABASE_URL: process.env.VITE_BACKEND_BASE_URL,
 		VITE_DATABASE_NAMESPACE: process.env.VITE_DATABASE_NAMESPACE,
 		USE_EMULATORS: String(useEmulators),
+		// Read only by cypress/ui-check/capture.cy.js
+		UI_CHECK_LABEL: process.env.UI_CHECK_LABEL,
+		UI_CHECK_WIDTHS: process.env.UI_CHECK_WIDTHS,
 		EMULATOR_TRAVELLER_EMAIL: SEED_USERS.TRAVELLER_ONE.email,
 		EMULATOR_TRAVELLER_UID: SEED_USERS.TRAVELLER_ONE.uid,
 		EMULATOR_STANDARD_UID: SEED_USERS.STANDARD.uid,
@@ -58,9 +61,13 @@ export default defineConfig({
 	},
 	e2e: {
 		// The live smoke spec signs in to the real project, so only its own run picks it up
-		specPattern: useEmulators
-			? 'cypress/e2e/**/*.cy.js'
-			: 'cypress/e2e-live/**/*.cy.js',
+		// The /ui-check capture script is committed but never part of the suite: only UI_CHECK=true picks it up
+		specPattern:
+			process.env.UI_CHECK === 'true'
+				? 'cypress/ui-check/**/*.cy.js'
+				: useEmulators
+					? 'cypress/e2e/**/*.cy.js'
+					: 'cypress/e2e-live/**/*.cy.js',
 		baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',
 		setupNodeEvents(on) {
 			on('task', { seedEmulators })
@@ -84,7 +91,11 @@ export default defineConfig({
 		},
 		specPattern: '**/*.cy.{js,jsx,ts,tsx}',
 		// Cypress only skips the E2E folder by matching the E2E pattern, which now varies by mode
-		excludeSpecPattern: ['cypress/e2e/**', 'cypress/e2e-live/**'],
+		excludeSpecPattern: [
+			'cypress/e2e/**',
+			'cypress/e2e-live/**',
+			'cypress/ui-check/**',
+		],
 		// Fixed so specs never depend on .env or CI secrets, and an unstubbed
 		// request fails on the unresolvable .invalid host instead of reaching the live DB
 		expose: {
