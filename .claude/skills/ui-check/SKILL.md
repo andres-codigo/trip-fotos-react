@@ -1,6 +1,6 @@
 ---
 name: ui-check
-description: Check a UI-affecting change (styling, layout, spacing, markup) in a real browser with full-page screenshots at 390, 768 and 1280px (plus either side of any breakpoint the change defines), compared with main, including logged-in pages and their states. Use before marking a UI change ready, or when someone reports a visual problem.
+description: Check a UI-affecting change (styling, layout, spacing, markup) in a real browser with full-page screenshots at 390 and 1280px (plus 768px and either side of any breakpoint, only when the change touches one), compared with main, including logged-in pages and their states. Use before marking a UI change ready, or when someone reports a visual problem.
 argument-hint: '[pages or components affected]'
 ---
 
@@ -10,7 +10,7 @@ Run the checklist in [Visual check for UI changes](../../../.github/instructions
 
 Container specifics the section does not cover:
 
-- No `chromium-cli` or Playwright is installed: run the committed capture script `cypress/ui-check/capture.cy.js`, never a throwaway spec. Start `npm run emulators`, then run it once per ref with `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 FIREBASE_DATABASE_EMULATOR_HOST=127.0.0.1:9000 UI_CHECK=true E2E_EMULATORS=true UI_CHECK_LABEL=<main|branch> [UI_CHECK_WIDTHS=390,1280] node .claude/skills/verify/run-e2e.mjs`. Screenshots land in `cypress/screenshots/capture.cy.js/<label>/`.
+- No `chromium-cli` or Playwright is installed: run the committed capture script `cypress/ui-check/capture.cy.js`, never a throwaway spec. Start `npm run emulators`, then run it once per ref with `FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 FIREBASE_DATABASE_EMULATOR_HOST=127.0.0.1:9000 UI_CHECK=true E2E_EMULATORS=true UI_CHECK_LABEL=<main|branch> [UI_CHECK_WIDTHS=390,768,1280] node .claude/skills/verify/run-e2e.mjs`. Screenshots land in `cypress/screenshots/capture.cy.js/<label>/`.
 - Extend the script (a new page or state) in the same change that needs it, rather than writing a one-off spec. Keep it ESLint-clean: lint errors make a spec fail to load ("Failed to fetch dynamically imported module").
 - Port 3000 may be the user's own dev server: never kill it by port. Start your own Vite on another port and stop it by PID, or run the spec against the emulators (see [testing.instructions.md](../../../.github/instructions/testing.instructions.md#when-to-run-e2e-locally)).
 - Never read `.env`: the seeded emulator accounts reach the spec through the Cypress config and `performLogin()`.

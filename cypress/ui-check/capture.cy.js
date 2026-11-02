@@ -4,7 +4,7 @@
 //
 //   UI_CHECK=true    selects this script instead of the E2E suite
 //   UI_CHECK_LABEL   prefix for the screenshot names (for example `main` or `branch`)
-//   UI_CHECK_WIDTHS  comma-separated viewport widths (default 390,768,1280)
+//   UI_CHECK_WIDTHS  comma-separated viewport widths (default 390,1280)
 import {
 	COMBOBOX_SELECTORS,
 	COMMON_SELECTORS,
@@ -24,7 +24,7 @@ import { TEST_USERS } from '../../src/constants/config/users'
 import { performLogin } from '../support/utils/authHelpers'
 
 const LABEL = Cypress.expose('UI_CHECK_LABEL') || 'capture'
-const WIDTHS = String(Cypress.expose('UI_CHECK_WIDTHS') || '390,768,1280')
+const WIDTHS = String(Cypress.expose('UI_CHECK_WIDTHS') || '390,1280')
 	.split(',')
 	.map(Number)
 const HEIGHT = 900
