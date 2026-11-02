@@ -9,7 +9,7 @@ const RULES = [
 	[/^package(-lock)?\.json$/, ALL],
 	[/^jsconfig\.json$/, ALL],
 	// Repo tooling has Vitest tests but no UI, so no component tests or build
-	[/^(\.claude|scripts)\/.*\.m?js$/, ['lint', 'vitest']],
+	[/^(\.claude|\.github|scripts)\/.*\.m?js$/, ['lint', 'vitest']],
 	// Vitest and Cypress component tests both run through the Vite config
 	[/^vite\.config\./, ['vitest', 'ct', 'build']],
 	[/^cypress\/e2e\//, ['lint']],

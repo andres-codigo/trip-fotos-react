@@ -28,6 +28,7 @@ describe('planGates', () => {
 		expect(planGates(['.claude/skills/verify/SKILL.md']).runArgs).toEqual(
 			[],
 		)
+		expect(planGates(['.github/labels.json']).runArgs).toEqual([])
 	})
 
 	it('runs lint and Vitest for tooling scripts, without e2e', () => {
@@ -35,6 +36,7 @@ describe('planGates', () => {
 			'.claude/skills/verify/changed-gates.mjs',
 			'.claude/hooks/require-open-pr.mjs',
 			'scripts/start-issue.mjs',
+			'.github/scripts/labels.mjs',
 		]) {
 			expect(planGates([file])).toEqual({
 				runArgs: ['lint', 'vitest'],
