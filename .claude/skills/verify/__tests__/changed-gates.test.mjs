@@ -25,6 +25,24 @@ describe('planGates', () => {
 
 	it('reports none for docs-only changes', () => {
 		expect(planGates(['docs/ai-assistance.md']).runArgs).toEqual([])
+		expect(planGates(['.claude/skills/verify/SKILL.md']).runArgs).toEqual(
+			[],
+		)
+		expect(planGates(['.github/labels.json']).runArgs).toEqual([])
+	})
+
+	it('runs lint and Vitest for tooling scripts, without e2e', () => {
+		for (const file of [
+			'.claude/skills/verify/changed-gates.mjs',
+			'.claude/hooks/require-open-pr.mjs',
+			'scripts/start-issue.mjs',
+			'.github/scripts/labels.mjs',
+		]) {
+			expect(planGates([file])).toEqual({
+				runArgs: ['lint', 'vitest'],
+				reasons: [],
+			})
+		}
 	})
 
 	it('adds e2e once, with no advisory, when it is forced', () => {
