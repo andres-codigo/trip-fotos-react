@@ -1,6 +1,6 @@
 # Plan — run Cypress E2E against the Firebase Emulator Suite
 
-Status: **Epic #292, optional but ordered**; children #499 to #504, grouped by the board's Workstream field. Do it after #378 (lean repo) and before #379 (Tailwind and shadcn/ui migration). The order is set in #379. Three migration issues (#370, #371, #373) call for `/verify e2e`, and the UI check in CLAUDE.md needs logged-in pages in states the shared live account cannot reach, so repeatable, seeded E2E is worth having first. CI is green and the Register photo test cleans up its own upload (`131d1c1`), backed by a 1-day Storage lifecycle rule on the test user's `images/<uid>/` prefix, so nothing is urgent.
+Status: **Epic #292, optional but ordered**; children #499 to #504, grouped by the board's Workstream field. Do it after #378 (lean repo) and before #379 (Tailwind and shadcn/ui migration). The order is set in #379. Three migration issues (#370, #371, #373) call for `/verify e2e`, and the UI check in CLAUDE.md needs logged-in pages in states the shared live account cannot reach, so repeatable, seeded E2E is worth having first. CI is green and the Register photo test cleans up its own upload (`131d1c1`), so nothing is urgent. The 1-day Storage lifecycle rule that once backed it up has been removed (it deleted a real account's photos on 4 November 2026).
 
 Updated 2026-10-29: the plan became epic #292 with six children, one PR each, and the review findings and decisions below were folded in.
 
@@ -30,7 +30,7 @@ Gaps found in review, each placed in the child that fixes it:
 - The flag must never be set in any Vercel environment, production or preview (#500).
 - `firebase-tools` is heavy: pinned dev dependency or `npx` (#499 measures, #500 decides); non-interactive CLI settings in CI (#503).
 - HTTPS app against HTTP emulators, and ports (#499, #500).
-- The 1-day lifecycle rule stays while the live account exists, and `/verify e2e` keeps its approval gate until the live path is gone (#504).
+- `/verify e2e` keeps its approval gate until the live path is gone (#504). The 1-day Storage lifecycle rule has been removed; never put one on a prefix that holds a real account's photos.
 
 ## Why
 
@@ -38,7 +38,7 @@ E2E currently signs in to, reads from and uploads to the live Firebase project:
 
 - Every sign-in test fails if the `CYPRESS_USER_*` account is deleted
 - `TravellersList` "register link when not a traveller" silently depends on that user never registering
-- The Register photo test writes to production Storage on every run (now deleted in `afterEach`, with a lifecycle rule as backstop)
+- The Register photo test writes to production Storage on every run (now deleted in `afterEach`; the lifecycle-rule backstop was removed after it deleted real photos, and #522 moved the test to the emulator)
 - CI needs Firebase secrets, so Dependabot PRs skip E2E entirely
 - Network or rate-limit blips show up as flaky failures
 - The shared account is the only traveller, so E2E and the UI check cannot reach the Contact button, the Contact page, a message with content, or a non-traveller sign-in
@@ -138,7 +138,7 @@ Not covered by the spike, for #500 to confirm: the profile-update REST call (`${
 
 - `/verify e2e` (`.claude/skills/verify/run-e2e.mjs`) runs against the emulators by default, removing the "uses live Firebase" approval caveat in `.claude/settings.json` and `docs/ai-assistance.md`; keep a `live` option for the smoke test.
 - **Live smoke test:** one read-only spec (sign in, one read) that runs on pushes to `main` only, with the secrets.
-- Keep the 1-day lifecycle rule on the test user's `images/<uid>/` prefix while the live account exists.
+- No Storage lifecycle rule on the live test user's `images/<uid>/` prefix: it has been removed, and the live smoke test must use a dedicated account with no real data.
 - The UI check (CLAUDE.md and `.github/instructions/testing.instructions.md`): point its logged-in screenshots at the emulators with the seeded accounts, so the pages and states (Contact, messages, a non-traveller) are repeatable.
 - Update README (Scripts, Environment Variables, CI/CD Workflows, Folder Structure for `scripts/`), CLAUDE.md (dev commands, Environment), `.github/instructions/testing.instructions.md` (seeding and anti-flakiness rules), and the verify skill's SKILL.md.
 
