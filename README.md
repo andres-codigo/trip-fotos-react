@@ -47,7 +47,7 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request; CodeQL scanning and a ruleset protecting `main`
 - **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers; versioned Firebase security rules
 - **Project automation** — issues and pull requests are labelled from one `labels.json` and moved across the GitHub Project board by workflows
-- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook, an issue-before-edit hook, and `/verify`, `/start-issue`, `/finish-pr` and `/ui-check` skills (see [AI Assistance](#ai-assistance))
+- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook, an issue-before-edit hook, a verify-before-commit hook, and `/verify`, `/start-issue`, `/finish-pr` and `/ui-check` skills (see [AI Assistance](#ai-assistance))
 
 <a id="status"></a>
 
@@ -357,7 +357,7 @@ trip-fotos-react/
 ├── .devcontainer/               # VS Code Dev Container configuration
 ├── .claude/
 │   ├── agents/                 # Claude Code subagent wrappers (delegate to .github/agents)
-│   ├── hooks/                  # Claude Code hook scripts (lint/format after edits, issue-before-edit guard, Status-refresh stop check)
+│   ├── hooks/                  # Claude Code hook scripts (lint/format after edits, issue-before-edit guard, verify-before-commit guard, Status-refresh stop check)
 │   ├── plans/                  # Committed work plans (e.g. deferred Firebase emulator plan)
 │   ├── rules/                  # Path-scoped Claude Code rules (comment style)
 │   ├── skills/                 # Claude Code skills (/verify, /start-issue, /finish-pr, /ui-check)
