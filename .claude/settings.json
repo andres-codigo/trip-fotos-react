@@ -69,6 +69,16 @@
 						"timeout": 20
 					}
 				]
+			},
+			{
+				"matcher": "Bash",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/require-verify.mjs\"",
+						"timeout": 30
+					}
+				]
 			}
 		],
 		"Stop": [

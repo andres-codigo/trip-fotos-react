@@ -17,3 +17,5 @@ Run `node scripts/start-issue.mjs $ARGUMENTS`, yourself and without asking. It r
 Once the script has printed its summary line, read the issue. If the work creates a new component, page, hook or Redux slice, scaffold it with the matching agent (`create-component`, `create-page`, `create-hook`, `create-redux-slice`), not by hand, then implement on top of the scaffold.
 
 When the issue is the last child of an epic, finishing it ends with [Closing an epic](../../../docs/ci-cd.md#closing-an-epic).
+
+When the implementation is done, run `/verify` (never the gates by hand: a `PreToolUse` hook blocks `git commit` without a recorded pass), commit, then run `/finish-pr` straight after.
