@@ -20,6 +20,7 @@ import {
 import { PAGE_SELECTORS } from '../../src/constants/test/selectors/pages'
 import { PATHS } from '../../src/constants/ui/paths'
 import { TEST_USERS } from '../../src/constants/config/users'
+import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../src/constants/travellers'
 
 import { performLogin } from '../support/utils/authHelpers'
 
@@ -392,6 +393,11 @@ describe(`UI check capture (${LABEL})`, () => {
 				'not.eq',
 				PATHS.REGISTER,
 			)
+			// The URL changes before the page renders, so wait for the content or the frame is mid-navigation
+			cy.contains(TRAVELLER_REGISTRATION_SUCCESS_MESSAGE).should(
+				'be.visible',
+			)
+			assertSettled()
 			shot('register-success')
 		})
 	})
