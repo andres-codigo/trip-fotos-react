@@ -65,17 +65,6 @@ const renderTravellers = (props = {}, locationState = null) => {
 	)
 }
 
-/**
- * Travellers Unit Tests
- *
- * Test Strategy:
- * - Focuses on rendering logic and correct application of CSS classes
- * - Verifies that the main container and heading are rendered as expected
- * - Ensures the <main> element has both global and module-specific classes
- * - Checks that the <h1> displays the correct text
- * - Renders with a real store and a stubbed fetch, so no selector needs mocking
- */
-
 describe('Travellers', () => {
 	afterEach(() => {
 		vi.unstubAllGlobals()

@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 
-import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
+import {
+	CITY_SEARCH_STATUS,
+	TRAVELLER_REGISTRATION_FIELDS,
+} from '@/constants/travellers'
 import { GLOBAL } from '@/constants/ui'
 
 import Input from '@/components/ui/form/input/Input'
@@ -14,9 +17,7 @@ import AddFile from '@/components/forms/file-uploader/AddFile'
 import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
 import { formatCity, getCityId } from '@/utils/formatCity'
 import useTravellerRegistration from './hooks/useTravellerRegistration'
-import useCitySearch, {
-	CITY_SEARCH_STATUS,
-} from '@/components/forms/traveller-registration/hooks/useCitySearch'
+import useCitySearch from '@/components/forms/traveller-registration/hooks/useCitySearch'
 
 const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 	const {

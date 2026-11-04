@@ -16,7 +16,7 @@ import { PATHS } from '@/constants/ui'
 import { selectUserId, tryLogin } from '@/store/slices/authenticationSlice'
 import { checkIsTraveller } from '@/store/slices/travellersSlice'
 
-import LoadingFallback from '@/components/common/LoadingFallback'
+import LoadingFallback from '@/components/common/loading-fallback/LoadingFallback'
 
 import SkipLink from '@/components/layout/skip-link/SkipLink'
 import Header from '@/components/layout/header/Header'

@@ -52,17 +52,6 @@ vi.mock(
 	}),
 )
 
-/**
- * Register Unit Tests
- *
- * Test Strategy:
- * - Focuses on rendering logic and correct application of CSS classes
- * - Verifies that the main container is rendered as expected
- * - Ensures the <main> element has both global and module-specific classes
- * - Checks that the BaseCard component is rendered
- * - Checks that the TravellerRegistrationForm is rendered with correct props
- */
-
 const createMockStore = (initialState) => {
 	return configureStore({
 		reducer: {

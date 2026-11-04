@@ -1,18 +1,6 @@
 import { render, fireEvent, screen, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-/**
- * TravellerRegistrationForm Unit Tests
- *
- * Test Strategy:
- * - Focuses on prop defaults, edge cases, and implementation details
- * - Complements Cypress tests which cover rendering, behavior, and accessibility scenarios
- * - Tests conditional rendering logic (form fields, error states, disabled states)
- * - Verifies prop spreading and className handling
- * - Tests form submission and callback invocation
- * - Ensures fieldConfig logic and getInputProps helper work correctly
- */
-
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
 import {
 	FILE_DROP,
@@ -45,12 +33,6 @@ vi.mock(
 	'@/components/forms/traveller-registration/hooks/useCitySearch',
 	() => ({
 		default: vi.fn(() => ({ results: [], status: 'idle' })),
-		CITY_SEARCH_STATUS: {
-			IDLE: 'idle',
-			LOADING: 'loading',
-			SUCCESS: 'success',
-			ERROR: 'error',
-		},
 	}),
 )
 

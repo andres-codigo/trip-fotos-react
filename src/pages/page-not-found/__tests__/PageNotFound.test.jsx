@@ -7,18 +7,6 @@ import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
-/**
- * PageNotFound Unit Tests
- *
- * Test Strategy:
- * - Focuses on rendering logic, conditional class application, and link behavior
- * - Complements Cypress tests which cover E2E navigation and visibility
- * - Tests conditional rendering logic for authentication state (isLoggedIn)
- * - Verifies correct className composition and structure
- * - Ensures correct link destination and text based on authentication state
- * - Uses mocks for redux, routing, and UI components to isolate logic
- */
-
 vi.mock('react-redux', async () => {
 	const { createReactReduxMock } =
 		await import('@/testUtils/vitest/mockReactRedux')

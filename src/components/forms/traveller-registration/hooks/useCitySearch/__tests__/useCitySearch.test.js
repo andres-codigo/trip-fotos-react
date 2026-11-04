@@ -2,10 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 
 import { CITY_SEARCH } from '@/constants/api'
+import { CITY_SEARCH_STATUS } from '@/constants/travellers'
 
-import useCitySearch, {
-	CITY_SEARCH_STATUS,
-} from '@/components/forms/traveller-registration/hooks/useCitySearch'
+import useCitySearch from '@/components/forms/traveller-registration/hooks/useCitySearch'
 
 import {
 	PHOTON_RESPONSE,

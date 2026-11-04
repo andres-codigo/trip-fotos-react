@@ -2,17 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import Alerts from '@/components/ui/alerts/Alerts'
 
-/**
- * Alerts Unit Tests
- *
- * Test Strategy:
- * - Tests default rendering (success state)
- * - Tests different alert types (error, info)
- * - Tests manual closing interaction
- * - Tests auto-closing behavior with timers
- * - Verifies correct ARIA roles and attributes
- */
-
 // Mock BaseButton to focus on Alerts logic
 vi.mock('@/components/ui/button/BaseButton', () => ({
 	default: ({ children, onClick, className, 'aria-label': ariaLabel }) => (

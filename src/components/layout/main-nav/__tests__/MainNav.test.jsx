@@ -2,23 +2,6 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useDispatch, useSelector } from 'react-redux'
 
-/**
- * MainNav Unit Tests
- *
- * Mocks:
- * - Custom hooks: All navigation-related hooks with controlled return values for state management
- * - NavMenuButtonLink and NavMenuMessagesLink: buttons that surface the props they receive as DOM (aria-current, label, click)
- *
- * Test Coverage:
- * - Rendering: Hook integration, prop forwarding, conditional rendering based on isLoggedIn
- * - Component Integration: What the child links render and do (their own props are covered by their tests)
- * - Hook Parameters: Ensures hooks are called with proper arguments and dependencies
- * - Active link: Tests that isActive is set when location matches path
- * - Accessibility: N/A (covered in MainNav.cy.jsx)
- *
- * Note: User interactions, DOM events, and accessibility are covered in MainNav.cy.jsx
- */
-
 const mockUseLocation = vi.fn()
 
 vi.mock('react-router-dom', () => ({

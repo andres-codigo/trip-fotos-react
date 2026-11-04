@@ -1,18 +1,6 @@
 import { render, fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
-/**
- * Input Unit Tests
- *
- * Test Strategy:
- * - Focuses on prop defaults, edge cases, and implementation details
- * - Complements Cypress tests which cover rendering, behavior, and accessibility scenarios
- * - Tests conditional rendering logic (label, required mark, error message)
- * - Verifies correct attributes, aria properties, and content rendering
- * - Tests event handling for onChange and onBlur
- * - Ensures prop spreading and custom class handling
- */
-
 import Input from '@/components/ui/form/input/Input'
 
 describe('<Input />', () => {

@@ -6,17 +6,6 @@ import { BUTTON } from '@/constants/test'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 
-/**
- * BaseButton Unit Tests
- *
- * Test Strategy:
- * - Focuses on prop defaults, edge cases, and implementation details
- * - Complements Cypress tests which cover rendering, behavior, and accessibility scenarios
- * - Tests conditional rendering logic (button vs Link vs span for disabled links)
- * - Tests conditional aria-label application based on children type
- * - Verifies prop spreading and className handling
- */
-
 const renderWithRouter = (component) => {
 	return render(<MemoryRouter>{component}</MemoryRouter>)
 }

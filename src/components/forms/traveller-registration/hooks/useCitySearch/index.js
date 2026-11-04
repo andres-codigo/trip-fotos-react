@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { CITY_SEARCH } from '@/constants/api'
-
-export const CITY_SEARCH_STATUS = Object.freeze({
-	IDLE: 'idle',
-	LOADING: 'loading',
-	SUCCESS: 'success',
-	ERROR: 'error',
-})
+import { CITY_SEARCH_STATUS } from '@/constants/travellers'
 
 const toCity = ({ properties = {} } = {}) => {
 	const {

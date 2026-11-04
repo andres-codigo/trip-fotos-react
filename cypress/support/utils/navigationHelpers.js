@@ -1,11 +1,6 @@
 import { PATHS } from '../../../src/constants/ui/paths'
 import { TRAVELLERS_LIST_SELECTORS } from '../../../src/constants/test/selectors/components'
 
-/**
- * Navigates to the traveller registration page
- * Waits for the register link to be active (have href) before clicking
- * Verifies successful navigation to the register route
- */
 export const navigateToRegisterPage = () => {
 	// Wait for the element to have the 'href' attribute.
 	// This implicitly waits for the loading state to finish (where it is a <span>)

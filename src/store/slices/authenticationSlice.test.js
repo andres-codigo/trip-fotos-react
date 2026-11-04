@@ -48,35 +48,6 @@ vi.mock('@/services/firebase/firebase', () => ({
 	getFirebaseAuth: () => firebaseAuth,
 }))
 
-/**
- * authenticationSlice Unit Tests
- *
- * Tests Redux slice managing user authentication state and lifecycle.
- *
- * Mocks:
- * - API_DATABASE: Mock Firebase authentication API configuration
- * - COMMON_HEADERS: Mock HTTP headers for API requests
- * - firebase/auth: Mock Auth SDK sign-in, sign-up and sign-out
- * - localStorage: Mock storage for session persistence
- * - timers: Fake timers for testing auto-logout functionality
- *
- * Slice Features:
- * - Async thunks: login, tryLogin (auto-restore session), logout, autoLogout
- * - Synchronous actions: clearUser, setAutoLogout
- * - Selectors: selectAuthenticationToken, selectUserProfile
- * - Session management: Token expiration timer, localStorage persistence
- * - Multi-mode support: Login and signup modes
- *
- * Test Coverage:
- * - Initial state and reducers
- * - Login/signup success and failure scenarios
- * - Session restoration from localStorage (tryLogin)
- * - Token expiration and auto-logout timer
- * - Logout and cleanup operations
- * - Error handling for network and localStorage failures
- * - Selector functions for state access
- */
-
 vi.mock('@/constants/api', async (importOriginal) => {
 	const actual = await importOriginal()
 	return {

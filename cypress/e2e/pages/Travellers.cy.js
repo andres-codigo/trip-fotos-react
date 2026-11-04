@@ -5,7 +5,6 @@ import {
 	TRAVELLER_ITEM_SELECTORS,
 	DIALOG_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
-import { TEST_IDS } from '../../../src/constants/test/selectors/_ids'
 import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
@@ -157,7 +156,7 @@ describe('Travellers page', () => {
 				delay: 600,
 			}).as('refreshTravellers')
 
-			cy.get(`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`)
+			cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON)
 				.should('be.enabled')
 				.click()
 
@@ -183,7 +182,7 @@ describe('Travellers page', () => {
 				timeout: REQUEST_TIMEOUT,
 			}).should('not.exist')
 
-			cy.get(`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`)
+			cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON)
 				.should('exist')
 				.and('not.be.disabled')
 		})
@@ -310,9 +309,7 @@ describe('Travellers page', () => {
 				body: { message: 'Server error' },
 			}).as('getTravellersRefreshError')
 
-			cy.get(
-				`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`,
-			).click()
+			cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON).click()
 			cy.wait('@getTravellersRefreshError', { timeout: REQUEST_TIMEOUT })
 
 			// Close error dialog
@@ -327,7 +324,7 @@ describe('Travellers page', () => {
 			}).as('getTravellersRetrySuccess')
 
 			// Button should still be enabled since we had initial data
-			cy.get(`[data-cy="${TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON}"]`)
+			cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON)
 				.should('not.be.disabled')
 				.click()
 			cy.wait('@getTravellersRetrySuccess', { timeout: REQUEST_TIMEOUT })

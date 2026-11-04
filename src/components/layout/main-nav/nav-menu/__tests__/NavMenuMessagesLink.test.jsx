@@ -1,23 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
-/**
- * NavMenuMessagesLink Unit Tests
- *
- * Mocks:
- * - NavMenuButtonLink: Simplified mock that renders button with forwarded props
- * - CSS Module: Provides stable mock class names for styling tests
- *
- * Test Coverage:
- * - Message count display: Conditional rendering based on totalMessages prop
- * - Class name: passed through unchanged, so the module's key names never leak in as global classes
- * - Prop forwarding: Ensures all required props are passed to NavMenuButtonLink
- * - Structure: Proper list item wrapper and data attributes
- *
- * Note: NavMenuButtonLink behavior (click handling, viewport, accessibility)
- * is already covered in NavMenuButtonLink.test.jsx
- */
-
 import NavMenuMessagesLink from '@/components/layout/main-nav/nav-menu/NavMenuMessagesLink'
 
 vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({

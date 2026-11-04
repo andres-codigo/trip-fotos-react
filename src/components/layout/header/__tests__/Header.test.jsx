@@ -6,21 +6,6 @@ import { configureStore } from '@reduxjs/toolkit'
 
 import { PATHS } from '@/constants/ui'
 
-/**
- * Header Unit Tests
- *
- * Mocks:
- * - Redux Store: Creates mock store with authentication slice containing token state
- *
- * Router: Tests wrap component in BrowserRouter since Header uses Link components for navigation
- *
- * Test Strategy:
- * - Tests conditional routing logic based on authentication token state
- * - Verifies falsy token values route to authentication page
- * - Verifies truthy token values route to home page
- * - Uses unmount() between test iterations to prevent DOM conflicts
- */
-
 import Header from '@/components/layout/header/Header'
 
 const createMockStore = (token) => {
