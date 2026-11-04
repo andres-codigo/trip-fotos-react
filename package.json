@@ -88,7 +88,7 @@
 	},
 	"allowScripts": {
 		"@parcel/watcher@2.6.0": true,
-		"cypress@16.2.0": true,
+		"cypress@16.2.1": true,
 		"@firebase/util@1.15.3": true,
 		"protobufjs@7.6.6": true
 	}
