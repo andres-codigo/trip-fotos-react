@@ -58,3 +58,10 @@ export const CONTACT_TRAVELLER_CONFIG = Object.freeze({
 	SENDING_MESSAGE: 'Sending your message, one moment please...',
 	SUCCESS_MESSAGE: 'Your message has been sent!',
 })
+
+export const CITY_SEARCH_STATUS = Object.freeze({
+	IDLE: 'idle',
+	LOADING: 'loading',
+	SUCCESS: 'success',
+	ERROR: 'error',
+})

@@ -30,19 +30,6 @@ import { login } from '@/store/slices/authenticationSlice'
 
 import Authentication from '@/pages/authentication/Authentication'
 
-/**
- * Authentication Unit Tests
- *
- * Test Strategy:
- * - Focuses on form validation, authentication flow, and error handling
- * - Complements E2E Cypress tests for user interaction and navigation flows
- * - Tests isolated validation handlers for email and password fields
- * - Verifies form submission behavior for both login and signup modes
- * - Ensures correct Redux actions are dispatched with proper payloads
- * - Validates loading states and error dialog rendering/interaction
- * - Uses comprehensive mocks for Redux, routing, validation, and Firebase utilities
- */
-
 vi.mock('@/store/slices/authenticationSlice', () => ({
 	login: vi.fn(() => Promise.resolve({})),
 }))
@@ -81,11 +68,6 @@ const renderWithProviders = (ui) =>
 		</Provider>,
 	)
 
-/**
- * Helper function to fill login form inputs
- * @param {string} email - Email value (defaults to mock email)
- * @param {string} password - Password value (defaults to mock password)
- */
 const fillLoginForm = (
 	email = MOCK_KEYS.EMAIL,
 	password = MOCK_KEYS.PASSWORD,
@@ -101,29 +83,17 @@ const fillLoginForm = (
 	)
 }
 
-/**
- * Helper function to submit the login form
- */
 const submitLoginForm = () => {
 	fireEvent.click(
 		screen.getByTestId(TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON),
 	)
 }
 
-/**
- * Helper function to fill and submit login form in one action
- * @param {string} email - Email value
- * @param {string} password - Password value
- */
 const fillAndSubmitLoginForm = (email, password) => {
 	fillLoginForm(email, password)
 	submitLoginForm()
 }
 
-/**
- * Helper function to assert error dialog presence and message
- * @param {string} expectedMessage - Expected error message text
- */
 const expectErrorDialog = async (expectedMessage) => {
 	await waitFor(() =>
 		expect(screen.getByRole(DIALOG.ROLE_ALERTDIALOG)).toBeInTheDocument(),
@@ -131,9 +101,6 @@ const expectErrorDialog = async (expectedMessage) => {
 	expect(screen.getByText(expectedMessage)).toBeInTheDocument()
 }
 
-/**
- * Helper function to assert error dialog is not present
- */
 const expectNoErrorDialog = async () => {
 	await waitFor(() =>
 		expect(

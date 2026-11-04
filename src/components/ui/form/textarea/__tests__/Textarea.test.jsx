@@ -1,16 +1,6 @@
 import { render, fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
-/**
- * Textarea Unit Tests
- *
- * Test Strategy:
- * - Focuses on prop defaults, conditional rendering and aria wiring
- * - Complements Cypress tests which cover real-browser behaviour and accessibility scenarios
- * - Verifies the label, required mark and error message render only when they should
- * - Tests onChange and onBlur handling, prop spreading and custom class handling
- */
-
 import Textarea from '@/components/ui/form/textarea/Textarea'
 
 const renderTextarea = (props = {}) =>

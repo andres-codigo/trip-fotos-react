@@ -5,16 +5,6 @@ import { BrowserRouter } from 'react-router-dom'
 import { API_DATABASE } from '@/constants/api'
 import { MOCK_KEYS } from '@/constants/test'
 
-/**
- * UserAuthenticationForm Unit Tests
- *
- * Mocks:
- * - Input: Simplified version that handles custom props (isValid, message, showRequiredMark)
- * - BaseButton: Handles isDisabled/isLink props and converts them to standard DOM attributes
- * - CSS Module: Provides stable class names to prevent import errors in test environment
- *
- * Router: Tests wrap components in BrowserRouter since UserAuthenticationForm uses Router components
- */
 import UserAuthenticationForm from '@/components/forms/user-authentication/UserAuthenticationForm'
 
 vi.mock('@/components/ui/form/input/Input', () => ({
@@ -102,7 +92,7 @@ describe('<UserAuthenticationForm />', () => {
 				name: /switch to signup/i,
 			})
 
-			// This verifies preventDefault behavior indirectly
+			// This verifies preventDefault behaviour indirectly
 			expect(toggleButton).toHaveAttribute('type', 'button')
 		})
 

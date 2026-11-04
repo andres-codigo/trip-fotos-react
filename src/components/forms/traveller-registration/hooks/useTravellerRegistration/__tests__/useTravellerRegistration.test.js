@@ -6,17 +6,6 @@ import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import useTravellerRegistration from '@/components/forms/traveller-registration/hooks/useTravellerRegistration'
 
-/**
- * useTravellerRegistration Hook Unit Tests
- *
- * Tests the custom hook that manages traveller registration form state and logic.
- *
- * Updated for current implementation:
- * - State shape uses { value, message, isValid }
- * - submitHandler is a higher-order function: (onSuccess) => (event) => void
- * - Validation occurs on change and on submit
- */
-
 describe('useTravellerRegistration', () => {
 	it('should initialise with default form state', () => {
 		const { result } = renderHook(() => useTravellerRegistration())

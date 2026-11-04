@@ -6,17 +6,6 @@ import { SPINNER } from '@/constants/test'
 
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-/**
- * BaseSpinner Unit Tests
- *
- * Test Strategy:
- * - Focuses on rendering verification and accessibility compliance
- * - Tests basic rendering of spinner container and loading image
- * - Verifies correct aria attributes for screen reader compatibility
- * - Ensures descriptive alternative text is provided for the loading indicator
- * - Tests SVG asset loading and image source attribution
- */
-
 vi.mock('@/assets/loading-spinner.svg', () => ({
 	default: SPINNER.MOCK_SVG,
 }))

@@ -4,16 +4,6 @@ import { describe, it, expect } from 'vitest'
 import BaseCard from '@/components/ui/card/BaseCard'
 import { COMMON_SELECTORS } from '@/constants/test'
 
-/**
- * BaseCard Unit Tests
- *
- * Test Strategy:
- * - Focuses on rendering verification and className composition
- * - Tests default rendering with children
- * - Verifies classNames utility combines custom classes with card styles
- * - Tests prop spreading and data attributes
- */
-
 // Test selector constant
 const BASE_CARD_SELECTOR = 'base-card'
 

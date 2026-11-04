@@ -1,18 +1,10 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 
-/**
- * LoadingFallback Unit Tests
- *
- * Test Strategy:
- * - Covers the two layouts: a full page with a main landmark, and a card on its own
- * - Complements the Cypress tests which cover the rendered result in a real browser
- */
-
 import { ACCESSIBILITY } from '@/constants/ui'
 import { COMMON_SELECTORS } from '@/constants/test'
 
-import LoadingFallback from '@/components/common/LoadingFallback'
+import LoadingFallback from '@/components/common/loading-fallback/LoadingFallback'
 
 describe('<LoadingFallback />', () => {
 	describe('as a page (isComponent is false)', () => {

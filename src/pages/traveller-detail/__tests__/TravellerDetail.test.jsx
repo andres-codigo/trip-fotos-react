@@ -4,7 +4,12 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-import { BADGE, IMAGE, TRAVELLER_DETAIL } from '@/constants/test'
+import {
+	BADGE,
+	COMMON_SELECTORS,
+	IMAGE,
+	TRAVELLER_DETAIL,
+} from '@/constants/test'
 
 import TravellerDetail from '@/pages/traveller-detail/TravellerDetail'
 import authenticationReducer from '@/store/slices/authenticationSlice'
@@ -102,17 +107,19 @@ describe('<TravellerDetail />', () => {
 	it('marks the own record cards with a heavier border and not other travellers', async () => {
 		const { unmount } = renderPage({ userId: 'abc' })
 		const profile = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
-		expect(profile.closest('[data-cy="base-card"]')).toHaveClass('border-2')
+		expect(profile.closest(COMMON_SELECTORS.BASE_CARD)).toHaveClass(
+			'border-2',
+		)
 		expect(
 			screen
 				.getByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
-				.closest('[data-cy="base-card"]'),
+				.closest(COMMON_SELECTORS.BASE_CARD),
 		).toHaveClass('border-2')
 		unmount()
 
 		renderPage({ userId: 'someone-else' })
 		const other = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
-		expect(other.closest('[data-cy="base-card"]')).not.toHaveClass(
+		expect(other.closest(COMMON_SELECTORS.BASE_CARD)).not.toHaveClass(
 			'border-2',
 		)
 	})

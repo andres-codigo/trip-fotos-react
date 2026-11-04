@@ -1,20 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-/**
- * NavMenuButtonLink Unit Tests
- *
- * Mocks:
- * - BaseButton: Simplified version that filters out React-specific props (isLink, isError, isDisabled, to)
- *   and renders as native button element to prevent DOM attribute warnings
- * - useViewport: Mocked hook that controls mobile/desktop behavior for conditional click handling
- *
- * Test Coverage:
- * - Rendering: Component output, prop forwarding, default values, and active-link semantics
- * - Behaviour: Click handling logic, mobile vs desktop interactions, viewport responsiveness
- * - Accessibility: Focus management for error states and keyboard navigation support
- */
-
 import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
 
 vi.mock('@/components/ui/button/BaseButton', () => ({

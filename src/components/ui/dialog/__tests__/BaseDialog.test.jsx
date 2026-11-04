@@ -2,18 +2,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import { DIALOG } from '@/constants/test'
 
-/**
- * BaseDialog Unit Tests
- *
- * Test Strategy:
- * - Focuses on prop defaults, edge cases, and implementation details
- * - Complements Cypress tests which cover rendering, behavior, and accessibility scenarios
- * - Tests conditional rendering logic (show/hide, header, actions, fixed)
- * - Verifies correct role, aria attributes, and content rendering
- * - Tests event handling for backdrop click, close button, and Escape key
- * - Ensures the title, description and focus wiring from Radix Dialog
- */
-
 import { render, screen, fireEvent } from '@testing-library/react'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 

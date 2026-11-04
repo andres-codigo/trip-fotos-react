@@ -1,6 +1,6 @@
 import { PAGE_SELECTORS, COMMON_SELECTORS } from '@/constants/test'
 
-import LoadingFallback from '@/components/common/LoadingFallback'
+import LoadingFallback from '@/components/common/loading-fallback/LoadingFallback'
 
 describe('<LoadingFallback />', () => {
 	it('renders BaseCard wrapped in a main element when isComponent is false', () => {

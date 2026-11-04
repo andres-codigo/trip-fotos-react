@@ -4,12 +4,6 @@ import { TEST_USERS } from '../../../src/constants/config/users'
 
 const REQUEST_TIMEOUT = 10000
 
-/**
- * Performs login flow and waits for successful authentication
- * @param {string} email - User email (defaults to valid user email)
- * @param {string} password - User password (defaults to valid user password)
- * @param {string} expectedRedirectUrl - Expected URL after login (defaults to home)
- */
 export const performLogin = (
 	email = TEST_USERS.STANDARD.EMAIL,
 	password = TEST_USERS.STANDARD.PASSWORD,
@@ -46,11 +40,6 @@ export const performLogin = (
 	cy.url({ timeout: REQUEST_TIMEOUT }).should('include', expectedRedirectUrl)
 }
 
-/**
- * Navigates to login page and performs authentication
- * @param {string} email - User email (defaults to valid user email)
- * @param {string} password - User password (defaults to valid user password)
- */
 export const loginAndNavigateToHome = (
 	email = TEST_USERS.STANDARD.EMAIL,
 	password = TEST_USERS.STANDARD.PASSWORD,

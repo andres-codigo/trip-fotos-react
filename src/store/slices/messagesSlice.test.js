@@ -24,23 +24,6 @@ import { handleApiError } from '@/utils/errorHandler'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
-/**
- * messagesSlice Unit Tests
- *
- * Tests Redux slice managing a traveller's private messages.
- *
- * Mocks:
- * - errorHandler: Mock error handling utility
- * - authenticationSlice: Mock token and user id selectors and a logout thunk
- * - global.fetch: Mock fetch API for simulating network requests
- *
- * Test Coverage:
- * - Initial state verification
- * - contactTraveller, loadMessages, deleteMessage and deleteTravellerMessages success and failure scenarios
- * - Reset of state on logout
- * - Selectors for state access
- */
-
 vi.mock('@/utils/errorHandler', () => ({
 	handleApiError: vi.fn((error, message) => {
 		const errorMessage = error?.message || error

@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react'
 import { GLOBAL } from '@/constants/ui'
 
-/**
- * Custom hook to detect viewport size with debouncing to prevent layout thrashing
- * @param {number} debounceMs - Debounce delay in milliseconds (default: 100)
- * @returns {object} Object containing viewport detection booleans
- */
 const useViewport = (debounceMs = 100) => {
 	const [viewport, setViewport] = useState(() => {
 		// Initial state based on current window size
