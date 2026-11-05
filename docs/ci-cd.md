@@ -58,7 +58,7 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
 - **Triggers:**
     - On **issue** events (`opened`, `reopened`, `edited`, `labeled`, `unlabeled`)
     - Manually via **Actions → "Run workflow"** (takes an issue number)
-- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, gives them the **type** label for their title prefix (`chore:` → `chore`; none without a prefix) and assigns the default assignee. Area labels arrive later from the PR that closes the issue. Editing an issue never changes its status. Runs queue per issue, so the `opened` and `labeled` events from creating a labelled issue do not race. Labels you add (`ready`, `in-progress`, `blocked`) move it across the board (see [Project Board Statuses](#project-board-statuses)).
+- **Purpose:** Adds new issues to the `Trip Fotos React` GitHub Project in **Triage**, gives them the **type** label for their title prefix (`chore:` → `chore`; none without a prefix) and assigns the default assignee. Area labels arrive later from the PR that closes the issue. Editing an issue never changes its status. Runs queue per issue, so the `opened` and `labeled` events from creating a labelled issue do not race. Labels you add (`ready`, `in-progress`, `blocked`) move it across the board (see [Project Board Statuses](#project-board-statuses)). Label events sent by a bot are skipped by a job-level `if`, before a runner starts.
 
 ---
 
@@ -66,8 +66,9 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
 
 - **Workflow File:** `.github/workflows/project-item-lifecycle.yml`
 - **Triggers:**
-    - On **pull_request_target** events (`opened`, `reopened`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`). Not `synchronize`: a push does not change the status, which `opened`, `ready_for_review` and `converted_to_draft` already set, and every run is billed a full minute
+    - On **pull_request_target** events (`opened`, `reopened`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`). An `edited` event runs only when the PR body changed (a job-level `if`, so no runner starts for a title edit). Not `synchronize`: a push does not change the status, which `opened`, `ready_for_review` and `converted_to_draft` already set, and every run is billed a full minute
 - **Purpose:** Keeps the issues a pull request closes (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. The board has one card per piece of work: the issue, with its PRs under **Linked pull requests**. A PR with no linked issue gets a tracking issue; Dependabot PRs get none and appear as their own card instead. Merging removes the `in-progress` label from the issues it closes and, when it closes exactly one issue (a tracking issue included), copies the PR's type and area labels to it; a PR closing several issues leaves their labels alone.
+- **Shared code:** the project and status-field IDs, the Status option IDs and the card helpers (find, add, set Status) live in `.github/scripts/project.mjs`, shared with Issue Intake and covered by Vitest. A card is found through the issue's own project items, not by paging the whole board.
 - **Secret (Optional but Recommended):** `PROJECT_AUTOMATION_TOKEN`
     - Used for Project v2 write operations when `github.token` does not have enough access.
 

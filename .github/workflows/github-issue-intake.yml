@@ -21,6 +21,8 @@ concurrency:
 
 jobs:
     intake-issue:
+        # Labels added by a workflow are auto-labels, not a triage decision: skip them before a runner starts
+        if: github.event_name == 'workflow_dispatch' || !((github.event.action == 'labeled' || github.event.action == 'unlabeled') && github.event.sender.type == 'Bot')
         runs-on: ubuntu-latest
         timeout-minutes: 5
 
@@ -33,15 +35,6 @@ jobs:
             - name: Intake issue and sync its board status
               uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
               env:
-                  PROJECT_ID: PVT_kwHOAybMeM4BCojE
-                  PROJECT_STATUS_FIELD_ID: PVTSSF_lAHOAybMeM4BCojEzg0yW4g
-                  STATUS_TRIAGE_OPTION_ID: 46daf40e
-                  STATUS_BACKLOG_OPTION_ID: 7be623db
-                  STATUS_READY_OPTION_ID: f75ad846
-                  STATUS_IN_PROGRESS_OPTION_ID: 47fc9ee4
-                  STATUS_BLOCKED_OPTION_ID: ba1ca20d
-                  STATUS_IN_REVIEW_OPTION_ID: 5e639cc6
-                  STATUS_DONE_OPTION_ID: 98236657
                   DEFAULT_ASSIGNEE: andres-codigo
                   PROJECT_AUTOMATION_TOKEN: ${{ secrets['PROJECT_AUTOMATION_TOKEN'] }}
               with:
@@ -50,19 +43,11 @@ jobs:
                       const owner = context.repo.owner
                       const repo = context.repo.repo
 
-                      const PROJECT_ID = process.env.PROJECT_ID
-                      const STATUS_FIELD_ID = process.env.PROJECT_STATUS_FIELD_ID
-                      const STATUS = {
-                        TRIAGE: process.env.STATUS_TRIAGE_OPTION_ID,
-                        BACKLOG: process.env.STATUS_BACKLOG_OPTION_ID,
-                        READY: process.env.STATUS_READY_OPTION_ID,
-                        IN_PROGRESS: process.env.STATUS_IN_PROGRESS_OPTION_ID,
-                        BLOCKED: process.env.STATUS_BLOCKED_OPTION_ID,
-                        IN_REVIEW: process.env.STATUS_IN_REVIEW_OPTION_ID,
-                        DONE: process.env.STATUS_DONE_OPTION_ID,
-                      }
                       const { loadLabelConfig, statusLabel, typeFor } = await import(
                         `${process.env.GITHUB_WORKSPACE}/.github/scripts/labels.mjs`
+                      )
+                      const { STATUS, STATUS_FIELD_ID, createProjectClient } = await import(
+                        `${process.env.GITHUB_WORKSPACE}/.github/scripts/project.mjs`
                       )
                       const labelConfig = loadLabelConfig(process.env.GITHUB_WORKSPACE)
                       const READY_LABEL = statusLabel(labelConfig, 'ready')
@@ -76,9 +61,8 @@ jobs:
                         ? getOctokit(PROJECT_AUTOMATION_TOKEN)
                         : github
 
-                      const projectGraphql = async (query, variables) => {
-                        return projectGithub.graphql(query, variables)
-                      }
+                      const projectGraphql = (query, variables) => projectGithub.graphql(query, variables)
+                      const { ensureItem: ensureProjectItem, setStatus } = createProjectClient(projectGraphql)
 
                       const issueNumber = (() => {
                         if (context.eventName === 'workflow_dispatch') {
@@ -147,95 +131,6 @@ jobs:
                             assignees: [DEFAULT_ASSIGNEE],
                           })
                         }
-                      }
-
-                      const addProjectItem = async (contentId) => {
-                        const data = await projectGraphql(
-                          `mutation($projectId: ID!, $contentId: ID!) {
-                            addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
-                              item { id }
-                            }
-                          }`,
-                          {
-                            projectId: PROJECT_ID,
-                            contentId,
-                          },
-                        )
-
-                        return data?.addProjectV2ItemById?.item?.id || null
-                      }
-
-                      const getProjectItemIdByContentId = async (contentId) => {
-                        let hasNextPage = true
-                        let cursor = null
-
-                        while (hasNextPage) {
-                          const data = await projectGraphql(
-                            `query($projectId: ID!, $cursor: String) {
-                              node(id: $projectId) {
-                                ... on ProjectV2 {
-                                  items(first: 100, after: $cursor) {
-                                    pageInfo {
-                                      hasNextPage
-                                      endCursor
-                                    }
-                                    nodes {
-                                      id
-                                      content {
-                                        __typename
-                                        ... on Issue { id }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }`,
-                            {
-                              projectId: PROJECT_ID,
-                              cursor,
-                            },
-                          )
-
-                          const items = data?.node?.items?.nodes || []
-                          const found = items.find((item) => item?.content?.id === contentId)
-                          if (found?.id) return found.id
-
-                          hasNextPage = data?.node?.items?.pageInfo?.hasNextPage || false
-                          cursor = data?.node?.items?.pageInfo?.endCursor || null
-                        }
-
-                        return null
-                      }
-
-                      const ensureProjectItem = async (contentId) => {
-                        let itemId = await getProjectItemIdByContentId(contentId)
-                        if (!itemId) {
-                          itemId = await addProjectItem(contentId)
-                        }
-                        return itemId
-                      }
-
-                      const setStatus = async (itemId, optionId) => {
-                        await projectGraphql(
-                          `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                            updateProjectV2ItemFieldValue(
-                              input: {
-                                projectId: $projectId
-                                itemId: $itemId
-                                fieldId: $fieldId
-                                value: { singleSelectOptionId: $optionId }
-                              }
-                            ) {
-                              projectV2Item { id }
-                            }
-                          }`,
-                          {
-                            projectId: PROJECT_ID,
-                            itemId,
-                            fieldId: STATUS_FIELD_ID,
-                            optionId,
-                          },
-                        )
                       }
 
                       const getStatusOptionId = async (itemId) => {
