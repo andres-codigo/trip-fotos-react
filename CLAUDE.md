@@ -80,4 +80,5 @@ release-please sets the version from PR titles on `main`; never edit `version` b
 - Do not create new top-level `src/` folders without updating the README Folder Structure tree
 - Do not re-inline domain-specific detail here — extend the relevant `.github/instructions/*.instructions.md` file instead
 - Do not let `README.md` go stale — see "Keeping README.md in sync" above
-- Route, Firebase rules and CSP changes: see `.claude/rules/deploy-config.md`
+- Do not call a new external origin without adding it to the CSP `connect-src` in `vercel.json`
+- Route and Firebase rules changes: see `.claude/rules/deploy-config.md`
