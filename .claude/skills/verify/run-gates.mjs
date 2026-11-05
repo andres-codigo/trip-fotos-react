@@ -33,6 +33,11 @@ const GATES = {
 		summary: /(built in .*)/,
 		failure: /error|Error/,
 	},
+	yaml: {
+		command: "npx prettier --check '.github/**/*.{yml,yaml}'",
+		summary: /(All matched files.*)/,
+		failure: /\[(warn|error)\]/,
+	},
 	e2e: {
 		command: 'npm run cy:run:e2e:emulators',
 		summary: /(All specs passed!.*|\d+ of \d+ failed.*)/,

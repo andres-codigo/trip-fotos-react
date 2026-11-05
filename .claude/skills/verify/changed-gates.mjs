@@ -2,6 +2,8 @@ import { execSync } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 
 const ALL = ['lint', 'vitest', 'ct', 'build']
+// Selected only by the rules below: `all` stays the four full gates
+const GATE_ORDER = [...ALL, 'yaml']
 
 // First match wins, so narrower patterns sit above broader ones
 const RULES = [
@@ -11,6 +13,10 @@ const RULES = [
 	// Repo tooling has Vitest tests but no UI, so no component tests or build
 	[/^(\.claude|\.github|scripts)\/.*\.m?js$/, ['lint', 'vitest']],
 	// Vitest and Cypress component tests both run through the Vite config
+	// A syntax check is all workflow and action YAML has locally
+	[/^\.github\/(workflows|actions)\/.*\.ya?ml$/, ['yaml']],
+	// Read by .github/scripts/__tests__/drift.test.mjs (README.md is an accepted gap)
+	[/^(vercel\.json|firebase\/|\.env\.example$)/, ['vitest']],
 	[/^vite\.config\./, ['vitest', 'ct', 'build']],
 	[/^cypress\/e2e\//, ['lint']],
 	[/^cypress\//, ['lint', 'ct']],
@@ -50,7 +56,7 @@ export const planGates = (files, { e2e = false, all = false } = {}) => {
 		),
 	]
 
-	const runArgs = ALL.filter((gate) => gates.has(gate))
+	const runArgs = GATE_ORDER.filter((gate) => gates.has(gate))
 	if (e2e || reasons.length) runArgs.push('e2e')
 	if (runArgs.length && all) runArgs.push('fresh')
 
