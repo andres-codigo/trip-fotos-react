@@ -144,7 +144,7 @@ Once the change passes `/verify` and the PR is ready for review:
 Two traps while a PR is open:
 
 - **Close keywords:** `project-item-lifecycle.yml` matches `close`, `fix` or `resolve` (any tense) followed by `#N` anywhere in a PR body or commit message, not only a `Closes #N` line. A slice of a parent or epic writes "part of #N"; only the final slice carries a real `Closes #N`. Never put those words next to a parent or epic number in prose, or merging closes it and sets it Done.
-- **Pushed branches:** never rebase a branch that is already pushed (a force-push is denied). Bring it up to date with `git fetch && git merge origin/main` and push normally; a conflicting PR runs no Vitest or Cypress checks, so a green list missing them means "conflict", not "passed".
+- **Conflicts:** a conflicting PR runs no Vitest or Cypress checks, so a green list missing them means "conflict", not "passed".
 
 ### Closing an epic
 
