@@ -316,9 +316,9 @@ Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools 
 
 | Workflow                          | File                                                               | Triggered On     |
 | --------------------------------- | ------------------------------------------------------------------ | ---------------- |
-| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`                          | Push/PR/Manual   |
+| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`                          | PR/Manual        |
 | Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml` (emulator and live smoke jobs) | Push/PR/Manual   |
-| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`                          | Push/PR/Manual   |
+| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`                          | PR/Manual        |
 | GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`                      | PR Target Events |
 | GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`                        | Issue Events     |
 | GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml`                     | PR Target Events |

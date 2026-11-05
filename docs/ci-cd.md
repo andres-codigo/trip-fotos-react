@@ -8,8 +8,7 @@ Every `uses:` in `.github/workflows` is pinned to a full commit SHA with the rel
 
 - **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
 - **Triggers:**
-    - On **push** to `main` (for changes in `src/**`, `package.json`, or `vite.config.*`)
-    - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files, `.github/labels.json` and `.github/scripts/**` still trigger it)
+    - On **pull requests** to `main` that change `src/**`, `scripts/**`, `.github/scripts/**`, `.github/labels.json`, `package.json`, `package-lock.json`, `vite.config.js` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
@@ -25,10 +24,10 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
 
 - **Workflow File:** `.github/workflows/cypress-e2e.yml`
 - **Triggers:**
-    - On **push** to `main` (for changes in `src/**`, `cypress/**`, `package.json`, or `cypress.config.*`)
-    - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files still trigger it)
+    - On **push** to `main` (for changes in `src/**`, `cypress/**`, `package.json`, or `cypress.config.*`): the live smoke job only; the emulator job is skipped because the pull request already passed the same specs on the same code
+    - On **pull requests** to `main` that change `src/**`, `cypress/**`, `cypress.config.js`, `scripts/**`, `firebase/**`, `firebase.json`, `.env.emulators`, `index.html`, `public/**`, `package.json`, `package-lock.json`, `vite.config.js` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
     - Manually via **Actions → "Run workflow"**
-- **Purpose:** Runs the Cypress end-to-end (E2E) specs against the local Firebase emulators on every pull request and push, to verify user flows and integration with the backend services. Runs `npm run cy:run:e2e:emulators` — see [Scripts](../README.md#scripts).
+- **Purpose:** Runs the Cypress end-to-end (E2E) specs against the local Firebase emulators on every pull request, to verify user flows and integration with the backend services. Runs `npm run cy:run:e2e:emulators` — see [Scripts](../README.md#scripts).
 - **Emulator job:** `Run Cypress E2E Tests (Firebase emulators)`. It needs no secrets, so it runs on every PR, Dependabot's included. It installs Java (`actions/setup-java`, Temurin 21), caches `~/.cache/firebase/emulators` and the `npx` download of the pinned Firebase CLI (`~/.npm/_npx`) and sets the Firebase CLI to non-interactive (`CI`, no update check). Expect 20 to 40 seconds of emulator start-up on top of the run.
 - **Live smoke job:** `Run Cypress Live Smoke Test` runs on pushes to `main` (and manual runs) only, never on a PR. It runs the one read-only spec in `cypress/e2e-live/` (sign in, read the travellers list) with the Firebase and `CYPRESS_USER_*` secrets, to catch drift the emulators cannot: keys, console settings, deployed rules and real token signing. The dev server is awaited with a `curl` retry loop (up to 60 seconds) rather than the Cypress action's URL ping, which gave up on the first unexpected connection error. The smoke test needs a dedicated account holding no real data, and no Storage lifecycle rule is set on its `images/<uid>/` prefix: the spec writes nothing, and an earlier 1-day rule deleted a real account's photos.
 
@@ -38,8 +37,7 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
 
 - **Workflow File:** `.github/workflows/cypress-component.yml`
 - **Triggers:**
-    - On **push** to `main` (for changes in `src/**/__tests__/**`, `src/**/*.jsx`, `src/**/*.tsx`, `cypress.config.*`, or `package.json`)
-    - On **pull requests** to `main`, except those that only change Markdown, `.claude/**`, `.devcontainer/**`, `.vscode/**` or `.github/**` (workflow files still trigger it)
+    - On **pull requests** to `main` that change `src/**`, `cypress.config.js`, `cypress/support/**`, `scripts/seed-emulators.mjs`, `package.json`, `package-lock.json`, `vite.config.js` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs Cypress component tests to verify individual React components in isolation. Runs `npm run cy:run:ct` — see [Scripts](../README.md#scripts).
 
@@ -68,7 +66,7 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
 
 - **Workflow File:** `.github/workflows/project-item-lifecycle.yml`
 - **Triggers:**
-    - On **pull_request_target** events (`opened`, `reopened`, `synchronize`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`)
+    - On **pull_request_target** events (`opened`, `reopened`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`). Not `synchronize`: a push does not change the status, which `opened`, `ready_for_review` and `converted_to_draft` already set, and every run is billed a full minute
 - **Purpose:** Keeps the issues a pull request closes (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. The board has one card per piece of work: the issue, with its PRs under **Linked pull requests**. A PR with no linked issue gets a tracking issue; Dependabot PRs get none and appear as their own card instead. Merging removes the `in-progress` label from the issues it closes and, when it closes exactly one issue (a tracking issue included), copies the PR's type and area labels to it; a PR closing several issues leaves their labels alone.
 - **Secret (Optional but Recommended):** `PROJECT_AUTOMATION_TOKEN`
     - Used for Project v2 write operations when `github.token` does not have enough access.
@@ -212,8 +210,8 @@ Fetch the current README first with `gh project view 2 --owner andres-codigo --f
 - **Triggers:** On **push** to `main`
 - **Purpose:** Works out the version from the conventional-commit titles of the squash-merged PRs and keeps one release PR open. The release PR bumps `version` in `package.json` and `package-lock.json` and updates `CHANGELOG.md`; merging it tags the release and publishes a GitHub Release. While the app is 0.x, `feat:` and `feature:` bump the minor version; `enhancement:`, `fix:` and `perf:` bump the patch. `chore`, `docs`, `test` and `refactor` PRs are hidden from the changelog and do not release on their own. The type list is `changelog-sections` in `release-please-config.json`; a type missing from it is ignored.
 - **History:** `bootstrap-sha` in the config starts the changelog at the commit tagged `v0.20.0`; earlier commits are ignored. Releases after that follow the tags.
-- **Token:** The release PR is opened with `PROJECT_AUTOMATION_TOKEN` (see [Token Rotation](#token-rotation--recovery-guide)), because PRs opened with the default token do not trigger the test workflows the `main` ruleset requires. Project Item Lifecycle skips branches starting `release-please--`, so a release PR gets no tracking issue.
-- **Never edit `version` by hand.** After merging a `feat` or `fix` PR, merge the open release PR once its checks are green.
+- **Token:** The release PR is opened with `PROJECT_AUTOMATION_TOKEN` (see [Token Rotation](#token-rotation--recovery-guide)), because PRs opened with the default token do not trigger workflows. The test workflows skip release PRs (a version bump and changelog only; the code was tested on its own PR), so a release PR shows no test checks. Project Item Lifecycle skips branches starting `release-please--`, so a release PR gets no tracking issue.
+- **Never edit `version` by hand.** After merging a `feat` or `fix` PR, merge the open release PR once its checks are green (a release PR has no test checks, so merge it when its other checks pass).
 
 ---
 
@@ -229,7 +227,7 @@ The **Protect main** repository ruleset (**Settings → Rules → Rulesets**) ap
 
 - Changes must arrive through a pull request, merged by squash or rebase (no approvals required)
 - Force-pushes and deleting the branch are blocked
-- **No required status checks.** The test workflows skip docs- and tooling-only pull requests with `paths` filters, and a required check that never runs would block those pull requests from merging
+- **No required status checks.** The test workflows skip pull requests that touch none of their files with `paths` filters, and skip drafts and release-please pull requests, and a required check that never runs would block those pull requests from merging
 
 The ruleset is kept in [`.github/rulesets/protect-main.json`](../.github/rulesets/protect-main.json). To recreate it, or apply an edit, run as a repository admin:
 
@@ -267,5 +265,7 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 | Guard - start-issue script        | `.github/workflows/start-issue-guard.yml`      | Automation       | PR Events        |
 
 ---
+
+> **Minutes:** Every job is billed in whole minutes, so the test workflows run only on ready pull requests that touch their files (see each trigger above), the Cypress jobs cache `~/.cache/Cypress` by lockfile, Vitest skips the Cypress binary download (`CYPRESS_INSTALL_BINARY=0`), and every job has a `timeout-minutes` so a hung run cannot use the 6-hour default.
 
 > **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly. The Vitest and component workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` secrets; only the live smoke job also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`. The emulator E2E job uses none.

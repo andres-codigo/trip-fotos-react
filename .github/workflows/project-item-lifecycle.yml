@@ -6,7 +6,6 @@ on:
             [
                 opened,
                 reopened,
-                synchronize,
                 edited,
                 ready_for_review,
                 converted_to_draft,
@@ -22,6 +21,7 @@ permissions:
 jobs:
     sync-project-lifecycle:
         runs-on: ubuntu-latest
+        timeout-minutes: 5
 
         steps:
             - name: Checkout label config
@@ -363,7 +363,7 @@ jobs:
                         }
                       }
 
-                      if (['opened', 'reopened', 'synchronize', 'ready_for_review', 'converted_to_draft'].includes(action)) {
+                      if (['opened', 'reopened', 'ready_for_review', 'converted_to_draft'].includes(action)) {
                         const openStatus = pr.draft ? STATUS.IN_PROGRESS : STATUS.IN_REVIEW
                         await setIssueStatuses(openStatus)
                         await setStatus(prItemId, openStatus)

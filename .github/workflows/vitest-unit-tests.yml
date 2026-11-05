@@ -4,30 +4,21 @@ permissions:
     pull-requests: write
 
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - 'src/**'
-            - 'package.json'
-            - 'vite.config.*'
-            - '**/*.test.{js,jsx,ts,tsx}'
-            - '**/*.spec.{js,jsx,ts,tsx}'
     pull_request:
         branches:
             - main
-        # Docs and tooling-guidance changes cannot affect the app; workflow edits still run everything
+        # Draft PRs wait for ready_for_review: /verify already ran the same gates locally
+        types: [opened, synchronize, reopened, ready_for_review]
+        # Only files Vitest reads or runs; its tests also live under scripts/ and .github/scripts/
         paths:
-            - '**'
-            - '!**/*.md'
-            - '!.claude/**'
-            - '!.devcontainer/**'
-            - '!.vscode/**'
-            - '!.github/**'
-            - '.github/workflows/**'
-            # The label config's tests live under .github/scripts
-            - '.github/labels.json'
+            - 'src/**'
+            - 'scripts/**'
             - '.github/scripts/**'
+            - '.github/labels.json'
+            - 'package.json'
+            - 'package-lock.json'
+            - 'vite.config.js'
+            - '.github/workflows/vitest-unit-tests.yml'
     workflow_dispatch:
 
 concurrency:
@@ -37,6 +28,7 @@ concurrency:
 jobs:
     test:
         name: Run Vitest Unit Tests
+        if: github.event_name != 'pull_request' || (!github.event.pull_request.draft && !startsWith(github.head_ref, 'release-please--'))
         runs-on: ubuntu-latest
         timeout-minutes: 10
         env:
@@ -58,8 +50,11 @@ jobs:
                   node-version: '24'
                   cache: 'npm'
 
+            # Vitest never runs Cypress, so skip its binary download
             - name: Install dependencies
               run: npm ci
+              env:
+                  CYPRESS_INSTALL_BINARY: '0'
 
             # A version bump leaves its pinned allowScripts entry stale, and npm ci then silently skips that package's install script
             - name: Check allowScripts covers every install script
