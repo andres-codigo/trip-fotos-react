@@ -1,0 +1,301 @@
+// Project Item Lifecycle: syncs a pull request and the issues it closes with the Project board.
+// The workflow only wires the trigger; see docs/ci-cd.md for the board rules.
+import {
+	loadLabelConfig,
+	statusLabel,
+	managedLabelNames,
+	diffManagedLabels,
+} from './labels.mjs'
+import {
+	STATUS,
+	createProjectClient,
+	isResourceAccessError,
+} from './project.mjs'
+
+export const run = async ({ github, context, core, getOctokit }) => {
+	const owner = context.repo.owner
+	const repo = context.repo.repo
+	const pr = context.payload.pull_request
+
+	const labelConfig = loadLabelConfig(process.env.GITHUB_WORKSPACE)
+	const BLOCKED_LABEL = statusLabel(labelConfig, 'blocked')
+	const IN_PROGRESS_LABEL = statusLabel(labelConfig, 'inProgress')
+	const PROJECT_AUTOMATION_TOKEN = process.env.PROJECT_AUTOMATION_TOKEN || ''
+
+	const TRACKING_MARKER = /Tracking-Issue:\s*#(\d+)/i
+	const KEYWORD_LINK = /(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+#(\d+)/gi
+	const TRACKING_PR_LINE = `- Pull request: #${pr.number}`
+	const DEPENDABOT_LOGINS = new Set(['app/dependabot', 'dependabot[bot]'])
+
+	const isDependabotAuthor = (login = '') => DEPENDABOT_LOGINS.has(login)
+	const isDependabotPR = isDependabotAuthor(pr.user?.login)
+
+	const extractLinkedIssueNumbers = (body = '') => {
+		const markerMatch = body.match(TRACKING_MARKER)
+		if (markerMatch) {
+			return [Number(markerMatch[1])]
+		}
+
+		const numbers = Array.from(body.matchAll(KEYWORD_LINK), (match) =>
+			Number(match[3]),
+		)
+		return [...new Set(numbers)]
+	}
+
+	const projectGithub = PROJECT_AUTOMATION_TOKEN
+		? getOctokit(PROJECT_AUTOMATION_TOKEN)
+		: github
+
+	const { ensureItem, setStatus } = createProjectClient((query, variables) =>
+		projectGithub.graphql(query, variables),
+	)
+
+	const getLivePullRequest = async () => {
+		const response = await github.rest.pulls.get({
+			owner,
+			repo,
+			pull_number: pr.number,
+		})
+
+		return response.data
+	}
+
+	const ensureProjectItem = async (contentId) => {
+		try {
+			return await ensureItem(contentId)
+		} catch (error) {
+			if (isResourceAccessError(error)) {
+				core.warning(
+					'Project write was skipped because the workflow token cannot write to the project. Configure or rotate PROJECT_AUTOMATION_TOKEN (see .github/project-automation-token.md).',
+				)
+				return null
+			}
+
+			throw error
+		}
+	}
+
+	const ensureAssignee = async (number, assignee) => {
+		if (!assignee) return
+		await github.rest.issues.addAssignees({
+			owner,
+			repo,
+			issue_number: number,
+			assignees: [assignee],
+		})
+	}
+
+	// Newest first, so the tracking issue of a recent PR is found on the first page
+	const findTrackingIssueNumber = async () => {
+		const pages = github.paginate.iterator(github.rest.issues.listForRepo, {
+			owner,
+			repo,
+			state: 'all',
+			per_page: 100,
+		})
+		for await (const { data } of pages) {
+			const found = data.find(
+				(issue) =>
+					!issue.pull_request &&
+					typeof issue.body === 'string' &&
+					issue.body.includes(TRACKING_PR_LINE),
+			)
+			if (found) return found.number
+		}
+		return null
+	}
+
+	const createTrackingIssue = async (existingBody = '') => {
+		const issueTitle = `Tracking: ${pr.title}`
+		const issueBody = [
+			'## Summary',
+			'Automatically created lifecycle tracking issue for this pull request.',
+			'',
+			TRACKING_PR_LINE,
+			`- Branch: \`${pr.head.ref}\``,
+			'',
+			'## Notes',
+			'- This issue is managed by `.github/workflows/project-item-lifecycle.yml`.',
+		].join('\n')
+
+		const created = await github.rest.issues.create({
+			owner,
+			repo,
+			title: issueTitle,
+			body: issueBody,
+		})
+
+		const newBody =
+			`${existingBody}\n\nTracking-Issue: #${created.data.number}`.trim()
+		await github.rest.pulls.update({
+			owner,
+			repo,
+			pull_number: pr.number,
+			body: newBody,
+		})
+
+		return created.data.number
+	}
+
+	const resolveIssueNumbers = async () => {
+		// Release PRs have no issue to close and should not get a tracking issue
+		if (isDependabotPR || pr.head?.ref?.startsWith('release-please--'))
+			return []
+
+		const livePr = await getLivePullRequest()
+		const liveBody = livePr.body || ''
+
+		const fromBody = extractLinkedIssueNumbers(liveBody)
+		if (fromBody.length > 0) return fromBody
+
+		const existingIssue = await findTrackingIssueNumber()
+		if (existingIssue) {
+			const newBody =
+				`${liveBody}\n\nTracking-Issue: #${existingIssue}`.trim()
+			await github.rest.pulls.update({
+				owner,
+				repo,
+				pull_number: pr.number,
+				body: newBody,
+			})
+			return [existingIssue]
+		}
+
+		return [await createTrackingIssue(liveBody)]
+	}
+
+	const getIssue = async (issueNumber) => {
+		const issue = await github.rest.issues.get({
+			owner,
+			repo,
+			issue_number: issueNumber,
+		})
+		return issue.data
+	}
+
+	const closeIssueIfOpen = async (issue) => {
+		if (issue.state === 'open') {
+			await github.rest.issues.update({
+				owner,
+				repo,
+				issue_number: issue.number,
+				state: 'closed',
+			})
+		}
+	}
+
+	const issueNumbers = await resolveIssueNumbers()
+	const linkedIssues = []
+	for (const issueNumber of issueNumbers) {
+		const issue = await getIssue(issueNumber)
+		const labels = (issue.labels || []).map((label) =>
+			typeof label === 'string' ? label : label.name,
+		)
+		linkedIssues.push({
+			number: issueNumber,
+			state: issue.state,
+			labels,
+			itemId: await ensureProjectItem(issue.node_id),
+			isBlocked: labels.includes(BLOCKED_LABEL),
+			isInProgress: labels.includes(IN_PROGRESS_LABEL),
+		})
+	}
+	// The issue card carries the status, so a PR only gets its own card when nothing tracks it
+	const prItemId =
+		linkedIssues.length === 0 ? await ensureProjectItem(pr.node_id) : null
+
+	const author = pr.user?.login
+	const shouldAssignAuthor = Boolean(author) && !isDependabotAuthor(author)
+	const action = context.payload.action
+
+	// A blocked issue stays Blocked until its label is removed, however its PR moves
+	const setIssueStatuses = async (optionId) => {
+		for (const issue of linkedIssues) {
+			if (!issue.isBlocked) await setStatus(issue.itemId, optionId)
+		}
+	}
+
+	if (action === 'opened' || action === 'reopened') {
+		if (shouldAssignAuthor) {
+			for (const issue of linkedIssues) {
+				await ensureAssignee(issue.number, author)
+			}
+			await ensureAssignee(pr.number, author)
+		}
+	}
+
+	if (
+		[
+			'opened',
+			'reopened',
+			'ready_for_review',
+			'converted_to_draft',
+		].includes(action)
+	) {
+		const openStatus = pr.draft ? STATUS.IN_PROGRESS : STATUS.IN_REVIEW
+		await setIssueStatuses(openStatus)
+		await setStatus(prItemId, openStatus)
+	}
+
+	// The merged PR's file-based labels describe the work better than any guess made at intake
+	const copyLabelsToIssue = async (issue) => {
+		const livePr = await getLivePullRequest()
+		const managed = managedLabelNames(labelConfig)
+		const wanted = livePr.labels
+			.map((label) => label.name)
+			.filter((name) => managed.has(name))
+		if (wanted.length === 0) return
+		const { add, remove } = diffManagedLabels(
+			labelConfig,
+			issue.labels,
+			wanted,
+		)
+		if (add.length) {
+			await github.rest.issues.addLabels({
+				owner,
+				repo,
+				issue_number: issue.number,
+				labels: add,
+			})
+		}
+		for (const name of remove) {
+			await github.rest.issues.removeLabel({
+				owner,
+				repo,
+				issue_number: issue.number,
+				name,
+			})
+		}
+	}
+
+	if (action === 'closed') {
+		if (pr.merged) {
+			for (const issue of linkedIssues) {
+				// A PR closing several issues has labels for the batch, not for each issue
+				if (linkedIssues.length === 1) await copyLabelsToIssue(issue)
+				await setStatus(issue.itemId, STATUS.DONE)
+				await closeIssueIfOpen(issue)
+				// Bot label events are ignored by the intake workflow, so this cannot move the issue off Done
+				if (issue.isInProgress) {
+					await github.rest.issues.removeLabel({
+						owner,
+						repo,
+						issue_number: issue.number,
+						name: IN_PROGRESS_LABEL,
+					})
+				}
+			}
+			await setStatus(prItemId, STATUS.DONE)
+		} else {
+			// Work flagged with the in-progress label carries on after an abandoned PR
+			for (const issue of linkedIssues) {
+				if (!issue.isBlocked) {
+					await setStatus(
+						issue.itemId,
+						issue.isInProgress ? STATUS.IN_PROGRESS : STATUS.READY,
+					)
+				}
+			}
+		}
+	}
+}
