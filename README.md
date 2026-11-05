@@ -364,6 +364,7 @@ trip-fotos-react/
 │   ├── settings.json           # Shared Claude Code permissions and hooks
 │   └── settings.local.json     # Personal Claude Code overrides (gitignored)
 ├── .github/
+│   ├── actions/                # Composite actions shared by the workflows (Node and dependency setup)
 │   ├── agents/                 # Scaffolding workflows (shared by Copilot and Claude Code)
 │   ├── instructions/           # Domain-specific guidance (shared by Copilot and Claude Code)
 │   ├── rulesets/               # Repository rulesets as JSON (applied via gh api)
