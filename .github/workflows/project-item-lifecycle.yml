@@ -20,6 +20,8 @@ permissions:
 
 jobs:
     sync-project-lifecycle:
+        # An edit that left the body alone cannot change which issues the PR closes
+        if: github.event.action != 'edited' || github.event.changes.body != null
         runs-on: ubuntu-latest
         timeout-minutes: 5
 
@@ -32,12 +34,6 @@ jobs:
             - name: Sync issue and project lifecycle
               uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
               env:
-                  PROJECT_ID: PVT_kwHOAybMeM4BCojE
-                  PROJECT_STATUS_FIELD_ID: PVTSSF_lAHOAybMeM4BCojEzg0yW4g
-                  STATUS_READY_OPTION_ID: f75ad846
-                  STATUS_IN_PROGRESS_OPTION_ID: 47fc9ee4
-                  STATUS_IN_REVIEW_OPTION_ID: 5e639cc6
-                  STATUS_DONE_OPTION_ID: 98236657
                   # Optional PAT for Project v2 writes. Rotation/recreation guide:
                   # .github/project-automation-token.md
                   PROJECT_AUTOMATION_TOKEN: ${{ secrets['PROJECT_AUTOMATION_TOKEN'] }}
@@ -48,16 +44,11 @@ jobs:
                       const repo = context.repo.repo
                       const pr = context.payload.pull_request
 
-                      const PROJECT_ID = process.env.PROJECT_ID
-                      const STATUS_FIELD_ID = process.env.PROJECT_STATUS_FIELD_ID
-                      const STATUS = {
-                        READY: process.env.STATUS_READY_OPTION_ID,
-                        IN_PROGRESS: process.env.STATUS_IN_PROGRESS_OPTION_ID,
-                        IN_REVIEW: process.env.STATUS_IN_REVIEW_OPTION_ID,
-                        DONE: process.env.STATUS_DONE_OPTION_ID,
-                      }
                       const { loadLabelConfig, statusLabel, managedLabelNames, diffManagedLabels } = await import(
                         `${process.env.GITHUB_WORKSPACE}/.github/scripts/labels.mjs`
+                      )
+                      const { STATUS, createProjectClient, isResourceAccessError } = await import(
+                        `${process.env.GITHUB_WORKSPACE}/.github/scripts/project.mjs`
                       )
                       const labelConfig = loadLabelConfig(process.env.GITHUB_WORKSPACE)
                       const BLOCKED_LABEL = statusLabel(labelConfig, 'blocked')
@@ -71,11 +62,6 @@ jobs:
 
                       const isDependabotAuthor = (login = '') => DEPENDABOT_LOGINS.has(login)
                       const isDependabotPR = isDependabotAuthor(pr.user?.login)
-
-                      const isResourceAccessError = (error) => {
-                        const message = String(error?.message || '')
-                        return message.includes('Resource not accessible by integration')
-                      }
 
                       const extractLinkedIssueNumbers = (body = '') => {
                         const markerMatch = body.match(TRACKING_MARKER)
@@ -91,13 +77,7 @@ jobs:
                         ? getOctokit(PROJECT_AUTOMATION_TOKEN)
                         : github
 
-                      const graphql = async (query, variables) => {
-                        return github.graphql(query, variables)
-                      }
-
-                      const projectGraphql = async (query, variables) => {
-                        return projectGithub.graphql(query, variables)
-                      }
+                      const { ensureItem, setStatus } = createProjectClient((query, variables) => projectGithub.graphql(query, variables))
 
                       const getLivePullRequest = async () => {
                         const response = await github.rest.pulls.get({
@@ -109,72 +89,9 @@ jobs:
                         return response.data
                       }
 
-                      const addProjectItem = async (contentId) => {
-                        const data = await projectGraphql(
-                          `mutation($projectId: ID!, $contentId: ID!) {
-                            addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
-                              item { id }
-                            }
-                          }`,
-                          {
-                            projectId: PROJECT_ID,
-                            contentId,
-                          },
-                        )
-
-                        return data?.addProjectV2ItemById?.item?.id || null
-                      }
-
-                      const getProjectItemIdByContentId = async (contentId) => {
-                        let hasNextPage = true
-                        let cursor = null
-
-                        while (hasNextPage) {
-                          const data = await projectGraphql(
-                            `query($projectId: ID!, $cursor: String) {
-                              node(id: $projectId) {
-                                ... on ProjectV2 {
-                                  items(first: 100, after: $cursor) {
-                                    pageInfo {
-                                      hasNextPage
-                                      endCursor
-                                    }
-                                    nodes {
-                                      id
-                                      content {
-                                        __typename
-                                        ... on Issue { id }
-                                        ... on PullRequest { id }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }`,
-                            {
-                              projectId: PROJECT_ID,
-                              cursor,
-                            },
-                          )
-
-                          const items = data?.node?.items?.nodes || []
-                          const found = items.find((item) => item?.content?.id === contentId)
-                          if (found?.id) return found.id
-
-                          hasNextPage = data?.node?.items?.pageInfo?.hasNextPage || false
-                          cursor = data?.node?.items?.pageInfo?.endCursor || null
-                        }
-
-                        return null
-                      }
-
                       const ensureProjectItem = async (contentId) => {
                         try {
-                          let itemId = await getProjectItemIdByContentId(contentId)
-                          if (!itemId) {
-                            itemId = await addProjectItem(contentId)
-                          }
-                          return itemId
+                          return await ensureItem(contentId)
                         } catch (error) {
                           if (isResourceAccessError(error)) {
                             core.warning('Project write was skipped because the workflow token cannot write to the project. Configure or rotate PROJECT_AUTOMATION_TOKEN (see .github/project-automation-token.md).')
@@ -185,64 +102,24 @@ jobs:
                         }
                       }
 
-                      const setStatus = async (itemId, optionId) => {
-                        if (!itemId || !optionId) return
-
-                        await projectGraphql(
-                          `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                            updateProjectV2ItemFieldValue(
-                              input: {
-                                projectId: $projectId
-                                itemId: $itemId
-                                fieldId: $fieldId
-                                value: { singleSelectOptionId: $optionId }
-                              }
-                            ) {
-                              projectV2Item { id }
-                            }
-                          }`,
-                          {
-                            projectId: PROJECT_ID,
-                            itemId,
-                            fieldId: STATUS_FIELD_ID,
-                            optionId,
-                          },
-                        )
-                      }
-
-                      const ensureIssueAssignee = async (issueNumber, assignee) => {
+                      const ensureAssignee = async (number, assignee) => {
                         if (!assignee) return
-                        await github.rest.issues.addAssignees({
-                          owner,
-                          repo,
-                          issue_number: issueNumber,
-                          assignees: [assignee],
-                        })
+                        await github.rest.issues.addAssignees({ owner, repo, issue_number: number, assignees: [assignee] })
                       }
 
-                      const ensurePRAssignee = async (prNumber, assignee) => {
-                        if (!assignee) return
-                        await github.rest.issues.addAssignees({
-                          owner,
-                          repo,
-                          issue_number: prNumber,
-                          assignees: [assignee],
-                        })
-                      }
-
+                      // Newest first, so the tracking issue of a recent PR is found on the first page
                       const findTrackingIssueNumber = async () => {
-                        const allIssues = await github.paginate(github.rest.issues.listForRepo, {
+                        const pages = github.paginate.iterator(github.rest.issues.listForRepo, {
                           owner,
                           repo,
                           state: 'all',
                           per_page: 100,
                         })
-
-                        const existing = allIssues.find((issue) => {
-                          return !issue.pull_request && typeof issue.body === 'string' && issue.body.includes(TRACKING_PR_LINE)
-                        })
-
-                        return existing?.number || null
+                        for await (const { data } of pages) {
+                          const found = data.find((issue) => !issue.pull_request && typeof issue.body === 'string' && issue.body.includes(TRACKING_PR_LINE))
+                          if (found) return found.number
+                        }
+                        return null
                       }
 
                       const createTrackingIssue = async (existingBody = '') => {
@@ -310,20 +187,9 @@ jobs:
                         return issue.data
                       }
 
-                      const closeIssueIfOpen = async (issueNumber) => {
-                        const issue = await github.rest.issues.get({
-                          owner,
-                          repo,
-                          issue_number: issueNumber,
-                        })
-
-                        if (issue.data.state === 'open') {
-                          await github.rest.issues.update({
-                            owner,
-                            repo,
-                            issue_number: issueNumber,
-                            state: 'closed',
-                          })
+                      const closeIssueIfOpen = async (issue) => {
+                        if (issue.state === 'open') {
+                          await github.rest.issues.update({ owner, repo, issue_number: issue.number, state: 'closed' })
                         }
                       }
 
@@ -334,6 +200,7 @@ jobs:
                         const labels = (issue.labels || []).map((label) => (typeof label === 'string' ? label : label.name))
                         linkedIssues.push({
                           number: issueNumber,
+                          state: issue.state,
                           labels,
                           itemId: await ensureProjectItem(issue.node_id),
                           isBlocked: labels.includes(BLOCKED_LABEL),
@@ -357,9 +224,9 @@ jobs:
                       if (action === 'opened' || action === 'reopened') {
                         if (shouldAssignAuthor) {
                           for (const issue of linkedIssues) {
-                            await ensureIssueAssignee(issue.number, author)
+                            await ensureAssignee(issue.number, author)
                           }
-                          await ensurePRAssignee(pr.number, author)
+                          await ensureAssignee(pr.number, author)
                         }
                       }
 
@@ -390,7 +257,7 @@ jobs:
                             // A PR closing several issues has labels for the batch, not for each issue
                             if (linkedIssues.length === 1) await copyLabelsToIssue(issue)
                             await setStatus(issue.itemId, STATUS.DONE)
-                            await closeIssueIfOpen(issue.number)
+                            await closeIssueIfOpen(issue)
                             // Bot label events are ignored by the intake workflow, so this cannot move the issue off Done
                             if (issue.isInProgress) {
                               await github.rest.issues.removeLabel({
