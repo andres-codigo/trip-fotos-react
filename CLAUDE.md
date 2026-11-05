@@ -18,7 +18,7 @@ Run `/finish-pr` when the work passes `/verify`: README Status and Project READM
 
 - Use British English (`en-GB`) for all code comments, documentation, and strings (e.g., `colour`, `behaviour`, `optimise`).
 - Commit messages follow `en-GB` spelling conventions.
-- Label every issue, epic or PR number with a few words, even in one-line progress notes: `ISSUE#438(#442) (upload progress)` for a piece of work, `#378 (lean the repo)` otherwise. Never write a bare `#N`.
+- Label every issue, epic or PR number with a few words, never a bare `#N`: `ISSUE#438(#442) (upload progress)` for a piece of work, `#378 (lean the repo)` otherwise.
 
 ## Domain-Specific Guidance
 
@@ -61,35 +61,23 @@ Detail lives in `.claude/` and [docs/ai-assistance.md](docs/ai-assistance.md).
 - **Agents** (`.claude/agents/`, wrappers around `.github/agents/*.agent.md` — edit the workflow there): `create-component`, `create-page`, `create-redux-slice`, `create-hook`. Scaffold every new component, page, hook and Redux slice with its agent, not by hand; `/start-issue` prompts for it
 - **`.claude/settings.json`** — shared permissions and a `PostToolUse` hook (`.claude/hooks/lint-edited-file.mjs`) that lints every edited file
 - **`/verify`** — runs the gates the change can affect as a pass/fail table; run before committing. `/verify all` forces every gate, `/verify e2e` adds the emulator E2E suite. If the code changes mid-run, stop it and start a fresh one; never rely on a stale result ([details](docs/ai-assistance.md#skills))
-- **Issue order** — never start an issue with an open blocked-by link or `Do after` line; work is pulled Triage → Backlog → Ready → In progress, and only epics start from Backlog. On "start #N" run `/start-issue` yourself, without asking; ask only when another issue in the workstream is already Ready. A newly created issue goes through the same sequence before the first file change ([Starting an issue](docs/ci-cd.md#starting-an-issue), [board statuses](docs/ci-cd.md#project-board-statuses))
+- **Issue order** — on "start #N", or after creating an issue, run `/start-issue` yourself before any file change; it enforces blockers and board order ([Starting an issue](docs/ci-cd.md#starting-an-issue), [board statuses](docs/ci-cd.md#project-board-statuses))
 - **Vue parity programme** — archived in `docs/ai-assisted-dev-story/vue-parity-programme/`; not loaded
 - Personal overrides go in the gitignored `.claude/settings.local.json`
 
 ## Keeping README.md in sync
 
-`README.md` is the user-facing source of truth for setup, scripts, and structure; it stays a summary, with detail in `docs/` (`ci-cd.md`, `testing.md`, `ai-assistance.md`, `local-https.md`). Update both in the same change whenever you:
-
-- Add, remove, or rename an `npm run` script (Scripts section)
-- Add, remove, or rename a `.env` variable (`.env.example` and the Environment Variables table)
-- Add, remove, or rename a top-level folder, or a `src/` subfolder (Folder Structure tree)
-- Add or change a GitHub Actions workflow (`docs/ci-cd.md` and the README Testing and CI table)
-- Add, remove, or materially change a user-facing feature (Features section)
-- Add or restructure `.claude/` or `.github/` guidance files (`docs/ai-assistance.md` and the README AI Assistance summary)
-- Change the README's About, Features, Stack or Status sections (the GitHub Project README too)
-
-The Status refresh, Project README and status update at the end of a change are in `/finish-pr`.
+`README.md` is the user-facing source of truth for setup, scripts and structure; it stays a summary, with detail in `docs/`. Update it in the same change as any user-facing feature, any new, renamed or removed top-level or `src/` folder (Folder Structure tree), or any change to its About, Features, Stack or Status sections. Script, env, workflow and guidance-file changes load the full list from `.claude/rules/readme-sync.md`; the end-of-change refresh is in `/finish-pr`.
 
 ## Versioning
 
-release-please works the version out from PR titles on `main`; never edit `version` by hand. `feat:`/`feature:` bumps minor, `enhancement:`, `fix:` and `perf:` bump patch, and `chore`, `docs`, `test` and `refactor` do not release. `/finish-pr` covers merging the release PR ([details](docs/ci-cd.md#9-release-please)).
+release-please sets the version from PR titles on `main`; never edit `version` by hand. Title prefixes and the release PR: [details](docs/ci-cd.md#9-release-please), `/finish-pr`.
 
 ## Things to avoid
 
 - Do not commit `.env` or `certs/`
 - Do not mock the Firebase Realtime Database in integration tests
 - Do not create new top-level `src/` folders without updating the README Folder Structure tree
-- Do not add a route to `PATHS` without adding it to the `rewrites` allow-list in `vercel.json` (a Vitest drift check enforces it)
-- Do not add a database or Storage field, or a write limit, without updating `firebase/database.rules.json` / `firebase/storage.rules` to match — client-side validation must mirror the rules. Deploy rule changes with `npm run firebase:rules` before the production deploy
-- Do not call a new external origin without adding it to the CSP `connect-src` in `vercel.json`
 - Do not re-inline domain-specific detail here — extend the relevant `.github/instructions/*.instructions.md` file instead
 - Do not let `README.md` go stale — see "Keeping README.md in sync" above
+- Route, Firebase rules and CSP changes: see `.claude/rules/deploy-config.md`
