@@ -8,13 +8,13 @@ Every `uses:` in `.github/workflows` is pinned to a full commit SHA with the rel
 
 - **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
 - **Triggers:**
-    - On **pull requests** to `main` that change `src/**`, `scripts/**`, `.github/scripts/**`, `.github/labels.json`, `package.json`, `package-lock.json`, `vite.config.js` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
+    - On **pull requests** to `main` that change `src/**`, `scripts/**`, `.github/scripts/**`, `.github/labels.json`, `.github/actions/**`, `package.json`, `package-lock.json`, `vite.config.js` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
 - **Merge Blocking:** Not a required check — see [Branch Protection](#-branch-protection). Don't merge a pull request whose run failed.
 
-Runs `npm run vitest:coverage -- --run`, which executes the suite once with coverage — see [Scripts](../README.md#scripts) for other Vitest commands.
+Runs `npm run vitest:coverage -- --run`, which executes the suite once with coverage — see [Scripts](../README.md#scripts) for other Vitest commands. The coverage report is uploaded only when the run fails, and kept for 7 days.
 
 It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, which fail when a route in `PATHS` is missing from the `vercel.json` rewrites, a collection the store requests has no rule in `firebase/database.rules.json`, or the README Scripts and Environment Variables sections drift from `package.json` and `.env.example`. A README-only change does not trigger the job (Markdown is excluded), so a script entry deleted from the README alone is caught on the next code change; field-level rules still need the manual check below.
 
@@ -25,7 +25,7 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
 - **Workflow File:** `.github/workflows/cypress-e2e.yml`
 - **Triggers:**
     - On **push** to `main` (for changes in `src/**`, `cypress/**`, `package.json`, or `cypress.config.*`): the live smoke job only; the emulator job is skipped because the pull request already passed the same specs on the same code
-    - On **pull requests** to `main` that change `src/**`, `cypress/**`, `cypress.config.js`, `scripts/**`, `firebase/**`, `firebase.json`, `.env.emulators`, `index.html`, `public/**`, `package.json`, `package-lock.json`, `vite.config.js` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
+    - On **pull requests** to `main` that change `src/**`, `cypress/**`, `cypress.config.js`, `scripts/**`, `firebase/**`, `firebase.json`, `.env.emulators`, `index.html`, `public/**`, `package.json`, `package-lock.json`, `vite.config.js`, `.github/actions/**` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the Cypress end-to-end (E2E) specs against the local Firebase emulators on every pull request, to verify user flows and integration with the backend services. Runs `npm run cy:run:e2e:emulators` — see [Scripts](../README.md#scripts).
 - **Emulator job:** `Run Cypress E2E Tests (Firebase emulators)`. It needs no secrets, so it runs on every PR, Dependabot's included. It installs Java (`actions/setup-java`, Temurin 21), caches `~/.cache/firebase/emulators` and the `npx` download of the pinned Firebase CLI (`~/.npm/_npx`) and sets the Firebase CLI to non-interactive (`CI`, no update check). Expect 20 to 40 seconds of emulator start-up on top of the run.
@@ -267,6 +267,6 @@ Some workflows, like the **Vitest test runner**, can be manually executed from t
 
 ---
 
-> **Minutes:** Every job is billed in whole minutes, so the test workflows run only on ready pull requests that touch their files (see each trigger above), the Cypress jobs cache `~/.cache/Cypress` by lockfile, Vitest skips the Cypress binary download (`CYPRESS_INSTALL_BINARY=0`), and every job has a `timeout-minutes` so a hung run cannot use the 6-hour default.
+> **Minutes:** Every job is billed in whole minutes, so the test workflows run only on ready pull requests that touch their files (see each trigger above), the Cypress jobs cache `~/.cache/Cypress` by lockfile, the shared `.github/actions/setup-node` action (Node, npm cache, Cypress binary cache, `npm ci`) does the setup for Vitest and the E2E jobs, with Vitest skipping the Cypress binary download (`CYPRESS_INSTALL_BINARY=0`), the component job leaves the install and caching to the Cypress action, and every job has a `timeout-minutes` so a hung run cannot use the 6-hour default.
 
-> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly. The Vitest and component workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` secrets; only the live smoke job also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`. The emulator E2E job uses none.
+> **Note:** Ensure all required environment variables and secrets are set in your repository settings for CI to work correctly. The Vitest, component and emulator jobs use no secrets (the first two set placeholder `VITE_FIREBASE_*` values, since neither suite reaches Firebase); only the live smoke job needs the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` secrets plus `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
