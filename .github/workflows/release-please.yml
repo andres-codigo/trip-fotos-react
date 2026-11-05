@@ -12,6 +12,7 @@ permissions:
 jobs:
     release-please:
         runs-on: ubuntu-latest
+        timeout-minutes: 5
 
         steps:
             # PRs opened with the default token do not trigger the test workflows, so the release PR needs the PAT
