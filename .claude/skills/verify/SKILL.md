@@ -15,15 +15,16 @@ Arguments: `$ARGUMENTS`
 
 ## Steps
 
-1. Run `node .claude/skills/verify/reset-checks.mjs` first, so a run that is stopped part-way and re-run never leaves an earlier tick on the status line. Then run `node .claude/skills/verify/changed-gates.mjs $ARGUMENTS`. It compares the branch, committed or not, with `main` and prints on its first line the arguments for the next step: some of `lint vitest ct build yaml`, plus `e2e` when requested or when the change touches routing, pages, the store, Firebase services, route or API constants, the Cypress config or the E2E specs, and `fresh` with `all` — or `none`. When `e2e` was added for that reason and not requested, a second line, `e2e advised: <reasons>`, says why. Do not second-guess it by reading the file list yourself.
+1. Run `npm run lint` first. A pass takes seconds and tells you the config loads. Lint findings continue to step 2 and appear in the table; a tool error (for example ESLint "couldn't find eslint.config") is a blocker: report it and stop, never start the gates on top of a broken lint. Do not run bare `npx eslint`, which skips `config/eslint.config.mjs`.
+2. Run `node .claude/skills/verify/reset-checks.mjs` next, so a run that is stopped part-way and re-run never leaves an earlier tick on the status line. Then run `node .claude/skills/verify/changed-gates.mjs $ARGUMENTS`. It compares the branch, committed or not, with `main` and prints on its first line the arguments for the next step: some of `lint vitest ct build yaml`, plus `e2e` when requested or when the change touches routing, pages, the store, Firebase services, route or API constants, the Cypress config or the E2E specs, and `fresh` with `all` — or `none`. When `e2e` was added for that reason and not requested, a second line, `e2e advised: <reasons>`, says why. Do not second-guess it by reading the file list yourself.
     - If it prints `none`, reply that nothing `/verify` checks has changed (e.g. only docs, Markdown or JSON under `.claude/` or `.github/`) and stop.
-2. Run `node .claude/skills/verify/run-gates.mjs <first line, verbatim>` in one Bash call with `timeout: 600000`. Report any of `lint vitest ct build yaml` it was not given as `⏭ skipped`.
+3. Run `node .claude/skills/verify/run-gates.mjs <first line, verbatim>` in one Bash call with `timeout: 600000`. Report any of `lint vitest ct build yaml` it was not given as `⏭ skipped`.
     - The script runs the gates in order, continuing after a failure, writes each full log to `node_modules/.cache/verify/<gate>.log` and prints one line per gate: `pass <counts>`, `FAIL` followed by the first error lines, or `cached`.
     - `cached` means the gate already passed on a byte-identical working tree (committed, uncommitted and untracked files alike), so it was not run again. Any edit invalidates the cache.
     - If the call times out, run the identical command once more: gates that passed are cached, so only the rest run.
     - `e2e` runs `npm run cy:run:e2e:emulators`: the Firebase emulators start, the seed loads and the specs run against them (needs Java; no credentials or live project). It always stops the emulators and any dev server it started. Never run `cypress run --e2e` directly — without a server and the emulators it fails on connection errors, not real bugs.
     - Do not run the npm scripts yourself or read the logs unless the printed error lines are not enough to name the failing file and message.
-3. Do not fix anything unless the user asks; this skill reports, it does not change code.
+4. Do not fix anything unless the user asks; this skill reports, it does not change code.
 
 ## Report
 
@@ -41,3 +42,5 @@ Reply with a table, then details for anything that failed. Show a cached gate as
 If the script printed `e2e advised`, put the reasons in the E2E row's notes (for example `ran: routing or pages changed`).
 
 For each failure, quote the first relevant error (file, line, message) and say whether it is in a file touched by the current change. For E2E failures, also say whether the error looks environmental (server not reachable, Firebase auth or network) rather than a code regression.
+
+Only one `/verify` may run at a time. Before starting another, stop any run still going (a stale run describes old code); never commit on a stale run's result.
