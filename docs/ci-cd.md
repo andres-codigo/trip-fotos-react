@@ -8,7 +8,7 @@ Every `uses:` in `.github/workflows` is pinned to a full commit SHA with the rel
 
 - **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
 - **Triggers:**
-    - On **pull requests** to `main` that change `src/**`, `scripts/**`, `.github/scripts/**`, `.github/labels.json`, `.github/actions/**`, `package.json`, `package-lock.json`, `vite.config.js` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
+    - On **pull requests** to `main` that change `src/**`, `scripts/**`, `.github/scripts/**`, `.github/labels.json`, `.github/actions/**`, `package.json`, `package-lock.json`, `vite.config.js`, `vercel.json`, `firebase/**`, `.env.example` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
@@ -16,7 +16,7 @@ Every `uses:` in `.github/workflows` is pinned to a full commit SHA with the rel
 
 Runs `npm run vitest:coverage -- --run`, which executes the suite once with coverage — see [Scripts](../README.md#scripts) for other Vitest commands. The coverage report is uploaded only when the run fails, and kept for 7 days.
 
-It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, which fail when a route in `PATHS` is missing from the `vercel.json` rewrites, a collection the store requests has no rule in `firebase/database.rules.json`, or the README Scripts and Environment Variables sections drift from `package.json` and `.env.example`. A README-only change does not trigger the job (Markdown is excluded), so a script entry deleted from the README alone is caught on the next code change; field-level rules still need the manual check below.
+It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, which fail when a route in `PATHS` is missing from the `vercel.json` rewrites, a collection the store requests has no rule in `firebase/database.rules.json`, or the README Scripts and Environment Variables sections drift from `package.json` and `.env.example`. The last three trigger paths exist because the drift test reads those files. A README-only change does not trigger the job (Markdown is excluded), so a script entry deleted from the README alone is caught on the next code change; field-level rules still need the manual check below.
 
 ---
 

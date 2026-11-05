@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Run the project's local quality gates (ESLint, Vitest, Cypress component tests, production build) and report a pass/fail summary. Pass `e2e` to force the Cypress E2E suite for any change; it runs on its own when the change touches routing, pages, the store, Firebase services or the E2E specs. Use before committing, before opening a pull request, or when asked to check that a change is safe.
+description: Run the project's local quality gates (ESLint, Vitest, Cypress component tests, production build, and a Prettier check of workflow YAML) and report a pass/fail summary. Pass `e2e` to force the Cypress E2E suite for any change; it runs on its own when the change touches routing, pages, the store, Firebase services or the E2E specs. Use before committing, before opening a pull request, or when asked to check that a change is safe.
 argument-hint: '[e2e] [all]'
 model: haiku
 context: fork
@@ -15,9 +15,9 @@ Arguments: `$ARGUMENTS`
 
 ## Steps
 
-1. Run `node .claude/skills/verify/reset-checks.mjs` first, so a run that is stopped part-way and re-run never leaves an earlier tick on the status line. Then run `node .claude/skills/verify/changed-gates.mjs $ARGUMENTS`. It compares the branch, committed or not, with `main` and prints on its first line the arguments for the next step: some of `lint vitest ct build`, plus `e2e` when requested or when the change touches routing, pages, the store, Firebase services, route or API constants, the Cypress config or the E2E specs, and `fresh` with `all` — or `none`. When `e2e` was added for that reason and not requested, a second line, `e2e advised: <reasons>`, says why. Do not second-guess it by reading the file list yourself.
+1. Run `node .claude/skills/verify/reset-checks.mjs` first, so a run that is stopped part-way and re-run never leaves an earlier tick on the status line. Then run `node .claude/skills/verify/changed-gates.mjs $ARGUMENTS`. It compares the branch, committed or not, with `main` and prints on its first line the arguments for the next step: some of `lint vitest ct build yaml`, plus `e2e` when requested or when the change touches routing, pages, the store, Firebase services, route or API constants, the Cypress config or the E2E specs, and `fresh` with `all` — or `none`. When `e2e` was added for that reason and not requested, a second line, `e2e advised: <reasons>`, says why. Do not second-guess it by reading the file list yourself.
     - If it prints `none`, reply that nothing `/verify` checks has changed (e.g. only docs, Markdown or JSON under `.claude/` or `.github/`) and stop.
-2. Run `node .claude/skills/verify/run-gates.mjs <first line, verbatim>` in one Bash call with `timeout: 600000`. Report any of `lint vitest ct build` it was not given as `⏭ skipped`.
+2. Run `node .claude/skills/verify/run-gates.mjs <first line, verbatim>` in one Bash call with `timeout: 600000`. Report any of `lint vitest ct build yaml` it was not given as `⏭ skipped`.
     - The script runs the gates in order, continuing after a failure, writes each full log to `node_modules/.cache/verify/<gate>.log` and prints one line per gate: `pass <counts>`, `FAIL` followed by the first error lines, or `cached`.
     - `cached` means the gate already passed on a byte-identical working tree (committed, uncommitted and untracked files alike), so it was not run again. Any edit invalidates the cache.
     - If the call times out, run the identical command once more: gates that passed are cached, so only the rest run.
@@ -35,6 +35,7 @@ Reply with a table, then details for anything that failed. Show a cached gate as
 | Vitest                  | ✅/❌/⏭ | passed/total         |
 | Cypress component tests | ✅/❌/⏭ | passed/total         |
 | Build                   | ✅/❌/⏭ | any warnings of note |
+| Workflow YAML           | ✅/❌/⏭ | Prettier check       |
 | Cypress E2E             | ✅/❌   | passed/total         |
 
 If the script printed `e2e advised`, put the reasons in the E2E row's notes (for example `ran: routing or pages changed`).

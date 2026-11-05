@@ -63,4 +63,46 @@ describe('planGates', () => {
 			'fresh',
 		])
 	})
+
+	it('selects only the YAML gate for workflow and action YAML', () => {
+		for (const file of [
+			'.github/workflows/cypress-e2e.yml',
+			'.github/actions/setup/action.yml',
+		]) {
+			expect(planGates([file]).runArgs).toEqual(['yaml'])
+		}
+	})
+
+	it('selects Vitest for the inputs the drift test reads', () => {
+		for (const file of [
+			'vercel.json',
+			'firebase/database.rules.json',
+			'.env.example',
+		]) {
+			expect(planGates([file]).runArgs).toEqual(['vitest'])
+		}
+	})
+
+	it('keeps the existing gates when YAML changes alongside code', () => {
+		expect(
+			planGates([
+				'.github/workflows/a.yml',
+				'src/components/ui/Badge.jsx',
+			]).runArgs,
+		).toEqual(['lint', 'vitest', 'ct', 'build', 'yaml'])
+		expect(
+			planGates(['.github/workflows/a.yml', '.github/scripts/labels.mjs'])
+				.runArgs,
+		).toEqual(['lint', 'vitest', 'yaml'])
+	})
+
+	it('keeps Markdown, labels and other config exempt', () => {
+		for (const file of [
+			'README.md',
+			'.github/labels.json',
+			'firebase.json',
+		]) {
+			expect(planGates([file]).runArgs).toEqual([])
+		}
+	})
 })
