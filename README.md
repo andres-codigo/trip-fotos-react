@@ -368,7 +368,7 @@ trip-fotos-react/
 │   ├── agents/                 # Scaffolding workflows (shared by Copilot and Claude Code)
 │   ├── instructions/           # Domain-specific guidance (shared by Copilot and Claude Code)
 │   ├── rulesets/               # Repository rulesets as JSON (applied via gh api)
-│   ├── scripts/                # Shared workflow logic (labels.mjs, project.mjs) with its Vitest tests
+│   ├── scripts/                # Shared workflow logic (labels.mjs, project.mjs, intake.mjs) with its Vitest tests
 │   ├── workflows/              # GitHub Actions workflow files for CI/CD automation
 │   ├── copilot-instructions.md # Workspace-level Copilot guidelines
 │   └── labels.json             # Single source of truth for every label

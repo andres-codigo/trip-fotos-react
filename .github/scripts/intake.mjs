@@ -1,0 +1,402 @@
+// Issue Intake: labels, assigns and moves an issue on the Project board.
+// The workflow only wires the trigger; see docs/ci-cd.md for the board rules.
+import { loadLabelConfig, statusLabel, typeFor } from './labels.mjs'
+import { STATUS, STATUS_FIELD_ID, createProjectClient } from './project.mjs'
+
+export const run = async ({ github, context, core, getOctokit }) => {
+	const owner = context.repo.owner
+	const repo = context.repo.repo
+
+	const labelConfig = loadLabelConfig(process.env.GITHUB_WORKSPACE)
+	const READY_LABEL = statusLabel(labelConfig, 'ready')
+	const BLOCKED_LABEL = statusLabel(labelConfig, 'blocked')
+	const IN_PROGRESS_LABEL = statusLabel(labelConfig, 'inProgress')
+	const TYPE_LABELS = labelConfig.type.map((label) => label.name)
+	const DEFAULT_ASSIGNEE = process.env.DEFAULT_ASSIGNEE
+	const PROJECT_AUTOMATION_TOKEN = process.env.PROJECT_AUTOMATION_TOKEN || ''
+
+	const projectGithub = PROJECT_AUTOMATION_TOKEN
+		? getOctokit(PROJECT_AUTOMATION_TOKEN)
+		: github
+
+	const projectGraphql = (query, variables) =>
+		projectGithub.graphql(query, variables)
+	const { ensureItem: ensureProjectItem, setStatus } =
+		createProjectClient(projectGraphql)
+
+	const issueNumber = (() => {
+		if (context.eventName === 'workflow_dispatch') {
+			const parsed = Number(context.payload.inputs?.issue_number)
+			return Number.isNaN(parsed) ? null : parsed
+		}
+
+		return context.payload.issue?.number || null
+	})()
+
+	if (!issueNumber) {
+		core.setFailed('Unable to resolve issue number from event payload.')
+		return
+	}
+
+	const issueResponse = await github.rest.issues.get({
+		owner,
+		repo,
+		issue_number: issueNumber,
+	})
+
+	const issue = issueResponse.data
+
+	if (issue.pull_request) {
+		core.info(`Skipping #${issueNumber} because it is a pull request.`)
+		return
+	}
+
+	const existingLabelNames = (issue.labels || []).map((label) =>
+		typeof label === 'string' ? label : label.name,
+	)
+
+	// Only the title prefix is a reliable signal; areas come from the PR that closes the issue
+	const expectedType = typeFor(labelConfig, { title: issue.title })
+
+	const action =
+		context.eventName === 'workflow_dispatch'
+			? 'dispatch'
+			: context.payload.action
+	const isLabelEvent = action === 'labeled' || action === 'unlabeled'
+
+	// Labels added by a workflow are auto-labels, not a triage decision
+	if (isLabelEvent && context.payload.sender?.type === 'Bot') {
+		core.info(
+			`Skipping ${action} event on #${issueNumber} from bot ${context.payload.sender.login}.`,
+		)
+		return
+	}
+
+	if (!isLabelEvent) {
+		if (expectedType) {
+			if (!existingLabelNames.includes(expectedType)) {
+				await github.rest.issues.addLabels({
+					owner,
+					repo,
+					issue_number: issueNumber,
+					labels: [expectedType],
+				})
+			}
+			// A retitled issue keeps a single type label
+			for (const name of existingLabelNames.filter(
+				(label) =>
+					TYPE_LABELS.includes(label) && label !== expectedType,
+			)) {
+				await github.rest.issues.removeLabel({
+					owner,
+					repo,
+					issue_number: issueNumber,
+					name,
+				})
+			}
+		}
+
+		if (
+			DEFAULT_ASSIGNEE &&
+			!(issue.assignees || []).some(
+				(assignee) => assignee.login === DEFAULT_ASSIGNEE,
+			)
+		) {
+			await github.rest.issues.addAssignees({
+				owner,
+				repo,
+				issue_number: issueNumber,
+				assignees: [DEFAULT_ASSIGNEE],
+			})
+		}
+	}
+
+	const getStatusOptionId = async (itemId) => {
+		const data = await projectGraphql(
+			`query($itemId: ID!) {
+	      node(id: $itemId) {
+	        ... on ProjectV2Item {
+	          fieldValues(first: 50) {
+	            nodes {
+	              ... on ProjectV2ItemFieldSingleSelectValue {
+	                optionId
+	                field {
+	                  ... on ProjectV2SingleSelectField {
+	                    id
+	                  }
+	                }
+	              }
+	            }
+	          }
+	        }
+	      }
+	    }`,
+			{
+				itemId,
+			},
+		)
+
+		const values = data?.node?.fieldValues?.nodes || []
+		const statusEntry = values.find(
+			(entry) => entry?.field?.id === STATUS_FIELD_ID,
+		)
+		return statusEntry?.optionId || null
+	}
+
+	// Only "Closes #N"-style links are visible here; Tracking-Issue markers are handled by the lifecycle workflow
+	const getOpenLinkedPullRequests = async () => {
+		const data = await github.graphql(
+			`query($owner: String!, $repo: String!, $number: Int!) {
+	      repository(owner: $owner, name: $repo) {
+	        issue(number: $number) {
+	          closedByPullRequestsReferences(first: 10, includeClosedPrs: false) {
+	            nodes { isDraft state }
+	          }
+	        }
+	      }
+	    }`,
+			{
+				owner,
+				repo,
+				number: issueNumber,
+			},
+		)
+
+		const nodes =
+			data?.repository?.issue?.closedByPullRequestsReferences?.nodes || []
+		return nodes.filter((node) => node?.state === 'OPEN')
+	}
+
+	const getAssessmentFields = async (itemId) => {
+		const data = await projectGraphql(
+			`query($itemId: ID!) {
+	      node(id: $itemId) {
+	        ... on ProjectV2Item {
+	          fieldValues(first: 50) {
+	            nodes {
+	              ... on ProjectV2ItemFieldSingleSelectValue {
+	                name
+	                field {
+	                  ... on ProjectV2SingleSelectField { name }
+	                }
+	              }
+	            }
+	          }
+	        }
+	      }
+	    }`,
+			{ itemId },
+		)
+		const values = data?.node?.fieldValues?.nodes || []
+		const valueOf = (fieldName) =>
+			values.find((entry) => entry?.field?.name === fieldName)?.name ||
+			null
+		return { Kind: valueOf('Kind'), Workstream: valueOf('Workstream') }
+	}
+
+	const getOpenBlockers = async () => {
+		const response = await github.request(
+			'GET /repos/{owner}/{repo}/issues/{issue_number}/dependencies/blocked_by',
+			{
+				owner,
+				repo,
+				issue_number: issueNumber,
+			},
+		)
+		return response.data
+			.filter((blocker) => blocker.state === 'open')
+			.map((blocker) => blocker.number)
+	}
+
+	// Pulling work out of order is refused by removing the label, so the board never reflects it
+	const reject = async (labelName, reason) => {
+		await github.rest.issues.removeLabel({
+			owner,
+			repo,
+			issue_number: issueNumber,
+			name: labelName,
+		})
+		await github.rest.issues.createComment({
+			owner,
+			repo,
+			issue_number: issueNumber,
+			body: `Removed \`${labelName}\`. ${reason}`,
+		})
+		return null
+	}
+
+	const resolveUnblockedStatus = async () => {
+		const openPullRequests = await getOpenLinkedPullRequests()
+		if (openPullRequests.some((pull) => !pull.isDraft))
+			return STATUS.IN_REVIEW
+		if (openPullRequests.length > 0) return STATUS.IN_PROGRESS
+		if (existingLabelNames.includes(IN_PROGRESS_LABEL))
+			return STATUS.IN_PROGRESS
+		if (existingLabelNames.includes(READY_LABEL)) return STATUS.READY
+		return STATUS.BACKLOG
+	}
+
+	const resolveNextStatus = async (currentStatus, itemId) => {
+		if (!isLabelEvent) {
+			if (!currentStatus) return STATUS.TRIAGE
+			if (action === 'reopened' && currentStatus === STATUS.DONE)
+				return STATUS.BACKLOG
+			// Edits never move an issue that is already on the board (#290)
+			return null
+		}
+
+		const labelName = context.payload.label?.name
+		const isBlocked = existingLabelNames.includes(BLOCKED_LABEL)
+
+		if (action === 'labeled') {
+			if (labelName === BLOCKED_LABEL) return STATUS.BLOCKED
+			if (isBlocked) return null
+			const isEpic = /^epic:/i.test(issue.title)
+
+			if (labelName === READY_LABEL) {
+				if (currentStatus === STATUS.TRIAGE) {
+					return reject(
+						labelName,
+						'This issue is still in Triage. Assess it first: set Kind and Workstream on the board, then add any label to move it to Backlog.',
+					)
+				}
+				if (![null, STATUS.BACKLOG].includes(currentStatus)) return null
+				const openBlockers = await getOpenBlockers()
+				if (openBlockers.length > 0) {
+					return reject(
+						labelName,
+						`It is blocked by open ${openBlockers.map((number) => `#${number}`).join(', ')}.`,
+					)
+				}
+				return STATUS.READY
+			}
+			// Never pulls an issue back from In review or Done (#302)
+			if (labelName === IN_PROGRESS_LABEL) {
+				if (currentStatus === STATUS.TRIAGE) {
+					return reject(
+						labelName,
+						'This issue is still in Triage. Assess it first, then mark it `ready`, then start it.',
+					)
+				}
+				if (currentStatus === STATUS.BACKLOG && !isEpic) {
+					return reject(
+						labelName,
+						'Work is pulled from Ready. Add `ready` first (epics are the only exception).',
+					)
+				}
+				return [null, STATUS.BACKLOG, STATUS.READY].includes(
+					currentStatus,
+				)
+					? STATUS.IN_PROGRESS
+					: null
+			}
+			// Labels picked on the new-issue form arrive with the opened event; they are not a triage decision
+			const isJustCreated =
+				Date.now() - new Date(issue.created_at).getTime() < 60_000
+			if (isJustCreated) return null
+			if (![null, STATUS.TRIAGE].includes(currentStatus)) return null
+			// A label alone is not an assessment: the board item needs its Kind and Workstream
+			const missing = Object.entries(await getAssessmentFields(itemId))
+				.filter(([, value]) => !value)
+				.map(([name]) => name)
+			if (missing.length > 0) {
+				await github.rest.issues.createComment({
+					owner,
+					repo,
+					issue_number: issueNumber,
+					body: `Staying in Triage: set ${missing.join(' and ')} on the board, then add or re-add a label to move it to Backlog.`,
+				})
+				return null
+			}
+			return STATUS.BACKLOG
+		}
+
+		if (labelName === BLOCKED_LABEL) return resolveUnblockedStatus()
+		if (labelName === READY_LABEL && currentStatus === STATUS.READY)
+			return STATUS.BACKLOG
+		if (
+			labelName === IN_PROGRESS_LABEL &&
+			currentStatus === STATUS.IN_PROGRESS
+		)
+			return resolveUnblockedStatus()
+		return null
+	}
+
+	let projectItemId
+	let finalStatus
+	try {
+		projectItemId = await ensureProjectItem(issue.node_id)
+		if (!projectItemId) {
+			core.setFailed(
+				`Unable to create or resolve project item for issue #${issueNumber}.`,
+			)
+			return
+		}
+
+		let currentStatus = await getStatusOptionId(projectItemId)
+		// Labels set at creation can fire before the opened event has given the item a status
+		if (!currentStatus && isLabelEvent) {
+			await setStatus(projectItemId, STATUS.TRIAGE)
+			currentStatus = STATUS.TRIAGE
+		}
+		const nextStatus = await resolveNextStatus(currentStatus, projectItemId)
+		if (nextStatus && nextStatus !== currentStatus) {
+			await setStatus(projectItemId, nextStatus)
+			core.info(
+				`Issue #${issueNumber} status: ${currentStatus || 'empty'} -> ${nextStatus}.`,
+			)
+		} else {
+			core.info(
+				`Issue #${issueNumber} status left unchanged (${currentStatus || 'empty'}).`,
+			)
+		}
+
+		finalStatus = await getStatusOptionId(projectItemId)
+	} catch (error) {
+		core.setFailed(
+			`Project update failed for issue #${issueNumber}. Ensure PROJECT_AUTOMATION_TOKEN has project + repo scope. Error: ${error.message}`,
+		)
+		return
+	}
+
+	if (!finalStatus) {
+		core.setFailed(
+			`Verification failed: issue #${issueNumber} has no project status.`,
+		)
+		return
+	}
+
+	if (isLabelEvent) return
+
+	const refreshedIssue = await github.rest.issues.get({
+		owner,
+		repo,
+		issue_number: issueNumber,
+	})
+
+	const refreshedLabels = (refreshedIssue.data.labels || []).map((label) =>
+		typeof label === 'string' ? label : label.name,
+	)
+
+	const hasAssignee = (refreshedIssue.data.assignees || []).some(
+		(assignee) => assignee.login === DEFAULT_ASSIGNEE,
+	)
+
+	if (expectedType && !refreshedLabels.includes(expectedType)) {
+		core.setFailed(
+			`Verification failed: issue #${issueNumber} is missing its type label (${expectedType}).`,
+		)
+		return
+	}
+
+	if (!hasAssignee) {
+		core.setFailed(
+			`Verification failed: issue #${issueNumber} is not assigned to ${DEFAULT_ASSIGNEE}.`,
+		)
+		return
+	}
+
+	core.info(
+		`Issue #${issueNumber} intake succeeded: project item linked, status set, labels and assignee verified.`,
+	)
+}
