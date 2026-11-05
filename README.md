@@ -63,7 +63,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Failed registrations clean up the photos they had uploaded
 - A photo dialog with next/previous buttons, arrow keys and a `?photo=N` link
 - Upload progress when registering
-- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs, a leaner repo and up-to-date dependencies
+- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs, a leaner repo, up-to-date dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
