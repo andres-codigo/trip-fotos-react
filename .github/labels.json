@@ -201,6 +201,16 @@
 			"name": "duplicate",
 			"color": "cfd3d7",
 			"description": "This issue or pull request already exists"
+		},
+		{
+			"name": "autorelease: pending",
+			"color": "ededed",
+			"description": "Added by release-please to its release PR until it is merged"
+		},
+		{
+			"name": "autorelease: tagged",
+			"color": "ededed",
+			"description": "Added by release-please once a merged release PR is tagged"
 		}
 	],
 	"replaced": {

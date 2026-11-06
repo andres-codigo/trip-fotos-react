@@ -175,6 +175,27 @@ describe('planLabelSync', () => {
 		})
 	})
 
+	it('describes the release-please labels instead of deleting them', () => {
+		const names = ['autorelease: pending', 'autorelease: tagged']
+		const bare = names.map((name) => ({
+			name,
+			color: 'ededed',
+			description: '',
+		}))
+		const steps = planLabelSync(config, bare)
+
+		for (const name of names) {
+			expect(steps).not.toContainEqual({ action: 'delete', name })
+			expect(steps).toContainEqual(
+				expect.objectContaining({
+					action: 'update',
+					name,
+					description: expect.stringContaining('release-please'),
+				}),
+			)
+		}
+	})
+
 	it('is a no-op when the repo already matches', () => {
 		const labels = [
 			...config.type,

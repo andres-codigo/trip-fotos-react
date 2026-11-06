@@ -14,7 +14,7 @@ export const allLabels = (config) => [
 export const statusLabel = (config, role) =>
 	config.status.find((label) => label.role === role)?.name
 
-// Type and area labels are owned by the workflows; status and other labels are set by people or Dependabot
+// Type and area labels are owned by the workflows; status and other labels are set by people, Dependabot or release-please
 export const managedLabelNames = (config) =>
 	new Set([...config.type, ...config.area].map((label) => label.name))
 
