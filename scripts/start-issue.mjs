@@ -58,6 +58,20 @@ export const doAfterNumbers = (body) => {
 	return { blockers: numbers(head), afterBefore: numbers(rest.join(' ')) }
 }
 
+// The board's item list lags a few seconds behind a just-created issue's own projectItems, so re-read it until the issue shows up
+export const waitForItem = async (
+	readItems,
+	number,
+	{ attempts = 12, wait = (ms) => sleep(ms) } = {},
+) => {
+	for (let attempt = 0; ; attempt++) {
+		const items = readItems()
+		const item = items.find((i) => i.content?.number === number)
+		if (item || attempt >= attempts) return { items, item }
+		await wait(5000)
+	}
+}
+
 const gh = (...args) => execFileSync('gh', args, { encoding: 'utf8' }).trim()
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim()
 const json = (...args) => JSON.parse(gh(...args))
@@ -166,18 +180,26 @@ const main = async () => {
 			`Open blockers: ${[...new Set(open)].map((n) => `#${n}`).join(', ')}`,
 		)
 
-	const items = json(
-		'project',
-		'item-list',
-		String(PROJECT),
-		'--owner',
-		OWNER,
-		'--limit',
-		'200',
-		'--format',
-		'json',
-	).items
-	const item = items.find((i) => i.content?.number === number)
+	const { items, item } = await waitForItem(
+		() =>
+			json(
+				'project',
+				'item-list',
+				String(PROJECT),
+				'--owner',
+				OWNER,
+				'--limit',
+				'200',
+				'--format',
+				'json',
+			).items,
+		number,
+	)
+	if (!item) {
+		stop(
+			`#${number} is not on the project board after a minute: check that Issue Intake ran, then re-run`,
+		)
+	}
 	const fields = json(
 		'project',
 		'field-list',
