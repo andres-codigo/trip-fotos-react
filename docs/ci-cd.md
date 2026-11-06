@@ -136,7 +136,7 @@ Epics skip step 3 and go from Backlog straight to In progress.
 
 Once the change passes `/verify` and the PR is ready for review:
 
-1. Poll `gh pr checks <PR>` a few minutes apart until every check has passed (a skipped Dependabot job is fine). If a check fails, stop and report it.
+1. Wait for the runs that marking it ready starts: for a few seconds `gh pr checks` still shows the draft-time runs as "skipping", which is not a pass. Poll `gh run list --branch <branch>` until no run created at or after the ready event is incomplete, then check that every check passed (a skipped Dependabot job is fine; a test job that skips although the change touches its trigger paths is not). If a check fails, stop and report it.
 2. Squash-merge (or rebase-merge a multi-commit PR whose commits are individually meaningful) and delete the head branch, then delete the merged local branch.
 3. Run `node .claude/skills/verify/reset-checks.mjs cache`: a squash merge leaves `main` with the verified tree, so the old `/verify` and `/ui-check` ticks would still match.
 4. Re-read the Status; the merge sets Done.
