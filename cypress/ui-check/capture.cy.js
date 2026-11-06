@@ -113,6 +113,7 @@ const eachWidth = (callback) => {
 describe(`UI check capture (${LABEL})`, () => {
 	// Seed once per run: cy.session then keeps each role signed in across the tests
 	before(() => {
+		cy.task('clearUiCheckScreenshots', LABEL)
 		cy.task('seedEmulators')
 		Cypress.session.clearAllSavedSessions()
 	})

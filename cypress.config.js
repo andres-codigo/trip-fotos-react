@@ -1,3 +1,6 @@
+import { rmSync } from 'node:fs'
+import path from 'node:path'
+
 import { defineConfig } from 'cypress'
 import { mergeConfig } from 'vite'
 import viteConfig from './vite.config.js'
@@ -20,6 +23,8 @@ if (useEmulators) {
 	dotenv.config({ path: '.env.emulators', override: true })
 }
 
+const isUiCheck = process.env.UI_CHECK === 'true'
+
 const testUser = useEmulators
 	? { email: SEED_USERS.STANDARD.email, password: SEED_PASSWORD }
 	: {
@@ -28,6 +33,8 @@ const testUser = useEmulators
 		}
 
 export default defineConfig({
+	// A /ui-check run keeps the other label's screenshots for the branch/main comparison; the capture script clears only its own label
+	trashAssetsBeforeRuns: !isUiCheck,
 	env: {
 		// PATHS
 		HOME_URL: PATHS.HOME,
@@ -62,15 +69,30 @@ export default defineConfig({
 	e2e: {
 		// The live smoke spec signs in to the real project, so only its own run picks it up
 		// The /ui-check capture script is committed but never part of the suite: only UI_CHECK=true picks it up
-		specPattern:
-			process.env.UI_CHECK === 'true'
-				? 'cypress/ui-check/**/*.cy.js'
-				: useEmulators
-					? 'cypress/e2e/**/*.cy.js'
-					: 'cypress/e2e-live/**/*.cy.js',
+		specPattern: isUiCheck
+			? 'cypress/ui-check/**/*.cy.js'
+			: useEmulators
+				? 'cypress/e2e/**/*.cy.js'
+				: 'cypress/e2e-live/**/*.cy.js',
 		baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',
-		setupNodeEvents(on) {
-			on('task', { seedEmulators })
+		setupNodeEvents(on, config) {
+			on('task', {
+				seedEmulators,
+				clearUiCheckScreenshots(label) {
+					if (!/^[\w-]+$/.test(label)) {
+						throw new Error(`Invalid UI_CHECK_LABEL: ${label}`)
+					}
+					rmSync(
+						path.join(
+							config.screenshotsFolder,
+							'capture.cy.js',
+							label,
+						),
+						{ recursive: true, force: true },
+					)
+					return null
+				},
+			})
 		},
 	},
 

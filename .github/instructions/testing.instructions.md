@@ -71,7 +71,7 @@ Do this for any change that can alter how a page looks (styling, layout, spacing
 - Enumerate every consumer, prop, mode, state and width of the changed component before capturing, and capture all of them; "not checked" is for what is impossible (live writes, unseedable data), never for what was skipped.
 - The script closes what the seeded emulators used to leave out: a seeded-in-spec traveller with an unreachable photo URL renders the real error path; the SMIL spinner is frozen with `pauseAnimations()` and `setCurrentTime(0)`; `:hover` and `:focus-visible` are forced through CDP (`CSS.forcePseudoState`, Chromium only); register (with a Storage emulator upload slowed through `Network.emulateNetworkConditions` so `BaseProgress` shows), contact send and message delete are driven for real; the file-preview and city-chip remove buttons are captured for hover and focus. The emulators are seeded once per run.
 - It ignores the React message `Cannot commit the same tree as before` (capture-only tooling noise, matched by exact text). If it appears in the CI E2E suite or outside a capture, investigate it.
-- Delete the screenshots (`cypress/screenshots/` is gitignored) afterwards.
+- A run clears only its own `UI_CHECK_LABEL` folder (`cypress/screenshots/capture.cy.js/<label>/`); Cypress's start-of-run wipe is off when `UI_CHECK=true`, so the `main` and branch shots sit side by side. Delete the screenshots (`cypress/screenshots/` is gitignored) afterwards.
 
 Case-only renames of files (such as `register.jsx` to `Register.jsx`) can leave files missing when you `git switch` on a case-insensitive filesystem; `git restore` the affected folder if so.
 
