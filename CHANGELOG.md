@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.6](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.5...v0.21.6) (2026-11-06)
+
+
+### Bug Fixes
+
+* start-issue.mjs crashes when a just-created issue is not yet in the board's item list ([#640](https://github.com/andres-codigo/trip-fotos-react/issues/640)) ([b3f0601](https://github.com/andres-codigo/trip-fotos-react/commit/b3f06012ee381988b40fb4ede9296497cafd2fa4))
+
 ## [0.21.5](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.4...v0.21.5) (2026-11-06)
 
 
