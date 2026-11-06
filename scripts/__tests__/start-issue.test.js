@@ -7,7 +7,9 @@ import {
 	branchName,
 	doAfterNumbers,
 	kindFor,
+	intakeWait,
 	parseTitle,
+	relabel,
 	waitForItem,
 } from '../start-issue.mjs'
 
@@ -49,6 +51,41 @@ describe('start-issue helpers', () => {
 		expect(doAfterNumbers('No dependency line')).toEqual({
 			blockers: [],
 			afterBefore: [],
+		})
+	})
+
+	describe('intakeWait', () => {
+		const created = '2026-11-06T03:36:14Z'
+		const at = (seconds) => new Date(created).getTime() + seconds * 1000
+
+		it('waits out the rest of Intake’s window for a new issue', () => {
+			expect(intakeWait(created, at(20))).toBe(45_000)
+		})
+
+		it('does not wait once the issue is past the window', () => {
+			expect(intakeWait(created, at(65))).toBe(0)
+			expect(intakeWait(created, at(600))).toBe(0)
+		})
+	})
+
+	describe('relabel', () => {
+		it('removes a label the bot added after start-up before adding it', () => {
+			const edit = vi.fn()
+
+			relabel(() => [{ name: 'fix' }], 'fix', edit)
+
+			expect(edit.mock.calls).toEqual([
+				['--remove-label', 'fix'],
+				['--add-label', 'fix'],
+			])
+		})
+
+		it('only adds a label that is not there', () => {
+			const edit = vi.fn()
+
+			relabel(() => [{ name: 'other' }], 'fix', edit)
+
+			expect(edit.mock.calls).toEqual([['--add-label', 'fix']])
 		})
 	})
 

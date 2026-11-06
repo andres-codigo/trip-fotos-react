@@ -72,6 +72,19 @@ export const waitForItem = async (
 	}
 }
 
+// Issue Intake ignores label events on an issue under 60s old (isJustCreated in .github/scripts/intake.mjs); 5s of margin covers clock skew
+const INTAKE_WINDOW_MS = 65_000
+
+export const intakeWait = (createdAt, now = Date.now()) =>
+	Math.max(0, new Date(createdAt).getTime() + INTAKE_WINDOW_MS - now)
+
+// Re-adding a label that is already present fires no event, so remove it first; read the labels fresh, since Intake's bot adds the type label after start-up
+export const relabel = (readLabels, label, edit) => {
+	if (readLabels().some((l) => l.name === label))
+		edit('--remove-label', label)
+	edit('--add-label', label)
+}
+
 const gh = (...args) => execFileSync('gh', args, { encoding: 'utf8' }).trim()
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim()
 const json = (...args) => JSON.parse(gh(...args))
@@ -147,7 +160,7 @@ const main = async () => {
 		'view',
 		String(number),
 		'--json',
-		'title,body,state,labels',
+		'title,body,state,createdAt',
 	)
 	let status = await statusOf(number)
 	if (
@@ -248,11 +261,14 @@ const main = async () => {
 		setField(item.id, fields, 'Workstream', workstream)
 		const label = flag('label') ?? parseTitle(issue.title).prefix
 		if (!label) stop('Pass an area label with --label', 2)
-		// Re-adding a label that is already present fires no event, so remove it first
-		if (issue.labels.some((l) => l.name === label)) {
-			gh('issue', 'edit', String(number), '--remove-label', label)
-		}
-		gh('issue', 'edit', String(number), '--add-label', label)
+		await sleep(intakeWait(issue.createdAt))
+		relabel(
+			() =>
+				json('issue', 'view', String(number), '--json', 'labels')
+					.labels,
+			label,
+			(...args) => gh('issue', 'edit', String(number), ...args),
+		)
 		await waitForStatus(number, 'Backlog')
 		status = 'Backlog'
 	}
