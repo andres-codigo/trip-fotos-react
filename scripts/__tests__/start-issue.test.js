@@ -1,11 +1,14 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
+import { vi } from 'vitest'
+
 import {
 	branchName,
 	doAfterNumbers,
 	kindFor,
 	parseTitle,
+	waitForItem,
 } from '../start-issue.mjs'
 
 describe('start-issue helpers', () => {
@@ -46,6 +49,47 @@ describe('start-issue helpers', () => {
 		expect(doAfterNumbers('No dependency line')).toEqual({
 			blockers: [],
 			afterBefore: [],
+		})
+	})
+
+	describe('waitForItem', () => {
+		const other = { id: 'A', content: { number: 1 } }
+		const target = { id: 'B', content: { number: 639 } }
+
+		it('re-reads the item list until a just-created issue appears', async () => {
+			const reads = [[other], [other], [other, target]]
+			const readItems = vi.fn(() => reads.shift())
+			const wait = vi.fn(async () => {})
+
+			const { item, items } = await waitForItem(readItems, 639, { wait })
+
+			expect(item).toBe(target)
+			expect(items).toEqual([other, target])
+			expect(readItems).toHaveBeenCalledTimes(3)
+			expect(wait).toHaveBeenCalledTimes(2)
+		})
+
+		it('reads once when the issue is already listed', async () => {
+			const readItems = vi.fn(() => [other, target])
+			const wait = vi.fn(async () => {})
+
+			expect((await waitForItem(readItems, 639, { wait })).item).toBe(
+				target,
+			)
+			expect(wait).not.toHaveBeenCalled()
+		})
+
+		it('gives up with no item after the last attempt', async () => {
+			const readItems = vi.fn(() => [other])
+			const wait = vi.fn(async () => {})
+
+			const { item } = await waitForItem(readItems, 639, {
+				attempts: 2,
+				wait,
+			})
+
+			expect(item).toBeUndefined()
+			expect(readItems).toHaveBeenCalledTimes(3)
 		})
 	})
 })
