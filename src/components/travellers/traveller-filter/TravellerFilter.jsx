@@ -9,6 +9,12 @@ import { TRAVELLER_FILTER_CONFIG } from '@/constants/travellers'
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
 
+const LEGEND_ID = 'traveller-filter-legend'
+
+// Link-styled, with a 44px target
+const LINK_BUTTON_CLASSES =
+	'min-h-11 px-2.5 text-accent-foreground underline hover:text-link-hover active:text-link-hover'
+
 const TravellerFilter = ({
 	options,
 	inactiveIds = [],
@@ -30,12 +36,36 @@ const TravellerFilter = ({
 	return (
 		<fieldset
 			className="m-0 my-4 border-0 p-0"
+			aria-labelledby={LEGEND_ID}
 			data-cy={TRAVELLER_FILTER.ROOT}>
-			<legend className="my-2 p-0 text-2xl leading-normal font-bold">
-				{TRAVELLER_FILTER_CONFIG.LEGEND}
-			</legend>
-			<div className="mb-2 flex flex-wrap items-end gap-2">
-				{hasSearch && (
+			{/* A heading rather than a legend: a legend cannot share a flex row with the buttons, so the fieldset takes its name from aria-labelledby */}
+			<div className="flex flex-wrap items-center justify-between gap-x-3">
+				<h2
+					id={LEGEND_ID}
+					className="my-2 text-xl leading-normal font-bold">
+					{TRAVELLER_FILTER_CONFIG.LEGEND}
+				</h2>
+				<div className="flex items-center">
+					<BaseButton
+						type="button"
+						modeType="text"
+						className={LINK_BUTTON_CLASSES}
+						onClick={() => onChangeMany(visibleIds, true)}
+						data-cy={TRAVELLER_FILTER.SELECT_ALL}>
+						{TRAVELLER_FILTER_CONFIG.SELECT_ALL}
+					</BaseButton>
+					<BaseButton
+						type="button"
+						modeType="text"
+						className={LINK_BUTTON_CLASSES}
+						onClick={() => onChangeMany(visibleIds, false)}
+						data-cy={TRAVELLER_FILTER.CLEAR}>
+						{TRAVELLER_FILTER_CONFIG.CLEAR}
+					</BaseButton>
+				</div>
+			</div>
+			{hasSearch && (
+				<div className="mb-2 w-70 mobile:w-full">
 					<Input
 						id="filter-search"
 						label={TRAVELLER_FILTER_CONFIG.SEARCH_LABEL}
@@ -44,22 +74,8 @@ const TravellerFilter = ({
 						onChange={(event) => setQuery(event.target.value)}
 						data-cy={TRAVELLER_FILTER.SEARCH}
 					/>
-				)}
-				<BaseButton
-					type="button"
-					modeType="outline"
-					onClick={() => onChangeMany(visibleIds, true)}
-					data-cy={TRAVELLER_FILTER.SELECT_ALL}>
-					{TRAVELLER_FILTER_CONFIG.SELECT_ALL}
-				</BaseButton>
-				<BaseButton
-					type="button"
-					modeType="outline"
-					onClick={() => onChangeMany(visibleIds, false)}
-					data-cy={TRAVELLER_FILTER.CLEAR}>
-					{TRAVELLER_FILTER_CONFIG.CLEAR}
-				</BaseButton>
-			</div>
+				</div>
+			)}
 			{/* Scrollable regions must be keyboard-focusable */}
 			<div
 				className="flex max-h-48 flex-wrap overflow-y-auto"

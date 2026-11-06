@@ -47,6 +47,22 @@ describe('<TravellerFilter />', () => {
 		)
 	})
 
+	it('names the fieldset from its heading', () => {
+		renderFilter()
+		expect(
+			screen.getByRole('group', { name: TRAVELLER_FILTER_CONFIG.LEGEND }),
+		).toHaveAttribute('data-cy', TRAVELLER_FILTER.ROOT)
+	})
+
+	it('renders Select all and Clear as buttons, not links', () => {
+		renderFilter()
+		;[TRAVELLER_FILTER.SELECT_ALL, TRAVELLER_FILTER.CLEAR].forEach((id) => {
+			const control = screen.getByTestId(id)
+			expect(control.tagName).toBe('BUTTON')
+			expect(control).toHaveAttribute('type', 'button')
+		})
+	})
+
 	it('checks all options by default', () => {
 		renderFilter()
 		screen
