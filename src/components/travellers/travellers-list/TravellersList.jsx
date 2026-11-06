@@ -26,6 +26,22 @@ import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
 
 import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
 
+const RefreshIcon = () => (
+	<svg
+		aria-hidden="true"
+		width="22"
+		height="22"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="2"
+		strokeLinecap="round"
+		strokeLinejoin="round">
+		<path d="M21 12a9 9 0 1 1-3-6.7" />
+		<path d="M21 4v5h-5" />
+	</svg>
+)
+
 const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const travellers = useSelector(selectTravellers)
 	const lastFetch = useSelector(selectLastFetch)
@@ -106,27 +122,32 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					{error}
 				</BaseDialog>
 			)}
-			<h1 className="mt-0">Travellers</h1>
+			{/* Refresh and Register wrap together below the heading when the row is too narrow, so neither overflows the card */}
 			<div
-				className="flex h-10 items-center justify-start [&>:nth-child(2)]:mr-2 [&>:nth-child(2)]:ml-auto"
+				className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1"
 				data-cy="controls">
-				<BaseButton
-					modeType="outline"
-					disabled={loading}
-					data-cy="refresh-button"
-					onClick={() => loadTravellersHandler(true)}>
-					Refresh
-				</BaseButton>
-				{isLoggedIn && isTravellerKnown && !isTraveller && (
+				<h1 className="my-0 grow">Travellers</h1>
+				<div className="ml-auto flex items-center gap-2">
 					<BaseButton
-						isLink
-						to={PATHS.REGISTER}
-						isDisabled={loading}
-						modeType="primary"
-						data-cy="register-link">
-						Register
+						modeType="flat"
+						ariaLabel="Refresh travellers"
+						className="size-11 p-0 disabled:cursor-default disabled:opacity-50"
+						disabled={loading}
+						data-cy="refresh-button"
+						onClick={() => loadTravellersHandler(true)}>
+						<RefreshIcon />
 					</BaseButton>
-				)}
+					{isLoggedIn && isTravellerKnown && !isTraveller && (
+						<BaseButton
+							isLink
+							to={PATHS.REGISTER}
+							isDisabled={loading}
+							modeType="primary"
+							data-cy="register-link">
+							Register
+						</BaseButton>
+					)}
+				</div>
 			</div>
 			{loading && (
 				<div className="my-20 min-h-15">

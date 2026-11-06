@@ -13,6 +13,7 @@ import {
 	FILE_UPLOADER_SELECTORS,
 	MESSAGE_ITEM_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
+	TRAVELLER_FILTER_SELECTORS,
 	TRAVELLER_ITEM_SELECTORS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 	TRAVELLERS_LIST_SELECTORS,
@@ -273,6 +274,29 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		it('captures the travellers list while it loads', () => {
+			// Held open so the spinner, and the disabled Refresh and Register, stay on screen
+			cy.intercept('GET', '**/travellers.json*', (request) => {
+				request.on('response', (response) => {
+					response.setDelay(60000)
+				})
+			})
+			eachWidth((width) => {
+				cy.visit(PATHS.TRAVELLERS)
+				cy.get(COMMON_SELECTORS.BASE_SPINNER).should('exist')
+				cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON).should(
+					'be.disabled',
+				)
+				cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should(
+					'have.attr',
+					'aria-disabled',
+					'true',
+				)
+				freezeAnimation()
+				shot(`travellers-loading-${width}`)
+			})
+		})
+
 		it('captures real hover and keyboard focus on the interactive controls', () => {
 			cy.viewport(1280, HEIGHT)
 			cy.visit(PATHS.TRAVELLERS)
@@ -281,6 +305,9 @@ describe(`UI check capture (${LABEL})`, () => {
 			;[
 				['details', TRAVELLER_ITEM_SELECTORS.DETAILS],
 				['refresh', TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON],
+				['register', TRAVELLERS_LIST_SELECTORS.REGISTER_LINK],
+				['filter-select-all', TRAVELLER_FILTER_SELECTORS.SELECT_ALL],
+				['filter-clear', TRAVELLER_FILTER_SELECTORS.CLEAR],
 				['image-button', COMMON_SELECTORS.BASE_IMAGE_BUTTON],
 			].forEach(([name, selector]) => {
 				forcePseudo(selector, ['hover'])

@@ -298,7 +298,9 @@ describe('Travellers page', () => {
 			})
 
 			// Verify refresh button is enabled and travellers are displayed
-			cy.get('button').contains('Refresh').should('not.be.disabled')
+			cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON).should(
+				'not.be.disabled',
+			)
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'be.visible',
 			)

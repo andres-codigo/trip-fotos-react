@@ -468,6 +468,17 @@ describe('<TravellersList />', () => {
 				).not.toBeDisabled()
 			})
 
+			it('should disable refresh button while loading', async () => {
+				setupMocksForLoadingState()
+				await act(async () => {
+					renderTravellersList({ isLoading: true })
+				})
+
+				expect(
+					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
+				).toBeDisabled()
+			})
+
 			it('should enable refresh button when travellers exist', async () => {
 				setupMocksForHasTravellers()
 				await act(async () => {
@@ -594,15 +605,45 @@ describe('<TravellersList />', () => {
 			).toBeInTheDocument()
 		})
 
-		it('should have proper role for refresh button', async () => {
+		it('should name the icon-only refresh button', async () => {
 			setupMocksForHasTravellers()
 			await act(async () => {
 				renderTravellersList()
 			})
 
-			expect(
+			const refreshButton = screen.getByRole('button', {
+				name: UI_TEXT.TRAVELLERS.REFRESH_BUTTON,
+			})
+			expect(refreshButton).toHaveAttribute(
+				'data-cy',
+				TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON,
+			)
+			expect(refreshButton.querySelector('svg')).toHaveAttribute(
+				'aria-hidden',
+				'true',
+			)
+		})
+
+		it('should keep the heading, refresh and register in the title row', async () => {
+			setupMocksForHasTravellers()
+			setupMocksForLoggedInUser()
+			vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			const controls = screen.getByTestId(
+				TEST_IDS.TRAVELLERS_LIST.CONTROLS,
+			)
+			expect(controls).toContainElement(
+				screen.getByRole('heading', { level: 1, name: 'Travellers' }),
+			)
+			expect(controls).toContainElement(
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
-			).toBeInTheDocument()
+			)
+			expect(controls).toContainElement(
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK),
+			)
 		})
 
 		it('should have proper list structure for travellers', async () => {

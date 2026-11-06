@@ -85,7 +85,7 @@ export const UI_TEXT = {
 		NO_TRAVELLERS_MESSAGE: 'No travellers listed.',
 		NO_MATCHING_MESSAGE: 'No travellers match the selected cities.',
 		REGISTER_AS_TRAVELLER: 'Register',
-		REFRESH_BUTTON: 'Refresh',
+		REFRESH_BUTTON: 'Refresh travellers',
 	},
 	BUTTONS: {
 		CLOSE: 'Close',
