@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.7](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.6...v0.21.7) (2026-11-06)
+
+
+### Bug Fixes
+
+* start-issue.mjs relabels a just-created issue inside Intake's 60-second window, so it never leaves Triage ([#645](https://github.com/andres-codigo/trip-fotos-react/issues/645)) ([95fcb82](https://github.com/andres-codigo/trip-fotos-react/commit/95fcb82d98e24779f16ae799a3c689b27ea6e455))
+
 ## [0.21.6](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.5...v0.21.6) (2026-11-06)
 
 
