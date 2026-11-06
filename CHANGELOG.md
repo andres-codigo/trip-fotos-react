@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.5](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.4...v0.21.5) (2026-11-06)
+
+
+### Enhancements
+
+* reorder the Travellers controls (Register beside the title, Refresh icon, filter links) ([#633](https://github.com/andres-codigo/trip-fotos-react/issues/633)) ([37b8912](https://github.com/andres-codigo/trip-fotos-react/commit/37b8912f560b2273ddcdfda4b8bc4197e9b7476a))
+
 ## [0.21.4](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.3...v0.21.4) (2026-11-02)
 
 
