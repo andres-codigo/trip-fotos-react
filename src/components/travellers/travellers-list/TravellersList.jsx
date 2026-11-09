@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import PropTypes from 'prop-types'
 
-import { GLOBAL } from '@/constants/ui'
 import { handleApiError } from '@/utils/errorHandler'
 import { PATHS } from '@/constants/ui'
+import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
 
 import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
 
@@ -17,14 +17,19 @@ import {
 	selectLastFetch,
 } from '@/store/slices/travellersSlice'
 
-import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseButton from '@/components/ui/button/BaseButton'
-import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 import TravellerFilter from '@/components/travellers/traveller-filter/TravellerFilter'
 import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
+import TravellerSkeleton from '@/components/travellers/traveller-skeleton/TravellerSkeleton'
 
 import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
+import usePaging from '@/components/travellers/travellers-list/hooks/usePaging'
+
+const SKELETON_KEYS = Array.from(
+	{ length: TRAVELLERS_LIST_CONFIG.PAGE_SIZE },
+	(_, index) => index,
+)
 
 const RefreshIcon = () => (
 	<svg
@@ -54,7 +59,9 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 	)
 	// Start in the loading state when a mount load is due, so the first paint never shows an enabled Register link that the load then disables
 	const [loading, setLoading] = useState(isLoading || shouldLoadOnMount)
+	const [refreshCount, setRefreshCount] = useState(0)
 	const hasInitialisedRef = useRef(false)
+	const listRef = useRef(null)
 
 	const dispatch = useDispatch()
 	const isLoggedIn = useSelector(selectIsAuthenticated)
@@ -69,6 +76,19 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 		setCitiesActive,
 		filteredTravellers,
 	} = useCityFilter(travellers)
+	const isFiltered = inactiveIds.length > 0
+	const {
+		visibleItems,
+		visibleCount,
+		total,
+		nextCount,
+		hasMore,
+		showMore,
+		firstNewIndex,
+	} = usePaging(filteredTravellers, {
+		pageSize: TRAVELLERS_LIST_CONFIG.PAGE_SIZE,
+		resetKey: `${refreshCount}|${inactiveIds.join('|')}`,
+	})
 
 	const loadTravellersHandler = useCallback(
 		async (refresh = false, silent = false) => {
@@ -108,20 +128,24 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
-	const handleError = () => setError(null)
+	// Keyboard and screen-reader users land on the first card that Show more added, not back at the button
+	useEffect(() => {
+		if (firstNewIndex === null) return
+		const firstNew = listRef.current?.children[firstNewIndex]
+		if (!firstNew) return
+		firstNew.setAttribute('tabindex', '-1')
+		firstNew.focus()
+	}, [firstNewIndex])
+
+	const refreshTravellers = () => {
+		setRefreshCount((count) => count + 1)
+		loadTravellersHandler(true)
+	}
+
+	const isPaged = total > TRAVELLERS_LIST_CONFIG.PAGE_SIZE
 
 	return (
 		<>
-			{error && (
-				<BaseDialog
-					show={true}
-					isError={true}
-					title={GLOBAL.ERROR_DIALOG_TITLE}
-					onClose={handleError}
-					data-cy="travellers-list-error-dialog">
-					{error}
-				</BaseDialog>
-			)}
 			{/* Refresh and Register wrap together below the heading when the row is too narrow, so neither overflows the card */}
 			<div
 				className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1"
@@ -134,7 +158,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 						className="size-11 p-0 disabled:cursor-default disabled:opacity-50"
 						disabled={loading}
 						data-cy="refresh-button"
-						onClick={() => loadTravellersHandler(true)}>
+						onClick={refreshTravellers}>
 						<RefreshIcon />
 					</BaseButton>
 					{isLoggedIn && isTravellerKnown && !isTraveller && (
@@ -149,10 +173,41 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					)}
 				</div>
 			</div>
-			{loading && (
-				<div className="my-20 min-h-15">
-					<BaseSpinner />
+			{!loading && error && (
+				<div
+					role="alert"
+					className="my-4 flex flex-col items-start gap-3 rounded-lg border border-destructive p-4"
+					data-cy="travellers-load-error">
+					<p className="m-0 font-bold text-destructive">
+						{TRAVELLERS_LIST_CONFIG.LOAD_ERROR_TITLE}
+					</p>
+					<p className="m-0">{error}</p>
+					<BaseButton
+						type="button"
+						modeType="primary"
+						onClick={refreshTravellers}
+						data-cy="travellers-try-again">
+						{TRAVELLERS_LIST_CONFIG.TRY_AGAIN}
+					</BaseButton>
 				</div>
+			)}
+			{loading && (
+				<>
+					<p
+						role="status"
+						className="my-2 text-muted-foreground"
+						data-cy="travellers-loading">
+						{TRAVELLERS_LIST_CONFIG.LOADING_LABEL}
+					</p>
+					<ul
+						aria-busy="true"
+						className="m-0 list-none p-0"
+						data-cy="travellers-skeleton-list">
+						{SKELETON_KEYS.map((key) => (
+							<TravellerSkeleton key={key} />
+						))}
+					</ul>
+				</>
 			)}
 			{!loading && hasTravellers && options.length > 0 && (
 				<TravellerFilter
@@ -163,16 +218,50 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				/>
 			)}
 			{!loading && hasTravellers && filteredTravellers.length > 0 && (
-				<ul
-					className="m-0 list-none p-0"
-					data-cy="travellers-list">
-					{filteredTravellers.map((traveller) => (
-						<TravellerItem
-							key={traveller.id}
-							{...traveller}
-						/>
-					))}
-				</ul>
+				<>
+					<ul
+						ref={listRef}
+						className="m-0 list-none p-0"
+						data-cy="travellers-list">
+						{visibleItems.map((traveller) => (
+							<TravellerItem
+								key={traveller.id}
+								{...traveller}
+							/>
+						))}
+					</ul>
+					{isPaged && (
+						<div className="mt-4 flex flex-col items-center gap-2">
+							{hasMore && (
+								<BaseButton
+									type="button"
+									modeType="outline"
+									className="w-full"
+									onClick={showMore}
+									data-cy="show-more-travellers">
+									{TRAVELLERS_LIST_CONFIG.SHOW_MORE(
+										nextCount,
+									)}
+								</BaseButton>
+							)}
+							<p
+								aria-live="polite"
+								className="m-0 text-sm text-muted-foreground"
+								data-cy="travellers-page-status">
+								{hasMore
+									? TRAVELLERS_LIST_CONFIG.PAGE_STATUS(
+											visibleCount,
+											total,
+											isFiltered,
+										)
+									: TRAVELLERS_LIST_CONFIG.ALL_SHOWN(
+											total,
+											isFiltered,
+										)}
+							</p>
+						</div>
+					)}
+				</>
 			)}
 			{!loading && hasTravellers && filteredTravellers.length === 0 && (
 				<div
@@ -183,7 +272,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					</h2>
 				</div>
 			)}
-			{!loading && !hasTravellers && (
+			{!loading && !error && !hasTravellers && (
 				<div
 					className="my-20 flex min-h-15 items-center justify-center"
 					data-cy="no-travellers-list">

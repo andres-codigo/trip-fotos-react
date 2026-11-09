@@ -6,13 +6,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { GLOBAL } from '@/constants/ui'
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
+import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
 import {
 	MOCK_CITIES,
 	MOCK_ERROR_MESSAGES,
 	MOCK_TRAVELLERS,
 	MOCK_USER,
-	DIALOG,
 	TEST_IDS,
+	TRAVELLER_SKELETON,
 	SPINNER,
 	UI_TEXT,
 } from '@/constants/test'
@@ -50,6 +51,8 @@ vi.mock('@/components/travellers/traveller-item/TravellerItem', () => ({
 }))
 
 import TravellersList from '@/components/travellers/travellers-list/TravellersList'
+
+const ALERT_ROLE = 'alert'
 import * as travellersSlice from '@/store/slices/travellersSlice'
 import * as authenticationSlice from '@/store/slices/authenticationSlice'
 
@@ -188,7 +191,7 @@ describe('<TravellersList />', () => {
 			).toBeInTheDocument()
 		})
 
-		it('should render spinner when loading', async () => {
+		it('should render the loading status and a page of skeleton cards when loading', async () => {
 			setupMocksForLoadingState()
 
 			await act(async () => {
@@ -196,8 +199,17 @@ describe('<TravellersList />', () => {
 			})
 
 			expect(
-				screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
-			).toBeInTheDocument()
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.LOADING),
+			).toHaveTextContent(TRAVELLERS_LIST_CONFIG.LOADING_LABEL)
+			expect(
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.SKELETON_LIST),
+			).toHaveAttribute('aria-busy', 'true')
+			expect(screen.getAllByTestId(TRAVELLER_SKELETON.ROOT)).toHaveLength(
+				TRAVELLERS_LIST_CONFIG.PAGE_SIZE,
+			)
+			expect(
+				screen.queryByTestId(TEST_IDS.SPINNER.CONTAINER),
+			).not.toBeInTheDocument()
 		})
 
 		it('should render "No travellers listed" message when no travellers exist', async () => {
@@ -209,7 +221,7 @@ describe('<TravellersList />', () => {
 
 			await waitFor(() => {
 				expect(
-					screen.queryByTestId(TEST_IDS.SPINNER.CONTAINER),
+					screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LOADING),
 				).not.toBeInTheDocument()
 			})
 
@@ -346,7 +358,7 @@ describe('<TravellersList />', () => {
 		})
 
 		describe('error handling', () => {
-			it('should clear error when handleError is called', async () => {
+			it('should reload and clear the inline error when Try again is pressed', async () => {
 				setupMocksForErrorState()
 
 				renderTravellersList({
@@ -354,15 +366,32 @@ describe('<TravellersList />', () => {
 					isLoading: false,
 				})
 
+				const alert = screen.getByRole(ALERT_ROLE)
+				expect(alert).toHaveTextContent(
+					TRAVELLERS_LIST_CONFIG.LOAD_ERROR_TITLE,
+				)
+				expect(alert).toHaveTextContent(
+					MOCK_ERROR_MESSAGES.INITIAL_ERROR,
+				)
 				expect(
-					screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-				).toBeInTheDocument()
+					screen.queryByText(
+						UI_TEXT.TRAVELLERS.NO_TRAVELLERS_MESSAGE,
+					),
+				).not.toBeInTheDocument()
 
-				fireEvent.click(screen.getByText(UI_TEXT.BUTTONS.CLOSE))
+				fireEvent.click(
+					screen.getByRole('button', {
+						name: TRAVELLERS_LIST_CONFIG.TRY_AGAIN,
+					}),
+				)
+
+				expect(travellersSlice.loadTravellers).toHaveBeenCalledWith({
+					forceRefresh: true,
+				})
 
 				await waitFor(() => {
 					expect(
-						screen.queryByRole(DIALOG.ROLE_ALERTDIALOG),
+						screen.queryByRole(ALERT_ROLE),
 					).not.toBeInTheDocument()
 				})
 			})
@@ -380,9 +409,7 @@ describe('<TravellersList />', () => {
 				)
 
 				await waitFor(() => {
-					expect(
-						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-					).toBeInTheDocument()
+					expect(screen.getByRole(ALERT_ROLE)).toBeInTheDocument()
 				})
 
 				expect(
@@ -403,9 +430,7 @@ describe('<TravellersList />', () => {
 				)
 
 				await waitFor(() => {
-					expect(
-						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-					).toBeInTheDocument()
+					expect(screen.getByRole(ALERT_ROLE)).toBeInTheDocument()
 				})
 
 				expect(
@@ -438,14 +463,12 @@ describe('<TravellersList />', () => {
 				})
 
 				await waitFor(() => {
-					expect(
-						screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-					).toBeInTheDocument()
+					expect(screen.getByRole(ALERT_ROLE)).toBeInTheDocument()
 				})
 
-				expect(
-					screen.getByText(GLOBAL.ERROR_DIALOG_TITLE),
-				).toBeInTheDocument()
+				expect(screen.getByRole(ALERT_ROLE)).toHaveTextContent(
+					TRAVELLERS_LIST_CONFIG.LOAD_ERROR_TITLE,
+				)
 			})
 		})
 
@@ -590,7 +613,7 @@ describe('<TravellersList />', () => {
 	})
 
 	describe('Accessibility tests', () => {
-		it('should have proper role for error dialog', async () => {
+		it('should announce the load error as an alert', async () => {
 			setupMocksForErrorState()
 
 			await act(async () => {
@@ -600,9 +623,7 @@ describe('<TravellersList />', () => {
 				})
 			})
 
-			expect(
-				screen.getByRole(DIALOG.ROLE_ALERTDIALOG),
-			).toBeInTheDocument()
+			expect(screen.getByRole(ALERT_ROLE)).toBeInTheDocument()
 		})
 
 		it('should name the icon-only refresh button', async () => {
@@ -731,6 +752,161 @@ describe('<TravellersList />', () => {
 			})
 
 			expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+		})
+	})
+
+	describe('Paging', () => {
+		const PAGE_SIZE = TRAVELLERS_LIST_CONFIG.PAGE_SIZE
+
+		const makeTravellers = (count, cityFor = () => MOCK_CITIES.TOKYO) =>
+			Array.from({ length: count }, (_, index) => ({
+				...MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE,
+				id: `traveller-${index}`,
+				cities: [cityFor(index)],
+			}))
+
+		const setupMocksForManyTravellers = (travellers) => {
+			setupMocksForHasTravellers()
+			vi.mocked(travellersSlice.selectTravellers).mockReturnValue(
+				travellers,
+			)
+		}
+
+		const getItems = () =>
+			screen.getAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM)
+		const getShowMore = () =>
+			screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.SHOW_MORE)
+		const getStatus = () =>
+			screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.PAGE_STATUS)
+
+		it('should show no paging controls for a single page', async () => {
+			setupMocksForManyTravellers(makeTravellers(PAGE_SIZE))
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			expect(getItems()).toHaveLength(PAGE_SIZE)
+			expect(getShowMore()).not.toBeInTheDocument()
+			expect(getStatus()).not.toBeInTheDocument()
+		})
+
+		it('should show the first page with Show more and a polite status', async () => {
+			setupMocksForManyTravellers(makeTravellers(30))
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			expect(getItems()).toHaveLength(PAGE_SIZE)
+			expect(getShowMore()).toHaveTextContent(
+				TRAVELLERS_LIST_CONFIG.SHOW_MORE(PAGE_SIZE),
+			)
+			expect(getStatus()).toHaveAttribute('aria-live', 'polite')
+			expect(getStatus()).toHaveTextContent(
+				TRAVELLERS_LIST_CONFIG.PAGE_STATUS(PAGE_SIZE, 30, false),
+			)
+		})
+
+		it('should add a page and move focus to the first new card', async () => {
+			setupMocksForManyTravellers(makeTravellers(30))
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			fireEvent.click(getShowMore())
+
+			const items = getItems()
+			expect(items).toHaveLength(PAGE_SIZE * 2)
+			expect(items[PAGE_SIZE]).toHaveFocus()
+			expect(items[PAGE_SIZE]).toHaveAttribute('tabindex', '-1')
+			expect(getStatus()).toHaveTextContent(
+				TRAVELLERS_LIST_CONFIG.PAGE_STATUS(PAGE_SIZE * 2, 30, false),
+			)
+			expect(getShowMore()).toHaveTextContent(
+				TRAVELLERS_LIST_CONFIG.SHOW_MORE(6),
+			)
+		})
+
+		it('should drop the button and say all are shown on the last page', async () => {
+			setupMocksForManyTravellers(makeTravellers(30))
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			fireEvent.click(getShowMore())
+			fireEvent.click(getShowMore())
+
+			const items = getItems()
+			expect(items).toHaveLength(30)
+			expect(items[PAGE_SIZE * 2]).toHaveFocus()
+			expect(getShowMore()).not.toBeInTheDocument()
+			expect(getStatus()).toHaveTextContent(
+				TRAVELLERS_LIST_CONFIG.ALL_SHOWN(30, false),
+			)
+		})
+
+		it('should count matching travellers and go back to the first page when the filter changes', async () => {
+			setupMocksForManyTravellers(
+				makeTravellers(30, (index) =>
+					index % 2 ? MOCK_CITIES.PRAGUE : MOCK_CITIES.TOKYO,
+				),
+			)
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			fireEvent.click(getShowMore())
+			expect(getItems()).toHaveLength(PAGE_SIZE * 2)
+
+			fireEvent.click(
+				screen.getByRole('checkbox', {
+					name: `${MOCK_CITIES.PRAGUE.city}, ${MOCK_CITIES.PRAGUE.country}`,
+				}),
+			)
+
+			expect(getItems()).toHaveLength(PAGE_SIZE)
+			expect(getStatus()).toHaveTextContent(
+				TRAVELLERS_LIST_CONFIG.PAGE_STATUS(PAGE_SIZE, 15, true),
+			)
+		})
+
+		it('should go back to the first page on Refresh', async () => {
+			setupMocksForManyTravellers(makeTravellers(30))
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			fireEvent.click(getShowMore())
+			expect(getItems()).toHaveLength(PAGE_SIZE * 2)
+
+			await act(async () => {
+				fireEvent.click(
+					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
+				)
+			})
+
+			expect(getItems()).toHaveLength(PAGE_SIZE)
+		})
+
+		it('should keep the cards shown when a Refresh fails', async () => {
+			setupMocksForManyTravellers(makeTravellers(30))
+			let mockDispatch
+			await act(async () => {
+				;({ mockDispatch } = renderTravellersList())
+			})
+
+			mockDispatch.mockRejectedValueOnce(
+				new Error(MOCK_ERROR_MESSAGES.LOAD_FAILED),
+			)
+			await act(async () => {
+				fireEvent.click(
+					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
+				)
+			})
+
+			expect(screen.getByRole(ALERT_ROLE)).toHaveTextContent(
+				MOCK_ERROR_MESSAGES.LOAD_FAILED,
+			)
+			expect(getItems()).toHaveLength(PAGE_SIZE)
 		})
 	})
 })

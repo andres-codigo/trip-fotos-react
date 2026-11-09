@@ -20,6 +20,7 @@
 	--secondary-foreground: #ffffff;
 	--muted: #eee8e8;
 	--muted-foreground: #424242;
+	--skeleton: #e4dede;
 	--accent: #f391e3;
 	--accent-foreground: #3a0061;
 	--destructive: #df0d0d;
@@ -67,6 +68,7 @@
 	--color-secondary-foreground: var(--secondary-foreground);
 	--color-muted: var(--muted);
 	--color-muted-foreground: var(--muted-foreground);
+	--color-skeleton: var(--skeleton);
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
@@ -149,6 +151,7 @@
 	--animate-dialog-out: dialog-out 0.3s ease-in forwards;
 	--animate-fade-in: fade-in 0.3s ease-out;
 	--animate-fade-out: fade-out 0.3s ease-in forwards;
+	--animate-skeleton: skeleton-pulse 1.6s ease-in-out infinite;
 
 	@keyframes dialog-in {
 		from {
@@ -178,6 +181,13 @@
 		}
 		to {
 			opacity: 1;
+		}
+	}
+
+	/* Opacity pulse only (no movement), so it is intentionally not disabled under prefers-reduced-motion */
+	@keyframes skeleton-pulse {
+		50% {
+			opacity: 0.55;
 		}
 	}
 

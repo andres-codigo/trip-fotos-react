@@ -3,8 +3,8 @@ import {
 	TRAVELLERS_LIST_SELECTORS,
 	TRAVELLER_FILTER_SELECTORS,
 	TRAVELLER_ITEM_SELECTORS,
-	DIALOG_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
+import { TRAVELLERS_LIST_CONFIG } from '../../../src/constants/travellers'
 import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
@@ -32,7 +32,7 @@ describe('Travellers page', () => {
 		it('has no axe violations', () => {
 			performLogin()
 			cy.get(PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER).should('exist')
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {
 				timeout: REQUEST_TIMEOUT,
 			}).should('not.exist')
 
@@ -83,7 +83,7 @@ describe('Travellers page', () => {
 			performLogin()
 
 			// Wait for initial loading to complete so button is enabled
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {
 				timeout: REQUEST_TIMEOUT,
 			}).should('not.exist')
 
@@ -111,7 +111,7 @@ describe('Travellers page', () => {
 			performLogin()
 
 			// Should show loading state initially
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
 
 			// Register link should be visible but disabled (aria-disabled="true")
 			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK)
@@ -129,10 +129,10 @@ describe('Travellers page', () => {
 			performLogin()
 
 			// Should show loading state initially
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
 
 			// Wait for loading to complete
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {
 				timeout: REQUEST_TIMEOUT,
 			}).should('not.exist')
 
@@ -146,11 +146,11 @@ describe('Travellers page', () => {
 			performLogin()
 
 			// Wait for initial load
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {
 				timeout: REQUEST_TIMEOUT,
 			}).should('not.exist')
 
-			// Make refresh loading deterministic so spinner assertion is stable in CI
+			// Make refresh loading deterministic so the loading assertion is stable in CI
 			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				fixture: 'travellers.json',
 				delay: 600,
@@ -161,13 +161,13 @@ describe('Travellers page', () => {
 				.click()
 
 			// Should show loading again
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {
 				timeout: REQUEST_TIMEOUT,
 			}).should('be.visible')
 			cy.wait('@refreshTravellers', { timeout: REQUEST_TIMEOUT })
 
 			// Wait for refresh to complete
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('not.exist')
 		})
 
 		it('should show refresh button when no travellers exist', () => {
@@ -178,7 +178,7 @@ describe('Travellers page', () => {
 			performLogin()
 
 			// Wait for loading to complete
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {
 				timeout: REQUEST_TIMEOUT,
 			}).should('not.exist')
 
@@ -189,7 +189,7 @@ describe('Travellers page', () => {
 	})
 
 	describe('Error Handling', () => {
-		it('should display server error dialog when API returns 500 status', () => {
+		it('should show an inline error when the API returns 500 status', () => {
 			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				statusCode: 500,
 				body: { message: 'Internal Server Error' },
@@ -199,19 +199,13 @@ describe('Travellers page', () => {
 			cy.visit(PATHS.TRAVELLERS)
 			cy.wait('@getTravellers500Error', { timeout: REQUEST_TIMEOUT })
 
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).within(() => {
-				cy.get(DIALOG_SELECTORS.TITLE).should(
-					'contain',
-					DIALOG_SELECTORS.MESSAGES.ERROR.TITLE,
-				)
-				cy.contains(ERROR_MESSAGES.REQUEST_ERROR).should('exist')
-				// Close the dialog
-				cy.get(DIALOG_SELECTORS.CLOSE_BUTTON).click()
-			})
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR)
+				.should('be.visible')
+				.and('contain', TRAVELLERS_LIST_CONFIG.LOAD_ERROR_TITLE)
+				.and('contain', ERROR_MESSAGES.REQUEST_ERROR)
 		})
 
-		it('should display client error dialog when API returns 400-499 status', () => {
+		it('should show an inline error when the API returns 400-499 status', () => {
 			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				statusCode: 403,
 				body: { message: 'Forbidden' },
@@ -221,14 +215,14 @@ describe('Travellers page', () => {
 			cy.visit(PATHS.TRAVELLERS)
 			cy.wait('@getTravellers403Error', { timeout: REQUEST_TIMEOUT })
 
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should(
 				'contain',
 				ERROR_MESSAGES.REQUEST_ERROR,
 			)
 		})
 
-		it('should display network error dialog when network fails', () => {
+		it('should show an inline error when the network fails', () => {
 			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				forceNetworkError: true,
 			}).as('getTravellersNetworkError')
@@ -237,8 +231,8 @@ describe('Travellers page', () => {
 			cy.visit(PATHS.TRAVELLERS)
 			cy.wait('@getTravellersNetworkError', { timeout: REQUEST_TIMEOUT })
 
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should(
 				'contain',
 				ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 			)
@@ -258,14 +252,14 @@ describe('Travellers page', () => {
 			cy.visit(PATHS.TRAVELLERS)
 			cy.wait('@getTravellersInvalidJSON', { timeout: REQUEST_TIMEOUT })
 
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should(
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should(
 				'contain',
 				ERROR_MESSAGES.UNEXPECTED_ERROR,
 			)
 		})
 
-		it('should close error dialog when close button is clicked', () => {
+		it('should reload when Try again is pressed', () => {
 			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				statusCode: 500,
 				body: { message: 'Server error' },
@@ -275,14 +269,19 @@ describe('Travellers page', () => {
 			cy.visit(PATHS.TRAVELLERS)
 			cy.wait('@getTravellersError', { timeout: REQUEST_TIMEOUT })
 
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('be.visible')
 
-			// Click the close button (you may need to adjust the selector based on your BaseDialog implementation)
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).within(() => {
-				cy.get('button').contains('Close').click()
-			})
+			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
+				fixture: 'travellers.json',
+			}).as('getTravellersRetry')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRY_AGAIN).click()
+			cy.wait('@getTravellersRetry', { timeout: REQUEST_TIMEOUT })
 
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				'have.length',
+				2,
+			)
 		})
 
 		it('should allow retry after error by clicking refresh button', () => {
@@ -314,11 +313,11 @@ describe('Travellers page', () => {
 			cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON).click()
 			cy.wait('@getTravellersRefreshError', { timeout: REQUEST_TIMEOUT })
 
-			// Close error dialog
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).within(() => {
-				cy.contains('button', 'Close').click()
-			})
+			// A failed refresh keeps the cards already shown
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
+				'be.visible',
+			)
 
 			// Setup successful retry
 			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
@@ -331,7 +330,7 @@ describe('Travellers page', () => {
 				.click()
 			cy.wait('@getTravellersRetrySuccess', { timeout: REQUEST_TIMEOUT })
 
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('not.exist')
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'be.visible',
 			)
@@ -339,7 +338,7 @@ describe('Travellers page', () => {
 	})
 
 	describe('Loading States', () => {
-		it('should show loading spinner during initial load', () => {
+		it('should show skeleton cards during initial load', () => {
 			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
 				fixture: 'travellers.json',
 				delay: 1000,
@@ -348,9 +347,9 @@ describe('Travellers page', () => {
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
 
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
 			cy.wait('@getTravellersWithDelay', { timeout: REQUEST_TIMEOUT })
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('not.exist')
 		})
 
 		it('should hide content while loading', () => {
@@ -362,14 +361,61 @@ describe('Travellers page', () => {
 			performLogin()
 			cy.visit(PATHS.TRAVELLERS)
 
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'not.exist',
 			)
 			cy.contains('No travellers listed.').should('not.exist')
 
 			cy.wait('@getTravellersWithDelay2', { timeout: REQUEST_TIMEOUT })
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('not.exist')
+		})
+	})
+
+	describe('Paging', () => {
+		it('shows 12 travellers at a time and moves focus to the first new card', () => {
+			cy.fixture('travellers.json').then((fixture) => {
+				const [record] = Object.values(fixture)
+				const body = Object.fromEntries(
+					Array.from({ length: 30 }, (_, index) => [
+						`paged-${String(index).padStart(2, '0')}`,
+						{ ...record, firstName: `Paged ${index + 1}` },
+					]),
+				)
+				cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
+					body,
+				}).as('getManyTravellers')
+			})
+
+			performLogin()
+			cy.visit(PATHS.TRAVELLERS)
+			cy.wait('@getManyTravellers', { timeout: REQUEST_TIMEOUT })
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				'have.length',
+				TRAVELLERS_LIST_CONFIG.PAGE_SIZE,
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should(
+				'have.text',
+				TRAVELLERS_LIST_CONFIG.PAGE_STATUS(12, 30, false),
+			)
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).click()
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+				.should('have.length', 24)
+				.eq(12)
+				.should('have.focus')
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).click()
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				'have.length',
+				30,
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should(
+				'have.text',
+				TRAVELLERS_LIST_CONFIG.ALL_SHOWN(30, false),
+			)
 		})
 	})
 

@@ -1,7 +1,7 @@
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import {
-	DIALOG_SELECTORS,
+	TRAVELLERS_LIST_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
@@ -66,10 +66,10 @@ describe('Stale persisted store', () => {
 
 		cy.url().should('include', PATHS.TRAVELLERS)
 		// The cached list must never be shown as current, so it is checked while loading as well as afterwards
-		cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('be.visible')
+		cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
 		cy.contains(STALE_NAME).should('not.exist')
 
-		cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER, {
+		cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {
 			timeout: REQUEST_TIMEOUT,
 		}).should('not.exist')
 		cy.get(PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER).should('exist')

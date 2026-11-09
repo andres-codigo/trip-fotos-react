@@ -1,5 +1,5 @@
 import { PAGE_SELECTORS } from '../../src/constants/test/selectors/pages'
-import { DIALOG_SELECTORS } from '../../src/constants/test/selectors/components'
+import { TRAVELLERS_LIST_SELECTORS } from '../../src/constants/test/selectors/components'
 import { PATHS } from '../../src/constants/ui/paths'
 
 import { performLogin } from '../support/utils/authHelpers'
@@ -18,6 +18,6 @@ describe('Live smoke', () => {
 			.its('response.statusCode')
 			.should('eq', 200)
 		cy.get(PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER).should('exist')
-		cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('not.exist')
+		cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('not.exist')
 	})
 })

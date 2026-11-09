@@ -20,6 +20,7 @@ import {
 	TRAVELLER_DETAIL,
 	TRAVELLER_FILTER,
 	TRAVELLER_ITEM,
+	TRAVELLER_SKELETON,
 } from '../ui-constants'
 
 /////
@@ -130,6 +131,12 @@ export const TRAVELLERS_LIST_SELECTORS = {
 	CONTROLS: getByDataCy('controls'),
 	NO_TRAVELLERS: getByDataCy('no-travellers-list'),
 	NO_MATCHING_TRAVELLERS: getByDataCy('no-matching-travellers'),
+	LOADING: getByDataCy('travellers-loading'),
+	SKELETON_LIST: getByDataCy('travellers-skeleton-list'),
+	SHOW_MORE: getByDataCy('show-more-travellers'),
+	PAGE_STATUS: getByDataCy('travellers-page-status'),
+	LOAD_ERROR: getByDataCy('travellers-load-error'),
+	TRY_AGAIN: getByDataCy('travellers-try-again'),
 }
 
 /////
@@ -150,7 +157,6 @@ export const DIALOG_SELECTORS = {
 	),
 	AUTHENTICATING: getByDataCy('authenticating-dialog'),
 	REGISTERING: getByDataCy('registering-dialog'),
-	TRAVELLERS_LIST_ERROR: getByDataCy('travellers-list-error-dialog'),
 	// Dialog elements
 	TITLE: getByDataCy('title'),
 	TEXT_CONTENT: getByDataCy('text-content'),
@@ -177,6 +183,10 @@ export const DIALOG_SELECTORS = {
 			[IDENTITY_TOOLKIT_ERRORS.UNMAPPED]: ERROR_MESSAGES.LOGIN_FAILED,
 		},
 	},
+}
+
+export const TRAVELLER_SKELETON_SELECTORS = {
+	ROOT: getByDataCy(TRAVELLER_SKELETON.ROOT),
 }
 
 export const TRAVELLER_ITEM_SELECTORS = {

@@ -116,6 +116,10 @@ export const TRAVELLER_ITEM = Object.freeze({
 	DELETE_CONFIRM: 'traveller-item-delete-confirm',
 })
 
+export const TRAVELLER_SKELETON = Object.freeze({
+	ROOT: 'traveller-skeleton',
+})
+
 export const TRAVELLER_DETAIL = Object.freeze({
 	ROOT: 'traveller-detail',
 	NAME: 'traveller-detail-name',

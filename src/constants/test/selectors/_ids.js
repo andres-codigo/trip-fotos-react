@@ -32,6 +32,12 @@ export const TEST_IDS = {
 		ITEM: 'traveller-item',
 		REFRESH_BUTTON: 'refresh-button',
 		REGISTER_LINK: 'register-link',
+		LOADING: 'travellers-loading',
+		SKELETON_LIST: 'travellers-skeleton-list',
+		SHOW_MORE: 'show-more-travellers',
+		PAGE_STATUS: 'travellers-page-status',
+		LOAD_ERROR: 'travellers-load-error',
+		TRY_AGAIN: 'travellers-try-again',
 	},
 	MESSAGES: {
 		CONTAINER: 'messages-main-container',
