@@ -28,6 +28,18 @@ export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 	DELETE_DIALOG_TITLE: 'Delete traveller?',
 })
 
+export const TRAVELLERS_LIST_CONFIG = Object.freeze({
+	PAGE_SIZE: 12,
+	LOADING_LABEL: 'Loading travellers…',
+	SHOW_MORE: (count) => `Show ${count} more`,
+	PAGE_STATUS: (shown, total, isFiltered) =>
+		`Showing ${shown} of ${total} ${isFiltered ? 'matching ' : ''}travellers`,
+	ALL_SHOWN: (total, isFiltered) =>
+		`All ${total} ${isFiltered ? 'matching ' : ''}travellers shown`,
+	LOAD_ERROR_TITLE: 'Travellers could not be loaded.',
+	TRY_AGAIN: 'Try again',
+})
+
 export const TRAVELLER_FILTER_CONFIG = Object.freeze({
 	LEGEND: 'Filter by city',
 	SEARCH_LABEL: 'Search cities',

@@ -140,7 +140,7 @@ const TravellerItem = ({
 			) : (
 				<li
 					className={cn(
-						'my-4 list-none rounded-lg border border-muted-foreground p-4',
+						'my-4 list-none rounded-lg border border-muted-foreground p-4 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ring',
 						isOwnRecord && 'border-2',
 					)}
 					data-own={isOwnRecord}

@@ -4,11 +4,12 @@ import { configureStore } from '@reduxjs/toolkit'
 
 import {
 	COMMON_SELECTORS,
-	DIALOG_SELECTORS,
 	TRAVELLER_FILTER_SELECTORS,
+	TRAVELLER_SKELETON_SELECTORS,
 	TRAVELLERS_LIST_SELECTORS,
 } from '@/constants/test'
-import { GLOBAL, PATHS } from '@/constants/ui'
+import { PATHS } from '@/constants/ui'
+import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
 
 import TravellersList from '@/components/travellers/travellers-list/TravellersList'
 import authenticationReducer from '@/store/slices/authenticationSlice'
@@ -75,17 +76,25 @@ const alreadyLoaded = (overrides = {}) => ({
 
 describe('<TravellersList />', () => {
 	describe('Loading', () => {
-		it('shows a spinner while the first load runs, then the travellers', () => {
+		it('shows a page of skeleton cards while the first load runs, then the travellers', () => {
 			cy.intercept('GET', TRAVELLERS_URL, {
 				body: onServer,
 				delay: 300,
 			}).as('load')
 			mountList()
 
-			cy.get(COMMON_SELECTORS.BASE_SPINNER).should('exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should(
+				'have.text',
+				TRAVELLERS_LIST_CONFIG.LOADING_LABEL,
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST)
+				.should('have.attr', 'aria-busy', 'true')
+				.find(TRAVELLER_SKELETON_SELECTORS.ROOT)
+				.should('have.length', TRAVELLERS_LIST_CONFIG.PAGE_SIZE)
+			cy.get(COMMON_SELECTORS.BASE_SPINNER).should('not.exist')
 			cy.wait('@load')
 
-			cy.get(COMMON_SELECTORS.BASE_SPINNER).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST).should('not.exist')
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
 				'have.length',
 				2,
@@ -107,7 +116,7 @@ describe('<TravellersList />', () => {
 			)
 		})
 
-		it('shows an error dialog when loading fails and closes it', () => {
+		it('shows an inline error when loading fails, and Try again reloads', () => {
 			cy.intercept('GET', TRAVELLERS_URL, {
 				statusCode: 500,
 				body: {},
@@ -116,15 +125,21 @@ describe('<TravellersList />', () => {
 
 			cy.wait('@load')
 
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('be.visible')
-			cy.get(DIALOG_SELECTORS.TITLE).should(
-				'have.text',
-				GLOBAL.ERROR_DIALOG_TITLE,
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR)
+				.should('be.visible')
+				.and('have.attr', 'role', 'alert')
+				.and('contain.text', TRAVELLERS_LIST_CONFIG.LOAD_ERROR_TITLE)
+			cy.get(TRAVELLERS_LIST_SELECTORS.NO_TRAVELLERS).should('not.exist')
+
+			cy.intercept('GET', TRAVELLERS_URL, { body: onServer }).as('retry')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRY_AGAIN).click()
+			cy.wait('@retry')
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				'have.length',
+				2,
 			)
-
-			cy.get(DIALOG_SELECTORS.CLOSE_BUTTON).click()
-
-			cy.get(DIALOG_SELECTORS.TRAVELLERS_LIST_ERROR).should('not.exist')
 		})
 
 		it('does not reload a list that was fetched moments ago', () => {
@@ -223,6 +238,68 @@ describe('<TravellersList />', () => {
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
 				'not.exist',
 			)
+		})
+	})
+
+	describe('Paging', () => {
+		const PAGE_SIZE = TRAVELLERS_LIST_CONFIG.PAGE_SIZE
+		const many = Array.from({ length: 30 }, (_, index) => ({
+			...listed[0],
+			id: `traveller-${index}`,
+			firstName: `Traveller ${index + 1}`,
+		}))
+
+		it('adds 12 at a time, focuses the first new card and ends with all shown', () => {
+			mountList({ travellers: alreadyLoaded({ travellers: many }) })
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				'have.length',
+				PAGE_SIZE,
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS)
+				.should('have.attr', 'aria-live', 'polite')
+				.and(
+					'have.text',
+					TRAVELLERS_LIST_CONFIG.PAGE_STATUS(PAGE_SIZE, 30, false),
+				)
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE)
+				.should(
+					'have.text',
+					TRAVELLERS_LIST_CONFIG.SHOW_MORE(PAGE_SIZE),
+				)
+				.click()
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+				.should('have.length', PAGE_SIZE * 2)
+				.eq(PAGE_SIZE)
+				.should('have.focus')
+				.and('contain.text', `Traveller ${PAGE_SIZE + 1}`)
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE)
+				.should('have.text', TRAVELLERS_LIST_CONFIG.SHOW_MORE(6))
+				.click()
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				'have.length',
+				30,
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should(
+				'have.text',
+				TRAVELLERS_LIST_CONFIG.ALL_SHOWN(30, false),
+			)
+		})
+
+		it('shows no paging controls for one page', () => {
+			mountList({ travellers: alreadyLoaded() })
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				'have.length',
+				2,
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).should('not.exist')
+			cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should('not.exist')
 		})
 	})
 

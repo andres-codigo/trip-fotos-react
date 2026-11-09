@@ -36,7 +36,7 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 - **Authentication** — email/password sign-up and log-in with Firebase Authentication, session persistence and auto-logout
 - **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database; cities visited are chosen through an accessible type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data) that stores each city with its country
 - **Photo uploads** — drag-and-drop or file-picker uploader with previews and type/size validation on the registration form; photos are compressed and uploaded to Cloud Storage as the signed-in user, each with small and medium thumbnails; a progress bar shows how many photos have uploaded while registering
-- **Traveller cards** — the travellers list shows each traveller's name, registration date, trip description, days in city, city badges and up to five photos (square, thumbnail-sized tiles that load the smallest size the screen needs), with contact and details links and an admin-only delete button
+- **Traveller cards** — the travellers list shows each traveller's name, registration date, trip description, days in city, city badges and up to five photos (square, thumbnail-sized tiles that load the smallest size the screen needs), with contact and details links and an admin-only delete button; the list shows 12 travellers at a time with a "Show 12 more" button and a "Showing 12 of N travellers" status, skeleton cards stand in while it loads, and a failed load shows an inline error with Try again
 - **Traveller details** — `/travellers/:id` shows a traveller's full profile, cities and every photo (each opens in a dialog that fits the screen, with next/previous buttons and a shareable `?photo=N` link), with a contact link for other travellers; unknown ids show a not-found message
 - **Messaging** — `/travellers/:id/contact` (signed-in users only) sends a traveller a message from the user's email address, with email and message validation, a success alert on the travellers list and an error dialog if sending fails; travellers read and delete the messages they have received on the messages page
 - **City filter** — checkboxes above the travellers list, built from the cities the loaded travellers have visited, narrow the list by city; all cities start selected; the list is height-capped, with Select all / Clear links beside its heading and a "N of M cities selected" status, and a search box once there are more than four cities
@@ -57,12 +57,12 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- Travellers list in pages: 12 at a time with Show more, skeleton cards while it loads, and an inline error with Try again
 - Faster photo lists: square tiles that load small thumbnails instead of full-size photos
 - Cleaner Travellers controls: Register beside the title, a Refresh icon, and Select all / Clear as links in the filter header
 - A tidier city filter on Travellers: a scrollable list, with Select all / Clear, and city search once there are more than four cities
 - Every component and page now uses Tailwind, with SCSS and Stylelint removed and no visual change
 - Signed-in users who open the login page are sent to the travellers list
-- Failed registrations clean up the photos they had uploaded
 - Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs and local checks, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:

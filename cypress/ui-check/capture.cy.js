@@ -156,6 +156,22 @@ const emulatorDatabase = (path) =>
 
 const assertSettled = () => {
 	cy.get(COMMON_SELECTORS.BASE_SPINNER).should('not.exist')
+	cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, { timeout: TIMEOUT }).should(
+		'not.exist',
+	)
+}
+
+// Earlier steps add travellers, so a card the step needs can sit beyond the first page
+const showAllTravellers = () => {
+	cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM, {
+		timeout: TIMEOUT,
+	}).should('exist')
+	cy.get('body').then(($body) => {
+		if ($body.find(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).length) {
+			cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).click()
+			showAllTravellers()
+		}
+	})
 }
 
 const eachWidth = (callback) => {
@@ -418,6 +434,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			const capture = (suffix) => {
 				cy.visit(PATHS.TRAVELLERS)
 				assertSettled()
+				showAllTravellers()
 				cy.get(listItem).should('have.length', 1)
 				if (isBranch)
 					assertSources(
@@ -477,7 +494,7 @@ describe(`UI check capture (${LABEL})`, () => {
 		})
 
 		it('captures the travellers list while it loads', () => {
-			// Held open so the spinner, and the disabled Refresh and Register, stay on screen
+			// Held open so the skeleton cards, and the disabled Refresh and Register, stay on screen
 			cy.intercept('GET', '**/travellers.json*', (request) => {
 				request.on('response', (response) => {
 					response.setDelay(60000)
@@ -485,7 +502,10 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 			eachWidth((width) => {
 				cy.visit(PATHS.TRAVELLERS)
-				cy.get(COMMON_SELECTORS.BASE_SPINNER).should('exist')
+				cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
+				cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST).should(
+					'be.visible',
+				)
 				cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON).should(
 					'be.disabled',
 				)
@@ -496,6 +516,119 @@ describe(`UI check capture (${LABEL})`, () => {
 				)
 				freezeAnimation()
 				shot(`travellers-loading-${width}`)
+			})
+		})
+
+		it('captures Travellers paging: first page, the focused new card, the last page', () => {
+			// Real seeded records cloned to 30, so the cards keep their photos and badges
+			cy.request(emulatorDatabase('travellers')).then(({ body }) => {
+				const records = Object.values(body)
+				const many = Object.fromEntries(
+					Array.from({ length: 30 }, (_, index) => [
+						`ui-check-paged-${String(index).padStart(2, '0')}`,
+						{
+							...records[index % records.length],
+							firstName: 'Paged',
+							lastName: `Traveller ${index + 1}`,
+						},
+					]),
+				)
+				cy.intercept('GET', '**/travellers.json*', { body: many })
+			})
+
+			eachWidth((width) => {
+				cy.visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+					'have.length',
+					12,
+				)
+				assertSettled()
+				cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should(
+					'have.text',
+					'Showing 12 of 30 travellers',
+				)
+				freezeAnimation()
+				shot(`paging-first-${width}`)
+
+				cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).click()
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+					.should('have.length', 24)
+					.eq(12)
+					.should('have.focus')
+				// A mouse click does not match :focus-visible, so the ring a keyboard user sees is forced
+				const newCard = `${TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM}[tabindex="-1"]`
+				forcePseudo(newCard, ['focus', 'focus-visible'])
+				// Clear of the sticky header, with room for the 2px-offset outline
+				cy.get(newCard)
+					.scrollIntoView({ offset: { top: -120, left: 0 } })
+					.should('be.visible')
+					.screenshot(`${LABEL}/paging-new-card-focus-${width}`, {
+						padding: 12,
+						scrollBehavior: false,
+					})
+				forcePseudo(newCard, [])
+
+				cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE)
+					.should('have.text', 'Show 6 more')
+					.click()
+				cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).should('not.exist')
+				cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should(
+					'have.text',
+					'All 30 travellers shown',
+				)
+				freezeAnimation()
+				shot(`paging-last-${width}`)
+			})
+
+			cy.viewport(1280, HEIGHT)
+			cy.visit(PATHS.TRAVELLERS)
+			assertSettled()
+			forcePseudo(TRAVELLERS_LIST_SELECTORS.SHOW_MORE, ['hover'])
+			shot('hover-show-more')
+			forcePseudo(TRAVELLERS_LIST_SELECTORS.SHOW_MORE, [
+				'focus',
+				'focus-visible',
+			])
+			shot('focus-show-more')
+			forcePseudo(TRAVELLERS_LIST_SELECTORS.SHOW_MORE, [])
+		})
+
+		it('captures the inline load error when the list fails to load', () => {
+			cy.intercept('GET', '**/travellers.json*', {
+				statusCode: 500,
+				body: {},
+			})
+			eachWidth((width) => {
+				cy.visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should(
+					'be.visible',
+				)
+				freezeAnimation()
+				shot(`travellers-load-error-${width}`)
+			})
+		})
+
+		it('captures a failed Refresh, which keeps the cards', () => {
+			eachWidth((width) => {
+				cy.visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
+				assertSettled()
+				cy.intercept('GET', '**/travellers.json*', {
+					statusCode: 500,
+					body: {},
+				}).as('failedRefresh')
+				cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON).click()
+				cy.wait('@failedRefresh')
+				cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should(
+					'be.visible',
+				)
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
+				freezeAnimation()
+				shot(`travellers-refresh-error-${width}`)
+				// Later visits must load normally again
+				cy.intercept('GET', '**/travellers.json*', (request) =>
+					request.continue(),
+				)
 			})
 		})
 
