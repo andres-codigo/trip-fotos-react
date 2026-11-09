@@ -46,6 +46,7 @@ const TravellerItem = ({
 	cities = [],
 	files = [],
 	fileDimensions,
+	fileThumbnails,
 	registered,
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false)
@@ -77,7 +78,7 @@ const TravellerItem = ({
 		setIsConfirming(false)
 		setIsDeleting(true)
 		const result = await dispatch(
-			deleteTraveller({ travellerId: id, files }),
+			deleteTraveller({ travellerId: id, files, fileThumbnails }),
 		)
 
 		if (deleteTraveller.rejected.match(result)) {
@@ -180,6 +181,7 @@ const TravellerItem = ({
 							<ImageGallery
 								title={fullName}
 								dimensions={fileDimensions}
+								thumbnails={fileThumbnails}
 								urls={files.slice(
 									0,
 									TRAVELLER_ITEM_CONFIG.MAX_IMAGES,
@@ -254,6 +256,10 @@ TravellerItem.propTypes = {
 	files: PropTypes.arrayOf(PropTypes.string),
 	fileDimensions: PropTypes.oneOfType([
 		PropTypes.arrayOf(PropTypes.object),
+		PropTypes.object,
+	]),
+	fileThumbnails: PropTypes.oneOfType([
+		PropTypes.arrayOf(PropTypes.array),
 		PropTypes.object,
 	]),
 	registered: PropTypes.string,

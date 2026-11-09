@@ -10,6 +10,7 @@ import {
 	deleteObject,
 	getDownloadURL,
 	ref,
+	uploadBytes,
 	uploadBytesResumable,
 } from 'firebase/storage'
 
@@ -22,6 +23,7 @@ import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
 import { SESSION_STORAGE_KEYS } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { GLOBAL } from '@/constants/ui'
 
 import {
 	authActions,
@@ -35,6 +37,12 @@ import { databaseRequest } from '@/store/databaseRequest'
 
 import { handleApiError } from '@/utils/errorHandler'
 import { measureImage } from '@/utils/measureImage'
+
+// The database turns a sparse array into an object, so both shapes are read the same way
+const thumbnailUrls = (fileThumbnails) =>
+	Object.values(fileThumbnails ?? {}).flatMap((thumbnails) =>
+		Object.values(thumbnails ?? {}).map(({ url }) => url),
+	)
 
 const shouldUpdate = (state) => {
 	const lastFetch = state.lastFetch
@@ -86,6 +94,7 @@ export const registerTraveller = createAsyncThunk(
 			const totalFiles = imageQueue.length
 			const fractions = new Array(totalFiles).fill(0)
 			const fileDimensions = new Array(totalFiles).fill(null)
+			const fileThumbnails = new Array(totalFiles).fill(null)
 			let lastReported = ''
 
 			// Snapshots arrive many times a second, so only a change the user can see reaches the store
@@ -108,15 +117,50 @@ export const registerTraveller = createAsyncThunk(
 
 			if (totalFiles > 0) reportProgress()
 
+			// Best effort: a missing thumbnail only means the tile loads the full photo
+			const uploadThumbnails = async (
+				file,
+				dimensions,
+				pathFor,
+				metadata,
+			) => {
+				const storage = getFirebaseStorage()
+				const aspect = dimensions
+					? Math.max(dimensions.width, dimensions.height) /
+						Math.min(dimensions.width, dimensions.height)
+					: 1
+				const results = await Promise.allSettled(
+					GLOBAL.IMAGE_THUMBNAIL_WIDTHS.map(async (width) => {
+						const thumbnail = await imageCompression(file, {
+							maxWidthOrHeight: Math.round(width * aspect),
+							useWebWorker: true,
+						})
+						const { ref: thumbnailRef } = await uploadBytes(
+							ref(storage, pathFor(`${width}w-`)),
+							thumbnail,
+							metadata,
+						)
+						uploadedRefs.push(thumbnailRef)
+						return {
+							width,
+							url: await getDownloadURL(thumbnailRef),
+						}
+					}),
+				)
+				return results
+					.filter((result) => result.status === 'fulfilled')
+					.map((result) => result.value)
+			}
+
 			let nextIndex = 0
 			const uploadImage = async (image) => {
 				const index = nextIndex++
 				const storage = getFirebaseStorage()
-				const storageRef = ref(
-					storage,
-					// Distinct files can share a name, and the same path would overwrite the earlier upload
-					`/images/${userId}/${crypto.randomUUID()}-${image.name}`,
-				)
+				// Distinct files can share a name, and the same path would overwrite the earlier upload
+				const id = crypto.randomUUID()
+				const pathFor = (variant = '') =>
+					`/images/${userId}/${id}-${variant}${image.name}`
+				const storageRef = ref(storage, pathFor())
 
 				const metadata = {
 					customMetadata: {
@@ -135,13 +179,20 @@ export const registerTraveller = createAsyncThunk(
 
 				fileDimensions[index] = await measureImage(compressedFile)
 
+				const thumbnailsUpload = uploadThumbnails(
+					compressedFile,
+					fileDimensions[index],
+					pathFor,
+					metadata,
+				)
+
 				const uploadTask = uploadBytesResumable(
 					storageRef,
 					compressedFile,
 					metadata,
 				)
 
-				return new Promise((resolve, reject) => {
+				const photoUpload = new Promise((resolve, reject) => {
 					uploadTask.on(
 						'state_changed',
 						(snapshot) => {
@@ -175,6 +226,15 @@ export const registerTraveller = createAsyncThunk(
 						},
 					)
 				})
+
+				// Settling both means no thumbnail can land after a failed registration's cleanup
+				const [photo, thumbnails] = await Promise.allSettled([
+					photoUpload,
+					thumbnailsUpload,
+				])
+				if (photo.status === 'rejected') throw photo.reason
+				fileThumbnails[index] = thumbnails.value
+				return photo.value
 			}
 
 			const uploadNextBatch = async () => {
@@ -202,6 +262,7 @@ export const registerTraveller = createAsyncThunk(
 				cities: data.cities,
 				files: imageUrls,
 				fileDimensions,
+				fileThumbnails,
 				registered: new Date().toISOString(),
 			}
 
@@ -267,6 +328,7 @@ export const updateTravellers = createAsyncThunk(
 				cities: responseData[key].cities,
 				files: responseData[key].files,
 				fileDimensions: responseData[key].fileDimensions,
+				fileThumbnails: responseData[key].fileThumbnails,
 				registered: responseData[key].registered,
 			}))
 
@@ -392,7 +454,7 @@ export const loadTravellers = createAsyncThunk(
 export const deleteTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.DELETE_TRAVELLER,
 	async (
-		{ travellerId, files = [] },
+		{ travellerId, files = [], fileThumbnails },
 		{ getState, dispatch, rejectWithValue },
 	) => {
 		try {
@@ -405,19 +467,21 @@ export const deleteTraveller = createAsyncThunk(
 
 			const storage = getFirebaseStorage()
 			await Promise.all(
-				files.map(async (fileUrl) => {
-					try {
-						await deleteObject(ref(storage, fileUrl))
-					} catch (error) {
-						// An already-missing image is the outcome we want, so a retry after a partial failure can still succeed
-						if (
-							error?.code !==
-							API_ERROR_MESSAGE.STORAGE_OBJECT_NOT_FOUND
-						) {
-							throw error
+				[...files, ...thumbnailUrls(fileThumbnails)].map(
+					async (fileUrl) => {
+						try {
+							await deleteObject(ref(storage, fileUrl))
+						} catch (error) {
+							// An already-missing image is the outcome we want, so a retry after a partial failure can still succeed
+							if (
+								error?.code !==
+								API_ERROR_MESSAGE.STORAGE_OBJECT_NOT_FOUND
+							) {
+								throw error
+							}
 						}
-					}
-				}),
+					},
+				),
 			)
 
 			await dispatch(deleteTravellerMessages(travellerId)).unwrap()

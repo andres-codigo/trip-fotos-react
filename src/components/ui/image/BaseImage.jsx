@@ -6,20 +6,29 @@ import { GLOBAL } from '@/constants/ui'
 
 const PLACEHOLDER_DIMENSIONS = { width: 4, height: 3 }
 
-const BaseImage = ({ title, url, dimensions, onOpen }) => {
+const BaseImage = ({ title, url, dimensions, thumbnails, onOpen }) => {
 	const [hasError, setHasError] = useState(false)
+	const [isThumbnailFailed, setIsThumbnailFailed] = useState(false)
 
 	const alt = `${title}'s photo`
 	const { width, height } = dimensions ?? PLACEHOLDER_DIMENSIONS
 
+	// Photos uploaded before thumbnails existed, or whose thumbnail fails, load the original
+	const sources =
+		!isThumbnailFailed && thumbnails?.length
+			? [...thumbnails].sort((a, b) => a.width - b.width)
+			: null
+	const handleError = () =>
+		sources ? setIsThumbnailFailed(true) : setHasError(true)
+
 	return (
 		<li
-			className="relative w-[32%] overflow-hidden [&_img]:block [&_img]:h-auto [&_img]:w-full [&_img]:cursor-pointer [&_img]:object-scale-down [@media(max-width:480px)]:w-[48%]"
+			className="relative aspect-square w-[32%] overflow-hidden bg-muted [&_img]:block [&_img]:h-full [&_img]:w-full [&_img]:cursor-pointer [&_img]:object-cover [@media(max-width:480px)]:w-[48%]"
 			data-cy={IMAGE.ID}>
 			{/* Nothing to enlarge, so the fallback is not a button */}
 			{hasError ? (
 				<span
-					className="block p-4 text-center text-card-foreground"
+					className="flex h-full items-center justify-center p-4 text-center text-card-foreground"
 					role="img"
 					aria-label={`${alt} is unavailable`}
 					data-cy={IMAGE.FALLBACK}>
@@ -28,17 +37,23 @@ const BaseImage = ({ title, url, dimensions, onOpen }) => {
 			) : (
 				<button
 					type="button"
-					className="block w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
+					className="block h-full w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-accent"
 					aria-label={`View ${title}'s photo`}
 					onClick={onOpen}
 					data-cy={IMAGE.BUTTON}>
 					<img
-						src={url}
+						src={sources ? sources[0].url : url}
+						srcSet={sources
+							?.map((source) => `${source.url} ${source.width}w`)
+							.join(', ')}
+						sizes={
+							sources ? GLOBAL.IMAGE_THUMBNAIL_SIZES : undefined
+						}
 						alt={alt}
 						width={width}
 						height={height}
 						loading="lazy"
-						onError={() => setHasError(true)}
+						onError={handleError}
 						data-cy={IMAGE.THUMBNAIL}
 					/>
 				</button>
@@ -54,6 +69,12 @@ BaseImage.propTypes = {
 		width: PropTypes.number.isRequired,
 		height: PropTypes.number.isRequired,
 	}),
+	thumbnails: PropTypes.arrayOf(
+		PropTypes.shape({
+			width: PropTypes.number.isRequired,
+			url: PropTypes.string.isRequired,
+		}),
+	),
 	onOpen: PropTypes.func.isRequired,
 }
 

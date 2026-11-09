@@ -33,6 +33,61 @@ const HEIGHT = 900
 const BROKEN_IMAGE_ID = 'ui-check-broken-image'
 const BROKEN_IMAGE_URL = 'http://localhost:1/unreachable.png'
 const TIMEOUT = 10000
+const PHOTOS_ID = 'ui-check-photo-states'
+const PHOTO_HOST = 'http://ui-check.invalid'
+const SLOW_PHOTO_URL = `${PHOTO_HOST}/slow-photo.svg`
+
+// Served through an intercept: Chrome treats data: URLs as cached and then prefers the largest srcset candidate
+const photoSvgs = {}
+const svgPhoto = (label, colour, width, height) => {
+	const url = `${PHOTO_HOST}/${label.toLowerCase()}-${colour.slice(1)}-${width}x${height}.svg`
+	photoSvgs[url] =
+		`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="${colour}"/><text x="50%" y="50%" font-size="${Math.min(width, height) / 4}" text-anchor="middle" dominant-baseline="middle" fill="#fff">${label}</text></svg>`
+	return url
+}
+
+// Thumbnails keep the photo's ratio with their shortest side at the thumbnail width
+const photoWithThumbnails = (colour, width, height) => {
+	const short = Math.min(width, height)
+	return {
+		file: svgPhoto('FULL', colour, width, height),
+		thumbnails: [320, 640].map((size) => ({
+			width: size,
+			url: svgPhoto(
+				String(size),
+				colour,
+				Math.round((width / short) * size),
+				Math.round((height / short) * size),
+			),
+		})),
+	}
+}
+
+const landscape = photoWithThumbnails('#1d4ed8', 1600, 1200)
+const portrait = photoWithThumbnails('#047857', 900, 1600)
+const panorama = photoWithThumbnails('#b45309', 1920, 480)
+const square = photoWithThumbnails('#0e7490', 1200, 1200)
+
+const PHOTO_STATES = {
+	files: [
+		landscape.file,
+		portrait.file,
+		svgPhoto('LEGACY', '#6d28d9', 640, 480),
+		svgPhoto('ORIGINAL', '#be123c', 640, 480),
+		SLOW_PHOTO_URL,
+		panorama.file,
+		square.file,
+	],
+	fileThumbnails: [
+		landscape.thumbnails,
+		portrait.thumbnails,
+		null,
+		[{ width: 320, url: BROKEN_IMAGE_URL }],
+		null,
+		panorama.thumbnails,
+		square.thumbnails,
+	],
+}
 
 // Seen only during captures, never in the CI E2E suite, and its stack runs
 // through $Cypress.pause, so it is tooling noise. Match that exact text only
@@ -118,8 +173,9 @@ describe(`UI check capture (${LABEL})`, () => {
 		Cypress.session.clearAllSavedSessions()
 	})
 
-	// A failed test must not leave the slowed network on for the next one
+	// A failed test must not leave the slowed network or a device scale on for the next one
 	afterEach(() => {
+		cdp('Emulation.clearDeviceMetricsOverride')
 		cdp('Network.emulateNetworkConditions', {
 			offline: false,
 			latency: 0,
@@ -275,6 +331,151 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		it('captures every photo tile state, the source each one loads and the photo dialog', () => {
+			const isBranch = LABEL !== 'main'
+			cy.request({
+				method: 'PUT',
+				url: emulatorDatabase(`travellers/${PHOTOS_ID}`),
+				headers: { Authorization: 'Bearer owner' },
+				body: {
+					firstName: 'Photo',
+					lastName: 'States',
+					tripDescription:
+						'Thumbnails, a legacy photo, a failing thumbnail and a slow photo.',
+					daysInCity: 2,
+					cities: ['lisbon'],
+					...PHOTO_STATES,
+					registered: Date.now(),
+				},
+			})
+			// Held open so the solid placeholder stays on screen
+			cy.intercept('GET', `${PHOTO_HOST}/*`, (request) => {
+				const svg = {
+					body:
+						photoSvgs[request.url] ??
+						'<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480"/>',
+					headers: { 'content-type': 'image/svg+xml' },
+				}
+				request.reply(
+					request.url === SLOW_PHOTO_URL
+						? { ...svg, delay: 60000 }
+						: svg,
+				)
+			})
+
+			// Lazy tiles only load once scrolled to, and an unsettled tile is no evidence
+			const tiles = (scope) => {
+				const selector = `${scope} ${COMMON_SELECTORS.BASE_IMAGE_THUMBNAIL}`
+				cy.get(scope).scrollIntoView()
+				// Re-queried per tile, since a failing thumbnail re-renders its tile
+				cy.get(selector)
+					.its('length')
+					.then((count) => {
+						Cypress._.times(count, (index) => {
+							cy.get(selector).eq(index).scrollIntoView()
+							cy.get(selector)
+								.eq(index)
+								.should(($el) => {
+									if ($el.attr('src') === SLOW_PHOTO_URL)
+										return
+									expect($el[0].complete).to.equal(true)
+									expect(
+										$el[0].naturalWidth,
+									).to.be.greaterThan(0)
+								})
+						})
+					})
+				return cy.get(selector)
+			}
+
+			const assertSources = (scope, expected) =>
+				tiles(scope).then(($imgs) => {
+					expected.forEach((source, index) => {
+						// The held photo has no current source until it loads
+						const actual =
+							source === SLOW_PHOTO_URL
+								? $imgs[index].getAttribute('src')
+								: $imgs[index].currentSrc
+						expect(actual, `tile ${index}`).to.equal(source)
+					})
+				})
+
+			const listItem = `${TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM}:has([data-cy]:contains("Photo States"))`
+			const branchList = (thumbnailSize) => {
+				const pick = (photo) =>
+					photo.thumbnails.find(
+						({ width }) => width === thumbnailSize,
+					).url
+				return [
+					pick(landscape),
+					pick(portrait),
+					PHOTO_STATES.files[2],
+					// The broken thumbnail falls back to the original
+					PHOTO_STATES.files[3],
+				]
+			}
+
+			const capture = (suffix) => {
+				cy.visit(PATHS.TRAVELLERS)
+				assertSettled()
+				cy.get(listItem).should('have.length', 1)
+				if (isBranch)
+					assertSources(
+						listItem,
+						branchList(suffix === '2x' ? 640 : 320),
+					)
+				else tiles(listItem)
+				cy.get(
+					`${listItem} ${TRAVELLER_ITEM_SELECTORS.SEE_ALL_LINK}`,
+				).should('contain.text', 'See all 7 photos')
+				freezeAnimation()
+				// The seeded list is many screens long, so only this traveller is captured
+				cy.get(listItem).screenshot(
+					`${LABEL}/photo-states-list-${suffix}`,
+				)
+
+				cy.visit(`${PATHS.TRAVELLERS}/${PHOTOS_ID}`)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should(
+					'be.visible',
+				)
+				assertSettled()
+				if (isBranch) {
+					const size = suffix === '2x' ? 640 : 320
+					assertSources(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST, [
+						...branchList(size),
+						SLOW_PHOTO_URL,
+						panorama.thumbnails.find(({ width }) => width === size)
+							.url,
+						square.thumbnails.find(({ width }) => width === size)
+							.url,
+					])
+				} else tiles(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)
+				freezeAnimation()
+				shot(`photo-states-detail-${suffix}`)
+			}
+
+			eachWidth((width) => {
+				capture(width)
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).first().click()
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL)
+					.should('be.visible')
+					.and('have.attr', 'src', landscape.file)
+					.and(($img) => expect($img[0].naturalWidth).to.equal(1600))
+				freezeAnimation()
+				shot(`photo-states-dialog-${width}`)
+			})
+
+			// A 2x screen picks the 640 thumbnails: same layout, so only the sources change
+			cy.viewport(390, HEIGHT)
+			cdp('Emulation.setDeviceMetricsOverride', {
+				width: 0,
+				height: 0,
+				deviceScaleFactor: 2,
+				mobile: false,
+			})
+			capture('2x')
+		})
+
 		it('captures the travellers list while it loads', () => {
 			// Held open so the spinner, and the disabled Refresh and Register, stay on screen
 			cy.intercept('GET', '**/travellers.json*', (request) => {
@@ -304,17 +505,28 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
 			assertSettled()
 			;[
-				['details', TRAVELLER_ITEM_SELECTORS.DETAILS],
+				['details', TRAVELLER_ITEM_SELECTORS.DETAILS, true],
 				['refresh', TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON],
 				['register', TRAVELLERS_LIST_SELECTORS.REGISTER_LINK],
 				['filter-select-all', TRAVELLER_FILTER_SELECTORS.SELECT_ALL],
 				['filter-clear', TRAVELLER_FILTER_SELECTORS.CLEAR],
-				['image-button', COMMON_SELECTORS.BASE_IMAGE_BUTTON],
-			].forEach(([name, selector]) => {
+				['image-button', COMMON_SELECTORS.BASE_IMAGE_BUTTON, true],
+			].forEach(([name, selector, inCard]) => {
+				// A full-page capture repeats the sticky header over the first card, so card controls are also captured alone
+				const capture = (state) => {
+					shot(`${state}-${name}`)
+					if (inCard) {
+						cy.get(selector)
+							.first()
+							.closest(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+							.should('be.visible')
+							.screenshot(`${LABEL}/${state}-${name}-card`)
+					}
+				}
 				forcePseudo(selector, ['hover'])
-				shot(`hover-${name}`)
+				capture('hover')
 				forcePseudo(selector, ['focus', 'focus-visible'])
-				shot(`focus-${name}`)
+				capture('focus')
 				forcePseudo(selector, [])
 			})
 		})

@@ -33,6 +33,11 @@ export const GLOBAL = Object.freeze({
 
 	// IMAGE
 	IMAGE_UNAVAILABLE: 'Image unavailable',
+	// Shortest side of each thumbnail made on upload, so a square tile is filled at 1x and 2x+ screens
+	IMAGE_THUMBNAIL_WIDTHS: Object.freeze([320, 640]),
+	// Tiles are 48% of the list on phones and 32% above that, in a card capped at 40rem
+	IMAGE_THUMBNAIL_SIZES:
+		'(max-width: 480px) 48vw, (max-width: 640px) 32vw, 200px',
 
 	// UPLOAD PROGRESS
 	REGISTERING_MESSAGE: 'Registering your details, one moment please...',

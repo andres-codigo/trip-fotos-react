@@ -165,6 +165,7 @@ const TravellerDetail = () => {
 									title={fullName}
 									urls={files}
 									dimensions={traveller?.fileDimensions}
+									thumbnails={traveller?.fileThumbnails}
 									urlParam={
 										TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
 									}

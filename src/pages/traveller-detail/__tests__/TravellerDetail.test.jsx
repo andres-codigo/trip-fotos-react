@@ -178,6 +178,24 @@ describe('<TravellerDetail />', () => {
 		})
 	})
 
+	it('serves the stored thumbnails to the photo tiles', async () => {
+		stubFetch({
+			data: {
+				...traveller,
+				fileThumbnails: [
+					[{ width: 320, url: 'https://img/0-320w.jpg' }],
+				],
+			},
+		})
+		renderPage()
+		const tiles = await screen.findAllByTestId(IMAGE.THUMBNAIL)
+		expect(tiles[0]).toHaveAttribute(
+			'srcset',
+			'https://img/0-320w.jpg 320w',
+		)
+		expect(tiles[1]).toHaveAttribute('src', 'https://img/1.jpg')
+	})
+
 	it('omits the photo list without files', async () => {
 		stubFetch({ data: { ...traveller, files: [] } })
 		renderPage()

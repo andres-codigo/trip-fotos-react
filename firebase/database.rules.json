@@ -17,6 +17,23 @@
 							".validate": false
 						}
 					}
+				},
+				"fileThumbnails": {
+					"$index": {
+						".validate": "$index.matches(/^[0-9]+$/)",
+						"$size": {
+							".validate": "$size.matches(/^[0-9]+$/) && newData.hasChildren(['width', 'url'])",
+							"width": {
+								".validate": "newData.isNumber() && newData.val() > 0"
+							},
+							"url": {
+								".validate": "newData.isString() && newData.val().length <= 2048"
+							},
+							"$other": {
+								".validate": false
+							}
+						}
+					}
 				}
 			}
 		},
