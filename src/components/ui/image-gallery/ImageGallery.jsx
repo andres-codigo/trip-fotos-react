@@ -13,7 +13,7 @@ const navClasses =
 	'h-10 w-10 flex-none cursor-pointer rounded-full border-0 bg-accent-foreground p-0 pb-[0.2rem] text-[1.75rem] leading-none text-primary-foreground focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-default disabled:opacity-30 [@media(max-width:480px)]:h-8 [@media(max-width:480px)]:w-8 [@media(max-width:480px)]:text-2xl'
 
 // With a `urlParam` the open photo lives in the URL as a 1-based number, so it can be shared and Back closes it
-const ImageGallery = ({ title, urls, dimensions, urlParam }) => {
+const ImageGallery = ({ title, urls, dimensions, thumbnails, urlParam }) => {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const [localIndex, setLocalIndex] = useState(null)
 	const [failed, setFailed] = useState(() => new Set())
@@ -73,6 +73,7 @@ const ImageGallery = ({ title, urls, dimensions, urlParam }) => {
 					title={title}
 					url={url}
 					dimensions={dimensions?.[position]}
+					thumbnails={thumbnails?.[position]}
 					onOpen={() => goTo(position, { replace: false })}
 				/>
 			))}
@@ -149,6 +150,11 @@ ImageGallery.propTypes = {
 	urls: PropTypes.arrayOf(PropTypes.string).isRequired,
 	dimensions: PropTypes.oneOfType([
 		PropTypes.arrayOf(PropTypes.object),
+		PropTypes.object,
+	]),
+	// The database stores a sparse array as an object keyed by position
+	thumbnails: PropTypes.oneOfType([
+		PropTypes.arrayOf(PropTypes.array),
 		PropTypes.object,
 	]),
 	urlParam: PropTypes.string,

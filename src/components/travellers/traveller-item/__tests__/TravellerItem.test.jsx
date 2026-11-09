@@ -166,6 +166,16 @@ describe('<TravellerItem />', () => {
 			).not.toBeInTheDocument()
 		})
 
+		it('serves each tile its stored thumbnails', () => {
+			renderItem({
+				files: files(2),
+				fileThumbnails: [[{ width: 320, url: '/0-320w.jpg' }]],
+			})
+			const tiles = screen.getAllByTestId(IMAGE.THUMBNAIL)
+			expect(tiles[0]).toHaveAttribute('srcset', '/0-320w.jpg 320w')
+			expect(tiles[1]).not.toHaveAttribute('srcset')
+		})
+
 		it('caps at 5 images and shows the see-all link for 7 files', () => {
 			renderItem({ files: files(7) })
 			expect(screen.getAllByTestId(IMAGE.ID)).toHaveLength(5)
@@ -279,14 +289,16 @@ describe('<TravellerItem />', () => {
 			expect(screen.getByTestId(TRAVELLER_ITEM.DELETE)).toHaveFocus()
 		})
 
-		it('dispatches deleteTraveller with id and files on confirm', async () => {
+		it('dispatches deleteTraveller with id, files and thumbnails on confirm', async () => {
 			const urls = files(2)
-			renderItem({ files: urls })
+			const fileThumbnails = [[{ width: 320, url: '/0-320w.jpg' }]]
+			renderItem({ files: urls, fileThumbnails })
 			confirmDelete()
 			await waitFor(() => expect(dispatch).toHaveBeenCalled())
 			expect(deleteTraveller).toHaveBeenCalledWith({
 				travellerId: 'abc',
 				files: urls,
+				fileThumbnails,
 			})
 		})
 

@@ -33,9 +33,17 @@ import travellersReducer, {
 	selectUploadProgress,
 } from './travellersSlice'
 
+import { GLOBAL } from '@/constants/ui'
 import { handleApiError } from '@/utils/errorHandler'
 import { updateProfile } from 'firebase/auth'
-import { deleteObject, ref, uploadBytesResumable } from 'firebase/storage'
+import {
+	deleteObject,
+	getDownloadURL,
+	ref,
+	uploadBytes,
+	uploadBytesResumable,
+} from 'firebase/storage'
+import imageCompression from 'browser-image-compression'
 import { getFirebaseStorage } from '@/services/firebase/firebase'
 
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
@@ -55,6 +63,7 @@ vi.mock('firebase/auth', () => ({
 vi.mock('firebase/storage', () => ({
 	ref: vi.fn((storage, path) => path),
 	deleteObject: vi.fn(() => Promise.resolve()),
+	uploadBytes: vi.fn((storageRef) => Promise.resolve({ ref: storageRef })),
 	uploadBytesResumable: vi.fn(() => ({
 		on: vi.fn((event, progress, error, complete) => {
 			complete()
@@ -456,6 +465,77 @@ describe('travellersSlice', () => {
 				vi.unstubAllGlobals()
 			})
 
+			it('should upload a thumbnail per width next to the photo and store them aligned with files', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+				vi.stubGlobal(
+					'createImageBitmap',
+					vi.fn().mockResolvedValue({ width: 1600, height: 800 }),
+				)
+				getDownloadURL.mockImplementation((path) =>
+					Promise.resolve(`https://mock-url.com${path}`),
+				)
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				const paths = uploadBytes.mock.calls.map(([path]) => path)
+				expect(paths).toHaveLength(GLOBAL.IMAGE_THUMBNAIL_WIDTHS.length)
+				GLOBAL.IMAGE_THUMBNAIL_WIDTHS.forEach((width) => {
+					expect(paths).toContainEqual(
+						expect.stringMatching(
+							new RegExp(
+								`^/images/${MOCK_USER.USER_ID}/.+-${width}w-test\\.jpg$`,
+							),
+						),
+					)
+					// A 2:1 photo is scaled so its shortest side fills the square tile
+					expect(imageCompression).toHaveBeenCalledWith(
+						expect.anything(),
+						expect.objectContaining({
+							maxWidthOrHeight: width * 2,
+						}),
+					)
+				})
+				const body = JSON.parse(fetch.mock.calls[0][1].body)
+				expect(body.fileThumbnails).toHaveLength(body.files.length)
+				expect(body.fileThumbnails[0]).toEqual(
+					GLOBAL.IMAGE_THUMBNAIL_WIDTHS.map((width) => ({
+						width,
+						url: expect.stringContaining(`-${width}w-test.jpg`),
+					})),
+				)
+				expect(result.payload.fileThumbnails).toEqual(
+					body.fileThumbnails,
+				)
+				getDownloadURL.mockImplementation(() =>
+					Promise.resolve('https://mock-url.com/image.jpg'),
+				)
+				vi.unstubAllGlobals()
+			})
+
+			it('should still register, keeping the thumbnails that uploaded, when one fails', async () => {
+				fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => ({ name: MOCK_USER.USER_ID }),
+				})
+				uploadBytes.mockRejectedValueOnce(new Error('thumbnail failed'))
+
+				const result = await store.dispatch(
+					registerTraveller(mockRegistrationData),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(result.payload.files).toHaveLength(1)
+				expect(result.payload.fileThumbnails[0]).toHaveLength(
+					GLOBAL.IMAGE_THUMBNAIL_WIDTHS.length - 1,
+				)
+				expect(deleteObject).not.toHaveBeenCalled()
+			})
+
 			it('should set the Auth display name and userName to the registered name', async () => {
 				const fullName = `${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`
 				fetch.mockResolvedValueOnce({
@@ -673,8 +753,15 @@ describe('travellersSlice', () => {
 					)
 
 					expect(result.meta.requestStatus).toBe('rejected')
-					expect(deleteObject).toHaveBeenCalledTimes(1)
+					expect(deleteObject).toHaveBeenCalledTimes(
+						1 + GLOBAL.IMAGE_THUMBNAIL_WIDTHS.length,
+					)
 					expect(deleteObject).toHaveBeenCalledWith('mock-ref')
+					GLOBAL.IMAGE_THUMBNAIL_WIDTHS.forEach((width) =>
+						expect(deleteObject).toHaveBeenCalledWith(
+							expect.stringContaining(`-${width}w-test.jpg`),
+						),
+					)
 				})
 
 				it('should delete the earlier batch and the settled uploads of the failing batch', async () => {
@@ -698,15 +785,19 @@ describe('travellersSlice', () => {
 
 					expect(result.meta.requestStatus).toBe('rejected')
 					expect(fetch).not.toHaveBeenCalled()
-					expect(
-						deleteObject.mock.calls.map(([target]) => target),
-					).toHaveLength(5)
-					expect(
-						new Set(
-							deleteObject.mock.calls.map(([target]) => target),
-						),
-					).toEqual(
+					const deleted = deleteObject.mock.calls.map(
+						([target]) => target,
+					)
+					const photos = deleted.filter((target) =>
+						target.startsWith('ref-'),
+					)
+					expect(photos).toHaveLength(5)
+					expect(new Set(photos)).toEqual(
 						new Set(['ref-0', 'ref-1', 'ref-2', 'ref-3', 'ref-4']),
+					)
+					// The failing photo's thumbnails settle before the cleanup, so none are left behind
+					expect(deleted.length - photos.length).toBe(
+						6 * GLOBAL.IMAGE_THUMBNAIL_WIDTHS.length,
 					)
 				})
 
@@ -1085,6 +1176,35 @@ describe('travellersSlice', () => {
 					remainingTraveller.id,
 				])
 				expect(state.selectedTraveller).toBeNull()
+			})
+
+			it('should delete each thumbnail too, read from an array or an index-keyed object', async () => {
+				const testStore = preloadStore()
+				mockFetchByUrl()
+				const thumbnail = (name) => ({
+					width: 320,
+					url: `https://storage.example.com/${name}`,
+				})
+
+				const result = await testStore.dispatch(
+					deleteTraveller({
+						travellerId,
+						files,
+						fileThumbnails: {
+							0: [thumbnail('one-320w'), thumbnail('one-640w')],
+							1: [thumbnail('two-320w')],
+						},
+					}),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(deleteObject).toHaveBeenCalledTimes(files.length + 3)
+				;['one-320w', 'one-640w', 'two-320w'].forEach((name) =>
+					expect(ref).toHaveBeenCalledWith(
+						undefined,
+						`https://storage.example.com/${name}`,
+					),
+				)
 			})
 
 			it('should skip Storage when the traveller has no images', async () => {

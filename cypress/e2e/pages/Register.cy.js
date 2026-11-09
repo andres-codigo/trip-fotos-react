@@ -5,6 +5,7 @@ import {
 	FILE_UPLOADER_SELECTORS,
 	COMBOBOX_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
+import { GLOBAL } from '../../../src/constants/ui/global'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { VALIDATION_MESSAGES } from '../../../src/constants/validation'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../../src/constants/travellers'
@@ -20,7 +21,7 @@ const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
 
 describe('Register Page', () => {
-	let uploadedImageUrl
+	let uploadedImageUrls = []
 
 	beforeEach(() => {
 		cy.resetEmulators()
@@ -31,10 +32,8 @@ describe('Register Page', () => {
 
 	// afterEach rather than the test body, so the image is removed even when a later assertion fails
 	afterEach(() => {
-		if (uploadedImageUrl) {
-			cy.deleteStorageObject(uploadedImageUrl)
-			uploadedImageUrl = undefined
-		}
+		uploadedImageUrls.forEach((url) => cy.deleteStorageObject(url))
+		uploadedImageUrls = []
 	})
 
 	it('renders the register page container', () => {
@@ -167,13 +166,21 @@ describe('Register Page', () => {
 				expect(body.fileDimensions).to.have.length(body.files.length)
 				expect(body.fileDimensions[0].width).to.be.greaterThan(0)
 				expect(body.fileDimensions[0].height).to.be.greaterThan(0)
+				expect(body.fileThumbnails).to.have.length(body.files.length)
+				expect(
+					body.fileThumbnails[0].map(({ width }) => width),
+				).to.deep.equal([...GLOBAL.IMAGE_THUMBNAIL_WIDTHS])
+				body.fileThumbnails[0].forEach(({ url }) => {
+					expect(url).to.include('/v0/b/')
+					uploadedImageUrls.push(url)
+				})
 			})
 			.its('files')
 			.should('have.length', 1)
 			.its('0')
 			.should('include', '/v0/b/')
 			.then((url) => {
-				uploadedImageUrl = url
+				uploadedImageUrls.push(url)
 			})
 
 		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)

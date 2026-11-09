@@ -58,6 +58,33 @@ describe('<BaseImage />', () => {
 		})
 	})
 
+	it('crops the photo into a square tile', () => {
+		mountImage()
+		cy.get(COMMON_SELECTORS.BASE_IMAGE).should(($tile) => {
+			const { width, height } = $tile[0].getBoundingClientRect()
+			expect(width).to.be.greaterThan(0)
+			expect(height).to.be.closeTo(width, 1)
+		})
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_THUMBNAIL).should(
+			'have.css',
+			'object-fit',
+			'cover',
+		)
+	})
+
+	// The tile clips overflow, so a ring drawn outside the button would be hidden
+	it('draws the keyboard focus ring inside the tile', () => {
+		mountImage()
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).focus()
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should(($button) => {
+			const style = getComputedStyle($button[0])
+			expect(style.outlineStyle).not.to.equal('none')
+			expect(parseFloat(style.outlineOffset)).to.be.at.most(
+				-parseFloat(style.outlineWidth),
+			)
+		})
+	})
+
 	it('calls onOpen on click', () => {
 		const onOpen = cy.stub().as('onOpen')
 		mountImage(url, onOpen)

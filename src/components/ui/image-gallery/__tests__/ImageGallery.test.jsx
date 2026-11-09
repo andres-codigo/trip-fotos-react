@@ -16,7 +16,12 @@ const urls = ['/a.jpg', '/b.jpg', '/c.jpg']
 
 const Search = () => <output data-cy="search">{useLocation().search}</output>
 
-const renderGallery = ({ urlParam, initialEntry = '/', dimensions } = {}) =>
+const renderGallery = ({
+	urlParam,
+	initialEntry = '/',
+	dimensions,
+	thumbnails,
+} = {}) =>
 	render(
 		<MemoryRouter initialEntries={[initialEntry]}>
 			<ul>
@@ -24,6 +29,7 @@ const renderGallery = ({ urlParam, initialEntry = '/', dimensions } = {}) =>
 					title="Ada"
 					urls={urls}
 					dimensions={dimensions}
+					thumbnails={thumbnails}
 					urlParam={urlParam}
 				/>
 			</ul>
@@ -63,6 +69,19 @@ describe('<ImageGallery />', () => {
 		const thumbnails = screen.getAllByTestId(IMAGE.THUMBNAIL)
 		expect(thumbnails[2]).toHaveAttribute('width', '600')
 		expect(thumbnails[0]).toHaveAttribute('width', '4')
+	})
+
+	it('gives each tile its own thumbnails from an index-keyed object and keeps the full photo in the dialog', () => {
+		renderGallery({
+			thumbnails: { 1: [{ width: 320, url: '/b-320w.jpg' }] },
+		})
+		const tiles = screen.getAllByTestId(IMAGE.THUMBNAIL)
+		expect(tiles[0]).toHaveAttribute('src', '/a.jpg')
+		expect(tiles[0]).not.toHaveAttribute('srcset')
+		expect(tiles[1]).toHaveAttribute('srcset', '/b-320w.jpg 320w')
+		openAt(1)
+		expect(full()).toHaveAttribute('src', '/b.jpg')
+		expect(full()).not.toHaveAttribute('srcset')
 	})
 
 	it('opens the clicked photo with its position', () => {
