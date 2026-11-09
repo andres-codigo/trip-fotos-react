@@ -17,29 +17,45 @@ describe('isCommit', () => {
 })
 
 describe('needsVerify', () => {
-	const cache = { tree: 't1', passed: ['lint'] }
+	const branch = ['src/a.js', '.claude/hooks/x.mjs']
+	const cache = {
+		gates: { lint: 't1', vitest: 't1', ct: 't1', build: 't1' },
+	}
+	const check = ({ tree = 't1', changed = [], ...rest } = {}) =>
+		needsVerify({
+			files: ['src/a.js'],
+			branch,
+			tree,
+			cache,
+			changedSince: () => changed,
+			...rest,
+		})
 
-	it('passes when the tree matches a recorded run', () =>
-		expect(needsVerify({ files: ['src/a.js'], tree: 't1', cache })).toBe(
-			false,
-		))
+	it('passes when every gate passed on this tree', () =>
+		expect(check()).toBe(false))
 
-	it('blocks when the tree changed since the run', () =>
-		expect(needsVerify({ files: ['src/a.js'], tree: 't2', cache })).toBe(
-			true,
-		))
+	it('passes when only files outside a gate changed since its pass', () =>
+		expect(
+			check({
+				tree: 't2',
+				changed: ['cypress/ui-check/capture.cy.js'],
+				cache: {
+					gates: { lint: 't2', vitest: 't1', ct: 't1', build: 't1' },
+				},
+			}),
+		).toBe(false))
+
+	it('blocks when a gate the change needs lapsed', () =>
+		expect(check({ tree: 't2', changed: ['src/a.js'] })).toBe(true))
 
 	it('blocks when nothing was recorded', () =>
-		expect(
-			needsVerify({ files: ['src/a.js'], tree: 't1', cache: {} }),
-		).toBe(true))
+		expect(check({ cache: {} })).toBe(true))
+
+	it('leaves e2e to CI', () =>
+		expect(check({ branch: ['src/pages/a.jsx'] })).toBe(false))
 
 	it('exempts docs-only changes', () =>
 		expect(
-			needsVerify({
-				files: ['README.md', 'docs/ci-cd.md'],
-				tree: 't2',
-				cache: {},
-			}),
+			check({ files: ['README.md', 'docs/ci-cd.md'], cache: {} }),
 		).toBe(false))
 })

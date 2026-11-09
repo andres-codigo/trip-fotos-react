@@ -1,6 +1,3 @@
-import { execSync } from 'node:child_process'
-import { pathToFileURL } from 'node:url'
-
 const ALL = ['lint', 'vitest', 'ct', 'build']
 // Selected only by the rules below: `all` stays the four full gates
 const GATE_ORDER = [...ALL, 'yaml']
@@ -19,6 +16,8 @@ const RULES = [
 	[/^(vercel\.json|firebase\/|\.env\.example$)/, ['vitest']],
 	[/^vite\.config\./, ['vitest', 'ct', 'build']],
 	[/^cypress\/e2e\//, ['lint']],
+	// The /ui-check capture spec is selected only by UI_CHECK=true, so no gate runs it
+	[/^cypress\/ui-check\//, ['lint']],
 	[/^cypress\//, ['lint', 'ct']],
 	[/^cypress\.config\./, ['ct']],
 	[/^(config\/|.*\.d\.ts$)/, ['lint']],
@@ -35,10 +34,27 @@ const E2E_ADVISED = [
 	[/^src\/constants\/(api|ui\/paths)/, 'API or route constants changed'],
 ]
 
-const git = (args) =>
-	execSync(`git ${args}`, { encoding: 'utf8' }).split('\n').filter(Boolean)
+// The gates a file can affect, for deciding whether an earlier pass still holds; E2E also follows anything the build ships
+export const gatesForFile = (file) => {
+	const gates = new Set(RULES.find(([pattern]) => pattern.test(file))?.[1])
+	if (
+		gates.has('build') ||
+		E2E_ADVISED.some(([pattern]) => pattern.test(file))
+	)
+		gates.add('e2e')
+	return gates
+}
 
-// The agent passes `runArgs` straight to run-gates.mjs, so opt-ins are decided here rather than by the agent
+// A gate still holds when it passed on an earlier tree and nothing changed since that it depends on. `changedSince(tree)` lists the files that differ from the tree in hand, or null when git cannot tell (for example a pruned tree)
+export const gateHolds = (gate, { tree, cache, changedSince }) => {
+	const passedOn = cache?.gates?.[gate]
+	if (!passedOn) return false
+	if (passedOn === tree) return true
+	const files = changedSince(passedOn)
+	return files !== null && !files.some((file) => gatesForFile(file).has(gate))
+}
+
+// The planner passes `runArgs` straight to the gate runner, so opt-ins are decided here rather than by the caller
 export const planGates = (files, { e2e = false, all = false } = {}) => {
 	const gates = new Set(all ? ALL : [])
 	for (const file of files) {
@@ -58,24 +74,6 @@ export const planGates = (files, { e2e = false, all = false } = {}) => {
 
 	const runArgs = GATE_ORDER.filter((gate) => gates.has(gate))
 	if (e2e || reasons.length) runArgs.push('e2e')
-	if (runArgs.length && all) runArgs.push('fresh')
 
 	return { runArgs, reasons: e2e ? [] : reasons }
-}
-
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-	const base = git('merge-base origin/main HEAD')[0]
-	const files = [
-		...new Set([
-			...git(`diff --name-only ${base}`),
-			...git('ls-files --others --exclude-standard'),
-		]),
-	]
-	const { runArgs, reasons } = planGates(files, {
-		e2e: process.argv.includes('e2e'),
-		all: process.argv.includes('all'),
-	})
-
-	console.log(runArgs.join(' ') || 'none')
-	if (reasons.length) console.log(`e2e advised: ${reasons.join('; ')}`)
 }
