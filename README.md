@@ -57,12 +57,12 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- Travellers list in pages: 12 at a time with Show more, skeleton cards while it loads, and an inline error with Try again
 - Faster photo lists: square tiles that load small thumbnails instead of full-size photos
 - Cleaner Travellers controls: Register beside the title, a Refresh icon, and Select all / Clear as links in the filter header
 - A tidier city filter on Travellers: a scrollable list, with Select all / Clear, and city search once there are more than four cities
 - Every component and page now uses Tailwind, with SCSS and Stylelint removed and no visual change
 - Signed-in users who open the login page are sent to the travellers list
-- Failed registrations clean up the photos they had uploaded
 - Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs and local checks, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
