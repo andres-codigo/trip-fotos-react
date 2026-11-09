@@ -63,7 +63,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Every component and page now uses Tailwind, with SCSS and Stylelint removed and no visual change
 - Signed-in users who open the login page are sent to the travellers list
 - Failed registrations clean up the photos they had uploaded
-- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
+- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs and local checks, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
