@@ -1,4 +1,4 @@
-import { planGates } from '../changed-gates.mjs'
+import { gateHolds, gatesForFile, planGates } from '../changed-gates.mjs'
 
 describe('planGates', () => {
 	it('adds e2e and names the reason when the change touches routing', () => {
@@ -54,13 +54,12 @@ describe('planGates', () => {
 		expect(reasons).toEqual([])
 	})
 
-	it('forces every gate and a fresh run with all, without e2e', () => {
+	it('forces every gate with all, without e2e', () => {
 		expect(planGates([], { all: true }).runArgs).toEqual([
 			'lint',
 			'vitest',
 			'ct',
 			'build',
-			'fresh',
 		])
 	})
 
@@ -105,4 +104,75 @@ describe('planGates', () => {
 			expect(planGates([file]).runArgs).toEqual([])
 		}
 	})
+})
+
+describe('gatesForFile', () => {
+	it('adds e2e for anything the build ships', () =>
+		expect([...gatesForFile('src/components/ui/Badge.jsx')]).toEqual([
+			'lint',
+			'vitest',
+			'ct',
+			'build',
+			'e2e',
+		]))
+
+	it('keeps the /ui-check capture spec to lint', () =>
+		expect([...gatesForFile('cypress/ui-check/capture.cy.js')]).toEqual([
+			'lint',
+		]))
+
+	it('maps tooling scripts to lint and Vitest only', () =>
+		expect([...gatesForFile('.claude/skills/ui-check/status.mjs')]).toEqual(
+			['lint', 'vitest'],
+		))
+})
+
+describe('gateHolds', () => {
+	const cache = { gates: { lint: 't1', build: 't1' } }
+	const changedSince = (files) => () => files
+
+	it('holds on the tree it passed on', () =>
+		expect(
+			gateHolds('lint', {
+				tree: 't1',
+				cache,
+				changedSince: changedSince([]),
+			}),
+		).toBe(true))
+
+	it('holds when nothing it depends on changed since', () =>
+		expect(
+			gateHolds('build', {
+				tree: 't2',
+				cache,
+				changedSince: changedSince([
+					'.claude/skills/ui-check/status.mjs',
+				]),
+			}),
+		).toBe(true))
+
+	it('lapses when a file it depends on changed since', () =>
+		expect(
+			gateHolds('lint', {
+				tree: 't2',
+				cache,
+				changedSince: changedSince([
+					'.claude/skills/ui-check/status.mjs',
+				]),
+			}),
+		).toBe(false))
+
+	it('lapses when git cannot read the earlier tree', () =>
+		expect(
+			gateHolds('build', { tree: 't2', cache, changedSince: () => null }),
+		).toBe(false))
+
+	it('lapses when the gate never passed', () =>
+		expect(
+			gateHolds('vitest', {
+				tree: 't1',
+				cache,
+				changedSince: changedSince([]),
+			}),
+		).toBe(false))
 })
