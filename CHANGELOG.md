@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.8](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.7...v0.21.8) (2026-11-09)
+
+
+### Enhancements
+
+* serve photo thumbnails with srcset ([#659](https://github.com/andres-codigo/trip-fotos-react/issues/659)) ([1b1304f](https://github.com/andres-codigo/trip-fotos-react/commit/1b1304f17edce5913af4ad255b8adf1c206b383d))
+
 ## [0.21.7](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.6...v0.21.7) (2026-11-06)
 
 
