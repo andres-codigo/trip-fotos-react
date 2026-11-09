@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.9](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.8...v0.21.9) (2026-11-09)
+
+
+### Enhancements
+
+* page the Travellers list and show skeleton cards while it loads ([#663](https://github.com/andres-codigo/trip-fotos-react/issues/663)) ([b9d3e4f](https://github.com/andres-codigo/trip-fotos-react/commit/b9d3e4f01cdbd0e4ee609f1c6c470283550101cf)), closes [#649](https://github.com/andres-codigo/trip-fotos-react/issues/649)
+
 ## [0.21.8](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.7...v0.21.8) (2026-11-09)
 
 
