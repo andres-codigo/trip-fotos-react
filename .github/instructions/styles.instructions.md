@@ -6,7 +6,7 @@ applyTo: 'src/**/*.{jsx,css}'
 
 # Styling Guidance
 
-The app is styled with Tailwind v4 utilities. There are no SCSS or CSS modules. The app is dark-only from the redesign in #383; until then the tokens hold the app's current light values.
+The app is styled with Tailwind v4 utilities. There are no SCSS or CSS modules. The app is dark only, with the design system's dark palette (`color-scheme: dark`); there is no light theme and no theme toggle.
 
 ## Utilities And `cn()`
 
@@ -17,7 +17,9 @@ The app is styled with Tailwind v4 utilities. There are no SCSS or CSS modules. 
 
 ## Semantic Tokens, Not Literal Colours
 
-`src/styles/tailwind.css` holds the semantic tokens (`--background`, `--primary`, `--border`, `--destructive` and so on) and maps them to utilities (`bg-primary`, `text-muted-foreground`, `border-border`). Use a token, not a literal `white`, `#fff` or `rgb(0 0 0 / …)`. A value that two components need becomes a token or an `@theme` entry, not a second copy. Use `rem` for sizes and spacing, not `px`. The existing breakpoints are 768 and 480px (inclusive: use `mobile:` for `max-width: 768px`, and an arbitrary `[@media(width<=480px)]:` variant for 480px, because `max-[480px]` is exclusive).
+`src/styles/tailwind.css` holds the semantic tokens, named as in the design system (`--bg`, `--surface`, `--text`, `--accent`, `--border-card`, `--danger` and so on), and maps them to utilities (`bg-surface`, `text-text-muted`, `border-border-card`). Every fill that carries text has an `on-…` partner (`bg-accent text-on-accent`); `accent-text` is the accent as text or outline. A `surface` card on `bg` takes a 1px `border-card` edge, since the two grounds are only 1.12:1. A card nested inside a `surface` card takes `border-strong` instead, as `border-card` is only 2.71:1 on `surface`. `border` is for hairline dividers only.
+
+Changing a token or colour value: before running `/verify`, search the specs (`src/**/__tests__/**`, `cypress/**`) for `rgb()`, `rgba()` and hex values and for the old class and token names, and update every assertion the change makes stale. Component specs assert computed colours, not only class names. Also fix any assertion the change makes meaningless, such as "the link is not black" on a dark page. Use a token, not a literal `white`, `#fff` or `rgb(0 0 0 / …)`. A value that two components need becomes a token or an `@theme` entry, not a second copy. Use `rem` for sizes and spacing, not `px`. The existing breakpoints are 768 and 480px (inclusive: use `mobile:` for `max-width: 768px`, and an arbitrary `[@media(width<=480px)]:` variant for 480px, because `max-[480px]` is exclusive).
 
 ## Layers And Specificity
 
@@ -33,7 +35,8 @@ Space a row or column of items with `gap` on the flex or grid parent, plus `item
 
 - Drive visual state from state, not class names: `aria-invalid:`, `data-[state=open]:`, `disabled:` and `aria-current:` variants, so a test can assert the attribute.
 - Hover and active states must differ visibly from the resting state and keep text contrast at or above WCAG AA (4.5:1) in every state. Check the hover colour, not just the resting one: a lighter red hover under white text can fall below 4.5:1.
-- Respect reduced motion for any animation that is not a spinner.
+- Focus: a global `:focus-visible` rule draws one cream `focus` ring (3px, 2px offset) on every control; do not add per-component focus colours or `outline-none`. A photo tile takes `tile-focus-ring`, which draws the ring outside the photo past a gap in the `surface` colour.
+- Respect reduced motion for any animation. A spinner pulses instead of turning (`motion-reduce:animate-skeleton`) and always sits beside visible text.
 
 ## Linting And Formatting
 

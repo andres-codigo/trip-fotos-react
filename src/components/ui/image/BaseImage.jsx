@@ -23,12 +23,12 @@ const BaseImage = ({ title, url, dimensions, thumbnails, onOpen }) => {
 
 	return (
 		<li
-			className="relative aspect-square w-[32%] overflow-hidden bg-muted [&_img]:block [&_img]:h-full [&_img]:w-full [&_img]:cursor-pointer [&_img]:object-cover [@media(max-width:480px)]:w-[48%]"
+			className="relative aspect-square w-[32%] overflow-hidden bg-surface-sunken tile-focus-ring [&_img]:block [&_img]:h-full [&_img]:w-full [&_img]:cursor-pointer [&_img]:object-cover [@media(max-width:480px)]:w-[48%]"
 			data-cy={IMAGE.ID}>
 			{/* Nothing to enlarge, so the fallback is not a button */}
 			{hasError ? (
 				<span
-					className="flex h-full items-center justify-center p-4 text-center text-card-foreground"
+					className="flex h-full items-center justify-center p-4 text-center text-text-muted"
 					role="img"
 					aria-label={`${alt} is unavailable`}
 					data-cy={IMAGE.FALLBACK}>
@@ -37,7 +37,7 @@ const BaseImage = ({ title, url, dimensions, thumbnails, onOpen }) => {
 			) : (
 				<button
 					type="button"
-					className="block h-full w-full cursor-pointer border-0 bg-transparent p-0 focus-visible:outline-3 focus-visible:-outline-offset-3 focus-visible:outline-accent"
+					className="block h-full w-full cursor-pointer border-0 bg-transparent p-0"
 					aria-label={`View ${title}'s photo`}
 					onClick={onOpen}
 					data-cy={IMAGE.BUTTON}>

@@ -64,7 +64,9 @@ const Messages = () => {
 					<h1>Messages</h1>
 					{isLoading && (
 						<div data-cy={MESSAGES_PAGE.SPINNER}>
-							<BaseSpinner />
+							<BaseSpinner
+								label={GLOBAL.SPINNER_LABEL.MESSAGES}
+							/>
 						</div>
 					)}
 					{!isLoading && hasMessages && (

@@ -44,8 +44,15 @@ export const GLOBAL = Object.freeze({
 	UPLOAD_PROGRESS_LABEL: (uploadedFiles, totalFiles, percent) =>
 		`Uploading photos: ${uploadedFiles} of ${totalFiles} done (${percent}%)`,
 
-	// SPINNER
-	LOADING_SPINNER_ALT: 'Loading content, please wait...',
+	// SPINNER: always shown as visible text beside it
+	SPINNER_LABEL: {
+		DEFAULT: 'Loading…',
+		AUTHENTICATING: 'Authenticating…',
+		MESSAGES: 'Loading messages…',
+		TRAVELLER: 'Loading traveller…',
+		DELETING_MESSAGE: 'Deleting message…',
+		DELETING_TRAVELLER: 'Deleting traveller…',
+	},
 
 	// BREAKPOINTS
 	BREAKPOINT: {

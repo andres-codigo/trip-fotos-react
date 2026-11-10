@@ -8,7 +8,7 @@ const BaseProgress = ({ value, label }) => (
 		data-cy={PROGRESS.ID}>
 		<progress
 			className={
-				'block h-3 w-full appearance-none overflow-hidden rounded-md border-0 bg-muted [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-primary [&::-webkit-progress-value]:transition-[width] [&::-webkit-progress-value]:duration-200'
+				'block h-3 w-full appearance-none overflow-hidden rounded-md border-0 bg-surface-sunken [&::-moz-progress-bar]:bg-accent [&::-webkit-progress-bar]:bg-surface-sunken [&::-webkit-progress-value]:bg-accent [&::-webkit-progress-value]:transition-[width] [&::-webkit-progress-value]:duration-200'
 			}
 			value={value}
 			max={100}
@@ -17,9 +17,7 @@ const BaseProgress = ({ value, label }) => (
 			{value}%
 		</progress>
 		<span
-			className={
-				'mt-2 block text-center text-[0.875rem] text-card-foreground'
-			}
+			className={'mt-2 block text-center text-[0.875rem] text-text-muted'}
 			data-cy={PROGRESS.LABEL}>
 			{label}
 		</span>

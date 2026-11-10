@@ -5,13 +5,13 @@ import PropTypes from 'prop-types'
 import BaseButton from '@/components/ui/button/BaseButton'
 
 const alertVariants = cva(
-	'relative z-10 flex w-full items-center justify-between gap-4 rounded-sm px-6 py-4 text-primary-foreground [&_p]:m-0 [&_p]:font-medium',
+	'relative z-10 flex w-full items-center justify-between gap-4 rounded-sm px-6 py-4 [&_p]:m-0 [&_p]:font-medium',
 	{
 		variants: {
 			type: {
-				success: 'bg-alert-success',
-				error: 'bg-destructive',
-				info: 'bg-accent-foreground',
+				success: 'bg-success text-on-success',
+				error: 'bg-danger text-on-danger',
+				info: 'bg-accent text-on-accent',
 			},
 			closing: {
 				true: 'animate-alert-out',

@@ -10,19 +10,19 @@ const buttonVariants = cva('border border-solid', {
 	variants: {
 		shape: {
 			button: 'inline-flex cursor-pointer items-center justify-center rounded-pill px-6 py-3 font-[family-name:inherit] text-[length:inherit] leading-tight font-[weight:inherit] no-underline',
-			link: 'inline-block border-transparent hover:text-link-hover active:text-link-hover',
+			link: 'inline-block border-transparent hover:text-accent-hover active:text-accent-hover',
 		},
 		mode: {
 			primary:
-				'border-accent-foreground bg-accent-foreground text-primary-foreground hover:border-secondary hover:bg-secondary active:border-secondary active:bg-secondary',
-			flat: 'border-transparent bg-transparent text-accent-foreground hover:bg-tint active:bg-tint',
-			danger: 'border-destructive bg-destructive text-primary-foreground hover:border-destructive-hover hover:bg-destructive-hover active:border-destructive-hover active:bg-destructive-hover',
+				'border-accent bg-accent text-on-accent hover:border-accent-hover hover:bg-accent-hover active:border-accent-hover active:bg-accent-hover',
+			flat: 'border-transparent bg-transparent text-accent-text hover:bg-surface-accent active:bg-surface-accent',
+			danger: 'border-danger bg-danger text-on-danger hover:border-danger-hover hover:bg-danger-hover active:border-danger-hover active:bg-danger-hover',
 			text: 'border-none bg-transparent p-0 text-inherit hover:bg-transparent active:bg-transparent',
 			outline:
-				'border-secondary bg-transparent text-secondary hover:bg-tint active:bg-tint',
+				'border-accent-text bg-transparent text-accent-text hover:bg-surface-accent active:bg-surface-accent',
 		},
 		disabled: {
-			true: 'cursor-default border-secondary bg-muted text-secondary hover:bg-muted active:bg-muted',
+			true: 'cursor-default border-border-strong bg-surface-sunken text-text-muted hover:bg-surface-sunken active:bg-surface-sunken',
 			false: '',
 		},
 	},

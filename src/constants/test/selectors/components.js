@@ -162,7 +162,7 @@ export const DIALOG_SELECTORS = {
 	TEXT_CONTENT: getByDataCy('text-content'),
 	CLOSE_BUTTON: getByDataCy('dialog-button'),
 	SPINNER_CONTAINER: getByDataCy('base-spinner'),
-	SPINNER_IMAGE: getByDataCy('base-spinner-img'),
+	SPINNER_LABEL: getByDataCy('base-spinner-label'),
 
 	// Messages
 	MESSAGES: {

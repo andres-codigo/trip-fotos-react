@@ -20,7 +20,7 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 				type="button"
 				className={cn(
 					badgeClasses,
-					'top-1 z-1 w-6 cursor-pointer bg-file-error text-2xl leading-6 text-primary-foreground focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent',
+					'top-1 z-1 w-6 cursor-pointer bg-danger text-2xl leading-6 text-on-danger',
 				)}
 				aria-label={GLOBAL.REMOVE_FILE_LABEL(file.name)}
 				onClick={() => onRemove(file)}
@@ -36,7 +36,7 @@ const FilePreview = ({ file, onRemove, tag: Tag = 'li' }) => {
 				/>
 			)}
 			<span
-				className="absolute inset-x-0 bottom-0 truncate bg-scrim px-2 py-1 text-[0.75rem] text-primary-foreground"
+				className="absolute inset-x-0 bottom-0 truncate bg-scrim px-2 py-1 text-[0.75rem] text-text"
 				title={file.name}
 				data-cy={FILE_PREVIEW.NAME}>
 				{file.name}

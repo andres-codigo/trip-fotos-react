@@ -13,12 +13,13 @@ describe('<BaseSpinner />', () => {
 			.and('have.attr', 'aria-busy', 'true')
 	})
 
-	it('shows the loading image with its alternative text', () => {
-		cy.mount(<BaseSpinner />)
+	it('shows its loading text beside the spinner', () => {
+		cy.mount(<BaseSpinner label={GLOBAL.SPINNER_LABEL.TRAVELLER} />)
 
-		cy.get('img')
-			.should('have.attr', 'alt', GLOBAL.LOADING_SPINNER_ALT)
+		cy.get('[data-cy="base-spinner-label"]')
+			.should('have.text', GLOBAL.SPINNER_LABEL.TRAVELLER)
 			.and('be.visible')
+		cy.get('[data-cy="base-spinner-icon"]').should('be.visible')
 	})
 
 	it('has no axe violations', () => {

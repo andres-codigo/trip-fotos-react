@@ -101,7 +101,7 @@ const UserAuthenticationForm = ({
 					id="login-signup-toggle-link"
 					isLink
 					onClick={handleSignUpClick}
-					className="pl-2 text-accent-foreground hover:text-secondary [@media(max-width:1024px)]:w-full [@media(max-width:1024px)]:pt-5 [@media(max-width:1024px)]:text-center"
+					className="pl-2 text-accent-text hover:text-accent-hover [@media(max-width:1024px)]:w-full [@media(max-width:1024px)]:pt-5 [@media(max-width:1024px)]:text-center"
 					data-cy="login-signup-toggle-link"
 					isDisabled={isLoading}>
 					{mode === API_DATABASE.AUTH_LOGIN_MODE

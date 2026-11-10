@@ -24,7 +24,7 @@ describe('<BaseButton />', () => {
 
 			const button = screen.getByTestId('styled-button')
 			expect(button).toHaveClass('custom-class')
-			expect(button.className).toContain('border-secondary')
+			expect(button.className).toContain('border-accent-text')
 		})
 
 		it('lets a consumer className override a conflicting utility', () => {
@@ -50,9 +50,7 @@ describe('<BaseButton />', () => {
 				</BaseButton>,
 			)
 
-			expect(screen.getByTestId('unknown-mode')).toHaveClass(
-				'bg-accent-foreground',
-			)
+			expect(screen.getByTestId('unknown-mode')).toHaveClass('bg-accent')
 		})
 
 		it('styles a link with a modeType as a button', () => {
@@ -97,7 +95,7 @@ describe('<BaseButton />', () => {
 
 			const span = screen.getByTestId('disabled-button-link')
 			expect(span).toHaveAttribute('aria-disabled', 'true')
-			expect(span).toHaveClass('bg-muted', 'cursor-default')
+			expect(span).toHaveClass('bg-surface-sunken', 'cursor-default')
 		})
 
 		it('spreads additional props to button element without conflicts', () => {

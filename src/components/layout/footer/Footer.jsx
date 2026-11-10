@@ -9,7 +9,7 @@ function Footer() {
 			data-cy="site-footer">
 			<Link
 				to={PATHS.PRIVACY}
-				className="inline-block p-3 text-primary focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
+				className="inline-block p-3 text-accent-text underline underline-offset-4"
 				data-cy="footer-privacy-link">
 				Privacy policy
 			</Link>

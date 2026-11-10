@@ -7,6 +7,7 @@ import {
 } from '../../../src/constants/test/selectors/components'
 
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
+import { GLOBAL } from '../../../src/constants/ui/global'
 
 import { TEST_USERS, AUTH_TEST_DATA } from '../../../src/constants/config/users'
 
@@ -219,10 +220,10 @@ describe('UI state and mode switching', () => {
 					DIALOG_SELECTORS.MESSAGES.LOADING.TEXT,
 				)
 				cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('exist')
-				cy.get(DIALOG_SELECTORS.SPINNER_IMAGE)
-					.should('exist')
-					.and('have.attr', 'src')
-					.and('include', 'data:image/svg+xml')
+				cy.get(DIALOG_SELECTORS.SPINNER_LABEL).should(
+					'have.text',
+					GLOBAL.SPINNER_LABEL.AUTHENTICATING,
+				)
 			})
 
 		cy.wait('@delayedLogin', { timeout: REQUEST_TIMEOUT })

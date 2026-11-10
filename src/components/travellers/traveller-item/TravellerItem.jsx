@@ -135,12 +135,14 @@ const TravellerItem = ({
 				<li
 					className="my-2 list-none"
 					data-cy={TRAVELLER_ITEM.SPINNER}>
-					<BaseSpinner />
+					<BaseSpinner
+						label={GLOBAL.SPINNER_LABEL.DELETING_TRAVELLER}
+					/>
 				</li>
 			) : (
 				<li
 					className={cn(
-						'my-4 list-none rounded-lg border border-muted-foreground p-4 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ring',
+						'my-4 list-none rounded-lg border border-border-strong p-4',
 						isOwnRecord && 'border-2',
 					)}
 					data-own={isOwnRecord}
@@ -189,12 +191,12 @@ const TravellerItem = ({
 							/>
 							{files.length >
 								TRAVELLER_ITEM_CONFIG.MAX_IMAGES && (
-								<li className="relative w-[32%] overflow-hidden bg-secondary/75 text-primary-foreground [@media(max-width:480px)]:w-[48%]">
+								<li className="relative w-[32%] overflow-hidden bg-accent font-medium text-on-accent tile-focus-ring [@media(max-width:480px)]:w-[48%]">
 									<Link
-										className="block h-full text-primary-foreground"
+										className="block h-full"
 										to={photosLink}
 										data-cy={TRAVELLER_ITEM.SEE_ALL_LINK}>
-										<span className="flex h-full items-center justify-center p-5 text-center text-primary-foreground">
+										<span className="flex h-full items-center justify-center p-5 text-center">
 											See all {files.length} photos
 										</span>
 									</Link>

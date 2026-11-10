@@ -13,7 +13,7 @@ function Header() {
 	)
 	return (
 		<header
-			className="fixed z-[1] flex h-20 w-full items-center justify-between bg-primary"
+			className="fixed z-[1] flex h-20 w-full items-center justify-between bg-header"
 			data-cy="site-header"
 			role="banner"
 			aria-label="Site header">
@@ -22,7 +22,7 @@ function Header() {
 				data-cy="site-header-title-link">
 				<Link
 					to={isLoggedIn ? PATHS.HOME : PATHS.AUTHENTICATION}
-					className="m-0 px-6 py-3 text-primary-foreground"
+					className="m-0 px-6 py-3 text-on-header"
 					aria-label="Trip Fotos Home">
 					Trip Fotos
 				</Link>

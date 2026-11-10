@@ -176,9 +176,9 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 			{!loading && error && (
 				<div
 					role="alert"
-					className="my-4 flex flex-col items-start gap-3 rounded-lg border border-destructive p-4"
+					className="my-4 flex flex-col items-start gap-3 rounded-lg border border-danger-text p-4"
 					data-cy="travellers-load-error">
-					<p className="m-0 font-bold text-destructive">
+					<p className="m-0 font-bold text-danger-text">
 						{TRAVELLERS_LIST_CONFIG.LOAD_ERROR_TITLE}
 					</p>
 					<p className="m-0">{error}</p>
@@ -195,7 +195,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				<>
 					<p
 						role="status"
-						className="my-2 text-muted-foreground"
+						className="my-2 text-text-muted"
 						data-cy="travellers-loading">
 						{TRAVELLERS_LIST_CONFIG.LOADING_LABEL}
 					</p>
@@ -246,7 +246,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 							)}
 							<p
 								aria-live="polite"
-								className="m-0 text-sm text-muted-foreground"
+								className="m-0 text-sm text-text-muted"
 								data-cy="travellers-page-status">
 								{hasMore
 									? TRAVELLERS_LIST_CONFIG.PAGE_STATUS(

@@ -2,7 +2,8 @@ export const TEST_IDS = {
 	MAIN_CONTAINER: 'main-container',
 	SPINNER: {
 		CONTAINER: 'base-spinner',
-		IMAGE: 'base-spinner-img',
+		ICON: 'base-spinner-icon',
+		LABEL: 'base-spinner-label',
 	},
 	BASE_CARD: 'base-card',
 	DIALOG: {

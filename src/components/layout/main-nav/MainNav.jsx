@@ -19,7 +19,7 @@ import NavMenuMessagesLink from './nav-menu/NavMenuMessagesLink'
 
 // Three bars that the toggle button turns into a cross while the menu is open
 const barClasses =
-	'mx-auto my-[0.3125rem] block h-[0.1875rem] w-[1.5625rem] bg-primary-foreground transition-colors duration-300 ease-in-out group-aria-expanded:first:translate-y-2 group-aria-expanded:first:rotate-45 group-aria-expanded:nth-2:opacity-0 group-aria-expanded:last:-translate-y-2 group-aria-expanded:last:-rotate-45'
+	'mx-auto my-[0.3125rem] block h-[0.1875rem] w-[1.5625rem] bg-on-header transition-colors duration-300 ease-in-out group-aria-expanded:first:translate-y-2 group-aria-expanded:first:rotate-45 group-aria-expanded:nth-2:opacity-0 group-aria-expanded:last:-translate-y-2 group-aria-expanded:last:-rotate-45'
 
 function MainNav({
 	isLoggedIn,
@@ -100,7 +100,7 @@ function MainNav({
 							className={cn(
 								'm-0 flex items-center justify-between p-0',
 								// Off-screen alone leaves the closed menu's links keyboard-focusable
-								'mobile:invisible mobile:absolute mobile:top-[4.9rem] mobile:left-[-100%] mobile:w-full mobile:flex-col mobile:bg-primary mobile:text-center mobile:shadow-menu',
+								'mobile:invisible mobile:absolute mobile:top-[4.9rem] mobile:left-[-100%] mobile:w-full mobile:flex-col mobile:bg-header mobile:text-center mobile:shadow-overlay',
 								isMenuOpen && 'mobile:visible mobile:left-0',
 							)}
 							data-cy="nav-menu-items-container"
