@@ -7,20 +7,15 @@ import {
 } from '@/constants/travellers'
 
 import BaseButton from '@/components/ui/button/BaseButton'
-import Input from '@/components/ui/form/input/Input'
 import Textarea from '@/components/ui/form/textarea/Textarea'
 import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
 
 import useContactTravellerForm from './hooks/useContactTravellerForm'
 
-const ContactTravellerForm = ({
-	userEmail = '',
-	isLoading = false,
-	onSubmit,
-}) => {
-	const { EMAIL, MESSAGE } = CONTACT_TRAVELLER_FIELDS
+const ContactTravellerForm = ({ isLoading = false, onSubmit }) => {
+	const { MESSAGE } = CONTACT_TRAVELLER_FIELDS
 	const { formData, handleInputChange, submitHandler } =
-		useContactTravellerForm(userEmail)
+		useContactTravellerForm()
 
 	const getFieldProps = (field) => ({
 		id: field,
@@ -41,18 +36,6 @@ const ContactTravellerForm = ({
 			aria-busy={isLoading}
 			data-cy={CONTACT_TRAVELLER.FORM}>
 			<LoadingAnnouncement isLoading={isLoading} />
-			<div className="my-2">
-				<Input
-					{...getFieldProps(EMAIL)}
-					label="E-Mail"
-					type="email"
-					autoComplete="email"
-					// The signed-in user's email identifies the sender, so it is not editable
-					disabled={isLoading || Boolean(userEmail)}
-					data-cy={CONTACT_TRAVELLER.EMAIL_INPUT}
-					data-cy-error={CONTACT_TRAVELLER.EMAIL_ERROR}
-				/>
-			</div>
 			<div className="my-2">
 				<Textarea
 					{...getFieldProps(MESSAGE)}
@@ -76,7 +59,6 @@ const ContactTravellerForm = ({
 }
 
 ContactTravellerForm.propTypes = {
-	userEmail: PropTypes.string,
 	isLoading: PropTypes.bool,
 	onSubmit: PropTypes.func.isRequired,
 }

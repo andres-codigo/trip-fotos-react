@@ -27,18 +27,29 @@ describe('<NavMenuMessagesLink />', () => {
 	})
 
 	it('shows the unread count and puts it in the accessible name', () => {
-		mountLink({ totalMessages: 3 })
+		mountLink({ unreadMessages: 3 })
 
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('have.text', '3')
 		cy.get('li a')
-			.should('have.attr', 'aria-label', 'Messages 3')
+			.should('have.attr', 'aria-label', 'Messages, 3 unread messages')
 			.invoke('prop', 'innerText')
 			.then((text) => text.replace(/\s+/g, ' ').trim())
 			.should('eq', 'Messages 3')
 	})
 
-	it('shows no count and a plain name when there are no messages', () => {
-		mountLink({ totalMessages: 0 })
+	it('uses the singular for one unread message', () => {
+		mountLink({ unreadMessages: 1 })
+
+		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('have.text', '1')
+		cy.get('li a').should(
+			'have.attr',
+			'aria-label',
+			'Messages, 1 unread message',
+		)
+	})
+
+	it('shows no count and a plain name when nothing is unread', () => {
+		mountLink({ unreadMessages: 0 })
 
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('not.exist')
 		cy.get('li a')
@@ -46,21 +57,21 @@ describe('<NavMenuMessagesLink />', () => {
 			.and('have.prop', 'innerText', 'Messages')
 	})
 
-	it('shows no count when the total is not known yet', () => {
+	it('shows no count when the unread count is not known yet', () => {
 		mountLink()
 
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('not.exist')
 	})
 
 	it('has no axe violations', () => {
-		mountLink({ totalMessages: 0 })
+		mountLink({ unreadMessages: 0 })
 
 		cy.get('li a').should('exist')
 		cy.checkA11y()
 	})
 
 	it('has no axe violations with the count shown', () => {
-		mountLink({ totalMessages: 3 })
+		mountLink({ unreadMessages: 3 })
 
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('be.visible')
 		cy.checkA11y()

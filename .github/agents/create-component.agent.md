@@ -40,7 +40,7 @@ Use this agent when you need to create a new React component with full structure
     - Call `cy.checkA11y()` in the Cypress component test of a form or a shared `ui` component
     - A shadcn component follows the move-and-rename rules in `components.instructions.md` → shadcn/ui components
     - Reference `src/testUtils` for mocking if needed
-    - For Cypress tests, do not use inline string selectors like `cy.get('[data-cy="..."]')`; create and use exported selector constants in `src/constants/test/selectors/components.js` using `getByDataCy`, following the `Header` and `Header.cy.jsx` pattern
+    - For Cypress tests, do not use inline string selectors like `cy.get('[data-cy="..."]')`; create and use exported selector constants in `src/constants/test/selectors/components.js` using `getByDataCy`, following the `Header` and `Header.cy.jsx` pattern and the naming rule in `testing.instructions.md` (Test Data & Utilities)
 
 6. **Styling**
     - Review the tokens in `src/styles/tailwind.css` and use them (`bg-surface`, `text-text-muted`) rather than a literal `white` or `rgb(...)`

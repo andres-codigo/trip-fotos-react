@@ -85,18 +85,32 @@ describe('<NavMenuMessagesLink />', () => {
 			)
 		})
 
-		it('should keep the visible text and the accessible name in step', () => {
+		it.each([
+			[3, 'Messages, 3 unread messages'],
+			[1, 'Messages, 1 unread message'],
+			[0, 'Messages'],
+		])(
+			'should name the link with %i unread as "%s"',
+			(unreadMessages, name) => {
+				render(
+					<NavMenuMessagesLink
+						{...defaultProps}
+						unreadMessages={unreadMessages}
+					/>,
+				)
+
+				expect(screen.getByRole('button', { name })).toBeInTheDocument()
+			},
+		)
+
+		it('should show the unread count after the visible text', () => {
 			render(
 				<NavMenuMessagesLink
 					{...defaultProps}
-					totalMessages={3}
+					unreadMessages={3}
 				/>,
 			)
 
-			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
-				expect.objectContaining({ ariaLabel: 'Messages 3' }),
-				undefined,
-			)
 			expect(screen.getByRole('button')).toHaveTextContent('Messages 3')
 		})
 
@@ -123,14 +137,14 @@ describe('<NavMenuMessagesLink />', () => {
 		})
 
 		// Message count tests
-		it('should not display message count when totalMessages is falsy', () => {
+		it('should not display the count when there are no unread messages', () => {
 			const falsyValues = [0, null, undefined, -1]
 
 			falsyValues.forEach((value) => {
 				const { unmount } = render(
 					<NavMenuMessagesLink
 						{...defaultProps}
-						totalMessages={value}
+						unreadMessages={value}
 					/>,
 				)
 
@@ -142,11 +156,11 @@ describe('<NavMenuMessagesLink />', () => {
 			})
 		})
 
-		it('should display message count when totalMessages > 0', () => {
+		it('should display the count when there are unread messages', () => {
 			render(
 				<NavMenuMessagesLink
 					{...defaultProps}
-					totalMessages={5}
+					unreadMessages={5}
 				/>,
 			)
 
@@ -159,7 +173,7 @@ describe('<NavMenuMessagesLink />', () => {
 			render(
 				<NavMenuMessagesLink
 					{...defaultProps}
-					totalMessages={3}
+					unreadMessages={3}
 				/>,
 			)
 
@@ -172,7 +186,7 @@ describe('<NavMenuMessagesLink />', () => {
 			render(
 				<NavMenuMessagesLink
 					{...defaultProps}
-					totalMessages={999}
+					unreadMessages={999}
 				/>,
 			)
 

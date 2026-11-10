@@ -17,6 +17,7 @@ applyTo: '{**/__tests__/**/*,cypress/e2e/**/*.cy.js}'
 Use existing project paths for shared testing assets:
 
 - **Test constants and mock data**: `src/constants/test` (`mock-data/` for data, `selectors/` for `getByDataCy` selectors). A colocated `*TestData.js` is acceptable only for data used by that one test folder.
+- **Naming test ids and selector keys**: name each key after what it labels and keep it in step with the config key for the same thing (`CONTACT_TRAVELLER.BACK_TO_MESSAGES` for the link whose text is `CONTACT_TRAVELLER_CONFIG.BACK_TO_MESSAGES`, not `BACK_LINK`). Follow the existing group shape: the outer element is `ROOT`, and the test-id key and the selector key match. Check new keys against their siblings before handing off, so no rename is needed later.
 - **Cypress helper utilities**: `cypress/support/utils`
 - **Cypress provider mounts**: `cypress/support/commands-support-files/mountWithProviders.jsx`
 - **General test helpers**: `src/testUtils` (`vitest/` polyfills, setup; `cypress/` `selectors.js` and `TestLocationDisplay`). Put a helper used by more than one test folder here rather than beside a single test; `vitest/mockReactRedux.js` is the shared `react-redux` mock (real `Provider`, `useSelector` and `useDispatch` as spies), used as `vi.mock('react-redux', async () => (await import('@/testUtils/vitest/mockReactRedux')).createReactReduxMock())` rather than hand-mocking it per test.

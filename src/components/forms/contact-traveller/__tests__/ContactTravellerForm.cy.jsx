@@ -13,16 +13,12 @@ describe('<ContactTravellerForm />', () => {
 		cy.checkA11y()
 	})
 
-	it('shows validation errors for an empty form and does not submit', () => {
+	it('shows a validation error for an empty message and does not submit', () => {
 		const onSubmit = cy.stub().as('onSubmit')
 		cy.mount(<ContactTravellerForm onSubmit={onSubmit} />)
 
 		cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()
 
-		cy.get(CONTACT_TRAVELLER_SELECTORS.EMAIL_ERROR).should(
-			'have.text',
-			VALIDATION_MESSAGES.EMAIL_INVALID,
-		)
 		cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_ERROR).should(
 			'have.text',
 			VALIDATION_MESSAGES.MESSAGE_REQUIRED,
@@ -38,23 +34,15 @@ describe('<ContactTravellerForm />', () => {
 		cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_ERROR).should('not.exist')
 	})
 
-	it('submits the prefilled email with the message', () => {
+	it('has no email field and submits only the message', () => {
 		const onSubmit = cy.stub().as('onSubmit')
-		cy.mount(
-			<ContactTravellerForm
-				userEmail="me@example.com"
-				onSubmit={onSubmit}
-			/>,
-		)
+		cy.mount(<ContactTravellerForm onSubmit={onSubmit} />)
 
-		cy.get(CONTACT_TRAVELLER_SELECTORS.EMAIL_INPUT)
-			.should('have.value', 'me@example.com')
-			.and('be.disabled')
+		cy.get('input[type="email"]').should('not.exist')
 		cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_INPUT).type('Hello there')
 		cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()
 
 		cy.get('@onSubmit').should('have.been.calledOnceWith', {
-			email: 'me@example.com',
 			message: 'Hello there',
 		})
 	})

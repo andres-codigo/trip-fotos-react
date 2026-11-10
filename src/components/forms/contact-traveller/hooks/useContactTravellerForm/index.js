@@ -3,15 +3,9 @@ import { useState } from 'react'
 import { CONTACT_MESSAGE, VALIDATION_MESSAGES } from '@/constants/validation'
 import { CONTACT_TRAVELLER_FIELDS } from '@/constants/travellers'
 
-import { validateEmail } from '@/utils/validation'
-
-const { EMAIL, MESSAGE } = CONTACT_TRAVELLER_FIELDS
+const { MESSAGE } = CONTACT_TRAVELLER_FIELDS
 
 const validateField = (id, value) => {
-	if (id === EMAIL) {
-		return validateEmail(value.trim())
-	}
-
 	if (id === MESSAGE && value.trim() === '') {
 		return { isValid: false, message: VALIDATION_MESSAGES.MESSAGE_REQUIRED }
 	}
@@ -28,9 +22,8 @@ const validateField = (id, value) => {
 	return { isValid: true, message: '' }
 }
 
-const useContactTravellerForm = (initialEmail = '') => {
+const useContactTravellerForm = () => {
 	const [formData, setFormData] = useState({
-		[EMAIL]: { value: initialEmail, message: '', isValid: true },
 		[MESSAGE]: { value: '', message: '', isValid: true },
 	})
 
@@ -60,7 +53,6 @@ const useContactTravellerForm = (initialEmail = '') => {
 		}
 
 		onSubmitSuccess({
-			[EMAIL]: formData[EMAIL].value.trim(),
 			[MESSAGE]: formData[MESSAGE].value.trim(),
 		})
 	}

@@ -5,7 +5,10 @@ import PropTypes from 'prop-types'
 
 import { PATHS } from '@/constants/ui'
 
-import { loadMessages, selectMessagesCount } from '@/store/slices/messagesSlice'
+import {
+	loadMessages,
+	selectUnreadMessagesCount,
+} from '@/store/slices/messagesSlice'
 
 import useClickOutsideToCloseDefault from './hooks/useClickOutsideToClose'
 import useLogoutDefault from './hooks/useLogout'
@@ -36,7 +39,7 @@ function MainNav({
 		(state) => state.travellers.isTraveller,
 	)
 	const isTraveller = isTravellerProp ?? isTravellerFromStore
-	const totalMessages = useSelector(selectMessagesCount)
+	const unreadMessages = useSelector(selectUnreadMessagesCount)
 
 	const { travellerName, setTravellerName, isMenuOpen, setIsMenuOpen } =
 		useMainNavState()
@@ -119,7 +122,7 @@ function MainNav({
 												handleMenuItemClick
 											}
 											data-cy="nav-menu-item-messages"
-											totalMessages={totalMessages}
+											unreadMessages={unreadMessages}
 										/>
 									)}
 									<li>

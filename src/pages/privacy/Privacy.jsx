@@ -39,6 +39,16 @@ const Privacy = () => {
 					to other signed-in users.
 				</p>
 
+				<h2 className="mt-6 mb-[1em] text-[1.17rem]">Messages</h2>
+				<p>
+					Registered travellers can message each other. A message
+					keeps your account id, so the traveller you write to sees
+					your traveller name and can reply in Trip Fotos, along with
+					the time it was sent and whether they have read it. Your
+					email address is not shared with them. Messages sent before
+					this change keep the email they were sent with.
+				</p>
+
 				<h2 className="mt-6 mb-[1em] text-[1.17rem]">City search</h2>
 				<p>
 					When you search for a city during registration, the text you

@@ -65,6 +65,7 @@ describe('Privacy', () => {
 			).toEqual([
 				'Account data',
 				'Traveller registration',
+				'Messages',
 				'City search',
 				'Data stored in your browser',
 				'Analytics',

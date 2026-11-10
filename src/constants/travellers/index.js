@@ -70,17 +70,61 @@ export const TRAVELLER_DETAIL_CONFIG = Object.freeze({
 })
 
 export const CONTACT_TRAVELLER_FIELDS = Object.freeze({
-	EMAIL: 'email',
 	MESSAGE: 'message',
 })
 
 export const CONTACT_TRAVELLER_CONFIG = Object.freeze({
 	FALLBACK_TITLE: 'Contact traveller',
 	TITLE: (firstName) => `Contact ${firstName}`,
+	REPLY_TITLE: (name) => `Reply to ${name}`,
+	REPLY_QUOTE: (name, when) =>
+		when ? `${name} wrote, ${when}:` : `${name} wrote:`,
+	BACK_TO_MESSAGES: 'Messages',
 	SUBMIT_LABEL: 'Send Message',
 	SENDING_TITLE: 'Sending',
 	SENDING_MESSAGE: 'Sending your message, one moment please...',
 	SUCCESS_MESSAGE: 'Your message has been sent!',
+	REPLY_SUCCESS_MESSAGE: 'Your reply has been sent!',
+})
+
+// Where a message's sender name comes from: a traveller card, a removed card, a failed lookup, or an older message that stored only an email
+export const SENDER_STATUS = Object.freeze({
+	TRAVELLER: 'traveller',
+	FORMER: 'former',
+	UNKNOWN: 'unknown',
+	LEGACY: 'legacy',
+})
+
+export const MESSAGES_CONFIG = Object.freeze({
+	TITLE: 'Messages',
+	FORMER_TRAVELLER: 'A former traveller',
+	UNKNOWN_TRAVELLER: 'A traveller',
+	NEW_TAG: 'New',
+	NEW_TAG_HIDDEN: ' message',
+	REPLY: 'Reply',
+	REPLY_BY_EMAIL: 'Reply by email',
+	REPLY_EMAIL_SUBJECT: 'Re: your message on Trip Fotos',
+	DELETE: 'Delete',
+	DELETE_LABEL: (sender) => `Delete message from ${sender}`,
+	SHOW_ALL: 'Show all',
+	SHOW_LESS: 'Show less',
+	TRY_AGAIN: 'Try again',
+	DELETED: 'Message deleted.',
+	UNDO: 'Undo',
+	UNDO_DURATION_MS: 8000,
+	// About five lines at the card's width; shorter texts never show "Show all"
+	CLAMP_LENGTH: 260,
+	SUMMARY: (unread, total) =>
+		`${unread > 0 ? `${unread} unread · ` : ''}${total} message${total === 1 ? '' : 's'}`,
+	EMPTY_TITLE: 'No messages yet',
+	EMPTY_TEXT:
+		'When a traveller contacts you from your card, their message appears here.',
+	BROWSE_TRAVELLERS: 'Browse travellers',
+	SKELETON_COUNT: 3,
+	NAV_LABEL: (unread) =>
+		unread > 0
+			? `Messages, ${unread} unread message${unread === 1 ? '' : 's'}`
+			: 'Messages',
 })
 
 export const CITY_SEARCH_STATUS = Object.freeze({

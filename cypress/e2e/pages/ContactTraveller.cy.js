@@ -116,10 +116,13 @@ describe('Contact Traveller page > sending a message', () => {
 				expect(request.url).to.include(
 					`/messages/${TEST_USERS.OTHER_TRAVELLER.ID}.json`,
 				)
-				expect(request.body).to.include({
-					userEmail: TEST_USERS.TRAVELLER.EMAIL,
+				expect(request.body).to.deep.equal({
+					senderId: TEST_USERS.TRAVELLER.ID,
 					message: MESSAGE,
+					createdAt: API_DATABASE.SERVER_TIMESTAMP,
+					read: false,
 				})
+				// A 200 from the emulator means the rules accepted it
 				expect(response.statusCode).to.eq(200)
 			},
 		)
@@ -150,5 +153,127 @@ describe('Contact Traveller page > sending a message', () => {
 			'have.value',
 			MESSAGE,
 		)
+	})
+})
+
+// Talks to the emulator directly, as a script could, so a pass proves the rules and not just the UI
+describe('Messages database rules', () => {
+	const messagesUrl = (recipientId, path = '') =>
+		`${Cypress.expose('VITE_DATABASE_URL')}/messages/${recipientId}${path}.json`
+	const send = (token, body, recipientId = TEST_USERS.OTHER_TRAVELLER.ID) =>
+		cy.request({
+			method: API_DATABASE.POST,
+			url: messagesUrl(recipientId),
+			qs: { ns: Cypress.expose('VITE_DATABASE_NAMESPACE'), auth: token },
+			body,
+			failOnStatusCode: false,
+		})
+	const validBody = (senderId) => ({
+		senderId,
+		message: 'Hello from the rules test.',
+		createdAt: API_DATABASE.SERVER_TIMESTAMP,
+		read: false,
+	})
+	const signedInToken = () =>
+		cy.window().then((win) => win.localStorage.getItem('token'))
+
+	beforeEach(() => {
+		cy.resetEmulators()
+	})
+
+	it('refuses a message from a signed-in user who is not a traveller', () => {
+		performLogin()
+		cy.window().then((win) => {
+			send(
+				win.localStorage.getItem('token'),
+				validBody(win.localStorage.getItem('userId')),
+			)
+				.its('status')
+				.should('be.oneOf', [401, 403])
+		})
+	})
+
+	it('refuses a message with no sign-in', () => {
+		send(undefined, validBody(TEST_USERS.TRAVELLER.ID))
+			.its('status')
+			.should('be.oneOf', [401, 403])
+	})
+
+	describe('as a traveller', () => {
+		beforeEach(() => {
+			performLogin(
+				TEST_USERS.TRAVELLER.EMAIL,
+				TEST_USERS.TRAVELLER.PASSWORD,
+			)
+		})
+
+		it('accepts a message written as themselves', () => {
+			signedInToken().then((token) =>
+				send(token, validBody(TEST_USERS.TRAVELLER.ID))
+					.its('status')
+					.should('eq', 200),
+			)
+		})
+
+		it('refuses a message written as someone else', () => {
+			signedInToken().then((token) =>
+				send(token, validBody(TEST_USERS.OTHER_TRAVELLER.ID))
+					.its('status')
+					.should('be.oneOf', [401, 403]),
+			)
+		})
+
+		it('refuses a message to themselves', () => {
+			signedInToken().then((token) =>
+				send(
+					token,
+					validBody(TEST_USERS.TRAVELLER.ID),
+					TEST_USERS.TRAVELLER.ID,
+				)
+					.its('status')
+					.should('be.oneOf', [401, 403]),
+			)
+		})
+
+		it('refuses a new message that is already read, carries an email or sets its own time', () => {
+			signedInToken().then((token) => {
+				const base = validBody(TEST_USERS.TRAVELLER.ID)
+				;[
+					{ ...base, read: true },
+					{ ...base, userEmail: TEST_USERS.TRAVELLER.EMAIL },
+					{ ...base, createdAt: 1 },
+				].forEach((body) =>
+					send(token, body)
+						.its('status')
+						.should('be.oneOf', [401, 403]),
+				)
+			})
+		})
+
+		it('refuses to mark a message read in someone else’s inbox', () => {
+			signedInToken().then((token) =>
+				send(token, validBody(TEST_USERS.TRAVELLER.ID)).then(
+					({ body }) =>
+						cy
+							.request({
+								method: API_DATABASE.PUT,
+								url: messagesUrl(
+									TEST_USERS.OTHER_TRAVELLER.ID,
+									`/${body.name}/read`,
+								),
+								qs: {
+									ns: Cypress.expose(
+										'VITE_DATABASE_NAMESPACE',
+									),
+									auth: token,
+								},
+								body: true,
+								failOnStatusCode: false,
+							})
+							.its('status')
+							.should('be.oneOf', [401, 403]),
+				),
+			)
+		})
 	})
 })

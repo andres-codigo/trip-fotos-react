@@ -6,7 +6,7 @@ import { CONTACT_MESSAGE, VALIDATION_MESSAGES } from '@/constants/validation'
 
 import useContactTravellerForm from '@/components/forms/contact-traveller/hooks/useContactTravellerForm'
 
-const { EMAIL, MESSAGE } = CONTACT_TRAVELLER_FIELDS
+const { MESSAGE } = CONTACT_TRAVELLER_FIELDS
 
 const change = (result, id, value) =>
 	act(() => result.current.handleInputChange({ target: { id, value } }))
@@ -17,25 +17,26 @@ const submit = (result, onSuccess) =>
 	)
 
 describe('useContactTravellerForm', () => {
-	it('prefills the email with the initial value', () => {
-		const { result } = renderHook(() =>
-			useContactTravellerForm('me@example.com'),
-		)
-		expect(result.current.formData[EMAIL].value).toBe('me@example.com')
+	it('starts with only an empty, valid message field', () => {
+		const { result } = renderHook(() => useContactTravellerForm())
+		expect(result.current.formData).toEqual({
+			[MESSAGE]: { value: '', message: '', isValid: true },
+		})
 	})
 
-	it('flags an invalid email and an empty message on change', () => {
+	it('flags an empty message on change and clears it once text is entered', () => {
 		const { result } = renderHook(() => useContactTravellerForm())
-		change(result, EMAIL, 'not-an-email')
 		change(result, MESSAGE, '   ')
 
-		expect(result.current.formData[EMAIL]).toMatchObject({
-			isValid: false,
-			message: VALIDATION_MESSAGES.EMAIL_INVALID,
-		})
 		expect(result.current.formData[MESSAGE]).toMatchObject({
 			isValid: false,
 			message: VALIDATION_MESSAGES.MESSAGE_REQUIRED,
+		})
+
+		change(result, MESSAGE, 'Hello')
+		expect(result.current.formData[MESSAGE]).toMatchObject({
+			isValid: true,
+			message: '',
 		})
 	})
 
@@ -53,27 +54,30 @@ describe('useContactTravellerForm', () => {
 		})
 	})
 
-	it('blocks submission and marks every invalid field', () => {
+	it('blocks submission and marks an empty message invalid', () => {
 		const onSuccess = vi.fn()
 		const { result } = renderHook(() => useContactTravellerForm())
 		submit(result, onSuccess)
 
 		expect(onSuccess).not.toHaveBeenCalled()
-		expect(result.current.formData[EMAIL].isValid).toBe(false)
 		expect(result.current.formData[MESSAGE].isValid).toBe(false)
 	})
 
-	it('submits trimmed values when the form is valid', () => {
+	it('blocks submission of a message over the maximum length', () => {
 		const onSuccess = vi.fn()
-		const { result } = renderHook(() =>
-			useContactTravellerForm('me@example.com'),
-		)
+		const { result } = renderHook(() => useContactTravellerForm())
+		change(result, MESSAGE, 'a'.repeat(CONTACT_MESSAGE.MAX_LENGTH + 1))
+		submit(result, onSuccess)
+
+		expect(onSuccess).not.toHaveBeenCalled()
+	})
+
+	it('submits only the trimmed message when the form is valid', () => {
+		const onSuccess = vi.fn()
+		const { result } = renderHook(() => useContactTravellerForm())
 		change(result, MESSAGE, '  Hello there  ')
 		submit(result, onSuccess)
 
-		expect(onSuccess).toHaveBeenCalledWith({
-			[EMAIL]: 'me@example.com',
-			[MESSAGE]: 'Hello there',
-		})
+		expect(onSuccess).toHaveBeenCalledWith({ [MESSAGE]: 'Hello there' })
 	})
 })

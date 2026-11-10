@@ -71,10 +71,14 @@ export const buildTravellers = () => ({
 
 export const buildMessages = () => ({
 	[SEED_USERS.TRAVELLER_ONE.uid]: {
+		// From the other seeded traveller, unread, so the card, Reply and the nav count all render
 		[MOCK_INBOX.SAMPLE_MESSAGE_ONE.id]: {
-			userEmail: MOCK_INBOX.SAMPLE_MESSAGE_ONE.userEmail,
+			senderId: SEED_USERS.TRAVELLER_TWO.uid,
 			message: MOCK_INBOX.SAMPLE_MESSAGE_ONE.message,
+			createdAt: Date.now() - 12 * 60 * 1000,
+			read: false,
 		},
+		// An older message with only an email, as stored before messaging was travellers-only
 		[MOCK_INBOX.SAMPLE_MESSAGE_TWO.id]: {
 			userEmail: MOCK_INBOX.SAMPLE_MESSAGE_TWO.userEmail,
 			message: MOCK_INBOX.SAMPLE_MESSAGE_TWO.message,

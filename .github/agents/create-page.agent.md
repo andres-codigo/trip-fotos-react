@@ -33,7 +33,7 @@ Use this agent when creating a new route-level page with structure, styling, and
 5. **Page Composition**
     - Compose reusable UI from `src/components`.
     - Keep reusable logic in hooks/components, not embedded deeply in page files.
-    - Give page-level and custom container elements `data-cy` attributes and export matching selector constants via `getByDataCy` in `src/constants/test/selectors/`; tests use the constants, never inline strings.
+    - Give page-level and custom container elements `data-cy` attributes and export matching selector constants via `getByDataCy` in `src/constants/test/selectors/`, named per `testing.instructions.md` (Test Data & Utilities); tests use the constants, never inline strings.
     - The root `<main>` has `id={ACCESSIBILITY.MAIN_CONTENT_ID}`, `tabIndex={-1}` and its own `<title>` (`Page name · ${GLOBAL.SITE_NAME}`).
     - Exactly one `<h1>`, kept inside the card or column it labels; section headings start at `<h2>` (see `pages.instructions.md` → Page Structure And Accessibility).
     - Style the page with Tailwind utilities (root `<main>` keeps `mainContainer cardPage`); see `styles.instructions.md`.
