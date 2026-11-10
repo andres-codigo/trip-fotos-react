@@ -63,11 +63,10 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Faster photo lists: square tiles that load small thumbnails instead of full-size photos
 - Cleaner Travellers controls: Register beside the title and a Refresh icon
 - Every component and page now uses Tailwind, with SCSS and Stylelint removed and no visual change
-- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs and local checks, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
+- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs and local checks, a browser check before them for UI changes, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
-- [#672](https://github.com/andres-codigo/trip-fotos-react/issues/672) — check the UI before `/verify`, so it runs once per change
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark redesign layout: a multi-column Travellers grid and the design system's layout proposals
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
