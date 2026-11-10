@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.11](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.10...v0.21.11) (2026-11-10)
+
+
+### Enhancements
+
+* city filter in a mobile sheet, with a Show all reset and a zero-results state ([#671](https://github.com/andres-codigo/trip-fotos-react/issues/671)) ([5391194](https://github.com/andres-codigo/trip-fotos-react/commit/5391194479580d1a2063235558047c506d459108))
+
 ## [0.21.10](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.9...v0.21.10) (2026-11-10)
 
 
