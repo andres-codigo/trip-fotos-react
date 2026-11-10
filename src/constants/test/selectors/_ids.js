@@ -29,6 +29,7 @@ export const TEST_IDS = {
 		CONTROLS: 'controls',
 		NO_LIST: 'no-travellers-list',
 		NO_MATCHES: 'no-matching-travellers',
+		SHOW_ALL_CITIES: 'travellers-show-all-cities',
 		LIST: 'travellers-list',
 		ITEM: 'traveller-item',
 		REFRESH_BUTTON: 'refresh-button',

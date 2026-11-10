@@ -30,9 +30,27 @@ describe('formatCity', () => {
 		expect(formatCity('prague')).toBe('Prague, Czechia')
 	})
 
-	it('returns unknown legacy strings unchanged and empty for nothing', () => {
-		expect(formatCity('atlantis')).toBe('atlantis')
+	it('capitalises unknown legacy ids, turning hyphens and underscores into spaces', () => {
+		expect(formatCity('krakow')).toBe('Krakow')
+		expect(formatCity('new-york')).toBe('New York')
+		expect(formatCity('rio__grande')).toBe('Rio Grande')
+	})
+
+	it('capitalises lower-case object parts and keeps capitals the source chose', () => {
+		expect(formatCity({ city: 'lisbon', country: 'portugal' })).toBe(
+			'Lisbon, Portugal',
+		)
+		expect(formatCity({ city: 'McLeod', country: 'USA' })).toBe(
+			'McLeod, USA',
+		)
+		expect(formatCity({ city: 'valparaíso', country: 'chile' })).toBe(
+			'Valparaíso, Chile',
+		)
+	})
+
+	it('returns an empty string for nothing', () => {
 		expect(formatCity(null)).toBe('')
+		expect(formatCity('')).toBe('')
 	})
 })
 
