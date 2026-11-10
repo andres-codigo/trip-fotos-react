@@ -373,7 +373,8 @@ describe('travellersSlice', () => {
 			lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
 			tripDescription:
 				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription,
-			daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity,
+			tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
+			tripEnd: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
 			cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
 			files: [{ name: 'test.jpg', file: new Blob() }],
 		}
@@ -399,10 +400,18 @@ describe('travellersSlice', () => {
 					lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
 					tripDescription:
 						MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription,
-					daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity,
+					tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
+					tripEnd: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
 					cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
 					files: ['https://mock-url.com/image.jpg'],
 				})
+				// Trip length is worked out from the dates, so the old field is no longer written
+				const savedBody = JSON.parse(fetch.mock.calls.at(-1)[1].body)
+				expect(savedBody).toMatchObject({
+					tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
+					tripEnd: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
+				})
+				expect(savedBody).not.toHaveProperty('daysInCity')
 
 				// Verify state updates
 				const state = store.getState().travellers
