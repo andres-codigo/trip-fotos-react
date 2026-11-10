@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import {
 	CITY_SEARCH_STATUS,
 	TRAVELLER_REGISTRATION_FIELDS,
+	TRIP_DATES_CONFIG,
 } from '@/constants/travellers'
 import { GLOBAL } from '@/constants/ui'
 
@@ -15,9 +16,14 @@ import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnn
 import AddFile from '@/components/forms/file-uploader/AddFile'
 
 import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
+import { cn } from '@/utils/cn'
 import { formatCity, getCityId } from '@/utils/formatCity'
+import { formatTripDays, getTripLength, toIsoDate } from '@/utils/tripDates'
+import { labelClasses } from '@/components/ui/form/fieldClasses'
 import useTravellerRegistration from './hooks/useTravellerRegistration'
 import useCitySearch from '@/components/forms/traveller-registration/hooks/useCitySearch'
+
+const TRIP_DATES_HINT_ID = 'trip-dates-hint'
 
 const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 	const {
@@ -51,8 +57,15 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 		city,
 	}))
 
-	const { FIRST_NAME, LAST_NAME, TRIP_DESCRIPTION, DAYS, CITIES, FILES } =
-		TRAVELLER_REGISTRATION_FIELDS
+	const {
+		FIRST_NAME,
+		LAST_NAME,
+		TRIP_DESCRIPTION,
+		TRIP_START,
+		TRIP_END,
+		CITIES,
+		FILES,
+	} = TRAVELLER_REGISTRATION_FIELDS
 
 	const fieldConfig = {
 		[FIRST_NAME]: { label: 'First name', testId: 'first-name-input' },
@@ -61,9 +74,13 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			label: 'About your trip',
 			testId: 'trip-description-input',
 		},
-		[DAYS]: {
-			label: 'Days spent in city',
-			testId: 'days-spent-in-city-input',
+		[TRIP_START]: {
+			label: TRIP_DATES_CONFIG.START_LABEL,
+			testId: 'trip-start-input',
+		},
+		[TRIP_END]: {
+			label: TRIP_DATES_CONFIG.END_LABEL,
+			testId: 'trip-end-input',
 		},
 	}
 
@@ -87,6 +104,22 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			'data-cy': config.testId,
 		}
 	}
+
+	const today = toIsoDate(new Date())
+	const tripDatesValid =
+		formData[TRIP_START].isValid && formData[TRIP_END].isValid
+	const tripLength =
+		tripDatesValid &&
+		getTripLength(formData[TRIP_START].value, formData[TRIP_END].value)
+
+	const getDateInputProps = (field) => ({
+		...getInputProps(field),
+		type: 'date',
+		max: today,
+		'aria-describedby': formData[field].isValid
+			? TRIP_DATES_HINT_ID
+			: `${TRIP_DATES_HINT_ID} ${field}-error`,
+	})
 
 	return (
 		<form
@@ -132,17 +165,40 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				)}
 			</div>
 
-			<div className="my-2">
-				<Input
-					type="number"
-					{...getInputProps(DAYS)}
-				/>
+			<fieldset
+				className="mx-0 my-2 min-w-0 border-0 p-0"
+				data-cy="trip-dates">
+				<legend className={labelClasses}>
+					{TRIP_DATES_CONFIG.LEGEND}
+				</legend>
+				<div className="grid grid-cols-2 gap-2.5">
+					<Input {...getDateInputProps(TRIP_START)} />
+					<Input {...getDateInputProps(TRIP_END)} />
+				</div>
+				{/* One live region from the start, so the length is announced when it replaces the hint */}
+				<p
+					id={TRIP_DATES_HINT_ID}
+					role="status"
+					className={cn(
+						'mt-1 mb-0 text-sm',
+						tripLength ? 'text-accent-text' : 'text-text-muted',
+					)}
+					data-cy="trip-length">
+					{tripLength
+						? formatTripDays(tripLength)
+						: TRIP_DATES_CONFIG.HINT}
+				</p>
 				{renderVisuallyHiddenError(
-					formData[DAYS],
-					'days-error',
+					formData[TRIP_START],
+					'trip-start-error-hidden',
 					'sr-only',
 				)}
-			</div>
+				{renderVisuallyHiddenError(
+					formData[TRIP_END],
+					'trip-end-error-hidden',
+					'sr-only',
+				)}
+			</fieldset>
 
 			<div className="my-2">
 				<Combobox

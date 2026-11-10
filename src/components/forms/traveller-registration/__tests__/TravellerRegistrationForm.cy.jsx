@@ -11,6 +11,7 @@ import {
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 } from '@/constants/test'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
+import { TRIP_DATES_CONFIG } from '@/constants/travellers'
 
 describe('<TravellerRegistrationForm />', () => {
 	let onSubmit
@@ -54,8 +55,11 @@ describe('<TravellerRegistrationForm />', () => {
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 			).should('exist')
 			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT,
 			).should('exist')
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).should(
+				'exist',
+			)
 			cy.get(COMBOBOX_SELECTORS.INPUT).should('exist')
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
@@ -171,7 +175,8 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.contains(VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED).should(
 				'exist',
 			)
-			cy.contains(VALIDATION_MESSAGES.DAYS_REQUIRED).should('exist')
+			cy.contains(VALIDATION_MESSAGES.TRIP_START_REQUIRED).should('exist')
+			cy.contains(VALIDATION_MESSAGES.TRIP_END_REQUIRED).should('exist')
 			cy.contains('p', VALIDATION_MESSAGES.CITIES_REQUIRED).should(
 				'be.visible',
 			)
@@ -215,22 +220,62 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.contains(VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED).should(
 				'exist',
 			)
-			cy.contains(VALIDATION_MESSAGES.DAYS_REQUIRED).should('exist')
+			cy.contains(VALIDATION_MESSAGES.TRIP_START_REQUIRED).should('exist')
+			cy.contains(VALIDATION_MESSAGES.TRIP_END_REQUIRED).should('exist')
 			cy.contains(VALIDATION_MESSAGES.CITIES_REQUIRED).should('exist')
 		})
 
-		it('validates days input is positive', () => {
+		it('shows the trip length once both dates are entered', () => {
 			render()
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_LENGTH).should(
+				'have.text',
+				TRIP_DATES_CONFIG.HINT,
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+				'2025-03-12',
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
+				'2025-03-19',
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_LENGTH).should(
+				'have.text',
+				'8 days',
+			)
+		})
 
-			// Invalid input (0)
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
-			).type('0')
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
-			).click()
+		it('flags an end date before the start date on the end date', () => {
+			render()
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+				'2025-03-19',
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
+				'2025-03-12',
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).should(
+				'have.attr',
+				'aria-invalid',
+				'true',
+			)
+			cy.contains(VALIDATION_MESSAGES.TRIP_END_BEFORE_START).should(
+				'be.visible',
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_LENGTH).should(
+				'have.text',
+				TRIP_DATES_CONFIG.HINT,
+			)
+		})
 
-			cy.contains(VALIDATION_MESSAGES.DAYS_REQUIRED).should('exist')
+		it('refuses a trip date in the future, and caps the calendar at today', () => {
+			render()
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT)
+				.should('have.attr', 'max')
+				.and('match', /^\d{4}-\d{2}-\d{2}$/)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+				'2999-01-01',
+			)
+			cy.contains(VALIDATION_MESSAGES.TRIP_DATE_IN_FUTURE).should(
+				'be.visible',
+			)
 		})
 
 		it('successfully submits with valid data', () => {
@@ -246,9 +291,12 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription)
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
-			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString())
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
+			)
 			cy.selectCity()
 
 			// Mock console.log to avoid cluttering test output, though we spy on onSubmit now
@@ -287,9 +335,12 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription)
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
-			).type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString())
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
+			)
 			cy.selectCity()
 
 			cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
@@ -358,8 +409,13 @@ describe('<TravellerRegistrationForm />', () => {
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT,
 			).should('have.attr', 'aria-required', 'true')
 			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT,
 			).should('have.attr', 'aria-required', 'true')
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).should(
+				'have.attr',
+				'aria-required',
+				'true',
+			)
 		})
 
 		it('shows invalid state via aria-invalid and connects to error message', () => {

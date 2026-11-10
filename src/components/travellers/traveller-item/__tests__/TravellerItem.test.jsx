@@ -33,7 +33,8 @@ const baseProps = {
 	firstName: 'Ada',
 	lastName: 'Lovelace',
 	tripDescription: 'Loves analytical engines',
-	daysInCity: 7,
+	tripStart: '2024-03-05',
+	tripEnd: '2024-03-11',
 	cities: [
 		'tokyo',
 		{ id: 'p1', city: 'Paris', region: 'IDF', country: 'France' },
@@ -80,27 +81,43 @@ describe('<TravellerItem />', () => {
 	})
 
 	describe('Rendering', () => {
-		it('renders name, date, trip description and days', () => {
+		it('renders name, trip dates and length, and trip description', () => {
 			renderItem()
 			expect(screen.getByTestId(TRAVELLER_ITEM.NAME)).toHaveTextContent(
 				'Ada Lovelace',
 			)
-			expect(
-				screen.getByTestId(TRAVELLER_ITEM.REGISTERED),
-			).toHaveTextContent('05 Mar 2024')
+			expect(screen.getByTestId(TRAVELLER_ITEM.TRIP)).toHaveTextContent(
+				'5–11 Mar 2024',
+			)
+			expect(screen.getByTestId(TRAVELLER_ITEM.TRIP)).toHaveTextContent(
+				'7 days',
+			)
 			expect(
 				screen.getByTestId(TRAVELLER_ITEM.TRIP_DESCRIPTION),
 			).toHaveTextContent('Loves analytical engines')
-			expect(screen.getByTestId(TRAVELLER_ITEM.DAYS)).toHaveTextContent(
-				'Days in city: 7 days',
+		})
+
+		it('does not show the registration date', () => {
+			renderItem({ registered: '2024-04-02T10:00:00.000Z' })
+			expect(screen.queryByText(/2 Apr|02 Apr/)).not.toBeInTheDocument()
+		})
+
+		it('shows only the length for an older traveller with no trip dates', () => {
+			renderItem({
+				tripStart: undefined,
+				tripEnd: undefined,
+				daysInCity: 8,
+			})
+			expect(screen.getByTestId(TRAVELLER_ITEM.TRIP)).toHaveTextContent(
+				'Trip: 8 days',
 			)
 		})
 
-		it('renders an empty date when registered is missing', () => {
-			renderItem({ registered: undefined })
+		it('shows no trip line when nothing about the trip is stored', () => {
+			renderItem({ tripStart: undefined, tripEnd: undefined })
 			expect(
-				screen.getByTestId(TRAVELLER_ITEM.REGISTERED),
-			).toBeEmptyDOMElement()
+				screen.queryByTestId(TRAVELLER_ITEM.TRIP),
+			).not.toBeInTheDocument()
 		})
 
 		it('highlights the signed-in user record', () => {

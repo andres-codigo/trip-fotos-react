@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 
 import { MOCK_CITIES, MOCK_TRAVELLERS } from '@/constants/test'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
@@ -14,7 +14,8 @@ describe('useTravellerRegistration', () => {
 			firstName: { value: '', message: '', isValid: true },
 			lastName: { value: '', message: '', isValid: true },
 			tripDescription: { value: '', message: '', isValid: true },
-			days: { value: '', message: '', isValid: true },
+			tripStart: { value: '', message: '', isValid: true },
+			tripEnd: { value: '', message: '', isValid: true },
 			cities: { value: [], message: '', isValid: true },
 		})
 	})
@@ -33,25 +34,6 @@ describe('useTravellerRegistration', () => {
 
 		expect(result.current.formData.firstName).toEqual({
 			value: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
-			message: '',
-			isValid: true,
-		})
-	})
-
-	it('should handle input change and validate number fields', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-
-		act(() => {
-			result.current.handleInputChange({
-				target: {
-					id: 'days',
-					value: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString(),
-				},
-			})
-		})
-
-		expect(result.current.formData.days).toEqual({
-			value: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.daysInCity.toString(),
 			message: '',
 			isValid: true,
 		})
@@ -143,7 +125,12 @@ describe('useTravellerRegistration', () => {
 		expect(result.current.formData.tripDescription.message).toBe(
 			VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED,
 		)
-		expect(result.current.formData.days.isValid).toBe(false)
+		expect(result.current.formData.tripStart.message).toBe(
+			VALIDATION_MESSAGES.TRIP_START_REQUIRED,
+		)
+		expect(result.current.formData.tripEnd.message).toBe(
+			VALIDATION_MESSAGES.TRIP_END_REQUIRED,
+		)
 		expect(result.current.formData.cities.isValid).toBe(false)
 		expect(mockOnSuccess).not.toHaveBeenCalled()
 	})
@@ -154,7 +141,7 @@ describe('useTravellerRegistration', () => {
 		const mockOnSuccess = vi.fn()
 		const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-		const { firstName, lastName, tripDescription, daysInCity } =
+		const { firstName, lastName, tripDescription, tripStart, tripEnd } =
 			MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE
 
 		act(() => {
@@ -168,7 +155,10 @@ describe('useTravellerRegistration', () => {
 				target: { id: 'tripDescription', value: tripDescription },
 			})
 			result.current.handleInputChange({
-				target: { id: 'days', value: daysInCity.toString() },
+				target: { id: 'tripStart', value: tripStart },
+			})
+			result.current.handleInputChange({
+				target: { id: 'tripEnd', value: tripEnd },
 			})
 			result.current.handleCityAdd(MOCK_CITIES.TOKYO)
 		})
@@ -182,7 +172,8 @@ describe('useTravellerRegistration', () => {
 			firstName,
 			lastName,
 			tripDescription,
-			daysInCity: daysInCity.toString(),
+			tripStart,
+			tripEnd,
 			cities: [MOCK_CITIES.TOKYO],
 			files: [],
 		})
@@ -270,7 +261,10 @@ describe('useTravellerRegistration', () => {
 				target: { id: 'tripDescription', value: 'Hi' },
 			})
 			result.current.handleInputChange({
-				target: { id: 'days', value: '3' },
+				target: { id: 'tripStart', value: '2025-03-12' },
+			})
+			result.current.handleInputChange({
+				target: { id: 'tripEnd', value: '2025-03-14' },
 			})
 			result.current.handleCityAdd(MOCK_CITIES.TOKYO)
 			result.current.handleFilesUpdated(files)
@@ -308,5 +302,124 @@ describe('useTravellerRegistration', () => {
 		})
 
 		expect(result.current.formData.cities.isValid).toBe(true)
+	})
+
+	describe('trip dates', () => {
+		const change = (result, id, value) =>
+			act(() => {
+				result.current.handleInputChange({ target: { id, value } })
+			})
+
+		beforeEach(() => {
+			vi.useFakeTimers({ toFake: ['Date'] })
+			vi.setSystemTime(new Date(2026, 10, 11, 12, 0))
+		})
+		afterEach(() => vi.useRealTimers())
+
+		it('accepts a start and an end on or after it, up to today', () => {
+			const { result } = renderHook(() => useTravellerRegistration())
+
+			change(result, 'tripStart', '2026-11-04')
+			change(result, 'tripEnd', '2026-11-11')
+
+			expect(result.current.formData.tripStart.isValid).toBe(true)
+			expect(result.current.formData.tripEnd.isValid).toBe(true)
+		})
+
+		it('accepts a day trip, with the same date twice', () => {
+			const { result } = renderHook(() => useTravellerRegistration())
+
+			change(result, 'tripStart', '2025-06-14')
+			change(result, 'tripEnd', '2025-06-14')
+
+			expect(result.current.formData.tripEnd.isValid).toBe(true)
+		})
+
+		it('flags an end date before the start date on the end date', () => {
+			const { result } = renderHook(() => useTravellerRegistration())
+
+			change(result, 'tripStart', '2025-03-19')
+			change(result, 'tripEnd', '2025-03-12')
+
+			expect(result.current.formData.tripStart.isValid).toBe(true)
+			expect(result.current.formData.tripEnd.message).toBe(
+				VALIDATION_MESSAGES.TRIP_END_BEFORE_START,
+			)
+		})
+
+		it('rechecks the end date when the start date changes', () => {
+			const { result } = renderHook(() => useTravellerRegistration())
+
+			change(result, 'tripStart', '2025-03-19')
+			change(result, 'tripEnd', '2025-03-12')
+			change(result, 'tripStart', '2025-03-10')
+
+			expect(result.current.formData.tripEnd.isValid).toBe(true)
+		})
+
+		it('leaves an untouched end date quiet when the start date is set', () => {
+			const { result } = renderHook(() => useTravellerRegistration())
+
+			change(result, 'tripStart', '2025-03-10')
+
+			expect(result.current.formData.tripEnd).toEqual({
+				value: '',
+				message: '',
+				isValid: true,
+			})
+		})
+
+		it('refuses a date after today', () => {
+			const { result } = renderHook(() => useTravellerRegistration())
+
+			change(result, 'tripStart', '2026-11-12')
+			change(result, 'tripEnd', '2026-11-20')
+
+			expect(result.current.formData.tripStart.message).toBe(
+				VALIDATION_MESSAGES.TRIP_DATE_IN_FUTURE,
+			)
+			expect(result.current.formData.tripEnd.message).toBe(
+				VALIDATION_MESSAGES.TRIP_DATE_IN_FUTURE,
+			)
+		})
+
+		it('does not also flag the end date when only the start date is in the future', () => {
+			const { result } = renderHook(() => useTravellerRegistration())
+
+			change(result, 'tripEnd', '2025-03-10')
+			change(result, 'tripStart', '2026-12-01')
+
+			expect(result.current.formData.tripStart.message).toBe(
+				VALIDATION_MESSAGES.TRIP_DATE_IN_FUTURE,
+			)
+			expect(result.current.formData.tripEnd.isValid).toBe(true)
+		})
+
+		it('refuses a trip longer than 366 days', () => {
+			const { result } = renderHook(() => useTravellerRegistration())
+
+			change(result, 'tripStart', '2024-01-01')
+			change(result, 'tripEnd', '2024-12-31')
+			expect(result.current.formData.tripEnd.isValid).toBe(true)
+
+			change(result, 'tripEnd', '2025-01-01')
+			expect(result.current.formData.tripEnd.message).toBe(
+				VALIDATION_MESSAGES.TRIP_TOO_LONG(366),
+			)
+		})
+
+		it('treats a cleared or malformed date as missing', () => {
+			const { result } = renderHook(() => useTravellerRegistration())
+
+			change(result, 'tripStart', '2025-02-30')
+			change(result, 'tripEnd', '')
+
+			expect(result.current.formData.tripStart.message).toBe(
+				VALIDATION_MESSAGES.TRIP_START_REQUIRED,
+			)
+			expect(result.current.formData.tripEnd.message).toBe(
+				VALIDATION_MESSAGES.TRIP_END_REQUIRED,
+			)
+		})
 	})
 })

@@ -8,7 +8,12 @@ export const VALIDATION_MESSAGES = {
 	FIRST_NAME_REQUIRED: 'First name must not be empty.',
 	LAST_NAME_REQUIRED: 'Last name must not be empty.',
 	TRIP_DESCRIPTION_REQUIRED: 'About your trip must not be empty.',
-	DAYS_REQUIRED: 'Number of days spent in the city cannot be empty.',
+	TRIP_START_REQUIRED: 'Enter the day your trip started.',
+	TRIP_END_REQUIRED: 'Enter the day your trip ended.',
+	TRIP_END_BEFORE_START: 'The end date must be on or after the start date.',
+	TRIP_DATE_IN_FUTURE: 'Trip dates cannot be in the future.',
+	TRIP_TOO_LONG: (maxDays) =>
+		`A trip can be up to a year long (${maxDays} days).`,
 	CITIES_REQUIRED: 'At least one city must be selected.',
 
 	// CONTACT TRAVELLER FORM

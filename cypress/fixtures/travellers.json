@@ -3,7 +3,8 @@
 		"firstName": "Test",
 		"lastName": "Traveller",
 		"tripDescription": "Test description",
-		"daysInCity": 5,
+		"tripStart": "2025-03-12",
+		"tripEnd": "2025-03-19",
 		"cities": ["City 1"],
 		"files": [],
 		"registered": "2023-01-01"

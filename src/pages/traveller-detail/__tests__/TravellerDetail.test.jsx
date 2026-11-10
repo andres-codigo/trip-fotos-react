@@ -19,7 +19,9 @@ const traveller = {
 	firstName: 'Ada',
 	lastName: 'Lovelace',
 	tripDescription: 'a'.repeat(300),
-	daysInCity: 7,
+	tripStart: '2024-12-28',
+	tripEnd: '2025-01-03',
+	registered: '2025-01-10T09:00:00.000Z',
 	cities: [
 		'tokyo',
 		{ id: 'p1', city: 'Paris', region: 'IDF', country: 'France' },
@@ -135,13 +137,31 @@ describe('<TravellerDetail />', () => {
 		expect(
 			screen.getByTestId(TRAVELLER_DETAIL.TRIP_DESCRIPTION).textContent,
 		).toBe('a'.repeat(300))
-		expect(screen.getByTestId(TRAVELLER_DETAIL.DAYS)).toHaveTextContent(
-			'Days in city: 7 days',
-		)
+		const trip = screen.getByTestId(TRAVELLER_DETAIL.TRIP)
+		expect(trip).toHaveTextContent('28 Dec 2024 – 3 Jan 2025')
+		expect(trip).toHaveTextContent('7 days')
+		expect(
+			screen.queryByText(/Registered|10 Jan 2025/),
+		).not.toBeInTheDocument()
 		expect(screen.getAllByTestId(IMAGE.ID)).toHaveLength(7)
 		expect(
 			screen.queryByTestId(TRAVELLER_DETAIL.SPINNER),
 		).not.toBeInTheDocument()
+	})
+
+	it('shows only the length for an older traveller with no trip dates', async () => {
+		stubFetch({
+			data: {
+				...traveller,
+				tripStart: undefined,
+				tripEnd: undefined,
+				daysInCity: '5',
+			},
+		})
+		renderPage()
+		expect(
+			await screen.findByTestId(TRAVELLER_DETAIL.TRIP),
+		).toHaveTextContent('Trip: 5 days')
 	})
 
 	describe('Photos anchor', () => {

@@ -60,9 +60,12 @@ describe('Register Page', () => {
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 		).should('be.visible')
-		cy.get(
-			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
-		).should('be.visible')
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).should(
+			'be.visible',
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).should(
+			'be.visible',
+		)
 		cy.get(COMBOBOX_SELECTORS.INPUT).should('be.visible')
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).should(
 			'be.visible',
@@ -78,12 +81,15 @@ describe('Register Page', () => {
 		cy.contains(VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED).should(
 			'be.visible',
 		)
-		cy.contains(VALIDATION_MESSAGES.DAYS_REQUIRED).should('be.visible')
+		cy.contains(VALIDATION_MESSAGES.TRIP_START_REQUIRED).should(
+			'be.visible',
+		)
+		cy.contains(VALIDATION_MESSAGES.TRIP_END_REQUIRED).should('be.visible')
 		cy.contains(VALIDATION_MESSAGES.CITIES_REQUIRED).should('be.visible')
 	})
 
 	it('successfully registers a traveller', () => {
-		const { firstName, lastName, tripDescription, daysInCity } =
+		const { firstName, lastName, tripDescription, tripStart, tripEnd } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept the registration API call
@@ -101,9 +107,12 @@ describe('Register Page', () => {
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 		).type(tripDescription)
-		cy.get(
-			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
-		).type(daysInCity)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+			tripStart,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
+			tripEnd,
+		)
 
 		// Choose a city through the (stubbed) city search
 		cy.selectCity()
@@ -124,11 +133,13 @@ describe('Register Page', () => {
 		cy.assertTravellerPersisted(TEST_USERS.STANDARD.ID, {
 			firstName,
 			lastName,
+			tripStart,
+			tripEnd,
 		})
 	})
 
 	it('registers a traveller with a photo uploaded to Storage', () => {
-		const { firstName, lastName, tripDescription, daysInCity } =
+		const { firstName, lastName, tripDescription, tripStart, tripEnd } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// A real Storage upload to the emulator (deleted in afterEach)
@@ -146,9 +157,12 @@ describe('Register Page', () => {
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 		).type(tripDescription)
-		cy.get(
-			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
-		).type(daysInCity)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+			tripStart,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
+			tripEnd,
+		)
 		cy.selectCity()
 
 		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
@@ -191,7 +205,7 @@ describe('Register Page', () => {
 	})
 
 	it('shows a loading dialog while registering', () => {
-		const { firstName, lastName, tripDescription, daysInCity } =
+		const { firstName, lastName, tripDescription, tripStart, tripEnd } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// Intercept with delay
@@ -214,9 +228,12 @@ describe('Register Page', () => {
 		cy.get(
 			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 		).type(tripDescription)
-		cy.get(
-			TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
-		).type(daysInCity)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+			tripStart,
+		)
+		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
+			tripEnd,
+		)
 
 		// Choose a city through the (stubbed) city search
 		cy.selectCity()
@@ -238,7 +255,7 @@ describe('Register Page', () => {
 
 	describe('Error Handling', () => {
 		it('shows an error dialog when registration fails', () => {
-			const { firstName, lastName, tripDescription, daysInCity } =
+			const { firstName, lastName, tripDescription, tripStart, tripEnd } =
 				MOCK_TRAVELLERS.NEW_TRAVELLER
 
 			// Intercept failure
@@ -257,9 +274,12 @@ describe('Register Page', () => {
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 			).type(tripDescription)
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
-			).type(daysInCity)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+				tripStart,
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
+				tripEnd,
+			)
 
 			// Choose a city through the (stubbed) city search
 			cy.selectCity()
@@ -294,5 +314,71 @@ describe('Register Page', () => {
 				'not.exist',
 			)
 		})
+	})
+})
+
+// Talks to the emulator directly, as a script could, so a pass proves the rules and not just the form
+describe('Traveller trip dates database rules', () => {
+	const save = (body) =>
+		cy.window().then((win) =>
+			cy.request({
+				method: API_DATABASE.PUT,
+				url: `${Cypress.expose('VITE_DATABASE_URL')}/travellers/${win.localStorage.getItem('userId')}.json`,
+				qs: {
+					ns: Cypress.expose('VITE_DATABASE_NAMESPACE'),
+					auth: win.localStorage.getItem('token'),
+				},
+				body,
+				failOnStatusCode: false,
+			}),
+		)
+	const traveller = (fields) => ({
+		firstName: 'Rules',
+		lastName: 'Test',
+		tripDescription: 'Checking the trip date rules.',
+		cities: ['tokyo'],
+		...fields,
+	})
+
+	beforeEach(() => {
+		cy.resetEmulators()
+		cy.visit(loginUrl)
+		performLogin()
+	})
+
+	it('accepts a start and an end on or after it, including a day trip', () => {
+		save(traveller({ tripStart: '2025-03-12', tripEnd: '2025-03-19' }))
+			.its('status')
+			.should('eq', 200)
+		save(traveller({ tripStart: '2025-06-14', tripEnd: '2025-06-14' }))
+			.its('status')
+			.should('eq', 200)
+	})
+
+	it('refuses an end date before the start date', () => {
+		save(traveller({ tripStart: '2025-03-19', tripEnd: '2025-03-12' }))
+			.its('status')
+			.should('be.oneOf', [401, 403])
+	})
+
+	it('refuses a date in another format', () => {
+		save(traveller({ tripStart: '12/03/2025', tripEnd: '2025-03-19' }))
+			.its('status')
+			.should('be.oneOf', [401, 403])
+	})
+
+	it('refuses one date without the other', () => {
+		save(traveller({ tripStart: '2025-03-12' }))
+			.its('status')
+			.should('be.oneOf', [401, 403])
+	})
+
+	it('refuses a days-in-city length that is not 1 to 366', () => {
+		save(traveller({ daysInCity: 0 }))
+			.its('status')
+			.should('be.oneOf', [401, 403])
+		save(traveller({ daysInCity: '5' }))
+			.its('status')
+			.should('be.oneOf', [401, 403])
 	})
 })
