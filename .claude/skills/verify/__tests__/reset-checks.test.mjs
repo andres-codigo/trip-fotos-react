@@ -37,6 +37,13 @@ describe('resetChecks', () => {
 		expect(fs.existsSync(file('verify', 'passed.json'))).toBe(false)
 	})
 
+	it('keeps the /ui-check result for /verify, which needs it to start', () => {
+		resetChecks(dir, { uiCheck: false })
+
+		expect(fs.existsSync(file('verify', 'status.json'))).toBe(false)
+		expect(fs.existsSync(file('ui-check', 'status.json'))).toBe(true)
+	})
+
 	it('does not fail when nothing has been recorded', () => {
 		resetChecks(dir, { cache: true })
 

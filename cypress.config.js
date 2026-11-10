@@ -58,6 +58,7 @@ export default defineConfig({
 		// Read only by cypress/ui-check/capture.cy.js
 		UI_CHECK_LABEL: process.env.UI_CHECK_LABEL,
 		UI_CHECK_WIDTHS: process.env.UI_CHECK_WIDTHS,
+		UI_CHECK_ONLY: process.env.UI_CHECK_ONLY,
 		EMULATOR_TRAVELLER_EMAIL: SEED_USERS.TRAVELLER_ONE.email,
 		EMULATOR_TRAVELLER_UID: SEED_USERS.TRAVELLER_ONE.uid,
 		EMULATOR_STANDARD_UID: SEED_USERS.STANDARD.uid,

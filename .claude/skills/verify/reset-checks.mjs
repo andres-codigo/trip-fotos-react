@@ -1,12 +1,15 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-// Clears the status-line results so a tick is only ever earned by the run in hand; `cache` also forgets which gates passed
-export const resetChecks = (projectDir, { cache = false } = {}) => {
+// Clears the status-line results so a tick is only ever earned by the run in hand; `cache` also forgets which gates passed. /verify keeps the /ui-check result (`uiCheck: false`), which it needs to start
+export const resetChecks = (
+	projectDir,
+	{ cache = false, uiCheck = true } = {},
+) => {
 	const root = path.join(projectDir, 'node_modules', '.cache')
 	const files = [
 		path.join(root, 'verify', 'status.json'),
-		path.join(root, 'ui-check', 'status.json'),
+		...(uiCheck ? [path.join(root, 'ui-check', 'status.json')] : []),
 		...(cache ? [path.join(root, 'verify', 'passed.json')] : []),
 	]
 	for (const file of files) fs.rmSync(file, { force: true })

@@ -12,7 +12,7 @@ Arguments: `$ARGUMENTS`
 
 ## When
 
-Once per commit, after every edit, including any `/ui-check` capture script change. Never alongside the emulators, a `/ui-check` capture or another `/verify`: the script refuses to start then (exit 3) and says why; clear the clash, then run it again. If the code changes mid-run, the script says so at the end: run it again and never commit on that result.
+Once per commit, after every edit. For a UI change (`src/**/*.{jsx,css}`, tests aside) run `/ui-check` and its fixes first: the script refuses (exit 3) until `/ui-check` has recorded `pass`, and keeps that pass through later edits that touch no UI file. Never alongside the emulators, a `/ui-check` capture or another `/verify`: the script refuses to start then (exit 3) and says why; clear the clash, then run it again. If the code changes mid-run, the script says so at the end: run it again and never commit on that result.
 
 ## Steps
 

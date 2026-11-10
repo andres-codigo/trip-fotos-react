@@ -16,7 +16,8 @@ const RULES = [
 	[/^(vercel\.json|firebase\/|\.env\.example$)/, ['vitest']],
 	[/^vite\.config\./, ['vitest', 'ct', 'build']],
 	[/^cypress\/e2e\//, ['lint']],
-	// The /ui-check capture spec is selected only by UI_CHECK=true, so no gate runs it
+	// The /ui-check capture spec is selected only by UI_CHECK=true, so no gate runs it; its helpers have Vitest tests
+	[/^cypress\/ui-check\/(?!capture\.cy\.js$)/, ['lint', 'vitest']],
 	[/^cypress\/ui-check\//, ['lint']],
 	[/^cypress\//, ['lint', 'ct']],
 	[/^cypress\.config\./, ['ct']],
@@ -33,6 +34,29 @@ const E2E_ADVISED = [
 	[/^src\/services\//, 'Firebase services changed'],
 	[/^src\/constants\/(api|ui\/paths)/, 'API or route constants changed'],
 ]
+
+// Files that can change how a page looks, so /ui-check comes before /verify; tests cannot
+const isUiFile = (file) =>
+	/^src\/.*\.(jsx|css)$/.test(file) &&
+	!/(\/__tests__\/|\.(test|cy)\.jsx$)/.test(file)
+
+// Why /verify must wait for /ui-check, or null. A pass still holds after edits that touch no UI file (such as the tests for its fixes)
+export const uiCheckGap = (files, { tree, uiStatus = {}, changedSince }) => {
+	const ui = files.filter(isUiFile)
+	if (!ui.length) return null
+	if (uiStatus.state === 'pass' && uiStatus.tree) {
+		if (uiStatus.tree === tree) return null
+		const since = changedSince(uiStatus.tree)
+		if (since && !since.some(isUiFile)) return null
+	}
+	const why =
+		uiStatus.state === 'pass'
+			? 'a UI file changed since /ui-check passed'
+			: uiStatus.state
+				? `/ui-check is at "${uiStatus.state}", not "pass"`
+				: '/ui-check has not passed on this change'
+	return `the change touches UI files (${ui.slice(0, 3).join(', ')}${ui.length > 3 ? ', …' : ''}) and ${why}: run /ui-check first, then /verify`
+}
 
 // The gates a file can affect, for deciding whether an earlier pass still holds; E2E also follows anything the build ships
 export const gatesForFile = (file) => {
