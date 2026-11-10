@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.23.0...v0.23.1) (2026-11-10)
+
+
+### Bug Fixes
+
+* delete a thumbnail whose download URL could not be read at registration ([#679](https://github.com/andres-codigo/trip-fotos-react/issues/679)) ([8c0317d](https://github.com/andres-codigo/trip-fotos-react/commit/8c0317d5001c29710ddfd81cfd95c99d8a145c64))
+
 ## [0.23.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.22.0...v0.23.0) (2026-11-10)
 
 
