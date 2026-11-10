@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.22.0...v0.23.0) (2026-11-10)
+
+
+### Features
+
+* trip dates and trip length on a traveller's trip ([#677](https://github.com/andres-codigo/trip-fotos-react/issues/677)) ([767869a](https://github.com/andres-codigo/trip-fotos-react/commit/767869a9bb8f7af54585e333659572b9b2f415cc))
+
 ## [0.22.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.11...v0.22.0) (2026-11-10)
 
 
