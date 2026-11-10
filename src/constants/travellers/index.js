@@ -12,9 +12,19 @@ export const TRAVELLER_REGISTRATION_FIELDS = Object.freeze({
 	FIRST_NAME: 'firstName',
 	LAST_NAME: 'lastName',
 	TRIP_DESCRIPTION: 'tripDescription',
-	DAYS: 'days',
+	TRIP_START: 'tripStart',
+	TRIP_END: 'tripEnd',
 	CITIES: 'cities',
 	FILES: 'files',
+})
+
+// MAX_DAYS must match the tripEnd limit in firebase/database.rules.json
+export const TRIP_DATES_CONFIG = Object.freeze({
+	LEGEND: 'Trip dates',
+	START_LABEL: 'From',
+	END_LABEL: 'To',
+	HINT: 'The day you arrived and the day you left. A day trip uses the same date twice.',
+	MAX_DAYS: 366,
 })
 
 export const TRAVELLER_REGISTRATION_SUCCESS_MESSAGE =

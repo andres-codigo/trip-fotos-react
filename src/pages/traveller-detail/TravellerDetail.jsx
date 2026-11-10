@@ -25,6 +25,7 @@ import BaseCard from '@/components/ui/card/BaseCard'
 import ImageGallery from '@/components/ui/image-gallery/ImageGallery'
 import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
+import TripSummary from '@/components/travellers/trip-summary/TripSummary'
 
 import useScrollToAnchor from '@/pages/traveller-detail/hooks/useScrollToAnchor'
 
@@ -132,14 +133,16 @@ const TravellerDetail = () => {
 					<BaseCard className={cn(SECTION, isOwnRecord && OWN)}>
 						{heading}
 						<section data-cy={TRAVELLER_DETAIL.PROFILE}>
+							<TripSummary
+								tripStart={traveller.tripStart}
+								tripEnd={traveller.tripEnd}
+								daysInCity={traveller.daysInCity}
+								data-cy={TRAVELLER_DETAIL.TRIP}
+							/>
 							<p
 								className="whitespace-pre-line italic"
 								data-cy={TRAVELLER_DETAIL.TRIP_DESCRIPTION}>
 								{traveller.tripDescription}
-							</p>
-							<p data-cy={TRAVELLER_DETAIL.DAYS}>
-								<strong>Days in city:</strong>{' '}
-								{traveller.daysInCity} days
 							</p>
 							<div
 								className="flex flex-wrap gap-2 pt-1 pb-4"

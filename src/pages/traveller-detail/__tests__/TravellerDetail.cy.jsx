@@ -12,7 +12,8 @@ const traveller = {
 	firstName: 'Ada',
 	lastName: 'Lovelace',
 	tripDescription: 'Loves analytical engines',
-	daysInCity: 7,
+	tripStart: '2024-03-05',
+	tripEnd: '2024-03-11',
 	cities: [
 		'tokyo',
 		{ id: 'p1', city: 'Paris', region: 'IDF', country: 'France' },
@@ -94,10 +95,9 @@ describe('<TravellerDetail />', () => {
 			'contain.text',
 			'Loves analytical engines',
 		)
-		cy.get(TRAVELLER_DETAIL_SELECTORS.DAYS).should(
-			'contain.text',
-			'Days in city: 7 days',
-		)
+		cy.get(TRAVELLER_DETAIL_SELECTORS.TRIP)
+			.should('contain.text', '5–11 Mar 2024')
+			.and('contain.text', '7 days')
 		cy.get(COMMON_SELECTORS.BASE_BADGE).should('have.length', 2)
 		cy.get(COMMON_SELECTORS.BASE_BADGE)
 			.first()

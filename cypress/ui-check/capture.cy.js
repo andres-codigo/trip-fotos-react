@@ -290,7 +290,8 @@ describe(`UI check capture (${LABEL})`, () => {
 						lastName: 'Image',
 						tripDescription:
 							'A traveller whose photo URL is unreachable.',
-						daysInCity: 3,
+						tripStart: '2024-12-28',
+						tripEnd: '2025-01-03',
 						cities: ['oslo'],
 						files: [BROKEN_IMAGE_URL],
 						fileDimensions: [{ width: 640, height: 480 }],
@@ -455,7 +456,8 @@ describe(`UI check capture (${LABEL})`, () => {
 						lastName: 'States',
 						tripDescription:
 							'Thumbnails, a legacy photo, a failing thumbnail and a slow photo.',
-						daysInCity: 2,
+						tripStart: '2025-06-14',
+						tripEnd: '2025-06-14',
 						cities: ['lisbon'],
 						...PHOTO_STATES,
 						registered: Date.now(),
@@ -827,6 +829,39 @@ describe(`UI check capture (${LABEL})`, () => {
 			},
 		)
 
+		capture('captures the register trip dates states at each width', () => {
+			const { TRIP_START_INPUT, TRIP_END_INPUT, TRIP_LENGTH } =
+				TRAVELLER_REGISTRATION_FORM_SELECTORS
+			eachWidth((width) => {
+				cy.visit(PATHS.REGISTER)
+				cy.get(TRIP_START_INPUT).type('2025-03-12')
+				cy.get(TRIP_END_INPUT).type('2025-03-19')
+				cy.get(TRIP_LENGTH).should('have.text', '8 days')
+				freezeAnimation()
+				shot(`register-trip-filled-${width}`)
+
+				cy.get(TRIP_END_INPUT).clear().type('2025-03-10')
+				cy.get(TRIP_END_INPUT).should(
+					'have.attr',
+					'aria-invalid',
+					'true',
+				)
+				shot(`register-trip-end-before-start-${width}`)
+
+				cy.get(TRIP_START_INPUT).clear().type('2999-01-01')
+				cy.get(TRIP_START_INPUT).should(
+					'have.attr',
+					'aria-invalid',
+					'true',
+				)
+				shot(`register-trip-future-${width}`)
+
+				forcePseudo(TRIP_START_INPUT, ['focus', 'focus-visible'])
+				shot(`focus-trip-start-${width}`)
+				forcePseudo(TRIP_START_INPUT, [])
+			})
+		})
+
 		capture(
 			'captures the register page, previews, the remove buttons and a real upload',
 			() => {
@@ -891,8 +926,11 @@ describe(`UI check capture (${LABEL})`, () => {
 					TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
 				).type('A trip registered by the capture script.')
 				cy.get(
-					TRAVELLER_REGISTRATION_FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
-				).type('4')
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT,
+				).type('2025-03-12')
+				cy.get(
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT,
+				).type('2025-03-15')
 				cy.get(
 					TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
 				).click()

@@ -21,16 +21,8 @@ import BaseBadge from '@/components/ui/badge/BaseBadge'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import ImageGallery from '@/components/ui/image-gallery/ImageGallery'
+import TripSummary from '@/components/travellers/trip-summary/TripSummary'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
-
-const formatRegistered = (registered) =>
-	registered
-		? new Date(registered).toLocaleDateString('en-GB', {
-				day: '2-digit',
-				month: 'short',
-				year: 'numeric',
-			})
-		: ''
 
 const shortenTripDescription = (tripDescription = '') =>
 	tripDescription.length >= TRAVELLER_ITEM_CONFIG.TRIP_DESCRIPTION_MAX_LENGTH
@@ -42,12 +34,13 @@ const TravellerItem = ({
 	firstName,
 	lastName,
 	tripDescription,
+	tripStart,
+	tripEnd,
 	daysInCity,
 	cities = [],
 	files = [],
 	fileDimensions,
 	fileThumbnails,
-	registered,
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false)
 	const [error, setError] = useState(null)
@@ -152,18 +145,16 @@ const TravellerItem = ({
 						data-cy={TRAVELLER_ITEM.NAME}>
 						{fullName}
 					</h3>
-					<span
-						className="inline text-xs leading-normal"
-						data-cy={TRAVELLER_ITEM.REGISTERED}>
-						{formatRegistered(registered)}
-					</span>
+					<TripSummary
+						tripStart={tripStart}
+						tripEnd={tripEnd}
+						daysInCity={daysInCity}
+						data-cy={TRAVELLER_ITEM.TRIP}
+					/>
 					<p
 						className="italic"
 						data-cy={TRAVELLER_ITEM.TRIP_DESCRIPTION}>
 						{shortenTripDescription(tripDescription)}
-					</p>
-					<p data-cy={TRAVELLER_ITEM.DAYS}>
-						<strong>Days in city:</strong> {daysInCity} days
 					</p>
 					<div
 						className="flex flex-wrap gap-2 pt-1 pb-4"
@@ -243,6 +234,8 @@ TravellerItem.propTypes = {
 	firstName: PropTypes.string,
 	lastName: PropTypes.string,
 	tripDescription: PropTypes.string,
+	tripStart: PropTypes.string,
+	tripEnd: PropTypes.string,
 	daysInCity: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 	cities: PropTypes.arrayOf(
 		PropTypes.oneOfType([
@@ -264,7 +257,6 @@ TravellerItem.propTypes = {
 		PropTypes.arrayOf(PropTypes.array),
 		PropTypes.object,
 	]),
-	registered: PropTypes.string,
 }
 
 export default TravellerItem

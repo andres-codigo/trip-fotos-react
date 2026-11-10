@@ -9,7 +9,11 @@ import {
 	UI_TEXT,
 } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
-import { TRAVELLER_REGISTRATION_FIELDS } from '@/constants/travellers'
+import {
+	TRAVELLER_REGISTRATION_FIELDS,
+	TRIP_DATES_CONFIG,
+} from '@/constants/travellers'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 // Test selector constants
 const FORM_SELECTORS = {
@@ -17,7 +21,9 @@ const FORM_SELECTORS = {
 	FIRST_NAME_INPUT: 'first-name-input',
 	LAST_NAME_INPUT: 'last-name-input',
 	TRIP_DESCRIPTION_INPUT: 'trip-description-input',
-	DAYS_SPENT_IN_CITY_INPUT: 'days-spent-in-city-input',
+	TRIP_START_INPUT: 'trip-start-input',
+	TRIP_END_INPUT: 'trip-end-input',
+	TRIP_LENGTH: 'trip-length',
 	REGISTER_BUTTON: 'register-button',
 }
 
@@ -47,7 +53,8 @@ describe('<TravellerRegistrationForm />', () => {
 			firstName: { value: '', message: '', isValid: true },
 			lastName: { value: '', message: '', isValid: true },
 			tripDescription: { value: '', message: '', isValid: true },
-			days: { value: '', message: '', isValid: true },
+			tripStart: { value: '', message: '', isValid: true },
+			tripEnd: { value: '', message: '', isValid: true },
 			cities: { value: [], message: '', isValid: true },
 		},
 		handleInputChange: vi.fn(),
@@ -61,7 +68,8 @@ describe('<TravellerRegistrationForm />', () => {
 				firstName: '',
 				lastName: '',
 				tripDescription: '',
-				daysInCity: '',
+				tripStart: '',
+				tripEnd: '',
 				cities: [],
 				files: [],
 			})
@@ -95,7 +103,10 @@ describe('<TravellerRegistrationForm />', () => {
 				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
 			).toBeInTheDocument()
 			expect(
-				screen.getByTestId(FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT),
+				screen.getByTestId(FORM_SELECTORS.TRIP_START_INPUT),
+			).toBeInTheDocument()
+			expect(
+				screen.getByTestId(FORM_SELECTORS.TRIP_END_INPUT),
 			).toBeInTheDocument()
 		})
 
@@ -138,7 +149,8 @@ describe('<TravellerRegistrationForm />', () => {
 					},
 					lastName: { value: '', message: '', isValid: true },
 					tripDescription: { value: '', message: '', isValid: true },
-					days: { value: '', message: '', isValid: true },
+					tripStart: { value: '', message: '', isValid: true },
+					tripEnd: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
 			})
@@ -170,7 +182,10 @@ describe('<TravellerRegistrationForm />', () => {
 				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
 			).toBeDisabled()
 			expect(
-				screen.getByTestId(FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT),
+				screen.getByTestId(FORM_SELECTORS.TRIP_START_INPUT),
+			).toBeDisabled()
+			expect(
+				screen.getByTestId(FORM_SELECTORS.TRIP_END_INPUT),
 			).toBeDisabled()
 		})
 
@@ -229,7 +244,8 @@ describe('<TravellerRegistrationForm />', () => {
 					},
 					lastName: { value: '', message: '', isValid: true },
 					tripDescription: { value: '', message: '', isValid: true },
-					days: { value: '', message: '', isValid: true },
+					tripStart: { value: '', message: '', isValid: true },
+					tripEnd: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
 			})
@@ -252,7 +268,8 @@ describe('<TravellerRegistrationForm />', () => {
 					firstName: { value: 'John', message: '', isValid: true },
 					lastName: { value: '', message: '', isValid: true },
 					tripDescription: { value: '', message: '', isValid: true },
-					days: { value: '', message: '', isValid: true },
+					tripStart: { value: '', message: '', isValid: true },
+					tripEnd: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
 			})
@@ -279,7 +296,8 @@ describe('<TravellerRegistrationForm />', () => {
 					firstName: { value: '', message: '', isValid: true },
 					lastName: { value: '', message: '', isValid: true },
 					tripDescription: { value: '', message: '', isValid: true },
-					days: { value: '', message: '', isValid: true },
+					tripStart: { value: '', message: '', isValid: true },
+					tripEnd: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
 			})
@@ -331,7 +349,11 @@ describe('<TravellerRegistrationForm />', () => {
 
 			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 
-			expect(screen.getByRole('status')).toHaveTextContent(message)
+			expect(
+				screen
+					.getAllByRole('status')
+					.some((region) => region.textContent.includes(message)),
+			).toBe(true)
 			useCitySearch.mockReturnValue({ results: [], status: 'idle' })
 		})
 
@@ -343,7 +365,8 @@ describe('<TravellerRegistrationForm />', () => {
 					onSuccess?.({
 						firstName: 'John',
 						tripDescription: 'Test',
-						daysInCity: '5',
+						tripStart: '2025-03-12',
+						tripEnd: '2025-03-16',
 						cities: ['Tokyo'],
 						files: [],
 					})
@@ -404,7 +427,10 @@ describe('<TravellerRegistrationForm />', () => {
 				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
 			).toHaveAttribute('required')
 			expect(
-				screen.getByTestId(FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT),
+				screen.getByTestId(FORM_SELECTORS.TRIP_START_INPUT),
+			).toHaveAttribute('required')
+			expect(
+				screen.getByTestId(FORM_SELECTORS.TRIP_END_INPUT),
 			).toHaveAttribute('required')
 		})
 	})
@@ -429,19 +455,95 @@ describe('<TravellerRegistrationForm />', () => {
 				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
 			).toBeInTheDocument()
 			expect(
-				screen.getByTestId(FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT),
+				screen.getByTestId(FORM_SELECTORS.TRIP_START_INPUT),
+			).toBeInTheDocument()
+			expect(
+				screen.getByTestId(FORM_SELECTORS.TRIP_END_INPUT),
 			).toBeInTheDocument()
 
 			expect(screen.getByRole('combobox')).toBeInTheDocument()
 		})
 
-		it('renders Input component with correct type for days field', () => {
+		it('renders the trip dates as two date inputs in a "Trip dates" group, capped at today', () => {
+			vi.useFakeTimers({ toFake: ['Date'] })
+			vi.setSystemTime(new Date(2026, 10, 11, 12, 0))
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+			vi.useRealTimers()
+
+			const group = screen.getByRole('group', { name: /Trip dates/ })
+			const from = within(group).getByLabelText(/^From/)
+			const to = within(group).getByLabelText(/^To/)
+
+			for (const input of [from, to]) {
+				expect(input).toHaveAttribute('type', 'date')
+				expect(input).toHaveAttribute('max', '2026-11-11')
+				expect(input).toHaveAttribute(
+					'aria-describedby',
+					'trip-dates-hint',
+				)
+			}
+			expect(
+				screen.getByTestId(FORM_SELECTORS.TRIP_LENGTH),
+			).toHaveTextContent(TRIP_DATES_CONFIG.HINT)
+		})
+
+		it('shows the trip length once both dates are valid', () => {
+			useTravellerRegistration.mockReturnValue({
+				...mockHookReturnValue,
+				formData: {
+					...mockHookReturnValue.formData,
+					tripStart: {
+						value: '2025-03-12',
+						message: '',
+						isValid: true,
+					},
+					tripEnd: {
+						value: '2025-03-19',
+						message: '',
+						isValid: true,
+					},
+				},
+			})
+
 			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 
-			const daysInput = screen.getByTestId(
-				FORM_SELECTORS.DAYS_SPENT_IN_CITY_INPUT,
+			expect(
+				screen.getByTestId(FORM_SELECTORS.TRIP_LENGTH),
+			).toHaveTextContent('8 days')
+		})
+
+		it('shows the hint, not a length, and links the error while a date is invalid', () => {
+			useTravellerRegistration.mockReturnValue({
+				...mockHookReturnValue,
+				formData: {
+					...mockHookReturnValue.formData,
+					tripStart: {
+						value: '2025-03-19',
+						message: '',
+						isValid: true,
+					},
+					tripEnd: {
+						value: '2025-03-12',
+						message: VALIDATION_MESSAGES.TRIP_END_BEFORE_START,
+						isValid: false,
+					},
+				},
+			})
+
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+
+			expect(
+				screen.getByTestId(FORM_SELECTORS.TRIP_LENGTH),
+			).toHaveTextContent(TRIP_DATES_CONFIG.HINT)
+			const to = screen.getByTestId(FORM_SELECTORS.TRIP_END_INPUT)
+			expect(to).toHaveAttribute('aria-invalid', 'true')
+			expect(to).toHaveAttribute(
+				'aria-describedby',
+				'trip-dates-hint tripEnd-error',
 			)
-			expect(daysInput).toHaveAttribute('type', 'number')
+			expect(document.getElementById('tripEnd-error')).toHaveTextContent(
+				VALIDATION_MESSAGES.TRIP_END_BEFORE_START,
+			)
 		})
 
 		it('renders Textarea component for trip description field', () => {
@@ -474,7 +576,8 @@ describe('<TravellerRegistrationForm />', () => {
 					},
 					lastName: { value: '', message: '', isValid: true },
 					tripDescription: { value: '', message: '', isValid: true },
-					days: { value: '', message: '', isValid: true },
+					tripStart: { value: '', message: '', isValid: true },
+					tripEnd: { value: '', message: '', isValid: true },
 					cities: { value: [], message: '', isValid: true },
 				},
 			})
@@ -496,7 +599,8 @@ describe('<TravellerRegistrationForm />', () => {
 					firstName: { value: '', message: '', isValid: true },
 					lastName: { value: '', message: '', isValid: true },
 					tripDescription: { value: '', message: '', isValid: true },
-					days: { value: '', message: '', isValid: true },
+					tripStart: { value: '', message: '', isValid: true },
+					tripEnd: { value: '', message: '', isValid: true },
 					cities: {
 						value: [],
 						message: 'Select at least one city',
