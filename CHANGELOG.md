@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.11...v0.22.0) (2026-11-10)
+
+
+### Features
+
+* Messages with sender, time, reply, unread count and undoable delete ([#675](https://github.com/andres-codigo/trip-fotos-react/issues/675)) ([9ba31de](https://github.com/andres-codigo/trip-fotos-react/commit/9ba31defe0018ccc663911994e0e3db85fc9a660))
+
 ## [0.21.11](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.10...v0.21.11) (2026-11-10)
 
 
