@@ -141,9 +141,15 @@ export const registerTraveller = createAsyncThunk(
 							metadata,
 						)
 						uploadedRefs.push(thumbnailRef)
-						return {
-							width,
-							url: await getDownloadURL(thumbnailRef),
+						try {
+							return {
+								width,
+								url: await getDownloadURL(thumbnailRef),
+							}
+						} catch (error) {
+							// No saved URL points at it, so deleteTraveller could never remove it
+							await deleteObject(thumbnailRef).catch(() => {})
+							throw error
 						}
 					}),
 				)
