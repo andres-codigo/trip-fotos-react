@@ -4,7 +4,7 @@ import { cn } from '@/utils/cn'
 
 const BaseCard = ({ className, children }) => {
 	const combinedClassName = cn(
-		'mx-auto max-w-160 rounded-lg p-4 shadow-elevated',
+		'mx-auto max-w-160 rounded-lg border border-border-card bg-surface p-4 shadow-card',
 		className,
 	)
 

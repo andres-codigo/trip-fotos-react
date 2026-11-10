@@ -35,7 +35,7 @@ describe('Alerts Component', () => {
 
 		const alert = screen.getByRole('alert')
 		expect(alert).toBeInTheDocument()
-		expect(alert).toHaveClass('bg-alert-success') // Default type
+		expect(alert).toHaveClass('bg-success', 'text-on-success') // Default type
 		expect(screen.getByText('Test Alert Message')).toBeInTheDocument()
 	})
 
@@ -48,7 +48,7 @@ describe('Alerts Component', () => {
 		)
 
 		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('bg-destructive')
+		expect(alert).toHaveClass('bg-danger')
 	})
 
 	it('renders correctly with "info" type', () => {
@@ -60,7 +60,7 @@ describe('Alerts Component', () => {
 		)
 
 		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('bg-accent-foreground')
+		expect(alert).toHaveClass('bg-accent')
 	})
 
 	it('starts fade-out on close button click and unmounts after animation ends', () => {

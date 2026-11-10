@@ -172,12 +172,12 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 							return (
 								<li
 									key={getCityId(city)}
-									className="inline-flex items-center gap-1 rounded-pill bg-field-focus py-1! pr-1! pl-3! text-primary"
+									className="inline-flex items-center gap-1 rounded-pill bg-surface-accent py-1! pr-1! pl-3! text-accent-text"
 									data-cy="selected-city">
 									<span>{name}</span>
 									<button
 										type="button"
-										className="size-7 cursor-pointer rounded-full border-0 bg-transparent text-[1.25rem] leading-none text-inherit hover:bg-tint focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
+										className="size-7 cursor-pointer rounded-full border-0 bg-transparent text-[1.25rem] leading-none text-inherit hover:bg-surface"
 										aria-label={GLOBAL.REMOVE_CITY_LABEL(
 											name,
 										)}
@@ -197,7 +197,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 					<>
 						<p
 							id="cities-error"
-							className="mt-1 text-destructive">
+							className="mt-1 text-danger-text">
 							{formData[CITIES].message}
 						</p>
 						{renderVisuallyHiddenError(

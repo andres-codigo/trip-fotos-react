@@ -72,16 +72,21 @@ describe('<BaseImage />', () => {
 		)
 	})
 
-	// The tile clips overflow, so a ring drawn outside the button would be hidden
-	it('draws the keyboard focus ring inside the tile', () => {
+	// A ring over the photo has no guaranteed contrast, so the tile draws it outside, past a ground-coloured gap
+	it('draws the keyboard focus ring outside the tile, with a gap', () => {
 		mountImage()
 		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).focus()
-		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should(($button) => {
-			const style = getComputedStyle($button[0])
-			expect(style.outlineStyle).not.to.equal('none')
-			expect(parseFloat(style.outlineOffset)).to.be.at.most(
-				-parseFloat(style.outlineWidth),
-			)
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should(
+			'have.css',
+			'outline-style',
+			'none',
+		)
+		cy.get(COMMON_SELECTORS.BASE_IMAGE).should(($tile) => {
+			const style = getComputedStyle($tile[0])
+			expect(style.outlineStyle).to.equal('solid')
+			expect(style.outlineColor).to.equal('rgb(255, 243, 196)')
+			expect(parseFloat(style.outlineOffset)).to.equal(2)
+			expect(style.boxShadow).to.contain('rgb(38, 36, 31)')
 		})
 	})
 

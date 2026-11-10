@@ -12,7 +12,7 @@ describe('<BaseBadge />', () => {
 	})
 
 	TRAVELLER_AREAS.forEach((area) => {
-		it(`renders the ${area} type with white text`, () => {
+		it(`renders the ${area} type with dark on-badge ink`, () => {
 			cy.mount(
 				<BaseBadge
 					type={area}
@@ -22,7 +22,7 @@ describe('<BaseBadge />', () => {
 			cy.get(COMMON_SELECTORS.BASE_BADGE).should(
 				'have.css',
 				'color',
-				'rgb(255, 255, 255)',
+				'rgb(20, 19, 15)',
 			)
 		})
 	})
@@ -55,7 +55,7 @@ describe('<BaseBadge />', () => {
 		cy.get(COMMON_SELECTORS.BASE_BADGE).should(
 			'have.css',
 			'color',
-			'rgb(51, 51, 51)',
+			'rgb(239, 233, 218)',
 		)
 	})
 

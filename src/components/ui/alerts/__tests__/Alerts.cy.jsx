@@ -2,9 +2,9 @@ import Alerts from '@/components/ui/alerts/Alerts'
 
 const ALERT = '[role="alert"]'
 const TYPE_CLASSES = {
-	success: 'bg-alert-success',
-	error: 'bg-destructive',
-	info: 'bg-accent-foreground',
+	success: 'bg-success',
+	error: 'bg-danger',
+	info: 'bg-accent',
 }
 const CLOSE_BUTTON = '[aria-label="Close message"]'
 
@@ -28,6 +28,14 @@ describe('<Alerts />', () => {
 				.should('have.class', TYPE_CLASSES[type])
 				.and('not.have.css', 'background-color', 'rgba(0, 0, 0, 0)')
 		})
+	})
+
+	it('draws success with the single success token and its on-success ink', () => {
+		cy.mount(<Alerts message="Saved." />)
+
+		cy.get(ALERT)
+			.should('have.css', 'background-color', 'rgb(127, 196, 140)')
+			.and('have.css', 'color', 'rgb(20, 19, 15)')
 	})
 
 	it('closes from the close button and reports it once the fade-out ends', () => {

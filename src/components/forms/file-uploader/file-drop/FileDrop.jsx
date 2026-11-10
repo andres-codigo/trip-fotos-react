@@ -56,8 +56,8 @@ const FileDrop = ({ onFilesDropped, className = '', children }) => {
 	return (
 		<div
 			className={cn(
-				'mx-auto w-full max-w-200 border border-dashed border-border transition-colors duration-200 ease-in-out hover:border-primary hover:bg-muted motion-reduce:transition-none',
-				isActive && 'border-primary bg-muted',
+				'mx-auto w-full max-w-200 border border-dashed border-border-strong transition-colors duration-200 ease-in-out hover:border-accent-text hover:bg-surface-accent motion-reduce:transition-none',
+				isActive && 'border-accent-text bg-surface-accent',
 				className,
 			)}
 			data-active={isActive}

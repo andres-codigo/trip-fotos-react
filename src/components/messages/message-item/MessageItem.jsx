@@ -49,17 +49,19 @@ const MessageItem = ({ id, email, message }) => {
 				<li
 					className="my-2 list-none"
 					data-cy={MESSAGE_ITEM.SPINNER}>
-					<BaseSpinner />
+					<BaseSpinner
+						label={GLOBAL.SPINNER_LABEL.DELETING_MESSAGE}
+					/>
 				</li>
 			) : (
 				<li
-					className="my-4 list-none rounded-lg border border-muted-foreground p-4 text-left"
+					className="my-4 list-none rounded-lg border border-border-strong p-4 text-left"
 					data-cy={MESSAGE_ITEM.ROOT}>
 					<div className={fieldClasses}>
 						<h3 className={fieldHeadingClasses}>Email</h3>
 						<p className={fieldTextClasses}>
 							<a
-								className="font-bold text-primary no-underline hover:text-link-hover active:text-link-hover"
+								className="font-bold text-text-link underline underline-offset-4 hover:text-accent-hover active:text-accent-hover"
 								href={`mailto:${email}`}
 								data-cy={MESSAGE_ITEM.EMAIL}>
 								{email}

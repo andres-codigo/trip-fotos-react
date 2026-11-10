@@ -1,30 +1,36 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 import { GLOBAL } from '@/constants/ui'
-import { SPINNER } from '@/constants/test'
+import { SPINNER, TEST_IDS } from '@/constants/test'
 
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
-vi.mock('@/assets/loading-spinner.svg', () => ({
-	default: SPINNER.MOCK_SVG,
-}))
-
 describe('BaseSpinner', () => {
-	afterEach(() => {
-		vi.clearAllMocks()
-	})
-
 	describe('Rendering tests', () => {
-		it('should render spinner with loading image', () => {
+		it('shows the default loading text beside the spinner', () => {
 			render(<BaseSpinner />)
 
-			const spinner = screen.getByRole(SPINNER.ROLE_STATUS)
-			const loadingImage = screen.getByAltText(GLOBAL.LOADING_SPINNER_ALT)
+			expect(screen.getByRole(SPINNER.ROLE_STATUS)).toHaveTextContent(
+				GLOBAL.SPINNER_LABEL.DEFAULT,
+			)
+		})
 
-			expect(spinner).toBeInTheDocument()
-			expect(loadingImage).toBeInTheDocument()
-			expect(loadingImage).toHaveAttribute('src', SPINNER.MOCK_SVG)
+		it('shows the label it is given', () => {
+			render(<BaseSpinner label={GLOBAL.SPINNER_LABEL.MESSAGES} />)
+
+			expect(
+				screen.getByTestId(TEST_IDS.SPINNER.LABEL),
+			).toHaveTextContent(GLOBAL.SPINNER_LABEL.MESSAGES)
+		})
+
+		it('pulses instead of turning under reduced motion', () => {
+			render(<BaseSpinner />)
+
+			const icon = screen.getByTestId(TEST_IDS.SPINNER.ICON)
+
+			expect(icon).toHaveClass('animate-spin')
+			expect(icon).toHaveClass('motion-reduce:animate-skeleton')
 		})
 	})
 
@@ -38,12 +44,13 @@ describe('BaseSpinner', () => {
 			expect(spinner).toHaveAttribute('aria-busy', 'true')
 		})
 
-		it('should provide descriptive alternative text for loading image', () => {
+		it('hides the decorative icon from assistive technology', () => {
 			render(<BaseSpinner />)
 
-			const loadingImage = screen.getByAltText(GLOBAL.LOADING_SPINNER_ALT)
-
-			expect(loadingImage).toBeInTheDocument()
+			expect(screen.getByTestId(TEST_IDS.SPINNER.ICON)).toHaveAttribute(
+				'aria-hidden',
+				'true',
+			)
 		})
 	})
 })

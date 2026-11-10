@@ -13,7 +13,7 @@ const LEGEND_ID = 'traveller-filter-legend'
 
 // Link-styled, with a 44px target
 const LINK_BUTTON_CLASSES =
-	'min-h-11 px-2.5 text-accent-foreground underline hover:text-link-hover active:text-link-hover'
+	'min-h-11 px-2.5 text-accent-text underline hover:text-accent-hover active:text-accent-hover'
 
 const TravellerFilter = ({
 	options,

@@ -6,7 +6,7 @@ const BLOCK = 'block animate-skeleton rounded-lg bg-skeleton'
 const TravellerSkeleton = () => (
 	<li
 		aria-hidden="true"
-		className="my-4 list-none rounded-lg border border-muted-foreground p-4"
+		className="my-4 list-none rounded-lg border border-border-strong p-4"
 		data-cy={TRAVELLER_SKELETON.ROOT}>
 		<div className="flex flex-col gap-3">
 			<div className="flex items-center gap-2">

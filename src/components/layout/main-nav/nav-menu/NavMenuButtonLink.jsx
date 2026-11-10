@@ -5,10 +5,10 @@ import BaseButton from '@/components/ui/button/BaseButton'
 import useViewport from '@/utils/useViewport'
 import { cn } from '@/utils/cn'
 
-// Links read as plain white text on the header; the current page gets an outline
+// Links read as plain cream text on the header; the current page gets an outline
 const linkClasses =
-	'relative text-primary-foreground hover:text-accent active:text-accent px-6 py-3 mobile:w-full mobile:px-0 mobile:py-5'
-const activeClasses = 'border-primary-foreground hover:border-accent'
+	'relative text-on-header hover:text-on-header-hover active:text-on-header-hover px-6 py-3 mobile:w-full mobile:px-0 mobile:py-5'
+const activeClasses = 'border-accent-text hover:border-on-header-hover'
 
 const NavMenuButtonLink = ({
 	children,

@@ -42,7 +42,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 					<>
 						<label
 							htmlFor={id}
-							className="relative mb-2 block cursor-pointer p-12 font-semibold focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-accent [&>span]:block">
+							className="relative mb-2 block cursor-pointer p-12 font-semibold focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-focus [&>span]:block">
 							{isActive ? (
 								<>
 									<span>{FILE_DROP_TEXT.ACTIVE}</span>
@@ -80,7 +80,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 						</label>
 						{files.length > 0 && (
 							<ul
-								className="m-2.5 flex list-none flex-wrap border border-background bg-file-list p-0"
+								className="m-2.5 flex list-none flex-wrap border border-border bg-surface-sunken p-0"
 								aria-label={GLOBAL.FILE_LIST_LABEL}
 								data-cy={FILE_DROP.LIST}>
 								{files.map((file) => (
@@ -99,7 +99,7 @@ const AddFile = ({ id = 'file-input', onFilesUpdated }) => {
 				<div
 					id={errorId}
 					role="alert"
-					className="text-file-error [&>p]:my-1"
+					className="text-danger-text [&>p]:my-1"
 					data-cy={FILE_DROP.ERRORS}>
 					{errors.map((error) => (
 						<p key={error}>{error}</p>

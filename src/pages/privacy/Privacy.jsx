@@ -3,6 +3,8 @@ import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 
+const LINK = 'text-text-link underline underline-offset-4'
+
 const Privacy = () => {
 	return (
 		<main
@@ -44,7 +46,8 @@ const Privacy = () => {
 					<a
 						href={CITY_SEARCH.PROVIDER_URL}
 						target="_blank"
-						rel="noopener noreferrer">
+						rel="noopener noreferrer"
+						className={LINK}>
 						Photon
 					</a>
 					, a place search service run by Komoot, to suggest matching
@@ -52,7 +55,8 @@ const Privacy = () => {
 					<a
 						href={CITY_SEARCH.ATTRIBUTION_URL}
 						target="_blank"
-						rel="noopener noreferrer">
+						rel="noopener noreferrer"
+						className={LINK}>
 						OpenStreetMap contributors
 					</a>
 					, available under the Open Database Licence.
@@ -79,7 +83,9 @@ const Privacy = () => {
 				<p>
 					To have your account or traveller profile removed, or to ask
 					what data is held about you, email{' '}
-					<a href="mailto:phones-medleys8x@icloud.com">
+					<a
+						href="mailto:phones-medleys8x@icloud.com"
+						className={LINK}>
 						phones-medleys8x@icloud.com
 					</a>{' '}
 					from the address you signed up with.

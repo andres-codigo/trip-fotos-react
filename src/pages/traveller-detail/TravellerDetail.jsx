@@ -30,7 +30,7 @@ import useScrollToAnchor from '@/pages/traveller-detail/hooks/useScrollToAnchor'
 
 // Cards after the first are spaced apart; the record's own cards get a heavier border
 const SECTION = 'not-first:mt-8'
-const OWN = 'border-2 border-muted-foreground'
+const OWN = 'border-2 border-border-strong'
 // Three tiles across and two on narrow screens; scroll-mt clears the sticky header when scrolled to via the photos anchor
 const IMAGES_LIST =
 	'flex scroll-mt-24 list-none flex-wrap gap-x-[2%] gap-y-8 px-0 py-4 [@media(width<=480px)]:gap-x-[4%] [@media(width<=480px)]:gap-y-4 [@media(width<=480px)]:py-2'
@@ -107,7 +107,7 @@ const TravellerDetail = () => {
 				<div
 					className="my-2"
 					data-cy={TRAVELLER_DETAIL.SPINNER}>
-					<BaseSpinner />
+					<BaseSpinner label={GLOBAL.SPINNER_LABEL.TRAVELLER} />
 				</div>
 			)}
 			{!isLoading && !showProfile && (

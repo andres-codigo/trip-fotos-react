@@ -136,7 +136,7 @@ const Authentication = () => {
 					fixed
 					data-cy="authenticating-dialog">
 					Authenticating your details, one moment please...
-					<BaseSpinner />
+					<BaseSpinner label={GLOBAL.SPINNER_LABEL.AUTHENTICATING} />
 				</BaseDialog>
 			)}
 			<section>

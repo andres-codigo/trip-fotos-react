@@ -50,7 +50,7 @@ describe('Not logged in > PageNotFound page styling', () => {
 
 		cy.get(PAGE_NOT_FOUND_SELECTORS.HOME_LINK)
 			.should('have.css', 'text-decoration-line', 'underline')
-			.and('not.have.css', 'color', 'rgb(0, 0, 0)')
+			.and('have.css', 'color', 'rgb(169, 201, 138)')
 	})
 })
 

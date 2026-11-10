@@ -5,6 +5,7 @@
 //   UI_CHECK=true    selects this script instead of the E2E suite
 //   UI_CHECK_LABEL   prefix for the screenshot names (for example `main` or `branch`)
 //   UI_CHECK_WIDTHS  comma-separated viewport widths (default 390,1280)
+import { API_DATABASE } from '../../src/constants/api'
 import {
 	COMBOBOX_SELECTORS,
 	COMMON_SELECTORS,
@@ -12,6 +13,8 @@ import {
 	DIALOG_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 	MESSAGE_ITEM_SELECTORS,
+	MESSAGES_PAGE_SELECTORS,
+	TOP_NAVIGATION_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
 	TRAVELLER_FILTER_SELECTORS,
 	TRAVELLER_ITEM_SELECTORS,
@@ -103,19 +106,13 @@ const shot = (name) => {
 	cy.screenshot(`${LABEL}/${name}`, { capture: 'fullPage' })
 }
 
-// Freezes CSS animation, the text caret and the SMIL spinner so a capture is never a random frame
+// Freezes CSS animation (the spinner too) and the text caret so a capture is never a random frame
 const freezeAnimation = () => {
 	cy.document().then((doc) => {
 		const style = doc.createElement('style')
 		style.textContent =
 			'*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }'
 		doc.head.appendChild(style)
-		doc.querySelectorAll('svg').forEach((svg) => {
-			if (typeof svg.pauseAnimations === 'function') {
-				svg.pauseAnimations()
-				svg.setCurrentTime(0)
-			}
-		})
 	})
 }
 
@@ -825,6 +822,31 @@ describe(`UI check capture (${LABEL})`, () => {
 					)
 					shot('messages-after-delete')
 				})
+		})
+
+		it('captures Messages when empty', () => {
+			cy.intercept(API_DATABASE.GET, '**/messages/*.json*', 'null')
+			eachWidth((width) => {
+				cy.visit(PATHS.MESSAGES)
+				cy.get(MESSAGES_PAGE_SELECTORS.EMPTY).should('be.visible')
+				assertSettled()
+				freezeAnimation()
+				shot(`messages-empty-${width}`)
+			})
+		})
+
+		it('captures the open mobile menu', () => {
+			;[390, 768].forEach((width) => {
+				cy.viewport(width, HEIGHT)
+				cy.visit(PATHS.TRAVELLERS)
+				assertSettled()
+				cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).click()
+				cy.get(
+					TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
+				).should('be.visible')
+				freezeAnimation()
+				shot(`mobile-menu-open-${width}`)
+			})
 		})
 
 		it('captures the contact form and a real send', () => {

@@ -5,7 +5,7 @@ function SkipLink() {
 	return (
 		<a
 			href={`#${ACCESSIBILITY.MAIN_CONTENT_ID}`}
-			className="absolute top-[-100vh] left-4 z-[2] bg-background px-4 py-3 font-bold text-primary focus:top-4 focus:outline-3 focus:outline-offset-2 focus:outline-accent"
+			className="absolute top-[-100vh] left-4 z-[2] bg-surface px-4 py-3 font-bold text-accent-text focus:top-4 focus:outline-3 focus:outline-offset-2 focus:outline-focus"
 			data-cy="skip-link">
 			Skip to main content
 		</a>

@@ -80,7 +80,7 @@ Maintain **API consistency** (prop names, validation patterns) when creating sim
 - Ensure form components handle accessibility attributes (`aria-*`, `role`) for validation states.
 - Render a control only while it can do something. An error, empty or unavailable state (e.g. `BaseImage`'s "Image unavailable" fallback) should drop its button or link rather than stay clickable, focusable and lead nowhere.
 - **Form Errors**: When displaying form field errors, render both a visual error (if the design calls for one) AND a visually hidden error span with `role="alert"` for screen readers. Use the `renderVisuallyHiddenError` utility and `ErrorMessage` (`ui/error-message`, which `Input`/`Textarea` already use) for a single message; do not hand-roll another `<p role="alert">`. `AddFile` keeps one `<div role="alert">` because it announces several messages as a single region. Page-level request errors use `Alerts`.
-- **Loading**: Show pending state with `BaseSpinner`; forms also set `aria-busy` from an `isLoading` prop. Forms announce loading with `LoadingAnnouncement` (`ui/loading-announcement`); do not hand-roll an `aria-live` loading span. Where a card shows a spinner, reuse `LoadingFallback`.
+- **Loading**: Show pending state with `BaseSpinner`, passing a label from `GLOBAL.SPINNER_LABEL` that says what is loading ("Loading messages…"; add an entry for a new context). The label is always visible beside the spinner, which turns, or pulses under reduced motion; forms also set `aria-busy` from an `isLoading` prop. Forms announce loading with `LoadingAnnouncement` (`ui/loading-announcement`); do not hand-roll an `aria-live` loading span. Where a card shows a spinner, reuse `LoadingFallback`.
 
 ## Testing
 
@@ -110,7 +110,7 @@ See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypr
 ## Styling
 
 - Style components with Tailwind utilities through `cn()`; use `cva` for a component with variants. Never add a stylesheet beside a component.
-- Use semantic tokens (`bg-primary`, `text-muted-foreground`), not literal colours.
+- Use semantic tokens (`bg-surface`, `text-text-muted`), not literal colours.
 - Accept a `className` prop and merge it last through `cn()`, so a caller can override a conflicting utility.
 - Put `leading-*` after the `text-[size]` in a class list: `tailwind-merge` drops an earlier `leading-*` when a later `text-[size]` is merged.
 

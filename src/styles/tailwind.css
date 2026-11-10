@@ -1,91 +1,95 @@
 /*
   Tailwind v4 theme and utilities, plus the app's global styles below. Preflight is left out
   because its base reset would change existing styles (headings, lists, form controls).
-  The app is dark-only: the dark palette arrives in #383 as a change of the values below.
+  The app is dark only; its values are the design system's dark palette.
 */
 /* Declared first so base ranks below the utilities whichever block appears first */
 @layer base, theme, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
-/* Semantic tokens at the app's current values */
+/* Semantic tokens: the design system's dark palette (dark only, no light theme or toggle) */
 :root {
-	--background: #ffffff;
-	--foreground: #000000;
-	--card: #ffffff;
-	--card-foreground: #333333;
-	--primary: #3d008d;
-	--primary-foreground: #ffffff;
-	--secondary: #640c9f;
-	--secondary-foreground: #ffffff;
-	--muted: #eee8e8;
-	--muted-foreground: #424242;
-	--skeleton: #e4dede;
-	--accent: #f391e3;
-	--accent-foreground: #3a0061;
-	--destructive: #df0d0d;
-	--destructive-foreground: #ffffff;
-	--destructive-hover: #ba0101;
-	--tint: #edd2ff;
-	--link-hover: #8d007a;
-	--success: #1b5e20;
-	--alert-success: #088a00;
-	--border: #cecece;
-	--input: #cecece;
-	--ring: #3d008d;
-	--field-focus: #f0e6fd;
-	--field-invalid: #ffcccc;
+	color-scheme: dark;
+	/* Native checkboxes and the like take the moss accent, not the browser's blue */
+	accent-color: var(--accent);
 
-	--overlay-backdrop: rgb(0 0 0 / 0.75);
+	--bg: #1b1a16;
+	--surface: #26241f;
+	--surface-sunken: #14130f;
+	--surface-accent: #2c3523;
+	--skeleton: #33302a;
+	--text: #efe9da;
+	--text-muted: #b5af9f;
+	--text-link: #a9c98a;
+	/* Hairline dividers only; card edges use border-card and control borders border-strong */
+	--border: #3a372f;
+	--border-card: #6b665a;
+	--border-strong: #857f6e;
+	--accent: #9fc07e;
+	--accent-hover: #b3d094;
+	--on-accent: #14130f;
+	--accent-text: #a9c98a;
+	--header: #1b1a16;
+	--on-header: #efe9da;
+	--on-header-hover: #a9c98a;
+	--focus: #fff3c4;
+	--danger: #e5675d;
+	--danger-hover: #ee8279;
+	--on-danger: #14130f;
+	--danger-surface: #3a2220;
+	--danger-text: #f08a82;
+	--success: #7fc48c;
+	--on-success: #14130f;
+
+	--overlay: rgb(0 0 0 / 0.7);
+	/* Behind text laid over a photo */
 	--scrim: rgb(0 0 0 / 0.6);
 
-	/* Register page file list */
-	--file-list: #f0ffff;
-	--file-error: #933933;
-
-	/* City badge tones, in the order getToneIndex assigns them */
-	--badge-tone-0: #3d008d;
-	--badge-tone-1: #71008d;
-	--badge-tone-2: #ad1457;
-	--badge-tone-3: #37474f;
-	--badge-tone-4: #9c3d00;
-	--badge-tone-5: #1b5e20;
-	--badge-tone-6: #006064;
-	--badge-tone-7: #1565c0;
+	/* City badge tones, in the order getToneIndex assigns them (the design system's badge-1 to badge-8) */
+	--badge-tone-0: #a9c98a;
+	--badge-tone-1: #f0a98a;
+	--badge-tone-2: #8ccbd1;
+	--badge-tone-3: #c8b0e6;
+	--badge-tone-4: #e6c36a;
+	--badge-tone-5: #7fb0e8;
+	--badge-tone-6: #e58fb2;
+	--badge-tone-7: #c9a37a;
+	--on-badge: #14130f;
 }
 
 /* Matches useViewport and GLOBAL.BREAKPOINT.MOBILE: the mobile layout includes 768px itself */
 @custom-variant mobile (@media (width <= 768px));
 
 @theme inline {
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--color-card: var(--card);
-	--color-card-foreground: var(--card-foreground);
-	--color-primary: var(--primary);
-	--color-primary-foreground: var(--primary-foreground);
-	--color-secondary: var(--secondary);
-	--color-secondary-foreground: var(--secondary-foreground);
-	--color-muted: var(--muted);
-	--color-muted-foreground: var(--muted-foreground);
+	--color-bg: var(--bg);
+	--color-surface: var(--surface);
+	--color-surface-sunken: var(--surface-sunken);
+	--color-surface-accent: var(--surface-accent);
 	--color-skeleton: var(--skeleton);
-	--color-accent: var(--accent);
-	--color-accent-foreground: var(--accent-foreground);
-	--color-destructive: var(--destructive);
-	--color-destructive-foreground: var(--destructive-foreground);
-	--color-destructive-hover: var(--destructive-hover);
-	--color-tint: var(--tint);
-	--color-link-hover: var(--link-hover);
-	--color-success: var(--success);
-	--color-alert-success: var(--alert-success);
+	--color-text: var(--text);
+	--color-text-muted: var(--text-muted);
+	--color-text-link: var(--text-link);
 	--color-border: var(--border);
-	--color-input: var(--input);
-	--color-ring: var(--ring);
-	--color-field-focus: var(--field-focus);
-	--color-field-invalid: var(--field-invalid);
+	--color-border-card: var(--border-card);
+	--color-border-strong: var(--border-strong);
+	--color-accent: var(--accent);
+	--color-accent-hover: var(--accent-hover);
+	--color-on-accent: var(--on-accent);
+	--color-accent-text: var(--accent-text);
+	--color-header: var(--header);
+	--color-on-header: var(--on-header);
+	--color-on-header-hover: var(--on-header-hover);
+	--color-focus: var(--focus);
+	--color-danger: var(--danger);
+	--color-danger-hover: var(--danger-hover);
+	--color-on-danger: var(--on-danger);
+	--color-danger-surface: var(--danger-surface);
+	--color-danger-text: var(--danger-text);
+	--color-success: var(--success);
+	--color-on-success: var(--on-success);
+	--color-overlay: var(--overlay);
 	--color-scrim: var(--scrim);
-	--color-file-list: var(--file-list);
-	--color-file-error: var(--file-error);
 
 	--color-badge-0: var(--badge-tone-0);
 	--color-badge-1: var(--badge-tone-1);
@@ -95,10 +99,12 @@
 	--color-badge-5: var(--badge-tone-5);
 	--color-badge-6: var(--badge-tone-6);
 	--color-badge-7: var(--badge-tone-7);
+	--color-on-badge: var(--on-badge);
 
-	--shadow-elevated: 0 2px 8px rgb(0 0 0 / 0.26);
-	--shadow-menu: 0 10px 27px rgb(0 0 0 / 0.05);
-	--shadow-dropdown: 0 2px 8px rgb(0 0 0 / 0.15);
+	/* Depth only: the 1px border-card edge carries a card's boundary on charcoal */
+	--shadow-card:
+		0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5);
+	--shadow-overlay: 0 12px 32px -12px rgb(0 0 0 / 0.6);
 
 	--radius-sm: 0.25rem;
 	--radius-md: 0.5rem;
@@ -281,7 +287,8 @@ html {
 body {
 	margin: 0;
 	padding: 0;
-	color: var(--foreground);
+	background-color: var(--bg);
+	color: var(--text);
 	font-size: 1rem;
 }
 
@@ -333,5 +340,26 @@ section {
 		list-style: none;
 		padding: 0;
 		margin: 0;
+	}
+}
+
+/* One cream focus ring on every control; in the base layer so a component's own outline utility still wins */
+@layer base {
+	:focus-visible {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+	}
+}
+
+/* Photo tiles: a ring over the photo has no guaranteed contrast, so it sits outside, past a 2px gap in the card's ground colour */
+@utility tile-focus-ring {
+	&:has(:focus-visible) {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+		box-shadow: 0 0 0 2px var(--surface);
+	}
+
+	& :focus-visible {
+		outline: none;
 	}
 }

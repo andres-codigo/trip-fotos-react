@@ -56,7 +56,7 @@ const Textarea = ({
 		{!isValid && message && (
 			<ErrorMessage
 				id={`${id}-error`}
-				className="mt-1 text-destructive"
+				className="mt-1 text-danger-text"
 				data-cy-error={dataCyError}>
 				{message}
 			</ErrorMessage>

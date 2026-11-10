@@ -43,7 +43,7 @@ Use this agent when you need to create a new React component with full structure
     - For Cypress tests, do not use inline string selectors like `cy.get('[data-cy="..."]')`; create and use exported selector constants in `src/constants/test/selectors/components.js` using `getByDataCy`, following the `Header` and `Header.cy.jsx` pattern
 
 6. **Styling**
-    - Review the tokens in `src/styles/tailwind.css` and use them (`bg-primary`, `text-muted-foreground`) rather than a literal `white` or `rgb(...)`
+    - Review the tokens in `src/styles/tailwind.css` and use them (`bg-surface`, `text-text-muted`) rather than a literal `white` or `rgb(...)`
     - Combine classes with `cn()` from `@/utils/cn`, use `cva` for variants, and accept a `className` prop merged last
     - Space sibling items with `gap` on the parent, never an outer margin on a reusable component
     - For buttons and links, follow `components.instructions.md` → Buttons And Links: navigation is `BaseButton isLink` with a `modeType`, actions are `<button>`
