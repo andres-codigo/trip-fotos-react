@@ -1,4 +1,9 @@
-import { gateHolds, gatesForFile, planGates } from '../changed-gates.mjs'
+import {
+	gateHolds,
+	gatesForFile,
+	planGates,
+	uiCheckGap,
+} from '../changed-gates.mjs'
 
 describe('planGates', () => {
 	it('adds e2e and names the reason when the change touches routing', () => {
@@ -60,6 +65,16 @@ describe('planGates', () => {
 			'vitest',
 			'ct',
 			'build',
+		])
+	})
+
+	it('runs Vitest for the /ui-check helpers but only ESLint for the capture spec', () => {
+		expect(planGates(['cypress/ui-check/only.js']).runArgs).toEqual([
+			'lint',
+			'vitest',
+		])
+		expect(planGates(['cypress/ui-check/capture.cy.js']).runArgs).toEqual([
+			'lint',
 		])
 	})
 
@@ -175,4 +190,75 @@ describe('gateHolds', () => {
 				changedSince: changedSince([]),
 			}),
 		).toBe(false))
+})
+
+describe('uiCheckGap', () => {
+	const ui = ['src/components/ui/Badge.jsx']
+	const gap = (files, rest = {}) =>
+		uiCheckGap(files, { tree: 't2', changedSince: () => [], ...rest })
+
+	it('lets a change with no UI files through without a /ui-check', () => {
+		expect(gap(['src/store/index.js', '.claude/hooks/a.mjs'])).toBeNull()
+	})
+
+	it('refuses a UI change that /ui-check has not checked', () => {
+		expect(gap(ui)).toMatch(
+			/touches UI files \(src\/components\/ui\/Badge\.jsx\) and \/ui-check has not passed on this change: run \/ui-check first/,
+		)
+	})
+
+	it('does not count tests as UI files', () => {
+		expect(
+			gap([
+				'src/components/ui/__tests__/Badge.test.jsx',
+				'src/components/ui/Badge.cy.jsx',
+			]),
+		).toBeNull()
+	})
+
+	it('treats CSS as a UI file', () => {
+		expect(gap(['src/index.css'])).not.toBeNull()
+	})
+
+	it('refuses while /ui-check is still capturing or on hold', () => {
+		for (const state of ['capturing', 'reviewing', 'hold']) {
+			expect(gap(ui, { uiStatus: { state, tree: 't2' } })).toMatch(
+				`/ui-check is at "${state}", not "pass"`,
+			)
+		}
+	})
+
+	it('accepts a pass on this tree', () => {
+		expect(gap(ui, { uiStatus: { state: 'pass', tree: 't2' } })).toBeNull()
+	})
+
+	it('keeps a pass when only non-UI files changed since, such as tests for its fixes', () => {
+		expect(
+			gap(ui, {
+				uiStatus: { state: 'pass', tree: 't1' },
+				changedSince: () => [
+					'src/components/ui/__tests__/Badge.test.jsx',
+					'src/components/ui/Badge.cy.jsx',
+				],
+			}),
+		).toBeNull()
+	})
+
+	it('refuses when a UI file changed since the pass', () => {
+		expect(
+			gap(ui, {
+				uiStatus: { state: 'pass', tree: 't1' },
+				changedSince: () => ['src/components/ui/Badge.jsx'],
+			}),
+		).toMatch(/a UI file changed since \/ui-check passed/)
+	})
+
+	it('refuses when git cannot tell what changed since the pass', () => {
+		expect(
+			gap(ui, {
+				uiStatus: { state: 'pass', tree: 't1' },
+				changedSince: () => null,
+			}),
+		).not.toBeNull()
+	})
 })

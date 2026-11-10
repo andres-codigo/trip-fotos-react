@@ -5,7 +5,7 @@ import net from 'node:net'
 import path from 'node:path'
 import { stripVTControlCharacters } from 'node:util'
 
-import { gateHolds, planGates } from './changed-gates.mjs'
+import { gateHolds, planGates, uiCheckGap } from './changed-gates.mjs'
 import { branchFiles, changedSince, treeHash } from './git-tree.mjs'
 import { resetChecks } from './reset-checks.mjs'
 
@@ -15,6 +15,14 @@ const cacheDir = path.join(projectDir, 'node_modules', '.cache', 'verify')
 const cacheFile = path.join(cacheDir, 'passed.json')
 // Read by the status line to show whether a run is in flight and how the last one ended
 const statusFile = path.join(cacheDir, 'status.json')
+// Written by .claude/skills/ui-check/status.mjs
+const uiStatusFile = path.join(
+	projectDir,
+	'node_modules',
+	'.cache',
+	'ui-check',
+	'status.json',
+)
 
 // Auth, Realtime Database, Storage and the Emulator UI (firebase.json)
 export const EMULATOR_PORTS = [9099, 9000, 9199, 4000]
@@ -144,7 +152,19 @@ const main = async () => {
 		process.exit(3)
 	}
 
-	const { runArgs, reasons } = planGates(branchFiles(projectDir), {
+	const files = branchFiles(projectDir)
+	const tree = treeHash(projectDir)
+	const uiGap = uiCheckGap(files, {
+		tree,
+		uiStatus: readJson(uiStatusFile),
+		changedSince: changedSince(projectDir, tree),
+	})
+	if (uiGap) {
+		console.log(`/verify not started: ${uiGap}.`)
+		process.exit(3)
+	}
+
+	const { runArgs, reasons } = planGates(files, {
 		e2e: args.includes('e2e'),
 		all,
 	})
@@ -155,9 +175,8 @@ const main = async () => {
 		return
 	}
 
-	resetChecks(projectDir)
+	resetChecks(projectDir, { uiCheck: false })
 	fs.mkdirSync(cacheDir, { recursive: true })
-	const tree = treeHash(projectDir)
 	const cache = { gates: readJson(cacheFile).gates ?? {} }
 	const holds = { tree, cache, changedSince: changedSince(projectDir, tree) }
 	const writeStatus = (state) =>
