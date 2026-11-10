@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.10](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.9...v0.21.10) (2026-11-10)
+
+
+### Enhancements
+
+* ship the dark palette and the design system's accessibility groundwork ([#669](https://github.com/andres-codigo/trip-fotos-react/issues/669)) ([e5265ec](https://github.com/andres-codigo/trip-fotos-react/commit/e5265ecdb6ddd8661544951cd410ed57d95a7f44))
+
 ## [0.21.9](https://github.com/andres-codigo/trip-fotos-react/compare/v0.21.8...v0.21.9) (2026-11-09)
 
 
