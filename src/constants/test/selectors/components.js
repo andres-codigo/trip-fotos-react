@@ -17,6 +17,7 @@ import {
 	MESSAGE_ITEM,
 	MESSAGES_PAGE,
 	PROGRESS,
+	SHEET,
 	TRAVELLER_DETAIL,
 	TRAVELLER_FILTER,
 	TRAVELLER_ITEM,
@@ -131,6 +132,7 @@ export const TRAVELLERS_LIST_SELECTORS = {
 	CONTROLS: getByDataCy('controls'),
 	NO_TRAVELLERS: getByDataCy('no-travellers-list'),
 	NO_MATCHING_TRAVELLERS: getByDataCy('no-matching-travellers'),
+	SHOW_ALL_CITIES: getByDataCy('travellers-show-all-cities'),
 	LOADING: getByDataCy('travellers-loading'),
 	SKELETON_LIST: getByDataCy('travellers-skeleton-list'),
 	SHOW_MORE: getByDataCy('show-more-travellers'),
@@ -147,6 +149,15 @@ export const COMBOBOX_SELECTORS = {
 	LISTBOX: getByDataCy(COMBOBOX.LISTBOX),
 	OPTION: getByDataCy(COMBOBOX.OPTION),
 	STATUS: getByDataCy(COMBOBOX.STATUS),
+}
+
+export const SHEET_SELECTORS = {
+	ROOT: getByDataCy(SHEET.ID),
+	BACKDROP: getByDataCy(SHEET.BACKDROP),
+	TITLE: getByDataCy(SHEET.TITLE),
+	CLOSE: getByDataCy(SHEET.CLOSE),
+	BODY: getByDataCy(SHEET.BODY),
+	FOOTER: getByDataCy(SHEET.FOOTER),
 }
 
 export const DIALOG_SELECTORS = {
@@ -230,8 +241,10 @@ export const TRAVELLER_FILTER_SELECTORS = {
 	SEARCH: getByDataCy(TRAVELLER_FILTER.SEARCH),
 	LIST: getByDataCy(TRAVELLER_FILTER.LIST),
 	EMPTY: getByDataCy(TRAVELLER_FILTER.EMPTY),
-	SELECT_ALL: getByDataCy(TRAVELLER_FILTER.SELECT_ALL),
-	CLEAR: getByDataCy(TRAVELLER_FILTER.CLEAR),
+	SHOW_ALL: getByDataCy(TRAVELLER_FILTER.SHOW_ALL),
+	TRIGGER: getByDataCy(TRAVELLER_FILTER.TRIGGER),
+	SHEET: getByDataCy(TRAVELLER_FILTER.SHEET),
+	SHOW_MATCHES: getByDataCy(TRAVELLER_FILTER.SHOW_MATCHES),
 	STATUS: getByDataCy(TRAVELLER_FILTER.STATUS),
 }
 

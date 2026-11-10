@@ -124,8 +124,9 @@ const cdp = (command, params = {}) =>
 
 // Cypress cannot hover, so force the pseudo-state through CDP (Chromium only).
 // The automation target is the runner page, so reach the element through the app's iframe
-const forcePseudo = (selector, states) => {
-	cy.get(selector).first().scrollIntoView()
+// A visually hidden checkbox is scrolled to the very top of its list by scrollIntoView, clipping its chip, so it can opt out
+const forcePseudo = (selector, states, { scroll = true } = {}) => {
+	if (scroll) cy.get(selector).first().scrollIntoView()
 	cdp('DOM.enable')
 		.then(() => cdp('CSS.enable'))
 		.then(() => cdp('DOM.getDocument', { depth: 0 }))
@@ -318,6 +319,59 @@ describe(`UI check capture (${LABEL})`, () => {
 
 			// Literal selectors keep the script usable on main, which lacks the new ones
 			const filter = (name) => `[data-cy="traveller-filter-${name}"]`
+			// Case-insensitive: main shows stored ids as they are ("oslo")
+			const chip = (name) => [filter('option'), new RegExp(name, 'i')]
+
+			const inlineStates = (width) => {
+				cy.get(filter('list')).first().focus()
+				shot(`city-filter-list-focus-${width}`)
+				cy.get(filter('search')).first().type('o')
+				cy.get(filter('checkbox')).should('exist')
+				shot(`city-filter-searched-${width}`)
+				cy.contains(...chip('Oslo')).click()
+				cy.get(filter('status')).should('contain', ' of ')
+				shot(`city-filter-ticked-${width}`)
+				cy.get(filter('search')).first().clear().type('zzz')
+				cy.get(filter('empty')).should('be.visible')
+				shot(`city-filter-empty-${width}`)
+			}
+
+			const sheetStates = (width) => {
+				cy.get(filter('trigger')).click()
+				cy.get(filter('sheet')).should('be.visible')
+				shot(`city-filter-sheet-${width}`)
+				cy.get(filter('sheet'))
+					.contains(...chip('Oslo'))
+					.click()
+				cy.get(filter('sheet'))
+					.contains(...chip('Rome'))
+					.click()
+				cy.get(filter('sheet'))
+					.find(`${filter('checkbox')}:checked`)
+					.should('have.length', 2)
+				shot(`city-filter-sheet-ticked-${width}`)
+				cy.get(filter('sheet')).find(filter('search')).type('o')
+				shot(`city-filter-sheet-searched-${width}`)
+				cy.get(filter('sheet'))
+					.find(filter('search'))
+					.clear()
+					.type('zzz')
+				cy.get(filter('sheet'))
+					.find(filter('empty'))
+					.should('be.visible')
+				shot(`city-filter-sheet-empty-${width}`)
+				cy.get(filter('sheet')).find(filter('search')).clear()
+				forcePseudo(`${filter('sheet')} ${filter('checkbox')}`, [
+					'focus',
+					'focus-visible',
+				])
+				shot(`city-filter-sheet-chip-focus-${width}`)
+				forcePseudo(`${filter('sheet')} ${filter('checkbox')}`, [])
+				cy.get(filter('show-matches')).click()
+				cy.get(filter('sheet')).should('not.exist')
+				cy.get(filter('trigger')).should('contain', '2 of')
+				shot(`city-filter-narrowed-${width}`)
+			}
 
 			eachWidth((width) => {
 				cy.visit(PATHS.TRAVELLERS)
@@ -326,20 +380,13 @@ describe(`UI check capture (${LABEL})`, () => {
 				freezeAnimation()
 				shot(`city-filter-many-${width}`)
 
+				// The branch swaps the inline filter for a sheet at 768px and below; main and wider screens keep it inline
 				cy.get('body').then(($body) => {
-					if (!$body.find(filter('search')).length) return
-					cy.get(filter('list')).focus()
-					shot(`city-filter-list-focus-${width}`)
-					cy.get(filter('search')).type('o')
-					cy.get(filter('checkbox')).should('exist')
-					shot(`city-filter-searched-${width}`)
-					cy.get(filter('clear')).click()
-					cy.get(filter('status')).should('contain', 'selected')
-					shot(`city-filter-cleared-visible-${width}`)
-					cy.get(filter('select-all')).click()
-					cy.get(filter('search')).clear().type('zzz')
-					cy.get(filter('empty')).should('be.visible')
-					shot(`city-filter-empty-${width}`)
+					if ($body.find(`${filter('trigger')}:visible`).length) {
+						sheetStates(width)
+					} else if ($body.find(filter('search')).length) {
+						inlineStates(width)
+					}
 				})
 			})
 		})
@@ -638,10 +685,17 @@ describe(`UI check capture (${LABEL})`, () => {
 				['details', TRAVELLER_ITEM_SELECTORS.DETAILS, true],
 				['refresh', TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON],
 				['register', TRAVELLERS_LIST_SELECTORS.REGISTER_LINK],
-				['filter-select-all', TRAVELLER_FILTER_SELECTORS.SELECT_ALL],
-				['filter-clear', TRAVELLER_FILTER_SELECTORS.CLEAR],
+				['filter-show-all', TRAVELLER_FILTER_SELECTORS.SHOW_ALL],
+				// Hover lands on the chip, keyboard focus on its hidden checkbox
+				['filter-chip', TRAVELLER_FILTER_SELECTORS.OPTION],
+				[
+					'filter-chip-checkbox',
+					TRAVELLER_FILTER_SELECTORS.CHECKBOX,
+					false,
+					{ scroll: false },
+				],
 				['image-button', COMMON_SELECTORS.BASE_IMAGE_BUTTON, true],
-			].forEach(([name, selector, inCard]) => {
+			].forEach(([name, selector, inCard, pseudoOptions]) => {
 				// A full-page capture repeats the sticky header over the first card, so card controls are also captured alone
 				const capture = (state) => {
 					shot(`${state}-${name}`)
@@ -653,11 +707,19 @@ describe(`UI check capture (${LABEL})`, () => {
 							.screenshot(`${LABEL}/${state}-${name}-card`)
 					}
 				}
-				forcePseudo(selector, ['hover'])
-				capture('hover')
-				forcePseudo(selector, ['focus', 'focus-visible'])
-				capture('focus')
-				forcePseudo(selector, [])
+				// main has no Show all cities, so a control missing from the page is skipped rather than failing the run
+				cy.get('body').then(($body) => {
+					if (!$body.find(selector).length) return
+					forcePseudo(selector, ['hover'], pseudoOptions)
+					capture('hover')
+					forcePseudo(
+						selector,
+						['focus', 'focus-visible'],
+						pseudoOptions,
+					)
+					capture('focus')
+					forcePseudo(selector, [], pseudoOptions)
+				})
 			})
 		})
 

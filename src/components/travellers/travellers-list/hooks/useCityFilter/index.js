@@ -2,8 +2,9 @@ import { useCallback, useMemo, useState } from 'react'
 
 import { formatCity, getCityId } from '@/utils/formatCity'
 
+// Tick to narrow: nothing ticked shows every traveller; ticking cities shows only travellers who visited one of them
 const useCityFilter = (travellers = []) => {
-	const [inactiveIds, setInactiveIds] = useState([])
+	const [tickedIds, setTickedIds] = useState([])
 	const list = useMemo(
 		() => (Array.isArray(travellers) ? travellers : []),
 		[travellers],
@@ -26,36 +27,40 @@ const useCityFilter = (travellers = []) => {
 		)
 	}, [list])
 
-	const toggleCity = useCallback((id, isActive) => {
-		setInactiveIds((previous) => {
-			if (isActive) return previous.filter((item) => item !== id)
+	// A Refresh can drop a city's last traveller; its tick goes with it, so a filter never hides everyone
+	const selectedIds = useMemo(
+		() =>
+			tickedIds.filter((id) =>
+				options.some((option) => option.id === id),
+			),
+		[tickedIds, options],
+	)
+
+	const toggleCity = useCallback((id, isSelected) => {
+		setTickedIds((previous) => {
+			if (!isSelected) return previous.filter((item) => item !== id)
 			return previous.includes(id) ? previous : [...previous, id]
 		})
 	}, [])
 
-	const setCitiesActive = useCallback((ids, isActive) => {
-		setInactiveIds((previous) => {
-			if (isActive) return previous.filter((item) => !ids.includes(item))
-			return [...new Set([...previous, ...ids])]
-		})
-	}, [])
+	const showAllCities = useCallback(() => setTickedIds([]), [])
 
 	const filteredTravellers = useMemo(() => {
-		if (inactiveIds.length === 0) return list
+		if (selectedIds.length === 0) return list
 
 		return list.filter((traveller) =>
-			(traveller?.cities ?? []).some((city) => {
-				const id = getCityId(city)
-				return id && !inactiveIds.includes(id)
-			}),
+			(traveller?.cities ?? []).some((city) =>
+				selectedIds.includes(getCityId(city)),
+			),
 		)
-	}, [list, inactiveIds])
+	}, [list, selectedIds])
 
 	return {
 		options,
-		inactiveIds,
+		selectedIds,
+		isFiltered: selectedIds.length > 0,
 		toggleCity,
-		setCitiesActive,
+		showAllCities,
 		filteredTravellers,
 	}
 }

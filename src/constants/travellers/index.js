@@ -44,10 +44,22 @@ export const TRAVELLER_FILTER_CONFIG = Object.freeze({
 	LEGEND: 'Filter by city',
 	SEARCH_LABEL: 'Search cities',
 	SEARCH_THRESHOLD: 4,
-	NO_MATCH: 'No cities match',
-	SELECT_ALL: 'Select all',
-	CLEAR: 'Clear',
+	NO_MATCH: (query) => `No cities match “${query}”`,
+	SHOW_ALL: 'Show all cities',
 	LIST_LABEL: 'Cities',
+	TRIGGER_LABEL: 'Filter',
+	CLOSE_LABEL: 'Close filter',
+	SUMMARY: (selected, total) =>
+		selected ? `${selected} of ${total} cities` : `All ${total} cities`,
+	STATUS: (selected, total) =>
+		selected
+			? `${selected} of ${total} cities selected`
+			: `All ${total} cities`,
+	SHOW_MATCHES: (count) =>
+		`Show ${count} ${count === 1 ? 'traveller' : 'travellers'}`,
+	NO_RESULTS_TITLE: 'No travellers to show',
+	NO_RESULTS_TEXT:
+		'None of the travellers left in the list visited these cities.',
 })
 
 export const TRAVELLER_DETAIL_CONFIG = Object.freeze({

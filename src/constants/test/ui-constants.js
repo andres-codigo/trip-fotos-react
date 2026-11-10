@@ -70,6 +70,15 @@ export const PROGRESS = Object.freeze({
 	LABEL: 'base-progress-label',
 })
 
+export const SHEET = Object.freeze({
+	ID: 'base-sheet',
+	BACKDROP: 'base-sheet-backdrop',
+	TITLE: 'base-sheet-title',
+	CLOSE: 'base-sheet-close',
+	BODY: 'base-sheet-body',
+	FOOTER: 'base-sheet-footer',
+})
+
 export const SPINNER = Object.freeze({
 	ROLE_STATUS: 'status',
 })
@@ -82,7 +91,6 @@ export const TEXTAREA = Object.freeze({
 export const UI_TEXT = {
 	TRAVELLERS: {
 		NO_TRAVELLERS_MESSAGE: 'No travellers listed.',
-		NO_MATCHING_MESSAGE: 'No travellers match the selected cities.',
 		REGISTER_AS_TRAVELLER: 'Register',
 		REFRESH_BUTTON: 'Refresh travellers',
 	},
@@ -154,8 +162,10 @@ export const TRAVELLER_FILTER = Object.freeze({
 	SEARCH: 'traveller-filter-search',
 	LIST: 'traveller-filter-list',
 	EMPTY: 'traveller-filter-empty',
-	SELECT_ALL: 'traveller-filter-select-all',
-	CLEAR: 'traveller-filter-clear',
+	SHOW_ALL: 'traveller-filter-show-all',
+	TRIGGER: 'traveller-filter-trigger',
+	SHEET: 'traveller-filter-sheet',
+	SHOW_MATCHES: 'traveller-filter-show-matches',
 	STATUS: 'traveller-filter-status',
 })
 

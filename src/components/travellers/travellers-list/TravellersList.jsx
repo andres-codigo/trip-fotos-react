@@ -4,7 +4,10 @@ import PropTypes from 'prop-types'
 
 import { handleApiError } from '@/utils/errorHandler'
 import { PATHS } from '@/constants/ui'
-import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
+import {
+	TRAVELLER_FILTER_CONFIG,
+	TRAVELLERS_LIST_CONFIG,
+} from '@/constants/travellers'
 
 import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
 
@@ -71,12 +74,12 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 	const hasTravellers = useSelector(selectHasTravellers)
 	const {
 		options,
-		inactiveIds,
+		selectedIds,
+		isFiltered,
 		toggleCity,
-		setCitiesActive,
+		showAllCities,
 		filteredTravellers,
 	} = useCityFilter(travellers)
-	const isFiltered = inactiveIds.length > 0
 	const {
 		visibleItems,
 		visibleCount,
@@ -87,7 +90,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 		firstNewIndex,
 	} = usePaging(filteredTravellers, {
 		pageSize: TRAVELLERS_LIST_CONFIG.PAGE_SIZE,
-		resetKey: `${refreshCount}|${inactiveIds.join('|')}`,
+		resetKey: `${refreshCount}|${selectedIds.join('|')}`,
 	})
 
 	const loadTravellersHandler = useCallback(
@@ -212,9 +215,10 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 			{!loading && hasTravellers && options.length > 0 && (
 				<TravellerFilter
 					options={options}
-					inactiveIds={inactiveIds}
-					onChangeFilter={toggleCity}
-					onChangeMany={setCitiesActive}
+					selectedIds={selectedIds}
+					matchCount={filteredTravellers.length}
+					onToggle={toggleCity}
+					onShowAll={showAllCities}
 				/>
 			)}
 			{!loading && hasTravellers && filteredTravellers.length > 0 && (
@@ -265,11 +269,22 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 			)}
 			{!loading && hasTravellers && filteredTravellers.length === 0 && (
 				<div
-					className="my-20 flex min-h-15 items-center justify-center"
+					role="status"
+					className="my-4 flex flex-col items-start gap-1 rounded-lg border border-border-card bg-surface p-5 shadow-card"
 					data-cy="no-matching-travellers">
-					<h2 className="my-[1em] text-center text-[1.17em]">
-						No travellers match the selected cities.
+					<h2 className="m-0 text-lg font-bold">
+						{TRAVELLER_FILTER_CONFIG.NO_RESULTS_TITLE}
 					</h2>
+					<p className="m-0 mb-3 text-text-muted">
+						{TRAVELLER_FILTER_CONFIG.NO_RESULTS_TEXT}
+					</p>
+					<BaseButton
+						type="button"
+						modeType="outline"
+						onClick={showAllCities}
+						data-cy="travellers-show-all-cities">
+						{TRAVELLER_FILTER_CONFIG.SHOW_ALL}
+					</BaseButton>
 				</div>
 			)}
 			{!loading && !error && !hasTravellers && (

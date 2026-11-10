@@ -14,6 +14,8 @@ const TRAVELLERS = [
 	{ id: 'd', cities: [] },
 ]
 
+const ids = (travellers) => travellers.map(({ id }) => id)
+
 describe('useCityFilter', () => {
 	it('de-duplicates options and sorts them by label', () => {
 		const { result } = renderHook(() =>
@@ -28,10 +30,11 @@ describe('useCityFilter', () => {
 
 	it('labels legacy string ids via formatCity', () => {
 		const { result } = renderHook(() =>
-			useCityFilter([{ cities: ['tokyo'] }]),
+			useCityFilter([{ cities: ['tokyo', 'krakow'] }]),
 		)
 
 		expect(result.current.options).toEqual([
+			{ id: 'krakow', label: 'Krakow' },
 			{ id: 'tokyo', label: 'Tokyo, Japan' },
 		])
 	})
@@ -44,70 +47,78 @@ describe('useCityFilter', () => {
 		expect(result.current.options).toEqual([])
 	})
 
-	it('has every city active by default', () => {
+	it('shows every traveller with nothing ticked', () => {
 		const { result } = renderHook(() => useCityFilter(TRAVELLERS))
 
-		expect(result.current.inactiveIds).toEqual([])
+		expect(result.current.selectedIds).toEqual([])
+		expect(result.current.isFiltered).toBe(false)
 		expect(result.current.filteredTravellers).toEqual(TRAVELLERS)
 	})
 
-	it('filters out travellers when a city is toggled off and restores on', () => {
+	it('narrows to travellers who visited a ticked city, and widens again on untick', () => {
 		const { result } = renderHook(() => useCityFilter(TRAVELLERS))
-
-		act(() => result.current.toggleCity(PRAGUE.id, false))
-		expect(result.current.inactiveIds).toEqual([PRAGUE.id])
-		expect(result.current.filteredTravellers.map(({ id }) => id)).toEqual([
-			'a',
-			'c',
-		])
 
 		act(() => result.current.toggleCity(PRAGUE.id, true))
-		expect(result.current.inactiveIds).toEqual([])
-		expect(result.current.filteredTravellers).toEqual(TRAVELLERS)
-	})
+		expect(result.current.selectedIds).toEqual([PRAGUE.id])
+		expect(result.current.isFiltered).toBe(true)
+		expect(ids(result.current.filteredTravellers)).toEqual(['a', 'b'])
 
-	it('does not add duplicate inactive ids', () => {
-		const { result } = renderHook(() => useCityFilter(TRAVELLERS))
+		act(() => result.current.toggleCity('tokyo', true))
+		expect(ids(result.current.filteredTravellers)).toEqual(['a', 'b', 'c'])
 
 		act(() => result.current.toggleCity(PRAGUE.id, false))
-		act(() => result.current.toggleCity(PRAGUE.id, false))
-
-		expect(result.current.inactiveIds).toEqual([PRAGUE.id])
+		expect(ids(result.current.filteredTravellers)).toEqual(['c'])
 	})
 
-	it('returns an empty array when every city is toggled off', () => {
+	it('does not add a ticked city twice', () => {
 		const { result } = renderHook(() => useCityFilter(TRAVELLERS))
 
-		act(() => {
-			result.current.options.forEach(({ id }) =>
-				result.current.toggleCity(id, false),
-			)
-		})
+		act(() => result.current.toggleCity(PRAGUE.id, true))
+		act(() => result.current.toggleCity(PRAGUE.id, true))
 
-		expect(result.current.filteredTravellers).toEqual([])
+		expect(result.current.selectedIds).toEqual([PRAGUE.id])
 	})
 
-	it('shows travellers without cities only when no filter is applied', () => {
+	it('hides travellers without cities only while narrowed', () => {
 		const { result } = renderHook(() => useCityFilter(TRAVELLERS))
 
-		expect(result.current.filteredTravellers).toContainEqual(TRAVELLERS[3])
-
-		act(() => result.current.toggleCity('tokyo', false))
-
+		act(() => result.current.toggleCity('tokyo', true))
 		expect(result.current.filteredTravellers).not.toContainEqual(
 			TRAVELLERS[3],
 		)
+
+		act(() => result.current.showAllCities())
+		expect(result.current.filteredTravellers).toContainEqual(TRAVELLERS[3])
 	})
 
-	it('sets several cities inactive and active at once', () => {
+	it('shows all cities again after Show all cities', () => {
 		const { result } = renderHook(() => useCityFilter(TRAVELLERS))
 
-		act(() => result.current.toggleCity('tokyo', false))
-		act(() => result.current.setCitiesActive(['tokyo', PRAGUE.id], false))
-		expect(result.current.inactiveIds).toEqual(['tokyo', PRAGUE.id])
+		act(() => {
+			result.current.toggleCity(PRAGUE.id, true)
+			result.current.toggleCity('tokyo', true)
+		})
+		act(() => result.current.showAllCities())
 
-		act(() => result.current.setCitiesActive([PRAGUE.id], true))
-		expect(result.current.inactiveIds).toEqual(['tokyo'])
+		expect(result.current.selectedIds).toEqual([])
+		expect(result.current.filteredTravellers).toEqual(TRAVELLERS)
+	})
+
+	it('drops the tick of a city whose last traveller has gone, so the list never empties', () => {
+		const { result, rerender } = renderHook(
+			({ travellers }) => useCityFilter(travellers),
+			{ initialProps: { travellers: TRAVELLERS } },
+		)
+
+		act(() => result.current.toggleCity('tokyo', true))
+		expect(ids(result.current.filteredTravellers)).toEqual(['c'])
+
+		const withoutC = TRAVELLERS.filter(({ id }) => id !== 'c')
+		rerender({ travellers: withoutC })
+
+		expect(result.current.selectedIds).toEqual([])
+		expect(result.current.isFiltered).toBe(false)
+		expect(result.current.filteredTravellers).toEqual(withoutC)
 	})
 
 	it.each([undefined, null])('handles %s travellers', (value) => {

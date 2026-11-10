@@ -466,12 +466,20 @@ describe('Travellers page > city filter', () => {
 		)
 	})
 
-	it('hides a traveller with no selected city and shows them again when it is re-checked', () => {
-		// Only the second traveller has Tokyo as their sole city
-		cy.contains(TRAVELLER_FILTER_SELECTORS.OPTION, 'Tokyo')
-			.find(TRAVELLER_FILTER_SELECTORS.CHECKBOX)
-			.uncheck()
+	// The seed gives the first traveller eight cities, Prague and Tokyo among them, and the second only Tokyo
+	// The checkbox is visually hidden inside the chip, so tick it the way a person does, by the chip
+	const tick = (city) =>
+		cy.contains(TRAVELLER_FILTER_SELECTORS.OPTION, city).click()
 
+	it('starts with nothing ticked, narrows to a ticked city and widens again on Show all cities', () => {
+		cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX).should('not.be.checked')
+		cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_ALL).should(
+			'have.attr',
+			'aria-disabled',
+			'true',
+		)
+
+		tick('Prague')
 		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
 			'have.length',
 			1,
@@ -479,23 +487,49 @@ describe('Travellers page > city filter', () => {
 		cy.contains(FIRST.firstName).should('exist')
 		cy.contains(SECOND.firstName).should('not.exist')
 
-		cy.contains(TRAVELLER_FILTER_SELECTORS.OPTION, 'Tokyo')
-			.find(TRAVELLER_FILTER_SELECTORS.CHECKBOX)
-			.check()
+		cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_ALL).click()
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+			'have.length',
+			2,
+		)
+		cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX).should('not.be.checked')
+	})
 
+	it('shows every traveller who visited any ticked city', () => {
+		tick('Tokyo')
 		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
 			'have.length',
 			2,
 		)
 	})
 
-	it('shows the empty state when every city is unchecked', () => {
-		cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX).uncheck()
-
-		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('not.exist')
-		cy.get(TRAVELLERS_LIST_SELECTORS.NO_MATCHING_TRAVELLERS).should(
-			'be.visible',
+	it('labels a stored lower-case city id in title case', () => {
+		cy.contains(TRAVELLER_FILTER_SELECTORS.OPTION, 'Krakow').should('exist')
+		cy.contains(TRAVELLER_FILTER_SELECTORS.OPTION, 'krakow').should(
+			'not.exist',
 		)
+	})
+
+	it('filters from the sheet on a phone', () => {
+		cy.viewport(390, 844)
+		cy.get(TRAVELLER_FILTER_SELECTORS.ROOT).should('not.be.visible')
+
+		cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).click()
+		cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
+			.contains(TRAVELLER_FILTER_SELECTORS.OPTION, 'Prague')
+			.click()
+		cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_MATCHES)
+			.should('have.text', 'Show 1 traveller')
+			.click()
+
+		cy.get(TRAVELLER_FILTER_SELECTORS.SHEET).should('not.exist')
+		cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+			'have.length',
+			1,
+		)
+		cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER)
+			.should('have.focus')
+			.and('contain.text', '1 of 8 cities')
 	})
 })
 

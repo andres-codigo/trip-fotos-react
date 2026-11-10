@@ -1,12 +1,15 @@
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { Provider, useDispatch, useSelector } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { GLOBAL } from '@/constants/ui'
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
-import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
+import {
+	TRAVELLER_FILTER_CONFIG,
+	TRAVELLERS_LIST_CONFIG,
+} from '@/constants/travellers'
 import {
 	MOCK_CITIES,
 	MOCK_ERROR_MESSAGES,
@@ -46,11 +49,21 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 	selectDidAutoLogout: vi.fn(),
 }))
 
+// A pass-through spy, so one test can force the zero-results guard the real hook never reaches
+vi.mock(
+	'@/components/travellers/travellers-list/hooks/useCityFilter',
+	async (importOriginal) => {
+		const actual = await importOriginal()
+		return { default: vi.fn(actual.default) }
+	},
+)
+
 vi.mock('@/components/travellers/traveller-item/TravellerItem', () => ({
 	default: () => <li data-cy="traveller-item">Traveller item</li>,
 }))
 
 import TravellersList from '@/components/travellers/travellers-list/TravellersList'
+import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
 
 const ALERT_ROLE = 'alert'
 import * as travellersSlice from '@/store/slices/travellersSlice'
@@ -706,7 +719,21 @@ describe('<TravellersList />', () => {
 				name: `${city.city}, ${city.country}`,
 			})
 
-		it('should render one active checkbox per distinct city', async () => {
+		const getItems = () =>
+			screen.getAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM)
+		const getShowAll = () =>
+			screen.getByRole('button', {
+				name: TRAVELLER_FILTER_CONFIG.SHOW_ALL,
+			})
+
+		afterEach(async () => {
+			const actual = await vi.importActual(
+				'@/components/travellers/travellers-list/hooks/useCityFilter',
+			)
+			vi.mocked(useCityFilter).mockImplementation(actual.default)
+		})
+
+		it('should render one unticked checkbox per distinct city and show every traveller', async () => {
 			setupMocksForTravellersWithCities()
 			await act(async () => {
 				renderTravellersList()
@@ -714,35 +741,69 @@ describe('<TravellersList />', () => {
 
 			const checkboxes = screen.getAllByRole('checkbox')
 			expect(checkboxes).toHaveLength(2)
-			checkboxes.forEach((checkbox) => expect(checkbox).toBeChecked())
-			expect(
-				screen.getAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
-			).toHaveLength(2)
+			checkboxes.forEach((checkbox) => expect(checkbox).not.toBeChecked())
+			expect(getItems()).toHaveLength(2)
+			expect(getShowAll()).toHaveAttribute('aria-disabled', 'true')
 		})
 
-		it('should hide travellers whose cities are all filtered out', async () => {
+		it('should narrow to travellers who visited a ticked city', async () => {
 			setupMocksForTravellersWithCities()
 			await act(async () => {
 				renderTravellersList()
 			})
 
 			fireEvent.click(getCheckbox(MOCK_CITIES.PRAGUE))
-			expect(
-				screen.getAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
-			).toHaveLength(2)
+			expect(getCheckbox(MOCK_CITIES.PRAGUE)).toBeChecked()
+			expect(getItems()).toHaveLength(1)
 
 			fireEvent.click(getCheckbox(MOCK_CITIES.TOKYO))
+			expect(getItems()).toHaveLength(2)
+		})
+
+		it('should show every traveller again on Show all cities', async () => {
+			setupMocksForTravellersWithCities()
+			await act(async () => {
+				renderTravellersList()
+			})
+
+			fireEvent.click(getCheckbox(MOCK_CITIES.PRAGUE))
+			expect(getShowAll()).toHaveAttribute('aria-disabled', 'false')
+
+			fireEvent.click(getShowAll())
+
+			expect(getItems()).toHaveLength(2)
+			expect(getCheckbox(MOCK_CITIES.PRAGUE)).not.toBeChecked()
+			expect(getShowAll()).toHaveAttribute('aria-disabled', 'true')
+		})
+
+		it('should show the zero-results card with a Show all cities reset', async () => {
+			setupMocksForTravellersWithCities()
+			const showAllCities = vi.fn()
+			vi.mocked(useCityFilter).mockImplementation(() => ({
+				options: [{ id: 'hobart', label: 'Hobart' }],
+				selectedIds: ['hobart'],
+				isFiltered: true,
+				toggleCity: vi.fn(),
+				showAllCities,
+				filteredTravellers: [],
+			}))
+			await act(async () => {
+				renderTravellersList()
+			})
+
 			expect(
 				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 			).not.toBeInTheDocument()
-			expect(
-				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.NO_MATCHES),
-			).toHaveTextContent(UI_TEXT.TRAVELLERS.NO_MATCHING_MESSAGE)
+			const card = screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.NO_MATCHES)
+			expect(card).toHaveAttribute('role', 'status')
+			expect(card).toHaveTextContent(
+				TRAVELLER_FILTER_CONFIG.NO_RESULTS_TITLE,
+			)
 
-			fireEvent.click(getCheckbox(MOCK_CITIES.PRAGUE))
-			expect(
-				screen.getAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM),
-			).toHaveLength(1)
+			fireEvent.click(
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.SHOW_ALL_CITIES),
+			)
+			expect(showAllCities).toHaveBeenCalledTimes(1)
 		})
 
 		it('should not render the filter when no traveller has a city', async () => {

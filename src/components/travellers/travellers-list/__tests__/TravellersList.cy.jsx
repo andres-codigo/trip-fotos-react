@@ -210,33 +210,51 @@ describe('<TravellersList />', () => {
 
 	describe('City filter', () => {
 		beforeEach(() => {
+			cy.viewport(1280, 800)
 			mountList({ travellers: alreadyLoaded() })
 		})
 
-		it('offers one checkbox per city, all ticked', () => {
+		it('offers one unticked checkbox per city and shows everyone', () => {
 			cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX)
 				.should('have.length', 2)
-				.and('be.checked')
+				.and('not.be.checked')
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				'have.length',
+				2,
+			)
 		})
 
-		it('hides travellers from an unticked city', () => {
-			cy.contains('label', 'Tokyo, Japan').click()
+		it('narrows to travellers from a ticked city, and Show all cities widens again', () => {
+			cy.contains('label', 'Prague, Czechia').click()
 
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
 				.should('have.length', 1)
 				.and('contain.text', 'Grace Lovelace')
+
+			cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_ALL).click()
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				'have.length',
+				2,
+			)
 		})
 
-		it('says so when no city is ticked', () => {
-			cy.contains('label', 'Tokyo, Japan').click()
-			cy.contains('label', 'Prague, Czechia').click()
+		it('filters from the sheet on mobile', () => {
+			cy.viewport(390, 844)
 
-			cy.get(TRAVELLERS_LIST_SELECTORS.NO_MATCHING_TRAVELLERS).should(
+			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).click()
+			cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
+				.contains('label', 'Tokyo, Japan')
+				.click()
+			cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_MATCHES)
+				.should('have.text', 'Show 1 traveller')
+				.click()
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+				.should('have.length', 1)
+				.and('contain.text', 'Ada Lovelace')
+			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).should(
 				'contain.text',
-				'No travellers match the selected cities.',
-			)
-			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
-				'not.exist',
+				'1 of 2 cities',
 			)
 		})
 	})
