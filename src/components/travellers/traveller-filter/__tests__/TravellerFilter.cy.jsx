@@ -109,6 +109,19 @@ describe('<TravellerFilter />', () => {
 			checkbox('Prague, Czechia').focus().should('have.focus')
 		})
 
+		it("keeps a chip's 5px focus ring (3px ring, 2px offset) inside the scrolling list", () => {
+			cy.mount(<StatefulFilter filterOptions={many} />)
+
+			cy.get(TRAVELLER_FILTER_SELECTORS.LIST).then(($list) => {
+				const list = $list[0].getBoundingClientRect()
+				const chip = $list
+					.find(TRAVELLER_FILTER_SELECTORS.OPTION)[0]
+					.getBoundingClientRect()
+				expect(chip.top - list.top).to.be.at.least(5)
+				expect(chip.left - list.left).to.be.at.least(5)
+			})
+		})
+
 		it('caps the list height, scrolls, and searches', () => {
 			cy.mount(<StatefulFilter filterOptions={many} />)
 

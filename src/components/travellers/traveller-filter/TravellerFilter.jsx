@@ -87,10 +87,10 @@ const CityChoices = ({ idPrefix, options, selectedIds, onToggle, inSheet }) => {
 					/>
 				</div>
 			)}
-			{/* Scrollable regions must be keyboard-focusable */}
+			{/* Scrollable regions must be keyboard-focusable; the padding fits a chip's 5px focus ring inside the scroll clip */}
 			<div
 				className={cn(
-					'flex flex-wrap content-start gap-2 overflow-y-auto p-1',
+					'flex flex-wrap content-start gap-2 overflow-y-auto p-1.5',
 					!inSheet && 'max-h-48',
 				)}
 				role="group"
