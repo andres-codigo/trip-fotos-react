@@ -26,5 +26,7 @@ export const ERROR_MESSAGES = Object.freeze({
 		"We couldn't send your message. Please try again.",
 
 	// Messages errors
-	INVALID_MESSAGE_PAYLOAD: 'Please provide your email address and a message.',
+	INVALID_MESSAGE_PAYLOAD: 'Please write a message before sending it.',
+	FAILED_TO_DELETE_MESSAGE:
+		'This message could not be deleted. Check your connection and try again.',
 })

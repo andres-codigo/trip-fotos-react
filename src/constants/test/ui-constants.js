@@ -88,6 +88,13 @@ export const TEXTAREA = Object.freeze({
 	ERROR_ID: 'test-textarea-error',
 })
 
+export const TOAST = Object.freeze({
+	ROOT: 'toast',
+	MESSAGE: 'toast-message',
+	ACTION: 'toast-action',
+	DISMISS: 'toast-dismiss',
+})
+
 export const UI_TEXT = {
 	TRAVELLERS: {
 		NO_TRAVELLERS_MESSAGE: 'No travellers listed.',
@@ -127,6 +134,10 @@ export const TRAVELLER_SKELETON = Object.freeze({
 	ROOT: 'traveller-skeleton',
 })
 
+export const MESSAGE_SKELETON = Object.freeze({
+	ROOT: 'message-skeleton',
+})
+
 export const TRAVELLER_DETAIL = Object.freeze({
 	ROOT: 'traveller-detail',
 	NAME: 'traveller-detail-name',
@@ -146,8 +157,8 @@ export const CONTACT_TRAVELLER = Object.freeze({
 	ROOT: 'contact-traveller',
 	TITLE: 'contact-traveller-title',
 	FORM: 'contact-traveller-form',
-	EMAIL_INPUT: 'contact-email-input',
-	EMAIL_ERROR: 'contact-email-error-message',
+	BACK_TO_MESSAGES: 'contact-back-to-messages',
+	REPLY_QUOTE: 'contact-reply-quote',
 	MESSAGE_INPUT: 'contact-message-input',
 	MESSAGE_ERROR: 'contact-message-error-message',
 	SUBMIT: 'contact-submit-button',
@@ -170,17 +181,25 @@ export const TRAVELLER_FILTER = Object.freeze({
 })
 
 export const MESSAGES_PAGE = Object.freeze({
-	SPINNER: 'messages-spinner',
+	LOADING: 'messages-loading',
+	SUMMARY: 'messages-summary',
 	LIST: 'messages-list',
 	EMPTY: 'messages-empty',
+	BROWSE_TRAVELLERS: 'messages-browse-travellers',
+	UNDO_TOAST: 'messages-undo-toast',
 	ERROR_DIALOG: 'messages-error-dialog',
 })
 
 export const MESSAGE_ITEM = Object.freeze({
 	ROOT: 'message-item',
-	EMAIL: 'message-item-email',
+	SENDER: 'message-item-sender',
+	SENDER_LINK: 'message-item-sender-link',
+	NEW_TAG: 'message-item-new',
+	TIME: 'message-item-time',
 	TEXT: 'message-item-text',
+	SHOW_ALL: 'message-item-show-all',
+	REPLY: 'message-item-reply',
 	DELETE: 'message-item-delete',
-	SPINNER: 'message-item-spinner',
-	ERROR_DIALOG: 'message-item-error-dialog',
+	DELETE_ERROR: 'message-item-delete-error',
+	TRY_AGAIN: 'message-item-try-again',
 })

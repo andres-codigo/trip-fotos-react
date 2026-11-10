@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { MOCK_INBOX } from '@/constants/test/mock-data/mock-messages'
 import { TONE_COUNT, getToneIndex } from '@/utils/getToneIndex'
 
 import {
@@ -71,16 +72,28 @@ describe('seed-emulators', () => {
 			)
 		})
 
-		it('has a message for the first traveller, with the fields the rules allow', () => {
+		it('gives the first traveller a message from the second, with the fields the rules require of a new message', () => {
 			const messages = buildMessages()[SEED_USERS.TRAVELLER_ONE.uid]
+			const fromTraveller = messages[MOCK_INBOX.SAMPLE_MESSAGE_ONE.id]
 
-			Object.values(messages).forEach((message) => {
-				expect(Object.keys(message).sort()).toEqual([
-					'message',
-					'userEmail',
-				])
-			})
-			expect(Object.keys(messages).length).toBeGreaterThan(0)
+			expect(Object.keys(fromTraveller).sort()).toEqual([
+				'createdAt',
+				'message',
+				'read',
+				'senderId',
+			])
+			expect(fromTraveller.senderId).toBe(SEED_USERS.TRAVELLER_TWO.uid)
+			expect(fromTraveller.read).toBe(false)
+			expect(typeof fromTraveller.createdAt).toBe('number')
+		})
+
+		it('keeps one older message with only an email, as stored before messaging was travellers-only', () => {
+			const older =
+				buildMessages()[SEED_USERS.TRAVELLER_ONE.uid][
+					MOCK_INBOX.SAMPLE_MESSAGE_TWO.id
+				]
+
+			expect(Object.keys(older).sort()).toEqual(['message', 'userEmail'])
 		})
 	})
 })

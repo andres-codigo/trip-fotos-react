@@ -55,14 +55,14 @@ vi.mock('@/components/layout/main-nav/nav-menu/NavMenuMessagesLink', () => ({
 		isActive,
 		onMenuItemClick,
 		'data-cy': dataCy,
-		totalMessages,
+		unreadMessages,
 	}) => (
 		<button
 			type="button"
 			aria-current={isActive ? 'page' : undefined}
 			onClick={onMenuItemClick}
 			data-cy={dataCy}>
-			Messages {totalMessages}
+			Messages {unreadMessages}
 		</button>
 	),
 }))
@@ -75,9 +75,11 @@ import { PATHS } from '@/constants/ui'
 
 describe('<MainNav />', () => {
 	const mockTravellerName = 'John Doe'
-	const mockTotalMessages = 5
-	const mockMessages = Array.from({ length: mockTotalMessages }, (_, id) => ({
+	// Five messages, two unread: the nav counts only the unread ones
+	const mockUnreadMessages = 2
+	const mockMessages = Array.from({ length: 5 }, (_, id) => ({
 		id,
+		read: id >= mockUnreadMessages,
 	}))
 
 	const mockSetTravellerName = vi.fn()
@@ -231,12 +233,35 @@ describe('<MainNav />', () => {
 			)
 		})
 
-		it('should render the Messages link with the message count', () => {
+		it('should render the Messages link with the unread count only', () => {
 			render(<MainNav {...defaultProps} />)
 
 			expect(
 				screen.getByTestId('nav-menu-item-messages'),
-			).toHaveTextContent(`Messages ${mockTotalMessages}`)
+			).toHaveTextContent(`Messages ${mockUnreadMessages}`)
+		})
+
+		it('should pass a zero count when every message is read', () => {
+			vi.mocked(useSelector).mockImplementation((selector) =>
+				selector({
+					travellers: {
+						travellerName: mockTravellerName,
+						isTraveller: true,
+					},
+					messages: {
+						messages: mockMessages.map((message) => ({
+							...message,
+							read: true,
+						})),
+					},
+				}),
+			)
+
+			render(<MainNav {...defaultProps} />)
+
+			expect(
+				screen.getByTestId('nav-menu-item-messages'),
+			).toHaveTextContent(/^Messages 0$/)
 		})
 
 		it('should not render the Messages link for a non-traveller', () => {

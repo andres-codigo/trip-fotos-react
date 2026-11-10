@@ -26,7 +26,9 @@ export const API_DATABASE = Object.freeze({
 	GET: 'GET',
 	POST: 'POST',
 	PUT: 'PUT',
+	PATCH: 'PATCH',
 	DELETE: 'DELETE',
+	SERVER_TIMESTAMP: Object.freeze({ '.sv': 'timestamp' }),
 })
 
 export const SDK_METHOD_TYPE_URLS = {

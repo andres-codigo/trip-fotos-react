@@ -16,7 +16,9 @@ import {
 	DIALOG_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 	MESSAGE_ITEM_SELECTORS,
+	MESSAGE_SKELETON_SELECTORS,
 	MESSAGES_PAGE_SELECTORS,
+	TOAST_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
 	TRAVELLER_FILTER_SELECTORS,
@@ -159,6 +161,36 @@ const forcePseudo = (selector, states, { scroll = true } = {}) => {
 
 const emulatorDatabase = (path) =>
 	`${Cypress.expose('VITE_DATABASE_URL')}/${path}.json?ns=${Cypress.expose('VITE_DATABASE_NAMESPACE')}`
+
+// The emulator's owner token passes the rules, for state no user could set
+const OWNER = { Authorization: 'Bearer owner' }
+
+const LONG_MESSAGE =
+	'Hi! We are heading to Kyoto in late March and your photos of the Philosopher’s Path were the reason we booked. Could you tell us which end you started from, and whether early morning was quiet enough for photos without crowds? Also, was the ryokan near Nanzen-ji worth the price, or would you stay closer to Gion next time? Any tips on the day trip to Nara would be lovely too. Thank you so much for sharing all of this.'
+
+// Opening Messages marks everything read, so each width puts the unread state back first
+const markAllUnread = () =>
+	cy
+		.request({
+			url: emulatorDatabase(`messages/${TEST_USERS.TRAVELLER.ID}`),
+			headers: OWNER,
+		})
+		.then(({ body }) => {
+			const unread = Object.fromEntries(
+				Object.entries(body ?? {})
+					.filter(
+						([id, message]) =>
+							message.senderId && id !== 'capture-former',
+					)
+					.map(([id]) => [`${id}/read`, false]),
+			)
+			cy.request({
+				method: 'PATCH',
+				url: emulatorDatabase(`messages/${TEST_USERS.TRAVELLER.ID}`),
+				headers: OWNER,
+				body: unread,
+			})
+		})
 
 const assertSettled = () => {
 	cy.get(COMMON_SELECTORS.BASE_SPINNER).should('not.exist')
@@ -920,31 +952,149 @@ describe(`UI check capture (${LABEL})`, () => {
 			},
 		)
 
-		capture('captures the messages page and a real delete', () => {
-			eachWidth((width) => {
-				cy.visit(PATHS.MESSAGES)
-				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('exist')
-				assertSettled()
-				freezeAnimation()
-				shot(`messages-${width}`)
-			})
-
-			cy.viewport(1280, HEIGHT)
-			cy.visit(PATHS.MESSAGES)
-			cy.get(MESSAGE_ITEM_SELECTORS.ROOT)
-				.its('length')
-				.then((count) => {
-					forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, ['hover'])
-					shot('hover-message-delete')
-					forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, [])
-					cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
-					cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should(
-						'have.length',
-						count - 1,
-					)
-					shot('messages-after-delete')
+		capture(
+			'captures the messages page in every state and a real delete',
+			() => {
+				// Extra messages for the long-text and former-traveller states, written past the rules as the emulator owner
+				cy.request({
+					method: 'PATCH',
+					url: emulatorDatabase(
+						`messages/${TEST_USERS.TRAVELLER.ID}`,
+					),
+					headers: OWNER,
+					body: {
+						'capture-long': {
+							senderId: TEST_USERS.OTHER_TRAVELLER.ID,
+							message: LONG_MESSAGE,
+							createdAt: Date.now() - 2 * 60 * 60 * 1000,
+							read: false,
+						},
+						'capture-former': {
+							senderId: 'capture-removed-traveller',
+							message: 'Thanks for the tips on Kyoto.',
+							createdAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
+							read: true,
+						},
+					},
 				})
-		})
+
+				eachWidth((width) => {
+					markAllUnread()
+					cy.visit(PATHS.TRAVELLERS)
+					cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES, {
+						timeout: TIMEOUT,
+					}).should('exist')
+					assertSettled()
+					freezeAnimation()
+					shot(`nav-unread-count-${width}`)
+					// Below the desktop nav the count sits in the hamburger menu
+					if (width <= 768) {
+						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).click()
+						cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should(
+							'be.visible',
+						)
+						shot(`nav-unread-count-menu-${width}`)
+					}
+
+					cy.visit(PATHS.MESSAGES)
+					cy.get(MESSAGE_ITEM_SELECTORS.NEW_TAG).should('exist')
+					cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).should('exist')
+					assertSettled()
+					freezeAnimation()
+					shot(`messages-${width}`)
+					cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).click()
+					shot(`messages-show-all-${width}`)
+
+					cy.intercept(
+						API_DATABASE.GET,
+						'**/messages/*.json*',
+						(req) =>
+							req.on('response', (res) => res.setDelay(60000)),
+					).as('slowMessages')
+					cy.visit(PATHS.MESSAGES)
+					cy.get(MESSAGE_SKELETON_SELECTORS.ROOT).should(
+						'have.length',
+						3,
+					)
+					freezeAnimation()
+					shot(`messages-loading-${width}`)
+					cy.intercept(
+						API_DATABASE.GET,
+						'**/messages/*.json*',
+						(req) => req.continue(),
+					)
+
+					markAllUnread()
+					cy.visit(PATHS.MESSAGES)
+					cy.get(MESSAGE_ITEM_SELECTORS.REPLY).first().click()
+					cy.get(CONTACT_TRAVELLER_SELECTORS.REPLY_QUOTE).should(
+						'be.visible',
+					)
+					freezeAnimation()
+					shot(`contact-reply-${width}`)
+				})
+
+				cy.viewport(1280, HEIGHT)
+				cy.visit(PATHS.MESSAGES)
+				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+				assertSettled()
+				forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, ['hover'])
+				shot('hover-message-delete')
+				forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, [
+					'focus',
+					'focus-visible',
+				])
+				shot('focus-message-delete')
+				forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, [])
+
+				eachWidth((width) => {
+					cy.visit(PATHS.MESSAGES)
+					cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+					cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+					cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST).should(
+						'be.visible',
+					)
+					freezeAnimation()
+					shot(`messages-undo-toast-${width}`)
+					cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
+						.find(TOAST_SELECTORS.ACTION)
+						.click()
+					cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+
+					cy.intercept(API_DATABASE.DELETE, '**/messages/*/*.json*', {
+						statusCode: 500,
+						body: {},
+					}).as('failedDelete')
+					cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+					cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
+						.find(TOAST_SELECTORS.DISMISS)
+						.click()
+					cy.wait('@failedDelete')
+					cy.get(MESSAGE_ITEM_SELECTORS.DELETE_ERROR).should(
+						'be.visible',
+					)
+					freezeAnimation()
+					shot(`messages-delete-failed-${width}`)
+					cy.intercept(
+						API_DATABASE.DELETE,
+						'**/messages/*/*.json*',
+						(req) => req.continue(),
+					)
+				})
+
+				cy.viewport(1280, HEIGHT)
+				cy.visit(PATHS.MESSAGES)
+				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+				cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
+					.find(TOAST_SELECTORS.DISMISS)
+					.click()
+				cy.reload()
+				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 3)
+				assertSettled()
+				shot('messages-after-delete')
+			},
+		)
 
 		capture('captures Messages when empty', () => {
 			cy.intercept(API_DATABASE.GET, '**/messages/*.json*', 'null')
@@ -986,10 +1136,6 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.viewport(1280, HEIGHT)
 			cy.visit(
 				`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}/contact`,
-			)
-			cy.get(CONTACT_TRAVELLER_SELECTORS.EMAIL_INPUT).should(
-				'have.value',
-				TEST_USERS.TRAVELLER.EMAIL,
 			)
 			cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_INPUT).type(
 				'Sent by the capture script.',

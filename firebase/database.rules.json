@@ -42,13 +42,20 @@
 				".read": "auth != null && (auth.uid === $travellerId || auth.token.admin === true)",
 				".write": "auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true)",
 				"$messageId": {
-					".write": "(!data.exists() && newData.exists()) || (auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true))",
-					".validate": "root.child('travellers/' + $travellerId).exists() && newData.hasChildren(['userEmail', 'message'])",
-					"userEmail": {
-						".validate": "newData.isString() && newData.val().length <= 254"
+					".write": "(auth != null && !data.exists() && newData.exists() && auth.uid !== $travellerId && newData.child('senderId').val() === auth.uid && root.child('travellers/' + auth.uid).exists()) || (auth != null && !newData.exists() && (auth.uid === $travellerId || auth.token.admin === true))",
+					".validate": "root.child('travellers/' + $travellerId).exists() && newData.hasChildren(['senderId', 'message', 'createdAt', 'read'])",
+					"senderId": {
+						".validate": "newData.isString() && newData.val() === auth.uid"
 					},
 					"message": {
 						".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 5000"
+					},
+					"createdAt": {
+						".validate": "newData.isNumber() && newData.val() === now"
+					},
+					"read": {
+						".write": "auth != null && auth.uid === $travellerId && data.parent().exists() && newData.val() === true",
+						".validate": "newData.isBoolean() && newData.val() === data.parent().exists()"
 					},
 					"$other": {
 						".validate": false

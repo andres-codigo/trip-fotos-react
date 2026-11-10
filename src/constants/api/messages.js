@@ -16,6 +16,7 @@ export const API_ERROR_MESSAGE = Object.freeze({
 	CONTACT_TRAVELLER_CATCH: 'An error occurred while contacting traveller ',
 	LOAD_MESSAGES_CATCH: 'An error occurred while loading messages ',
 	DELETE_MESSAGE_CATCH: 'An error occurred while deleting message ',
+	MARK_MESSAGES_READ_CATCH: 'An error occurred while marking messages read ',
 
 	// API Response Codes/Strings
 	STORAGE_OBJECT_NOT_FOUND: 'storage/object-not-found',
