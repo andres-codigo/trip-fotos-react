@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 
 import {
@@ -543,6 +543,59 @@ describe('travellersSlice', () => {
 					GLOBAL.IMAGE_THUMBNAIL_WIDTHS.length - 1,
 				)
 				expect(deleteObject).not.toHaveBeenCalled()
+			})
+
+			describe('when a thumbnail download URL cannot be read', () => {
+				const failingWidth = GLOBAL.IMAGE_THUMBNAIL_WIDTHS[0]
+				const isFailingThumbnail = (path) =>
+					String(path).includes(`-${failingWidth}w-`)
+
+				beforeEach(() => {
+					fetch.mockResolvedValueOnce({
+						ok: true,
+						json: async () => ({ name: MOCK_USER.USER_ID }),
+					})
+					getDownloadURL.mockImplementation((path) =>
+						isFailingThumbnail(path)
+							? Promise.reject(new Error('url failed'))
+							: Promise.resolve('https://mock-url.com/image.jpg'),
+					)
+				})
+
+				afterEach(() => {
+					getDownloadURL.mockImplementation(() =>
+						Promise.resolve('https://mock-url.com/image.jpg'),
+					)
+				})
+
+				it('should delete that thumbnail, leaving no stored object behind, and still register', async () => {
+					const result = await store.dispatch(
+						registerTraveller(mockRegistrationData),
+					)
+
+					expect(result.meta.requestStatus).toBe('fulfilled')
+					expect(result.payload.fileThumbnails[0]).toHaveLength(
+						GLOBAL.IMAGE_THUMBNAIL_WIDTHS.length - 1,
+					)
+					const failingPath = uploadBytes.mock.calls
+						.map(([path]) => path)
+						.find(isFailingThumbnail)
+					expect(deleteObject).toHaveBeenCalledTimes(1)
+					expect(deleteObject).toHaveBeenCalledWith(failingPath)
+				})
+
+				it('should still register when that thumbnail is already gone', async () => {
+					deleteObject.mockRejectedValueOnce({
+						code: 'storage/object-not-found',
+					})
+
+					const result = await store.dispatch(
+						registerTraveller(mockRegistrationData),
+					)
+
+					expect(result.meta.requestStatus).toBe('fulfilled')
+					expect(deleteObject).toHaveBeenCalledTimes(1)
+				})
 			})
 
 			it('should set the Auth display name and userName to the registered name', async () => {
