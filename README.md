@@ -57,17 +57,18 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- A dark theme throughout: a warm charcoal palette, one clear focus ring on every control, edged cards and a loading spinner that says what is loading
 - Travellers list in pages: 12 at a time with Show more, skeleton cards while it loads, and an inline error with Try again
 - Faster photo lists: square tiles that load small thumbnails instead of full-size photos
 - Cleaner Travellers controls: Register beside the title, a Refresh icon, and Select all / Clear as links in the filter header
 - A tidier city filter on Travellers: a scrollable list, with Select all / Clear, and city search once there are more than four cities
 - Every component and page now uses Tailwind, with SCSS and Stylelint removed and no visual change
-- Signed-in users who open the login page are sent to the travellers list
 - Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs and local checks, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
-- [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark-only Claude-inspired redesign, with a multi-column Travellers grid
+- [#650](https://github.com/andres-codigo/trip-fotos-react/issues/650) — city filter: a mobile sheet, Show all and a zero-results state
+- [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark redesign layout: a multi-column Travellers grid and the design system's layout proposals
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
 <a id="stack"></a>
