@@ -57,12 +57,12 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- Better messages: the sender's name and when they wrote, unread markers and an unread count, Reply inside Trip Fotos, and Delete with Undo; messaging is now between travellers only, with no email shared
 - A friendlier city filter: tick cities to narrow the list, Show all cities to reset, and a Filter button that opens a sheet on phones
 - A dark theme throughout: a warm charcoal palette, one clear focus ring on every control, edged cards and a loading spinner that says what is loading
 - Travellers list in pages: 12 at a time with Show more, skeleton cards while it loads, and an inline error with Try again
 - Faster photo lists: square tiles that load small thumbnails instead of full-size photos
 - Cleaner Travellers controls: Register beside the title and a Refresh icon
-- Every component and page now uses Tailwind, with SCSS and Stylelint removed and no visual change
 - Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs and local checks, a browser check before them for UI changes, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
