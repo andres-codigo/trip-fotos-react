@@ -64,7 +64,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - A friendlier city filter: tick cities to narrow the list, Show all cities to reset, and a Filter button that opens a sheet on phones
 - A dark theme throughout: a warm charcoal palette, one clear focus ring on every control, edged cards and a loading spinner that says what is loading
 - Travellers list in pages: 12 at a time with Show more, skeleton cards while it loads, and an inline error with Try again
-- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs, faster local checks and E2E runs that rerun only failed tests and no longer fail on a busy machine, a faster browser check before them for UI changes, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
+- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs, faster local checks and E2E runs that rerun only failed tests, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
