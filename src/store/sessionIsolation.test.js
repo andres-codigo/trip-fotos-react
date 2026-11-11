@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import authenticationReducer, {
 	authActions,
@@ -29,7 +29,7 @@ const STANDARD_SESSION = {
 const VIEWED_TRAVELLER = { id: 'traveller-uid', firstName: 'Ada' }
 
 const createStore = () =>
-	configureStore({
+	configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 			travellers: travellersReducer,

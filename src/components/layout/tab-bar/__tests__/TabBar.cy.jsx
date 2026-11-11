@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import { TAB_BAR_SELECTORS } from '@/constants/test'
 import { NAVIGATION, PATHS } from '@/constants/ui'
@@ -22,8 +22,8 @@ const reducer = {
 }
 
 const createStore = ({ isTraveller, messages }) => {
-	const initial = configureStore({ reducer }).getState()
-	return configureStore({
+	const initial = configureTestStore({ reducer }).getState()
+	return configureTestStore({
 		reducer,
 		preloadedState: {
 			authentication: {

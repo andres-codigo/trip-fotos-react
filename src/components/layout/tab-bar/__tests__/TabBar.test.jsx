@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import { TAB_BAR } from '@/constants/test'
 import { NAVIGATION, PATHS } from '@/constants/ui'
@@ -21,7 +21,7 @@ const createStore = ({
 	isTraveller = true,
 	messages = [],
 } = {}) => {
-	const store = configureStore({
+	const store = configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 			travellers: travellersReducer,
@@ -29,13 +29,7 @@ const createStore = ({
 		},
 	})
 	const initial = store.getState()
-	return configureStore({
-		// The 32ms default warns on a busy machine, as the app's own store allows for
-		middleware: (getDefaultMiddleware) =>
-			getDefaultMiddleware({
-				immutableCheck: { warnAfter: 128 },
-				serializableCheck: { warnAfter: 128 },
-			}),
+	return configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 			travellers: travellersReducer,

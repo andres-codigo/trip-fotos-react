@@ -11,6 +11,7 @@ import {
 	COMBOBOX_SELECTORS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 } from '../../src/constants/test/selectors/components'
+import { middleware } from '../../src/store/middleware'
 import { MOCK_PHOTON_TOKYO_RESPONSE } from '../../src/constants/test/mock-data/mock-travellers'
 import { TEST_USERS } from '../../src/constants/config/users'
 import { VIEWPORTS } from '../../src/constants/config/viewports'
@@ -20,6 +21,7 @@ import { VIEWPORTS } from '../../src/constants/config/viewports'
 ////
 Cypress.Commands.add('createMockStore', (authToken = null) => {
 	return configureStore({
+		middleware,
 		reducer: {
 			authentication: (state = {}) => state,
 			travellers: (state = {}) => state,

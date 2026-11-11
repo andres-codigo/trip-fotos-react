@@ -7,7 +7,7 @@ import {
 } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 import { MemoryRouter, useNavigate } from 'react-router-dom'
 
 import { registerTraveller } from '@/store/slices/travellersSlice'
@@ -53,7 +53,7 @@ vi.mock(
 )
 
 const createMockStore = (initialState) => {
-	return configureStore({
+	return configureTestStore({
 		reducer: {
 			travellers: (
 				state = { status: 'idle', error: null, uploadProgress: null },

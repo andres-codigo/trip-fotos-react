@@ -1,7 +1,7 @@
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 import { TEST_IDS } from '@/constants/test'
@@ -38,7 +38,7 @@ const stubTravellers = (records) =>
 	)
 
 const renderTravellers = (props = {}, locationState = null) => {
-	const store = configureStore({
+	const store = configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 			travellers: travellersReducer,

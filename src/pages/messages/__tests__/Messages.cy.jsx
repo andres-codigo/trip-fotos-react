@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import {
 	MESSAGE_ITEM_SELECTORS,
@@ -50,7 +50,7 @@ describe('<Messages />', () => {
 			body: deleteStatus === 200 ? null : {},
 		}).as('deleteMessage')
 
-		const store = configureStore({
+		const store = configureTestStore({
 			reducer: {
 				authentication: authenticationReducer,
 				messages: messagesReducer,

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { API_DATABASE } from '@/constants/api'
@@ -42,7 +42,7 @@ const renderPage = ({
 	id = 'abc',
 	state,
 } = {}) => {
-	const store = configureStore({
+	const store = configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 			messages: messagesReducer,

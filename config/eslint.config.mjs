@@ -18,6 +18,19 @@ const __dirname = path.dirname(__filename)
 const resolvePath = (file) => path.resolve(__dirname, file)
 const gitignorePath = resolvePath('../.gitignore')
 
+const IMPORT_PATTERNS = [
+	{
+		regex: '^\\.\\./',
+		message: "Use the '@/' alias instead of parent-relative imports.",
+	},
+	{
+		// test/selectors and test/utilities are nested barrels in their own right
+		regex: '^@/constants/(?!test/(selectors|utilities)$)[^/]+/.+',
+		message:
+			"Import constants from the subdirectory barrel, e.g. '@/constants/ui'.",
+	},
+]
+
 export default [
 	// Cypress global configurations
 	pluginCypress.configs.globals,
@@ -94,21 +107,24 @@ export default [
 			'no-restricted-imports': [
 				'error',
 				{
-					patterns: [
+					paths: [
 						{
-							regex: '^\\.\\./',
+							name: '@reduxjs/toolkit',
+							importNames: ['configureStore'],
 							message:
-								"Use the '@/' alias instead of parent-relative imports.",
-						},
-						{
-							// test/selectors and test/utilities are nested barrels in their own right
-							regex: '^@/constants/(?!test/(selectors|utilities)$)[^/]+/.+',
-							message:
-								"Import constants from the subdirectory barrel, e.g. '@/constants/ui'.",
+								"Build a test store with configureTestStore from '@/testUtils/configureTestStore', which keeps the app's middleware limits.",
 						},
 					],
+					patterns: IMPORT_PATTERNS,
 				},
 			],
+		},
+	},
+	// The two places that may call configureStore: the app's store and the test helper built on its options
+	{
+		files: ['src/store/store.js', 'src/testUtils/configureTestStore.js'],
+		rules: {
+			'no-restricted-imports': ['error', { patterns: IMPORT_PATTERNS }],
 		},
 	},
 

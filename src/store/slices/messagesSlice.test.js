@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import { MOCK_USER, MOCK_INBOX } from '@/constants/test'
 
@@ -46,7 +46,7 @@ vi.mock('./authenticationSlice', async () => {
 let store
 
 const initialiseStore = () => {
-	store = configureStore({
+	store = configureTestStore({
 		reducer: {
 			messages: messagesReducer,
 		},

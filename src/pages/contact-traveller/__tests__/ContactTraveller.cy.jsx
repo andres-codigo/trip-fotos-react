@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import ContactTraveller from '@/pages/contact-traveller/ContactTraveller'
 import authenticationReducer from '@/store/slices/authenticationSlice'
@@ -29,7 +29,7 @@ const REPLY_TO = Object.freeze({
 
 describe('<ContactTraveller />', () => {
 	const mountPage = (state) => {
-		const store = configureStore({
+		const store = configureTestStore({
 			reducer: {
 				authentication: authenticationReducer,
 				messages: messagesReducer,

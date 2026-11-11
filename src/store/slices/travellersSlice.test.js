@@ -7,7 +7,7 @@ import {
 	onTestFinished,
 	vi,
 } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import {
 	MOCK_USER,
@@ -121,7 +121,7 @@ vi.mock('./authenticationSlice', async () => {
 let store
 
 const initialiseStore = () => {
-	store = configureStore({
+	store = configureTestStore({
 		reducer: {
 			travellers: travellersReducer,
 		},
@@ -977,7 +977,7 @@ describe('travellersSlice', () => {
 		}
 
 		const preloadStore = () =>
-			configureStore({
+			configureTestStore({
 				reducer: { travellers: travellersReducer },
 				preloadedState: {
 					travellers: {
@@ -1238,7 +1238,7 @@ describe('travellersSlice', () => {
 					new Date().getTime() - MOCK_TIME.THIRTY_SECONDS_AGO
 				const cachedTravellers = [MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE]
 
-				store = configureStore({
+				store = configureTestStore({
 					reducer: {
 						travellers: travellersReducer,
 					},
@@ -1272,7 +1272,7 @@ describe('travellersSlice', () => {
 					new Date().getTime() - MOCK_TIME.THIRTY_SECONDS_AGO
 				const cachedTravellers = [MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE]
 
-				const testStore = configureStore({
+				const testStore = configureTestStore({
 					reducer: {
 						travellers: travellersReducer,
 					},
@@ -1367,7 +1367,7 @@ describe('travellersSlice', () => {
 		}
 
 		const preloadStore = () =>
-			configureStore({
+			configureTestStore({
 				reducer: { travellers: travellersReducer },
 				preloadedState: {
 					travellers: {
@@ -1448,7 +1448,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should stop the user being a traveller when they delete their own profile', async () => {
-				const testStore = configureStore({
+				const testStore = configureTestStore({
 					reducer: { travellers: travellersReducer },
 					preloadedState: {
 						travellers: {
