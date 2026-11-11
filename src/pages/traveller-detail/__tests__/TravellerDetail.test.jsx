@@ -150,6 +150,10 @@ describe('<TravellerDetail />', () => {
 		).not.toBeInTheDocument()
 		expect(screen.getAllByTestId(IMAGE.ID)).toHaveLength(7)
 		expect(
+			screen.getByRole('heading', { level: 2, name: 'Photos' }),
+		).toHaveAttribute('data-cy', TRAVELLER_DETAIL.PHOTOS_HEADING)
+		expect(screen.getByText('7 photos')).toBeInTheDocument()
+		expect(
 			screen.queryByTestId(TRAVELLER_DETAIL.SPINNER),
 		).not.toBeInTheDocument()
 	})
@@ -183,11 +187,16 @@ describe('<TravellerDetail />', () => {
 
 		it('scrolls to the photos once the traveller has loaded', async () => {
 			renderPage({ hash: '#photos' })
-			const list = await screen.findByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
-			expect(list).toHaveAttribute('id', 'photos')
+			const heading = await screen.findByTestId(
+				TRAVELLER_DETAIL.PHOTOS_HEADING,
+			)
+			const anchor = heading.closest('#photos')
+			expect(anchor).toContainElement(
+				screen.getByTestId(TRAVELLER_DETAIL.IMAGES_LIST),
+			)
 			// The scroll runs in an effect, which can flush after the list appears
 			await waitFor(() => expect(scrollIntoView).toHaveBeenCalledTimes(1))
-			expect(scrollIntoView.mock.contexts[0]).toBe(list)
+			expect(scrollIntoView.mock.contexts[0]).toBe(anchor)
 		})
 
 		it('does not scroll without the photos hash', async () => {
@@ -241,34 +250,52 @@ describe('<TravellerDetail />', () => {
 		expect(badges[1].className).toMatch(/\bbg-badge-\d\b/)
 	})
 
-	it('shows the contact link for a traveller viewing someone else', async () => {
+	it('offers Message {first name} in the profile for a traveller viewing someone else', async () => {
 		renderPage({ isTraveller: true })
-		expect(
-			await screen.findByRole('heading', {
-				level: 2,
-				name: 'Send Ada a message',
-			}),
-		).toBeInTheDocument()
-		expect(screen.getByTestId(TRAVELLER_DETAIL.CONTACT)).toHaveAttribute(
-			'href',
-			'/travellers/abc/contact',
-		)
+		const profile = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+		const message = screen.getByRole('link', { name: 'Message Ada' })
+		expect(profile).toContainElement(message)
+		expect(message).toHaveAttribute('data-cy', TRAVELLER_DETAIL.MESSAGE)
+		expect(message).toHaveAttribute('href', '/travellers/abc/contact')
 	})
 
-	it('hides the contact section on the own record', async () => {
+	it('hides Message on the own record', async () => {
 		renderPage({ userId: 'abc', isTraveller: true })
 		await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
 		expect(
-			screen.queryByTestId(TRAVELLER_DETAIL.CONTACT_SECTION),
+			screen.queryByTestId(TRAVELLER_DETAIL.MESSAGE),
 		).not.toBeInTheDocument()
 	})
 
-	it('hides the contact section for non-travellers', async () => {
+	it('hides Message for non-travellers', async () => {
 		renderPage()
 		await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
 		expect(
-			screen.queryByTestId(TRAVELLER_DETAIL.CONTACT_SECTION),
+			screen.queryByTestId(TRAVELLER_DETAIL.MESSAGE),
 		).not.toBeInTheDocument()
+	})
+
+	it('links back to Travellers above the profile', async () => {
+		renderPage()
+		const profile = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+		const back = screen.getByRole('link', { name: 'Back to travellers' })
+		expect(back).toHaveAttribute(
+			'data-cy',
+			TRAVELLER_DETAIL.BACK_TO_TRAVELLERS,
+		)
+		expect(back).toHaveAttribute('href', '/travellers')
+		expect(
+			back.compareDocumentPosition(profile) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy()
+	})
+
+	it('shows no back link while loading', async () => {
+		renderPage()
+		expect(
+			screen.queryByTestId(TRAVELLER_DETAIL.BACK_TO_TRAVELLERS),
+		).not.toBeInTheDocument()
+		await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
 	})
 
 	describe('Own trip actions', () => {
@@ -360,10 +387,9 @@ describe('<TravellerDetail />', () => {
 		expect(
 			await screen.findByText('Traveller not found.'),
 		).toBeInTheDocument()
-		expect(screen.getByTestId(TRAVELLER_DETAIL.BACK_LINK)).toHaveAttribute(
-			'href',
-			'/travellers',
-		)
+		expect(
+			screen.getByTestId(TRAVELLER_DETAIL.BACK_TO_TRAVELLERS),
+		).toHaveAttribute('href', '/travellers')
 		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
 			'Traveller',
 		)
@@ -398,7 +424,7 @@ describe('<TravellerDetail />', () => {
 					await screen.findByTestId(TRAVELLER_DETAIL.NOT_FOUND),
 				).toHaveTextContent('Traveller not found.')
 				expect(
-					screen.getByTestId(TRAVELLER_DETAIL.BACK_LINK),
+					screen.getByTestId(TRAVELLER_DETAIL.BACK_TO_TRAVELLERS),
 				).toHaveAttribute('href', '/travellers')
 				expect(
 					screen.queryByTestId(TRAVELLER_DETAIL.PROFILE),

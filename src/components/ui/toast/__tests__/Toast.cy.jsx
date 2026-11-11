@@ -40,13 +40,24 @@ describe('<Toast />', () => {
 			)
 		})
 
-		it('sits at the bottom centre of the viewport', () => {
+		it('sits at the bottom centre, 16px above the 61px tab bar on a phone', () => {
 			mountToast()
 			cy.get(TOAST_SELECTORS.ROOT).should(($toast) => {
 				const rect = $toast[0].getBoundingClientRect()
-				expect(rect.bottom).to.be.closeTo(844 - 16, 1)
+				expect(rect.bottom).to.be.closeTo(844 - 61 - 16, 1)
 				expect(rect.left + rect.width / 2).to.be.closeTo(390 / 2, 1)
 				expect(rect.width).to.be.closeTo(390 - 32, 1)
+			})
+		})
+
+		it('sits 16px above the bottom edge on desktop, where there is no tab bar', () => {
+			cy.viewport(1280, 800)
+			mountToast()
+			cy.get(TOAST_SELECTORS.ROOT).should(($toast) => {
+				expect($toast[0].getBoundingClientRect().bottom).to.be.closeTo(
+					800 - 16,
+					1,
+				)
 			})
 		})
 	})

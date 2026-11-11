@@ -30,12 +30,12 @@ import TripSummary from '@/components/travellers/trip-summary/TripSummary'
 
 import useScrollToAnchor from '@/pages/traveller-detail/hooks/useScrollToAnchor'
 
-// Cards after the first are spaced apart; the record's own cards get a heavier border
-const SECTION = 'not-first:mt-8'
+// Cards after the profile are spaced apart (the back link comes first, so not-first cannot tell); the record's own cards get a heavier border
+const SECTION = 'mt-8'
 const OWN = 'border-2 border-border-strong'
-// Three tiles across and two on narrow screens; scroll-mt clears the sticky header when scrolled to via the photos anchor
+// Three tiles across and two on narrow screens
 const IMAGES_LIST =
-	'flex scroll-mt-24 list-none flex-wrap gap-x-[2%] gap-y-8 px-0 py-4 [@media(width<=480px)]:gap-x-[4%] [@media(width<=480px)]:gap-y-4 [@media(width<=480px)]:py-2'
+	'flex list-none flex-wrap gap-x-[2%] gap-y-8 px-0 py-4 [@media(width<=480px)]:gap-x-[4%] [@media(width<=480px)]:gap-y-4 [@media(width<=480px)]:py-2'
 
 const TravellerDetail = () => {
 	const { id } = useParams()
@@ -124,6 +124,31 @@ const TravellerDetail = () => {
 					<BaseSpinner label={GLOBAL.SPINNER_LABEL.TRAVELLER} />
 				</div>
 			)}
+			{!isLoading && (
+				// The card's own column, so the link lines up with the card at every width
+				<div className="mx-auto mb-2 max-w-160">
+					<BaseButton
+						isLink
+						to={PATHS.TRAVELLERS}
+						ariaLabel={TRAVELLER_DETAIL_CONFIG.BACK_LABEL}
+						className="inline-flex min-h-11 items-center gap-1 text-text-link underline underline-offset-4"
+						data-cy={TRAVELLER_DETAIL.BACK_TO_TRAVELLERS}>
+						<svg
+							aria-hidden="true"
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round">
+							<path d="m15 18-6-6 6-6" />
+						</svg>
+						{TRAVELLER_DETAIL_CONFIG.BACK_LABEL}
+					</BaseButton>
+				</div>
+			)}
 			{!isLoading && !showProfile && (
 				<BaseCard>
 					{heading}
@@ -131,19 +156,12 @@ const TravellerDetail = () => {
 						<ErrorMessage>
 							{TRAVELLER_DETAIL_CONFIG.NOT_FOUND_MESSAGE}
 						</ErrorMessage>
-						<BaseButton
-							isLink
-							to={PATHS.TRAVELLERS}
-							modeType="outline"
-							data-cy={TRAVELLER_DETAIL.BACK_LINK}>
-							{TRAVELLER_DETAIL_CONFIG.BACK_LABEL}
-						</BaseButton>
 					</div>
 				</BaseCard>
 			)}
 			{showProfile && (
 				<>
-					<BaseCard className={cn(SECTION, isOwnRecord && OWN)}>
+					<BaseCard className={cn(isOwnRecord && OWN)}>
 						{alertMessage && (
 							<div
 								className="mb-4"
@@ -178,6 +196,19 @@ const TravellerDetail = () => {
 									/>
 								))}
 							</div>
+							{canContact && (
+								<div className="flex flex-wrap gap-2">
+									<BaseButton
+										isLink
+										to={`${PATHS.TRAVELLERS}/${id}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`}
+										modeType="primary"
+										data-cy={TRAVELLER_DETAIL.MESSAGE}>
+										{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(
+											traveller.firstName,
+										)}
+									</BaseButton>
+								</div>
+							)}
 							{isOwnRecord && (
 								<div className="flex flex-wrap gap-2">
 									<BaseButton
@@ -220,37 +251,39 @@ const TravellerDetail = () => {
 					)}
 					{files.length > 0 && (
 						<BaseCard className={cn(SECTION, isOwnRecord && OWN)}>
-							<ul
+							{/* The anchor holds the heading too, so a scroll to the photos shows it under the header */}
+							<div
 								id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
 								ref={photosRef}
-								className={IMAGES_LIST}
-								data-cy={TRAVELLER_DETAIL.IMAGES_LIST}>
-								<ImageGallery
-									title={fullName}
-									urls={files}
-									dimensions={traveller?.fileDimensions}
-									thumbnails={traveller?.fileThumbnails}
-									urlParam={
-										TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
-									}
-								/>
-							</ul>
-						</BaseCard>
-					)}
-					{canContact && (
-						<BaseCard className={SECTION}>
-							<section data-cy={TRAVELLER_DETAIL.CONTACT_SECTION}>
-								<h2>Send {traveller.firstName} a message</h2>
-								<div className="flex justify-end">
-									<BaseButton
-										isLink
-										to={`${PATHS.TRAVELLERS}/${id}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`}
-										modeType="primary"
-										data-cy={TRAVELLER_DETAIL.CONTACT}>
-										Contact
-									</BaseButton>
+								className="scroll-mt-24">
+								<div className="flex flex-wrap items-baseline justify-between gap-2">
+									<h2
+										className="m-0"
+										data-cy={
+											TRAVELLER_DETAIL.PHOTOS_HEADING
+										}>
+										{TRAVELLER_DETAIL_CONFIG.PHOTOS_HEADING}
+									</h2>
+									<span className="text-sm text-text-muted">
+										{TRAVELLER_DETAIL_CONFIG.PHOTO_COUNT(
+											files.length,
+										)}
+									</span>
 								</div>
-							</section>
+								<ul
+									className={IMAGES_LIST}
+									data-cy={TRAVELLER_DETAIL.IMAGES_LIST}>
+									<ImageGallery
+										title={fullName}
+										urls={files}
+										dimensions={traveller?.fileDimensions}
+										thumbnails={traveller?.fileThumbnails}
+										urlParam={
+											TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
+										}
+									/>
+								</ul>
+							</div>
 						</BaseCard>
 					)}
 				</>

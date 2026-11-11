@@ -102,18 +102,18 @@ describe('<TravellerItem />', () => {
 
 	it('shows only the details link for a non-traveller non-admin', () => {
 		render()
-		cy.get(TRAVELLER_ITEM_SELECTORS.DETAILS).should(
+		cy.get(TRAVELLER_ITEM_SELECTORS.VIEW_TRIP).should(
 			'have.attr',
 			'href',
 			'/travellers/abc',
 		)
-		cy.get(TRAVELLER_ITEM_SELECTORS.CONTACT).should('not.exist')
+		cy.get(TRAVELLER_ITEM_SELECTORS.MESSAGE).should('not.exist')
 		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).should('not.exist')
 	})
 
 	it('shows contact for a registered traveller', () => {
 		render({ isTraveller: true })
-		cy.get(TRAVELLER_ITEM_SELECTORS.CONTACT).should(
+		cy.get(TRAVELLER_ITEM_SELECTORS.MESSAGE).should(
 			'have.attr',
 			'href',
 			'/travellers/abc/contact',
@@ -127,7 +127,7 @@ describe('<TravellerItem />', () => {
 
 	it('hides contact and delete on the own record', () => {
 		render({ auth: { userId: 'abc', isAdmin: true }, isTraveller: true })
-		cy.get(TRAVELLER_ITEM_SELECTORS.CONTACT).should('not.exist')
+		cy.get(TRAVELLER_ITEM_SELECTORS.MESSAGE).should('not.exist')
 		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).should('not.exist')
 	})
 

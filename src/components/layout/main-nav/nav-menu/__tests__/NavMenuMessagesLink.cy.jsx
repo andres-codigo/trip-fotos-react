@@ -9,7 +9,6 @@ const mountLink = (props = {}) =>
 		<MemoryRouter>
 			<ul>
 				<NavMenuMessagesLink
-					isLink
 					to="/messages"
 					{...props}
 				/>

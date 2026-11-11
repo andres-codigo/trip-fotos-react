@@ -205,16 +205,15 @@ describe('<TravellerItem />', () => {
 	describe('Actions', () => {
 		it('always shows the details link', () => {
 			renderItem()
-			expect(screen.getByTestId(TRAVELLER_ITEM.DETAILS)).toHaveAttribute(
-				'href',
-				'/travellers/abc',
-			)
+			expect(
+				screen.getByTestId(TRAVELLER_ITEM.VIEW_TRIP),
+			).toHaveAttribute('href', '/travellers/abc')
 		})
 
 		it('shows contact for another traveller when registered', () => {
 			setup({ isTraveller: true })
 			renderItem()
-			expect(screen.getByTestId(TRAVELLER_ITEM.CONTACT)).toHaveAttribute(
+			expect(screen.getByTestId(TRAVELLER_ITEM.MESSAGE)).toHaveAttribute(
 				'href',
 				'/travellers/abc/contact',
 			)
@@ -223,7 +222,7 @@ describe('<TravellerItem />', () => {
 		it('hides contact when not a traveller', () => {
 			renderItem()
 			expect(
-				screen.queryByTestId(TRAVELLER_ITEM.CONTACT),
+				screen.queryByTestId(TRAVELLER_ITEM.MESSAGE),
 			).not.toBeInTheDocument()
 		})
 
@@ -231,14 +230,14 @@ describe('<TravellerItem />', () => {
 			setup({ userId: 'abc', isTraveller: true, isAdmin: true })
 			renderItem()
 			expect(
-				screen.queryByTestId(TRAVELLER_ITEM.CONTACT),
+				screen.queryByTestId(TRAVELLER_ITEM.MESSAGE),
 			).not.toBeInTheDocument()
 			expect(
 				screen.queryByTestId(TRAVELLER_ITEM.DELETE),
 			).not.toBeInTheDocument()
 		})
 
-		it('offers Edit trip, before Details, on own record only', () => {
+		it('offers Edit trip, before View trip, on own record only', () => {
 			setup({ userId: 'abc', isTraveller: true })
 			renderItem()
 			const edit = screen.getByTestId(TRAVELLER_ITEM.EDIT)
@@ -246,7 +245,7 @@ describe('<TravellerItem />', () => {
 			expect(edit).toHaveTextContent(TRAVELLER_ITEM_CONFIG.EDIT_LABEL)
 			expect(
 				edit.compareDocumentPosition(
-					screen.getByTestId(TRAVELLER_ITEM.DETAILS),
+					screen.getByTestId(TRAVELLER_ITEM.VIEW_TRIP),
 				) & Node.DOCUMENT_POSITION_FOLLOWING,
 			).toBeTruthy()
 		})

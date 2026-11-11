@@ -10,7 +10,7 @@ describe('Logged in > PageNotFound page', () => {
 		cy.visit(loginUrl)
 		performLogin()
 	})
-	it('displays the 404 page and user can navigate to the home page', () => {
+	it('displays the 404 page and user can go on to Travellers', () => {
 		cy.location('pathname').should('be.oneOf', [
 			PATHS.HOME,
 			PATHS.TRAVELLERS,
@@ -22,21 +22,18 @@ describe('Logged in > PageNotFound page', () => {
 		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.PAGE_NOT_FOUND)
 
 		// Check for the 404 message
-		cy.contains('This page is not available. Sorry about that.').should(
-			'be.visible',
-		)
+		cy.contains('This page is not available.').should('be.visible')
 
 		// Check App title link is present and has the correct href
 		cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK).as('header')
-		cy.get('@header').find('a').should('have.attr', 'href', PATHS.HOME)
+		cy.get('@header')
+			.find('a')
+			.should('have.attr', 'href', PATHS.TRAVELLERS)
 
-		// Click the back to home link and verify url
-		cy.get(PAGE_NOT_FOUND_SELECTORS.HOME_LINK).as('homeLink')
-		cy.get('@homeLink').click()
-		cy.location('pathname').should('be.oneOf', [
-			PATHS.HOME,
-			PATHS.TRAVELLERS,
-		])
+		cy.get(PAGE_NOT_FOUND_SELECTORS.ACTION)
+			.should('have.text', 'Go to Travellers')
+			.click()
+		cy.location('pathname').should('eq', PATHS.TRAVELLERS)
 
 		// Revisit a non-existent route
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
@@ -45,12 +42,15 @@ describe('Logged in > PageNotFound page', () => {
 })
 
 describe('Not logged in > PageNotFound page styling', () => {
-	it('shows the home link as a link, not plain text', () => {
+	it('offers Log in as a primary button', () => {
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
 
-		cy.get(PAGE_NOT_FOUND_SELECTORS.HOME_LINK)
-			.should('have.css', 'text-decoration-line', 'underline')
-			.and('have.css', 'color', 'rgb(169, 201, 138)')
+		cy.get(PAGE_NOT_FOUND_SELECTORS.ACTION)
+			.should('have.text', 'Log in')
+			.and('have.attr', 'href', PATHS.AUTHENTICATION)
+			.and('have.css', 'background-color', 'rgb(159, 192, 126)')
+			.invoke('outerHeight')
+			.should('be.at.least', 44)
 	})
 })
 
@@ -58,9 +58,7 @@ describe('Not logged in > PageNotFound page accessibility', () => {
 	it('has no axe violations', () => {
 		cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
 		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.PAGE_NOT_FOUND)
-		cy.contains('This page is not available. Sorry about that.').should(
-			'be.visible',
-		)
+		cy.contains('This page is not available.').should('be.visible')
 
 		cy.checkA11y()
 	})
@@ -79,9 +77,7 @@ describe('Not logged in > PageNotFound page', () => {
 		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.PAGE_NOT_FOUND)
 
 		// Check for the 404 message
-		cy.contains('This page is not available. Sorry about that.').should(
-			'be.visible',
-		)
+		cy.contains('This page is not available.').should('be.visible')
 
 		// Check App title link is present and has the correct href
 		cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK).as('header')
@@ -90,7 +86,7 @@ describe('Not logged in > PageNotFound page', () => {
 			.should('have.attr', 'href', PATHS.AUTHENTICATION)
 
 		// Click the back to home link and verify url
-		cy.get(PAGE_NOT_FOUND_SELECTORS.HOME_LINK).as('homeLink')
+		cy.get(PAGE_NOT_FOUND_SELECTORS.ACTION).as('homeLink')
 		cy.get('@homeLink').click()
 		cy.url().should('eq', loginUrl)
 

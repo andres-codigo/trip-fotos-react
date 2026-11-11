@@ -22,5 +22,5 @@ export const PAGE_SELECTORS = {
 }
 
 export const PAGE_NOT_FOUND_SELECTORS = {
-	HOME_LINK: getByDataCy('home-link'),
+	ACTION: getByDataCy('page-not-found-action'),
 }

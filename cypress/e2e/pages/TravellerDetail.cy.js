@@ -28,7 +28,7 @@ describe('Traveller Detail page', () => {
 			TRAVELLER_ITEM_SELECTORS.ROOT,
 			`${PHOTOGRAPHER.firstName} ${PHOTOGRAPHER.lastName}`,
 		)
-			.find(TRAVELLER_ITEM_SELECTORS.DETAILS)
+			.find(TRAVELLER_ITEM_SELECTORS.VIEW_TRIP)
 			.click()
 
 		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
@@ -92,7 +92,7 @@ describe('Traveller Detail page', () => {
 			OTHER.firstName,
 		)
 
-		cy.get(TRAVELLER_DETAIL_SELECTORS.CONTACT).click()
+		cy.get(TRAVELLER_DETAIL_SELECTORS.MESSAGE).click()
 
 		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
 			'eq',

@@ -1,83 +1,38 @@
-import { useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
-import BaseButton from '@/components/ui/button/BaseButton'
-import useViewport from '@/utils/useViewport'
 import { cn } from '@/utils/cn'
 
-// Links read as plain cream text on the header; the current page gets an outline
+// The current page gets a 3px bar under the label, never colour alone; the ring sits inside so it clears the header edge
 const linkClasses =
-	'relative text-on-header hover:text-on-header-hover active:text-on-header-hover px-6 py-3 mobile:w-full mobile:px-0 mobile:py-5'
-const activeClasses = 'border-accent-text hover:border-on-header-hover'
+	'relative flex h-full items-center gap-2 px-4 text-[0.9375rem] font-medium text-on-header no-underline hover:bg-surface-accent focus-visible:-outline-offset-3'
+const activeClasses =
+	'after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-[3px] after:bg-accent-text'
 
 const NavMenuButtonLink = ({
 	children,
-	isLink = false,
-	isError = false,
-	isDisabled = false,
-	modeType,
+	to,
 	isActive = false,
-	to = '/',
+	ariaLabel,
 	className,
-	onMenuItemClick,
-	onClick,
 	'data-cy': dataCy,
-	...props
-}) => {
-	const elementRef = useRef()
-	const { isMobile } = useViewport()
-
-	useEffect(() => {
-		if (isError && elementRef.current) {
-			elementRef.current.focus()
-		}
-	}, [isError])
-
-	const handleClick = (event) => {
-		if (isLink && onMenuItemClick && isMobile) {
-			onMenuItemClick()
-		}
-
-		if (onClick) {
-			onClick(event)
-		}
-	}
-
-	const combinedClassName = cn(
-		isLink && linkClasses,
-		isLink && isActive && activeClasses,
-		className,
-	)
-
-	return (
-		<BaseButton
-			ref={elementRef}
-			className={combinedClassName}
-			isLink={isLink}
-			to={to}
-			isError={isError}
-			isDisabled={isDisabled}
-			modeType={modeType}
-			aria-current={isActive ? 'page' : undefined}
-			onClick={handleClick}
-			data-cy={dataCy}
-			{...props}>
-			{children}
-		</BaseButton>
-	)
-}
+}) => (
+	<Link
+		to={to}
+		className={cn(linkClasses, isActive && activeClasses, className)}
+		aria-current={isActive ? 'page' : undefined}
+		aria-label={ariaLabel}
+		data-cy={dataCy}>
+		{children}
+	</Link>
+)
 
 NavMenuButtonLink.propTypes = {
 	children: PropTypes.node.isRequired,
-	isLink: PropTypes.bool,
-	isError: PropTypes.bool,
-	isDisabled: PropTypes.bool,
-	modeType: PropTypes.string,
+	to: PropTypes.string.isRequired,
 	isActive: PropTypes.bool,
-	to: PropTypes.string,
+	ariaLabel: PropTypes.string,
 	className: PropTypes.string,
-	onMenuItemClick: PropTypes.func,
-	onClick: PropTypes.func,
 	'data-cy': PropTypes.string,
 }
 

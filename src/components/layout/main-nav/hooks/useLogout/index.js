@@ -1,20 +1,22 @@
 import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+
+import { PATHS } from '@/constants/ui'
 
 import { logout } from '@/store/slices/authenticationSlice'
 
-function useLogout(setTravellerName, setIsMenuOpen) {
+function useLogout(setTravellerName) {
 	const dispatch = useDispatch()
+	const navigate = useNavigate()
 
-	const handleLogoutClick = (event) => {
-		event.preventDefault()
-
+	const handleLogOut = () => {
 		setTravellerName('')
-		setIsMenuOpen(false)
 
 		dispatch(logout())
+		navigate(PATHS.AUTHENTICATION)
 	}
 
-	return handleLogoutClick
+	return handleLogOut
 }
 
 export default useLogout

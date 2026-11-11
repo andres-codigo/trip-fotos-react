@@ -21,6 +21,7 @@ import LoadingFallback from '@/components/common/loading-fallback/LoadingFallbac
 import SkipLink from '@/components/layout/skip-link/SkipLink'
 import Header from '@/components/layout/header/Header'
 import Footer from '@/components/layout/footer/Footer'
+import TabBar from '@/components/layout/tab-bar/TabBar'
 const Authentication = lazy(
 	() => import('@/pages/authentication/Authentication'),
 )
@@ -174,6 +175,7 @@ function AppRoutes() {
 				</Routes>
 			</Suspense>
 			<Footer />
+			<TabBar />
 		</>
 	)
 }

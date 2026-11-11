@@ -1,477 +1,170 @@
 import { Provider } from 'react-redux'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import PropTypes from 'prop-types'
+import { MemoryRouter } from 'react-router-dom'
+import { configureStore } from '@reduxjs/toolkit'
 
-import { PAGE_SELECTORS, TOP_NAVIGATION_SELECTORS } from '@/constants/test'
-
-import { VIEWPORTS } from '@/constants/config'
-
+import {
+	ACCOUNT_MENU_SELECTORS,
+	TOP_NAVIGATION_SELECTORS,
+} from '@/constants/test'
 import { PATHS } from '@/constants/ui'
 
-import { TestMainNav } from './test-utilities/mainNavTestUtils'
-import {
-	mockUseMainNavState,
-	assertMenuItems,
-	assertMenuItemRedirect,
-} from './test-utilities/mainNavTestHelpers'
+import authenticationReducer from '@/store/slices/authenticationSlice'
+import travellersReducer from '@/store/slices/travellersSlice'
+import messagesReducer from '@/store/slices/messagesSlice'
+
 import TestLocationDisplay from '@/testUtils/cypress/TestLocationDisplay'
 
-import MessagesPage from '@/pages/messages/Messages'
-import TravellersPage from '@/pages/travellers/Travellers'
-import AuthenticationPage from '@/pages/authentication/Authentication'
+import MainNav from '@/components/layout/main-nav/MainNav'
 
-const assertMenuItemRedirectWithDefaults = (
-	routePath,
-	viewportType,
-	navMenuItem,
-	locationPageClassName,
-	PageComponent,
-	store,
-	isTraveller = false,
-) => {
-	assertMenuItemRedirect(
-		store,
-		routePath,
-		viewportType,
-		navMenuItem,
-		locationPageClassName,
-		PageComponent,
-		TestMainNav,
-		TestLocationDisplay,
-		Provider,
-		MemoryRouter,
-		Routes,
-		Route,
-		isTraveller,
+const USER_ID = 'ada-uid'
+
+const createStore = () =>
+	configureStore({
+		reducer: {
+			authentication: authenticationReducer,
+			travellers: travellersReducer,
+			messages: messagesReducer,
+		},
+		preloadedState: {
+			authentication: {
+				...authenticationReducer(undefined, { type: '@@init' }),
+				token: 'token',
+				userId: USER_ID,
+			},
+			travellers: {
+				...travellersReducer(undefined, { type: '@@init' }),
+				travellerName: 'Ada Lovelace',
+			},
+			messages: {
+				...messagesReducer(undefined, { type: '@@init' }),
+				messages: [{ id: 'm1', read: false }],
+			},
+		},
+	})
+
+// The header's own frame, so the nav is measured where it sits in the app
+const mountNav = ({ path = PATHS.TRAVELLERS, isTraveller = true } = {}) =>
+	cy.mount(
+		<Provider store={createStore()}>
+			<MemoryRouter initialEntries={[path]}>
+				<header className="fixed flex h-20 w-full items-center justify-between bg-header">
+					<p className="px-6 text-2xl font-bold">Trip Fotos</p>
+					<MainNav
+						isLoggedIn
+						isTraveller={isTraveller}
+					/>
+				</header>
+				<div className="pt-24">
+					<TestLocationDisplay />
+				</div>
+			</MemoryRouter>
+		</Provider>,
 	)
-}
 
 describe('<MainNav />', () => {
-	describe('Rendering tests', () => {
-		describe('Not logged in', () => {
-			it('does not render nav', () => {
-				cy.createMockStore('mock-token').then((store) => {
-					cy.mountWithProviders(
-						<TestMainNav isLoggedIn={false} />,
-						store,
-					)
-					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER).should(
-						'not.exist',
-					)
-				})
-			})
+	describe('Desktop', () => {
+		beforeEach(() => {
+			cy.viewport(1280, 800)
 		})
 
-		describe('Logged in', () => {
-			describe('Mobile', () => {
-				it('renders menu items and hamburger menu when logged in', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						cy.mountWithProviders(
-							<TestMainNav
-								isLoggedIn={true}
-								isTraveller={true}
-								isMenuOpen={true}
-							/>,
-							store,
-						)
-						cy.setViewportToMobile()
-						cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
-							.should('exist')
-							.and('be.visible')
-						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
-							.should('exist')
-							.and('be.visible')
-						assertMenuItems(mockUseMainNavState().travellerName)
-					})
-				})
-			})
+		it('shows Travellers, Messages and My trip inline, then the account button', () => {
+			mountNav()
 
-			describe('Tablet', () => {
-				it('renders menu items when logged in', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						cy.mountWithProviders(
-							<TestMainNav
-								isLoggedIn={true}
-								isTraveller={true}
-								isMenuOpen={true}
-							/>,
-							store,
-						)
-						cy.setViewportToTablet()
-						cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
-							.should('exist')
-							.and('be.visible')
-						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
-							'not.be.visible',
-						)
-						assertMenuItems(mockUseMainNavState().travellerName)
-					})
-				})
-			})
+			cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER).should(
+				'be.visible',
+			)
+			cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS)
+				.should('have.attr', 'aria-current', 'page')
+				.invoke('outerHeight')
+				.should('eq', 80)
+			cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should(
+				'have.text',
+				'1',
+			)
+			cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MY_TRIP).then(
+				($trip) => {
+					cy.get(ACCOUNT_MENU_SELECTORS.BUTTON)
+						.should('be.visible')
+						.then(($account) => {
+							expect(
+								$account[0].getBoundingClientRect().left,
+							).to.be.greaterThan(
+								$trip[0].getBoundingClientRect().right,
+							)
+						})
+				},
+			)
+			cy.checkA11y()
+		})
 
-			describe('Desktop', () => {
-				it('renders menu items when logged in', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						cy.mountWithProviders(
-							<TestMainNav
-								isLoggedIn={true}
-								isTraveller={true}
-								isMenuOpen={true}
-							/>,
-							store,
-						)
-						cy.setViewportToTablet()
-						cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
-							.should('exist')
-							.and('be.visible')
-						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
-							'not.be.visible',
-						)
-						assertMenuItems(mockUseMainNavState().travellerName)
-					})
-				})
-			})
+		it('goes to each place from the nav', () => {
+			mountNav()
+
+			cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES).click()
+			cy.get('[data-cy="location-display"]').should(
+				'have.text',
+				PATHS.MESSAGES,
+			)
+			cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES).should(
+				'have.attr',
+				'aria-current',
+				'page',
+			)
+			cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MY_TRIP).click()
+			cy.get('[data-cy="location-display"]').should(
+				'have.text',
+				`${PATHS.TRAVELLERS}/${USER_ID}`,
+			)
+		})
+
+		it('logs out from the account menu and lands on Log in', () => {
+			mountNav()
+
+			cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
+			cy.get(ACCOUNT_MENU_SELECTORS.SIGNED_IN_AS).should(
+				'contain.text',
+				'Ada Lovelace',
+			)
+			cy.get(ACCOUNT_MENU_SELECTORS.LOG_OUT).click()
+			cy.get('[data-cy="location-display"]').should(
+				'have.text',
+				PATHS.AUTHENTICATION,
+			)
 		})
 	})
 
-	describe('Behaviour tests', () => {
-		describe('Logged in', () => {
-			describe('Mobile', () => {
-				it('redirects to Messages page when Messages is clicked', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						assertMenuItemRedirectWithDefaults(
-							PATHS.MESSAGES,
-							VIEWPORTS.MOBILE,
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
-							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
-							MessagesPage,
-							store,
-							true,
-						)
-					})
-				})
-
-				it('redirects to Travellers page when Travellers is clicked', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						assertMenuItemRedirectWithDefaults(
-							PATHS.TRAVELLERS,
-							VIEWPORTS.MOBILE,
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
-							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
-							TravellersPage,
-							store,
-						)
-					})
-				})
-
-				it('redirects to Authentication page and closes menu when Logout is clicked', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						assertMenuItemRedirectWithDefaults(
-							PATHS.AUTHENTICATION,
-							VIEWPORTS.MOBILE,
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
-							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
-							AuthenticationPage,
-							store,
-						)
-					})
-				})
-
-				it('opens and closes the hamburger menu on mobile when clicking outside', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						cy.mountWithProviders(
-							<TestMainNav
-								isLoggedIn={true}
-								isMenuOpen={true}
-							/>,
-							store,
-						)
-						cy.setViewportToMobile()
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('be.visible')
-						cy.get('body').click(0, 0)
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('not.be.visible')
-					})
-				})
-
-				it('toggles the hamburger menu when the hamburger is clicked on mobile', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						cy.mountWithProviders(
-							<TestMainNav
-								isLoggedIn={true}
-								isMenuOpen={false}
-							/>,
-							store,
-						)
-						cy.setViewportToMobile()
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('not.be.visible')
-						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
-							.click()
-							.should('have.attr', 'aria-expanded', 'true')
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('be.visible')
-						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
-							.click()
-							.should('have.attr', 'aria-expanded', 'false')
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('not.be.visible')
-					})
-				})
-
-				it('closes the hamburger menu when Messages link is clicked on mobile', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						cy.mountWithProviders(
-							<TestMainNav
-								isLoggedIn={true}
-								isTraveller={true}
-								isMenuOpen={true}
-							/>,
-							store,
-						)
-						cy.setViewportToMobile()
-
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('be.visible')
-
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
-						).click()
-
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('not.be.visible')
-					})
-				})
-
-				it('closes the hamburger menu when Travellers link is clicked on mobile', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						cy.mountWithProviders(
-							<TestMainNav
-								isLoggedIn={true}
-								isMenuOpen={true}
-							/>,
-							store,
-						)
-						cy.setViewportToMobile()
-
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('be.visible')
-
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
-						).click()
-
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-						).should('not.be.visible')
-					})
-				})
-
-				it('hamburger menu does not exist when user is not logged in', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						cy.mountWithProviders(
-							<TestMainNav isLoggedIn={false} />,
-							store,
-						)
-						cy.setViewportToMobile()
-
-						cy.get(
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER,
-						).should('not.exist')
-						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
-							'not.exist',
-						)
-					})
-				})
-			})
-
-			describe('Tablet', () => {
-				it('redirects to Messages page when Messages is clicked', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						assertMenuItemRedirectWithDefaults(
-							PATHS.MESSAGES,
-							VIEWPORTS.TABLET,
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
-							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
-							MessagesPage,
-							store,
-							true,
-						)
-					})
-				})
-
-				it('redirects to Travellers page when Travellers is clicked', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						assertMenuItemRedirectWithDefaults(
-							PATHS.TRAVELLERS,
-							VIEWPORTS.TABLET,
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
-							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
-							TravellersPage,
-							store,
-						)
-					})
-				})
-
-				it('redirects to Authentication page when Logout is clicked', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						assertMenuItemRedirectWithDefaults(
-							PATHS.AUTHENTICATION,
-							VIEWPORTS.tablet,
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
-							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
-							AuthenticationPage,
-							store,
-						)
-					})
-				})
-			})
-
-			describe('Desktop', () => {
-				it('redirects to Messages page when Messages is clicked', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						assertMenuItemRedirectWithDefaults(
-							PATHS.MESSAGES,
-							VIEWPORTS.DESKTOP,
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MESSAGES,
-							PAGE_SELECTORS.MESSAGES_MAIN_CONTAINER,
-							MessagesPage,
-							store,
-							true,
-						)
-					})
-				})
-
-				it('redirects to Travellers page when Travellers is clicked', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						assertMenuItemRedirectWithDefaults(
-							PATHS.TRAVELLERS,
-							VIEWPORTS.DESKTOP,
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
-							PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER,
-							TravellersPage,
-							store,
-						)
-					})
-				})
-
-				it('redirects to Authentication page when Logout is clicked', () => {
-					cy.createMockStore('mock-token').then((store) => {
-						assertMenuItemRedirectWithDefaults(
-							PATHS.AUTHENTICATION,
-							VIEWPORTS.DESKTOP,
-							TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT,
-							PAGE_SELECTORS.AUTHENTICATION_MAIN_CONTAINER,
-							AuthenticationPage,
-							store,
-						)
-					})
-				})
-			})
+	describe('Mobile', () => {
+		beforeEach(() => {
+			cy.viewport(390, 844)
 		})
-	})
 
-	describe('Accessibility tests', () => {
-		describe('Logged in', () => {
-			it('nav has appropriate aria-label and role', () => {
-				cy.createMockStore('mock-token').then((store) => {
-					cy.mountWithProviders(
-						<TestMainNav
-							isLoggedIn={true}
-							isMenuOpen={true}
-						/>,
-						store,
-					)
-					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
-						.should('have.attr', 'aria-label', 'Top navigation')
-						.and('have.attr', 'role', 'navigation')
-				})
-			})
+		it('hides the inline nav and keeps the account button clear of the right edge', () => {
+			mountNav()
 
-			it('hamburger menu button has correct aria attributes', () => {
-				cy.createMockStore('mock-token').then((store) => {
-					cy.mountWithProviders(
-						<TestMainNav
-							isLoggedIn={true}
-							isMenuOpen={true}
-						/>,
-						store,
-					)
-					cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
-						.should(
-							'have.attr',
-							'aria-controls',
-							'nav-menu-items-container',
-						)
-						.and('have.attr', 'aria-expanded', 'true')
-						.and('have.attr', 'aria-label', 'Close navigation menu')
+			cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER).should(
+				'not.be.visible',
+			)
+			cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should('be.visible').focus()
+			// The 3px ring sits inside the button, so the button's own box must stay on screen
+			cy.focused()
+				.should('have.css', 'outline-offset', '-3px')
+				.then(($button) => {
+					const { right, height } = $button[0].getBoundingClientRect()
+					expect(right).to.be.at.most(390 - 8)
+					expect(height).to.be.at.least(44)
 				})
-			})
+		})
 
-			it('menu items container has id and data-cy, and aria-label', () => {
-				cy.createMockStore('mock-token').then((store) => {
-					cy.mountWithProviders(
-						<TestMainNav
-							isLoggedIn={true}
-							isMenuOpen={true}
-						/>,
-						store,
-					)
-					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER)
-						.should('have.attr', 'id', 'nav-menu-items-container')
-						.and('have.attr', 'aria-label', 'Main navigation menu')
-				})
-			})
+		it('opens the account menu inside the viewport', () => {
+			mountNav()
 
-			it('logout button is accessible by role and label', () => {
-				cy.createMockStore('mock-token').then((store) => {
-					cy.mountWithProviders(
-						<TestMainNav
-							isLoggedIn={true}
-							isMenuOpen={true}
-						/>,
-						store,
-					)
-					cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT)
-						.should('exist')
-						.and('contain.text', 'Logout')
-				})
+			cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
+			cy.get(ACCOUNT_MENU_SELECTORS.PANEL).then(($panel) => {
+				const { left, right } = $panel[0].getBoundingClientRect()
+				expect(left).to.be.at.least(0)
+				expect(right).to.be.at.most(390)
 			})
-
-			it('all interactive elements are focusable', () => {
-				cy.createMockStore('mock-token').then((store) => {
-					cy.mountWithProviders(
-						<TestMainNav
-							isLoggedIn={true}
-							isMenuOpen={true}
-						/>,
-						store,
-					)
-					cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
-						.focus()
-						.should('have.focus')
-					cy.get(
-						`${TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER} a`,
-					).each(($el) => {
-						cy.wrap($el).focus().should('have.focus')
-					})
-				})
-			})
+			cy.checkA11y()
 		})
 	})
 })
-
-TestMainNav.propTypes = {
-	isLoggedIn: PropTypes.bool,
-	isTraveller: PropTypes.bool,
-	isMenuOpen: PropTypes.bool,
-}

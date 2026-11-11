@@ -1,338 +1,185 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { useDispatch, useSelector } from 'react-redux'
-
-const mockUseLocation = vi.fn()
-
-vi.mock('react-router-dom', () => ({
-	useLocation: () => mockUseLocation(),
-}))
-
-vi.mock('react-redux', async () => {
-	const { createReactReduxMock } =
-		await import('@/testUtils/vitest/mockReactRedux')
-	return createReactReduxMock()
-})
-
-import MainNav from '@/components/layout/main-nav/MainNav'
-
-// Mock custom hooks
-vi.mock('@/components/layout/main-nav/hooks/useMainNavState', () => ({
-	default: vi.fn(),
-}))
-
-vi.mock('@/components/layout/main-nav/hooks/useClickOutsideToClose', () => ({
-	default: vi.fn(),
-}))
-
-vi.mock('@/components/layout/main-nav/hooks/useLogout', () => ({
-	default: vi.fn(),
-}))
-
-// Mock child components: they surface what MainNav passes as DOM, so tests assert what is rendered
-vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
-	default: ({
-		isActive,
-		onClick,
-		onMenuItemClick,
-		'data-cy': dataCy,
-		ariaLabel,
-		children,
-	}) => (
-		<button
-			type="button"
-			aria-label={ariaLabel}
-			aria-current={isActive ? 'page' : undefined}
-			onClick={onClick || onMenuItemClick}
-			data-cy={dataCy}>
-			{children}
-		</button>
-	),
-}))
-
-vi.mock('@/components/layout/main-nav/nav-menu/NavMenuMessagesLink', () => ({
-	default: ({
-		isActive,
-		onMenuItemClick,
-		'data-cy': dataCy,
-		unreadMessages,
-	}) => (
-		<button
-			type="button"
-			aria-current={isActive ? 'page' : undefined}
-			onClick={onMenuItemClick}
-			data-cy={dataCy}>
-			Messages {unreadMessages}
-		</button>
-	),
-}))
-
-import useMainNavState from '@/components/layout/main-nav/hooks/useMainNavState'
-import useClickOutsideToClose from '@/components/layout/main-nav/hooks/useClickOutsideToClose'
-import useLogout from '@/components/layout/main-nav/hooks/useLogout'
+import { Provider } from 'react-redux'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { configureStore } from '@reduxjs/toolkit'
 
 import { PATHS } from '@/constants/ui'
 
-describe('<MainNav />', () => {
-	const mockTravellerName = 'John Doe'
-	// Five messages, two unread: the nav counts only the unread ones
-	const mockUnreadMessages = 2
-	const mockMessages = Array.from({ length: 5 }, (_, id) => ({
-		id,
-		read: id >= mockUnreadMessages,
-	}))
+import authenticationReducer from '@/store/slices/authenticationSlice'
+import travellersReducer from '@/store/slices/travellersSlice'
+import messagesReducer from '@/store/slices/messagesSlice'
 
-	const mockSetTravellerName = vi.fn()
-	const mockDispatch = vi.fn()
-	const mockSetIsMenuOpen = vi.fn()
+import MainNav from '@/components/layout/main-nav/MainNav'
 
-	const mockHandleLogoutClick = vi.fn()
+const USER_ID = 'ada-uid'
 
-	beforeEach(() => {
-		// Default location mock
-		mockUseLocation.mockReturnValue({
-			pathname: '/current-path',
-		})
-
-		// Default selector mock
-		vi.mocked(useSelector).mockImplementation((selector) =>
-			selector({
-				travellers: {
-					travellerName: mockTravellerName,
-					isTraveller: true,
-				},
-				messages: { messages: mockMessages },
+const createStore = ({ travellerName = 'Ada Lovelace', messages = [] } = {}) =>
+	configureStore({
+		// The 32ms default warns on a busy machine, as the app's own store allows for
+		middleware: (getDefaultMiddleware) =>
+			getDefaultMiddleware({
+				immutableCheck: { warnAfter: 128 },
+				serializableCheck: { warnAfter: 128 },
 			}),
-		)
-
-		// Default hook return values
-		vi.mocked(useMainNavState).mockReturnValue({
-			travellerName: mockTravellerName,
-			setTravellerName: mockSetTravellerName,
-			isMenuOpen: false,
-			setIsMenuOpen: mockSetIsMenuOpen,
-		})
-
-		vi.mocked(useDispatch).mockReturnValue(mockDispatch)
-		mockDispatch.mockClear()
-		vi.mocked(useClickOutsideToClose).mockReturnValue(undefined)
-		vi.mocked(useLogout).mockReturnValue(mockHandleLogoutClick)
+		reducer: {
+			authentication: authenticationReducer,
+			travellers: travellersReducer,
+			messages: messagesReducer,
+		},
+		preloadedState: {
+			authentication: {
+				...authenticationReducer(undefined, { type: '@@init' }),
+				token: 'token',
+				userId: USER_ID,
+			},
+			travellers: {
+				...travellersReducer(undefined, { type: '@@init' }),
+				travellerName,
+			},
+			messages: {
+				...messagesReducer(undefined, { type: '@@init' }),
+				messages,
+			},
+		},
 	})
 
-	const defaultProps = {
-		isLoggedIn: true,
-	}
-
-	describe('Behaviour tests', () => {
-		it('should sync the store traveller name when logged in', () => {
-			render(<MainNav {...defaultProps} />)
-
-			expect(mockSetTravellerName).toHaveBeenCalledWith(mockTravellerName)
-		})
-
-		it('should clear the displayed name when the store name is empty', () => {
-			vi.mocked(useSelector).mockImplementation((selector) =>
-				selector({
-					travellers: { travellerName: '', isTraveller: true },
-					messages: { messages: [] },
-				}),
-			)
-
-			render(<MainNav {...defaultProps} />)
-
-			expect(mockSetTravellerName).toHaveBeenCalledWith('')
-		})
-
-		it('should load the messages for a logged-in traveller', () => {
-			render(<MainNav {...defaultProps} />)
-
-			expect(mockDispatch).toHaveBeenCalledWith(expect.any(Function))
-		})
-
-		it.each([
-			['logged out', { isLoggedIn: false }],
-			['not a traveller', { isLoggedIn: true, isTraveller: false }],
-		])('should not load the messages when %s', (_label, props) => {
-			render(<MainNav {...props} />)
-
-			expect(mockDispatch).not.toHaveBeenCalled()
-		})
-
-		it('should not touch the displayed name when logged out', () => {
-			render(
+// isTraveller is passed so the nav never fetches messages; the store's messages feed the count
+const renderNav = ({
+	isLoggedIn = true,
+	isTraveller = true,
+	path = PATHS.TRAVELLERS,
+	store = createStore(),
+	useLogout,
+} = {}) => {
+	render(
+		<Provider store={store}>
+			<MemoryRouter initialEntries={[path]}>
 				<MainNav
-					{...defaultProps}
-					isLoggedIn={false}
-				/>,
-			)
+					isLoggedIn={isLoggedIn}
+					isTraveller={isTraveller}
+					{...(useLogout && { useLogout })}
+				/>
+				<Routes>
+					<Route
+						path="*"
+						element={null}
+					/>
+				</Routes>
+			</MemoryRouter>
+		</Provider>,
+	)
+	return store
+}
 
-			expect(mockSetTravellerName).not.toHaveBeenCalled()
-		})
+const mainNav = () => screen.getByRole('navigation', { name: 'Main' })
 
-		it('should close the menu when the Messages link is clicked', () => {
-			render(<MainNav {...defaultProps} />)
-
-			fireEvent.click(screen.getByTestId('nav-menu-item-messages'))
-
-			expect(mockSetIsMenuOpen).toHaveBeenCalledWith(false)
-		})
-
-		it('should close the menu when the Travellers link is clicked', () => {
-			render(<MainNav {...defaultProps} />)
-
-			fireEvent.click(screen.getByTestId('nav-menu-item-travellers'))
-
-			expect(mockSetIsMenuOpen).toHaveBeenCalledWith(false)
-		})
-
-		it.each([
-			['Messages', 'nav-menu-item-messages', PATHS.MESSAGES],
-			['Travellers', 'nav-menu-item-travellers', PATHS.TRAVELLERS],
-		])(
-			'should mark the %s link as the current page only on its own path',
-			(_label, dataCy, path) => {
-				mockUseLocation.mockReturnValue({ pathname: path })
-				const { unmount } = render(<MainNav {...defaultProps} />)
-
-				expect(screen.getByTestId(dataCy)).toHaveAttribute(
-					'aria-current',
-					'page',
-				)
-				unmount()
-
-				mockUseLocation.mockReturnValue({ pathname: '/other-path' })
-				render(<MainNav {...defaultProps} />)
-
-				expect(screen.getByTestId(dataCy)).not.toHaveAttribute(
-					'aria-current',
-				)
-			},
-		)
+describe('<MainNav />', () => {
+	beforeEach(() => {
+		localStorage.clear()
 	})
 
 	describe('Rendering tests', () => {
-		it('should not render MainNav when isLoggedIn is false', () => {
-			render(<MainNav isLoggedIn={false} />)
+		it('renders nothing when logged out', () => {
+			renderNav({ isLoggedIn: false })
 
 			expect(screen.queryByRole('navigation')).not.toBeInTheDocument()
-		})
-
-		it('should call default hooks with correct parameters', () => {
-			render(<MainNav {...defaultProps} />)
-
-			expect(vi.mocked(useMainNavState)).toHaveBeenCalledTimes(1)
-			expect(vi.mocked(useClickOutsideToClose)).toHaveBeenCalledWith(
-				false,
-				expect.any(Object),
-				expect.any(Object),
-				mockSetIsMenuOpen,
-			)
-			expect(vi.mocked(useLogout)).toHaveBeenCalledWith(
-				mockSetTravellerName,
-				mockSetIsMenuOpen,
-			)
-		})
-
-		it('should render the Messages link with the unread count only', () => {
-			render(<MainNav {...defaultProps} />)
-
 			expect(
-				screen.getByTestId('nav-menu-item-messages'),
-			).toHaveTextContent(`Messages ${mockUnreadMessages}`)
-		})
-
-		it('should pass a zero count when every message is read', () => {
-			vi.mocked(useSelector).mockImplementation((selector) =>
-				selector({
-					travellers: {
-						travellerName: mockTravellerName,
-						isTraveller: true,
-					},
-					messages: {
-						messages: mockMessages.map((message) => ({
-							...message,
-							read: true,
-						})),
-					},
-				}),
-			)
-
-			render(<MainNav {...defaultProps} />)
-
-			expect(
-				screen.getByTestId('nav-menu-item-messages'),
-			).toHaveTextContent(/^Messages 0$/)
-		})
-
-		it('should not render the Messages link for a non-traveller', () => {
-			render(
-				<MainNav
-					{...defaultProps}
-					isTraveller={false}
-				/>,
-			)
-
-			expect(
-				screen.queryByTestId('nav-menu-item-messages'),
+				screen.queryByRole('button', { name: /^Account/ }),
 			).not.toBeInTheDocument()
 		})
 
-		it('should render the Travellers link', () => {
-			render(<MainNav {...defaultProps} />)
+		it('lists Travellers, Messages and My trip for a traveller, and no Logout', () => {
+			renderNav()
 
+			const links = within(mainNav()).getAllByRole('link')
+			expect(links.map((link) => link.textContent)).toEqual([
+				'Travellers',
+				'Messages',
+				'My trip',
+			])
+			expect(links[2]).toHaveAttribute(
+				'href',
+				`${PATHS.TRAVELLERS}/${USER_ID}`,
+			)
 			expect(
-				screen.getByTestId('nav-menu-item-travellers'),
-			).toHaveTextContent('Travellers')
+				within(mainNav()).queryByText(/log ?out/i),
+			).not.toBeInTheDocument()
 		})
 
-		it('should render the Logout link with the traveller name and log out on click', () => {
-			render(<MainNav {...defaultProps} />)
+		it('lists Travellers and Register for a user who is not a traveller', () => {
+			renderNav({ isTraveller: false })
 
-			const logout = screen.getByTestId('nav-menu-item-logout')
-			expect(logout).toHaveAccessibleName(`Logout ${mockTravellerName}`)
+			const links = within(mainNav()).getAllByRole('link')
+			expect(links.map((link) => link.textContent)).toEqual([
+				'Travellers',
+				'Register',
+			])
+			expect(links[1]).toHaveAttribute('href', PATHS.REGISTER)
+		})
 
-			fireEvent.click(logout)
+		it.each([
+			[PATHS.TRAVELLERS, 'Travellers'],
+			[PATHS.MESSAGES, 'Messages'],
+			[`${PATHS.TRAVELLERS}/${USER_ID}`, 'My trip'],
+			[`${PATHS.TRAVELLERS}/${USER_ID}/edit`, 'My trip'],
+		])('marks only the current page on %s', (path, current) => {
+			renderNav({ path })
 
-			expect(mockHandleLogoutClick).toHaveBeenCalledTimes(1)
+			const marked = within(mainNav())
+				.getAllByRole('link')
+				.filter((link) => link.getAttribute('aria-current') === 'page')
+			expect(marked).toHaveLength(1)
+			expect(marked[0]).toHaveTextContent(current)
+		})
+
+		it("marks nothing on someone else's trip", () => {
+			renderNav({ path: `${PATHS.TRAVELLERS}/someone-else` })
+
+			expect(
+				within(mainNav())
+					.getAllByRole('link')
+					.some((link) => link.hasAttribute('aria-current')),
+			).toBe(false)
+		})
+
+		it('shows the unread count on Messages', () => {
+			renderNav({
+				store: createStore({
+					messages: [
+						{ id: 'm1', read: false },
+						{ id: 'm2', read: true },
+					],
+				}),
+			})
+
+			expect(
+				within(mainNav()).getByRole('link', {
+					name: 'Messages, 1 unread message',
+				}),
+			).toBeInTheDocument()
+		})
+
+		it('names the account button after the signed-in traveller', () => {
+			renderNav()
+
+			expect(
+				screen.getByRole('button', { name: 'Account, Ada Lovelace' }),
+			).toHaveAttribute('aria-expanded', 'false')
 		})
 	})
 
-	describe('Accessibility tests', () => {
-		it('should set correct aria-label and aria-expanded when menu is closed', () => {
-			render(<MainNav {...defaultProps} />)
+	describe('Behaviour tests', () => {
+		it('logs out from the account menu', () => {
+			const handleLogOut = vi.fn()
+			renderNav({ useLogout: () => handleLogOut })
 
-			const hamburgerButton = screen.getByTestId('hamburger-menu')
-			expect(hamburgerButton).toHaveAttribute(
-				'aria-label',
-				'Open navigation menu',
+			fireEvent.click(
+				screen.getByRole('button', { name: 'Account, Ada Lovelace' }),
 			)
-			expect(hamburgerButton).toHaveAttribute('aria-expanded', 'false')
-		})
+			fireEvent.click(screen.getByRole('button', { name: 'Log out' }))
 
-		it('should set correct aria-label and aria-expanded when menu is open', () => {
-			vi.mocked(useMainNavState).mockReturnValueOnce({
-				...vi.mocked(useMainNavState).getMockImplementation()(),
-				isMenuOpen: true,
-			})
-
-			render(<MainNav {...defaultProps} />)
-
-			const hamburgerButton = screen.getByTestId('hamburger-menu')
-			expect(hamburgerButton).toHaveAttribute(
-				'aria-label',
-				'Close navigation menu',
-			)
-			expect(hamburgerButton).toHaveAttribute('aria-expanded', 'true')
-		})
-
-		it('should set aria-controls attribute on hamburger button', () => {
-			render(<MainNav {...defaultProps} />)
-
-			const hamburgerButton = screen.getByTestId('hamburger-menu')
-			expect(hamburgerButton).toHaveAttribute(
-				'aria-controls',
-				'nav-menu-items-container',
-			)
+			expect(handleLogOut).toHaveBeenCalledOnce()
 		})
 	})
 })

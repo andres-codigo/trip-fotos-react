@@ -45,7 +45,7 @@ export const TEST_IDS = {
 		CONTAINER: 'messages-main-container',
 	},
 	PAGE_NOT_FOUND: {
-		HOME_LINK: 'home-link',
+		ACTION: 'page-not-found-action',
 	},
 	PRIVACY: {
 		CONTAINER: 'privacy-main-container',
