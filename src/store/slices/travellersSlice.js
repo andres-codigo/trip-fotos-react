@@ -496,9 +496,27 @@ export const loadTraveller = createAsyncThunk(
 	},
 )
 
+// The Auth display name can be missing (a failed name update at registration), so the nav takes the name from the record
+const loadOwnName = async (userId, dispatch) => {
+	try {
+		const [firstName, lastName] = await Promise.all(
+			['firstName', 'lastName'].map(async (field) =>
+				(
+					await databaseRequest(`/travellers/${userId}/${field}`)
+				).json(),
+			),
+		)
+		if (firstName && lastName) {
+			dispatch(setTravellerName(`${firstName} ${lastName}`))
+		}
+	} catch {
+		// The name is only shown in the nav, so failing to read it must not fail the traveller check
+	}
+}
+
 export const checkIsTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.CHECK_IS_TRAVELLER,
-	async (userId, { rejectWithValue }) => {
+	async (userId, { dispatch, rejectWithValue }) => {
 		try {
 			// shallow avoids downloading the whole record just to test it exists
 			const response = await databaseRequest(`/travellers/${userId}`, {
@@ -506,6 +524,10 @@ export const checkIsTraveller = createAsyncThunk(
 			})
 
 			const responseData = await response.json()
+
+			if (responseData !== null) {
+				await loadOwnName(userId, dispatch)
+			}
 
 			return responseData !== null
 		} catch (error) {

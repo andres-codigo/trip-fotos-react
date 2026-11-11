@@ -1648,6 +1648,63 @@ describe('travellersSlice', () => {
 				})
 			})
 
+			it('should take travellerName from the record when the Auth display name is missing', async () => {
+				const json = (value) => ({ ok: true, json: async () => value })
+				global.fetch
+					.mockResolvedValueOnce(json({ firstName: true }))
+					.mockResolvedValueOnce(json('Ada'))
+					.mockResolvedValueOnce(json('Lovelace'))
+
+				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
+
+				expect(global.fetch).toHaveBeenCalledWith(
+					expect.stringContaining(
+						`/travellers/${MOCK_USER.USER_ID}/firstName.json`,
+					),
+					expect.any(Object),
+				)
+				expect(store.getState().travellers.travellerName).toBe(
+					'Ada Lovelace',
+				)
+			})
+
+			it('should still confirm the traveller, keeping the session name, when the record name cannot be read', async () => {
+				store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
+				global.fetch
+					.mockResolvedValueOnce({
+						ok: true,
+						json: async () => ({ firstName: true }),
+					})
+					.mockResolvedValueOnce({ ok: false, status: 500 })
+					.mockResolvedValueOnce({ ok: false, status: 500 })
+
+				const result = await store.dispatch(
+					checkIsTraveller(MOCK_USER.USER_ID),
+				)
+
+				expect(result.payload).toBe(true)
+				expect(store.getState().travellers).toMatchObject({
+					isTraveller: true,
+					travellerName: MOCK_USER.FULL_NAME,
+				})
+			})
+
+			it('should keep the record answer when the session restores after it', async () => {
+				global.fetch.mockResolvedValueOnce({
+					ok: true,
+					json: async () => null,
+				})
+				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
+
+				// The persisted userId starts the check before tryLogin resolves; a stale display name must not come back
+				store.dispatch({
+					type: 'authentication/tryLogin/fulfilled',
+					payload: { userName: MOCK_USER.FULL_NAME },
+				})
+
+				expect(store.getState().travellers.travellerName).toBe('')
+			})
+
 			it('should set isTraveller to false when there is no traveller record', async () => {
 				store.dispatch(setIsTraveller(true))
 				global.fetch.mockResolvedValueOnce({
