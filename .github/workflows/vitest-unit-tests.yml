@@ -9,12 +9,13 @@ on:
             - main
         # Draft PRs wait for ready_for_review: /verify already ran the same gates locally
         types: [opened, synchronize, reopened, ready_for_review]
-        # Only files Vitest reads or runs; its tests also live under scripts/, .github/scripts/ and two cypress/ helper folders
+        # Only files Vitest reads or runs; its tests also live under scripts/, .github/scripts/, .claude/ and two cypress/ helper folders
         paths:
             - 'src/**'
             - 'scripts/**'
             - '.github/scripts/**'
-            # Cypress helpers with Vitest tests
+            # Tooling and Cypress helpers with Vitest tests
+            - '.claude/**/*.mjs'
             - 'cypress/support/utils/**'
             - 'cypress/ui-check/**'
             - '.github/labels.json'
