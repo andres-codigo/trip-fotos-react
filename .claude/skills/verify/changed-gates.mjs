@@ -19,6 +19,8 @@ const RULES = [
 	// The /ui-check capture spec is selected only by UI_CHECK=true, so no gate runs it; its helpers have Vitest tests
 	[/^cypress\/ui-check\/(?!capture\.cy\.js$)/, ['lint', 'vitest']],
 	[/^cypress\/ui-check\//, ['lint']],
+	// The support helpers have Vitest tests alongside them
+	[/^cypress\/support\/utils\//, ['lint', 'vitest', 'ct']],
 	[/^cypress\//, ['lint', 'ct']],
 	[/^cypress\.config\./, ['ct']],
 	[/^(config\/|.*\.d\.ts$)/, ['lint']],
