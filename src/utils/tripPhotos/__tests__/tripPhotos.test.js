@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isStoredFile, thumbnailUrlsOf, toTripPhotos } from '@/utils/tripPhotos'
+import { thumbnailUrlsOf, toTripPhotos } from '@/utils/tripPhotos'
 
 describe('toTripPhotos', () => {
 	it('pairs each photo with its dimensions and thumbnails by position', () => {
@@ -44,17 +44,5 @@ describe('thumbnailUrlsOf', () => {
 		])
 		expect(thumbnailUrlsOf({ 0: { url: 'x' } })).toEqual(['x'])
 		expect(thumbnailUrlsOf(null)).toEqual([])
-	})
-})
-
-describe('isStoredFile', () => {
-	it('counts a Storage URL and refuses an inline data: photo', () => {
-		expect(
-			isStoredFile(
-				'https://firebasestorage.googleapis.com/v0/b/x/o/a.jpg',
-			),
-		).toBe(true)
-		expect(isStoredFile('data:image/svg+xml,%3Csvg/%3E')).toBe(false)
-		expect(isStoredFile(null)).toBe(false)
 	})
 })

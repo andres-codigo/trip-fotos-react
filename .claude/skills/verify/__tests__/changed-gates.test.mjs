@@ -141,6 +141,17 @@ describe('gatesForFile', () => {
 			'lint',
 		]))
 
+	it('runs Vitest for the impact manifest and its tests, which no component test covers', () => {
+		expect([...gatesForFile('cypress/impact.js')]).toEqual([
+			'lint',
+			'vitest',
+		])
+		expect([...gatesForFile('cypress/__tests__/impact.test.js')]).toEqual([
+			'lint',
+			'vitest',
+		])
+	})
+
 	it('maps tooling scripts to lint and Vitest only', () =>
 		expect([...gatesForFile('.claude/skills/ui-check/status.mjs')]).toEqual(
 			['lint', 'vitest'],

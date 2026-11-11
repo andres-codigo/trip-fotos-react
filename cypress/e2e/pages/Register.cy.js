@@ -16,6 +16,7 @@ import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-trav
 import { TEST_USERS } from '../../../src/constants/config/users'
 
 import { performLogin } from '../../support/utils/authHelpers'
+import { atPath } from '../../support/utils/waitForSuccess'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
@@ -124,7 +125,7 @@ describe('Register Page', () => {
 		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
 
 		// Verify redirection to Travellers page
-		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)
+		cy.waitForSuccess(atPath(PATHS.TRAVELLERS))
 
 		// Verify success alert message
 		cy.get('[role="alert"]')
@@ -197,7 +198,7 @@ describe('Register Page', () => {
 				uploadedImageUrls.push(url)
 			})
 
-		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)
+		cy.waitForSuccess(atPath(PATHS.TRAVELLERS))
 		cy.assertTravellerPersisted(TEST_USERS.STANDARD.ID, {
 			firstName,
 			lastName,

@@ -15,6 +15,7 @@ import {
 } from './scripts/seed-emulators.mjs'
 import { recordSpec } from './.claude/skills/verify/spec-results.mjs'
 import {
+	CAPTURES_ROOT,
 	stampPath,
 	writeStamp,
 } from './.claude/skills/ui-check/main-captures.mjs'
@@ -41,6 +42,8 @@ const testUser = useEmulators
 export default defineConfig({
 	// A /ui-check run keeps the other label's screenshots for the branch/main comparison; the capture script clears only its own label
 	trashAssetsBeforeRuns: !isUiCheck,
+	// Their own folder, so a component or E2E run, which trashes cypress/screenshots, never deletes them
+	...(isUiCheck && { screenshotsFolder: CAPTURES_ROOT }),
 	env: {
 		// PATHS
 		HOME_URL: PATHS.HOME,
@@ -89,15 +92,14 @@ export default defineConfig({
 				config.screenshotsFolder,
 				'capture.cy.js',
 			)
-			// A full `main` capture records its commit, so the next /ui-check on the same main reuses it
+			// A `main` run records the captures it took on its commit, so the next /ui-check on the same main reuses them
 			if (isUiCheck) {
 				on('after:run', (results) => {
 					writeStamp({
 						projectDir: config.projectRoot,
-						capturesDir,
+						dir: capturesDir,
 						label: process.env.UI_CHECK_LABEL,
-						only: process.env.UI_CHECK_ONLY,
-						failed: results?.totalFailed ?? 1,
+						results,
 						widths: process.env.UI_CHECK_WIDTHS,
 					})
 				})
@@ -105,15 +107,23 @@ export default defineConfig({
 			on('task', {
 				seedEmulators,
 				resetEmulatorData,
-				clearUiCheckScreenshots(label) {
-					if (!/^[\w-]+$/.test(label)) {
-						throw new Error(`Invalid UI_CHECK_LABEL: ${label}`)
+				// The whole label before a full run, or one capture's folder as it starts
+				clearUiCheckScreenshots({ label, capture }) {
+					if (
+						!/^[\w-]+$/.test(label) ||
+						!/^[\w-]*$/.test(capture ?? '')
+					) {
+						throw new Error(
+							`Invalid capture folder: ${label}/${capture}`,
+						)
 					}
-					rmSync(path.join(capturesDir, label), {
+					rmSync(path.join(capturesDir, label, capture ?? ''), {
 						recursive: true,
 						force: true,
 					})
-					rmSync(stampPath(capturesDir, label), { force: true })
+					if (!capture) {
+						rmSync(stampPath(capturesDir, label), { force: true })
+					}
 					return null
 				},
 			})

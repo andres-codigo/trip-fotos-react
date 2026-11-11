@@ -16,6 +16,7 @@ import { TEST_USERS } from '../../../src/constants/config/users'
 import { PATHS } from '../../../src/constants/ui/paths'
 
 import { performLogin } from '../../support/utils/authHelpers'
+import { atPath } from '../../support/utils/waitForSuccess'
 
 const REQUEST_TIMEOUT = 10000
 const SEEDED_PHOTO_COUNT = 4
@@ -72,10 +73,7 @@ describe('Edit Trip page', () => {
 		save()
 
 		cy.wait('@saveTrip', { timeout: REQUEST_TIMEOUT })
-		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
-			'eq',
-			detailPath,
-		)
+		cy.waitForSuccess(atPath(detailPath))
 		cy.get(TRAVELLER_DETAIL_SELECTORS.SAVED_ALERT).should(
 			'contain.text',
 			EDIT_TRIP_CONFIG.SAVED_MESSAGE,
@@ -111,10 +109,7 @@ describe('Edit Trip page', () => {
 				)
 			})
 
-		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
-			'eq',
-			detailPath,
-		)
+		cy.waitForSuccess(atPath(detailPath))
 		cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)
 			.find(COMMON_SELECTORS.BASE_IMAGE_BUTTON)
 			.should('have.length', SEEDED_PHOTO_COUNT + 1)
@@ -134,10 +129,7 @@ describe('Edit Trip page', () => {
 		cy.wait('@saveTrip', { timeout: REQUEST_TIMEOUT })
 			.its('request.body.files')
 			.should('have.length', SEEDED_PHOTO_COUNT - 1)
-		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
-			'eq',
-			detailPath,
-		)
+		cy.waitForSuccess(atPath(detailPath))
 		cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)
 			.find(COMMON_SELECTORS.BASE_IMAGE_BUTTON)
 			.should('have.length', SEEDED_PHOTO_COUNT - 1)
@@ -150,10 +142,7 @@ describe('Edit Trip page', () => {
 		cy.get(EDIT_TRIP_SELECTORS.DELETE_DIALOG).should('be.visible')
 		cy.get(EDIT_TRIP_SELECTORS.DELETE_CONFIRM).click()
 
-		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
-			'eq',
-			PATHS.TRAVELLERS,
-		)
+		cy.waitForSuccess(atPath(PATHS.TRAVELLERS))
 		cy.contains(EDIT_TRIP_CONFIG.DELETED_MESSAGE).should('be.visible')
 		cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should('be.visible')
 	})

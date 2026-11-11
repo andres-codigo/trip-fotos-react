@@ -5,6 +5,7 @@ import net from 'node:net'
 import path from 'node:path'
 import { stripVTControlCharacters } from 'node:util'
 
+import { affectedSpecs } from '../../../cypress/impact.js'
 import { gateHolds, planGates, uiCheckGap } from './changed-gates.mjs'
 import { branchFiles, changedSince, treeHash } from './git-tree.mjs'
 import { resetChecks } from './reset-checks.mjs'
@@ -195,7 +196,7 @@ const stopGates = () => {
 	}
 }
 
-const runGate = (gate, { specs, specResults } = {}) =>
+const runGate = (gate, { specs, specResults, env = {} } = {}) =>
 	new Promise((resolve) => {
 		const { command, withSpecs, summary, failure } = GATES[gate]
 		const log = path.join(cacheDir, `${gate}.log`)
@@ -204,9 +205,11 @@ const runGate = (gate, { specs, specResults } = {}) =>
 			cwd: projectDir,
 			shell: true,
 			detached: true,
-			env: specResults
-				? { ...process.env, VERIFY_SPEC_RESULTS: specResults }
-				: process.env,
+			env: {
+				...process.env,
+				...env,
+				...(specResults && { VERIFY_SPEC_RESULTS: specResults }),
+			},
 			stdio: ['ignore', out, out],
 		})
 		children.add(child)
@@ -306,14 +309,21 @@ const main = async () => {
 		return `reran ${specs.length} failed spec${specs.length === 1 ? '' : 's'} (${specs.join(', ')}); the other ${suite.length - specs.length} passed earlier on this tree`
 	}
 
+	// run-e2e.mjs runs these first and stops on their first failure, before the rest of the suite
+	const firstSpecs = affectedSpecs(files)
+
 	const start = async (gate) => {
 		const plan = plans[gate]
+		const env =
+			gate === 'e2e' && firstSpecs.length
+				? { E2E_SPEC_FIRST: firstSpecs.join(',') }
+				: {}
 		const specResults = plan && path.join(cacheDir, `${gate}-specs.ndjson`)
 		if (specResults) fs.rmSync(specResults, { force: true })
 		const result =
 			plan?.specs?.length === 0
 				? { status: 0, summary: '', errors: [], log: '' }
-				: await runGate(gate, { specs: plan?.specs, specResults })
+				: await runGate(gate, { specs: plan?.specs, specResults, env })
 		recordGate({
 			cache,
 			specRecords,

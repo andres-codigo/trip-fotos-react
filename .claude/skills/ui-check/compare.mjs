@@ -1,9 +1,11 @@
 // Compares two /ui-check capture folders: node compare.mjs [main label] [branch label]
-// Lists identical, changed, new and missing shots, prints the changed rows of each changed pair and writes a side-by-side crop of the changed region
+// Lists identical, changed, new and missing shots, prints the changed rows of each changed pair, writes a side-by-side crop of the changed region and a sheet of each new or changed state at all its widths
 import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import zlib from 'node:zlib'
+
+import { CAPTURES_ROOT } from './main-captures.mjs'
 
 const SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
 const CHANNELS = { 0: 1, 2: 3, 4: 2, 6: 4 }
@@ -201,11 +203,21 @@ const listPngs = (dir, prefix = '') =>
 const hash = (file) =>
 	crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')
 
-// Byte-identical pairs are compared by hash alone; a pair that differs only in its bytes, not its pixels, counts as identical
+const captureOf = (name) => (name.includes('/') ? name.split('/')[0] : '')
+
+// Byte-identical pairs are compared by hash alone; a pair that differs only in its bytes, not its pixels, counts as identical. A filtered branch run leaves out whole captures, so only the captures it took are compared
 export const compareFolders = (beforeDir, afterDir) => {
-	const before = listPngs(beforeDir)
 	const after = new Set(listPngs(afterDir))
-	const result = { identical: [], changed: [], added: [], missing: [] }
+	const taken = new Set([...after].map(captureOf))
+	const all = listPngs(beforeDir)
+	const before = all.filter((name) => taken.has(captureOf(name)))
+	const result = {
+		identical: [],
+		changed: [],
+		added: [],
+		missing: [],
+		notRun: new Set(all.map(captureOf).filter((id) => !taken.has(id))).size,
+	}
 	for (const name of before) {
 		if (!after.has(name)) {
 			result.missing.push(name)
@@ -240,7 +252,7 @@ const size = ({ width, height }) => `${width}x${height}`
 
 export const report = (result, cropDir) => {
 	const lines = [
-		`identical ${result.identical.length}, changed ${result.changed.length}, new ${result.added.length}, missing ${result.missing.length}`,
+		`identical ${result.identical.length}, changed ${result.changed.length}, new ${result.added.length}, missing ${result.missing.length}${result.notRun ? `; ${result.notRun} captures not run on this label` : ''}`,
 	]
 	for (const { name, before, after, ranges } of result.changed) {
 		lines.push(
@@ -263,18 +275,78 @@ export const writeCrops = (result, cropDir) => {
 	}
 }
 
+// `travellers-390.png` and `travellers-1280.png` are one state at two widths; `hover-show-more.png` is a state of its own
+export const stateOf = (name) => name.replace(/(-\d+)?\.png$/, '')
+
+// Each state the branch added or changed, with every width the branch took of it, narrowest first
+export const sheetGroups = (result, afterNames) => {
+	const states = new Set(
+		[...result.added, ...result.changed.map(({ name }) => name)].map(
+			stateOf,
+		),
+	)
+	const width = (name) => Number(name.match(/-(\d+)\.png$/)?.[1] ?? 0)
+	return [...states].sort().map((state) => ({
+		state,
+		names: afterNames
+			.filter((name) => stateOf(name) === state)
+			.sort((a, b) => width(a) - width(b)),
+	}))
+}
+
+// Side by side, top-aligned; the area below a shorter image is grey
+export const sheet = (images) => {
+	const width =
+		images.reduce((sum, image) => sum + image.width, 0) +
+		GAP * (images.length - 1)
+	const height = Math.max(...images.map((image) => image.height))
+	const data = Buffer.alloc(width * height * 4)
+	for (let i = 0; i < width * height; i++) data.set(GAP_COLOUR, i * 4)
+	let left = 0
+	for (const image of images) {
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < image.width; x++) {
+				const target = (y * width + left + x) * 4
+				if (y >= image.height) {
+					data.set(EMPTY_COLOUR, target)
+				} else {
+					const source = (y * image.width + x) * 4
+					image.data.copy(data, target, source, source + 4)
+				}
+			}
+		}
+		left += image.width + GAP
+	}
+	return { width, height, data }
+}
+
+export const writeSheets = (result, afterDir, sheetDir) => {
+	fs.rmSync(sheetDir, { recursive: true, force: true })
+	return sheetGroups(result, listPngs(afterDir)).map(({ state, names }) => {
+		const file = path.join(sheetDir, `${state}.png`)
+		fs.mkdirSync(path.dirname(file), { recursive: true })
+		const images = names.map((name) =>
+			decodePng(fs.readFileSync(path.join(afterDir, name))),
+		)
+		fs.writeFileSync(file, encodePng(sheet(images)))
+		return file
+	})
+}
+
 const main = () => {
 	const [beforeLabel = 'main', afterLabel = 'branch'] = process.argv.slice(2)
 	const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd()
-	const screenshots = path.join(projectDir, 'cypress', 'screenshots')
-	const captures = path.join(screenshots, 'capture.cy.js')
-	const cropDir = path.join(screenshots, 'compare', afterLabel)
-	const result = compareFolders(
-		path.join(captures, beforeLabel),
-		path.join(captures, afterLabel),
-	)
+	const root = path.join(projectDir, CAPTURES_ROOT)
+	const captures = path.join(root, 'capture.cy.js')
+	const cropDir = path.join(root, 'compare', afterLabel)
+	const afterDir = path.join(captures, afterLabel)
+	const result = compareFolders(path.join(captures, beforeLabel), afterDir)
 	writeCrops(result, cropDir)
+	const sheets = writeSheets(result, afterDir, path.join(cropDir, 'sheets'))
 	console.log(report(result, path.relative(projectDir, cropDir)))
+	sheets.forEach((file) =>
+		console.log(`sheet ${path.relative(projectDir, file)}`),
+	)
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main()

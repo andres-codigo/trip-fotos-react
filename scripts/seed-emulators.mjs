@@ -1,17 +1,22 @@
 #!/usr/bin/env node
 import { pathToFileURL } from 'node:url'
+import zlib from 'node:zlib'
 import { initializeApp, deleteApp } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getDatabase } from 'firebase-admin/database'
+import { getStorage } from 'firebase-admin/storage'
 
 import { MOCK_TRAVELLERS } from '../src/constants/test/mock-data/mock-travellers.js'
 import { MOCK_INBOX } from '../src/constants/test/mock-data/mock-messages.js'
 
 const PROJECT_ID = 'demo-trip-fotos'
 const DATABASE_URL = `https://${PROJECT_ID}-default-rtdb.firebaseio.com`
+const BUCKET = `${PROJECT_ID}.appspot.com`
+const STORAGE_ORIGIN = 'http://127.0.0.1:9199'
 const REQUIRED_HOSTS = [
 	'FIREBASE_AUTH_EMULATOR_HOST',
 	'FIREBASE_DATABASE_EMULATOR_HOST',
+	'FIREBASE_STORAGE_EMULATOR_HOST',
 ]
 
 const PASSWORD = 'seed-password-1'
@@ -38,37 +43,107 @@ const CITIES_ALL_TONES = [
 
 const WIDTH = 640
 const HEIGHT = 480
+// GLOBAL.IMAGE_THUMBNAIL_WIDTHS; the app never upscales, so a thumbnail wider than the photo keeps its size
+const THUMBNAIL_WIDTHS = [320, 640]
+const PHOTO_COLOURS = ['3b82f6', '10b981', 'f59e0b', 'ef4444']
 
-const placeholderImage = (colour) =>
-	`data:image/svg+xml,${encodeURIComponent(
-		`<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}"><rect width="100%" height="100%" fill="${colour}"/></svg>`,
-	)}`
+// A solid-colour PNG, so the seeded photos are real Storage objects that delete and edit like uploaded ones
+export const solidPng = (hex, width, height) => {
+	const pixel = Buffer.from(hex, 'hex')
+	const line = Buffer.concat([Buffer.alloc(1), Buffer.alloc(width * 3)])
+	for (let x = 0; x < width; x++) pixel.copy(line, 1 + x * 3)
+	const chunk = (type, body) => {
+		const length = Buffer.alloc(4)
+		length.writeUInt32BE(body.length)
+		const typed = Buffer.concat([Buffer.from(type, 'latin1'), body])
+		const crc = Buffer.alloc(4)
+		crc.writeUInt32BE(zlib.crc32(typed))
+		return Buffer.concat([length, typed, crc])
+	}
+	const header = Buffer.alloc(13)
+	header.writeUInt32BE(width, 0)
+	header.writeUInt32BE(height, 4)
+	header[8] = 8
+	header[9] = 2
+	return Buffer.concat([
+		Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+		chunk('IHDR', header),
+		chunk(
+			'IDAT',
+			zlib.deflateSync(Buffer.concat(Array(height).fill(line))),
+		),
+		chunk('IEND', Buffer.alloc(0)),
+	])
+}
 
-const PHOTOS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'].map(
-	placeholderImage,
-)
+// Fixed paths and tokens, so the download URLs (and the captures that show them) are the same on every seed
+const storageObject = (index, colour, variant, width, height) => {
+	const name = `seed-${index}-${variant}${colour}.png`
+	const path = `images/${SEED_USERS.TRAVELLER_ONE.uid}/${name}`
+	const token = `seed-${index}-${variant.replace(/-$/, '') || 'full'}`
+	return {
+		path,
+		token,
+		colour,
+		width,
+		height,
+		url: `${STORAGE_ORIGIN}/v0/b/${BUCKET}/o/${encodeURIComponent(path)}?alt=media&token=${token}`,
+	}
+}
 
-export const buildTravellers = () => ({
-	[SEED_USERS.TRAVELLER_ONE.uid]: {
-		firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
-		lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
-		tripDescription: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription,
-		tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
-		tripEnd: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
-		cities: CITIES_ALL_TONES,
-		files: PHOTOS,
-		fileDimensions: PHOTOS.map(() => ({ width: WIDTH, height: HEIGHT })),
-		registered: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.registered,
-	},
-	[SEED_USERS.TRAVELLER_TWO.uid]: {
-		firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.firstName,
-		lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.lastName,
-		tripDescription: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.tripDescription,
-		daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.daysInCity,
-		cities: ['tokyo'],
-		registered: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.registered,
-	},
-})
+export const buildPhotos = () =>
+	PHOTO_COLOURS.map((colour, index) => ({
+		file: storageObject(index, colour, '', WIDTH, HEIGHT),
+		thumbnails: THUMBNAIL_WIDTHS.map((width) => {
+			const scale = Math.min(1, width / Math.min(WIDTH, HEIGHT))
+			return {
+				width,
+				...storageObject(
+					index,
+					colour,
+					`${width}w-`,
+					Math.round(WIDTH * scale),
+					Math.round(HEIGHT * scale),
+				),
+			}
+		}),
+	}))
+
+export const storageObjects = () =>
+	buildPhotos().flatMap(({ file, thumbnails }) => [file, ...thumbnails])
+
+export const buildTravellers = () => {
+	const photos = buildPhotos()
+	return {
+		[SEED_USERS.TRAVELLER_ONE.uid]: {
+			firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+			lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName,
+			tripDescription:
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription,
+			tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
+			tripEnd: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
+			cities: CITIES_ALL_TONES,
+			files: photos.map(({ file }) => file.url),
+			fileDimensions: photos.map(() => ({
+				width: WIDTH,
+				height: HEIGHT,
+			})),
+			fileThumbnails: photos.map(({ thumbnails }) =>
+				thumbnails.map(({ width, url }) => ({ width, url })),
+			),
+			registered: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.registered,
+		},
+		[SEED_USERS.TRAVELLER_TWO.uid]: {
+			firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.firstName,
+			lastName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.lastName,
+			tripDescription:
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.tripDescription,
+			daysInCity: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.daysInCity,
+			cities: ['tokyo'],
+			registered: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO.registered,
+		},
+	}
+}
 
 // `now` lets /ui-check seed against the clock it freezes, so "12 min ago" reads the same in every run
 export const buildMessages = (now = Date.now()) => ({
@@ -106,19 +181,43 @@ const withEmulators = async (work) => {
 		`seed-${Date.now()}`,
 	)
 	try {
-		return await work(getAuth(app), getDatabase(app))
+		return await work(
+			getAuth(app),
+			getDatabase(app),
+			getStorage(app).bucket(BUCKET),
+		)
 	} finally {
 		await deleteApp(app)
 	}
 }
 
-const writeData = (db, now) =>
-	db.ref().set({
+// Every image goes first, so a photo a capture uploaded or deleted is back to the seed too
+const writePhotos = async (bucket) => {
+	await bucket.deleteFiles({ prefix: 'images/' })
+	await Promise.all(
+		storageObjects().map(({ path, token, colour, width, height }) =>
+			bucket.file(path).save(solidPng(colour, width, height), {
+				contentType: 'image/png',
+				metadata: {
+					metadata: {
+						firebaseStorageDownloadTokens: token,
+						userId: SEED_USERS.TRAVELLER_ONE.uid,
+					},
+				},
+			}),
+		),
+	)
+}
+
+const writeData = async (db, bucket, now) => {
+	await writePhotos(bucket)
+	await db.ref().set({
 		travellers: buildTravellers(),
 		messages: buildMessages(now),
 	})
+}
 
-const seed = async (auth, db, now) => {
+const seed = async (auth, db, bucket, now) => {
 	// Clear first so a re-run always starts from the same state
 	const { users } = await auth.listUsers(1000)
 	if (users.length > 0) {
@@ -135,12 +234,12 @@ const seed = async (auth, db, now) => {
 		if (admin) await auth.setCustomUserClaims(uid, { admin: true })
 	}
 
-	await writeData(db, now)
+	await writeData(db, bucket, now)
 }
 
 export const seedEmulators = ({ now } = {}) =>
-	withEmulators(async (auth, db) => {
-		await seed(auth, db, now)
+	withEmulators(async (auth, db, bucket) => {
+		await seed(auth, db, bucket, now)
 		return null
 	})
 
@@ -150,15 +249,15 @@ export const needsFullSeed = (users) => {
 	return Object.values(SEED_USERS).some(({ uid }) => !uids.has(uid))
 }
 
-// The database only, so cy.session stays valid; a full seed when a seeded account is gone, which the caller must follow by clearing the saved sessions
+// The database and photos only, so cy.session stays valid; a full seed when a seeded account is gone, which the caller must follow by clearing the saved sessions
 export const resetEmulatorData = ({ now } = {}) =>
-	withEmulators(async (auth, db) => {
+	withEmulators(async (auth, db, bucket) => {
 		const { users } = await auth.listUsers(1000)
 		if (needsFullSeed(users)) {
-			await seed(auth, db, now)
+			await seed(auth, db, bucket, now)
 			return { reseeded: true }
 		}
-		await writeData(db, now)
+		await writeData(db, bucket, now)
 		return { reseeded: false }
 	})
 

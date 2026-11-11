@@ -1050,25 +1050,6 @@ describe('travellersSlice', () => {
 				expect(deleteObject).not.toHaveBeenCalledWith(kept.url)
 			})
 
-			it('should not send an inline data: photo to Storage, which has no object for it', async () => {
-				const testStore = preloadStore()
-				fetch.mockResolvedValueOnce({ ok: true })
-				const inline = {
-					url: 'data:image/svg+xml,%3Csvg/%3E',
-					thumbnails: null,
-				}
-
-				await testStore.dispatch(
-					updateTraveller({
-						...edit,
-						removedPhotos: [inline, removed],
-					}),
-				)
-
-				expect(deleteObject).not.toHaveBeenCalledWith(inline.url)
-				expect(deleteObject).toHaveBeenCalledWith(removed.url)
-			})
-
 			it('should still save when a removed photo cannot be deleted', async () => {
 				const testStore = preloadStore()
 				fetch.mockResolvedValueOnce({ ok: true })
@@ -1496,20 +1477,6 @@ describe('travellersSlice', () => {
 				const state = testStore.getState().travellers
 				expect(state.isTraveller).toBe(false)
 				expect(state.travellerName).toBe('')
-			})
-
-			it('should skip inline data: photos, which have no Storage object', async () => {
-				const testStore = preloadStore()
-				mockFetchByUrl()
-				const inline = 'data:image/svg+xml,%3Csvg/%3E'
-
-				const result = await testStore.dispatch(
-					deleteTraveller({ travellerId, files: [inline, ...files] }),
-				)
-
-				expect(result.meta.requestStatus).toBe('fulfilled')
-				expect(ref).not.toHaveBeenCalledWith(undefined, inline)
-				expect(deleteObject).toHaveBeenCalledTimes(files.length)
 			})
 
 			it('should keep an admin a traveller when they delete someone else', async () => {
