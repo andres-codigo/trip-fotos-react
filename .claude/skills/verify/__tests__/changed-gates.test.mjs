@@ -78,6 +78,11 @@ describe('planGates', () => {
 		])
 	})
 
+	it('runs Vitest for the Cypress support helpers, which have Vitest tests', () =>
+		expect(
+			planGates(['cypress/support/utils/authHelpers.js']).runArgs,
+		).toEqual(['lint', 'vitest', 'ct', 'e2e']))
+
 	it('selects only the YAML gate for workflow and action YAML', () => {
 		for (const file of [
 			'.github/workflows/cypress-e2e.yml',
