@@ -20,6 +20,43 @@ describe('useTravellerRegistration', () => {
 		})
 	})
 
+	it('starts from an existing traveller, for editing a trip', () => {
+		const city = MOCK_CITIES.TOKYO
+		const { result } = renderHook(() =>
+			useTravellerRegistration({
+				firstName: 'Amara',
+				lastName: 'Okafor',
+				tripDescription: 'Cherry blossom season.',
+				tripStart: '2025-03-12',
+				tripEnd: '2025-03-19',
+				cities: [city, 'prague'],
+			}),
+		)
+
+		expect(result.current.formData).toEqual({
+			firstName: { value: 'Amara', message: '', isValid: true },
+			lastName: { value: 'Okafor', message: '', isValid: true },
+			tripDescription: {
+				value: 'Cherry blossom season.',
+				message: '',
+				isValid: true,
+			},
+			tripStart: { value: '2025-03-12', message: '', isValid: true },
+			tripEnd: { value: '2025-03-19', message: '', isValid: true },
+			cities: { value: [city, 'prague'], message: '', isValid: true },
+		})
+	})
+
+	it('leaves the trip dates empty for an older traveller who has none', () => {
+		const { result } = renderHook(() =>
+			useTravellerRegistration({ firstName: 'Kofi', cities: ['prague'] }),
+		)
+
+		expect(result.current.formData.tripStart.value).toBe('')
+		expect(result.current.formData.tripEnd.value).toBe('')
+		expect(result.current.formData.lastName.value).toBe('')
+	})
+
 	it('should handle input change and validate text fields', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 

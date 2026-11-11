@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import {
+	describe,
+	it,
+	expect,
+	beforeEach,
+	afterEach,
+	onTestFinished,
+	vi,
+} from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 
 import {
@@ -14,6 +22,7 @@ import { API_ERROR_MESSAGE } from '@/constants/api'
 import { authActions, logout, selectUserId } from './authenticationSlice'
 import travellersReducer, {
 	registerTraveller,
+	updateTraveller,
 	travellerName,
 	setTravellerName,
 	selectShouldUpdate,
@@ -933,6 +942,223 @@ describe('travellersSlice', () => {
 		})
 	})
 
+	describe('updateTraveller', () => {
+		const kept = {
+			url: 'https://storage.example.com/images/u/kept.jpg',
+			dimensions: { width: 800, height: 600 },
+			thumbnails: [
+				{ width: 320, url: 'https://storage.example.com/k-320.jpg' },
+			],
+		}
+		const removed = {
+			url: 'https://storage.example.com/images/u/removed.jpg',
+			dimensions: { width: 600, height: 800 },
+			thumbnails: [
+				{ width: 320, url: 'https://storage.example.com/r-320.jpg' },
+			],
+		}
+		const existing = {
+			...MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE,
+			id: MOCK_USER.USER_ID,
+			daysInCity: 8,
+			registered: '2025-04-02T10:00:00.000Z',
+			files: [kept.url, removed.url],
+		}
+		const edit = {
+			firstName: 'Amara',
+			lastName: 'Okafor',
+			tripDescription: 'Cherry blossom season.',
+			tripStart: '2025-03-12',
+			tripEnd: '2025-03-19',
+			cities: ['tokyo'],
+			files: [],
+			keptPhotos: [kept],
+			removedPhotos: [removed],
+		}
+
+		const preloadStore = () =>
+			configureStore({
+				reducer: { travellers: travellersReducer },
+				preloadedState: {
+					travellers: {
+						travellerName: '',
+						isTraveller: true,
+						hasTravellers: true,
+						travellers: [existing, { id: 'someone-else' }],
+						selectedTraveller: existing,
+						lastFetch: null,
+						status: 'idle',
+						error: null,
+						uploadProgress: null,
+					},
+				},
+			})
+
+		const savedBody = () => JSON.parse(fetch.mock.calls.at(-1)[1].body)
+
+		describe('success scenarios', () => {
+			it('should patch the edited fields and the kept photos, dropping the old length', async () => {
+				const testStore = preloadStore()
+				fetch.mockResolvedValueOnce({ ok: true })
+
+				const result = await testStore.dispatch(updateTraveller(edit))
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(fetch).toHaveBeenCalledWith(
+					expect.stringContaining(
+						`/travellers/${MOCK_USER.USER_ID}.json?auth=${MOCK_USER.TOKEN}`,
+					),
+					expect.objectContaining({ method: 'PATCH' }),
+				)
+				expect(savedBody()).toEqual({
+					firstName: 'Amara',
+					lastName: 'Okafor',
+					tripDescription: 'Cherry blossom season.',
+					tripStart: '2025-03-12',
+					tripEnd: '2025-03-19',
+					daysInCity: null,
+					cities: ['tokyo'],
+					files: [kept.url],
+					fileDimensions: [kept.dimensions],
+					fileThumbnails: [kept.thumbnails],
+				})
+				// registered is not part of an edit, so the stored date stays as it was
+				expect(savedBody()).not.toHaveProperty('registered')
+			})
+
+			it('should delete each removed photo and its thumbnails only after the record is saved', async () => {
+				const testStore = preloadStore()
+				const order = []
+				fetch.mockImplementationOnce(async () => {
+					order.push('save')
+					return { ok: true }
+				})
+				deleteObject.mockImplementation(async (target) => {
+					order.push(target)
+				})
+				onTestFinished(() =>
+					deleteObject.mockImplementation(() => Promise.resolve()),
+				)
+
+				await testStore.dispatch(updateTraveller(edit))
+
+				expect(order).toEqual([
+					'save',
+					removed.url,
+					removed.thumbnails[0].url,
+				])
+				expect(deleteObject).not.toHaveBeenCalledWith(kept.url)
+			})
+
+			it('should not send an inline data: photo to Storage, which has no object for it', async () => {
+				const testStore = preloadStore()
+				fetch.mockResolvedValueOnce({ ok: true })
+				const inline = {
+					url: 'data:image/svg+xml,%3Csvg/%3E',
+					thumbnails: null,
+				}
+
+				await testStore.dispatch(
+					updateTraveller({
+						...edit,
+						removedPhotos: [inline, removed],
+					}),
+				)
+
+				expect(deleteObject).not.toHaveBeenCalledWith(inline.url)
+				expect(deleteObject).toHaveBeenCalledWith(removed.url)
+			})
+
+			it('should still save when a removed photo cannot be deleted', async () => {
+				const testStore = preloadStore()
+				fetch.mockResolvedValueOnce({ ok: true })
+				deleteObject
+					.mockRejectedValueOnce(new Error('storage down'))
+					.mockRejectedValueOnce(new Error('storage down'))
+
+				const result = await testStore.dispatch(updateTraveller(edit))
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+			})
+
+			it('should append new uploads after the kept photos', async () => {
+				const testStore = preloadStore()
+				fetch.mockResolvedValueOnce({ ok: true })
+
+				await testStore.dispatch(
+					updateTraveller({
+						...edit,
+						files: [{ name: 'new.jpg', file: new Blob() }],
+					}),
+				)
+
+				const body = savedBody()
+				expect(body.files).toEqual([
+					kept.url,
+					'https://mock-url.com/image.jpg',
+				])
+				expect(body.fileDimensions).toHaveLength(2)
+				expect(body.fileThumbnails[1]).toHaveLength(
+					GLOBAL.IMAGE_THUMBNAIL_WIDTHS.length,
+				)
+			})
+
+			it('should update the selected traveller, the list entry and the name', async () => {
+				const testStore = preloadStore()
+				fetch.mockResolvedValueOnce({ ok: true })
+
+				await testStore.dispatch(updateTraveller(edit))
+
+				const state = testStore.getState().travellers
+				expect(state.selectedTraveller).toMatchObject({
+					id: MOCK_USER.USER_ID,
+					tripDescription: 'Cherry blossom season.',
+					files: [kept.url],
+					registered: existing.registered,
+				})
+				expect(state.selectedTraveller).not.toHaveProperty(
+					'daysInCity',
+					8,
+				)
+				expect(state.travellers[0]).toMatchObject({
+					firstName: 'Amara',
+					files: [kept.url],
+				})
+				expect(state.travellers[1]).toEqual({ id: 'someone-else' })
+				expect(state.travellerName).toBe('Amara Okafor')
+				expect(updateProfile).toHaveBeenCalledWith(MOCK_AUTH_USER, {
+					displayName: 'Amara Okafor',
+				})
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('should reject with the save message, delete nothing kept or removed, and remove its own uploads', async () => {
+				const testStore = preloadStore()
+				fetch.mockResolvedValueOnce({ ok: false })
+
+				const result = await testStore.dispatch(
+					updateTraveller({
+						...edit,
+						files: [{ name: 'new.jpg', file: new Blob() }],
+					}),
+				)
+
+				expect(result.meta.requestStatus).toBe('rejected')
+				expect(result.payload).toContain(
+					ERROR_MESSAGES.FAILED_TO_SAVE_TRIP,
+				)
+				expect(deleteObject).not.toHaveBeenCalledWith(removed.url)
+				expect(deleteObject).not.toHaveBeenCalledWith(kept.url)
+				expect(deleteObject).toHaveBeenCalledWith('mock-ref')
+
+				const state = testStore.getState().travellers
+				expect(state.selectedTraveller).toEqual(existing)
+				expect(state.uploadProgress).toBeNull()
+			})
+		})
+	})
+
 	describe('loadTraveller', () => {
 		const mockId = 'user123'
 		const mockTravellerData = MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE
@@ -1238,6 +1464,64 @@ describe('travellersSlice', () => {
 					remainingTraveller.id,
 				])
 				expect(state.selectedTraveller).toBeNull()
+			})
+
+			it('should stop the user being a traveller when they delete their own profile', async () => {
+				const testStore = configureStore({
+					reducer: { travellers: travellersReducer },
+					preloadedState: {
+						travellers: {
+							travellerName: 'Amara Okafor',
+							isTraveller: true,
+							hasTravellers: true,
+							travellers: [{ id: MOCK_USER.USER_ID, files }],
+							selectedTraveller: null,
+							lastFetch: new Date().getTime(),
+							status: 'idle',
+							error: null,
+						},
+					},
+				})
+				fetch.mockImplementation(async (url, options) =>
+					options?.method === 'GET'
+						? { ok: true, json: async () => null }
+						: { ok: true },
+				)
+
+				const result = await testStore.dispatch(
+					deleteTraveller({ travellerId: MOCK_USER.USER_ID, files }),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				const state = testStore.getState().travellers
+				expect(state.isTraveller).toBe(false)
+				expect(state.travellerName).toBe('')
+			})
+
+			it('should skip inline data: photos, which have no Storage object', async () => {
+				const testStore = preloadStore()
+				mockFetchByUrl()
+				const inline = 'data:image/svg+xml,%3Csvg/%3E'
+
+				const result = await testStore.dispatch(
+					deleteTraveller({ travellerId, files: [inline, ...files] }),
+				)
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(ref).not.toHaveBeenCalledWith(undefined, inline)
+				expect(deleteObject).toHaveBeenCalledTimes(files.length)
+			})
+
+			it('should keep an admin a traveller when they delete someone else', async () => {
+				const testStore = preloadStore()
+				testStore.dispatch(setIsTraveller(true))
+				mockFetchByUrl()
+
+				await testStore.dispatch(
+					deleteTraveller({ travellerId, files }),
+				)
+
+				expect(testStore.getState().travellers.isTraveller).toBe(true)
 			})
 
 			it('should delete each thumbnail too, read from an array or an index-keyed object', async () => {

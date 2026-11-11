@@ -11,6 +11,10 @@
 		{
 			"source": "/travellers/:id/contact",
 			"destination": "/"
+		},
+		{
+			"source": "/travellers/:id/edit",
+			"destination": "/"
 		}
 	],
 	"trailingSlash": false,

@@ -35,6 +35,7 @@ vi.mock('@/constants/ui', () => ({
 		TRAVELLERS: '/travellers',
 		TRAVELLER_DETAIL: '/travellers/:id',
 		CONTACT_TRAVELLER: '/travellers/:id/contact',
+		EDIT_TRAVELLER: '/travellers/:id/edit',
 		REGISTER: '/register',
 		MESSAGES: '/messages',
 		PRIVACY: '/privacy',
@@ -80,6 +81,9 @@ vi.mock('@/pages/traveller-detail/TravellerDetail', () => ({
 }))
 vi.mock('@/pages/contact-traveller/ContactTraveller', () => ({
 	default: () => <div>ContactTravellerPage</div>,
+}))
+vi.mock('@/pages/edit-trip/EditTrip', () => ({
+	default: () => <div>EditTripPage</div>,
 }))
 vi.mock('@/pages/messages/Messages', () => ({
 	default: () => <div>MessagesPage</div>,
@@ -301,6 +305,40 @@ describe('App', () => {
 				expect(
 					screen.getByText('ContactTravellerPage'),
 				).toBeInTheDocument()
+			})
+			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
+		it('redirects to /authentication if not logged in and on an edit trip route', async () => {
+			setAuthState(null, false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: '/travellers/abc123/edit',
+			})
+
+			renderWithRoute('/travellers/abc123/edit')
+
+			await waitFor(() => {
+				expect(navigateMock).toHaveBeenCalledWith(
+					PATHS.AUTHENTICATION,
+					{
+						replace: true,
+					},
+				)
+			})
+		})
+
+		it('renders EditTripPage when logged in and on an edit trip route', async () => {
+			setAuthState('token', false)
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: '/travellers/abc123/edit',
+			})
+
+			renderWithRoute('/travellers/abc123/edit')
+
+			await waitFor(() => {
+				expect(screen.getByText('EditTripPage')).toBeInTheDocument()
 			})
 			expect(navigateMock).not.toHaveBeenCalled()
 		})

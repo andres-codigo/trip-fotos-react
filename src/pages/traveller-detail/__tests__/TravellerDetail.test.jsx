@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { configureStore } from '@reduxjs/toolkit'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
+import { TRAVELLER_DETAIL_CONFIG } from '@/constants/travellers'
 import {
 	BADGE,
 	COMMON_SELECTORS,
@@ -40,6 +41,7 @@ const renderPage = ({
 	userId = 'me',
 	isTraveller = false,
 	hash = '',
+	state = null,
 } = {}) => {
 	const store = configureStore({
 		reducer: {
@@ -60,7 +62,10 @@ const renderPage = ({
 
 	return render(
 		<Provider store={store}>
-			<MemoryRouter initialEntries={[`/travellers/${id}${hash}`]}>
+			<MemoryRouter
+				initialEntries={[
+					{ pathname: `/travellers/${id}`, hash, state },
+				]}>
 				<Routes>
 					<Route
 						path="/travellers/:id"
@@ -264,6 +269,89 @@ describe('<TravellerDetail />', () => {
 		expect(
 			screen.queryByTestId(TRAVELLER_DETAIL.CONTACT_SECTION),
 		).not.toBeInTheDocument()
+	})
+
+	describe('Own trip actions', () => {
+		it('offers Edit trip and Add photos on the own record', async () => {
+			renderPage({ userId: 'abc' })
+			await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+
+			expect(screen.getByTestId(TRAVELLER_DETAIL.EDIT)).toHaveAttribute(
+				'href',
+				'/travellers/abc/edit',
+			)
+			expect(
+				screen.getByTestId(TRAVELLER_DETAIL.ADD_PHOTOS),
+			).toHaveAttribute('href', '/travellers/abc/edit#photos')
+		})
+
+		it("offers neither on someone else's record", async () => {
+			renderPage({ isTraveller: true })
+			await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+
+			expect(
+				screen.queryByTestId(TRAVELLER_DETAIL.EDIT),
+			).not.toBeInTheDocument()
+			expect(
+				screen.queryByTestId(TRAVELLER_DETAIL.ADD_PHOTOS),
+			).not.toBeInTheDocument()
+		})
+
+		it('shows an own trip with no photos as such, with its own Add photos', async () => {
+			stubFetch({ data: { ...traveller, files: undefined } })
+			renderPage({ userId: 'abc' })
+			const empty = await screen.findByTestId(TRAVELLER_DETAIL.NO_PHOTOS)
+
+			expect(empty).toHaveTextContent(
+				TRAVELLER_DETAIL_CONFIG.NO_PHOTOS_MESSAGE,
+			)
+			expect(
+				screen.getByRole('heading', {
+					level: 2,
+					name: TRAVELLER_DETAIL_CONFIG.PHOTOS_HEADING,
+				}),
+			).toBeInTheDocument()
+			expect(
+				screen.getAllByRole('link', {
+					name: TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL,
+				}),
+			).toHaveLength(2)
+		})
+
+		it("says nothing about missing photos on someone else's trip", async () => {
+			stubFetch({ data: { ...traveller, files: undefined } })
+			renderPage()
+			await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+
+			expect(
+				screen.queryByTestId(TRAVELLER_DETAIL.NO_PHOTOS),
+			).not.toBeInTheDocument()
+		})
+
+		it('shows the saved alert it was sent with', async () => {
+			renderPage({
+				userId: 'abc',
+				state: { alertMessage: 'Your trip has been saved.' },
+			})
+
+			const alert = await screen.findByTestId(
+				TRAVELLER_DETAIL.SAVED_ALERT,
+			)
+			expect(alert).toHaveTextContent('Your trip has been saved.')
+			// Inside the profile card, as on Travellers, so it is no wider than the cards
+			expect(alert.closest(COMMON_SELECTORS.BASE_CARD)).toContainElement(
+				screen.getByTestId(TRAVELLER_DETAIL.PROFILE),
+			)
+		})
+
+		it('shows no alert on a plain visit', async () => {
+			renderPage({ userId: 'abc' })
+			await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+
+			expect(
+				screen.queryByTestId(TRAVELLER_DETAIL.SAVED_ALERT),
+			).not.toBeInTheDocument()
+		})
 	})
 
 	it('shows the not-found state for an unknown id', async () => {

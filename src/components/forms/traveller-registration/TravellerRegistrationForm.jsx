@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 
 import {
 	CITY_SEARCH_STATUS,
+	TRIP_PHOTOS_CONFIG,
 	TRAVELLER_REGISTRATION_FIELDS,
 	TRIP_DATES_CONFIG,
+	TRAVELLER_ITEM_CONFIG,
 } from '@/constants/travellers'
 import { GLOBAL } from '@/constants/ui'
 
@@ -14,27 +16,54 @@ import Combobox from '@/components/ui/form/combobox/Combobox'
 import BaseButton from '@/components/ui/button/BaseButton'
 import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
 import AddFile from '@/components/forms/file-uploader/AddFile'
+import TripPhotos from '@/components/forms/trip-photos/TripPhotos'
 
 import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
 import { cn } from '@/utils/cn'
 import { formatCity, getCityId } from '@/utils/formatCity'
 import { formatTripDays, getTripLength, toIsoDate } from '@/utils/tripDates'
+import { toTripPhotos } from '@/utils/tripPhotos'
 import { labelClasses } from '@/components/ui/form/fieldClasses'
 import useTravellerRegistration from './hooks/useTravellerRegistration'
 import useCitySearch from '@/components/forms/traveller-registration/hooks/useCitySearch'
 
 const TRIP_DATES_HINT_ID = 'trip-dates-hint'
 
-const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
+const TravellerRegistrationForm = ({
+	isLoading = false,
+	onSubmit,
+	initialTraveller = null,
+	title = 'Register as a Traveller',
+	submitLabel = 'Register',
+	actions = null,
+	focusPhotos = false,
+}) => {
+	const isEditing = Boolean(initialTraveller)
+	const photos = useMemo(
+		() => toTripPhotos(initialTraveller ?? {}),
+		[initialTraveller],
+	)
+	const [removedUrls, setRemovedUrls] = useState([])
+	const [photosError, setPhotosError] = useState('')
+	const photosRef = useRef(null)
+
+	// "Add photos" lands here, so the uploader takes focus once the form is drawn
+	useEffect(() => {
+		if (!focusPhotos || !photosRef.current) return
+		photosRef.current.scrollIntoView?.()
+		photosRef.current.querySelector('input[type="file"]')?.focus()
+	}, [focusPhotos])
+
 	const {
 		formData,
+		files,
 		handleInputChange,
 		handleCityAdd,
 		handleCityRemove,
 		handleCitiesBlur,
 		handleFilesUpdated,
 		submitHandler,
-	} = useTravellerRegistration()
+	} = useTravellerRegistration(initialTraveller)
 
 	// City search uses the Photon geocoder with OpenStreetMap data (ODbL); the required credit is on the privacy page
 	const [cityQuery, setCityQuery] = useState('')
@@ -121,9 +150,29 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 			: `${TRIP_DATES_HINT_ID} ${field}-error`,
 	})
 
+	const keptPhotos = photos.filter(({ url }) => !removedUrls.includes(url))
+	const removedPhotos = photos.filter(({ url }) => removedUrls.includes(url))
+
+	const handleRemovePhoto = (url) => {
+		setRemovedUrls((urls) => [...urls, url])
+		setPhotosError('')
+	}
+
+	const handleUndoPhoto = (url) =>
+		setRemovedUrls((urls) => urls.filter((removed) => removed !== url))
+
+	// A trip that had photos keeps at least one; an older trip with none can still be saved
+	const handleValidSubmit = (data) => {
+		if (photos.length > 0 && keptPhotos.length + data[FILES].length === 0) {
+			setPhotosError(TRIP_PHOTOS_CONFIG.NONE_LEFT_ERROR)
+			return
+		}
+		onSubmit(isEditing ? { ...data, keptPhotos, removedPhotos } : data)
+	}
+
 	return (
 		<form
-			onSubmit={submitHandler(onSubmit)}
+			onSubmit={submitHandler(handleValidSubmit)}
 			noValidate
 			data-cy="traveller-registration-form"
 			aria-busy={isLoading}
@@ -132,7 +181,7 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				id="traveller-registration-title"
 				className="mt-0 mb-[0.83em] text-[1.5rem]"
 				data-cy="traveller-registration-form-title">
-				Register as a Traveller
+				{title}
 			</h1>
 			<LoadingAnnouncement isLoading={isLoading} />
 			<div className="my-2">
@@ -265,21 +314,48 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 				)}
 			</div>
 
-			<fieldset className="mx-0 mt-2 mb-6 border-0 p-0">
-				<legend className="mb-2 font-bold">Photos (optional)</legend>
-				<AddFile
-					id={FILES}
-					onFilesUpdated={handleFilesUpdated}
-				/>
+			<fieldset
+				ref={photosRef}
+				id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
+				data-cy="traveller-photos"
+				className="mx-0 mt-2 mb-6 flex scroll-mt-24 flex-col gap-4 border-0 p-0">
+				<legend className="mb-2 font-bold">
+					{isEditing
+						? TRIP_PHOTOS_CONFIG.LEGEND
+						: 'Photos (optional)'}
+				</legend>
+				{isEditing && (
+					<TripPhotos
+						photos={photos}
+						removedUrls={removedUrls}
+						newCount={files.length}
+						onRemove={handleRemovePhoto}
+						onUndo={handleUndoPhoto}
+						disabled={isLoading}
+						error={photosError}
+					/>
+				)}
+				{/* A block wrapper, so the uploader's auto margins centre it rather than shrink it to its text */}
+				<div>
+					<AddFile
+						id={FILES}
+						onFilesUpdated={handleFilesUpdated}
+					/>
+				</div>
 			</fieldset>
 
-			<div>
+			<div
+				className={cn(
+					'flex flex-wrap gap-2',
+					isEditing && 'justify-end',
+				)}>
+				{actions}
 				<BaseButton
 					id="register-button"
 					type="submit"
 					data-cy="register-button"
 					isDisabled={isLoading}>
-					Register
+					{submitLabel}
 				</BaseButton>
 			</div>
 		</form>
@@ -289,6 +365,27 @@ const TravellerRegistrationForm = ({ isLoading = false, onSubmit }) => {
 TravellerRegistrationForm.propTypes = {
 	isLoading: PropTypes.bool,
 	onSubmit: PropTypes.func.isRequired,
+	initialTraveller: PropTypes.shape({
+		firstName: PropTypes.string,
+		lastName: PropTypes.string,
+		tripDescription: PropTypes.string,
+		tripStart: PropTypes.string,
+		tripEnd: PropTypes.string,
+		cities: PropTypes.array,
+		files: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
+		fileDimensions: PropTypes.oneOfType([
+			PropTypes.array,
+			PropTypes.object,
+		]),
+		fileThumbnails: PropTypes.oneOfType([
+			PropTypes.array,
+			PropTypes.object,
+		]),
+	}),
+	title: PropTypes.string,
+	submitLabel: PropTypes.string,
+	actions: PropTypes.node,
+	focusPhotos: PropTypes.bool,
 }
 
 export default TravellerRegistrationForm

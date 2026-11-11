@@ -5,6 +5,7 @@ const TRAVELLERS_BASE_ACTIONS = Object.freeze({
 	LOAD_TRAVELLER: 'travellers/loadTraveller',
 	UPDATE_TRAVELLERS: 'travellers/updateTravellers',
 	REGISTER_TRAVELLER: 'travellers/registerTraveller',
+	UPDATE_TRAVELLER: 'travellers/updateTraveller',
 	DELETE_TRAVELLER: 'travellers/deleteTraveller',
 	CHECK_IS_TRAVELLER: 'travellers/checkIsTraveller',
 })

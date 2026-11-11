@@ -9,6 +9,7 @@ export const PATHS = Object.freeze({
 	TRAVELLERS: '/travellers',
 	TRAVELLER_DETAIL: '/travellers/:id',
 	CONTACT_TRAVELLER: '/travellers/:id/contact',
+	EDIT_TRAVELLER: '/travellers/:id/edit',
 	REGISTER: '/register',
 	MESSAGES: '/messages',
 	PRIVACY: '/privacy',

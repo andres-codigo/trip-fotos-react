@@ -19,6 +19,7 @@ import {
 	selectSelectedTraveller,
 } from '@/store/slices/travellersSlice'
 
+import Alerts from '@/components/ui/alerts/Alerts'
 import BaseBadge from '@/components/ui/badge/BaseBadge'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseCard from '@/components/ui/card/BaseCard'
@@ -38,13 +39,23 @@ const IMAGES_LIST =
 
 const TravellerDetail = () => {
 	const { id } = useParams()
-	const { hash } = useLocation()
+	const { hash, state: locationState } = useLocation()
 	const dispatch = useDispatch()
 	const userId = useSelector(selectUserId)
 	const isTraveller = useSelector(selectIsTraveller)
 	const selectedTraveller = useSelector(selectSelectedTraveller)
 
 	const [outcome, setOutcome] = useState({ id: null, failed: false })
+	const [alertMessage, setAlertMessage] = useState(
+		() => locationState?.alertMessage ?? null,
+	)
+
+	// Cleared from history so a refresh does not repeat the alert
+	useEffect(() => {
+		if (alertMessage) {
+			window.history.replaceState({}, document.title)
+		}
+	}, [alertMessage])
 
 	useEffect(() => {
 		let isCurrent = true
@@ -75,6 +86,8 @@ const TravellerDetail = () => {
 	const canContact = !isOwnRecord && isTraveller
 	const cities = traveller?.cities ?? []
 	const files = traveller?.files ?? []
+	const editLink = `${PATHS.TRAVELLERS}/${id}${TRAVELLER_ITEM_CONFIG.EDIT_PATH_SEGMENT}`
+	const addPhotosLink = `${editLink}#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
 
 	const shouldScrollToPhotos =
 		showProfile && hash === `#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
@@ -131,6 +144,16 @@ const TravellerDetail = () => {
 			{showProfile && (
 				<>
 					<BaseCard className={cn(SECTION, isOwnRecord && OWN)}>
+						{alertMessage && (
+							<div
+								className="mb-4"
+								data-cy={TRAVELLER_DETAIL.SAVED_ALERT}>
+								<Alerts
+									message={alertMessage}
+									onClose={() => setAlertMessage(null)}
+								/>
+							</div>
+						)}
 						{heading}
 						<section data-cy={TRAVELLER_DETAIL.PROFILE}>
 							<TripSummary
@@ -155,8 +178,46 @@ const TravellerDetail = () => {
 									/>
 								))}
 							</div>
+							{isOwnRecord && (
+								<div className="flex flex-wrap gap-2">
+									<BaseButton
+										isLink
+										to={editLink}
+										modeType="outline"
+										data-cy={TRAVELLER_DETAIL.EDIT}>
+										{TRAVELLER_ITEM_CONFIG.EDIT_LABEL}
+									</BaseButton>
+									<BaseButton
+										isLink
+										to={addPhotosLink}
+										modeType="outline"
+										data-cy={TRAVELLER_DETAIL.ADD_PHOTOS}>
+										{
+											TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL
+										}
+									</BaseButton>
+								</div>
+							)}
 						</section>
 					</BaseCard>
+					{isOwnRecord && files.length === 0 && (
+						<BaseCard className={cn(SECTION, OWN)}>
+							<section data-cy={TRAVELLER_DETAIL.NO_PHOTOS}>
+								<h2 className="mt-0">
+									{TRAVELLER_DETAIL_CONFIG.PHOTOS_HEADING}
+								</h2>
+								<p className="text-text-muted">
+									{TRAVELLER_DETAIL_CONFIG.NO_PHOTOS_MESSAGE}
+								</p>
+								<BaseButton
+									isLink
+									to={addPhotosLink}
+									modeType="outline">
+									{TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL}
+								</BaseButton>
+							</section>
+						</BaseCard>
+					)}
 					{files.length > 0 && (
 						<BaseCard className={cn(SECTION, isOwnRecord && OWN)}>
 							<ul

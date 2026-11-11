@@ -22,6 +22,10 @@ export const ERROR_MESSAGES = Object.freeze({
 	// Traveller-specific errors
 	FAILED_TO_REGISTER_TRAVELLER:
 		"We couldn't complete your registration. Please try again.",
+	FAILED_TO_SAVE_TRIP:
+		'Your changes were not saved. Your trip is as it was; please try again.',
+	FAILED_TO_DELETE_PROFILE:
+		'Your profile could not be deleted. Please try again.',
 	FAILED_TO_CONTACT_TRAVELLER:
 		"We couldn't send your message. Please try again.",
 
