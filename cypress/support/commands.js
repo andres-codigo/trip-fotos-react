@@ -2,6 +2,7 @@ import { mount } from 'cypress/react'
 import { configureStore } from '@reduxjs/toolkit'
 
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
+import { animationsSettled } from './utils/animations'
 
 import {
 	HEADER_SELECTORS,
@@ -220,6 +221,8 @@ Cypress.Commands.add('checkA11y', (context, options = {}) => {
 				return win
 			}),
 		)
+		// Mid-fade, text blends with what is behind it and fails colour contrast
+		.then((win) => animationsSettled(win.document).then(() => win))
 		.then((win) =>
 			win.axe.run(context ?? win.document, {
 				runOnly: { type: 'tag', values: WCAG_AA_TAGS },
