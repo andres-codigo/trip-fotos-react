@@ -54,7 +54,7 @@ CI runs the full E2E suite on every pull request, so a local run is for earlier 
 - Store logic or persisted state changes (`src/store/`) — Vitest and component tests build their own store without redux-persist, so only E2E sees rehydration
 - Firebase services or API constants change
 
-`/verify` runs E2E by itself for these paths (and notes why). For other changes, leave E2E to CI, or pass `e2e` to force it. To run one spec, start `npm run emulators` and `npm run emulators:seed` in another terminal, then run `E2E_EMULATORS=true node .claude/skills/verify/run-e2e.mjs --spec <path>`. The runner uses its own port, 5190 (`E2E_PORT` overrides it), never the dev server's 3000. In live mode it reuses a server already on that port, so a Vite error overlay left from an earlier compile failure there will fail every spec; restart that server first.
+`/verify` runs E2E by itself for these paths (and notes why). For other changes, leave E2E to CI, or pass `e2e` to force it. To run one spec, start `npm run emulators` and `npm run emulators:seed` in another terminal, then run `E2E_EMULATORS=true node .claude/skills/verify/run-e2e.mjs --spec <path>`. The runner uses its own port, 5190 (`E2E_PORT` overrides it), never the dev server's 3000. It builds the app and serves the build with `vite preview`, so an app change shows only on the next run. In live mode it reuses a server already on that port, so a Vite error overlay left from an earlier compile failure there will fail every spec; restart that server first.
 
 ## Visual Check For UI Changes
 
