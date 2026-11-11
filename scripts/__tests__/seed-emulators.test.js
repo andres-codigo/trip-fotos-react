@@ -8,6 +8,7 @@ import {
 	assertEmulatorsOnly,
 	buildMessages,
 	buildTravellers,
+	needsFullSeed,
 } from '../seed-emulators.mjs'
 
 describe('seed-emulators', () => {
@@ -94,6 +95,36 @@ describe('seed-emulators', () => {
 				]
 
 			expect(Object.keys(older).sort()).toEqual(['message', 'userEmail'])
+		})
+	})
+
+	it('dates the unread message from the clock it is given', () => {
+		const now = Date.UTC(2026, 5, 15, 12)
+		const message =
+			buildMessages(now)[SEED_USERS.TRAVELLER_ONE.uid][
+				MOCK_INBOX.SAMPLE_MESSAGE_ONE.id
+			]
+
+		expect(message.createdAt).toBe(now - 12 * 60 * 1000)
+	})
+
+	describe('needsFullSeed', () => {
+		const seeded = Object.values(SEED_USERS).map(({ uid }) => ({ uid }))
+
+		it('keeps the accounts when every seeded user exists, extra users or not', () => {
+			expect(needsFullSeed(seeded)).toBe(false)
+			expect(needsFullSeed([...seeded, { uid: 'registered' }])).toBe(
+				false,
+			)
+		})
+
+		it('reseeds when a seeded user has deleted their account', () => {
+			const withoutTraveller = seeded.filter(
+				({ uid }) => uid !== SEED_USERS.TRAVELLER_ONE.uid,
+			)
+
+			expect(needsFullSeed(withoutTraveller)).toBe(true)
+			expect(needsFullSeed([])).toBe(true)
 		})
 	})
 })

@@ -70,13 +70,14 @@ export const buildTravellers = () => ({
 	},
 })
 
-export const buildMessages = () => ({
+// `now` lets /ui-check seed against the clock it freezes, so "12 min ago" reads the same in every run
+export const buildMessages = (now = Date.now()) => ({
 	[SEED_USERS.TRAVELLER_ONE.uid]: {
 		// From the other seeded traveller, unread, so the card, Reply and the nav count all render
 		[MOCK_INBOX.SAMPLE_MESSAGE_ONE.id]: {
 			senderId: SEED_USERS.TRAVELLER_TWO.uid,
 			message: MOCK_INBOX.SAMPLE_MESSAGE_ONE.message,
-			createdAt: Date.now() - 12 * 60 * 1000,
+			createdAt: now - 12 * 60 * 1000,
 			read: false,
 		},
 		// An older message with only an email, as stored before messaging was travellers-only
@@ -96,31 +97,33 @@ export const assertEmulatorsOnly = (env = process.env) => {
 	}
 }
 
-export const seedEmulators = async () => {
+// A fresh app each call, deleted after, so the database connection never
+// keeps the process alive or leaks between cy.task calls
+const withEmulators = async (work) => {
 	assertEmulatorsOnly()
-
-	// A fresh app each call, deleted after, so the database connection never
-	// keeps the process alive or leaks between cy.task calls
 	const app = initializeApp(
 		{ projectId: PROJECT_ID, databaseURL: DATABASE_URL },
 		`seed-${Date.now()}`,
 	)
 	try {
-		await seed(getAuth(app), getDatabase(app))
+		return await work(getAuth(app), getDatabase(app))
 	} finally {
 		await deleteApp(app)
 	}
-
-	return null
 }
 
-const seed = async (auth, db) => {
+const writeData = (db, now) =>
+	db.ref().set({
+		travellers: buildTravellers(),
+		messages: buildMessages(now),
+	})
+
+const seed = async (auth, db, now) => {
 	// Clear first so a re-run always starts from the same state
 	const { users } = await auth.listUsers(1000)
 	if (users.length > 0) {
 		await auth.deleteUsers(users.map(({ uid }) => uid))
 	}
-	await db.ref().remove()
 
 	for (const { uid, email, admin } of Object.values(SEED_USERS)) {
 		await auth.createUser({
@@ -132,9 +135,32 @@ const seed = async (auth, db) => {
 		if (admin) await auth.setCustomUserClaims(uid, { admin: true })
 	}
 
-	await db.ref('travellers').set(buildTravellers())
-	await db.ref('messages').set(buildMessages())
+	await writeData(db, now)
 }
+
+export const seedEmulators = ({ now } = {}) =>
+	withEmulators(async (auth, db) => {
+		await seed(auth, db, now)
+		return null
+	})
+
+// A capture that deletes its own account leaves the seeded users incomplete
+export const needsFullSeed = (users) => {
+	const uids = new Set(users.map(({ uid }) => uid))
+	return Object.values(SEED_USERS).some(({ uid }) => !uids.has(uid))
+}
+
+// The database only, so cy.session stays valid; a full seed when a seeded account is gone, which the caller must follow by clearing the saved sessions
+export const resetEmulatorData = ({ now } = {}) =>
+	withEmulators(async (auth, db) => {
+		const { users } = await auth.listUsers(1000)
+		if (needsFullSeed(users)) {
+			await seed(auth, db, now)
+			return { reseeded: true }
+		}
+		await writeData(db, now)
+		return { reseeded: false }
+	})
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
 	try {

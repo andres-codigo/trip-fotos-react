@@ -8,11 +8,16 @@ import viteConfig from './vite.config.js'
 import { PATHS } from './src/constants/ui/paths.js'
 
 import {
+	resetEmulatorData,
 	seedEmulators,
 	SEED_USERS,
 	SEED_PASSWORD,
 } from './scripts/seed-emulators.mjs'
 import { recordSpec } from './.claude/skills/verify/spec-results.mjs'
+import {
+	stampPath,
+	writeStamp,
+} from './.claude/skills/ui-check/main-captures.mjs'
 
 import dotenv from 'dotenv'
 dotenv.config()
@@ -80,20 +85,35 @@ export default defineConfig({
 		setupNodeEvents(on, config) {
 			// /verify reruns only the specs that failed
 			on('after:spec', recordSpec)
+			const capturesDir = path.join(
+				config.screenshotsFolder,
+				'capture.cy.js',
+			)
+			// A full `main` capture records its commit, so the next /ui-check on the same main reuses it
+			if (isUiCheck) {
+				on('after:run', (results) => {
+					writeStamp({
+						projectDir: config.projectRoot,
+						capturesDir,
+						label: process.env.UI_CHECK_LABEL,
+						only: process.env.UI_CHECK_ONLY,
+						failed: results?.totalFailed ?? 1,
+						widths: process.env.UI_CHECK_WIDTHS,
+					})
+				})
+			}
 			on('task', {
 				seedEmulators,
+				resetEmulatorData,
 				clearUiCheckScreenshots(label) {
 					if (!/^[\w-]+$/.test(label)) {
 						throw new Error(`Invalid UI_CHECK_LABEL: ${label}`)
 					}
-					rmSync(
-						path.join(
-							config.screenshotsFolder,
-							'capture.cy.js',
-							label,
-						),
-						{ recursive: true, force: true },
-					)
+					rmSync(path.join(capturesDir, label), {
+						recursive: true,
+						force: true,
+					})
+					rmSync(stampPath(capturesDir, label), { force: true })
 					return null
 				},
 			})
