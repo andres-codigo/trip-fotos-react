@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.24.0...v0.24.1) (2026-11-11)
+
+
+### Bug Fixes
+
+* show the signed-in traveller's name in the nav on every page, not only after the travellers list loads ([#694](https://github.com/andres-codigo/trip-fotos-react/issues/694)) ([287014a](https://github.com/andres-codigo/trip-fotos-react/commit/287014a6327f60450a9044a4c2391268e92d1bf0))
+
 ## [0.24.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.23.1...v0.24.0) (2026-11-11)
 
 
