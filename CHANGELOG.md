@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.23.1...v0.24.0) (2026-11-11)
+
+
+### Features
+
+* travellers can edit their trip, add photos and delete their own profile ([#687](https://github.com/andres-codigo/trip-fotos-react/issues/687)) ([f6ddf4a](https://github.com/andres-codigo/trip-fotos-react/commit/f6ddf4a3d79a0f0ef4e4e893fa08729e0f00bde8))
+
 ## [0.23.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.23.0...v0.23.1) (2026-11-10)
 
 
