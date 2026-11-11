@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.24.1...v0.25.0) (2026-11-11)
+
+
+### Features
+
+* move Logout into an account menu, add a phone tab bar and back links ([#699](https://github.com/andres-codigo/trip-fotos-react/issues/699)) ([8a9db2d](https://github.com/andres-codigo/trip-fotos-react/commit/8a9db2d0b2aa0a40940480a336c80afa623fbf1a))
+
 ## [0.24.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.24.0...v0.24.1) (2026-11-11)
 
 
