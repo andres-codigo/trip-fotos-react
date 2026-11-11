@@ -143,8 +143,7 @@ describe('Register Page', () => {
 		const { firstName, lastName, tripDescription, tripStart, tripEnd } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
-		// A real Storage upload to the emulator (deleted in afterEach)
-		cy.intercept('POST', '**/v0/b/*/o*').as('uploadImage')
+		// A real Storage upload to the emulator (deleted in afterEach), not spied on: an intercepted upload stores an image the browser cannot show
 		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*').as(
 			'registerTraveller',
 		)
@@ -174,7 +173,6 @@ describe('Register Page', () => {
 
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
 
-		cy.wait('@uploadImage', { timeout: REQUEST_TIMEOUT })
 		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
 			.its('request.body')
 			.then((body) => {
