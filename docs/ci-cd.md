@@ -8,7 +8,7 @@ Every `uses:` in `.github/workflows` is pinned to a full commit SHA with the rel
 
 - **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
 - **Triggers:**
-    - On **pull requests** to `main` that change `src/**`, `scripts/**`, `.github/scripts/**`, `.github/labels.json`, `.github/actions/**`, `package.json`, `package-lock.json`, `vite.config.js`, `vercel.json`, `firebase/**`, `.env.example` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
+    - On **pull requests** to `main` that change `src/**`, `scripts/**`, `.github/scripts/**`, `cypress/support/utils/**`, `cypress/ui-check/**`, `.github/labels.json`, `.github/actions/**`, `package.json`, `package-lock.json`, `vite.config.js`, `vercel.json`, `firebase/**`, `.env.example` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
