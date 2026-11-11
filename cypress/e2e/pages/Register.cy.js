@@ -16,6 +16,7 @@ import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-trav
 import { TEST_USERS } from '../../../src/constants/config/users'
 
 import { performLogin } from '../../support/utils/authHelpers'
+import { atPath } from '../../support/utils/waitForSuccess'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
@@ -124,7 +125,7 @@ describe('Register Page', () => {
 		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
 
 		// Verify redirection to Travellers page
-		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)
+		cy.waitForSuccess(atPath(PATHS.TRAVELLERS))
 
 		// Verify success alert message
 		cy.get('[role="alert"]')
@@ -142,8 +143,7 @@ describe('Register Page', () => {
 		const { firstName, lastName, tripDescription, tripStart, tripEnd } =
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
-		// A real Storage upload to the emulator (deleted in afterEach)
-		cy.intercept('POST', '**/v0/b/*/o*').as('uploadImage')
+		// A real Storage upload to the emulator (deleted in afterEach), not spied on: an intercepted upload stores an image the browser cannot show
 		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*').as(
 			'registerTraveller',
 		)
@@ -173,7 +173,6 @@ describe('Register Page', () => {
 
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
 
-		cy.wait('@uploadImage', { timeout: REQUEST_TIMEOUT })
 		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
 			.its('request.body')
 			.then((body) => {
@@ -197,7 +196,7 @@ describe('Register Page', () => {
 				uploadedImageUrls.push(url)
 			})
 
-		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.TRAVELLERS)
+		cy.waitForSuccess(atPath(PATHS.TRAVELLERS))
 		cy.assertTravellerPersisted(TEST_USERS.STANDARD.ID, {
 			firstName,
 			lastName,

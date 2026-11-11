@@ -5,10 +5,11 @@
 //
 //   UI_CHECK=true    selects this script instead of the E2E suite
 //   UI_CHECK_LABEL   prefix for the screenshot names (for example `main` or `branch`)
-//   UI_CHECK_WIDTHS  comma-separated viewport widths (default 390,1280)
-//   UI_CHECK_ONLY    comma-separated parts of test names to run (for example
-//                    `city filter`), to recheck a fix on the branch; it keeps the
-//                    label's other screenshots and overwrites the ones it takes
+//   UI_CHECK_WIDTHS  comma-separated viewport widths (default 390,1280), then
+//                    `;part=widths` per capture (see cypress/ui-check/selection.js)
+//   UI_CHECK_ONLY    comma-separated parts of capture ids or titles to run (for
+//                    example `city-filter`); cypress/impact.js names each capture.
+//                    It keeps the label's other captures and retakes its own
 import { API_DATABASE } from '../../src/constants/api'
 import {
 	COMBOBOX_SELECTORS,
@@ -31,6 +32,7 @@ import {
 } from '../../src/constants/test/selectors/components'
 import { PAGE_SELECTORS } from '../../src/constants/test/selectors/pages'
 import { PATHS } from '../../src/constants/ui/paths'
+import { SESSION_STORAGE_KEYS } from '../../src/constants/auth'
 import { TEST_USERS } from '../../src/constants/config/users'
 import {
 	EDIT_TRIP_CONFIG,
@@ -38,13 +40,19 @@ import {
 } from '../../src/constants/travellers'
 
 import { performLogin } from '../support/utils/authHelpers'
+import { shows } from '../support/utils/waitForSuccess'
 
-import { parseOnly, runsCapture } from './only'
+import { CAPTURES } from '../impact'
+import {
+	onlyHashDiffers,
+	parseOnly,
+	parseWidthSpec,
+	runsCapture,
+	widthsFor,
+} from './selection'
 
 const LABEL = Cypress.expose('UI_CHECK_LABEL') || 'capture'
-const WIDTHS = String(Cypress.expose('UI_CHECK_WIDTHS') || '390,1280')
-	.split(',')
-	.map(Number)
+const WIDTH_SPEC = parseWidthSpec(Cypress.expose('UI_CHECK_WIDTHS'))
 const ONLY = parseOnly(Cypress.expose('UI_CHECK_ONLY'))
 // A filtered run overwrites its own shots rather than adding `name (1).png` beside them
 const SCREENSHOT = { overwrite: true }
@@ -116,18 +124,33 @@ Cypress.on('uncaught:exception', (error) => {
 	}
 })
 
+// Set as each capture starts; its shots go in a folder named after it, so a filtered run replaces exactly its own
+let currentCapture = null
+const shotName = (name) => `${LABEL}/${currentCapture}/${name}`
+
 // Every call site asserts the content first; the helper only names the file
 const shot = (name) => {
 	// eslint-disable-next-line cypress/assertion-before-screenshot
-	cy.screenshot(`${LABEL}/${name}`, { ...SCREENSHOT, capture: 'fullPage' })
+	cy.screenshot(shotName(name), { ...SCREENSHOT, capture: 'fullPage' })
 }
 
-// Freezes CSS animation (the spinner too) and the text caret so a capture is never a random frame
+// cy.visit keeps the page when only the hash differs, so reload to start the app afresh
+const visit = (path) =>
+	cy.url({ log: false }).then((current) => {
+		cy.visit(path)
+		if (onlyHashDiffers(current, path)) cy.reload()
+	})
+
+// times: 1, so a stub for a failure never also answers the real request after it
+const interceptOnce = (method, url, response) =>
+	cy.intercept({ method, url, times: 1 }, response)
+
+// Freezes CSS animation (the spinner and the progress bar's fill too) and the text caret so a capture is never a random frame
 const freezeAnimation = () => {
 	cy.document().then((doc) => {
 		const style = doc.createElement('style')
 		style.textContent =
-			'*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }'
+			'*, *::before, *::after, ::-webkit-progress-value { animation: none !important; transition: none !important; caret-color: transparent !important; }'
 		doc.head.appendChild(style)
 	})
 }
@@ -211,11 +234,65 @@ const markAllUnread = () =>
 			})
 		})
 
+// The app learns the signed-in traveller's name from the travellers list, so where the list shows, Logout can render before the name does
+const assertSignedInName = () =>
+	cy.window({ log: false }).then((win) => {
+		const uid = win.localStorage.getItem(SESSION_STORAGE_KEYS.USER_ID)
+		const listed = win.document.querySelector(
+			TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM,
+		)
+		if (!uid || !listed) return
+		cy.request({
+			url: emulatorDatabase(`travellers/${uid}`),
+			headers: OWNER,
+			log: false,
+		}).then(({ body }) => {
+			if (!body?.firstName) return
+			cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT, {
+				timeout: TIMEOUT,
+			}).should('contain.text', body.firstName)
+		})
+	})
+
+// Seeded photos load over the network from the Storage emulator, so a capture could catch one half-painted, and a full-page capture scrolls lazy ones in only as it goes. So every image loads now; the deliberately held photo is left out
+const assertImagesLoaded = () =>
+	cy
+		.document({ log: false })
+		.then((doc) => {
+			for (const image of doc.images) image.loading = 'eager'
+		})
+		.document({ log: false, timeout: TIMEOUT })
+		.should((doc) => {
+			const loading = [...doc.images]
+				.filter((image) => !image.complete)
+				.map((image) => image.currentSrc || image.src)
+				.filter((url) => url !== SLOW_PHOTO_URL)
+			expect(
+				loading.length,
+				`images still loading: ${loading.join(' ')}`,
+			).to.equal(0)
+		})
+		.then((doc) =>
+			Promise.all(
+				[...doc.images]
+					.filter((image) => image.naturalWidth)
+					.map((image) => image.decode().catch(() => null)),
+			),
+		)
+
 const assertSettled = () => {
 	cy.get(COMMON_SELECTORS.BASE_SPINNER).should('not.exist')
 	cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, { timeout: TIMEOUT }).should(
 		'not.exist',
 	)
+	cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST, {
+		timeout: TIMEOUT,
+	}).should('not.exist')
+	cy.get(MESSAGE_SKELETON_SELECTORS.ROOT, { timeout: TIMEOUT }).should(
+		'not.exist',
+	)
+	assertSignedInName()
+	assertImagesLoaded()
 }
 
 // A step can add travellers, so a card it needs can sit beyond the first page
@@ -232,21 +309,32 @@ const showAllTravellers = () => {
 }
 
 const eachWidth = (callback) => {
-	WIDTHS.forEach((width) => {
+	widthsFor(
+		WIDTH_SPEC,
+		currentCapture,
+		CAPTURES[currentCapture].title,
+	).forEach((width) => {
 		cy.viewport(width, HEIGHT)
 		callback(width)
 	})
 }
 
 // Skipped rather than left out, so the run lists what UI_CHECK_ONLY filtered away
-const capture = (title, test) =>
-	(runsCapture(ONLY, title) ? it : it.skip)(title, test)
+const capture = (id, test) => {
+	const entry = CAPTURES[id]
+	if (!entry) throw new Error(`Add capture "${id}" to cypress/impact.js`)
+	;(runsCapture(ONLY, id, entry.title) ? it : it.skip)(entry.title, () => {
+		currentCapture = id
+		cy.task('clearUiCheckScreenshots', { label: LABEL, capture: id })
+		test()
+	})
+}
 
 describe(`UI check capture (${LABEL})`, () => {
 	// A full seed once per run: cy.session then keeps each role signed in across the tests
 	before(() => {
 		// A filtered run rechecks a few tests, so the label's other shots stay for the comparison
-		if (!ONLY.length) cy.task('clearUiCheckScreenshots', LABEL)
+		if (!ONLY.length) cy.task('clearUiCheckScreenshots', { label: LABEL })
 		cy.task('seedEmulators', { now: NOW })
 		Cypress.session.clearAllSavedSessions()
 	})
@@ -270,7 +358,7 @@ describe(`UI check capture (${LABEL})`, () => {
 	})
 
 	context('public pages', () => {
-		capture('captures the authentication, privacy and 404 pages', () => {
+		capture('public-pages', () => {
 			;[
 				[
 					'authentication',
@@ -289,7 +377,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				],
 			].forEach(([name, path, container]) => {
 				eachWidth((width) => {
-					cy.visit(path)
+					visit(path)
 					cy.get(container).should('be.visible')
 					assertSettled()
 					freezeAnimation()
@@ -304,327 +392,314 @@ describe(`UI check capture (${LABEL})`, () => {
 			performLogin()
 		})
 
-		capture(
-			'captures the travellers list, a failing image and the detail page',
-			() => {
+		capture('travellers-detail', () => {
+			cy.request({
+				method: 'PUT',
+				url: emulatorDatabase(`travellers/${BROKEN_IMAGE_ID}`),
+				headers: { Authorization: 'Bearer owner' },
+				body: {
+					firstName: 'Broken',
+					lastName: 'Image',
+					tripDescription:
+						'A traveller whose photo URL is unreachable.',
+					tripStart: '2024-12-28',
+					tripEnd: '2025-01-03',
+					cities: ['oslo'],
+					files: [BROKEN_IMAGE_URL],
+					fileDimensions: [{ width: 640, height: 480 }],
+					registered: NOW,
+				},
+			})
+
+			eachWidth((width) => {
+				visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+					'have.length.at.least',
+					3,
+				)
+				assertSettled()
+				// The real error path: the unreachable URL fires a genuine error event
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_FALLBACK, {
+					timeout: TIMEOUT,
+				}).should('exist')
+				freezeAnimation()
+				shot(`travellers-${width}`)
+
+				cy.get(TRAVELLER_ITEM_SELECTORS.DETAILS).first().click()
+				cy.get(TRAVELLER_DETAIL_SELECTORS.ROOT).should('be.visible')
+				assertSettled()
+				freezeAnimation()
+				shot(`traveller-detail-${width}`)
+			})
+		})
+
+		capture('city-filter-many', () => {
+			;[
+				'oslo',
+				'lima',
+				'rome',
+				'paris',
+				'cairo',
+				'tokyo',
+				'prague',
+				'berlin',
+				'madrid',
+				'vienna',
+				'athens',
+				'dublin',
+				'warsaw',
+				'zagreb',
+				'sofia',
+				'riga',
+				'tallinn',
+				'bern',
+				'bruges',
+				'porto',
+				'seville',
+				'florence',
+			].forEach((city, index) => {
 				cy.request({
 					method: 'PUT',
-					url: emulatorDatabase(`travellers/${BROKEN_IMAGE_ID}`),
+					url: emulatorDatabase(
+						`travellers/ui-check-many-cities-${index}`,
+					),
 					headers: { Authorization: 'Bearer owner' },
 					body: {
-						firstName: 'Broken',
-						lastName: 'Image',
-						tripDescription:
-							'A traveller whose photo URL is unreachable.',
-						tripStart: '2024-12-28',
-						tripEnd: '2025-01-03',
-						cities: ['oslo'],
+						firstName: `Many${index}`,
+						lastName: 'Cities',
+						tripDescription: 'Seeded for the city filter.',
+						daysInCity: 2,
+						cities: [city],
 						files: [BROKEN_IMAGE_URL],
 						fileDimensions: [{ width: 640, height: 480 }],
 						registered: NOW,
 					},
 				})
+			})
 
-				eachWidth((width) => {
-					cy.visit(PATHS.TRAVELLERS)
-					cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
-						'have.length.at.least',
-						3,
-					)
-					assertSettled()
-					// The real error path: the unreachable URL fires a genuine error event
-					cy.get(COMMON_SELECTORS.BASE_IMAGE_FALLBACK, {
-						timeout: TIMEOUT,
-					}).should('exist')
-					freezeAnimation()
-					shot(`travellers-${width}`)
+			// Literal selectors keep the script usable on main, which lacks the new ones
+			const filter = (name) => `[data-cy="traveller-filter-${name}"]`
+			// Case-insensitive: main shows stored ids as they are ("oslo")
+			const chip = (name) => [filter('option'), new RegExp(name, 'i')]
 
-					cy.get(TRAVELLER_ITEM_SELECTORS.DETAILS).first().click()
-					cy.get(TRAVELLER_DETAIL_SELECTORS.ROOT).should('be.visible')
-					assertSettled()
-					freezeAnimation()
-					shot(`traveller-detail-${width}`)
-				})
-			},
-		)
+			const inlineStates = (width) => {
+				cy.get(filter('list')).first().focus()
+				shot(`city-filter-list-focus-${width}`)
+				cy.get(filter('search')).first().type('o')
+				cy.get(filter('checkbox')).should('exist')
+				shot(`city-filter-searched-${width}`)
+				cy.contains(...chip('Oslo')).click()
+				cy.get(filter('status')).should('contain', ' of ')
+				shot(`city-filter-ticked-${width}`)
+				cy.get(filter('search')).first().clear().type('zzz')
+				cy.get(filter('empty')).should('be.visible')
+				shot(`city-filter-empty-${width}`)
+			}
 
-		capture(
-			'captures the city filter with many cities, searched, empty and focused',
-			() => {
-				;[
-					'oslo',
-					'lima',
-					'rome',
-					'paris',
-					'cairo',
-					'tokyo',
-					'prague',
-					'berlin',
-					'madrid',
-					'vienna',
-					'athens',
-					'dublin',
-					'warsaw',
-					'zagreb',
-					'sofia',
-					'riga',
-					'tallinn',
-					'bern',
-					'bruges',
-					'porto',
-					'seville',
-					'florence',
-				].forEach((city, index) => {
-					cy.request({
-						method: 'PUT',
-						url: emulatorDatabase(
-							`travellers/ui-check-many-cities-${index}`,
-						),
-						headers: { Authorization: 'Bearer owner' },
-						body: {
-							firstName: `Many${index}`,
-							lastName: 'Cities',
-							tripDescription: 'Seeded for the city filter.',
-							daysInCity: 2,
-							cities: [city],
-							files: [BROKEN_IMAGE_URL],
-							fileDimensions: [{ width: 640, height: 480 }],
-							registered: NOW,
-						},
-					})
-				})
+			const sheetStates = (width) => {
+				cy.get(filter('trigger')).click()
+				cy.get(filter('sheet')).should('be.visible')
+				shot(`city-filter-sheet-${width}`)
+				cy.get(filter('sheet'))
+					.contains(...chip('Oslo'))
+					.click()
+				cy.get(filter('sheet'))
+					.contains(...chip('Rome'))
+					.click()
+				cy.get(filter('sheet'))
+					.find(`${filter('checkbox')}:checked`)
+					.should('have.length', 2)
+				shot(`city-filter-sheet-ticked-${width}`)
+				cy.get(filter('sheet')).find(filter('search')).type('o')
+				shot(`city-filter-sheet-searched-${width}`)
+				cy.get(filter('sheet'))
+					.find(filter('search'))
+					.clear()
+					.type('zzz')
+				cy.get(filter('sheet'))
+					.find(filter('empty'))
+					.should('be.visible')
+				shot(`city-filter-sheet-empty-${width}`)
+				cy.get(filter('sheet')).find(filter('search')).clear()
+				forcePseudo(`${filter('sheet')} ${filter('checkbox')}`, [
+					'focus',
+					'focus-visible',
+				])
+				shot(`city-filter-sheet-chip-focus-${width}`)
+				forcePseudo(`${filter('sheet')} ${filter('checkbox')}`, [])
+				cy.get(filter('show-matches')).click()
+				cy.get(filter('sheet')).should('not.exist')
+				cy.get(filter('trigger')).should('contain', '2 of')
+				shot(`city-filter-narrowed-${width}`)
+			}
 
-				// Literal selectors keep the script usable on main, which lacks the new ones
-				const filter = (name) => `[data-cy="traveller-filter-${name}"]`
-				// Case-insensitive: main shows stored ids as they are ("oslo")
-				const chip = (name) => [filter('option'), new RegExp(name, 'i')]
+			eachWidth((width) => {
+				visit(PATHS.TRAVELLERS)
+				cy.get(filter('checkbox')).should('have.length.at.least', 8)
+				assertSettled()
+				freezeAnimation()
+				shot(`city-filter-many-${width}`)
 
-				const inlineStates = (width) => {
-					cy.get(filter('list')).first().focus()
-					shot(`city-filter-list-focus-${width}`)
-					cy.get(filter('search')).first().type('o')
-					cy.get(filter('checkbox')).should('exist')
-					shot(`city-filter-searched-${width}`)
-					cy.contains(...chip('Oslo')).click()
-					cy.get(filter('status')).should('contain', ' of ')
-					shot(`city-filter-ticked-${width}`)
-					cy.get(filter('search')).first().clear().type('zzz')
-					cy.get(filter('empty')).should('be.visible')
-					shot(`city-filter-empty-${width}`)
-				}
-
-				const sheetStates = (width) => {
-					cy.get(filter('trigger')).click()
-					cy.get(filter('sheet')).should('be.visible')
-					shot(`city-filter-sheet-${width}`)
-					cy.get(filter('sheet'))
-						.contains(...chip('Oslo'))
-						.click()
-					cy.get(filter('sheet'))
-						.contains(...chip('Rome'))
-						.click()
-					cy.get(filter('sheet'))
-						.find(`${filter('checkbox')}:checked`)
-						.should('have.length', 2)
-					shot(`city-filter-sheet-ticked-${width}`)
-					cy.get(filter('sheet')).find(filter('search')).type('o')
-					shot(`city-filter-sheet-searched-${width}`)
-					cy.get(filter('sheet'))
-						.find(filter('search'))
-						.clear()
-						.type('zzz')
-					cy.get(filter('sheet'))
-						.find(filter('empty'))
-						.should('be.visible')
-					shot(`city-filter-sheet-empty-${width}`)
-					cy.get(filter('sheet')).find(filter('search')).clear()
-					forcePseudo(`${filter('sheet')} ${filter('checkbox')}`, [
-						'focus',
-						'focus-visible',
-					])
-					shot(`city-filter-sheet-chip-focus-${width}`)
-					forcePseudo(`${filter('sheet')} ${filter('checkbox')}`, [])
-					cy.get(filter('show-matches')).click()
-					cy.get(filter('sheet')).should('not.exist')
-					cy.get(filter('trigger')).should('contain', '2 of')
-					shot(`city-filter-narrowed-${width}`)
-				}
-
-				eachWidth((width) => {
-					cy.visit(PATHS.TRAVELLERS)
-					cy.get(filter('checkbox')).should('have.length.at.least', 8)
-					assertSettled()
-					freezeAnimation()
-					shot(`city-filter-many-${width}`)
-
-					// The branch swaps the inline filter for a sheet at 768px and below; main and wider screens keep it inline
-					cy.get('body').then(($body) => {
-						if ($body.find(`${filter('trigger')}:visible`).length) {
-							sheetStates(width)
-						} else if ($body.find(filter('search')).length) {
-							inlineStates(width)
-						}
-					})
-				})
-			},
-		)
-
-		capture(
-			'captures every photo tile state, the source each one loads and the photo dialog',
-			() => {
-				const isBranch = LABEL !== 'main'
-				cy.request({
-					method: 'PUT',
-					url: emulatorDatabase(`travellers/${PHOTOS_ID}`),
-					headers: { Authorization: 'Bearer owner' },
-					body: {
-						firstName: 'Photo',
-						lastName: 'States',
-						tripDescription:
-							'Thumbnails, a legacy photo, a failing thumbnail and a slow photo.',
-						tripStart: '2025-06-14',
-						tripEnd: '2025-06-14',
-						cities: ['lisbon'],
-						...PHOTO_STATES,
-						registered: NOW,
-					},
-				})
-				// Held open so the solid placeholder stays on screen
-				cy.intercept('GET', `${PHOTO_HOST}/*`, (request) => {
-					const svg = {
-						body:
-							photoSvgs[request.url] ??
-							'<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480"/>',
-						headers: { 'content-type': 'image/svg+xml' },
+				// The branch swaps the inline filter for a sheet at 768px and below; main and wider screens keep it inline
+				cy.get('body').then(($body) => {
+					if ($body.find(`${filter('trigger')}:visible`).length) {
+						sheetStates(width)
+					} else if ($body.find(filter('search')).length) {
+						inlineStates(width)
 					}
-					request.reply(
-						request.url === SLOW_PHOTO_URL
-							? { ...svg, delay: 60000 }
-							: svg,
-					)
 				})
+			})
+		})
 
-				// Lazy tiles only load once scrolled to, and an unsettled tile is no evidence
-				const tiles = (scope) => {
-					const selector = `${scope} ${COMMON_SELECTORS.BASE_IMAGE_THUMBNAIL}`
-					cy.get(scope).scrollIntoView()
-					// Re-queried per tile, since a failing thumbnail re-renders its tile
-					cy.get(selector)
-						.its('length')
-						.then((count) => {
-							Cypress._.times(count, (index) => {
-								cy.get(selector).eq(index).scrollIntoView()
-								cy.get(selector)
-									.eq(index)
-									.should(($el) => {
-										if ($el.attr('src') === SLOW_PHOTO_URL)
-											return
-										expect($el[0].complete).to.equal(true)
-										expect(
-											$el[0].naturalWidth,
-										).to.be.greaterThan(0)
-									})
-							})
-						})
-					return cy.get(selector)
+		capture('photo-states', () => {
+			const isBranch = LABEL !== 'main'
+			cy.request({
+				method: 'PUT',
+				url: emulatorDatabase(`travellers/${PHOTOS_ID}`),
+				headers: { Authorization: 'Bearer owner' },
+				body: {
+					firstName: 'Photo',
+					lastName: 'States',
+					tripDescription:
+						'Thumbnails, a legacy photo, a failing thumbnail and a slow photo.',
+					tripStart: '2025-06-14',
+					tripEnd: '2025-06-14',
+					cities: ['lisbon'],
+					...PHOTO_STATES,
+					registered: NOW,
+				},
+			})
+			// Held open so the solid placeholder stays on screen
+			cy.intercept('GET', `${PHOTO_HOST}/*`, (request) => {
+				const svg = {
+					body:
+						photoSvgs[request.url] ??
+						'<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480"/>',
+					headers: { 'content-type': 'image/svg+xml' },
 				}
+				request.reply(
+					request.url === SLOW_PHOTO_URL
+						? { ...svg, delay: 60000 }
+						: svg,
+				)
+			})
 
-				const assertSources = (scope, expected) =>
-					tiles(scope).then(($imgs) => {
-						expected.forEach((source, index) => {
-							// The held photo has no current source until it loads
-							const actual =
-								source === SLOW_PHOTO_URL
-									? $imgs[index].getAttribute('src')
-									: $imgs[index].currentSrc
-							expect(actual, `tile ${index}`).to.equal(source)
+			// Lazy tiles only load once scrolled to, and an unsettled tile is no evidence
+			const tiles = (scope) => {
+				const selector = `${scope} ${COMMON_SELECTORS.BASE_IMAGE_THUMBNAIL}`
+				cy.get(scope).scrollIntoView()
+				// Re-queried per tile, since a failing thumbnail re-renders its tile
+				cy.get(selector)
+					.its('length')
+					.then((count) => {
+						Cypress._.times(count, (index) => {
+							cy.get(selector).eq(index).scrollIntoView()
+							cy.get(selector)
+								.eq(index)
+								.should(($el) => {
+									if ($el.attr('src') === SLOW_PHOTO_URL)
+										return
+									expect($el[0].complete).to.equal(true)
+									expect(
+										$el[0].naturalWidth,
+									).to.be.greaterThan(0)
+								})
 						})
 					})
+				return cy.get(selector)
+			}
 
-				const listItem = `${TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM}:has([data-cy]:contains("Photo States"))`
-				const branchList = (thumbnailSize) => {
-					const pick = (photo) =>
-						photo.thumbnails.find(
-							({ width }) => width === thumbnailSize,
-						).url
-					return [
-						pick(landscape),
-						pick(portrait),
-						PHOTO_STATES.files[2],
-						// The broken thumbnail falls back to the original
-						PHOTO_STATES.files[3],
-					]
-				}
-
-				const capture = (suffix) => {
-					cy.visit(PATHS.TRAVELLERS)
-					assertSettled()
-					showAllTravellers()
-					cy.get(listItem).should('have.length', 1)
-					if (isBranch)
-						assertSources(
-							listItem,
-							branchList(suffix === '2x' ? 640 : 320),
-						)
-					else tiles(listItem)
-					cy.get(
-						`${listItem} ${TRAVELLER_ITEM_SELECTORS.SEE_ALL_LINK}`,
-					).should('contain.text', 'See all 7 photos')
-					freezeAnimation()
-					// The seeded list is many screens long, so only this traveller is captured
-					cy.get(listItem).screenshot(
-						`${LABEL}/photo-states-list-${suffix}`,
-						SCREENSHOT,
-					)
-
-					cy.visit(`${PATHS.TRAVELLERS}/${PHOTOS_ID}`)
-					cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should(
-						'be.visible',
-					)
-					assertSettled()
-					if (isBranch) {
-						const size = suffix === '2x' ? 640 : 320
-						assertSources(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST, [
-							...branchList(size),
-							SLOW_PHOTO_URL,
-							panorama.thumbnails.find(
-								({ width }) => width === size,
-							).url,
-							square.thumbnails.find(
-								({ width }) => width === size,
-							).url,
-						])
-					} else tiles(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)
-					freezeAnimation()
-					shot(`photo-states-detail-${suffix}`)
-				}
-
-				eachWidth((width) => {
-					capture(width)
-					cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).first().click()
-					cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL)
-						.should('be.visible')
-						.and('have.attr', 'src', landscape.file)
-						.and(($img) =>
-							expect($img[0].naturalWidth).to.equal(1600),
-						)
-					freezeAnimation()
-					shot(`photo-states-dialog-${width}`)
+			const assertSources = (scope, expected) =>
+				tiles(scope).then(($imgs) => {
+					expected.forEach((source, index) => {
+						// The held photo has no current source until it loads
+						const actual =
+							source === SLOW_PHOTO_URL
+								? $imgs[index].getAttribute('src')
+								: $imgs[index].currentSrc
+						expect(actual, `tile ${index}`).to.equal(source)
+					})
 				})
 
-				// A 2x screen picks the 640 thumbnails: same layout, so only the sources change
-				cy.viewport(390, HEIGHT)
-				cdp('Emulation.setDeviceMetricsOverride', {
-					width: 0,
-					height: 0,
-					deviceScaleFactor: 2,
-					mobile: false,
-				})
-				capture('2x')
-			},
-		)
+			const listItem = `${TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM}:has([data-cy]:contains("Photo States"))`
+			const branchList = (thumbnailSize) => {
+				const pick = (photo) =>
+					photo.thumbnails.find(
+						({ width }) => width === thumbnailSize,
+					).url
+				return [
+					pick(landscape),
+					pick(portrait),
+					PHOTO_STATES.files[2],
+					// The broken thumbnail falls back to the original
+					PHOTO_STATES.files[3],
+				]
+			}
 
-		capture('captures the travellers list while it loads', () => {
+			const capture = (suffix) => {
+				visit(PATHS.TRAVELLERS)
+				assertSettled()
+				showAllTravellers()
+				cy.get(listItem).should('have.length', 1)
+				if (isBranch)
+					assertSources(
+						listItem,
+						branchList(suffix === '2x' ? 640 : 320),
+					)
+				else tiles(listItem)
+				cy.get(
+					`${listItem} ${TRAVELLER_ITEM_SELECTORS.SEE_ALL_LINK}`,
+				).should('contain.text', 'See all 7 photos')
+				freezeAnimation()
+				// The seeded list is many screens long, so only this traveller is captured
+				cy.get(listItem).screenshot(
+					shotName(`photo-states-list-${suffix}`),
+					SCREENSHOT,
+				)
+
+				visit(`${PATHS.TRAVELLERS}/${PHOTOS_ID}`)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should(
+					'be.visible',
+				)
+				assertSettled()
+				if (isBranch) {
+					const size = suffix === '2x' ? 640 : 320
+					assertSources(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST, [
+						...branchList(size),
+						SLOW_PHOTO_URL,
+						panorama.thumbnails.find(({ width }) => width === size)
+							.url,
+						square.thumbnails.find(({ width }) => width === size)
+							.url,
+					])
+				} else tiles(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)
+				freezeAnimation()
+				shot(`photo-states-detail-${suffix}`)
+			}
+
+			eachWidth((width) => {
+				capture(width)
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).first().click()
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL)
+					.should('be.visible')
+					.and('have.attr', 'src', landscape.file)
+					.and(($img) => expect($img[0].naturalWidth).to.equal(1600))
+				freezeAnimation()
+				shot(`photo-states-dialog-${width}`)
+			})
+
+			// A 2x screen picks the 640 thumbnails: same layout, so only the sources change
+			cy.viewport(390, HEIGHT)
+			cdp('Emulation.setDeviceMetricsOverride', {
+				width: 0,
+				height: 0,
+				deviceScaleFactor: 2,
+				mobile: false,
+			})
+			capture('2x')
+		})
+
+		capture('travellers-loading', () => {
 			// Held open so the skeleton cards, and the disabled Refresh and Register, stay on screen
 			cy.intercept('GET', '**/travellers.json*', (request) => {
 				request.on('response', (response) => {
@@ -632,7 +707,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				})
 			})
 			eachWidth((width) => {
-				cy.visit(PATHS.TRAVELLERS)
+				visit(PATHS.TRAVELLERS)
 				cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
 				cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST).should(
 					'be.visible',
@@ -650,110 +725,102 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
-		capture(
-			'captures Travellers paging: first page, the focused new card, the last page',
-			() => {
-				// Real seeded records cloned to 30, so the cards keep their photos and badges
-				cy.request(emulatorDatabase('travellers')).then(({ body }) => {
-					const records = Object.values(body)
-					const many = Object.fromEntries(
-						Array.from({ length: 30 }, (_, index) => [
-							`ui-check-paged-${String(index).padStart(2, '0')}`,
-							{
-								...records[index % records.length],
-								firstName: 'Paged',
-								lastName: `Traveller ${index + 1}`,
-							},
-						]),
-					)
-					cy.intercept('GET', '**/travellers.json*', { body: many })
-				})
+		capture('travellers-paging', () => {
+			// Real seeded records cloned to 30, so the cards keep their photos and badges
+			cy.request(emulatorDatabase('travellers')).then(({ body }) => {
+				const records = Object.values(body)
+				const many = Object.fromEntries(
+					Array.from({ length: 30 }, (_, index) => [
+						`ui-check-paged-${String(index).padStart(2, '0')}`,
+						{
+							...records[index % records.length],
+							firstName: 'Paged',
+							lastName: `Traveller ${index + 1}`,
+						},
+					]),
+				)
+				cy.intercept('GET', '**/travellers.json*', { body: many })
+			})
 
-				eachWidth((width) => {
-					cy.visit(PATHS.TRAVELLERS)
-					cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
-						'have.length',
-						12,
-					)
-					assertSettled()
-					cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should(
-						'have.text',
-						'Showing 12 of 30 travellers',
-					)
-					freezeAnimation()
-					shot(`paging-first-${width}`)
-
-					cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).click()
-					cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
-						.should('have.length', 24)
-						.eq(12)
-						.should('have.focus')
-					// A mouse click does not match :focus-visible, so the ring a keyboard user sees is forced
-					const newCard = `${TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM}[tabindex="-1"]`
-					forcePseudo(newCard, ['focus', 'focus-visible'])
-					// Clear of the sticky header, with room for the 2px-offset outline
-					cy.get(newCard)
-						.scrollIntoView({ offset: { top: -120, left: 0 } })
-						.should('be.visible')
-						.screenshot(`${LABEL}/paging-new-card-focus-${width}`, {
-							...SCREENSHOT,
-							padding: 12,
-							scrollBehavior: false,
-						})
-					forcePseudo(newCard, [])
-
-					cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE)
-						.should('have.text', 'Show 6 more')
-						.click()
-					cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).should(
-						'not.exist',
-					)
-					cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should(
-						'have.text',
-						'All 30 travellers shown',
-					)
-					freezeAnimation()
-					shot(`paging-last-${width}`)
-				})
-
-				cy.viewport(1280, HEIGHT)
-				cy.visit(PATHS.TRAVELLERS)
+			eachWidth((width) => {
+				visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+					'have.length',
+					12,
+				)
 				assertSettled()
-				forcePseudo(TRAVELLERS_LIST_SELECTORS.SHOW_MORE, ['hover'])
-				shot('hover-show-more')
-				forcePseudo(TRAVELLERS_LIST_SELECTORS.SHOW_MORE, [
-					'focus',
-					'focus-visible',
-				])
-				shot('focus-show-more')
-				forcePseudo(TRAVELLERS_LIST_SELECTORS.SHOW_MORE, [])
-			},
-		)
+				cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should(
+					'have.text',
+					'Showing 12 of 30 travellers',
+				)
+				freezeAnimation()
+				shot(`paging-first-${width}`)
 
-		capture(
-			'captures the inline load error when the list fails to load',
-			() => {
-				cy.intercept('GET', '**/travellers.json*', {
+				cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).click()
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+					.should('have.length', 24)
+					.eq(12)
+					.should('have.focus')
+				// A mouse click does not match :focus-visible, so the ring a keyboard user sees is forced
+				const newCard = `${TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM}[tabindex="-1"]`
+				forcePseudo(newCard, ['focus', 'focus-visible'])
+				// Clear of the sticky header, with room for the 2px-offset outline
+				cy.get(newCard)
+					.scrollIntoView({ offset: { top: -120, left: 0 } })
+					.should('be.visible')
+					.screenshot(shotName(`paging-new-card-focus-${width}`), {
+						...SCREENSHOT,
+						padding: 12,
+						scrollBehavior: false,
+					})
+				forcePseudo(newCard, [])
+
+				cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE)
+					.should('have.text', 'Show 6 more')
+					.click()
+				cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).should('not.exist')
+				cy.get(TRAVELLERS_LIST_SELECTORS.PAGE_STATUS).should(
+					'have.text',
+					'All 30 travellers shown',
+				)
+				freezeAnimation()
+				shot(`paging-last-${width}`)
+			})
+
+			cy.viewport(1280, HEIGHT)
+			visit(PATHS.TRAVELLERS)
+			assertSettled()
+			forcePseudo(TRAVELLERS_LIST_SELECTORS.SHOW_MORE, ['hover'])
+			shot('hover-show-more')
+			forcePseudo(TRAVELLERS_LIST_SELECTORS.SHOW_MORE, [
+				'focus',
+				'focus-visible',
+			])
+			shot('focus-show-more')
+			forcePseudo(TRAVELLERS_LIST_SELECTORS.SHOW_MORE, [])
+		})
+
+		capture('travellers-load-error', () => {
+			eachWidth((width) => {
+				interceptOnce('GET', '**/travellers.json*', {
 					statusCode: 500,
 					body: {},
 				})
-				eachWidth((width) => {
-					cy.visit(PATHS.TRAVELLERS)
-					cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should(
-						'be.visible',
-					)
-					freezeAnimation()
-					shot(`travellers-load-error-${width}`)
-				})
-			},
-		)
+				visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should(
+					'be.visible',
+				)
+				freezeAnimation()
+				shot(`travellers-load-error-${width}`)
+			})
+		})
 
-		capture('captures a failed Refresh, which keeps the cards', () => {
+		capture('travellers-refresh-error', () => {
 			eachWidth((width) => {
-				cy.visit(PATHS.TRAVELLERS)
+				visit(PATHS.TRAVELLERS)
 				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
 				assertSettled()
-				cy.intercept('GET', '**/travellers.json*', {
+				interceptOnce('GET', '**/travellers.json*', {
 					statusCode: 500,
 					body: {},
 				}).as('failedRefresh')
@@ -765,101 +832,89 @@ describe(`UI check capture (${LABEL})`, () => {
 				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
 				freezeAnimation()
 				shot(`travellers-refresh-error-${width}`)
-				// Later visits must load normally again
-				cy.intercept('GET', '**/travellers.json*', (request) =>
-					request.continue(),
-				)
 			})
 		})
 
-		capture(
-			'captures real hover and keyboard focus on the interactive controls',
-			() => {
-				cy.viewport(1280, HEIGHT)
-				cy.visit(PATHS.TRAVELLERS)
-				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
-				assertSettled()
-				;[
-					['details', TRAVELLER_ITEM_SELECTORS.DETAILS, true],
-					['refresh', TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON],
-					['register', TRAVELLERS_LIST_SELECTORS.REGISTER_LINK],
-					['filter-show-all', TRAVELLER_FILTER_SELECTORS.SHOW_ALL],
-					// Hover lands on the chip, keyboard focus on its hidden checkbox
-					['filter-chip', TRAVELLER_FILTER_SELECTORS.OPTION],
-					[
-						'filter-chip-checkbox',
-						TRAVELLER_FILTER_SELECTORS.CHECKBOX,
-						false,
-						{ scroll: false },
-					],
-					['image-button', COMMON_SELECTORS.BASE_IMAGE_BUTTON, true],
-				].forEach(([name, selector, inCard, pseudoOptions]) => {
-					// A full-page capture repeats the sticky header over the first card, so card controls are also captured alone
-					const capture = (state) => {
-						shot(`${state}-${name}`)
-						if (inCard) {
-							cy.get(selector)
-								.first()
-								.closest(
-									TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM,
-								)
-								.should('be.visible')
-								.screenshot(
-									`${LABEL}/${state}-${name}-card`,
-									SCREENSHOT,
-								)
-						}
+		capture('hover-focus', () => {
+			cy.viewport(1280, HEIGHT)
+			visit(PATHS.TRAVELLERS)
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
+			assertSettled()
+			;[
+				['details', TRAVELLER_ITEM_SELECTORS.DETAILS, true],
+				['refresh', TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON],
+				['register', TRAVELLERS_LIST_SELECTORS.REGISTER_LINK],
+				['filter-show-all', TRAVELLER_FILTER_SELECTORS.SHOW_ALL],
+				// Hover lands on the chip, keyboard focus on its hidden checkbox
+				['filter-chip', TRAVELLER_FILTER_SELECTORS.OPTION],
+				[
+					'filter-chip-checkbox',
+					TRAVELLER_FILTER_SELECTORS.CHECKBOX,
+					false,
+					{ scroll: false },
+				],
+				['image-button', COMMON_SELECTORS.BASE_IMAGE_BUTTON, true],
+			].forEach(([name, selector, inCard, pseudoOptions]) => {
+				// A full-page capture repeats the sticky header over the first card, so card controls are also captured alone
+				const capture = (state) => {
+					shot(`${state}-${name}`)
+					if (inCard) {
+						cy.get(selector)
+							.first()
+							.closest(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
+							.should('be.visible')
+							.screenshot(
+								shotName(`${state}-${name}-card`),
+								SCREENSHOT,
+							)
 					}
-					// main has no Show all cities, so a control missing from the page is skipped rather than failing the run
-					cy.get('body').then(($body) => {
-						if (!$body.find(selector).length) return
-						forcePseudo(selector, ['hover'], pseudoOptions)
-						capture('hover')
-						forcePseudo(
-							selector,
-							['focus', 'focus-visible'],
-							pseudoOptions,
-						)
-						capture('focus')
-						forcePseudo(selector, [], pseudoOptions)
-					})
+				}
+				// main has no Show all cities, so a control missing from the page is skipped rather than failing the run
+				cy.get('body').then(($body) => {
+					if (!$body.find(selector).length) return
+					forcePseudo(selector, ['hover'], pseudoOptions)
+					capture('hover')
+					forcePseudo(
+						selector,
+						['focus', 'focus-visible'],
+						pseudoOptions,
+					)
+					capture('focus')
+					forcePseudo(selector, [], pseudoOptions)
 				})
-			},
-		)
+			})
+		})
 
-		capture(
-			'captures the register file list with previews and a rejected file at each width',
-			() => {
-				eachWidth((width) => {
-					cy.visit(PATHS.REGISTER)
-					cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
-						[
-							'cypress/fixtures/test-image.png',
-							{
-								contents: Cypress.Buffer.from('x'),
-								fileName: 'notes.pdf',
-								mimeType: 'application/pdf',
-							},
-						],
-						{ force: true },
-					)
-					cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should(
-						'be.visible',
-					)
-					cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_ERRORS).should(
-						'be.visible',
-					)
-					freezeAnimation()
-					shot(`register-files-rejected-${width}`)
-				})
-			},
-		)
+		capture('register-files', () => {
+			eachWidth((width) => {
+				visit(PATHS.REGISTER)
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+					[
+						'cypress/fixtures/test-image.png',
+						{
+							contents: Cypress.Buffer.from('x'),
+							fileName: 'notes.pdf',
+							mimeType: 'application/pdf',
+						},
+					],
+					{ force: true },
+				)
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should(
+					'be.visible',
+				)
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_ERRORS).should(
+					'be.visible',
+				)
+				freezeAnimation()
+				shot(`register-files-rejected-${width}`)
+			})
+		})
 
-		capture('captures the register trip dates states at each width', () => {
+		capture('register-dates', () => {
 			const { TRIP_START_INPUT, TRIP_END_INPUT, TRIP_LENGTH } =
 				TRAVELLER_REGISTRATION_FORM_SELECTORS
 			eachWidth((width) => {
-				cy.visit(PATHS.REGISTER)
+				visit(PATHS.REGISTER)
 				cy.get(TRIP_START_INPUT).type('2025-03-12')
 				cy.get(TRIP_END_INPUT).type('2025-03-19')
 				cy.get(TRIP_LENGTH).should('have.text', '8 days')
@@ -888,101 +943,97 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
-		capture(
-			'captures the register page, previews, the remove buttons and a real upload',
-			() => {
-				eachWidth((width) => {
-					cy.visit(PATHS.REGISTER)
-					cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should(
-						'be.visible',
-					)
-					freezeAnimation()
-					shot(`register-${width}`)
-
-					cy.get(
-						TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
-					).click()
-					shot(`register-validation-${width}`)
-				})
-
-				cy.viewport(1280, HEIGHT)
-				cy.visit(PATHS.REGISTER)
-				cy.selectCity()
-				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
-					'cypress/fixtures/test-image.png',
-					{ force: true },
-				)
-				cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should(
+		capture('register-upload', () => {
+			eachWidth((width) => {
+				visit(PATHS.REGISTER)
+				cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should(
 					'be.visible',
 				)
 				freezeAnimation()
-				;[
-					[
-						'file-remove',
-						FILE_UPLOADER_SELECTORS.FILE_PREVIEW_REMOVE,
-					],
-					[
-						'city-remove',
-						TRAVELLER_REGISTRATION_FORM_SELECTORS.SELECTED_CITY_REMOVE,
-					],
-				].forEach(([name, selector]) => {
-					forcePseudo(selector, ['hover'])
-					shot(`hover-${name}`)
-					forcePseudo(selector, ['focus', 'focus-visible'])
-					shot(`focus-${name}`)
-					forcePseudo(selector, [])
-				})
+				shot(`register-${width}`)
 
-				// A real Storage emulator upload, slowed so the progress bar stays on screen
-				cdp('Network.enable').then(() =>
-					cdp('Network.emulateNetworkConditions', {
-						offline: false,
-						latency: 500,
-						downloadThroughput: 2000,
-						uploadThroughput: 2000,
-					}),
-				)
-				cy.get(
-					TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT,
-				).type('Ui')
-				cy.get(
-					TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT,
-				).type('Check')
-				cy.get(
-					TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
-				).type('A trip registered by the capture script.')
-				cy.get(
-					TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT,
-				).type('2025-03-12')
-				cy.get(
-					TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT,
-				).type('2025-03-15')
 				cy.get(
 					TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
 				).click()
-				cy.get(COMMON_SELECTORS.BASE_PROGRESS, {
-					timeout: TIMEOUT,
-				}).should('be.visible')
-				freezeAnimation()
-				shot('register-upload-progress')
+				shot(`register-validation-${width}`)
+			})
+
+			cy.viewport(1280, HEIGHT)
+			visit(PATHS.REGISTER)
+			cy.selectCity()
+			cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+				'cypress/fixtures/test-image.png',
+				{ force: true },
+			)
+			cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should('be.visible')
+			freezeAnimation()
+			;[
+				['file-remove', FILE_UPLOADER_SELECTORS.FILE_PREVIEW_REMOVE],
+				[
+					'city-remove',
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.SELECTED_CITY_REMOVE,
+				],
+			].forEach(([name, selector]) => {
+				forcePseudo(selector, ['hover'])
+				shot(`hover-${name}`)
+				forcePseudo(selector, ['focus', 'focus-visible'])
+				shot(`focus-${name}`)
+				forcePseudo(selector, [])
+			})
+
+			// A real Storage emulator upload, slowed so the progress bar stays on screen
+			cdp('Network.enable').then(() =>
 				cdp('Network.emulateNetworkConditions', {
 					offline: false,
-					latency: 0,
-					downloadThroughput: -1,
-					uploadThroughput: -1,
-				})
-				cy.location('pathname', { timeout: 30000 }).should(
-					'not.eq',
-					PATHS.REGISTER,
-				)
-				// The URL changes before the page renders, so wait for the content or the frame is mid-navigation
-				cy.contains(TRAVELLER_REGISTRATION_SUCCESS_MESSAGE).should(
-					'be.visible',
-				)
-				assertSettled()
-				shot('register-success')
-			},
-		)
+					latency: 500,
+					downloadThroughput: 2000,
+					uploadThroughput: 2000,
+				}),
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
+				'Ui',
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
+				'Check',
+			)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+			).type('A trip registered by the capture script.')
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
+				'2025-03-12',
+			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
+				'2025-03-15',
+			)
+			// Frozen before the upload starts, so the bar shows its real width rather than a frame of its width transition
+			freezeAnimation()
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
+			).click()
+			cy.get(COMMON_SELECTORS.BASE_PROGRESS, {
+				timeout: TIMEOUT,
+			}).should('be.visible')
+			// The bytes sent first and the reply waits on the throttled network, so 99% is the one stable frame
+			cy.contains('(99%)', { timeout: 30000 }).should('be.visible')
+			freezeAnimation()
+			shot('register-upload-progress')
+			cdp('Network.emulateNetworkConditions', {
+				offline: false,
+				latency: 0,
+				downloadThroughput: -1,
+				uploadThroughput: -1,
+			})
+			cy.waitForSuccess(
+				(win) => win.location.pathname !== PATHS.REGISTER,
+				{ timeout: 30000 },
+			)
+			// The URL changes before the page renders, so wait for the content or the frame is mid-navigation
+			cy.contains(TRAVELLER_REGISTRATION_SUCCESS_MESSAGE).should(
+				'be.visible',
+			)
+			assertSettled()
+			shot('register-success')
+		})
 	})
 
 	context('signed in as a registered traveller', () => {
@@ -993,179 +1044,149 @@ describe(`UI check capture (${LABEL})`, () => {
 			)
 		})
 
-		capture(
-			'captures the travellers list and a profile with the Contact button',
-			() => {
-				eachWidth((width) => {
-					cy.visit(PATHS.TRAVELLERS)
-					cy.get(TRAVELLER_ITEM_SELECTORS.CONTACT).should('exist')
-					assertSettled()
-					freezeAnimation()
-					shot(`travellers-contact-${width}`)
-
-					cy.visit(
-						`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}`,
-					)
-					cy.get(TRAVELLER_DETAIL_SELECTORS.CONTACT_SECTION).should(
-						'be.visible',
-					)
-					assertSettled()
-					freezeAnimation()
-					shot(`traveller-detail-contact-${width}`)
-				})
-			},
-		)
-
-		capture(
-			'captures the messages page in every state and a real delete',
-			() => {
-				// Only Date, so the app's timers still run; message times then read the same in every run
-				cy.clock(NOW, ['Date'])
-				// Extra messages for the long-text and former-traveller states, written past the rules as the emulator owner
-				cy.request({
-					method: 'PATCH',
-					url: emulatorDatabase(
-						`messages/${TEST_USERS.TRAVELLER.ID}`,
-					),
-					headers: OWNER,
-					body: {
-						'capture-long': {
-							senderId: TEST_USERS.OTHER_TRAVELLER.ID,
-							message: LONG_MESSAGE,
-							createdAt: NOW - 2 * 60 * 60 * 1000,
-							read: false,
-						},
-						'capture-former': {
-							senderId: 'capture-removed-traveller',
-							message: 'Thanks for the tips on Kyoto.',
-							createdAt: FORMER_MESSAGE_TIME,
-							read: true,
-						},
-					},
-				})
-
-				eachWidth((width) => {
-					markAllUnread()
-					cy.visit(PATHS.TRAVELLERS)
-					cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES, {
-						timeout: TIMEOUT,
-					}).should('exist')
-					assertSettled()
-					freezeAnimation()
-					shot(`nav-unread-count-${width}`)
-					// Below the desktop nav the count sits in the hamburger menu
-					if (width <= 768) {
-						cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).click()
-						cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should(
-							'be.visible',
-						)
-						shot(`nav-unread-count-menu-${width}`)
-					}
-
-					cy.visit(PATHS.MESSAGES)
-					cy.get(MESSAGE_ITEM_SELECTORS.NEW_TAG).should('exist')
-					cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).should('exist')
-					assertSettled()
-					freezeAnimation()
-					shot(`messages-${width}`)
-					cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).click()
-					shot(`messages-show-all-${width}`)
-
-					cy.intercept(
-						API_DATABASE.GET,
-						'**/messages/*.json*',
-						(req) =>
-							req.on('response', (res) => res.setDelay(60000)),
-					).as('slowMessages')
-					cy.visit(PATHS.MESSAGES)
-					cy.get(MESSAGE_SKELETON_SELECTORS.ROOT).should(
-						'have.length',
-						3,
-					)
-					freezeAnimation()
-					shot(`messages-loading-${width}`)
-					cy.intercept(
-						API_DATABASE.GET,
-						'**/messages/*.json*',
-						(req) => req.continue(),
-					)
-
-					markAllUnread()
-					cy.visit(PATHS.MESSAGES)
-					cy.get(MESSAGE_ITEM_SELECTORS.REPLY).first().click()
-					cy.get(CONTACT_TRAVELLER_SELECTORS.REPLY_QUOTE).should(
-						'be.visible',
-					)
-					freezeAnimation()
-					shot(`contact-reply-${width}`)
-				})
-
-				cy.viewport(1280, HEIGHT)
-				cy.visit(PATHS.MESSAGES)
-				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+		capture('contact-button', () => {
+			eachWidth((width) => {
+				visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLER_ITEM_SELECTORS.CONTACT).should('exist')
 				assertSettled()
-				forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, ['hover'])
-				shot('hover-message-delete')
-				forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, [
-					'focus',
-					'focus-visible',
-				])
-				shot('focus-message-delete')
-				forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, [])
+				freezeAnimation()
+				shot(`travellers-contact-${width}`)
 
-				eachWidth((width) => {
-					cy.visit(PATHS.MESSAGES)
-					cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
-					cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
-					cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST).should(
+				visit(`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}`)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.CONTACT_SECTION).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`traveller-detail-contact-${width}`)
+			})
+		})
+
+		capture('messages-states', () => {
+			// Only Date, so the app's timers still run; message times then read the same in every run
+			cy.clock(NOW, ['Date'])
+			// Extra messages for the long-text and former-traveller states, written past the rules as the emulator owner
+			cy.request({
+				method: 'PATCH',
+				url: emulatorDatabase(`messages/${TEST_USERS.TRAVELLER.ID}`),
+				headers: OWNER,
+				body: {
+					'capture-long': {
+						senderId: TEST_USERS.OTHER_TRAVELLER.ID,
+						message: LONG_MESSAGE,
+						createdAt: NOW - 2 * 60 * 60 * 1000,
+						read: false,
+					},
+					'capture-former': {
+						senderId: 'capture-removed-traveller',
+						message: 'Thanks for the tips on Kyoto.',
+						createdAt: FORMER_MESSAGE_TIME,
+						read: true,
+					},
+				},
+			})
+
+			eachWidth((width) => {
+				markAllUnread()
+				visit(PATHS.TRAVELLERS)
+				cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES, {
+					timeout: TIMEOUT,
+				}).should('exist')
+				assertSettled()
+				freezeAnimation()
+				shot(`nav-unread-count-${width}`)
+				// Below the desktop nav the count sits in the hamburger menu
+				if (width <= 768) {
+					cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).click()
+					cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should(
 						'be.visible',
 					)
-					freezeAnimation()
-					shot(`messages-undo-toast-${width}`)
-					cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
-						.find(TOAST_SELECTORS.ACTION)
-						.click()
-					cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+					shot(`nav-unread-count-menu-${width}`)
+				}
 
-					cy.intercept(API_DATABASE.DELETE, '**/messages/*/*.json*', {
-						statusCode: 500,
-						body: {},
-					}).as('failedDelete')
-					cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
-					cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
-						.find(TOAST_SELECTORS.DISMISS)
-						.click()
-					cy.wait('@failedDelete')
-					cy.get(MESSAGE_ITEM_SELECTORS.DELETE_ERROR).should(
-						'be.visible',
-					)
-					freezeAnimation()
-					shot(`messages-delete-failed-${width}`)
-					cy.intercept(
-						API_DATABASE.DELETE,
-						'**/messages/*/*.json*',
-						(req) => req.continue(),
-					)
-				})
+				visit(PATHS.MESSAGES)
+				cy.get(MESSAGE_ITEM_SELECTORS.NEW_TAG).should('exist')
+				cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).should('exist')
+				assertSettled()
+				freezeAnimation()
+				shot(`messages-${width}`)
+				cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).click()
+				shot(`messages-show-all-${width}`)
 
-				cy.viewport(1280, HEIGHT)
-				cy.visit(PATHS.MESSAGES)
+				interceptOnce(API_DATABASE.GET, '**/messages/*.json*', (req) =>
+					req.on('response', (res) => res.setDelay(60000)),
+				).as('slowMessages')
+				visit(PATHS.MESSAGES)
+				cy.get(MESSAGE_SKELETON_SELECTORS.ROOT).should('have.length', 3)
+				freezeAnimation()
+				shot(`messages-loading-${width}`)
+
+				markAllUnread()
+				visit(PATHS.MESSAGES)
+				cy.get(MESSAGE_ITEM_SELECTORS.REPLY).first().click()
+				cy.get(CONTACT_TRAVELLER_SELECTORS.REPLY_QUOTE).should(
+					'be.visible',
+				)
+				freezeAnimation()
+				shot(`contact-reply-${width}`)
+			})
+
+			cy.viewport(1280, HEIGHT)
+			visit(PATHS.MESSAGES)
+			cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+			assertSettled()
+			forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, ['hover'])
+			shot('hover-message-delete')
+			forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, [
+				'focus',
+				'focus-visible',
+			])
+			shot('focus-message-delete')
+			forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, [])
+
+			eachWidth((width) => {
+				visit(PATHS.MESSAGES)
 				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+				cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST).should('be.visible')
+				freezeAnimation()
+				shot(`messages-undo-toast-${width}`)
+				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
+					.find(TOAST_SELECTORS.ACTION)
+					.click()
+				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+
+				interceptOnce(API_DATABASE.DELETE, '**/messages/*/*.json*', {
+					statusCode: 500,
+					body: {},
+				}).as('failedDelete')
 				cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
 				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
 					.find(TOAST_SELECTORS.DISMISS)
 					.click()
-				cy.reload()
-				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 3)
-				assertSettled()
-				shot('messages-after-delete')
-			},
-		)
+				cy.wait('@failedDelete')
+				cy.get(MESSAGE_ITEM_SELECTORS.DELETE_ERROR).should('be.visible')
+				freezeAnimation()
+				shot(`messages-delete-failed-${width}`)
+			})
 
-		capture('captures Messages when empty', () => {
+			cy.viewport(1280, HEIGHT)
+			visit(PATHS.MESSAGES)
+			cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+			cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+			cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
+				.find(TOAST_SELECTORS.DISMISS)
+				.click()
+			cy.reload()
+			cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 3)
+			assertSettled()
+			shot('messages-after-delete')
+		})
+
+		capture('messages-empty', () => {
 			cy.intercept(API_DATABASE.GET, '**/messages/*.json*', 'null')
 			eachWidth((width) => {
-				cy.visit(PATHS.MESSAGES)
+				visit(PATHS.MESSAGES)
 				cy.get(MESSAGES_PAGE_SELECTORS.EMPTY).should('be.visible')
 				assertSettled()
 				freezeAnimation()
@@ -1173,10 +1194,10 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
-		capture('captures the open mobile menu', () => {
+		capture('mobile-menu', () => {
 			;[390, 768].forEach((width) => {
 				cy.viewport(width, HEIGHT)
-				cy.visit(PATHS.TRAVELLERS)
+				visit(PATHS.TRAVELLERS)
 				assertSettled()
 				cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).click()
 				cy.get(
@@ -1187,9 +1208,9 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
-		capture('captures the contact form and a real send', () => {
+		capture('contact-send', () => {
 			eachWidth((width) => {
-				cy.visit(
+				visit(
 					`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}/contact`,
 				)
 				cy.get(CONTACT_TRAVELLER_SELECTORS.FORM).should('be.visible')
@@ -1200,7 +1221,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 
 			cy.viewport(1280, HEIGHT)
-			cy.visit(
+			visit(
 				`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}/contact`,
 			)
 			cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_INPUT).type(
@@ -1213,29 +1234,26 @@ describe(`UI check capture (${LABEL})`, () => {
 			shot('contact-sent')
 		})
 
-		capture(
-			'captures your own trip and the edit page at each width',
-			() => {
-				eachWidth((width) => {
-					cy.visit(ownTripPath)
-					cy.get(TRAVELLER_DETAIL_SELECTORS.EDIT).should('be.visible')
-					assertSettled()
-					freezeAnimation()
-					shot(`own-trip-${width}`)
+		capture('own-trip', () => {
+			eachWidth((width) => {
+				visit(ownTripPath)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.EDIT).should('be.visible')
+				assertSettled()
+				freezeAnimation()
+				shot(`own-trip-${width}`)
 
-					cy.visit(editTripPath)
-					cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
-					assertSettled()
-					freezeAnimation()
-					shot(`edit-trip-${width}`)
-				})
-			},
-		)
+				visit(editTripPath)
+				cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+				assertSettled()
+				freezeAnimation()
+				shot(`edit-trip-${width}`)
+			})
+		})
 
-		capture('captures the edit page photo and field states', () => {
+		capture('edit-states', () => {
 			eachWidth((width) => {
 				// Through the link, as a traveller gets there; a visit that only changes the hash would not reload the page
-				cy.visit(ownTripPath)
+				visit(ownTripPath)
 				cy.get(TRAVELLER_DETAIL_SELECTORS.ADD_PHOTOS).click()
 				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).should(
 					'have.focus',
@@ -1278,7 +1296,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
-		capture('captures a trip with one photo and with none', () => {
+		capture('edit-photo-count', () => {
 			cy.request({
 				url: emulatorDatabase(`travellers/${TEST_USERS.TRAVELLER.ID}`),
 				headers: OWNER,
@@ -1299,7 +1317,7 @@ describe(`UI check capture (${LABEL})`, () => {
 
 				setPhotos(seeded.files.slice(0, 1))
 				eachWidth((width) => {
-					cy.visit(editTripPath)
+					visit(editTripPath)
 					cy.get(TRIP_PHOTOS_SELECTORS.LAST_PHOTO_HINT).should(
 						'be.visible',
 					)
@@ -1309,7 +1327,7 @@ describe(`UI check capture (${LABEL})`, () => {
 
 				setPhotos(null)
 				eachWidth((width) => {
-					cy.visit(ownTripPath)
+					visit(ownTripPath)
 					cy.get(TRAVELLER_DETAIL_SELECTORS.NO_PHOTOS).should(
 						'be.visible',
 					)
@@ -1317,7 +1335,7 @@ describe(`UI check capture (${LABEL})`, () => {
 					freezeAnimation()
 					shot(`own-trip-no-photos-${width}`)
 
-					cy.visit(editTripPath)
+					visit(editTripPath)
 					cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should(
 						'be.visible',
 					)
@@ -1337,14 +1355,13 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
-		capture('captures saving, a failed save and a real save', () => {
+		capture('edit-save', () => {
 			cy.viewport(390, HEIGHT)
-			cy.intercept(
-				// times: 1, or this reply would still answer the real save below
-				{ method: 'PATCH', url: '**/travellers/*.json*', times: 1 },
-				{ statusCode: 500, body: {} },
-			).as('failedSave')
-			cy.visit(editTripPath)
+			interceptOnce('PATCH', '**/travellers/*.json*', {
+				statusCode: 500,
+				body: {},
+			}).as('failedSave')
+			visit(editTripPath)
 			cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
@@ -1354,11 +1371,10 @@ describe(`UI check capture (${LABEL})`, () => {
 			freezeAnimation()
 			shot('edit-trip-save-failed')
 
-			cy.intercept(
-				{ method: 'PATCH', url: '**/travellers/*.json*' },
-				(req) => req.on('response', (res) => res.setDelay(4000)),
+			interceptOnce('PATCH', '**/travellers/*.json*', (req) =>
+				req.on('response', (res) => res.setDelay(4000)),
 			)
-			cy.visit(editTripPath)
+			visit(editTripPath)
 			cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
@@ -1366,13 +1382,11 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.get(EDIT_TRIP_SELECTORS.SAVING_DIALOG).should('be.visible')
 			freezeAnimation()
 			shot('edit-trip-saving')
-			cy.get(TRAVELLER_DETAIL_SELECTORS.SAVED_ALERT, {
-				timeout: TIMEOUT,
-			}).should('be.visible')
+			cy.waitForSuccess(shows(TRAVELLER_DETAIL_SELECTORS.SAVED_ALERT))
 
 			// A real Storage emulator upload, slowed so the progress bar stays on screen
 			cy.viewport(1280, HEIGHT)
-			cy.visit(editTripPath)
+			visit(editTripPath)
 			cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
 			cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
 				'cypress/fixtures/test-image.png',
@@ -1386,12 +1400,16 @@ describe(`UI check capture (${LABEL})`, () => {
 					uploadThroughput: 2000,
 				}),
 			)
+			// Frozen before the upload starts, so the bar shows its real width rather than a frame of its width transition
+			freezeAnimation()
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
 			).click()
 			cy.get(COMMON_SELECTORS.BASE_PROGRESS, { timeout: TIMEOUT }).should(
 				'be.visible',
 			)
+			// The bytes sent first and the reply waits on the throttled network, so 99% is the one stable frame
+			cy.contains('(99%)', { timeout: 30000 }).should('be.visible')
 			freezeAnimation()
 			shot('edit-trip-upload-progress')
 			cdp('Network.emulateNetworkConditions', {
@@ -1400,9 +1418,13 @@ describe(`UI check capture (${LABEL})`, () => {
 				downloadThroughput: -1,
 				uploadThroughput: -1,
 			})
-			cy.get(TRAVELLER_DETAIL_SELECTORS.SAVED_ALERT, {
+			cy.waitForSuccess(shows(TRAVELLER_DETAIL_SELECTORS.SAVED_ALERT), {
 				timeout: 30000,
-			}).should('contain.text', EDIT_TRIP_CONFIG.SAVED_MESSAGE)
+			})
+			cy.get(TRAVELLER_DETAIL_SELECTORS.SAVED_ALERT).should(
+				'contain.text',
+				EDIT_TRIP_CONFIG.SAVED_MESSAGE,
+			)
 			cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)
 				.find('li')
 				.should('have.length.at.least', 5)
@@ -1412,64 +1434,58 @@ describe(`UI check capture (${LABEL})`, () => {
 		})
 
 		// It deletes the seeded traveller's account, so the next capture's reset reseeds the users
-		capture(
-			'captures deleting your own profile, failed and for real',
-			() => {
-				eachWidth((width) => {
-					cy.visit(editTripPath)
-					cy.get(EDIT_TRIP_SELECTORS.DELETE).should('be.visible')
-					freezeAnimation()
-					forcePseudo(EDIT_TRIP_SELECTORS.DELETE, [
-						'focus',
-						'focus-visible',
-					])
-					shot(`edit-trip-delete-section-${width}`)
-					forcePseudo(EDIT_TRIP_SELECTORS.DELETE, [])
-					cy.get(EDIT_TRIP_SELECTORS.DELETE).click()
-					cy.get(EDIT_TRIP_SELECTORS.DELETE_CANCEL).should(
-						'have.focus',
-					)
-					shot(`edit-trip-delete-dialog-${width}`)
-					cy.get(EDIT_TRIP_SELECTORS.DELETE_CANCEL).click()
-				})
-
-				cy.viewport(390, HEIGHT)
-				const recordDelete = {
-					method: 'DELETE',
-					url: `**/travellers/${TEST_USERS.TRAVELLER.ID}.json*`,
-				}
-				cy.intercept(
-					{ ...recordDelete, times: 1 },
-					{ statusCode: 500, body: {} },
-				).as('failedDelete')
-				cy.visit(editTripPath)
+		capture('delete-profile', () => {
+			eachWidth((width) => {
+				visit(editTripPath)
+				cy.get(EDIT_TRIP_SELECTORS.DELETE).should('be.visible')
+				freezeAnimation()
+				forcePseudo(EDIT_TRIP_SELECTORS.DELETE, [
+					'focus',
+					'focus-visible',
+				])
+				shot(`edit-trip-delete-section-${width}`)
+				forcePseudo(EDIT_TRIP_SELECTORS.DELETE, [])
 				cy.get(EDIT_TRIP_SELECTORS.DELETE).click()
-				cy.get(EDIT_TRIP_SELECTORS.DELETE_CONFIRM).click()
-				cy.wait('@failedDelete')
-				cy.get(EDIT_TRIP_SELECTORS.ERROR_DIALOG).should('be.visible')
-				freezeAnimation()
-				shot('edit-trip-delete-failed')
+				cy.get(EDIT_TRIP_SELECTORS.DELETE_CANCEL).should('have.focus')
+				shot(`edit-trip-delete-dialog-${width}`)
+				cy.get(EDIT_TRIP_SELECTORS.DELETE_CANCEL).click()
+			})
 
-				cy.intercept(recordDelete, (req) =>
-					req.on('response', (res) => res.setDelay(4000)),
-				)
-				cy.visit(editTripPath)
-				cy.get(EDIT_TRIP_SELECTORS.DELETE).click()
-				cy.get(EDIT_TRIP_SELECTORS.DELETE_CONFIRM).click()
-				cy.get(EDIT_TRIP_SELECTORS.DELETING).should('be.visible')
-				freezeAnimation()
-				shot('edit-trip-deleting')
-				cy.contains(EDIT_TRIP_CONFIG.DELETED_MESSAGE, {
-					timeout: 30000,
-				}).should('be.visible')
-				cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should(
-					'be.visible',
-				)
-				assertSettled()
-				freezeAnimation()
-				shot('profile-deleted')
-			},
-		)
+			cy.viewport(390, HEIGHT)
+			const recordDelete = `**/travellers/${TEST_USERS.TRAVELLER.ID}.json*`
+			interceptOnce('DELETE', recordDelete, {
+				statusCode: 500,
+				body: {},
+			}).as('failedDelete')
+			visit(editTripPath)
+			cy.get(EDIT_TRIP_SELECTORS.DELETE).click()
+			cy.get(EDIT_TRIP_SELECTORS.DELETE_CONFIRM).click()
+			cy.wait('@failedDelete')
+			cy.get(EDIT_TRIP_SELECTORS.ERROR_DIALOG).should('be.visible')
+			freezeAnimation()
+			shot('edit-trip-delete-failed')
+
+			interceptOnce('DELETE', recordDelete, (req) =>
+				req.on('response', (res) => res.setDelay(4000)),
+			)
+			visit(editTripPath)
+			cy.get(EDIT_TRIP_SELECTORS.DELETE).click()
+			cy.get(EDIT_TRIP_SELECTORS.DELETE_CONFIRM).click()
+			cy.get(EDIT_TRIP_SELECTORS.DELETING).should('be.visible')
+			freezeAnimation()
+			shot('edit-trip-deleting')
+			cy.waitForSuccess(
+				(win) =>
+					win.document.body.textContent.includes(
+						EDIT_TRIP_CONFIG.DELETED_MESSAGE,
+					),
+				{ timeout: 30000 },
+			)
+			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should('be.visible')
+			assertSettled()
+			freezeAnimation()
+			shot('profile-deleted')
+		})
 	})
 
 	context('signed in as an admin', () => {
@@ -1477,21 +1493,16 @@ describe(`UI check capture (${LABEL})`, () => {
 			performLogin(TEST_USERS.ADMIN.EMAIL, TEST_USERS.ADMIN.PASSWORD)
 		})
 
-		capture(
-			'captures the admin travellers list and the delete dialog',
-			() => {
-				cy.viewport(1280, HEIGHT)
-				cy.visit(PATHS.TRAVELLERS)
-				cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).first().click()
-				cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_DIALOG).should(
-					'be.visible',
-				)
-				shot('admin-delete-dialog')
-			},
-		)
+		capture('admin-delete', () => {
+			cy.viewport(1280, HEIGHT)
+			visit(PATHS.TRAVELLERS)
+			cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).first().click()
+			cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_DIALOG).should('be.visible')
+			shot('admin-delete-dialog')
+		})
 	})
 	context('with a short city list', () => {
-		capture('captures the city filter with three cities', () => {
+		capture('city-filter-three', () => {
 			cy.request({
 				method: 'DELETE',
 				url: emulatorDatabase('travellers'),
@@ -1517,7 +1528,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			performLogin()
 
 			eachWidth((width) => {
-				cy.visit(PATHS.TRAVELLERS)
+				visit(PATHS.TRAVELLERS)
 				cy.get('[data-cy="traveller-filter-checkbox"]').should(
 					'have.length',
 					3,

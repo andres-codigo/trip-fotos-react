@@ -11,9 +11,13 @@ import {
 	decodePng,
 	encodePng,
 	report,
+	sheet,
+	sheetGroups,
+	stateOf,
 	sideBySide,
 	toRanges,
 	writeCrops,
+	writeSheets,
 } from '../compare.mjs'
 
 const WHITE = [255, 255, 255, 255]
@@ -221,5 +225,89 @@ describe('ui-check compare', () => {
 			expect(crop.width).toBe(4 + 8 + 4)
 			expect(crop.height).toBe(6)
 		})
+
+		it('compares only the captures a filtered branch run took', () => {
+			write('main', 'messages-states/messages-390.png', image(4, 6))
+			write('main', 'edit-states/edit-390.png', image(4, 6))
+			write('branch', 'edit-states/edit-390.png', image(4, 6))
+
+			const result = compareFolders(
+				path.join(root, 'main'),
+				path.join(root, 'branch'),
+			)
+
+			expect(result.missing).toEqual(['gone-390.png'])
+			expect(result.identical).toContain('edit-states/edit-390.png')
+			expect(result.notRun).toBe(1)
+			expect(report(result).split('\n')[0]).toMatch(
+				/1 captures not run on this label/,
+			)
+		})
+
+		it('writes one sheet per new or changed state with all its widths, narrowest first', () => {
+			write('branch', 'changed-1280.png', image(5, 3))
+			write('branch', 'extra/new-768.png', image(2, 8))
+			const result = compareFolders(
+				path.join(root, 'main'),
+				path.join(root, 'branch'),
+			)
+
+			expect(
+				sheetGroups(result, [
+					'changed-1280.png',
+					'changed-390.png',
+					'extra/new-390.png',
+					'extra/new-768.png',
+					'same-390.png',
+				]),
+			).toEqual([
+				{
+					state: 'changed',
+					names: ['changed-390.png', 'changed-1280.png'],
+				},
+				{
+					state: 'extra/new',
+					names: ['extra/new-390.png', 'extra/new-768.png'],
+				},
+			])
+
+			const files = writeSheets(
+				result,
+				path.join(root, 'branch'),
+				path.join(root, 'sheets'),
+			)
+			const changed = decodePng(fs.readFileSync(files[0]))
+			expect(files.map((file) => path.relative(root, file))).toEqual([
+				path.join('sheets', 'changed.png'),
+				path.join('sheets', 'extra', 'new.png'),
+			])
+			expect([changed.width, changed.height]).toEqual([4 + 8 + 5, 6])
+		})
+	})
+
+	it('names a state by its shot, without the width or the extension', () => {
+		expect(stateOf('edit-states/edit-trip-390.png')).toBe(
+			'edit-states/edit-trip',
+		)
+		expect(stateOf('edit-save/edit-trip-saving.png')).toBe(
+			'edit-save/edit-trip-saving',
+		)
+	})
+
+	it('pads a shorter image in a sheet with grey', () => {
+		const tall = image(2, 4, () => RED)
+		const short = image(2, 2, () => RED)
+		const result = sheet([tall, short])
+		const pixel = (x, y) => [
+			...result.data.subarray(
+				(y * result.width + x) * 4,
+				(y * result.width + x) * 4 + 4,
+			),
+		]
+
+		expect([result.width, result.height]).toEqual([2 + 8 + 2, 4])
+		expect(pixel(10, 1)).toEqual(RED)
+		expect(pixel(10, 3)).toEqual([128, 128, 128, 255])
+		expect(pixel(3, 0)).toEqual([255, 0, 255, 255])
 	})
 })

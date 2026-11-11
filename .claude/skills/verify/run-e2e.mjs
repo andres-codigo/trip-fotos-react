@@ -1,7 +1,10 @@
 import { spawn, spawnSync } from 'node:child_process'
+import fs from 'node:fs'
 import http from 'node:http'
 import https from 'node:https'
 import path from 'node:path'
+
+import { suiteSpecs } from './spec-results.mjs'
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd()
 const bin = (name) => path.join(projectDir, 'node_modules', '.bin', name)
@@ -40,6 +43,62 @@ export const cypressArgs = (args, spec = process.env.E2E_SPEC) => [
 	...(spec ? ['--spec', spec] : []),
 	...args,
 ]
+
+const split = (list) =>
+	String(list ?? '')
+		.split(',')
+		.map((spec) => spec.trim())
+		.filter(Boolean)
+
+// E2E_SPEC_FIRST (set by /verify to the specs for the changed pages) runs as its own batch before the rest, so a real failure shows in the first minute or two; null runs the whole suite
+export const specBatches = ({ first, spec, suite }) => {
+	const scope = split(spec).length ? split(spec) : suite
+	const head = split(first).filter((name) => scope.includes(name))
+	const rest = scope.filter((name) => !head.includes(name))
+	if (!head.length || !rest.length) return [split(spec).join(',') || null]
+	return [head.join(','), rest.join(',')]
+}
+
+// Lines after which every later Storage or Database call hangs until its timeout, so the run stops at once
+const FATAL_EMULATOR_LINES = [
+	/Unexpected rules runtime error/,
+	/Emulator has exited/,
+]
+
+export const fatalLine = (text) =>
+	text
+		.split('\n')
+		.find((line) => FATAL_EMULATOR_LINES.some((fatal) => fatal.test(line)))
+		?.trim() ?? null
+
+const LOG_FILE = /^firebase-debug(\.\d+)?\.log$/
+
+// The emulators log to firebase-debug.log in the project (a numbered one when another firebase command holds it). Reads only what is written after the watch starts
+export const watchEmulatorLogs = ({ dir, onFatal, interval = 500 }) => {
+	const logs = () => fs.readdirSync(dir).filter((name) => LOG_FILE.test(name))
+	const size = (name) => fs.statSync(path.join(dir, name)).size
+	const offsets = new Map(logs().map((name) => [name, size(name)]))
+	const check = () => {
+		for (const name of logs()) {
+			const end = size(name)
+			const start = offsets.get(name) ?? 0
+			offsets.set(name, end)
+			if (end <= start) continue
+			const buffer = Buffer.alloc(end - start)
+			const fd = fs.openSync(path.join(dir, name), 'r')
+			fs.readSync(fd, buffer, 0, buffer.length, start)
+			fs.closeSync(fd)
+			const line = fatalLine(buffer.toString('utf8'))
+			if (line) {
+				clearInterval(timer)
+				onFatal(line)
+				return
+			}
+		}
+	}
+	const timer = setInterval(check, interval)
+	return () => clearInterval(timer)
+}
 
 const isUp = (url) =>
 	new Promise((resolve) => {
@@ -133,16 +192,55 @@ const main = async () => {
 		}
 	}
 
-	const cypress = spawn(bin('cypress'), cypressArgs(process.argv.slice(2)), {
-		cwd: projectDir,
-		env: { ...process.env, VITE_ROOT_URL: baseUrl },
-		stdio: 'inherit',
-	})
+	let cypress = null
+	const stopWatching = useEmulators
+		? watchEmulatorLogs({
+				dir: projectDir,
+				onFatal: (line) => {
+					console.error(
+						`\nThe emulators crashed, so every later call would hang: ${line}\nRestart the emulators (or rerun) and look at firebase-debug.log.`,
+					)
+					cypress?.kill('SIGTERM')
+					stopServer()
+					process.exit(1)
+				},
+			})
+		: () => {}
 
-	cypress.on('exit', (code) => {
-		stopServer()
-		process.exit(code ?? 1)
+	const runCypress = (spec) =>
+		new Promise((resolve) => {
+			cypress = spawn(
+				bin('cypress'),
+				cypressArgs(process.argv.slice(2), spec ?? undefined),
+				{
+					cwd: projectDir,
+					env: { ...process.env, VITE_ROOT_URL: baseUrl },
+					stdio: 'inherit',
+				},
+			)
+			cypress.on('exit', (code) => resolve(code ?? 1))
+		})
+
+	const batches = specBatches({
+		first: process.env.E2E_SPEC_FIRST,
+		spec: process.env.E2E_SPEC,
+		suite: suiteSpecs('e2e', projectDir),
 	})
+	let code = 0
+	for (const [index, spec] of batches.entries()) {
+		if (batches.length > 1) {
+			console.log(
+				index === 0
+					? `Running the specs for the changed pages first: ${spec}`
+					: 'The affected specs passed; running the rest',
+			)
+		}
+		code = await runCypress(spec)
+		if (code !== 0) break
+	}
+	stopWatching()
+	stopServer()
+	process.exit(code)
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) await main()

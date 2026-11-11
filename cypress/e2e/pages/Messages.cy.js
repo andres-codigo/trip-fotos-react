@@ -17,6 +17,7 @@ import { TEST_USERS } from '../../../src/constants/config/users'
 import { PATHS } from '../../../src/constants/ui/paths'
 
 import { performLogin } from '../../support/utils/authHelpers'
+import { atPath } from '../../support/utils/waitForSuccess'
 
 const REQUEST_TIMEOUT = 10000
 const MESSAGES_URL = '**/messages/*.json*'
@@ -239,7 +240,7 @@ describe('Logged in > Messages page', () => {
 			},
 		)
 
-		cy.location('pathname').should('eq', PATHS.MESSAGES)
+		cy.waitForSuccess(atPath(PATHS.MESSAGES))
 		cy.contains(CONTACT_TRAVELLER_CONFIG.REPLY_SUCCESS_MESSAGE).should(
 			'be.visible',
 		)

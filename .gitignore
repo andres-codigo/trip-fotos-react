@@ -36,6 +36,7 @@ coverage
 # CYRPESS TESTING
 cypress/downloads
 cypress/screenshots
+cypress/ui-check-captures
 
 # PLAYWRIGHT MCP
 .playwright-mcp

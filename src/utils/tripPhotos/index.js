@@ -8,7 +8,3 @@ export const toTripPhotos = ({ files, fileDimensions, fileThumbnails } = {}) =>
 
 export const thumbnailUrlsOf = (thumbnails) =>
 	Object.values(thumbnails ?? {}).map(({ url }) => url)
-
-// An inline data: photo has no Storage object, and sending one to Storage fails rather than finding nothing
-export const isStoredFile = (url) =>
-	typeof url === 'string' && !url.startsWith('data:')

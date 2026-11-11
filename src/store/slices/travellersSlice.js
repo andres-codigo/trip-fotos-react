@@ -37,7 +37,7 @@ import { databaseRequest } from '@/store/databaseRequest'
 
 import { handleApiError } from '@/utils/errorHandler'
 import { measureImage } from '@/utils/measureImage'
-import { isStoredFile, thumbnailUrlsOf } from '@/utils/tripPhotos'
+import { thumbnailUrlsOf } from '@/utils/tripPhotos'
 
 // The database turns a sparse array into an object, so both shapes are read the same way
 const thumbnailUrls = (fileThumbnails) =>
@@ -360,7 +360,6 @@ export const updateTraveller = createAsyncThunk(
 						url,
 						...thumbnailUrlsOf(thumbnails),
 					])
-					.filter(isStoredFile)
 					.map((url) => deleteObject(ref(storage, url))),
 			)
 
@@ -559,9 +558,8 @@ export const deleteTraveller = createAsyncThunk(
 
 			const storage = getFirebaseStorage()
 			await Promise.all(
-				[...files, ...thumbnailUrls(fileThumbnails)]
-					.filter(isStoredFile)
-					.map(async (fileUrl) => {
+				[...files, ...thumbnailUrls(fileThumbnails)].map(
+					async (fileUrl) => {
 						try {
 							await deleteObject(ref(storage, fileUrl))
 						} catch (error) {
@@ -573,7 +571,8 @@ export const deleteTraveller = createAsyncThunk(
 								throw error
 							}
 						}
-					}),
+					},
+				),
 			)
 
 			await dispatch(deleteTravellerMessages(travellerId)).unwrap()

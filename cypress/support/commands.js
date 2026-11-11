@@ -3,6 +3,7 @@ import { configureStore } from '@reduxjs/toolkit'
 
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 import { animationsSettled } from './utils/animations'
+import { successOutcome } from './utils/waitForSuccess'
 
 import {
 	HEADER_SELECTORS,
@@ -153,6 +154,29 @@ Cypress.Commands.add('resetEmulators', () => {
 	// The seed recreates the users, which invalidates their cached sessions
 	Cypress.session.clearAllSavedSessions()
 })
+
+// Waits for `success(win)` but fails as soon as an error dialog shows, rather than running out the timeout
+Cypress.Commands.add(
+	'waitForSuccess',
+	(success, { timeout = 10000, interval = 100 } = {}) => {
+		const deadline = Date.now() + timeout
+		const poll = () =>
+			cy.window({ log: false }).then((win) => {
+				const outcome = successOutcome(win, success)
+				if (outcome?.error) {
+					throw new Error(
+						`An error dialog showed instead of success: ${outcome.error}`,
+					)
+				}
+				if (outcome?.done) return
+				if (Date.now() > deadline) {
+					throw new Error(`No success within ${timeout}ms`)
+				}
+				cy.wait(interval, { log: false }).then(poll)
+			})
+		poll()
+	},
+)
 
 // Reads the record back from the emulator, so a pass means the write reached the database
 Cypress.Commands.add('assertTravellerPersisted', (uid, expected) => {

@@ -3,12 +3,15 @@ import { describe, expect, it } from 'vitest'
 import { MOCK_INBOX } from '@/constants/test/mock-data/mock-messages'
 import { TONE_COUNT, getToneIndex } from '@/utils/getToneIndex'
 
+import { decodePng } from '../../.claude/skills/ui-check/compare.mjs'
 import {
 	SEED_USERS,
 	assertEmulatorsOnly,
 	buildMessages,
 	buildTravellers,
 	needsFullSeed,
+	solidPng,
+	storageObjects,
 } from '../seed-emulators.mjs'
 
 describe('seed-emulators', () => {
@@ -16,9 +19,10 @@ describe('seed-emulators', () => {
 		const hosts = {
 			FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099',
 			FIREBASE_DATABASE_EMULATOR_HOST: '127.0.0.1:9000',
+			FIREBASE_STORAGE_EMULATOR_HOST: '127.0.0.1:9199',
 		}
 
-		it('passes when both emulator hosts are set', () => {
+		it('passes when every emulator host is set', () => {
 			expect(() => assertEmulatorsOnly(hosts)).not.toThrow()
 		})
 
@@ -30,8 +34,10 @@ describe('seed-emulators', () => {
 			)
 		})
 
-		it('refuses when neither is set', () => {
-			expect(() => assertEmulatorsOnly({})).toThrow(/AUTH.*DATABASE/)
+		it('refuses when none is set', () => {
+			expect(() => assertEmulatorsOnly({})).toThrow(
+				/AUTH.*DATABASE.*STORAGE/,
+			)
 		})
 	})
 
@@ -55,6 +61,36 @@ describe('seed-emulators', () => {
 				expect(width).toBeGreaterThan(0)
 				expect(height).toBeGreaterThan(0)
 			})
+		})
+
+		it('points every photo and thumbnail at a Storage emulator object, never an inline data: URL', () => {
+			const urls = new Set(storageObjects().map(({ url }) => url))
+			const thumbnails = withPhotos.fileThumbnails.flatMap((sizes) =>
+				sizes.map(({ url }) => url),
+			)
+
+			expect(withPhotos.fileThumbnails).toHaveLength(
+				withPhotos.files.length,
+			)
+			;[...withPhotos.files, ...thumbnails].forEach((url) => {
+				expect(url).toMatch(
+					/^http:\/\/127\.0\.0\.1:9199\/v0\/b\/demo-trip-fotos\.appspot\.com\/o\/images%2Fseed-traveller-one%2F.+\?alt=media&token=/,
+				)
+				expect(urls.has(url)).toBe(true)
+			})
+			expect(urls.size).toBe(storageObjects().length)
+		})
+
+		it('sizes each thumbnail with its shortest side at its width, never larger than the photo', () => {
+			const [file, ...thumbnails] = storageObjects().slice(0, 3)
+
+			expect([file.width, file.height]).toEqual([640, 480])
+			expect(
+				thumbnails.map(({ width, height }) => [width, height]),
+			).toEqual([
+				[427, 320],
+				[640, 480],
+			])
 		})
 
 		it('uses tripDescription and covers all eight badge tones', () => {
@@ -106,6 +142,14 @@ describe('seed-emulators', () => {
 			]
 
 		expect(message.createdAt).toBe(now - 12 * 60 * 1000)
+	})
+
+	it('writes a PNG of the given size and colour', () => {
+		const image = decodePng(solidPng('3b82f6', 5, 3))
+
+		expect([image.width, image.height]).toEqual([5, 3])
+		expect([...image.data.subarray(0, 4)]).toEqual([0x3b, 0x82, 0xf6, 255])
+		expect([...image.data.subarray(-4)]).toEqual([0x3b, 0x82, 0xf6, 255])
 	})
 
 	describe('needsFullSeed', () => {

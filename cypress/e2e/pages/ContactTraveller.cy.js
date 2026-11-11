@@ -8,6 +8,7 @@ import { TEST_USERS } from '../../../src/constants/config/users'
 import { PATHS } from '../../../src/constants/ui/paths'
 
 import { performLogin } from '../../support/utils/authHelpers'
+import { atPath } from '../../support/utils/waitForSuccess'
 
 const REQUEST_TIMEOUT = 10000
 const OTHER_TRAVELLER_ID = 'e2e-other-traveller'
@@ -127,10 +128,7 @@ describe('Contact Traveller page > sending a message', () => {
 			},
 		)
 
-		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
-			'eq',
-			PATHS.TRAVELLERS,
-		)
+		cy.waitForSuccess(atPath(PATHS.TRAVELLERS))
 		cy.contains(CONTACT_TRAVELLER_CONFIG.SUCCESS_MESSAGE).should(
 			'be.visible',
 		)
