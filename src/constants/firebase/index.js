@@ -9,11 +9,12 @@ export const FIREBASE = Object.freeze({
 	APP_ID: import.meta.env.VITE_FIREBASE_APP_ID,
 })
 
-// Dev server only: a production build ignores the flag, so it can never point at local emulators
+// The dev server, or a build made with `--mode emulators` (the E2E runner's); a Vercel build (production mode) ignores the flag, so it can never point at local emulators
+export const emulatorsEnabled = ({ DEV, MODE, VITE_USE_FIREBASE_EMULATORS }) =>
+	(DEV || MODE === 'emulators') && VITE_USE_FIREBASE_EMULATORS === 'true'
+
 export const FIREBASE_EMULATORS = Object.freeze({
-	ENABLED:
-		import.meta.env.DEV &&
-		import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true',
+	ENABLED: emulatorsEnabled(import.meta.env),
 	AUTH_URL: 'http://127.0.0.1:9099',
 	STORAGE_HOST: '127.0.0.1',
 	STORAGE_PORT: 9199,

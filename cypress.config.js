@@ -12,6 +12,7 @@ import {
 	SEED_USERS,
 	SEED_PASSWORD,
 } from './scripts/seed-emulators.mjs'
+import { recordSpec } from './.claude/skills/verify/spec-results.mjs'
 
 import dotenv from 'dotenv'
 dotenv.config()
@@ -77,6 +78,8 @@ export default defineConfig({
 				: 'cypress/e2e-live/**/*.cy.js',
 		baseUrl: process.env.VITE_ROOT_URL || 'http://localhost:3000',
 		setupNodeEvents(on, config) {
+			// /verify reruns only the specs that failed
+			on('after:spec', recordSpec)
 			on('task', {
 				seedEmulators,
 				clearUiCheckScreenshots(label) {
@@ -111,6 +114,9 @@ export default defineConfig({
 					],
 				},
 			}),
+		},
+		setupNodeEvents(on) {
+			on('after:spec', recordSpec)
 		},
 		specPattern: '**/*.cy.{js,jsx,ts,tsx}',
 		// Cypress only skips the E2E folder by matching the E2E pattern, which now varies by mode

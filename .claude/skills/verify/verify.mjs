@@ -1,5 +1,5 @@
 // Runs the /verify gates and prints the pass/fail table: node verify.mjs [e2e] [all]
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import fs from 'node:fs'
 import net from 'node:net'
 import path from 'node:path'
@@ -8,11 +8,20 @@ import { stripVTControlCharacters } from 'node:util'
 import { gateHolds, planGates, uiCheckGap } from './changed-gates.mjs'
 import { branchFiles, changedSince, treeHash } from './git-tree.mjs'
 import { resetChecks } from './reset-checks.mjs'
+import {
+	isSpecGate,
+	passedSpecs,
+	readSpecResults,
+	specsToRun,
+	suiteSpecs,
+} from './spec-results.mjs'
 
 const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd()
 // node_modules is gitignored and shared by every worktree that links it, so the cache survives branch switches
 const cacheDir = path.join(projectDir, 'node_modules', '.cache', 'verify')
 const cacheFile = path.join(cacheDir, 'passed.json')
+// The Cypress specs that passed on a tree whose gate run failed
+const specsFile = path.join(cacheDir, 'specs.json')
 // Read by the status line to show whether a run is in flight and how the last one ended
 const statusFile = path.join(cacheDir, 'status.json')
 // Written by .claude/skills/ui-check/status.mjs
@@ -44,6 +53,9 @@ const GATES = {
 	ct: {
 		name: 'Cypress component tests',
 		command: 'npm run cy:run:ct',
+		// Only the specs still to pass on this tree
+		withSpecs: (specs) =>
+			`npm run cy:run:ct -- --spec '${specs.join(',')}'`,
 		summary: /(All specs passed!.*|\d+ of \d+ failed.*)/,
 		failure: /^\s*\d+\) |AssertionError|Error:|✖/,
 	},
@@ -62,6 +74,9 @@ const GATES = {
 	e2e: {
 		name: 'Cypress E2E',
 		command: 'npm run cy:run:e2e:emulators',
+		// `emulators:exec` passes no arguments on, so run-e2e.mjs reads the specs from E2E_SPEC
+		withSpecs: (specs) =>
+			`E2E_SPEC='${specs.join(',')}' npm run cy:run:e2e:emulators`,
 		summary: /(All specs passed!.*|\d+ of \d+ failed.*)/,
 		failure: /^\s*\d+\) |AssertionError|Error:|✖|ECONNREFUSED/,
 	},
@@ -114,33 +129,110 @@ export const findClash = async ({
 	return null
 }
 
-const runGate = (gate) => {
-	const { command, summary, failure } = GATES[gate]
-	const result = spawnSync(command, {
-		cwd: projectDir,
-		shell: true,
-		encoding: 'utf8',
-		maxBuffer: 64 * 1024 * 1024,
-	})
-	// Colour codes would stop the summary and failure patterns matching
-	const output = stripVTControlCharacters(
-		`${result.stdout}\n${result.stderr}`,
-	)
-	const log = path.join(cacheDir, `${gate}.log`)
-	fs.writeFileSync(log, output)
-	const lines = output.split('\n')
-	return {
-		status: result.status,
-		summary:
-			lines.map((line) => line.match(summary)?.[1]).findLast(Boolean) ??
-			'',
-		errors: lines
-			.filter((line) => failure.test(line))
-			.slice(0, MAX_FAILURE_LINES)
-			.map((line) => line.trim()),
-		log,
+// The Cypress gates share the screenshots folder, so they never overlap
+const SERIAL = ['ct', 'e2e']
+
+// Starts each gate through `start(gate)` (a promise of its result). This container is I/O-bound: the fast gates in parallel save only seconds over running in turn, and alongside the component tests they slow that gate by minutes. So they run alongside E2E, which mostly waits on the emulators, or, with no E2E, together before the component tests. `stopOthers` runs when ESLint exits 2, as nothing else is worth reporting then, and no gate starts after it
+export const scheduleGates = async (gates, start, stopOthers) => {
+	const results = {}
+	let stopped = false
+	const run = async (gate) => {
+		if (stopped) return
+		results[gate] = await start(gate)
+		if (gate === 'lint' && results[gate].status === 2) {
+			stopped = true
+			stopOthers()
+		}
+	}
+	const fast = gates.filter((gate) => !SERIAL.includes(gate))
+	const all = (list) => Promise.all(list.map(run))
+	if (gates.includes('e2e')) {
+		if (gates.includes('ct')) await run('ct')
+		await all(['e2e', ...fast])
+	} else {
+		await all(fast)
+		if (gates.includes('ct')) await run('ct')
+	}
+	return results
+}
+
+// Updates both caches after a gate. A failure drops the gate's last pass, which an older tree could otherwise still hold; a Cypress gate keeps the specs that have passed on this tree
+export const recordGate = ({
+	cache,
+	specRecords,
+	gate,
+	tree,
+	status,
+	specResults,
+}) => {
+	if (status === 0) {
+		cache.gates[gate] = tree
+		delete specRecords[gate]
+		return
+	}
+	delete cache.gates[gate]
+	if (specResults)
+		specRecords[gate] = {
+			tree,
+			passed: passedSpecs({
+				record: specRecords[gate],
+				tree,
+				results: specResults,
+			}),
+		}
+}
+
+const children = new Set()
+
+const stopGates = () => {
+	for (const child of children) {
+		// Negative PID kills the gate's whole process group (npm, Cypress, Vite)
+		try {
+			process.kill(-child.pid, 'SIGTERM')
+		} catch {
+			// Already exited
+		}
 	}
 }
+
+const runGate = (gate, { specs, specResults } = {}) =>
+	new Promise((resolve) => {
+		const { command, withSpecs, summary, failure } = GATES[gate]
+		const log = path.join(cacheDir, `${gate}.log`)
+		const out = fs.openSync(log, 'w')
+		const child = spawn(specs ? withSpecs(specs) : command, {
+			cwd: projectDir,
+			shell: true,
+			detached: true,
+			env: specResults
+				? { ...process.env, VERIFY_SPEC_RESULTS: specResults }
+				: process.env,
+			stdio: ['ignore', out, out],
+		})
+		children.add(child)
+		child.on('close', (status) => {
+			children.delete(child)
+			fs.closeSync(out)
+			// Colour codes would stop the summary and failure patterns matching
+			const output = stripVTControlCharacters(
+				fs.readFileSync(log, 'utf8'),
+			)
+			fs.writeFileSync(log, output)
+			const lines = output.split('\n')
+			resolve({
+				status: status ?? 1,
+				summary:
+					lines
+						.map((line) => line.match(summary)?.[1])
+						.findLast(Boolean) ?? '',
+				errors: lines
+					.filter((line) => failure.test(line))
+					.slice(0, MAX_FAILURE_LINES)
+					.map((line) => line.trim()),
+				log,
+			})
+		})
+	})
 
 const main = async () => {
 	const args = process.argv.slice(2)
@@ -191,32 +283,89 @@ const main = async () => {
 		)
 	writeStatus('running')
 
-	const rows = []
+	const specRecords = readJson(specsFile)
+	const toRun = runArgs.filter((gate) => all || !gateHolds(gate, holds))
+	const rows = runArgs
+		.filter((gate) => !toRun.includes(gate))
+		.map((gate) => [gate, '✅ cached', 'no change since it last passed'])
+
+	// A Cypress gate that failed on this tree reruns only the specs that have not passed on it yet; `all` runs whole suites
+	const plans = Object.fromEntries(
+		toRun.filter(isSpecGate).map((gate) => {
+			const suite = suiteSpecs(gate, projectDir)
+			const specs = all
+				? null
+				: specsToRun({ suite, record: specRecords[gate], tree })
+			return [gate, { suite, specs }]
+		}),
+	)
+	const rerunNote = (gate) => {
+		const { suite, specs } = plans[gate] ?? {}
+		if (!specs) return ''
+		if (!specs.length) return 'every spec had already passed on this tree'
+		return `reran ${specs.length} failed spec${specs.length === 1 ? '' : 's'} (${specs.join(', ')}); the other ${suite.length - specs.length} passed earlier on this tree`
+	}
+
+	const start = async (gate) => {
+		const plan = plans[gate]
+		const specResults = plan && path.join(cacheDir, `${gate}-specs.ndjson`)
+		if (specResults) fs.rmSync(specResults, { force: true })
+		const result =
+			plan?.specs?.length === 0
+				? { status: 0, summary: '', errors: [], log: '' }
+				: await runGate(gate, { specs: plan?.specs, specResults })
+		recordGate({
+			cache,
+			specRecords,
+			gate,
+			tree,
+			status: result.status,
+			specResults: plan && readSpecResults(specResults),
+		})
+		fs.writeFileSync(cacheFile, JSON.stringify(cache, null, '\t'))
+		fs.writeFileSync(specsFile, JSON.stringify(specRecords, null, '\t'))
+		return result
+	}
+
+	process.on('SIGINT', () => {
+		stopGates()
+		writeStatus('fail')
+		process.exit(130)
+	})
+
+	const results = await scheduleGates(toRun, start, stopGates)
+
+	// ESLint exits 2 when it cannot run at all; never report the other gates on top of a broken config
+	if (results.lint?.status === 2) {
+		writeStatus('fail')
+		console.log(
+			'ESLint could not run (exit 2); the other gates were stopped.',
+		)
+		results.lint.errors.forEach((line) => console.log(`  ${line}`))
+		console.log(`  full log: ${results.lint.log}`)
+		process.exit(1)
+	}
+
 	const failures = []
-	for (const gate of runArgs) {
-		if (!all && gateHolds(gate, holds)) {
-			rows.push([gate, '✅ cached', 'no change since it last passed'])
-			continue
-		}
-		const result = runGate(gate)
-		// ESLint exits 2 when it cannot run at all; never report the other gates on top of a broken config
-		if (gate === 'lint' && result.status === 2) {
-			writeStatus('fail')
-			console.log(
-				'ESLint could not run (exit 2); no other gate was started.',
-			)
-			result.errors.forEach((line) => console.log(`  ${line}`))
-			console.log(`  full log: ${result.log}`)
-			process.exit(1)
-		}
-		if (result.status === 0) {
-			cache.gates[gate] = tree
-			rows.push([gate, '✅', result.summary])
-		} else {
-			rows.push([gate, '❌', result.summary || `exit ${result.status}`])
+	for (const gate of toRun) {
+		const result = results[gate]
+		const note = [result.summary, rerunNote(gate)]
+			.filter(Boolean)
+			.join('; ')
+		if (result.status === 0) rows.push([gate, '✅', note])
+		else {
+			const kept = plans[gate]
+				? `${specRecords[gate].passed.length} of ${plans[gate].suite.length} specs have passed on this tree; the next /verify reruns only the rest`
+				: ''
+			rows.push([
+				gate,
+				'❌',
+				[note || `exit ${result.status}`, kept]
+					.filter(Boolean)
+					.join('; '),
+			])
 			failures.push([gate, result])
 		}
-		fs.writeFileSync(cacheFile, JSON.stringify(cache, null, '\t'))
 	}
 
 	const passed = failures.length === 0

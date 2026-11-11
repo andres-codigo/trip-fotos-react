@@ -46,7 +46,8 @@ export default defineConfig({
 	preview: {
 		host: true,
 		port: 3001,
-		open: true,
+		// The E2E runner serves its build here, headless
+		open: !isCypress,
 		https: httpsConfig,
 	},
 	plugins: [react(), tailwindcss()],

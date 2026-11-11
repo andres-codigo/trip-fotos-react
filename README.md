@@ -63,7 +63,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - A dark theme throughout: a warm charcoal palette, one clear focus ring on every control, edged cards and a loading spinner that says what is loading
 - Travellers list in pages: 12 at a time with Show more, skeleton cards while it loads, and an inline error with Try again
 - Faster photo lists: square tiles that load small thumbnails instead of full-size photos
-- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs and local checks, a browser check before them for UI changes, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
+- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs, faster local checks that rerun only failed tests, a browser check before them for UI changes, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
@@ -236,7 +236,7 @@ npm run emulators                 # Auth 9099, Database 9000, Storage 9199, UI h
 npm run dev -- --mode emulators   # in a second terminal: the app against them
 ```
 
-`--mode emulators` loads [`.env.emulators`](.env.emulators), which sets `VITE_USE_FIREBASE_EMULATORS` (the dev server only; a production build ignores it) and `VITE_DATABASE_NAMESPACE`. The namespace is added to every Realtime Database request as `?ns=`, because the emulator serves a request without one from a namespace that has no rules. **Never set either variable in Vercel.**
+`--mode emulators` loads [`.env.emulators`](.env.emulators), which sets `VITE_USE_FIREBASE_EMULATORS` (the dev server, or a build made with `--mode emulators` as the E2E runner does; a Vercel build ignores it) and `VITE_DATABASE_NAMESPACE`. The namespace is added to every Realtime Database request as `?ns=`, because the emulator serves a request without one from a namespace that has no rules. **Never set either variable in Vercel.**
 
 `npm run emulators:seed` clears the emulators and loads a fixed data set: a standard user (not a traveller), two travellers (one with four photos and all eight badge tones, one with none), an admin (`admin: true` claim) and two messages for the first traveller (an unread one from the second traveller, and an older email-only one). Run it through `firebase emulators:exec` so the host variables are set; it refuses to run without them, so it can never write to the live project. The accounts are listed in [`scripts/seed-emulators.mjs`](scripts/seed-emulators.mjs), and `cy.task('seedEmulators')` re-seeds from a spec.
 
