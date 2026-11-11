@@ -1,7 +1,7 @@
 import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { AUTHENTICATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
-import { TOP_NAVIGATION_SELECTORS } from '../../../src/constants/test/selectors/components'
+import { ACCOUNT_MENU_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
 import { performLogin } from '../../support/utils/authHelpers'
@@ -58,7 +58,8 @@ describe('App Routing', () => {
 
 	it('redirects a protected route to the authentication page after logout', () => {
 		performLogin()
-		cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT).click()
+		cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
+		cy.get(ACCOUNT_MENU_SELECTORS.LOG_OUT).click()
 		cy.url().should('include', PATHS.AUTHENTICATION)
 
 		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)

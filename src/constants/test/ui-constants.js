@@ -120,8 +120,8 @@ export const TRAVELLER_ITEM = Object.freeze({
 	BADGES: 'traveller-item-badges',
 	IMAGES_LIST: 'traveller-item-images',
 	SEE_ALL_LINK: 'traveller-item-see-all',
-	CONTACT: 'traveller-item-contact',
-	DETAILS: 'traveller-item-details',
+	MESSAGE: 'traveller-item-message',
+	VIEW_TRIP: 'traveller-item-view-trip',
 	DELETE: 'traveller-item-delete',
 	SPINNER: 'traveller-item-spinner',
 	ERROR_DIALOG: 'traveller-item-error-dialog',
@@ -139,19 +139,37 @@ export const MESSAGE_SKELETON = Object.freeze({
 	ROOT: 'message-skeleton',
 })
 
+export const ACCOUNT_MENU = Object.freeze({
+	ROOT: 'account-menu',
+	BUTTON: 'account-menu-button',
+	PANEL: 'account-menu-panel',
+	SIGNED_IN_AS: 'account-menu-signed-in-as',
+	LOG_OUT: 'account-menu-log-out',
+})
+
+export const TAB_BAR = Object.freeze({
+	ROOT: 'tab-bar',
+	TRAVELLERS: 'tab-bar-travellers',
+	MESSAGES: 'tab-bar-messages',
+	MY_TRIP: 'tab-bar-my-trip',
+	REGISTER: 'tab-bar-register',
+	UNREAD: 'tab-bar-unread',
+	SPACER: 'tab-bar-spacer',
+})
+
 export const TRAVELLER_DETAIL = Object.freeze({
 	ROOT: 'traveller-detail',
 	NAME: 'traveller-detail-name',
 	SPINNER: 'traveller-detail-spinner',
 	NOT_FOUND: 'traveller-detail-not-found',
-	BACK_LINK: 'traveller-detail-back',
+	BACK_TO_TRAVELLERS: 'traveller-detail-back-to-travellers',
+	PHOTOS_HEADING: 'traveller-detail-photos-heading',
 	PROFILE: 'traveller-detail-profile',
 	TRIP_DESCRIPTION: 'traveller-detail-trip-description',
 	TRIP: 'traveller-detail-trip',
 	BADGES: 'traveller-detail-badges',
 	IMAGES_LIST: 'traveller-detail-images',
-	CONTACT_SECTION: 'traveller-detail-contact-section',
-	CONTACT: 'traveller-detail-contact',
+	MESSAGE: 'traveller-detail-message',
 	EDIT: 'traveller-detail-edit',
 	ADD_PHOTOS: 'traveller-detail-add-photos',
 	NO_PHOTOS: 'traveller-detail-no-photos',

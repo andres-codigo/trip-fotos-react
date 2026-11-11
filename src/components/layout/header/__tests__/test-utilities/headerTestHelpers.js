@@ -1,4 +1,8 @@
-import { HEADER_SELECTORS, TOP_NAVIGATION_SELECTORS } from '@/constants/test'
+import {
+	ACCOUNT_MENU_SELECTORS,
+	HEADER_SELECTORS,
+	TOP_NAVIGATION_SELECTORS,
+} from '@/constants/test'
 
 export const assertHeaderTitleLink = (expectedHref) => {
 	cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK)
@@ -25,25 +29,22 @@ export const assertNavMenu = ({ shouldExist, shouldBeVisible }) => {
 	}
 }
 
-export const assertHamburgerMenu = (shouldExist) => {
-	const hamburgerMenu = cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU)
-	if (shouldExist) {
-		hamburgerMenu.should('exist')
-	} else {
-		hamburgerMenu.should('not.exist')
-	}
+export const assertAccountMenu = (shouldBeVisible) => {
+	cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should(
+		shouldBeVisible ? 'be.visible' : 'not.exist',
+	)
 }
 
 export const headerAssertions = (
 	expectedHref,
 	navMenuExists,
 	navMenuVisible,
-	hamburgerMenuExists,
+	accountMenuVisible,
 ) => {
 	assertHeaderTitleLink(expectedHref)
 	assertNavMenu({
 		shouldExist: navMenuExists,
 		shouldBeVisible: navMenuVisible,
 	})
-	assertHamburgerMenu(hamburgerMenuExists)
+	assertAccountMenu(accountMenuVisible)
 }

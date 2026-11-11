@@ -12,15 +12,18 @@
 //                    It keeps the label's other captures and retakes its own
 import { API_DATABASE } from '../../src/constants/api'
 import {
+	ACCOUNT_MENU_SELECTORS,
 	COMBOBOX_SELECTORS,
 	COMMON_SELECTORS,
 	CONTACT_TRAVELLER_SELECTORS,
 	DIALOG_SELECTORS,
 	EDIT_TRIP_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
+	FOOTER_SELECTORS,
 	MESSAGE_ITEM_SELECTORS,
 	MESSAGE_SKELETON_SELECTORS,
 	MESSAGES_PAGE_SELECTORS,
+	TAB_BAR_SELECTORS,
 	TOAST_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
@@ -30,7 +33,10 @@ import {
 	TRAVELLERS_LIST_SELECTORS,
 	TRIP_PHOTOS_SELECTORS,
 } from '../../src/constants/test/selectors/components'
-import { PAGE_SELECTORS } from '../../src/constants/test/selectors/pages'
+import {
+	PAGE_NOT_FOUND_SELECTORS,
+	PAGE_SELECTORS,
+} from '../../src/constants/test/selectors/pages'
 import { PATHS } from '../../src/constants/ui/paths'
 import { SESSION_STORAGE_KEYS } from '../../src/constants/auth'
 import { TEST_USERS } from '../../src/constants/config/users'
@@ -129,9 +135,13 @@ let currentCapture = null
 const shotName = (name) => `${LABEL}/${currentCapture}/${name}`
 
 // Every call site asserts the content first; the helper only names the file
-const shot = (name) => {
+const shot = (name, options = {}) => {
 	// eslint-disable-next-line cypress/assertion-before-screenshot
-	cy.screenshot(shotName(name), { ...SCREENSHOT, capture: 'fullPage' })
+	cy.screenshot(shotName(name), {
+		...SCREENSHOT,
+		capture: 'fullPage',
+		...options,
+	})
 }
 
 // cy.visit keeps the page when only the hash differs, so reload to start the app afresh
@@ -234,7 +244,7 @@ const markAllUnread = () =>
 			})
 		})
 
-// Logout can render before the restored session fills in the name, so a traveller's page is not settled until it shows
+// The account button can render before the restored session fills in the name, so a traveller's page is not settled until it shows
 const assertSignedInName = () =>
 	cy.window({ log: false }).then((win) => {
 		const uid = win.localStorage.getItem(SESSION_STORAGE_KEYS.USER_ID)
@@ -245,9 +255,11 @@ const assertSignedInName = () =>
 			log: false,
 		}).then(({ body }) => {
 			if (!body?.firstName) return
-			cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT, {
+			cy.get(ACCOUNT_MENU_SELECTORS.BUTTON, {
 				timeout: TIMEOUT,
-			}).should('contain.text', body.firstName)
+			})
+				.should('have.attr', 'aria-label')
+				.and('contain', body.firstName)
 		})
 	})
 
@@ -422,7 +434,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				freezeAnimation()
 				shot(`travellers-${width}`)
 
-				cy.get(TRAVELLER_ITEM_SELECTORS.DETAILS).first().click()
+				cy.get(TRAVELLER_ITEM_SELECTORS.VIEW_TRIP).first().click()
 				cy.get(TRAVELLER_DETAIL_SELECTORS.ROOT).should('be.visible')
 				assertSettled()
 				freezeAnimation()
@@ -799,6 +811,8 @@ describe(`UI check capture (${LABEL})`, () => {
 
 		capture('travellers-load-error', () => {
 			eachWidth((width) => {
+				// The page the session left open loads the list too, after cy.visit resolves, so it must finish before the failure is stubbed
+				assertSettled()
 				interceptOnce('GET', '**/travellers.json*', {
 					statusCode: 500,
 					body: {},
@@ -838,7 +852,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
 			assertSettled()
 			;[
-				['details', TRAVELLER_ITEM_SELECTORS.DETAILS, true],
+				['details', TRAVELLER_ITEM_SELECTORS.VIEW_TRIP, true],
 				['refresh', TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON],
 				['register', TRAVELLERS_LIST_SELECTORS.REGISTER_LINK],
 				['filter-show-all', TRAVELLER_FILTER_SELECTORS.SHOW_ALL],
@@ -1041,21 +1055,19 @@ describe(`UI check capture (${LABEL})`, () => {
 			)
 		})
 
-		capture('contact-button', () => {
+		capture('message-button', () => {
 			eachWidth((width) => {
 				visit(PATHS.TRAVELLERS)
-				cy.get(TRAVELLER_ITEM_SELECTORS.CONTACT).should('exist')
+				cy.get(TRAVELLER_ITEM_SELECTORS.MESSAGE).should('exist')
 				assertSettled()
 				freezeAnimation()
-				shot(`travellers-contact-${width}`)
+				shot(`travellers-message-${width}`)
 
 				visit(`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}`)
-				cy.get(TRAVELLER_DETAIL_SELECTORS.CONTACT_SECTION).should(
-					'be.visible',
-				)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.MESSAGE).should('be.visible')
 				assertSettled()
 				freezeAnimation()
-				shot(`traveller-detail-contact-${width}`)
+				shot(`traveller-detail-message-${width}`)
 			})
 		})
 
@@ -1092,14 +1104,12 @@ describe(`UI check capture (${LABEL})`, () => {
 				assertSettled()
 				freezeAnimation()
 				shot(`nav-unread-count-${width}`)
-				// Below the desktop nav the count sits in the hamburger menu
-				if (width <= 768) {
-					cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).click()
-					cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should(
-						'be.visible',
-					)
-					shot(`nav-unread-count-menu-${width}`)
-				}
+				// Below the desktop nav the count sits on the tab bar's Messages
+				cy.get(
+					width <= 768
+						? TAB_BAR_SELECTORS.UNREAD
+						: TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES,
+				).should('be.visible')
 
 				visit(PATHS.MESSAGES)
 				cy.get(MESSAGE_ITEM_SELECTORS.NEW_TAG).should('exist')
@@ -1196,17 +1206,62 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
-		capture('mobile-menu', () => {
-			;[390, 768].forEach((width) => {
-				cy.viewport(width, HEIGHT)
+		capture('account-menu', () => {
+			eachWidth((width) => {
 				visit(PATHS.TRAVELLERS)
 				assertSettled()
-				cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).click()
-				cy.get(
-					TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER,
-				).should('be.visible')
 				freezeAnimation()
-				shot(`mobile-menu-open-${width}`)
+				// Hover and keyboard focus on the places, inline above 768px and in the tab bar at and below it. Viewport shots are cut at the browser window's 720px, so the viewport matches it
+				cy.viewport(width, 720)
+				const place =
+					width <= 768
+						? TAB_BAR_SELECTORS.MY_TRIP
+						: TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MY_TRIP
+				forcePseudo(place, ['hover'], { scroll: false })
+				shot(`nav-hover-${width}`, { capture: 'viewport' })
+				forcePseudo(place, ['focus', 'focus-visible'], {
+					scroll: false,
+				})
+				shot(`nav-focus-${width}`, { capture: 'viewport' })
+				forcePseudo(place, [], { scroll: false })
+				forcePseudo(
+					ACCOUNT_MENU_SELECTORS.BUTTON,
+					['focus', 'focus-visible'],
+					{
+						scroll: false,
+					},
+				)
+				shot(`account-button-focus-${width}`, { capture: 'viewport' })
+				forcePseudo(ACCOUNT_MENU_SELECTORS.BUTTON, [], {
+					scroll: false,
+				})
+
+				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
+				cy.get(ACCOUNT_MENU_SELECTORS.PANEL).should('be.visible')
+				shot(`account-menu-open-${width}`)
+				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
+
+				// The foot of the page on a phone: the footer must clear the docked tab bar
+				if (width <= 768) {
+					cy.scrollTo('bottom')
+					cy.get(FOOTER_SELECTORS.PRIVACY_LINK).then(($privacy) => {
+						cy.get(TAB_BAR_SELECTORS.ROOT).then(($bar) => {
+							expect(
+								$privacy[0].getBoundingClientRect().bottom,
+							).to.be.at.most($bar[0].getBoundingClientRect().top)
+						})
+					})
+					shot(`tab-bar-page-foot-${width}`, { capture: 'viewport' })
+				}
+
+				// Signed in, the 404 page leads to Travellers
+				cy.visit(PATHS.NON_EXISTENT_PATH, { failOnStatusCode: false })
+				cy.get(PAGE_NOT_FOUND_SELECTORS.ACTION).should(
+					'have.text',
+					'Go to Travellers',
+				)
+				freezeAnimation()
+				shot(`not-found-signed-in-${width}`)
 			})
 		})
 

@@ -105,7 +105,7 @@ const Toast = ({
 	return (
 		<div
 			className={cn(
-				'fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-1/2 z-50 w-[calc(100%-2rem)] max-w-[26rem] -translate-x-1/2',
+				'fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-1/2 z-50 w-[calc(100%-2rem)] max-w-[26rem] -translate-x-1/2 mobile:bottom-[calc(4.75rem+1px+env(safe-area-inset-bottom))]',
 				className,
 			)}
 			data-cy={dataCy}>

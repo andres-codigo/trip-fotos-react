@@ -36,6 +36,8 @@ export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 	CONTACT_PATH_SEGMENT: '/contact',
 	EDIT_PATH_SEGMENT: '/edit',
 	EDIT_LABEL: 'Edit trip',
+	VIEW_LABEL: 'View trip',
+	MESSAGE_LABEL: (firstName) => `Message ${firstName}`,
 	PHOTOS_ANCHOR: 'photos',
 	DELETE_DIALOG_TITLE: 'Delete traveller?',
 })
@@ -80,6 +82,7 @@ export const TRAVELLER_DETAIL_CONFIG = Object.freeze({
 	BACK_LABEL: 'Back to travellers',
 	PHOTO_PARAM: 'photo',
 	PHOTOS_HEADING: 'Photos',
+	PHOTO_COUNT: (count) => `${count} ${count === 1 ? 'photo' : 'photos'}`,
 	ADD_PHOTOS_LABEL: 'Add photos',
 	NO_PHOTOS_MESSAGE: 'No photos on this trip yet.',
 })
@@ -160,6 +163,9 @@ export const SENDER_STATUS = Object.freeze({
 	LEGACY: 'legacy',
 })
 
+const unreadLabel = (unread) =>
+	`${unread} unread message${unread === 1 ? '' : 's'}`
+
 export const MESSAGES_CONFIG = Object.freeze({
 	TITLE: 'Messages',
 	FORMER_TRAVELLER: 'A former traveller',
@@ -186,10 +192,9 @@ export const MESSAGES_CONFIG = Object.freeze({
 		'When a traveller contacts you from your card, their message appears here.',
 	BROWSE_TRAVELLERS: 'Browse travellers',
 	SKELETON_COUNT: 3,
+	UNREAD_LABEL: unreadLabel,
 	NAV_LABEL: (unread) =>
-		unread > 0
-			? `Messages, ${unread} unread message${unread === 1 ? '' : 's'}`
-			: 'Messages',
+		unread > 0 ? `Messages, ${unreadLabel(unread)}` : 'Messages',
 })
 
 export const CITY_SEARCH_STATUS = Object.freeze({

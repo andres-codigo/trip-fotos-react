@@ -102,8 +102,8 @@ export const CAPTURES = {
 		title: 'captures the register page, previews, the remove buttons and a real upload',
 		areas: ['register', 'trips'],
 	},
-	'contact-button': {
-		title: 'captures the travellers list and a profile with the Contact button',
+	'message-button': {
+		title: 'captures the travellers list and a profile with the Message button',
 		areas: ['travellers', 'detail', 'contact'],
 	},
 	'messages-states': {
@@ -114,9 +114,9 @@ export const CAPTURES = {
 		title: 'captures Messages when empty',
 		areas: ['messages'],
 	},
-	'mobile-menu': {
-		title: 'captures the open mobile menu',
-		areas: ['travellers'],
+	'account-menu': {
+		title: 'captures the open account menu, the tab bar, the foot of the page and the signed-in 404',
+		areas: ['travellers', 'detail', 'notFound'],
 	},
 	'contact-send': {
 		title: 'captures the contact form and a real send',
@@ -158,9 +158,12 @@ export const E2E_SPECS = {
 		'authentication',
 		'travellers',
 	],
-	'cypress/e2e/components/TopNavigationMenu.cy.js': [
+	'cypress/e2e/components/Navigation.cy.js': [
 		'authentication',
 		'messages',
+		'travellers',
+		'detail',
+		'privacy',
 	],
 	'cypress/e2e/pages/Authentication.cy.js': ['authentication'],
 	'cypress/e2e/pages/ContactTraveller.cy.js': ['contact', 'detail'],

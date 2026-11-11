@@ -67,6 +67,9 @@ vi.mock('@/components/layout/skip-link/SkipLink', () => ({
 vi.mock('@/components/layout/header/Header', () => ({
 	default: () => <div>Header</div>,
 }))
+vi.mock('@/components/layout/tab-bar/TabBar', () => ({
+	default: () => <div>TabBar</div>,
+}))
 vi.mock('@/components/layout/footer/Footer', () => ({
 	default: () => <div>Footer</div>,
 }))
@@ -135,6 +138,13 @@ describe('App', () => {
 			expect(screen.getByText('SkipLink')).toBeInTheDocument()
 			expect(screen.getByText('Header')).toBeInTheDocument()
 			expect(screen.getByText('Footer')).toBeInTheDocument()
+			// Last in the page, so the tab bar comes last in tab order too
+			expect(
+				screen
+					.getByText('Footer')
+					.compareDocumentPosition(screen.getByText('TabBar')) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy()
 			await waitFor(() => {
 				expect(screen.getByText('TravellersPage')).toBeInTheDocument()
 			})

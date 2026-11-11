@@ -31,13 +31,13 @@ describe('<Header />', () => {
 					cy.mountWithProviders(<Header />, store)
 
 					cy.setViewportToMobile()
-					headerAssertions(PATHS.HOME, true, false, true)
+					headerAssertions(PATHS.TRAVELLERS, true, false, true)
 
 					cy.setViewportToTablet()
-					headerAssertions(PATHS.HOME, true, true, true)
+					headerAssertions(PATHS.TRAVELLERS, true, true, true)
 
 					cy.setViewportToDesktop()
-					headerAssertions(PATHS.HOME, true, true, true)
+					headerAssertions(PATHS.TRAVELLERS, true, true, true)
 				})
 			})
 		})
@@ -57,11 +57,11 @@ describe('<Header />', () => {
 		})
 
 		describe('Logged in', () => {
-			it('renders the site title link with the "/" href and label', () => {
+			it('renders the site title link with the "/travellers" href and label', () => {
 				cy.createMockStore('fake-token').then((store) => {
 					cy.mountWithProviders(<Header />, store)
 					cy.get(`${HEADER_SELECTORS.SITE_HEADER_TITLE_LINK} a`)
-						.should('have.attr', 'href', PATHS.HOME)
+						.should('have.attr', 'href', PATHS.TRAVELLERS)
 						.and('have.attr', 'aria-label', 'Trip Fotos Home')
 						.and('contain.text', 'Trip Fotos')
 				})
@@ -99,11 +99,7 @@ describe('<Header />', () => {
 						`${HEADER_SELECTORS.SITE_HEADER_TITLE_LINK} a`,
 					).should('have.attr', 'aria-label', 'Trip Fotos Home')
 
-					cy.get('nav').should(
-						'have.attr',
-						'aria-label',
-						'Top navigation',
-					)
+					cy.get('nav').should('have.attr', 'aria-label', 'Main')
 				})
 			})
 		})

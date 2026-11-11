@@ -7,7 +7,6 @@ import { successOutcome } from './utils/waitForSuccess'
 
 import {
 	HEADER_SELECTORS,
-	TOP_NAVIGATION_SELECTORS,
 	AUTHENTICATION_FORM_SELECTORS,
 	COMBOBOX_SELECTORS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
@@ -217,17 +216,6 @@ Cypress.Commands.add('assertHeaderTitleLink', () => {
 		.then(($siteHeaderTitleLink) => {
 			expect($siteHeaderTitleLink.text()).to.equal('Trip Fotos')
 		})
-})
-
-////
-// TOP NAVIGATION HAMBURGER MENU
-////
-Cypress.Commands.add('assertHamburgerMenuState', (isActive) => {
-	cy.get(TOP_NAVIGATION_SELECTORS.HAMBURGER_MENU).should(
-		'have.attr',
-		'aria-expanded',
-		String(isActive),
-	)
 })
 
 ////

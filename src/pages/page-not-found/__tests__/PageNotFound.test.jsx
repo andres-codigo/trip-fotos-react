@@ -45,14 +45,20 @@ describe('PageNotFound', () => {
 			expect(main).toHaveAttribute('tabindex', '-1')
 		})
 
-		it('separates the home link from the surrounding sentence with spaces', () => {
+		it('says the page is not available and why', () => {
 			render(<PageNotFound />)
 
 			expect(
-				screen.getByRole('link', { name: 'Trip Fotos' }).parentElement,
-			).toHaveTextContent(
-				/^Best return to the Trip Fotos home page to get back on track\.$/,
-			)
+				screen.getByRole('heading', {
+					level: 1,
+					name: 'This page is not available.',
+				}),
+			).toBeInTheDocument()
+			expect(
+				screen.getByText(
+					'The link may be old, or the trip may have been removed.',
+				),
+			).toBeInTheDocument()
 		})
 
 		it('sets the document title', () => {
@@ -113,12 +119,23 @@ describe('PageNotFound', () => {
 			render(<PageNotFound />)
 
 			const baseButton = screen.getByTestId(
-				TEST_IDS.PAGE_NOT_FOUND.HOME_LINK,
+				TEST_IDS.PAGE_NOT_FOUND.ACTION,
 			)
 
-			expect(baseButton).toBeInTheDocument()
 			expect(baseButton.tagName).toBe('A')
-			expect(baseButton).toHaveTextContent('Trip Fotos')
+			expect(baseButton).toHaveTextContent('Go to Travellers')
+		})
+
+		it('offers Log in when logged out', () => {
+			useSelector.mockImplementation((fn) =>
+				fn({ authentication: { token: null } }),
+			)
+
+			render(<PageNotFound />)
+
+			expect(
+				screen.getByTestId(TEST_IDS.PAGE_NOT_FOUND.ACTION),
+			).toHaveTextContent('Log in')
 		})
 	})
 
@@ -129,7 +146,7 @@ describe('PageNotFound', () => {
 			)
 			render(<PageNotFound />)
 
-			const button = screen.getByTestId(TEST_IDS.PAGE_NOT_FOUND.HOME_LINK)
+			const button = screen.getByTestId(TEST_IDS.PAGE_NOT_FOUND.ACTION)
 			expect(button.getAttribute('href')).toBe(PATHS.TRAVELLERS)
 		})
 
@@ -139,7 +156,7 @@ describe('PageNotFound', () => {
 			)
 			render(<PageNotFound />)
 
-			const button = screen.getByTestId(TEST_IDS.PAGE_NOT_FOUND.HOME_LINK)
+			const button = screen.getByTestId(TEST_IDS.PAGE_NOT_FOUND.ACTION)
 			expect(button.getAttribute('href')).toBe(PATHS.AUTHENTICATION)
 		})
 	})

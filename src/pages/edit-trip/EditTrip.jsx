@@ -262,7 +262,7 @@ const EditTrip = () => {
 							isLink
 							to={PATHS.TRAVELLERS}
 							modeType="outline"
-							data-cy={TRAVELLER_DETAIL.BACK_LINK}>
+							data-cy={TRAVELLER_DETAIL.BACK_TO_TRAVELLERS}>
 							{TRAVELLER_DETAIL_CONFIG.BACK_LABEL}
 						</BaseButton>
 					</div>

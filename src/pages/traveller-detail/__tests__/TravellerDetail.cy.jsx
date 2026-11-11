@@ -109,9 +109,9 @@ describe('<TravellerDetail />', () => {
 		const viewportHeight = 200
 		cy.viewport(390, viewportHeight)
 		mountPage({ hash: '#photos' })
-		// The profile card alone is taller than the viewport, so the list is only on screen if the page scrolled to it
-		cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should(($list) => {
-			const { top } = $list[0].getBoundingClientRect()
+		// The profile card alone is taller than the viewport, so the heading is only on screen if the page scrolled to it
+		cy.get(TRAVELLER_DETAIL_SELECTORS.PHOTOS_HEADING).should(($heading) => {
+			const { top } = $heading[0].getBoundingClientRect()
 			expect(top).to.be.within(0, viewportHeight)
 		})
 	})
@@ -129,19 +129,59 @@ describe('<TravellerDetail />', () => {
 		)
 	})
 
-	it('shows the contact link for a traveller viewing someone else', () => {
+	it('puts Message {first name} in the profile card, under the badges', () => {
 		mountPage({ isTraveller: true })
-		cy.get(TRAVELLER_DETAIL_SELECTORS.CONTACT).should(
-			'have.attr',
-			'href',
-			'/travellers/abc/contact',
-		)
+		cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE)
+			.find(TRAVELLER_DETAIL_SELECTORS.MESSAGE)
+			.should('have.attr', 'href', '/travellers/abc/contact')
+			.and('have.text', 'Message Ada')
+			.then(($message) => {
+				cy.get(TRAVELLER_DETAIL_SELECTORS.BADGES).then(($badges) => {
+					expect(
+						$message[0].getBoundingClientRect().top,
+					).to.be.at.least($badges[0].getBoundingClientRect().bottom)
+				})
+			})
 	})
 
-	it('hides the contact section on the own record', () => {
+	it('hides Message on the own record', () => {
 		mountPage({ userId: 'abc', isTraveller: true })
 		cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE).should('exist')
-		cy.get(TRAVELLER_DETAIL_SELECTORS.CONTACT_SECTION).should('not.exist')
+		cy.get(TRAVELLER_DETAIL_SELECTORS.MESSAGE).should('not.exist')
+	})
+
+	it('lines the back link up with the left edge of the card on desktop', () => {
+		cy.viewport(1280, 800)
+		mountPage()
+		cy.get(TRAVELLER_DETAIL_SELECTORS.BACK_TO_TRAVELLERS).then(($back) => {
+			cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE)
+				.closest(COMMON_SELECTORS.BASE_CARD)
+				.should(($card) => {
+					expect($back[0].getBoundingClientRect().left).to.be.closeTo(
+						$card[0].getBoundingClientRect().left,
+						1,
+					)
+				})
+		})
+	})
+
+	it('puts a 44px Back to travellers link above the profile card', () => {
+		mountPage()
+		cy.get(TRAVELLER_DETAIL_SELECTORS.BACK_TO_TRAVELLERS)
+			.should('have.attr', 'href', '/travellers')
+			.and('contain.text', 'Back to travellers')
+			.then(($back) => {
+				const back = $back[0].getBoundingClientRect()
+				expect(back.height).to.be.at.least(44)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE)
+					.closest(COMMON_SELECTORS.BASE_CARD)
+					.then(($card) => {
+						// Close above the card it leads away from: the link's 8px margin, no card spacing
+						const gap =
+							$card[0].getBoundingClientRect().top - back.bottom
+						expect(gap).to.be.within(0, 12)
+					})
+			})
 	})
 
 	it('shows the not-found state for an unknown id', () => {
@@ -150,7 +190,7 @@ describe('<TravellerDetail />', () => {
 			'contain.text',
 			'Traveller not found.',
 		)
-		cy.get(TRAVELLER_DETAIL_SELECTORS.BACK_LINK).should(
+		cy.get(TRAVELLER_DETAIL_SELECTORS.BACK_TO_TRAVELLERS).should(
 			'have.attr',
 			'href',
 			'/travellers',

@@ -34,6 +34,12 @@ const SESSION = {
 
 const createStore = () =>
 	configureStore({
+		// The 32ms default warns on a busy machine, as the app's own store allows for
+		middleware: (getDefaultMiddleware) =>
+			getDefaultMiddleware({
+				immutableCheck: { warnAfter: 128 },
+				serializableCheck: { warnAfter: 128 },
+			}),
 		reducer: {
 			authentication: authenticationReducer,
 			travellers: travellersReducer,
@@ -78,7 +84,7 @@ const renderNav = (store) =>
 		</Provider>,
 	)
 
-const logoutLink = () => screen.getByRole('link', { name: /^Logout/ })
+const accountButton = () => screen.getByRole('button', { name: /^Account/ })
 
 describe('<MainNav /> signed-in name', () => {
 	beforeEach(() => {
@@ -91,7 +97,7 @@ describe('<MainNav /> signed-in name', () => {
 
 		renderNav(store)
 
-		expect(logoutLink()).toHaveTextContent(`Logout ${FULL_NAME}`)
+		expect(accountButton()).toHaveAccessibleName(`Account, ${FULL_NAME}`)
 	})
 
 	it('shows no name for a signed-in user who is not a traveller, even with a stale display name', async () => {
@@ -103,7 +109,7 @@ describe('<MainNav /> signed-in name', () => {
 
 		renderNav(store)
 
-		expect(logoutLink()).toHaveTextContent(/^Logout$/)
+		expect(accountButton()).toHaveAccessibleName('Account')
 	})
 
 	it('updates the name after the traveller edits it', async () => {
@@ -120,7 +126,9 @@ describe('<MainNav /> signed-in name', () => {
 			)
 		})
 
-		expect(logoutLink()).toHaveTextContent('Logout Augusta Lovelace')
+		expect(accountButton()).toHaveAccessibleName(
+			'Account, Augusta Lovelace',
+		)
 	})
 
 	it('clears the name when the session ends', async () => {
@@ -132,6 +140,6 @@ describe('<MainNav /> signed-in name', () => {
 			store.dispatch(authActions.clearUser())
 		})
 
-		expect(logoutLink()).toHaveTextContent(/^Logout$/)
+		expect(accountButton()).toHaveAccessibleName('Account')
 	})
 })

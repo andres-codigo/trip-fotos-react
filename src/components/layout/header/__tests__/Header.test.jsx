@@ -45,7 +45,7 @@ describe('<Header />', () => {
 			})
 		})
 
-		it('routes to home page when token is truthy', () => {
+		it('routes to Travellers when token is truthy', () => {
 			const truthyValues = ['token', 1, true, 'any-string']
 
 			truthyValues.forEach((truthyValue) => {
@@ -53,7 +53,7 @@ describe('<Header />', () => {
 				const link = screen.getByRole('link', {
 					name: 'Trip Fotos Home',
 				})
-				expect(link).toHaveAttribute('href', PATHS.HOME)
+				expect(link).toHaveAttribute('href', PATHS.TRAVELLERS)
 				unmount()
 			})
 		})

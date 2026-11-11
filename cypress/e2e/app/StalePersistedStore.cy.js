@@ -2,7 +2,7 @@ import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import {
 	TRAVELLERS_LIST_SELECTORS,
-	TOP_NAVIGATION_SELECTORS,
+	ACCOUNT_MENU_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 
@@ -76,7 +76,7 @@ describe('Stale persisted store', () => {
 		cy.contains(STALE_NAME).should('not.exist')
 	})
 
-	it('does not show a stale traveller name on the Logout button', () => {
+	it('does not show a stale traveller name on the account button', () => {
 		cy.visit(BASE_URL_CYPRESS + PATHS.TRAVELLERS, {
 			onBeforeLoad: seedStalePersistedStore,
 		})
@@ -84,10 +84,10 @@ describe('Stale persisted store', () => {
 		cy.get(PAGE_SELECTORS.TRAVELLERS_MAIN_CONTAINER, {
 			timeout: REQUEST_TIMEOUT,
 		}).should('exist')
-		cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_LOGOUT, {
+		cy.get(ACCOUNT_MENU_SELECTORS.BUTTON, {
 			timeout: REQUEST_TIMEOUT,
 		})
-			.should('exist')
+			.should('have.attr', 'aria-label')
 			.and('not.contain', STALE_NAME)
 	})
 

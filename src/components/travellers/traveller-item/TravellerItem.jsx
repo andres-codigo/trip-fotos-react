@@ -202,8 +202,8 @@ const TravellerItem = ({
 								isLink
 								to={contactLink}
 								modeType="outline"
-								data-cy={TRAVELLER_ITEM.CONTACT}>
-								Contact
+								data-cy={TRAVELLER_ITEM.MESSAGE}>
+								{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(firstName)}
 							</BaseButton>
 						)}
 						{isOwnRecord && (
@@ -219,8 +219,8 @@ const TravellerItem = ({
 							isLink
 							to={detailsLink}
 							modeType="primary"
-							data-cy={TRAVELLER_ITEM.DETAILS}>
-							Details
+							data-cy={TRAVELLER_ITEM.VIEW_TRIP}>
+							{TRAVELLER_ITEM_CONFIG.VIEW_LABEL}
 						</BaseButton>
 						{canDelete && (
 							<BaseButton

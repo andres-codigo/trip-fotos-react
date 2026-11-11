@@ -1,237 +1,49 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
+
+import { TOP_NAVIGATION_SELECTORS } from '@/constants/test'
 
 import NavMenuMessagesLink from '@/components/layout/main-nav/nav-menu/NavMenuMessagesLink'
 
-vi.mock('@/components/layout/main-nav/nav-menu/NavMenuButtonLink', () => ({
-	default: vi.fn(
-		({
-			children,
-			isLink: _isLink,
-			to: _to,
-			'data-cy': dataCy,
-			onMenuItemClick: _onMenuItemClick,
-			isActive: _isActive,
-			className,
-			ariaLabel,
-			...props
-		}) => {
-			return (
-				<button
-					className={className}
-					data-cy={dataCy}
-					aria-label={ariaLabel}
-					{...props}>
-					{children}
-				</button>
-			)
-		},
-	),
-}))
+const renderLink = (props = {}) =>
+	render(
+		<MemoryRouter>
+			<ul>
+				<NavMenuMessagesLink
+					to="/messages"
+					data-cy="nav-menu-item-messages"
+					{...props}
+				/>
+			</ul>
+		</MemoryRouter>,
+	)
 
-import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
-
-const mockNavMenuButtonLink = vi.mocked(NavMenuButtonLink)
+const countSelector = TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES
 
 describe('<NavMenuMessagesLink />', () => {
-	const defaultProps = {
-		isLink: true,
-		to: '/messages',
-		onMenuItemClick: vi.fn(),
-		'data-cy': 'messages-link',
-	}
+	it('renders a list item with a Messages link', () => {
+		renderLink()
 
-	describe('Rendering tests', () => {
-		it('should render Messages text', () => {
-			render(<NavMenuMessagesLink {...defaultProps} />)
-
-			expect(screen.getByText('Messages')).toBeInTheDocument()
-		})
-
-		it('should render with proper list item structure', () => {
-			render(<NavMenuMessagesLink {...defaultProps} />)
-
-			const listItem = screen.getByRole('listitem')
-			expect(listItem).toContainElement(screen.getByText('Messages'))
-		})
-
-		it('should forward all props to NavMenuButtonLink', () => {
-			render(<NavMenuMessagesLink {...defaultProps} />)
-
-			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
-				{
-					ariaLabel: 'Messages',
-					children: ['Messages', false],
-					'data-cy': 'messages-link',
-					isLink: true,
-					onMenuItemClick: defaultProps.onMenuItemClick,
-					to: '/messages',
-				},
-				undefined,
-			)
-		})
-
-		it('should pass className through without the styles object', () => {
-			render(
-				<NavMenuMessagesLink
-					{...defaultProps}
-					className="custom-class"
-				/>,
-			)
-
-			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
-				expect.objectContaining({ className: 'custom-class' }),
-				undefined,
-			)
-		})
-
-		it.each([
-			[3, 'Messages, 3 unread messages'],
-			[1, 'Messages, 1 unread message'],
-			[0, 'Messages'],
-		])(
-			'should name the link with %i unread as "%s"',
-			(unreadMessages, name) => {
-				render(
-					<NavMenuMessagesLink
-						{...defaultProps}
-						unreadMessages={unreadMessages}
-					/>,
-				)
-
-				expect(screen.getByRole('button', { name })).toBeInTheDocument()
-			},
-		)
-
-		it('should show the unread count after the visible text', () => {
-			render(
-				<NavMenuMessagesLink
-					{...defaultProps}
-					unreadMessages={3}
-				/>,
-			)
-
-			expect(screen.getByRole('button')).toHaveTextContent('Messages 3')
-		})
-
-		it('should handle missing optional props gracefully', () => {
-			const minimalProps = {
-				isLink: true,
-				to: '/messages',
-			}
-
-			render(<NavMenuMessagesLink {...minimalProps} />)
-
-			expect(screen.getByText('Messages')).toBeInTheDocument()
-			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
-				{
-					ariaLabel: 'Messages',
-					children: ['Messages', false],
-					'data-cy': undefined,
-					isLink: true,
-					onMenuItemClick: undefined,
-					to: '/messages',
-				},
-				undefined,
-			)
-		})
-
-		// Message count tests
-		it('should not display the count when there are no unread messages', () => {
-			const falsyValues = [0, null, undefined, -1]
-
-			falsyValues.forEach((value) => {
-				const { unmount } = render(
-					<NavMenuMessagesLink
-						{...defaultProps}
-						unreadMessages={value}
-					/>,
-				)
-
-				expect(
-					screen.queryByTestId('total-messages'),
-				).not.toBeInTheDocument()
-
-				unmount()
-			})
-		})
-
-		it('should display the count when there are unread messages', () => {
-			render(
-				<NavMenuMessagesLink
-					{...defaultProps}
-					unreadMessages={5}
-				/>,
-			)
-
-			const messageCount = screen.getByTestId('total-messages')
-			expect(messageCount).toBeInTheDocument()
-			expect(messageCount).toHaveTextContent('5')
-		})
-
-		it('should nest the count inside the link', () => {
-			render(
-				<NavMenuMessagesLink
-					{...defaultProps}
-					unreadMessages={3}
-				/>,
-			)
-
-			expect(screen.getByRole('button')).toContainElement(
-				screen.getByTestId('total-messages'),
-			)
-		})
-
-		it('should display large message counts correctly', () => {
-			render(
-				<NavMenuMessagesLink
-					{...defaultProps}
-					unreadMessages={999}
-				/>,
-			)
-
-			expect(screen.getByTestId('total-messages')).toHaveTextContent(
-				'999',
-			)
-		})
+		const link = screen.getByRole('link', { name: 'Messages' })
+		expect(link.closest('li')).toBeInTheDocument()
+		expect(link).toHaveAttribute('href', '/messages')
+		expect(link).toHaveAttribute('data-cy', 'nav-menu-item-messages')
+		expect(document.querySelector(countSelector)).toBeNull()
 	})
 
-	describe('Behaviour tests', () => {
-		it('should pass custom onMenuItemClick function to NavMenuButtonLink', () => {
-			const mockOnMenuItemClick = vi.fn()
+	it('shows the unread count inside the link and in its name', () => {
+		renderLink({ unreadMessages: 12 })
 
-			render(
-				<NavMenuMessagesLink
-					{...defaultProps}
-					onMenuItemClick={mockOnMenuItemClick}
-				/>,
-			)
-
-			// Verify the specific function instance is passed
-			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
-				expect.objectContaining({
-					onMenuItemClick: mockOnMenuItemClick,
-				}),
-				undefined,
-			)
+		const link = screen.getByRole('link', {
+			name: 'Messages, 12 unread messages',
 		})
+		expect(link.querySelector(countSelector)).toHaveTextContent('12')
 	})
 
-	describe('Accessibility tests', () => {
-		it('should pass through custom data-cy attribute for testing', () => {
-			render(
-				<NavMenuMessagesLink
-					{...defaultProps}
-					data-cy="messages-nav-item"
-				/>,
-			)
+	it('marks the current page', () => {
+		renderLink({ isActive: true })
 
-			expect(mockNavMenuButtonLink).toHaveBeenCalledWith(
-				expect.objectContaining({
-					'data-cy': 'messages-nav-item',
-				}),
-				undefined,
-			)
-		})
+		expect(screen.getByRole('link')).toHaveAttribute('aria-current', 'page')
 	})
 })

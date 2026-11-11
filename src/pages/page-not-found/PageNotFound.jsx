@@ -1,6 +1,13 @@
 import { useSelector } from 'react-redux'
 
-import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
+import { TEST_IDS } from '@/constants/test'
+
+import {
+	ACCESSIBILITY,
+	GLOBAL,
+	PAGE_NOT_FOUND_CONFIG,
+	PATHS,
+} from '@/constants/ui'
 
 import BaseCard from '@/components/ui/card/BaseCard'
 import BaseButton from '@/components/ui/button/BaseButton'
@@ -20,21 +27,18 @@ const PageNotFound = () => {
 			<title>{`Page not found · ${GLOBAL.SITE_NAME}`}</title>
 			<BaseCard>
 				<h1 className="my-[0.83em] text-[1.5rem]">
-					This page is not available. Sorry about that.
+					{PAGE_NOT_FOUND_CONFIG.TITLE}
 				</h1>
-				<p>
-					Best return to the{' '}
-					<BaseButton
-						isLink
-						className="text-accent-text underline"
-						to={
-							isLoggedIn ? PATHS.TRAVELLERS : PATHS.AUTHENTICATION
-						}
-						data-cy="home-link">
-						Trip Fotos
-					</BaseButton>{' '}
-					home page to get back on track.
-				</p>
+				<p className="text-text-muted">{PAGE_NOT_FOUND_CONFIG.TEXT}</p>
+				<BaseButton
+					isLink
+					modeType="primary"
+					to={isLoggedIn ? PATHS.TRAVELLERS : PATHS.AUTHENTICATION}
+					data-cy={TEST_IDS.PAGE_NOT_FOUND.ACTION}>
+					{isLoggedIn
+						? PAGE_NOT_FOUND_CONFIG.TRAVELLERS_LABEL
+						: PAGE_NOT_FOUND_CONFIG.LOG_IN_LABEL}
+				</BaseButton>
 			</BaseCard>
 		</main>
 	)
