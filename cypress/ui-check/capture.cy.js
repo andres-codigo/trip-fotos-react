@@ -234,14 +234,11 @@ const markAllUnread = () =>
 			})
 		})
 
-// The app learns the signed-in traveller's name from the travellers list, so where the list shows, Logout can render before the name does
+// Logout can render before the restored session fills in the name, so a traveller's page is not settled until it shows
 const assertSignedInName = () =>
 	cy.window({ log: false }).then((win) => {
 		const uid = win.localStorage.getItem(SESSION_STORAGE_KEYS.USER_ID)
-		const listed = win.document.querySelector(
-			TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM,
-		)
-		if (!uid || !listed) return
+		if (!uid) return
 		cy.request({
 			url: emulatorDatabase(`travellers/${uid}`),
 			headers: OWNER,
@@ -1113,13 +1110,18 @@ describe(`UI check capture (${LABEL})`, () => {
 				cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).click()
 				shot(`messages-show-all-${width}`)
 
-				interceptOnce(API_DATABASE.GET, '**/messages/*.json*', (req) =>
+				// The page and the nav's unread count may each request messages, in either order, so every request is held until the shot
+				cy.intercept(API_DATABASE.GET, '**/messages/*.json*', (req) =>
 					req.on('response', (res) => res.setDelay(60000)),
 				).as('slowMessages')
 				visit(PATHS.MESSAGES)
 				cy.get(MESSAGE_SKELETON_SELECTORS.ROOT).should('have.length', 3)
 				freezeAnimation()
 				shot(`messages-loading-${width}`)
+				// The newest handler runs first, and continuing ends the chain, so this releases the hold
+				cy.intercept(API_DATABASE.GET, '**/messages/*.json*', (req) =>
+					req.continue(),
+				)
 
 				markAllUnread()
 				visit(PATHS.MESSAGES)
