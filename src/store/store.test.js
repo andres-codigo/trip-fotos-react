@@ -99,4 +99,38 @@ describe('Store Configuration', () => {
 	it('should exclude messages from persistence', () => {
 		expect(persistConfigs[0].blacklist).toContain('messages')
 	})
+
+	describe('immutableCheck warning limit', () => {
+		// Each dispatch reads Date.now four times in the immutable check, so a step of n ms per read reports 2n ms
+		const dispatchWithClockStep = (step) => {
+			let now = 0
+			const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => {
+				now += step
+				return now
+			})
+			const warnSpy = vi
+				.spyOn(console, 'warn')
+				.mockImplementation(() => {})
+
+			store.dispatch({ type: 'test/clock-step' })
+
+			const immutableWarnings = warnSpy.mock.calls.filter(([message]) =>
+				String(message).includes('ImmutableStateInvariantMiddleware'),
+			)
+			nowSpy.mockRestore()
+			warnSpy.mockRestore()
+			return immutableWarnings
+		}
+
+		it('should not warn when a pass takes longer than the 32ms default but under 128ms', () => {
+			expect(dispatchWithClockStep(30)).toHaveLength(0)
+		})
+
+		it('should warn when a pass takes longer than 128ms', () => {
+			const warnings = dispatchWithClockStep(70)
+
+			expect(warnings).toHaveLength(1)
+			expect(warnings[0][0]).toContain('threshold of 128ms')
+		})
+	})
 })
