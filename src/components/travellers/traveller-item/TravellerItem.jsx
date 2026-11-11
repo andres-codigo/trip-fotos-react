@@ -56,6 +56,7 @@ const TravellerItem = ({
 	const detailsLink = `${PATHS.TRAVELLERS}/${id}`
 	const photosLink = `${detailsLink}#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
 	const contactLink = `${detailsLink}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`
+	const editLink = `${detailsLink}${TRAVELLER_ITEM_CONFIG.EDIT_PATH_SEGMENT}`
 	const isOwnRecord = id === userId
 	const canContact = !isOwnRecord && isTraveller
 	const canDelete = isAdmin && !isOwnRecord
@@ -203,6 +204,15 @@ const TravellerItem = ({
 								modeType="outline"
 								data-cy={TRAVELLER_ITEM.CONTACT}>
 								Contact
+							</BaseButton>
+						)}
+						{isOwnRecord && (
+							<BaseButton
+								isLink
+								to={editLink}
+								modeType="outline"
+								data-cy={TRAVELLER_ITEM.EDIT}>
+								{TRAVELLER_ITEM_CONFIG.EDIT_LABEL}
 							</BaseButton>
 						)}
 						<BaseButton

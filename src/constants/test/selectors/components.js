@@ -21,6 +21,8 @@ import {
 	SHEET,
 	TOAST,
 	TRAVELLER_DETAIL,
+	EDIT_TRIP,
+	TRIP_PHOTOS,
 	TRAVELLER_FILTER,
 	TRAVELLER_ITEM,
 	TRAVELLER_SKELETON,
@@ -116,6 +118,7 @@ export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	LAST_NAME_INPUT: getByDataCy('last-name-input'),
 	TRIP_DESCRIPTION_INPUT: getByDataCy('trip-description-input'),
 	TRIP_DATES: getByDataCy('trip-dates'),
+	PHOTOS: getByDataCy('traveller-photos'),
 	TRIP_START_INPUT: getByDataCy('trip-start-input'),
 	TRIP_END_INPUT: getByDataCy('trip-end-input'),
 	TRIP_LENGTH: getByDataCy('trip-length'),
@@ -232,6 +235,7 @@ export const TRAVELLER_ITEM_SELECTORS = {
 	DELETE_DIALOG: getByDataCy(TRAVELLER_ITEM.DELETE_DIALOG),
 	DELETE_CANCEL: getByDataCy(TRAVELLER_ITEM.DELETE_CANCEL),
 	DELETE_CONFIRM: getByDataCy(TRAVELLER_ITEM.DELETE_CONFIRM),
+	EDIT: getByDataCy(TRAVELLER_ITEM.EDIT),
 }
 
 export const TRAVELLER_DETAIL_SELECTORS = {
@@ -247,7 +251,19 @@ export const TRAVELLER_DETAIL_SELECTORS = {
 	IMAGES_LIST: getByDataCy(TRAVELLER_DETAIL.IMAGES_LIST),
 	CONTACT_SECTION: getByDataCy(TRAVELLER_DETAIL.CONTACT_SECTION),
 	CONTACT: getByDataCy(TRAVELLER_DETAIL.CONTACT),
+	EDIT: getByDataCy(TRAVELLER_DETAIL.EDIT),
+	ADD_PHOTOS: getByDataCy(TRAVELLER_DETAIL.ADD_PHOTOS),
+	NO_PHOTOS: getByDataCy(TRAVELLER_DETAIL.NO_PHOTOS),
+	SAVED_ALERT: getByDataCy(TRAVELLER_DETAIL.SAVED_ALERT),
 }
+
+export const EDIT_TRIP_SELECTORS = Object.fromEntries(
+	Object.entries(EDIT_TRIP).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const TRIP_PHOTOS_SELECTORS = Object.fromEntries(
+	Object.entries(TRIP_PHOTOS).map(([key, id]) => [key, getByDataCy(id)]),
+)
 
 export const TRAVELLER_FILTER_SELECTORS = {
 	ROOT: getByDataCy(TRAVELLER_FILTER.ROOT),

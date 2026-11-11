@@ -14,6 +14,7 @@ import {
 	COMMON_SELECTORS,
 	CONTACT_TRAVELLER_SELECTORS,
 	DIALOG_SELECTORS,
+	EDIT_TRIP_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 	MESSAGE_ITEM_SELECTORS,
 	MESSAGE_SKELETON_SELECTORS,
@@ -25,11 +26,15 @@ import {
 	TRAVELLER_ITEM_SELECTORS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 	TRAVELLERS_LIST_SELECTORS,
+	TRIP_PHOTOS_SELECTORS,
 } from '../../src/constants/test/selectors/components'
 import { PAGE_SELECTORS } from '../../src/constants/test/selectors/pages'
 import { PATHS } from '../../src/constants/ui/paths'
 import { TEST_USERS } from '../../src/constants/config/users'
-import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../src/constants/travellers'
+import {
+	EDIT_TRIP_CONFIG,
+	TRAVELLER_REGISTRATION_SUCCESS_MESSAGE,
+} from '../../src/constants/travellers'
 
 import { performLogin } from '../support/utils/authHelpers'
 
@@ -161,6 +166,9 @@ const forcePseudo = (selector, states, { scroll = true } = {}) => {
 
 const emulatorDatabase = (path) =>
 	`${Cypress.expose('VITE_DATABASE_URL')}/${path}.json?ns=${Cypress.expose('VITE_DATABASE_NAMESPACE')}`
+
+const ownTripPath = `${PATHS.TRAVELLERS}/${TEST_USERS.TRAVELLER.ID}`
+const editTripPath = `${ownTripPath}/edit`
 
 // The emulator's owner token passes the rules, for state no user could set
 const OWNER = { Authorization: 'Bearer owner' }
@@ -1184,6 +1192,267 @@ describe(`UI check capture (${LABEL})`, () => {
 			assertSettled()
 			shot('contact-sent')
 		})
+
+		capture(
+			'captures your own trip and the edit page at each width',
+			() => {
+				eachWidth((width) => {
+					cy.visit(ownTripPath)
+					cy.get(TRAVELLER_DETAIL_SELECTORS.EDIT).should('be.visible')
+					assertSettled()
+					freezeAnimation()
+					shot(`own-trip-${width}`)
+
+					cy.visit(editTripPath)
+					cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+					assertSettled()
+					freezeAnimation()
+					shot(`edit-trip-${width}`)
+				})
+			},
+		)
+
+		capture('captures the edit page photo and field states', () => {
+			eachWidth((width) => {
+				// Through the link, as a traveller gets there; a visit that only changes the hash would not reload the page
+				cy.visit(ownTripPath)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.ADD_PHOTOS).click()
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).should(
+					'have.focus',
+				)
+				freezeAnimation()
+				shot(`edit-trip-add-photos-${width}`)
+
+				cy.get(TRIP_PHOTOS_SELECTORS.REMOVE).eq(3).click()
+				cy.get(TRIP_PHOTOS_SELECTORS.REMOVE).eq(1).click()
+				cy.get(TRIP_PHOTOS_SELECTORS.UNDO)
+					.should('have.length', 2)
+					.first()
+					.should('have.focus')
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+					'cypress/fixtures/test-image.png',
+					{ force: true },
+				)
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should(
+					'be.visible',
+				)
+				forcePseudo(TRIP_PHOTOS_SELECTORS.UNDO, [
+					'focus',
+					'focus-visible',
+				])
+				shot(`edit-trip-removed-and-new-${width}`)
+				forcePseudo(TRIP_PHOTOS_SELECTORS.UNDO, [])
+
+				forcePseudo(TRIP_PHOTOS_SELECTORS.REMOVE, [
+					'focus',
+					'focus-visible',
+				])
+				shot(`edit-trip-focus-remove-${width}`)
+				forcePseudo(TRIP_PHOTOS_SELECTORS.REMOVE, [])
+
+				cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT)
+					.clear()
+					.type('2020-01-01')
+					.blur()
+				shot(`edit-trip-invalid-${width}`)
+			})
+		})
+
+		capture('captures a trip with one photo and with none', () => {
+			cy.request({
+				url: emulatorDatabase(`travellers/${TEST_USERS.TRAVELLER.ID}`),
+				headers: OWNER,
+			}).then(({ body: seeded }) => {
+				const setPhotos = (files) =>
+					cy.request({
+						method: 'PATCH',
+						url: emulatorDatabase(
+							`travellers/${TEST_USERS.TRAVELLER.ID}`,
+						),
+						headers: OWNER,
+						body: {
+							files,
+							fileDimensions: files && seeded.fileDimensions,
+							fileThumbnails: files && seeded.fileThumbnails,
+						},
+					})
+
+				setPhotos(seeded.files.slice(0, 1))
+				eachWidth((width) => {
+					cy.visit(editTripPath)
+					cy.get(TRIP_PHOTOS_SELECTORS.LAST_PHOTO_HINT).should(
+						'be.visible',
+					)
+					freezeAnimation()
+					shot(`edit-trip-last-photo-${width}`)
+				})
+
+				setPhotos(null)
+				eachWidth((width) => {
+					cy.visit(ownTripPath)
+					cy.get(TRAVELLER_DETAIL_SELECTORS.NO_PHOTOS).should(
+						'be.visible',
+					)
+					assertSettled()
+					freezeAnimation()
+					shot(`own-trip-no-photos-${width}`)
+
+					cy.visit(editTripPath)
+					cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should(
+						'be.visible',
+					)
+					cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('not.exist')
+					freezeAnimation()
+					shot(`edit-trip-no-photos-${width}`)
+				})
+
+				cy.request({
+					method: 'PUT',
+					url: emulatorDatabase(
+						`travellers/${TEST_USERS.TRAVELLER.ID}`,
+					),
+					headers: OWNER,
+					body: seeded,
+				})
+			})
+		})
+
+		capture('captures saving, a failed save and a real save', () => {
+			cy.viewport(390, HEIGHT)
+			cy.intercept(
+				// times: 1, or this reply would still answer the real save below
+				{ method: 'PATCH', url: '**/travellers/*.json*', times: 1 },
+				{ statusCode: 500, body: {} },
+			).as('failedSave')
+			cy.visit(editTripPath)
+			cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
+			).click()
+			cy.wait('@failedSave')
+			cy.get(EDIT_TRIP_SELECTORS.ERROR_DIALOG).should('be.visible')
+			freezeAnimation()
+			shot('edit-trip-save-failed')
+
+			cy.intercept(
+				{ method: 'PATCH', url: '**/travellers/*.json*' },
+				(req) => req.on('response', (res) => res.setDelay(4000)),
+			)
+			cy.visit(editTripPath)
+			cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
+			).click()
+			cy.get(EDIT_TRIP_SELECTORS.SAVING_DIALOG).should('be.visible')
+			freezeAnimation()
+			shot('edit-trip-saving')
+			cy.get(TRAVELLER_DETAIL_SELECTORS.SAVED_ALERT, {
+				timeout: TIMEOUT,
+			}).should('be.visible')
+
+			// A real Storage emulator upload, slowed so the progress bar stays on screen
+			cy.viewport(1280, HEIGHT)
+			cy.visit(editTripPath)
+			cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+			cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+				'cypress/fixtures/test-image.png',
+				{ force: true },
+			)
+			cdp('Network.enable').then(() =>
+				cdp('Network.emulateNetworkConditions', {
+					offline: false,
+					latency: 500,
+					downloadThroughput: 2000,
+					uploadThroughput: 2000,
+				}),
+			)
+			cy.get(
+				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
+			).click()
+			cy.get(COMMON_SELECTORS.BASE_PROGRESS, { timeout: TIMEOUT }).should(
+				'be.visible',
+			)
+			freezeAnimation()
+			shot('edit-trip-upload-progress')
+			cdp('Network.emulateNetworkConditions', {
+				offline: false,
+				latency: 0,
+				downloadThroughput: -1,
+				uploadThroughput: -1,
+			})
+			cy.get(TRAVELLER_DETAIL_SELECTORS.SAVED_ALERT, {
+				timeout: 30000,
+			}).should('contain.text', EDIT_TRIP_CONFIG.SAVED_MESSAGE)
+			cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)
+				.find('li')
+				.should('have.length.at.least', 5)
+			assertSettled()
+			freezeAnimation()
+			shot('own-trip-saved')
+		})
+
+		// Last in this context: it deletes the seeded traveller, so the emulators are reseeded after it
+		capture(
+			'captures deleting your own profile, failed and for real',
+			() => {
+				eachWidth((width) => {
+					cy.visit(editTripPath)
+					cy.get(EDIT_TRIP_SELECTORS.DELETE).should('be.visible')
+					freezeAnimation()
+					forcePseudo(EDIT_TRIP_SELECTORS.DELETE, [
+						'focus',
+						'focus-visible',
+					])
+					shot(`edit-trip-delete-section-${width}`)
+					forcePseudo(EDIT_TRIP_SELECTORS.DELETE, [])
+					cy.get(EDIT_TRIP_SELECTORS.DELETE).click()
+					cy.get(EDIT_TRIP_SELECTORS.DELETE_CANCEL).should(
+						'have.focus',
+					)
+					shot(`edit-trip-delete-dialog-${width}`)
+					cy.get(EDIT_TRIP_SELECTORS.DELETE_CANCEL).click()
+				})
+
+				cy.viewport(390, HEIGHT)
+				const recordDelete = {
+					method: 'DELETE',
+					url: `**/travellers/${TEST_USERS.TRAVELLER.ID}.json*`,
+				}
+				cy.intercept(
+					{ ...recordDelete, times: 1 },
+					{ statusCode: 500, body: {} },
+				).as('failedDelete')
+				cy.visit(editTripPath)
+				cy.get(EDIT_TRIP_SELECTORS.DELETE).click()
+				cy.get(EDIT_TRIP_SELECTORS.DELETE_CONFIRM).click()
+				cy.wait('@failedDelete')
+				cy.get(EDIT_TRIP_SELECTORS.ERROR_DIALOG).should('be.visible')
+				freezeAnimation()
+				shot('edit-trip-delete-failed')
+
+				cy.intercept(recordDelete, (req) =>
+					req.on('response', (res) => res.setDelay(4000)),
+				)
+				cy.visit(editTripPath)
+				cy.get(EDIT_TRIP_SELECTORS.DELETE).click()
+				cy.get(EDIT_TRIP_SELECTORS.DELETE_CONFIRM).click()
+				cy.get(EDIT_TRIP_SELECTORS.DELETING).should('be.visible')
+				freezeAnimation()
+				shot('edit-trip-deleting')
+				cy.contains(EDIT_TRIP_CONFIG.DELETED_MESSAGE, {
+					timeout: 30000,
+				}).should('be.visible')
+				cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot('profile-deleted')
+
+				cy.task('seedEmulators')
+				cy.then(() => Cypress.session.clearAllSavedSessions())
+			},
+		)
 	})
 
 	context('signed in as an admin', () => {

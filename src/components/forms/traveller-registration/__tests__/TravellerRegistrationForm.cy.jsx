@@ -37,6 +37,24 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('exist')
 		})
 
+		// The uploader centres itself with auto margins, which a flex column would shrink to its text; 700px keeps it under its own 800px cap
+		it('stretches the drop zone across the photos group, on Register and when editing', () => {
+			cy.viewport(700, 900)
+			;[
+				{},
+				{ initialTraveller: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE },
+			].forEach((props) => {
+				render(props)
+				cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.PHOTOS).then(
+					($fieldset) => {
+						cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP)
+							.invoke('outerWidth')
+							.should('be.closeTo', $fieldset.outerWidth(), 1)
+					},
+				)
+			})
+		})
+
 		it('has no axe violations', () => {
 			render()
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('exist')

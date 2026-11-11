@@ -91,8 +91,13 @@ const Privacy = () => {
 
 				<h2 className="mt-6 mb-[1em] text-[1.17rem]">Your choices</h2>
 				<p>
-					To have your account or traveller profile removed, or to ask
-					what data is held about you, email{' '}
+					You can edit your trip, or delete your traveller profile
+					with its photos and messages, from Edit trip on your own
+					trip.
+				</p>
+				<p>
+					To have your account removed, or to ask what data is held
+					about you, email{' '}
 					<a
 						href="mailto:phones-medleys8x@icloud.com"
 						className={LINK}>

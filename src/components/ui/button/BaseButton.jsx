@@ -20,6 +20,8 @@ const buttonVariants = cva('border border-solid', {
 			text: 'border-none bg-transparent p-0 text-inherit hover:bg-transparent active:bg-transparent',
 			outline:
 				'border-accent-text bg-transparent text-accent-text hover:bg-surface-accent active:bg-surface-accent',
+			dangerOutline:
+				'border-danger-text bg-transparent text-danger-text hover:bg-danger-surface active:bg-danger-surface',
 		},
 		disabled: {
 			true: 'cursor-default border-border-strong bg-surface-sunken text-text-muted hover:bg-surface-sunken active:bg-surface-sunken',
@@ -29,7 +31,7 @@ const buttonVariants = cva('border border-solid', {
 	defaultVariants: { mode: 'primary', shape: 'button', disabled: false },
 })
 
-const MODES = ['primary', 'flat', 'danger', 'text', 'outline']
+const MODES = ['primary', 'flat', 'danger', 'dangerOutline', 'text', 'outline']
 
 // An unknown or legacy modeType (e.g. 'outlined') keeps the primary look
 const resolveMode = (modeType) =>

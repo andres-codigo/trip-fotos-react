@@ -41,6 +41,20 @@ describe('<BaseButton />', () => {
 			expect(button).not.toHaveClass('px-6')
 		})
 
+		it('draws the danger outline as a danger-coloured edge on no fill', () => {
+			render(
+				<BaseButton
+					modeType={BUTTON.MODE.DANGER_OUTLINE}
+					data-cy="danger-outline">
+					Delete my profile
+				</BaseButton>,
+			)
+
+			const button = screen.getByTestId('danger-outline')
+			expect(button).toHaveClass('border-danger-text', 'text-danger-text')
+			expect(button).not.toHaveClass('bg-danger')
+		})
+
 		it('falls back to the primary look for an unknown modeType', () => {
 			render(
 				<BaseButton

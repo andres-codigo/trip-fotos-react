@@ -6,12 +6,14 @@ import {
 	FILE_DROP,
 	MOCK_CITIES,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
+	TRIP_PHOTOS,
 	UI_TEXT,
 } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 import {
 	TRAVELLER_REGISTRATION_FIELDS,
 	TRIP_DATES_CONFIG,
+	TRIP_PHOTOS_CONFIG,
 } from '@/constants/travellers'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
@@ -723,5 +725,166 @@ describe('<TravellerRegistrationForm />', () => {
 			'id',
 			TRAVELLER_REGISTRATION_FIELDS.FILES,
 		)
+	})
+
+	describe('Editing a trip', () => {
+		const photo = (n) => ({
+			url: `https://img/${n}.jpg`,
+			dimensions: { width: 4, height: 3 },
+			thumbnails: null,
+		})
+		const traveller = (count) => ({
+			firstName: 'Amara',
+			files: Array.from({ length: count }, (_, i) => photo(i).url),
+			fileDimensions: Array.from(
+				{ length: count },
+				(_, i) => photo(i).dimensions,
+			),
+		})
+		const fields = {
+			firstName: 'Amara',
+			lastName: '',
+			tripDescription: '',
+			tripStart: '',
+			tripEnd: '',
+			cities: [],
+		}
+		const withFiles = (files) => ({
+			...mockHookReturnValue,
+			files,
+			submitHandler: (onSuccess) => (e) => {
+				e.preventDefault()
+				onSuccess({ ...fields, files })
+			},
+		})
+		const renderEdit = (props = {}) =>
+			render(
+				<TravellerRegistrationForm
+					onSubmit={mockOnSubmit}
+					initialTraveller={traveller(3)}
+					title="Edit your trip"
+					submitLabel="Save changes"
+					actions={<a href="/travellers/me">Cancel</a>}
+					{...props}
+				/>,
+			)
+		const submit = () =>
+			fireEvent.submit(screen.getByTestId(FORM_SELECTORS.FORM))
+
+		beforeEach(() => {
+			useTravellerRegistration.mockReturnValue(withFiles([]))
+		})
+
+		it('starts the hook from the traveller', () => {
+			renderEdit()
+			expect(useTravellerRegistration).toHaveBeenCalledWith(
+				expect.objectContaining({ firstName: 'Amara' }),
+			)
+		})
+
+		it('uses the given title, submit label and extra actions', () => {
+			renderEdit()
+			expect(
+				screen.getByRole('heading', {
+					level: 1,
+					name: 'Edit your trip',
+				}),
+			).toBeInTheDocument()
+			expect(
+				screen.getByTestId(FORM_SELECTORS.REGISTER_BUTTON),
+			).toHaveTextContent('Save changes')
+			expect(
+				screen.getByRole('link', { name: 'Cancel' }),
+			).toBeInTheDocument()
+		})
+
+		it('lists the photos already on the trip above the uploader, under "Photos"', () => {
+			renderEdit()
+			const fieldset = screen.getByRole('group', {
+				name: TRIP_PHOTOS_CONFIG.LEGEND,
+			})
+			expect(fieldset).toHaveAttribute('id', 'photos')
+			expect(
+				within(fieldset).getAllByTestId(TRIP_PHOTOS.TILE),
+			).toHaveLength(3)
+			expect(
+				within(fieldset).getByTestId(FILE_DROP.INPUT),
+			).toBeInTheDocument()
+		})
+
+		it('submits the kept and the removed photos apart', () => {
+			renderEdit()
+			fireEvent.click(screen.getAllByTestId(TRIP_PHOTOS.REMOVE)[1])
+			submit()
+
+			expect(mockOnSubmit).toHaveBeenCalledWith({
+				...fields,
+				files: [],
+				keptPhotos: [photo(0), photo(2)],
+				removedPhotos: [photo(1)],
+			})
+		})
+
+		it('puts a removed photo back on Undo', () => {
+			renderEdit()
+			fireEvent.click(screen.getAllByTestId(TRIP_PHOTOS.REMOVE)[0])
+			fireEvent.click(screen.getByTestId(TRIP_PHOTOS.UNDO))
+			submit()
+
+			expect(mockOnSubmit).toHaveBeenCalledWith(
+				expect.objectContaining({
+					keptPhotos: [photo(0), photo(1), photo(2)],
+					removedPhotos: [],
+				}),
+			)
+		})
+
+		it('refuses to save a trip left with no photos', () => {
+			// One new file lets the last photo go; the file is then gone by submit
+			useTravellerRegistration.mockReturnValue({
+				...withFiles([{ id: 'new' }]),
+				submitHandler: (onSuccess) => (e) => {
+					e.preventDefault()
+					onSuccess({ ...fields, files: [] })
+				},
+			})
+			renderEdit({ initialTraveller: traveller(1) })
+			fireEvent.click(screen.getByTestId(TRIP_PHOTOS.REMOVE))
+			submit()
+
+			expect(mockOnSubmit).not.toHaveBeenCalled()
+			expect(screen.getByTestId(TRIP_PHOTOS.ERROR)).toHaveTextContent(
+				TRIP_PHOTOS_CONFIG.NONE_LEFT_ERROR,
+			)
+		})
+
+		it('saves an older trip that never had photos', () => {
+			renderEdit({ initialTraveller: { firstName: 'Kofi' } })
+			submit()
+
+			expect(mockOnSubmit).toHaveBeenCalledWith(
+				expect.objectContaining({ keptPhotos: [], removedPhotos: [] }),
+			)
+		})
+
+		it('focuses the uploader when opened from "Add photos"', () => {
+			renderEdit({ focusPhotos: true })
+			expect(screen.getByTestId(FILE_DROP.INPUT)).toHaveFocus()
+		})
+
+		it('leaves focus alone otherwise', () => {
+			renderEdit()
+			expect(screen.getByTestId(FILE_DROP.INPUT)).not.toHaveFocus()
+		})
+
+		it('submits Register data unchanged, with no photo lists', () => {
+			useTravellerRegistration.mockReturnValue(mockHookReturnValue)
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+			submit()
+
+			expect(mockOnSubmit.mock.calls[0][0]).not.toHaveProperty(
+				'keptPhotos',
+			)
+		})
 	})
 })

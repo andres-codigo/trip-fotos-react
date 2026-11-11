@@ -34,6 +34,8 @@ export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 	TRIP_DESCRIPTION_MAX_LENGTH: 250,
 	MAX_IMAGES: 5,
 	CONTACT_PATH_SEGMENT: '/contact',
+	EDIT_PATH_SEGMENT: '/edit',
+	EDIT_LABEL: 'Edit trip',
 	PHOTOS_ANCHOR: 'photos',
 	DELETE_DIALOG_TITLE: 'Delete traveller?',
 })
@@ -77,6 +79,59 @@ export const TRAVELLER_DETAIL_CONFIG = Object.freeze({
 	NOT_FOUND_MESSAGE: 'Traveller not found.',
 	BACK_LABEL: 'Back to travellers',
 	PHOTO_PARAM: 'photo',
+	PHOTOS_HEADING: 'Photos',
+	ADD_PHOTOS_LABEL: 'Add photos',
+	NO_PHOTOS_MESSAGE: 'No photos on this trip yet.',
+})
+
+const photosPhrase = (photoCount) => {
+	if (!photoCount) return ''
+	return photoCount === 1 ? ', your photo' : `, all ${photoCount} photos`
+}
+
+export const EDIT_TRIP_CONFIG = Object.freeze({
+	TITLE: 'Edit your trip',
+	BACK_LABEL: 'Back to your trip',
+	SAVE_LABEL: 'Save changes',
+	CANCEL_LABEL: 'Cancel',
+	SAVING_TITLE: 'Saving',
+	SAVING_MESSAGE: 'Saving your trip…',
+	SAVED_MESSAGE: 'Your trip has been saved.',
+	PHOTOS_LEGEND: 'Photos',
+	ADD_MORE_PHOTOS: 'Add more photos',
+	DELETE_HEADING: 'Delete my profile',
+	DELETE_LABEL: 'Delete my profile',
+	DELETE_SUMMARY: (photoCount) =>
+		`Removes your trip${photosPhrase(photoCount)} and your messages for good. Your account stays, so you can register a new trip later.`,
+	DELETE_DIALOG_TITLE: 'Delete your profile?',
+	DELETE_DIALOG_MESSAGE: (photoCount) =>
+		`This permanently removes your trip${photosPhrase(photoCount)} and your messages. Your account stays, so you can log in and register a new trip.`,
+	DELETING_MESSAGE: 'Deleting your profile…',
+	DELETED_MESSAGE: 'Your profile has been deleted.',
+})
+
+export const TRIP_PHOTOS_CONFIG = Object.freeze({
+	LEGEND: 'Photos',
+	LIST_LABEL: 'Photos on this trip',
+	COUNT: (count) => `${count} ${count === 1 ? 'photo' : 'photos'}`,
+	COUNT_AFTER_SAVE: (total, removing, adding) =>
+		[
+			`${total} ${total === 1 ? 'photo' : 'photos'} after saving`,
+			removing && `${removing} to remove`,
+			adding && `${adding} to add`,
+		]
+			.filter(Boolean)
+			.join(' · '),
+	REMOVE_LABEL: (position, total) => `Remove photo ${position} of ${total}`,
+	UNDO_LABEL: (position, total) =>
+		`Undo removing photo ${position} of ${total}`,
+	REMOVED_LABEL: 'Will be removed',
+	UNDO: 'Undo',
+	LAST_PHOTO_HINT:
+		'A trip needs at least one photo. Add another before removing this one.',
+	NONE_LEFT_ERROR:
+		'A trip needs at least one photo. Undo a removal or add a photo.',
+	EMPTY_HINT: 'No photos on this trip yet. Add some below.',
 })
 
 export const CONTACT_TRAVELLER_FIELDS = Object.freeze({

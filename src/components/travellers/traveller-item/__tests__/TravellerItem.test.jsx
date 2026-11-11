@@ -238,6 +238,27 @@ describe('<TravellerItem />', () => {
 			).not.toBeInTheDocument()
 		})
 
+		it('offers Edit trip, before Details, on own record only', () => {
+			setup({ userId: 'abc', isTraveller: true })
+			renderItem()
+			const edit = screen.getByTestId(TRAVELLER_ITEM.EDIT)
+			expect(edit).toHaveAttribute('href', '/travellers/abc/edit')
+			expect(edit).toHaveTextContent(TRAVELLER_ITEM_CONFIG.EDIT_LABEL)
+			expect(
+				edit.compareDocumentPosition(
+					screen.getByTestId(TRAVELLER_ITEM.DETAILS),
+				) & Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy()
+		})
+
+		it("does not offer Edit trip on someone else's record, even to an admin", () => {
+			setup({ isTraveller: true, isAdmin: true })
+			renderItem()
+			expect(
+				screen.queryByTestId(TRAVELLER_ITEM.EDIT),
+			).not.toBeInTheDocument()
+		})
+
 		it('hides delete for non-admins', () => {
 			renderItem()
 			expect(

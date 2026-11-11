@@ -37,12 +37,11 @@ import { databaseRequest } from '@/store/databaseRequest'
 
 import { handleApiError } from '@/utils/errorHandler'
 import { measureImage } from '@/utils/measureImage'
+import { isStoredFile, thumbnailUrlsOf } from '@/utils/tripPhotos'
 
 // The database turns a sparse array into an object, so both shapes are read the same way
 const thumbnailUrls = (fileThumbnails) =>
-	Object.values(fileThumbnails ?? {}).flatMap((thumbnails) =>
-		Object.values(thumbnails ?? {}).map(({ url }) => url),
-	)
+	Object.values(fileThumbnails ?? {}).flatMap(thumbnailUrlsOf)
 
 const shouldUpdate = (state) => {
 	const lastFetch = state.lastFetch
@@ -51,6 +50,167 @@ const shouldUpdate = (state) => {
 	}
 	const currentTimeStamp = new Date().getTime()
 	return (currentTimeStamp - lastFetch) / 1000 > 60
+}
+
+// Every finished upload is pushed to uploadedRefs, so a failed save can remove the files it left behind
+const uploadPhotos = async (files, { userId, dispatch, uploadedRefs }) => {
+	const MAX_CONCURRENT_UPLOADS = 5
+	const imageQueue = [...files]
+	const imageUrls = []
+
+	const totalFiles = imageQueue.length
+	const fractions = new Array(totalFiles).fill(0)
+	const fileDimensions = new Array(totalFiles).fill(null)
+	const fileThumbnails = new Array(totalFiles).fill(null)
+	let lastReported = ''
+
+	// Snapshots arrive many times a second, so only a change the user can see reaches the store
+	const reportProgress = () => {
+		const uploadedFiles = fractions.filter(
+			(fraction) => fraction === 1,
+		).length
+		const percent = Math.round(
+			(fractions.reduce((sum, fraction) => sum + fraction, 0) /
+				totalFiles) *
+				100,
+		)
+		const key = `${uploadedFiles}/${percent}`
+		if (key === lastReported) return
+		lastReported = key
+		dispatch(setUploadProgress({ uploadedFiles, totalFiles, percent }))
+	}
+
+	if (totalFiles > 0) reportProgress()
+
+	// Best effort: a missing thumbnail only means the tile loads the full photo
+	const uploadThumbnails = async (file, dimensions, pathFor, metadata) => {
+		const storage = getFirebaseStorage()
+		const aspect = dimensions
+			? Math.max(dimensions.width, dimensions.height) /
+				Math.min(dimensions.width, dimensions.height)
+			: 1
+		const results = await Promise.allSettled(
+			GLOBAL.IMAGE_THUMBNAIL_WIDTHS.map(async (width) => {
+				const thumbnail = await imageCompression(file, {
+					maxWidthOrHeight: Math.round(width * aspect),
+					useWebWorker: true,
+				})
+				const { ref: thumbnailRef } = await uploadBytes(
+					ref(storage, pathFor(`${width}w-`)),
+					thumbnail,
+					metadata,
+				)
+				uploadedRefs.push(thumbnailRef)
+				try {
+					return {
+						width,
+						url: await getDownloadURL(thumbnailRef),
+					}
+				} catch (error) {
+					// No saved URL points at it, so deleteTraveller could never remove it
+					await deleteObject(thumbnailRef).catch(() => {})
+					throw error
+				}
+			}),
+		)
+		return results
+			.filter((result) => result.status === 'fulfilled')
+			.map((result) => result.value)
+	}
+
+	let nextIndex = 0
+	const uploadImage = async (image) => {
+		const index = nextIndex++
+		const storage = getFirebaseStorage()
+		// Distinct files can share a name, and the same path would overwrite the earlier upload
+		const id = crypto.randomUUID()
+		const pathFor = (variant = '') =>
+			`/images/${userId}/${id}-${variant}${image.name}`
+		const storageRef = ref(storage, pathFor())
+
+		const metadata = {
+			customMetadata: {
+				userId: userId,
+			},
+		}
+
+		const compressedFile = await imageCompression(image.file || image, {
+			maxSizeMB: 1,
+			maxWidthOrHeight: 1920,
+			useWebWorker: true,
+		})
+
+		fileDimensions[index] = await measureImage(compressedFile)
+
+		const thumbnailsUpload = uploadThumbnails(
+			compressedFile,
+			fileDimensions[index],
+			pathFor,
+			metadata,
+		)
+
+		const uploadTask = uploadBytesResumable(
+			storageRef,
+			compressedFile,
+			metadata,
+		)
+
+		const photoUpload = new Promise((resolve, reject) => {
+			uploadTask.on(
+				'state_changed',
+				(snapshot) => {
+					// A finished file is only counted once its download URL is in hand
+					fractions[index] = Math.min(
+						snapshot.bytesTransferred / (snapshot.totalBytes || 1),
+						0.99,
+					)
+					reportProgress()
+				},
+				() => {
+					reject(new Error(`Failed to upload image: ${image.name}`))
+				},
+				async () => {
+					uploadedRefs.push(uploadTask.snapshot.ref)
+					try {
+						const url = await getDownloadURL(
+							uploadTask.snapshot.ref,
+						)
+						fractions[index] = 1
+						reportProgress()
+						resolve(url)
+					} catch (error) {
+						reject(error)
+					}
+				},
+			)
+		})
+
+		// Settling both means no thumbnail can land after a failed registration's cleanup
+		const [photo, thumbnails] = await Promise.allSettled([
+			photoUpload,
+			thumbnailsUpload,
+		])
+		if (photo.status === 'rejected') throw photo.reason
+		fileThumbnails[index] = thumbnails.value
+		return photo.value
+	}
+
+	const uploadNextBatch = async () => {
+		const batch = imageQueue.splice(0, MAX_CONCURRENT_UPLOADS)
+		// Waiting for the whole batch to settle means no upload can land after the cleanup below
+		const batchResults = await Promise.allSettled(batch.map(uploadImage))
+		const failed = batchResults.find(
+			(result) => result.status === 'rejected',
+		)
+		if (failed) throw failed.reason
+		imageUrls.push(...batchResults.map((result) => result.value))
+	}
+
+	while (imageQueue.length > 0) {
+		await uploadNextBatch()
+	}
+
+	return { urls: imageUrls, fileDimensions, fileThumbnails }
 }
 
 export const travellerName = createAsyncThunk(
@@ -87,178 +247,15 @@ export const registerTraveller = createAsyncThunk(
 		const uploadedRefs = []
 
 		try {
-			const MAX_CONCURRENT_UPLOADS = 5
-			const imageQueue = [...(data.files || [])]
-			const imageUrls = []
-
-			const totalFiles = imageQueue.length
-			const fractions = new Array(totalFiles).fill(0)
-			const fileDimensions = new Array(totalFiles).fill(null)
-			const fileThumbnails = new Array(totalFiles).fill(null)
-			let lastReported = ''
-
-			// Snapshots arrive many times a second, so only a change the user can see reaches the store
-			const reportProgress = () => {
-				const uploadedFiles = fractions.filter(
-					(fraction) => fraction === 1,
-				).length
-				const percent = Math.round(
-					(fractions.reduce((sum, fraction) => sum + fraction, 0) /
-						totalFiles) *
-						100,
-				)
-				const key = `${uploadedFiles}/${percent}`
-				if (key === lastReported) return
-				lastReported = key
-				dispatch(
-					setUploadProgress({ uploadedFiles, totalFiles, percent }),
-				)
-			}
-
-			if (totalFiles > 0) reportProgress()
-
-			// Best effort: a missing thumbnail only means the tile loads the full photo
-			const uploadThumbnails = async (
-				file,
-				dimensions,
-				pathFor,
-				metadata,
-			) => {
-				const storage = getFirebaseStorage()
-				const aspect = dimensions
-					? Math.max(dimensions.width, dimensions.height) /
-						Math.min(dimensions.width, dimensions.height)
-					: 1
-				const results = await Promise.allSettled(
-					GLOBAL.IMAGE_THUMBNAIL_WIDTHS.map(async (width) => {
-						const thumbnail = await imageCompression(file, {
-							maxWidthOrHeight: Math.round(width * aspect),
-							useWebWorker: true,
-						})
-						const { ref: thumbnailRef } = await uploadBytes(
-							ref(storage, pathFor(`${width}w-`)),
-							thumbnail,
-							metadata,
-						)
-						uploadedRefs.push(thumbnailRef)
-						try {
-							return {
-								width,
-								url: await getDownloadURL(thumbnailRef),
-							}
-						} catch (error) {
-							// No saved URL points at it, so deleteTraveller could never remove it
-							await deleteObject(thumbnailRef).catch(() => {})
-							throw error
-						}
-					}),
-				)
-				return results
-					.filter((result) => result.status === 'fulfilled')
-					.map((result) => result.value)
-			}
-
-			let nextIndex = 0
-			const uploadImage = async (image) => {
-				const index = nextIndex++
-				const storage = getFirebaseStorage()
-				// Distinct files can share a name, and the same path would overwrite the earlier upload
-				const id = crypto.randomUUID()
-				const pathFor = (variant = '') =>
-					`/images/${userId}/${id}-${variant}${image.name}`
-				const storageRef = ref(storage, pathFor())
-
-				const metadata = {
-					customMetadata: {
-						userId: userId,
-					},
-				}
-
-				const compressedFile = await imageCompression(
-					image.file || image,
-					{
-						maxSizeMB: 1,
-						maxWidthOrHeight: 1920,
-						useWebWorker: true,
-					},
-				)
-
-				fileDimensions[index] = await measureImage(compressedFile)
-
-				const thumbnailsUpload = uploadThumbnails(
-					compressedFile,
-					fileDimensions[index],
-					pathFor,
-					metadata,
-				)
-
-				const uploadTask = uploadBytesResumable(
-					storageRef,
-					compressedFile,
-					metadata,
-				)
-
-				const photoUpload = new Promise((resolve, reject) => {
-					uploadTask.on(
-						'state_changed',
-						(snapshot) => {
-							// A finished file is only counted once its download URL is in hand
-							fractions[index] = Math.min(
-								snapshot.bytesTransferred /
-									(snapshot.totalBytes || 1),
-								0.99,
-							)
-							reportProgress()
-						},
-						() => {
-							reject(
-								new Error(
-									`Failed to upload image: ${image.name}`,
-								),
-							)
-						},
-						async () => {
-							uploadedRefs.push(uploadTask.snapshot.ref)
-							try {
-								const url = await getDownloadURL(
-									uploadTask.snapshot.ref,
-								)
-								fractions[index] = 1
-								reportProgress()
-								resolve(url)
-							} catch (error) {
-								reject(error)
-							}
-						},
-					)
-				})
-
-				// Settling both means no thumbnail can land after a failed registration's cleanup
-				const [photo, thumbnails] = await Promise.allSettled([
-					photoUpload,
-					thumbnailsUpload,
-				])
-				if (photo.status === 'rejected') throw photo.reason
-				fileThumbnails[index] = thumbnails.value
-				return photo.value
-			}
-
-			const uploadNextBatch = async () => {
-				const batch = imageQueue.splice(0, MAX_CONCURRENT_UPLOADS)
-				// Waiting for the whole batch to settle means no upload can land after the cleanup below
-				const batchResults = await Promise.allSettled(
-					batch.map(uploadImage),
-				)
-				const failed = batchResults.find(
-					(result) => result.status === 'rejected',
-				)
-				if (failed) throw failed.reason
-				imageUrls.push(...batchResults.map((result) => result.value))
-			}
-
-			while (imageQueue.length > 0) {
-				await uploadNextBatch()
-			}
+			const {
+				urls: imageUrls,
+				fileDimensions,
+				fileThumbnails,
+			} = await uploadPhotos(data.files || [], {
+				userId,
+				dispatch,
+				uploadedRefs,
+			})
 
 			const travellerData = {
 				firstName: data.firstName,
@@ -303,6 +300,92 @@ export const registerTraveller = createAsyncThunk(
 				handleApiError(
 					error,
 					`${API_ERROR_MESSAGE.REGISTER_TRAVELLER_CATCH}${userId}.`,
+				),
+			)
+		}
+	},
+)
+
+export const updateTraveller = createAsyncThunk(
+	TRAVELLERS_ACTION_TYPES.UPDATE_TRAVELLER,
+	async (data, { getState, dispatch, rejectWithValue }) => {
+		const userId = selectUserId(getState())
+		const token = selectAuthenticationToken(getState())
+		const keptPhotos = data.keptPhotos ?? []
+		const removedPhotos = data.removedPhotos ?? []
+		const uploadedRefs = []
+
+		try {
+			const uploaded = await uploadPhotos(data.files || [], {
+				userId,
+				dispatch,
+				uploadedRefs,
+			})
+
+			const changes = {
+				firstName: data.firstName,
+				lastName: data.lastName,
+				tripDescription: data.tripDescription,
+				tripStart: data.tripStart,
+				tripEnd: data.tripEnd,
+				// The trip dates replace the length an older record stored
+				daysInCity: null,
+				cities: data.cities,
+				files: [...keptPhotos.map(({ url }) => url), ...uploaded.urls],
+				fileDimensions: [
+					...keptPhotos.map(({ dimensions }) => dimensions),
+					...uploaded.fileDimensions,
+				],
+				fileThumbnails: [
+					...keptPhotos.map(({ thumbnails }) => thumbnails),
+					...uploaded.fileThumbnails,
+				],
+			}
+
+			try {
+				await databaseRequest(`/travellers/${userId}`, {
+					method: API_DATABASE.PATCH,
+					token,
+					body: changes,
+				})
+			} catch {
+				throw new Error(ERROR_MESSAGES.FAILED_TO_SAVE_TRIP)
+			}
+
+			// Removed only once the record no longer points at them; one that fails is left behind, never shown
+			const storage = getFirebaseStorage()
+			await Promise.allSettled(
+				removedPhotos
+					.flatMap(({ url, thumbnails }) => [
+						url,
+						...thumbnailUrlsOf(thumbnails),
+					])
+					.filter(isStoredFile)
+					.map((url) => deleteObject(ref(storage, url))),
+			)
+
+			// The record is already saved, so a failed name update must not report the save as failed
+			await dispatch(
+				travellerName({ first: data.firstName, last: data.lastName }),
+			)
+
+			const saved = {
+				...getState().travellers.selectedTraveller,
+				...changes,
+				id: userId,
+			}
+			delete saved.daysInCity
+			return saved
+		} catch (error) {
+			// Best effort: the record still points at the old photos, so only this attempt's uploads go
+			await Promise.allSettled(
+				uploadedRefs.map((uploadedRef) => deleteObject(uploadedRef)),
+			)
+
+			return rejectWithValue(
+				handleApiError(
+					error,
+					`${API_ERROR_MESSAGE.UPDATE_TRAVELLER_CATCH}${userId}.`,
 				),
 			)
 		}
@@ -476,8 +559,9 @@ export const deleteTraveller = createAsyncThunk(
 
 			const storage = getFirebaseStorage()
 			await Promise.all(
-				[...files, ...thumbnailUrls(fileThumbnails)].map(
-					async (fileUrl) => {
+				[...files, ...thumbnailUrls(fileThumbnails)]
+					.filter(isStoredFile)
+					.map(async (fileUrl) => {
 						try {
 							await deleteObject(ref(storage, fileUrl))
 						} catch (error) {
@@ -489,11 +573,15 @@ export const deleteTraveller = createAsyncThunk(
 								throw error
 							}
 						}
-					},
-				),
+					}),
 			)
 
 			await dispatch(deleteTravellerMessages(travellerId)).unwrap()
+			// Deleting your own profile leaves you signed in, but no longer a traveller
+			if (travellerId === selectUserId(getState())) {
+				dispatch(setIsTraveller(false))
+				dispatch(setTravellerName(''))
+			}
 			// The record is already gone, so a failed refresh must not report the delete as failed
 			await dispatch(loadTravellers({ forceRefresh: true }))
 
@@ -616,6 +704,28 @@ const travellersSlice = createSlice({
 				state.travellerName = `${action.payload.firstName} ${action.payload.lastName}`
 			})
 			.addCase(registerTraveller.rejected, (state, action) => {
+				state.status = 'failed'
+				state.uploadProgress = null
+				state.error = action.payload
+			})
+
+			// UPDATE_TRAVELLER async thunk handlers
+			.addCase(updateTraveller.pending, (state) => {
+				state.status = 'loading'
+				state.uploadProgress = null
+			})
+			.addCase(updateTraveller.fulfilled, (state, action) => {
+				state.status = 'succeeded'
+				state.uploadProgress = null
+				state.selectedTraveller = action.payload
+				state.travellers = state.travellers.map((traveller) =>
+					traveller.id === action.payload.id
+						? action.payload
+						: traveller,
+				)
+				state.travellerName = `${action.payload.firstName} ${action.payload.lastName}`
+			})
+			.addCase(updateTraveller.rejected, (state, action) => {
 				state.status = 'failed'
 				state.uploadProgress = null
 				state.error = action.payload

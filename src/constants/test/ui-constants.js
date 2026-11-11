@@ -12,6 +12,7 @@ export const BUTTON = Object.freeze({
 		PRIMARY: 'primary',
 		OUTLINE: 'outline',
 		DANGER: 'danger',
+		DANGER_OUTLINE: 'dangerOutline',
 	},
 })
 
@@ -127,6 +128,7 @@ export const TRAVELLER_ITEM = Object.freeze({
 	DELETE_DIALOG: 'traveller-item-delete-dialog',
 	DELETE_CANCEL: 'traveller-item-delete-cancel',
 	DELETE_CONFIRM: 'traveller-item-delete-confirm',
+	EDIT: 'traveller-item-edit',
 })
 
 export const TRAVELLER_SKELETON = Object.freeze({
@@ -150,6 +152,35 @@ export const TRAVELLER_DETAIL = Object.freeze({
 	IMAGES_LIST: 'traveller-detail-images',
 	CONTACT_SECTION: 'traveller-detail-contact-section',
 	CONTACT: 'traveller-detail-contact',
+	EDIT: 'traveller-detail-edit',
+	ADD_PHOTOS: 'traveller-detail-add-photos',
+	NO_PHOTOS: 'traveller-detail-no-photos',
+	SAVED_ALERT: 'traveller-detail-saved-alert',
+})
+
+export const EDIT_TRIP = Object.freeze({
+	ROOT: 'edit-trip',
+	BACK_TO_TRIP: 'edit-trip-back-to-trip',
+	CANCEL: 'edit-trip-cancel',
+	SAVING_DIALOG: 'edit-trip-saving-dialog',
+	ERROR_DIALOG: 'edit-trip-error-dialog',
+	DELETE_SECTION: 'edit-trip-delete-section',
+	DELETE: 'edit-trip-delete',
+	DELETE_DIALOG: 'edit-trip-delete-dialog',
+	DELETE_CANCEL: 'edit-trip-delete-cancel',
+	DELETE_CONFIRM: 'edit-trip-delete-confirm',
+	DELETING: 'edit-trip-deleting',
+})
+
+export const TRIP_PHOTOS = Object.freeze({
+	ROOT: 'trip-photos',
+	COUNT: 'trip-photos-count',
+	TILE: 'trip-photos-tile',
+	REMOVE: 'trip-photos-remove',
+	REMOVED: 'trip-photos-removed',
+	UNDO: 'trip-photos-undo',
+	LAST_PHOTO_HINT: 'trip-photos-last-photo-hint',
+	ERROR: 'trip-photos-error',
 })
 
 export const CONTACT_TRAVELLER = Object.freeze({

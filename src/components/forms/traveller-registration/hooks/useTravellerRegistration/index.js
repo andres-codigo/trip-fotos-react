@@ -40,7 +40,9 @@ const validateTripEnd = (tripEnd, tripStart, today) => {
 	return VALID
 }
 
-const useTravellerRegistration = () => {
+const field = (value) => ({ value, message: '', isValid: true })
+
+const useTravellerRegistration = (initialTraveller = null) => {
 	const {
 		FIRST_NAME,
 		LAST_NAME,
@@ -51,14 +53,14 @@ const useTravellerRegistration = () => {
 		FILES,
 	} = TRAVELLER_REGISTRATION_FIELDS
 
-	const [formData, setFormData] = useState({
-		[FIRST_NAME]: { value: '', message: '', isValid: true },
-		[LAST_NAME]: { value: '', message: '', isValid: true },
-		[TRIP_DESCRIPTION]: { value: '', message: '', isValid: true },
-		[TRIP_START]: { value: '', message: '', isValid: true },
-		[TRIP_END]: { value: '', message: '', isValid: true },
-		[CITIES]: { value: [], message: '', isValid: true },
-	})
+	const [formData, setFormData] = useState(() => ({
+		[FIRST_NAME]: field(initialTraveller?.firstName ?? ''),
+		[LAST_NAME]: field(initialTraveller?.lastName ?? ''),
+		[TRIP_DESCRIPTION]: field(initialTraveller?.tripDescription ?? ''),
+		[TRIP_START]: field(initialTraveller?.tripStart ?? ''),
+		[TRIP_END]: field(initialTraveller?.tripEnd ?? ''),
+		[CITIES]: field(initialTraveller?.cities ?? []),
+	}))
 	const [files, setFiles] = useState([])
 
 	const handleFilesUpdated = useCallback((updatedFiles) => {
@@ -214,6 +216,7 @@ const useTravellerRegistration = () => {
 
 	return {
 		formData,
+		files,
 		handleInputChange,
 		handleCityAdd,
 		handleCityRemove,
