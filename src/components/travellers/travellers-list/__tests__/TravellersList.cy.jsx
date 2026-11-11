@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import {
 	COMMON_SELECTORS,
@@ -39,7 +39,7 @@ const listed = Object.entries(onServer).map(([id, traveller]) => ({
 }))
 
 const mountList = ({ travellers = {}, props = {} } = {}) => {
-	const store = configureStore({
+	const store = configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 			travellers: travellersReducer,

@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 import { EDIT_TRIP, TRAVELLER_DETAIL } from '@/constants/test'
@@ -113,7 +113,7 @@ const LocationProbe = () => {
 }
 
 const renderPage = ({ id = 'me', userId = 'me', hash = '' } = {}) => {
-	const store = configureStore({
+	const store = configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 			travellers: travellersReducer,

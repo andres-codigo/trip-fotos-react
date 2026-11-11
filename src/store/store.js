@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { persistStore, persistReducer, createTransform } from 'redux-persist'
 import { combineReducers } from 'redux'
 
+import { middleware } from './middleware'
 import storage from './storage'
 import authenticationReducer from './slices/authenticationSlice'
 import travellersReducer from './slices/travellersSlice'
@@ -36,24 +37,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer)
 
 const store = configureStore({
 	reducer: persistedReducer,
-	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware({
-			// The 32ms default warns on a busy machine, and Cypress fails on any console warning
-			immutableCheck: { warnAfter: 128 },
-			serializableCheck: {
-				warnAfter: 128,
-				ignoredActions: [
-					'persist/FLUSH',
-					'persist/REHYDRATE',
-					'persist/PAUSE',
-					'persist/PERSIST',
-					'persist/PURGE',
-					'persist/REGISTER',
-				],
-				// File objects are passed to the upload thunk, never stored in state
-				ignoredActionPaths: ['meta.arg.files'],
-			},
-		}),
+	middleware,
 })
 
 export const persistor = persistStore(store)

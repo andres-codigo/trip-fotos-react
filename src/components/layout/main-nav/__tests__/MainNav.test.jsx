@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import { PATHS } from '@/constants/ui'
 
@@ -15,13 +15,7 @@ import MainNav from '@/components/layout/main-nav/MainNav'
 const USER_ID = 'ada-uid'
 
 const createStore = ({ travellerName = 'Ada Lovelace', messages = [] } = {}) =>
-	configureStore({
-		// The 32ms default warns on a busy machine, as the app's own store allows for
-		middleware: (getDefaultMiddleware) =>
-			getDefaultMiddleware({
-				immutableCheck: { warnAfter: 128 },
-				serializableCheck: { warnAfter: 128 },
-			}),
+	configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 			travellers: travellersReducer,

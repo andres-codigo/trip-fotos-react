@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import TravellerDetail from '@/pages/traveller-detail/TravellerDetail'
 import authenticationReducer from '@/store/slices/authenticationSlice'
@@ -29,7 +29,7 @@ describe('<TravellerDetail />', () => {
 		search = '',
 		hash = '',
 	} = {}) => {
-		const store = configureStore({
+		const store = configureTestStore({
 			reducer: {
 				authentication: authenticationReducer,
 				travellers: travellersReducer,

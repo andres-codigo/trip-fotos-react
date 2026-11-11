@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import {
 	ACCOUNT_MENU_SELECTORS,
@@ -19,7 +19,7 @@ import MainNav from '@/components/layout/main-nav/MainNav'
 const USER_ID = 'ada-uid'
 
 const createStore = () =>
-	configureStore({
+	configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 			travellers: travellersReducer,

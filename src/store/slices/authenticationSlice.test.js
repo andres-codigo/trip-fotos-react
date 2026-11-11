@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import { API_DATABASE } from '@/constants/api'
 import {
@@ -68,7 +68,7 @@ vi.mock('@/constants/api', async (importOriginal) => {
 let store
 
 const initialiseStore = () => {
-	store = configureStore({
+	store = configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
 		},

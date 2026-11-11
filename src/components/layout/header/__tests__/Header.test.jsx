@@ -2,14 +2,14 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import { PATHS } from '@/constants/ui'
 
 import Header from '@/components/layout/header/Header'
 
 const createMockStore = (token) => {
-	return configureStore({
+	return configureTestStore({
 		reducer: {
 			authentication: (state = { token }) => state,
 		},

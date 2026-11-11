@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import { configureStore } from '@reduxjs/toolkit'
+import configureTestStore from '@/testUtils/configureTestStore'
 
 import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
 import authenticationReducer from '@/store/slices/authenticationSlice'
@@ -32,7 +32,7 @@ const photos = (n) =>
 
 describe('<TravellerItem />', () => {
 	const render = ({ props = {}, auth = {}, isTraveller = false } = {}) => {
-		const store = configureStore({
+		const store = configureTestStore({
 			reducer: {
 				authentication: authenticationReducer,
 				travellers: travellersReducer,
