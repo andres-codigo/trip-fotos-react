@@ -38,6 +38,8 @@ const store = configureStore({
 	reducer: persistedReducer,
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({
+			// The 32ms default warns on a busy machine, and Cypress fails on any console warning
+			immutableCheck: { warnAfter: 128 },
 			serializableCheck: {
 				warnAfter: 128,
 				ignoredActions: [
