@@ -1,6 +1,7 @@
 // Reusable /ui-check capture script. It is not part of the E2E suite (the E2E
 // pattern is cypress/e2e/**), so CI never runs it. Run it with the emulators
-// seeded; see .claude/skills/ui-check/SKILL.md.
+// seeded; see .claude/skills/ui-check/SKILL.md. Each capture starts from the
+// seed data, so it gives the same images alone, filtered or in a full run.
 //
 //   UI_CHECK=true    selects this script instead of the E2E suite
 //   UI_CHECK_LABEL   prefix for the screenshot names (for example `main` or `branch`)
@@ -173,6 +174,16 @@ const editTripPath = `${ownTripPath}/edit`
 // The emulator's owner token passes the rules, for state no user could set
 const OWNER = { Authorization: 'Bearer owner' }
 
+// Noon, so "2 h ago" stays on the same day; never later than now, or the app would see its session token as expired
+const NOW = (() => {
+	const noon = new Date()
+	if (noon.getHours() < 12) noon.setDate(noon.getDate() - 1)
+	noon.setHours(12, 0, 0, 0)
+	return noon.getTime()
+})()
+// Shown as a date, so a fixed one reads the same on any day
+const FORMER_MESSAGE_TIME = new Date(2026, 0, 14, 9, 30).getTime()
+
 const LONG_MESSAGE =
 	'Hi! We are heading to Kyoto in late March and your photos of the Philosopher’s Path were the reason we booked. Could you tell us which end you started from, and whether early morning was quiet enough for photos without crowds? Also, was the ryokan near Nanzen-ji worth the price, or would you stay closer to Gion next time? Any tips on the day trip to Nara would be lovely too. Thank you so much for sharing all of this.'
 
@@ -207,7 +218,7 @@ const assertSettled = () => {
 	)
 }
 
-// Earlier steps add travellers, so a card the step needs can sit beyond the first page
+// A step can add travellers, so a card it needs can sit beyond the first page
 const showAllTravellers = () => {
 	cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM, {
 		timeout: TIMEOUT,
@@ -232,12 +243,19 @@ const capture = (title, test) =>
 	(runsCapture(ONLY, title) ? it : it.skip)(title, test)
 
 describe(`UI check capture (${LABEL})`, () => {
-	// Seed once per run: cy.session then keeps each role signed in across the tests
+	// A full seed once per run: cy.session then keeps each role signed in across the tests
 	before(() => {
 		// A filtered run rechecks a few tests, so the label's other shots stay for the comparison
 		if (!ONLY.length) cy.task('clearUiCheckScreenshots', LABEL)
-		cy.task('seedEmulators')
+		cy.task('seedEmulators', { now: NOW })
 		Cypress.session.clearAllSavedSessions()
+	})
+
+	// Back to the seed data before every capture, so no capture sees what an earlier one wrote. Only the database, unless a capture deleted an account
+	beforeEach(() => {
+		cy.task('resetEmulatorData', { now: NOW }).then(({ reseeded }) => {
+			if (reseeded) Cypress.session.clearAllSavedSessions()
+		})
 	})
 
 	// A failed test must not leave the slowed network or a device scale on for the next one
@@ -303,7 +321,7 @@ describe(`UI check capture (${LABEL})`, () => {
 						cities: ['oslo'],
 						files: [BROKEN_IMAGE_URL],
 						fileDimensions: [{ width: 640, height: 480 }],
-						registered: Date.now(),
+						registered: NOW,
 					},
 				})
 
@@ -371,7 +389,7 @@ describe(`UI check capture (${LABEL})`, () => {
 							cities: [city],
 							files: [BROKEN_IMAGE_URL],
 							fileDimensions: [{ width: 640, height: 480 }],
-							registered: Date.now(),
+							registered: NOW,
 						},
 					})
 				})
@@ -468,7 +486,7 @@ describe(`UI check capture (${LABEL})`, () => {
 						tripEnd: '2025-06-14',
 						cities: ['lisbon'],
 						...PHOTO_STATES,
-						registered: Date.now(),
+						registered: NOW,
 					},
 				})
 				// Held open so the solid placeholder stays on screen
@@ -1001,6 +1019,8 @@ describe(`UI check capture (${LABEL})`, () => {
 		capture(
 			'captures the messages page in every state and a real delete',
 			() => {
+				// Only Date, so the app's timers still run; message times then read the same in every run
+				cy.clock(NOW, ['Date'])
 				// Extra messages for the long-text and former-traveller states, written past the rules as the emulator owner
 				cy.request({
 					method: 'PATCH',
@@ -1012,13 +1032,13 @@ describe(`UI check capture (${LABEL})`, () => {
 						'capture-long': {
 							senderId: TEST_USERS.OTHER_TRAVELLER.ID,
 							message: LONG_MESSAGE,
-							createdAt: Date.now() - 2 * 60 * 60 * 1000,
+							createdAt: NOW - 2 * 60 * 60 * 1000,
 							read: false,
 						},
 						'capture-former': {
 							senderId: 'capture-removed-traveller',
 							message: 'Thanks for the tips on Kyoto.',
-							createdAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
+							createdAt: FORMER_MESSAGE_TIME,
 							read: true,
 						},
 					},
@@ -1391,7 +1411,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			shot('own-trip-saved')
 		})
 
-		// Last in this context: it deletes the seeded traveller, so the emulators are reseeded after it
+		// It deletes the seeded traveller's account, so the next capture's reset reseeds the users
 		capture(
 			'captures deleting your own profile, failed and for real',
 			() => {
@@ -1448,9 +1468,6 @@ describe(`UI check capture (${LABEL})`, () => {
 				assertSettled()
 				freezeAnimation()
 				shot('profile-deleted')
-
-				cy.task('seedEmulators')
-				cy.then(() => Cypress.session.clearAllSavedSessions())
 			},
 		)
 	})
@@ -1493,7 +1510,7 @@ describe(`UI check capture (${LABEL})`, () => {
 						cities: [city],
 						files: [BROKEN_IMAGE_URL],
 						fileDimensions: [{ width: 640, height: 480 }],
-						registered: Date.now(),
+						registered: NOW,
 					},
 				})
 			})
