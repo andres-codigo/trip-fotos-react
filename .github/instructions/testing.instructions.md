@@ -8,7 +8,7 @@ applyTo: '{**/__tests__/**/*,cypress/e2e/**/*.cy.js}'
 
 ## Test Organisation
 
-- **Vitest tests**: `*.test.jsx` for components and pages, `*.test.js` for hooks, utils and store slices, colocated in `__tests__` folders (slice tests sit beside the slice).
+- **Vitest tests**: `*.test.jsx` for components and pages, `*.test.js` for hooks, utils and store slices, colocated in `__tests__` folders (slice tests sit beside the slice). A `.test.js` file other than a hook's `use*.test.js` runs in Node, not jsdom (the `node` project in `vite.config.js`), so it has no `document` or `window`.
 - **Cypress component tests**: `*.cy.jsx` colocated in component/page `__tests__` folders.
 - **Cypress E2E tests**: `cypress/e2e/{pages,app,components}/[Name].cy.js` with no further suffix: the folder says what it covers (`pages` per route, `app` for app-wide flows, `components` for shared components). Adding, removing or renaming one means recording its CI time in `SPEC_SECONDS` in [`scripts/e2e-groups.mjs`](../../scripts/e2e-groups.mjs), which splits the specs across the parallel CI jobs; its test fails until you do. Name its areas in `E2E_SPECS` in [`cypress/impact.js`](../../cypress/impact.js) too, which picks the specs a PR runs; its test also fails until you do.
 

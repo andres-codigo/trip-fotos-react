@@ -3,12 +3,15 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'path'
 import fs from 'fs'
 import os from 'os'
+import { configDefaults } from 'vitest/config'
 
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+
+const NODE_TESTS = 'src/**/!(use*).test.js'
 
 const getHttpsConfig = () => {
 	const keyPath = './certs/localhost.key'
@@ -83,11 +86,30 @@ export default defineConfig({
 	},
 	test: {
 		globals: true,
-		environment: 'jsdom',
-		setupFiles: [
-			'./src/testUtils/vitest/jsdomPolyfills.js',
-			'./src/testUtils/vitest/testingLibrarySetup.js',
-			'./src/testUtils/vitest/failOnConsole.js',
+		// Setting up jsdom costs about 2s a file, so tests that need no DOM (any .test.js but a hook's use*.test.js) run in node
+		projects: [
+			{
+				extends: true,
+				test: {
+					name: 'dom',
+					environment: 'jsdom',
+					exclude: [...configDefaults.exclude, NODE_TESTS],
+					setupFiles: [
+						'./src/testUtils/vitest/jsdomPolyfills.js',
+						'./src/testUtils/vitest/testingLibrarySetup.js',
+						'./src/testUtils/vitest/failOnConsole.js',
+					],
+				},
+			},
+			{
+				extends: true,
+				test: {
+					name: 'node',
+					environment: 'node',
+					include: [NODE_TESTS],
+					setupFiles: ['./src/testUtils/vitest/failOnConsole.js'],
+				},
+			},
 		],
 		// Performance optimisations - uses worker threads for parallel test execution
 		// Dynamically sets thread count: 2 in CI, half of CPU cores locally (min 1)
