@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.25.1...v0.25.2) (2026-11-12)
+
+
+### Bug Fixes
+
+* /verify reruns only the gates and specs a change can affect ([#711](https://github.com/andres-codigo/trip-fotos-react/issues/711)) ([04064b9](https://github.com/andres-codigo/trip-fotos-react/commit/04064b9a47d1a56d8cb0872a632d6f0e29bab8b8))
+
 ## [0.25.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.25.0...v0.25.1) (2026-11-12)
 
 
