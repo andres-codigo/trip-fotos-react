@@ -66,7 +66,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Edit your trip: change your details, add or remove photos (with Undo, nothing goes until you save), or delete your own profile, from Edit trip on your card and trip page
 - Trip dates: travellers give the days their trip started and ended, and cards show when it was and how long it lasted, in place of the registration date
 - Better messages: the sender's name and when they wrote, unread markers and an unread count, Reply inside Trip Fotos, and Delete with Undo; messaging is now between travellers only, with no email shared
-- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, faster local checks and E2E runs that rerun only failed tests, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
+- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, faster local checks that rerun only the checks and tests a change can affect, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 

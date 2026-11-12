@@ -21,6 +21,13 @@ describe('planGates', () => {
 		expect(runArgs).toEqual(['lint', 'e2e'])
 	})
 
+	it('runs no build or e2e for a test-only change under pages', () =>
+		expect(
+			planGates([
+				'src/pages/traveller-detail/__tests__/TravellerDetail.test.jsx',
+			]),
+		).toEqual({ runArgs: ['lint', 'vitest'], reasons: [] }))
+
 	it('leaves e2e out of a change that cannot break it', () => {
 		const { runArgs, reasons } = planGates(['src/components/ui/Badge.jsx'])
 
@@ -150,6 +157,26 @@ describe('gatesForFile', () => {
 			'lint',
 			'vitest',
 		])
+	})
+
+	it('keeps a component spec to lint and the component tests', () => {
+		expect([
+			...gatesForFile(
+				'src/components/forms/traveller-registration/TravellerRegistrationForm.cy.jsx',
+			),
+		]).toEqual(['lint', 'ct'])
+		expect([
+			...gatesForFile('src/pages/register/__tests__/Register.cy.jsx'),
+		]).toEqual(['lint', 'ct'])
+	})
+
+	it('keeps a Vitest test to lint and Vitest, even under pages or the store', () => {
+		for (const file of [
+			'src/pages/traveller-detail/__tests__/TravellerDetail.test.jsx',
+			'src/store/slices/__tests__/messagesSlice.test.js',
+			'src/utils/formatDate.test.js',
+		])
+			expect([...gatesForFile(file)]).toEqual(['lint', 'vitest'])
 	})
 
 	it('maps tooling scripts to lint and Vitest only', () =>

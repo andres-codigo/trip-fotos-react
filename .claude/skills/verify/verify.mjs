@@ -6,7 +6,12 @@ import path from 'node:path'
 import { stripVTControlCharacters } from 'node:util'
 
 import { affectedSpecs } from '../../../cypress/impact.js'
-import { gateHolds, planGates, uiCheckGap } from './changed-gates.mjs'
+import {
+	gateHolds,
+	gatesForFile,
+	planGates,
+	uiCheckGap,
+} from './changed-gates.mjs'
 import { branchFiles, changedSince, treeHash } from './git-tree.mjs'
 import { resetChecks } from './reset-checks.mjs'
 import {
@@ -183,6 +188,32 @@ export const recordGate = ({
 		}
 }
 
+// The specs a Cypress gate runs, and the passes carried onto this tree. E2E runs only the specs `affected` names, as CI does on a pull request (the whole suite when none is, or with `all`); a push to main runs everything
+export const planSpecs = ({
+	gate,
+	suite,
+	record,
+	tree,
+	changed,
+	affected,
+	all = false,
+}) => {
+	if (all) return { suite, specs: null, passed: [] }
+	const scoped =
+		gate === 'e2e' && affected.length
+			? suite.filter((spec) => affected.includes(spec))
+			: suite
+	const scope = scoped.length ? scoped : suite
+	const specs =
+		specsToRun({ suite: scope, record, tree, changed }) ??
+		(scope === suite ? null : scope)
+	return {
+		suite: scope,
+		specs,
+		passed: specs ? scope.filter((spec) => !specs.includes(spec)) : [],
+	}
+}
+
 const children = new Set()
 
 const stopGates = () => {
@@ -292,25 +323,39 @@ const main = async () => {
 		.filter((gate) => !toRun.includes(gate))
 		.map((gate) => [gate, '✅ cached', 'no change since it last passed'])
 
-	// A Cypress gate that failed on this tree reruns only the specs that have not passed on it yet; `all` runs whole suites
+	// run-e2e.mjs runs these first and stops on their first failure, before the rest of the suite
+	const firstSpecs = affectedSpecs(files)
+
+	// A Cypress gate that failed reruns only the specs that have not passed since; `all` runs whole suites
 	const plans = Object.fromEntries(
 		toRun.filter(isSpecGate).map((gate) => {
-			const suite = suiteSpecs(gate, projectDir)
-			const specs = all
-				? null
-				: specsToRun({ suite, record: specRecords[gate], tree })
-			return [gate, { suite, specs }]
+			const record = specRecords[gate]
+			const since =
+				record && record.tree !== tree
+					? holds.changedSince(record.tree)
+					: []
+			const plan = planSpecs({
+				gate,
+				suite: suiteSpecs(gate, projectDir),
+				record,
+				tree,
+				changed: since?.filter((file) => gatesForFile(file).has(gate)),
+				affected: firstSpecs,
+				all,
+			})
+			// recordGate adds this run's passes to these
+			specRecords[gate] = { tree, passed: plan.passed }
+			return [gate, plan]
 		}),
 	)
 	const rerunNote = (gate) => {
 		const { suite, specs } = plans[gate] ?? {}
 		if (!specs) return ''
-		if (!specs.length) return 'every spec had already passed on this tree'
-		return `reran ${specs.length} failed spec${specs.length === 1 ? '' : 's'} (${specs.join(', ')}); the other ${suite.length - specs.length} passed earlier on this tree`
+		if (!specs.length) return 'every spec had already passed'
+		const ran = `ran ${specs.length} spec${specs.length === 1 ? '' : 's'} (${specs.join(', ')})`
+		const passed = suite.length - specs.length
+		return passed ? `${ran}; the other ${passed} passed earlier` : ran
 	}
-
-	// run-e2e.mjs runs these first and stops on their first failure, before the rest of the suite
-	const firstSpecs = affectedSpecs(files)
 
 	const start = async (gate) => {
 		const plan = plans[gate]
@@ -365,7 +410,7 @@ const main = async () => {
 		if (result.status === 0) rows.push([gate, '✅', note])
 		else {
 			const kept = plans[gate]
-				? `${specRecords[gate].passed.length} of ${plans[gate].suite.length} specs have passed on this tree; the next /verify reruns only the rest`
+				? `${specRecords[gate].passed.length} of ${plans[gate].suite.length} specs have passed; the next /verify reruns only the rest and any spec edited since`
 				: ''
 			rows.push([
 				gate,
