@@ -12,6 +12,15 @@ applyTo: '{**/__tests__/**/*,cypress/e2e/**/*.cy.js}'
 - **Cypress component tests**: `*.cy.jsx` colocated in component/page `__tests__` folders.
 - **Cypress E2E tests**: `cypress/e2e/{pages,app,components}/[Name].cy.js` with no further suffix: the folder says what it covers (`pages` per route, `app` for app-wide flows, `components` for shared components).
 
+### Which layer owns a check
+
+Each check is written once, in the layer that owns it. Before adding a test, look for the same check in the other layers.
+
+- **Vitest** owns logic, state and branches, the text and ARIA a user relies on, focus moves and timers.
+- **Component tests** own what needs a real browser: layout, size and position, computed styles, hover and keyboard-focus styles, native `<dialog>` behaviour (backdrop click, Escape), real file selection and drag-drop, and `cy.checkA11y()`. They do not repeat Vitest's rendering, prop or callback checks.
+- **E2E** owns user flows across routes, Firebase and the persisted store.
+- No layer tests class names for their own sake, `data-cy` values alone, the props a child receives, which wrapper component is used, or code written inside the test itself. A page's `<main>` structure (skip-link target, class, `data-cy`) is one test, not one per attribute.
+
 ## Test Data & Utilities
 
 Use existing project paths for shared testing assets:

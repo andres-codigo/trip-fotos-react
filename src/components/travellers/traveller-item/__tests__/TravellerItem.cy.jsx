@@ -64,84 +64,6 @@ describe('<TravellerItem />', () => {
 		)
 	}
 
-	it('renders the traveller content', () => {
-		render()
-		cy.get(TRAVELLER_ITEM_SELECTORS.NAME).should(
-			'have.text',
-			'Ada Lovelace',
-		)
-		cy.get(TRAVELLER_ITEM_SELECTORS.TRIP)
-			.should('contain.text', '5–11 Mar 2024')
-			.and('contain.text', '7 days')
-		cy.get(TRAVELLER_ITEM_SELECTORS.TRIP_DESCRIPTION).should(
-			'contain.text',
-			'Loves analytical engines',
-		)
-	})
-
-	it('renders a badge per city', () => {
-		render()
-		cy.get(COMMON_SELECTORS.BASE_BADGE).should('have.length', 2)
-		cy.get(COMMON_SELECTORS.BASE_BADGE)
-			.first()
-			.should('contain.text', 'Tokyo, Japan')
-	})
-
-	it('caps images at five and shows the see-all link', () => {
-		render({ props: { files: photos(7) } })
-		cy.get(COMMON_SELECTORS.BASE_IMAGE).should('have.length', 5)
-		cy.get(TRAVELLER_ITEM_SELECTORS.SEE_ALL_LINK)
-			.should('contain.text', 'See all 7 photos')
-			.and('have.attr', 'href', '/travellers/abc#photos')
-	})
-
-	it('omits the see-all link for five photos', () => {
-		render({ props: { files: photos(5) } })
-		cy.get(TRAVELLER_ITEM_SELECTORS.SEE_ALL_LINK).should('not.exist')
-	})
-
-	it('shows only the details link for a non-traveller non-admin', () => {
-		render()
-		cy.get(TRAVELLER_ITEM_SELECTORS.VIEW_TRIP).should(
-			'have.attr',
-			'href',
-			'/travellers/abc',
-		)
-		cy.get(TRAVELLER_ITEM_SELECTORS.MESSAGE).should('not.exist')
-		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).should('not.exist')
-	})
-
-	it('shows contact for a registered traveller', () => {
-		render({ isTraveller: true })
-		cy.get(TRAVELLER_ITEM_SELECTORS.MESSAGE).should(
-			'have.attr',
-			'href',
-			'/travellers/abc/contact',
-		)
-	})
-
-	it('shows delete for admins', () => {
-		render({ auth: { isAdmin: true } })
-		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).should('be.visible')
-	})
-
-	it('hides contact and delete on the own record', () => {
-		render({ auth: { userId: 'abc', isAdmin: true }, isTraveller: true })
-		cy.get(TRAVELLER_ITEM_SELECTORS.MESSAGE).should('not.exist')
-		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).should('not.exist')
-	})
-
-	it('shows an error dialog when deletion fails', () => {
-		cy.intercept('DELETE', '**/travellers/abc.json*', {
-			statusCode: 500,
-			body: {},
-		})
-		render({ auth: { isAdmin: true } })
-		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).click()
-		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_CONFIRM).click()
-		cy.get(TRAVELLER_ITEM_SELECTORS.ERROR_DIALOG).should('be.visible')
-	})
-
 	it('cancels the delete from the keyboard and restores focus', () => {
 		cy.intercept('DELETE', '**/travellers/abc.json*').as('deleteTraveller')
 		render({ auth: { isAdmin: true } })
@@ -158,7 +80,7 @@ describe('<TravellerItem />', () => {
 		cy.get('@deleteTraveller.all').should('have.length', 0)
 	})
 
-	it('exposes a heading and accessible image buttons', () => {
+	it('has no axe violations, with a named heading and image buttons', () => {
 		render({ props: { files: photos(1) } })
 		cy.get('h3').should('have.text', 'Ada Lovelace')
 		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should(
@@ -166,5 +88,6 @@ describe('<TravellerItem />', () => {
 			'aria-label',
 			"View Ada Lovelace's photo",
 		)
+		cy.checkA11y()
 	})
 })

@@ -1,251 +1,132 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { BrowserRouter } from 'react-router-dom'
 
 import { API_DATABASE } from '@/constants/api'
-import { MOCK_KEYS } from '@/constants/test'
+import { MOCK_KEYS, TEST_IDS } from '@/constants/test'
 
 import UserAuthenticationForm from '@/components/forms/user-authentication/UserAuthenticationForm'
 
-vi.mock('@/components/ui/form/input/Input', () => ({
-	default: ({ label, isValid, message, showRequiredMark, ...props }) => {
-		const domProps = { ...props }
+const IDS = TEST_IDS.USER_AUTH_FORM
+const VALID = (value) => ({ value, isValid: true, message: '' })
 
-		delete domProps.isValid
-		delete domProps.message
-		delete domProps.showRequiredMark
-
-		return (
-			<div>
-				<label htmlFor={domProps.id}>
-					{label}
-					{props.required && showRequiredMark && (
-						<span className="input-required">*</span>
-					)}
-				</label>
-				<input
-					{...domProps}
-					aria-invalid={!isValid}
-				/>
-				{!isValid && message && <span role="alert">{message}</span>}
-			</div>
-		)
-	},
-}))
-
-vi.mock('@/components/ui/button/BaseButton', () => ({
-	default: ({ children, isDisabled, isLink, ...restProps }) => {
-		const elementProps = {
-			...restProps,
-			disabled: isDisabled,
-		}
-
-		return isLink ? (
-			<button
-				type="button"
-				{...elementProps}>
-				{children}
-			</button>
-		) : (
-			<button {...elementProps}>{children}</button>
-		)
-	},
-}))
-
-const renderWithRouter = (component) => {
-	return render(<BrowserRouter>{component}</BrowserRouter>)
+const renderForm = (props = {}) => {
+	const handlers = {
+		onEmailChange: vi.fn(),
+		onPasswordChange: vi.fn(),
+		onSubmit: vi.fn((e) => e.preventDefault()),
+		onSwitchMode: vi.fn(),
+	}
+	render(
+		<BrowserRouter>
+			<UserAuthenticationForm
+				email={VALID(MOCK_KEYS.EMAIL)}
+				password={VALID(MOCK_KEYS.PASSWORD)}
+				mode={API_DATABASE.AUTH_LOGIN_MODE}
+				{...handlers}
+				{...props}
+			/>
+		</BrowserRouter>,
+	)
+	return handlers
 }
 
-// Create default props factory to avoid object recreation
-const createDefaultProps = () => ({
-	email: {
-		value: MOCK_KEYS.EMAIL,
-		isValid: true,
-		message: '',
-	},
-	password: {
-		value: MOCK_KEYS.PASSWORD,
-		isValid: true,
-		message: '',
-	},
-	mode: API_DATABASE.AUTH_LOGIN_MODE,
-	onEmailChange: vi.fn(),
-	onPasswordChange: vi.fn(),
-	onSubmit: vi.fn(),
-	onSwitchMode: vi.fn(),
-	isLoading: false,
-})
-
 describe('<UserAuthenticationForm />', () => {
-	let defaultProps
+	it.each([
+		[API_DATABASE.AUTH_LOGIN_MODE, 'Login', 'Log in', 'Switch to Signup'],
+		[API_DATABASE.AUTH_SIGNUP_MODE, 'Signup', 'Sign up', 'Switch to Login'],
+	])(
+		'renders the %s form, titled, with labelled required inputs',
+		(mode, title, submit, toggle) => {
+			renderForm({ mode })
 
-	beforeEach(() => {
-		// Create fresh props for each test to avoid cross-test pollution
-		defaultProps = createDefaultProps()
+			const form = screen.getByTestId(IDS.FORM)
+			expect(form).toHaveAttribute('novalidate')
+			expect(form).toHaveAttribute('aria-busy', 'false')
+			expect(form).toHaveAccessibleName(`${title} Form`)
+			;[/E-Mail/, /Password/].forEach((label) => {
+				const input = screen.getByLabelText(label)
+				expect(input).toBeRequired()
+				expect(input).toHaveAttribute('aria-required', 'true')
+				expect(input).not.toHaveAttribute('aria-describedby')
+			})
+			expect(
+				screen.getByTestId(IDS.LOGIN_SUBMIT_BUTTON),
+			).toHaveTextContent(submit)
+			expect(
+				screen.getByTestId(IDS.LOGIN_SIGNUP_TOGGLE_LINK),
+			).toHaveTextContent(toggle)
+		},
+	)
+
+	it('reports input changes and submits', () => {
+		const { onEmailChange, onPasswordChange, onSubmit } = renderForm()
+
+		fireEvent.change(screen.getByTestId(IDS.EMAIL_INPUT), {
+			target: { value: 'a@b.co' },
+		})
+		fireEvent.change(screen.getByTestId(IDS.PASSWORD_INPUT), {
+			target: { value: 'secret' },
+		})
+		fireEvent.click(screen.getByTestId(IDS.LOGIN_SUBMIT_BUTTON))
+
+		expect(onEmailChange).toHaveBeenCalled()
+		expect(onPasswordChange).toHaveBeenCalled()
+		expect(onSubmit).toHaveBeenCalledTimes(1)
 	})
 
-	describe('Rendering tests', () => {
-		it('should have button type="button" for toggle link to prevent form submission', () => {
-			renderWithRouter(<UserAuthenticationForm {...defaultProps} />)
+	it('switches mode from the toggle without submitting', () => {
+		const { onSubmit, onSwitchMode } = renderForm()
 
-			const toggleButton = screen.getByRole('button', {
-				name: /switch to signup/i,
-			})
+		fireEvent.click(screen.getByTestId(IDS.LOGIN_SIGNUP_TOGGLE_LINK))
 
-			// This verifies preventDefault behaviour indirectly
-			expect(toggleButton).toHaveAttribute('type', 'button')
-		})
-
-		it('should render login mode correctly', () => {
-			renderWithRouter(
-				<UserAuthenticationForm
-					{...defaultProps}
-					mode={API_DATABASE.AUTH_LOGIN_MODE}
-				/>,
-			)
-
-			expect(screen.getByText('Login')).toBeInTheDocument()
-			expect(screen.getByText('Log in')).toBeInTheDocument()
-			expect(screen.getByText('Switch to Signup')).toBeInTheDocument()
-		})
-
-		it('should render signup mode correctly', () => {
-			renderWithRouter(
-				<UserAuthenticationForm
-					{...defaultProps}
-					mode={API_DATABASE.AUTH_SIGNUP_MODE}
-				/>,
-			)
-
-			expect(screen.getByText('Signup')).toBeInTheDocument()
-			expect(screen.getByText('Sign up')).toBeInTheDocument()
-			expect(screen.getByText('Switch to Login')).toBeInTheDocument()
-		})
+		expect(onSwitchMode).toHaveBeenCalledTimes(1)
+		expect(onSubmit).not.toHaveBeenCalled()
 	})
 
-	describe('Behaviour tests', () => {
-		it('should call onSwitchMode when toggle button is clicked', () => {
-			const mockOnSwitchMode = vi.fn()
+	it('disables the inputs and both buttons, and marks the form busy, while loading', () => {
+		renderForm({ isLoading: true })
 
-			renderWithRouter(
-				<UserAuthenticationForm
-					{...defaultProps}
-					onSwitchMode={mockOnSwitchMode}
-				/>,
-			)
-
-			const toggleButton = screen.getByRole('button', {
-				name: /switch to signup/i,
-			})
-			fireEvent.click(toggleButton)
-
-			expect(mockOnSwitchMode).toHaveBeenCalledWith(expect.any(Object))
-		})
-
-		it('should be disabled when isLoading is true', () => {
-			renderWithRouter(
-				<UserAuthenticationForm
-					{...defaultProps}
-					isLoading={true}
-				/>,
-			)
-
-			const toggleButton = screen.getByRole('button', {
-				name: /switch to signup/i,
-			})
-			expect(toggleButton).toBeDisabled()
-		})
+		expect(screen.getByTestId(IDS.EMAIL_INPUT)).toBeDisabled()
+		expect(screen.getByTestId(IDS.PASSWORD_INPUT)).toBeDisabled()
+		expect(screen.getByTestId(IDS.LOGIN_SUBMIT_BUTTON)).toBeDisabled()
+		expect(
+			screen.getByTestId(IDS.LOGIN_SIGNUP_TOGGLE_LINK),
+		).toHaveAttribute('aria-disabled', 'true')
+		expect(screen.getByTestId(IDS.FORM)).toHaveAttribute(
+			'aria-busy',
+			'true',
+		)
 	})
 
-	describe('Accessibility tests', () => {
-		it('sets aria-describedby to "email-error" when email is invalid with message', () => {
-			const props = {
-				...defaultProps,
-				email: {
-					value: '',
-					isValid: false,
-					message: 'Email is required',
-				},
-				password: { value: '', isValid: true, message: '' },
-			}
+	it.each([
+		['email', /E-Mail/, 'Invalid email'],
+		['password', /Password/, 'Invalid password'],
+	])(
+		'marks an invalid %s and links it to an alert with the message',
+		(field, label, message) => {
+			renderForm({ [field]: { value: '', isValid: false, message } })
 
-			const { getByLabelText } = renderWithRouter(
-				<UserAuthenticationForm {...props} />,
-			)
-			const emailInput = getByLabelText(/E-Mail/i)
+			const input = screen.getByLabelText(label)
+			expect(input).toHaveAttribute('aria-invalid', 'true')
+			expect(input).toHaveAttribute('aria-describedby', `${field}-error`)
+			const error = document.getElementById(`${field}-error`)
+			expect(error).toHaveAttribute('role', 'alert')
+			expect(error).toHaveTextContent(message)
+		},
+	)
 
-			expect(emailInput).toHaveAttribute(
-				'aria-describedby',
-				'email-error',
-			)
+	it('links no error to an invalid field that has no message', () => {
+		renderForm({
+			email: { value: '', isValid: false, message: '' },
+			password: { value: '', isValid: false, message: '' },
 		})
 
-		it('sets aria-describedby to "password-error" when password is invalid with message', () => {
-			const props = {
-				...defaultProps,
-				email: {
-					value: defaultProps.email.value,
-					isValid: true,
-					message: '',
-				},
-				password: {
-					value: '',
-					isValid: false,
-					message: 'Password is required',
-				},
-			}
-
-			const { getByLabelText } = renderWithRouter(
-				<UserAuthenticationForm {...props} />,
-			)
-			const passwordInput = getByLabelText(/Password/i)
-
-			expect(passwordInput).toHaveAttribute(
-				'aria-describedby',
-				'password-error',
-			)
-		})
-
-		it('sets aria-describedby to undefined when field is valid', () => {
-			const props = {
-				...defaultProps,
-				email: {
-					value: defaultProps.email.value,
-					isValid: true,
-					message: '',
-				},
-				password: {
-					value: defaultProps.password.value,
-					isValid: true,
-					message: '',
-				},
-			}
-
-			const { getByLabelText } = renderWithRouter(
-				<UserAuthenticationForm {...props} />,
-			)
-			const emailInput = getByLabelText(/E-Mail/i)
-			const passwordInput = getByLabelText(/Password/i)
-
-			expect(emailInput).not.toHaveAttribute('aria-describedby')
-			expect(passwordInput).not.toHaveAttribute('aria-describedby')
-		})
-
-		it('sets aria-describedby to undefined when field is invalid but has no message', () => {
-			const props = {
-				...defaultProps,
-				email: { value: '', isValid: false, message: '' },
-				password: { value: '', isValid: false, message: '' },
-			}
-
-			const { getByLabelText } = renderWithRouter(
-				<UserAuthenticationForm {...props} />,
-			)
-			const emailInput = getByLabelText(/E-Mail/i)
-			const passwordInput = getByLabelText(/Password/i)
-
-			expect(emailInput).not.toHaveAttribute('aria-describedby')
-			expect(passwordInput).not.toHaveAttribute('aria-describedby')
-		})
+		expect(screen.getByLabelText(/E-Mail/)).not.toHaveAttribute(
+			'aria-describedby',
+		)
+		expect(screen.getByLabelText(/Password/)).not.toHaveAttribute(
+			'aria-describedby',
+		)
 	})
 })

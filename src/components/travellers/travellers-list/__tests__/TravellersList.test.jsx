@@ -193,17 +193,6 @@ describe('<TravellersList />', () => {
 	}
 
 	describe('Rendering tests', () => {
-		it('should render controls section', async () => {
-			setupMocksForNoTravellers()
-
-			await act(async () => {
-				renderTravellersList()
-			})
-			expect(
-				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.CONTROLS),
-			).toBeInTheDocument()
-		})
-
 		it('should render the loading status and a page of skeleton cards when loading', async () => {
 			setupMocksForLoadingState()
 
@@ -223,6 +212,16 @@ describe('<TravellersList />', () => {
 			expect(
 				screen.queryByTestId(TEST_IDS.SPINNER.CONTAINER),
 			).not.toBeInTheDocument()
+			expect(screen.getByRole(SPINNER.ROLE_STATUS)).toBeInTheDocument()
+			expect(
+				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
+			).not.toBeInTheDocument()
+			expect(
+				screen.queryByText(UI_TEXT.TRAVELLERS.NO_TRAVELLERS_MESSAGE),
+			).not.toBeInTheDocument()
+			expect(
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
+			).toBeDisabled()
 		})
 
 		it('should render "No travellers listed" message when no travellers exist', async () => {
@@ -504,28 +503,6 @@ describe('<TravellersList />', () => {
 				).not.toBeDisabled()
 			})
 
-			it('should disable refresh button while loading', async () => {
-				setupMocksForLoadingState()
-				await act(async () => {
-					renderTravellersList({ isLoading: true })
-				})
-
-				expect(
-					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
-				).toBeDisabled()
-			})
-
-			it('should enable refresh button when travellers exist', async () => {
-				setupMocksForHasTravellers()
-				await act(async () => {
-					renderTravellersList()
-				})
-
-				expect(
-					screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
-				).not.toBeDisabled()
-			})
-
 			it('should call loadTravellersHandler with true when refresh button is clicked', async () => {
 				setupMocksForHasTravellers()
 
@@ -580,46 +557,6 @@ describe('<TravellersList />', () => {
 				})
 				expect(
 					screen.queryByRole(SPINNER.ROLE_STATUS),
-				).not.toBeInTheDocument()
-			})
-		})
-
-		describe('loading states', () => {
-			it('should show loading spinner when isLoading prop is true', async () => {
-				setupMocksForLoadingState()
-
-				await act(async () => {
-					renderTravellersList({ isLoading: true })
-				})
-
-				expect(
-					screen.getByRole(SPINNER.ROLE_STATUS),
-				).toBeInTheDocument()
-			})
-
-			it('should hide travellers list when loading', async () => {
-				setupMocksForHasTravellers()
-
-				await act(async () => {
-					renderTravellersList({ isLoading: true })
-				})
-
-				expect(
-					screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
-				).not.toBeInTheDocument()
-			})
-
-			it('should hide no travellers message when loading', async () => {
-				setupMocksForLoadingState()
-
-				await act(async () => {
-					renderTravellersList({ isLoading: true })
-				})
-
-				expect(
-					screen.queryByText(
-						UI_TEXT.TRAVELLERS.NO_TRAVELLERS_MESSAGE,
-					),
 				).not.toBeInTheDocument()
 			})
 		})
@@ -678,20 +615,6 @@ describe('<TravellersList />', () => {
 			expect(controls).toContainElement(
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK),
 			)
-		})
-
-		it('should have proper list structure for travellers', async () => {
-			setupMocksForHasTravellers()
-			await act(async () => {
-				renderTravellersList()
-			})
-
-			expect(
-				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
-			).toBeInTheDocument()
-			expect(
-				screen.queryAllByTestId(TEST_IDS.TRAVELLERS_LIST.ITEM)[0],
-			).toBeInTheDocument()
 		})
 	})
 

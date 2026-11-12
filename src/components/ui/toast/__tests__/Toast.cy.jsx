@@ -27,19 +27,6 @@ describe('<Toast />', () => {
 			cy.checkA11y()
 		})
 
-		it('renders the message, action and Dismiss button', () => {
-			mountToast()
-			cy.get(TOAST_SELECTORS.MESSAGE)
-				.should('have.attr', 'role', 'status')
-				.and('contain', MESSAGE)
-			cy.get(TOAST_SELECTORS.ACTION).should('have.text', 'Undo')
-			cy.get(TOAST_SELECTORS.DISMISS).should(
-				'have.attr',
-				'aria-label',
-				'Dismiss',
-			)
-		})
-
 		it('sits at the bottom centre, 16px above the 61px tab bar on a phone', () => {
 			mountToast()
 			cy.get(TOAST_SELECTORS.ROOT).should(($toast) => {
@@ -63,16 +50,6 @@ describe('<Toast />', () => {
 	})
 
 	describe('Behaviour tests', () => {
-		it('closes after the duration', () => {
-			cy.clock()
-			mountToast({ duration: 8000 })
-			cy.get(TOAST_SELECTORS.ROOT).should('be.visible')
-			cy.tick(7999)
-			cy.get('@onClose').should('not.have.been.called')
-			cy.tick(1)
-			cy.get('@onClose').should('have.been.calledOnce')
-		})
-
 		it('pauses while hovered and resumes when the pointer leaves', () => {
 			cy.clock()
 			mountToast({ duration: 8000 })
@@ -85,21 +62,6 @@ describe('<Toast />', () => {
 			cy.tick(4999)
 			cy.get('@onClose').should('not.have.been.called')
 			cy.tick(1)
-			cy.get('@onClose').should('have.been.calledOnce')
-		})
-
-		it('calls onAction and not onClose when the action is clicked', () => {
-			cy.clock()
-			mountToast()
-			cy.get(TOAST_SELECTORS.ACTION).click()
-			cy.tick(20000)
-			cy.get('@onAction').should('have.been.calledOnce')
-			cy.get('@onClose').should('not.have.been.called')
-		})
-
-		it('calls onClose once when Dismiss is clicked', () => {
-			mountToast()
-			cy.get(TOAST_SELECTORS.DISMISS).click()
 			cy.get('@onClose').should('have.been.calledOnce')
 		})
 	})

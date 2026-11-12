@@ -75,17 +75,7 @@ describe('Travellers', () => {
 	const setupMocksForNoTravellers = () => stubTravellers(null)
 
 	describe('Rendering tests', () => {
-		it('renders the <main> element', async () => {
-			setupMocksForHasTravellers()
-
-			await act(async () => {
-				renderTravellers()
-			})
-
-			expect(screen.getByRole('main')).toBeInTheDocument()
-		})
-
-		it('<main> element has correct data attributes', async () => {
+		it('renders the travellers list inside <main>', async () => {
 			setupMocksForHasTravellers()
 
 			await act(async () => {
@@ -98,15 +88,6 @@ describe('Travellers', () => {
 				'data-cy-alt',
 				TEST_IDS.TRAVELLERS.CONTAINER,
 			)
-		})
-
-		it('renders the TravellersList component', async () => {
-			setupMocksForHasTravellers()
-
-			await act(async () => {
-				renderTravellers()
-			})
-
 			expect(
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 			).toBeInTheDocument()
@@ -196,29 +177,6 @@ describe('Travellers', () => {
 			})
 
 			expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-		})
-	})
-
-	describe('Accessibility tests', () => {
-		it('the main container has the correct role', async () => {
-			setupMocksForHasTravellers()
-
-			await act(async () => {
-				renderTravellers()
-			})
-
-			expect(screen.getByRole('main')).toBeInTheDocument()
-		})
-
-		it('the alert component has the correct role', async () => {
-			setupMocksForHasTravellers()
-			const alertMessage = 'Success Message'
-
-			await act(async () => {
-				renderTravellers({}, { alertMessage })
-			})
-
-			expect(screen.getByRole('alert')).toBeInTheDocument()
 		})
 	})
 })

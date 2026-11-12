@@ -28,7 +28,10 @@ describe('<BaseDialog />', () => {
 	describe('Rendering tests', () => {
 		it('renders when show is true', () => {
 			renderDialog()
-			expect(screen.getByRole('dialog')).toBeInTheDocument()
+			expect(screen.getByRole('dialog')).toHaveAttribute(
+				'aria-modal',
+				'true',
+			)
 			expect(screen.getByText(defaultProps.title)).toBeInTheDocument()
 			expect(screen.getByText(defaultProps.children)).toBeInTheDocument()
 		})

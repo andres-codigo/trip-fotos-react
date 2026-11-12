@@ -85,13 +85,6 @@ describe('Contact Traveller Page', () => {
 
 		cy.checkA11y()
 	})
-
-	it('has no axe violations on the traveller detail page', () => {
-		cy.visit(contactPath(OTHER_TRAVELLER_ID))
-		assertRedirectedToDetail(OTHER_TRAVELLER_ID)
-
-		cy.checkA11y()
-	})
 })
 
 describe('Contact Traveller page > sending a message', () => {
@@ -131,25 +124,6 @@ describe('Contact Traveller page > sending a message', () => {
 		cy.waitForSuccess(atPath(PATHS.TRAVELLERS))
 		cy.contains(CONTACT_TRAVELLER_CONFIG.SUCCESS_MESSAGE).should(
 			'be.visible',
-		)
-	})
-
-	it('shows an error dialog and keeps the typed message when sending fails', () => {
-		cy.intercept(API_DATABASE.POST, MESSAGE_URL, {
-			statusCode: 500,
-			body: {},
-		}).as('sendMessage')
-
-		cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_INPUT).type(MESSAGE)
-		cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()
-		cy.wait('@sendMessage', { timeout: REQUEST_TIMEOUT })
-
-		cy.get(CONTACT_TRAVELLER_SELECTORS.ERROR_DIALOG).should('be.visible')
-		cy.location('pathname').should('eq', recipientPath)
-		cy.get(CONTACT_TRAVELLER_SELECTORS.SENDING_DIALOG).should('not.exist')
-		cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_INPUT).should(
-			'have.value',
-			MESSAGE,
 		)
 	})
 })

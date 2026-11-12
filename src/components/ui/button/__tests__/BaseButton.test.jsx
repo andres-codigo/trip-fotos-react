@@ -12,6 +12,52 @@ const renderWithRouter = (component) => {
 
 describe('<BaseButton />', () => {
 	describe('Rendering tests', () => {
+		it('renders a button, a link, or an unfocusable span for a disabled link', () => {
+			renderWithRouter(
+				<>
+					<BaseButton
+						isDisabled
+						data-cy="button">
+						Button
+					</BaseButton>
+					<BaseButton
+						isLink
+						to="/test"
+						data-cy="link">
+						Link
+					</BaseButton>
+					<BaseButton
+						isLink
+						data-cy="default-link">
+						Home
+					</BaseButton>
+					<BaseButton
+						isLink
+						isDisabled
+						to="/test"
+						data-cy="disabled-link">
+						Disabled
+					</BaseButton>
+				</>,
+			)
+
+			expect(screen.getByTestId('button').tagName).toBe('BUTTON')
+			expect(screen.getByTestId('button')).toBeDisabled()
+			expect(screen.getByTestId('link')).toHaveAttribute('href', '/test')
+			expect(screen.getByTestId('link')).not.toHaveAttribute(
+				'aria-disabled',
+			)
+			expect(screen.getByTestId('default-link')).toHaveAttribute(
+				'href',
+				'/',
+			)
+			const span = screen.getByTestId('disabled-link')
+			expect(span.tagName).toBe('SPAN')
+			expect(span).not.toHaveAttribute('href')
+			expect(span).toHaveAttribute('aria-disabled', 'true')
+			expect(span).toHaveAttribute('tabindex', '-1')
+		})
+
 		it('keeps a consumer className alongside the mode styles', () => {
 			render(
 				<BaseButton

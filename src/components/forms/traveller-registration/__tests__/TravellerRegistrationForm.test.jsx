@@ -2,13 +2,7 @@ import { render, fireEvent, screen, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
-import {
-	FILE_DROP,
-	MOCK_CITIES,
-	TRAVELLER_REGISTRATION_FORM_SELECTORS,
-	TRIP_PHOTOS,
-	UI_TEXT,
-} from '@/constants/test'
+import { FILE_DROP, MOCK_CITIES, TRIP_PHOTOS, UI_TEXT } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 import {
 	TRAVELLER_REGISTRATION_FIELDS,
@@ -84,207 +78,72 @@ describe('<TravellerRegistrationForm />', () => {
 	})
 
 	describe('Rendering tests', () => {
-		it('renders form with title', () => {
+		const FIELDS = [
+			FORM_SELECTORS.FIRST_NAME_INPUT,
+			FORM_SELECTORS.LAST_NAME_INPUT,
+			FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+			FORM_SELECTORS.TRIP_START_INPUT,
+			FORM_SELECTORS.TRIP_END_INPUT,
+		]
+
+		it('renders a titled, idle form whose fields are all required', () => {
 			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 
-			expect(
-				screen.getByText(UI_TEXT.FORMS.REGISTER_AS_TRAVELLER),
-			).toBeInTheDocument()
-		})
-
-		it('renders all required form fields', () => {
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			expect(
-				screen.getByTestId(FORM_SELECTORS.FIRST_NAME_INPUT),
-			).toBeInTheDocument()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.LAST_NAME_INPUT),
-			).toBeInTheDocument()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
-			).toBeInTheDocument()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_START_INPUT),
-			).toBeInTheDocument()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_END_INPUT),
-			).toBeInTheDocument()
-		})
-
-		it('labels the city search "Cities visited" with a required mark', () => {
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			const combobox = screen.getByRole('combobox', {
-				name: UI_TEXT.FORMS.CITIES_VISITED,
-			})
-			expect(combobox).toHaveAttribute('aria-required', 'true')
-		})
-
-		it('renders submit button', () => {
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			expect(
-				screen.getByTestId(FORM_SELECTORS.REGISTER_BUTTON),
-			).toBeInTheDocument()
-		})
-
-		it('renders with correct data-cy attributes', () => {
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			expect(screen.getByTestId(FORM_SELECTORS.FORM)).toBeInTheDocument()
+			const form = screen.getByTestId(FORM_SELECTORS.FORM)
+			expect(form).toHaveAttribute('novalidate')
+			expect(form).toHaveAttribute('aria-busy', 'false')
+			expect(form).toHaveAttribute(
+				'aria-labelledby',
+				'traveller-registration-title',
+			)
 			expect(
 				screen.getByTestId('traveller-registration-form-title'),
-			).toBeInTheDocument()
-		})
-	})
-
-	describe('Form state and props passing', () => {
-		it('passes correct props to Input components', () => {
-			useTravellerRegistration.mockReturnValue({
-				...mockHookReturnValue,
-				formData: {
-					firstName: {
-						value: 'John',
-						message: 'First name is required',
-						isValid: false,
-					},
-					lastName: { value: '', message: '', isValid: true },
-					tripDescription: { value: '', message: '', isValid: true },
-					tripStart: { value: '', message: '', isValid: true },
-					tripEnd: { value: '', message: '', isValid: true },
-					cities: { value: [], message: '', isValid: true },
-				},
-			})
-
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			const firstNameInput = screen.getByTestId(
+			).toHaveTextContent(UI_TEXT.FORMS.REGISTER_AS_TRAVELLER)
+			FIELDS.forEach((field) =>
+				expect(screen.getByTestId(field)).toHaveAttribute('required'),
+			)
+			;[
 				FORM_SELECTORS.FIRST_NAME_INPUT,
+				FORM_SELECTORS.LAST_NAME_INPUT,
+				FORM_SELECTORS.TRIP_START_INPUT,
+				FORM_SELECTORS.TRIP_END_INPUT,
+			].forEach((field) =>
+				expect(screen.getByTestId(field)).toHaveAttribute(
+					'aria-required',
+					'true',
+				),
 			)
-			expect(firstNameInput).toHaveValue('John')
-			expect(firstNameInput).toHaveAttribute('required')
+			expect(
+				screen.getByRole('combobox', {
+					name: UI_TEXT.FORMS.CITIES_VISITED,
+				}),
+			).toHaveAttribute('aria-required', 'true')
+			expect(
+				screen.getByTestId(FORM_SELECTORS.REGISTER_BUTTON),
+			).toBeEnabled()
 		})
 
-		it('disables form inputs when isLoading is true', () => {
-			render(
+		it('disables every field and the submit button, and announces the busy form, while loading', () => {
+			const { container } = render(
 				<TravellerRegistrationForm
 					isLoading={true}
 					onSubmit={mockOnSubmit}
 				/>,
 			)
 
-			expect(
-				screen.getByTestId(FORM_SELECTORS.FIRST_NAME_INPUT),
-			).toBeDisabled()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.LAST_NAME_INPUT),
-			).toBeDisabled()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
-			).toBeDisabled()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_START_INPUT),
-			).toBeDisabled()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_END_INPUT),
-			).toBeDisabled()
-		})
-
-		it('disables submit button when isLoading is true', () => {
-			render(
-				<TravellerRegistrationForm
-					isLoading={true}
-					onSubmit={mockOnSubmit}
-				/>,
+			FIELDS.forEach((field) =>
+				expect(screen.getByTestId(field)).toBeDisabled(),
 			)
-
-			const submitButton = screen.getByTestId(
-				FORM_SELECTORS.REGISTER_BUTTON,
-			)
-			expect(submitButton).toBeDisabled()
-		})
-
-		it('sets aria-busy on form when isLoading is true', () => {
-			render(
-				<TravellerRegistrationForm
-					isLoading={true}
-					onSubmit={mockOnSubmit}
-				/>,
-			)
-
+			expect(
+				screen.getByTestId(FORM_SELECTORS.REGISTER_BUTTON),
+			).toBeDisabled()
 			expect(screen.getByTestId(FORM_SELECTORS.FORM)).toHaveAttribute(
 				'aria-busy',
 				'true',
 			)
-		})
-
-		it('sets aria-busy to false when isLoading is false', () => {
-			render(
-				<TravellerRegistrationForm
-					isLoading={false}
-					onSubmit={mockOnSubmit}
-				/>,
-			)
-
-			expect(screen.getByTestId(FORM_SELECTORS.FORM)).toHaveAttribute(
-				'aria-busy',
-				'false',
-			)
-		})
-	})
-
-	describe('Form validation styling', () => {
-		it('form renders with proper structure for invalid fields', () => {
-			useTravellerRegistration.mockReturnValue({
-				...mockHookReturnValue,
-				formData: {
-					firstName: {
-						value: '',
-						message: 'Required',
-						isValid: false,
-					},
-					lastName: { value: '', message: '', isValid: true },
-					tripDescription: { value: '', message: '', isValid: true },
-					tripStart: { value: '', message: '', isValid: true },
-					tripEnd: { value: '', message: '', isValid: true },
-					cities: { value: [], message: '', isValid: true },
-				},
-			})
-
-			const { container } = render(
-				<TravellerRegistrationForm onSubmit={mockOnSubmit} />,
-			)
-
-			// Verify form renders successfully
-			const form = container.querySelector(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM,
-			)
-			expect(form).toBeInTheDocument()
-		})
-
-		it('does not add invalidForm class when field is valid', () => {
-			useTravellerRegistration.mockReturnValue({
-				...mockHookReturnValue,
-				formData: {
-					firstName: { value: 'John', message: '', isValid: true },
-					lastName: { value: '', message: '', isValid: true },
-					tripDescription: { value: '', message: '', isValid: true },
-					tripStart: { value: '', message: '', isValid: true },
-					tripEnd: { value: '', message: '', isValid: true },
-					cities: { value: [], message: '', isValid: true },
-				},
-			})
-
-			const { container } = render(
-				<TravellerRegistrationForm onSubmit={mockOnSubmit} />,
-			)
-
-			// Check that form rendered successfully
-			const form = container.querySelector(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM,
-			)
-			expect(form).toBeInTheDocument()
+			expect(
+				container.querySelector('[aria-live="polite"]'),
+			).toBeInTheDocument()
 		})
 	})
 
@@ -384,88 +243,7 @@ describe('<TravellerRegistrationForm />', () => {
 		})
 	})
 
-	describe('Accessibility', () => {
-		it('sets noValidate on form to prevent browser validation', () => {
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			const form = screen.getByTestId(FORM_SELECTORS.FORM)
-			expect(form).toHaveAttribute('novalidate')
-		})
-
-		it('sets aria-labelledby on form pointing to title', () => {
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			const form = screen.getByTestId(FORM_SELECTORS.FORM)
-			expect(form).toHaveAttribute(
-				'aria-labelledby',
-				'traveller-registration-title',
-			)
-		})
-
-		it('renders aria-live region for loading state', () => {
-			const { container } = render(
-				<TravellerRegistrationForm
-					isLoading={true}
-					onSubmit={mockOnSubmit}
-				/>,
-			)
-
-			const ariaLiveRegion = container.querySelector(
-				'[aria-live="polite"]',
-			)
-			expect(ariaLiveRegion).toBeInTheDocument()
-		})
-
-		it('all text inputs have required attribute', () => {
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			expect(
-				screen.getByTestId(FORM_SELECTORS.FIRST_NAME_INPUT),
-			).toHaveAttribute('required')
-			expect(
-				screen.getByTestId(FORM_SELECTORS.LAST_NAME_INPUT),
-			).toHaveAttribute('required')
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
-			).toHaveAttribute('required')
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_START_INPUT),
-			).toHaveAttribute('required')
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_END_INPUT),
-			).toHaveAttribute('required')
-		})
-	})
-
 	describe('Form field configuration', () => {
-		it('renders form with all expected sections', () => {
-			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
-
-			// Check for form title
-			expect(
-				screen.getByText(UI_TEXT.FORMS.REGISTER_AS_TRAVELLER),
-			).toBeInTheDocument()
-
-			// Check for form fields
-			expect(
-				screen.getByTestId(FORM_SELECTORS.FIRST_NAME_INPUT),
-			).toBeInTheDocument()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.LAST_NAME_INPUT),
-			).toBeInTheDocument()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_DESCRIPTION_INPUT),
-			).toBeInTheDocument()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_START_INPUT),
-			).toBeInTheDocument()
-			expect(
-				screen.getByTestId(FORM_SELECTORS.TRIP_END_INPUT),
-			).toBeInTheDocument()
-
-			expect(screen.getByRole('combobox')).toBeInTheDocument()
-		})
-
 		it('renders the trip dates as two date inputs in a "Trip dates" group, capped at today', () => {
 			vi.useFakeTimers({ toFake: ['Date'] })
 			vi.setSystemTime(new Date(2026, 10, 11, 12, 0))
@@ -546,15 +324,6 @@ describe('<TravellerRegistrationForm />', () => {
 			expect(document.getElementById('tripEnd-error')).toHaveTextContent(
 				VALIDATION_MESSAGES.TRIP_END_BEFORE_START,
 			)
-		})
-
-		it('renders Textarea component for trip description field', () => {
-			const { container } = render(
-				<TravellerRegistrationForm onSubmit={mockOnSubmit} />,
-			)
-
-			const textarea = container.querySelector('textarea')
-			expect(textarea).toBeInTheDocument()
 		})
 
 		it('labels the trip description textarea "About your trip"', () => {

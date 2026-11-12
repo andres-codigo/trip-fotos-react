@@ -1,16 +1,11 @@
-import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import {
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
-	DIALOG_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
-	COMBOBOX_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { GLOBAL } from '../../../src/constants/ui/global'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
-import { VALIDATION_MESSAGES } from '../../../src/constants/validation'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../../src/constants/travellers'
 import { API_DATABASE } from '../../../src/constants/api'
-import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-travellers'
 
 import { TEST_USERS } from '../../../src/constants/config/users'
@@ -37,56 +32,10 @@ describe('Register Page', () => {
 		uploadedImageUrls = []
 	})
 
-	it('renders the register page container', () => {
-		cy.get(PAGE_SELECTORS.REGISTER_MAIN_CONTAINER).should('be.visible')
-		cy.get(PAGE_SELECTORS.REGISTER_MAIN_CONTAINER).within(() => {
-			cy.get('h1').should('contain', 'Register')
-		})
-	})
-
 	it('has no axe violations', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('be.visible')
 
 		cy.checkA11y()
-	})
-
-	it('renders the traveller registration form', () => {
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('be.visible')
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).should(
-			'be.visible',
-		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).should(
-			'be.visible',
-		)
-		cy.get(
-			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
-		).should('be.visible')
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).should(
-			'be.visible',
-		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).should(
-			'be.visible',
-		)
-		cy.get(COMBOBOX_SELECTORS.INPUT).should('be.visible')
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).should(
-			'be.visible',
-		)
-	})
-
-	it('shows validation errors on empty submit', () => {
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
-		cy.contains(VALIDATION_MESSAGES.FIRST_NAME_REQUIRED).should(
-			'be.visible',
-		)
-		cy.contains(VALIDATION_MESSAGES.LAST_NAME_REQUIRED).should('be.visible')
-		cy.contains(VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED).should(
-			'be.visible',
-		)
-		cy.contains(VALIDATION_MESSAGES.TRIP_START_REQUIRED).should(
-			'be.visible',
-		)
-		cy.contains(VALIDATION_MESSAGES.TRIP_END_REQUIRED).should('be.visible')
-		cy.contains(VALIDATION_MESSAGES.CITIES_REQUIRED).should('be.visible')
 	})
 
 	it('successfully registers a traveller', () => {
@@ -200,118 +149,6 @@ describe('Register Page', () => {
 		cy.assertTravellerPersisted(TEST_USERS.STANDARD.ID, {
 			firstName,
 			lastName,
-		})
-	})
-
-	it('shows a loading dialog while registering', () => {
-		const { firstName, lastName, tripDescription, tripStart, tripEnd } =
-			MOCK_TRAVELLERS.NEW_TRAVELLER
-
-		// Intercept with delay
-		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*', {
-			delay: 1000,
-			statusCode: 200,
-			body: {
-				...MOCK_TRAVELLERS.NEW_TRAVELLER,
-				registered: new Date().toISOString(),
-			},
-		}).as('registerTravellerDelayed')
-
-		// Fill in the form
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
-			firstName,
-		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
-			lastName,
-		)
-		cy.get(
-			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
-		).type(tripDescription)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
-			tripStart,
-		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
-			tripEnd,
-		)
-
-		// Choose a city through the (stubbed) city search
-		cy.selectCity()
-
-		// Submit the form
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
-
-		// Check for loading dialog
-		cy.get(DIALOG_SELECTORS.REGISTERING, {
-			timeout: REQUEST_TIMEOUT,
-		}).should('be.visible')
-		cy.get(DIALOG_SELECTORS.REGISTERING).within(() => {
-			cy.get(DIALOG_SELECTORS.TITLE).should('contain', 'Registering')
-			cy.get(DIALOG_SELECTORS.SPINNER_CONTAINER).should('exist')
-		})
-
-		cy.wait('@registerTravellerDelayed', { timeout: REQUEST_TIMEOUT })
-	})
-
-	describe('Error Handling', () => {
-		it('shows an error dialog when registration fails', () => {
-			const { firstName, lastName, tripDescription, tripStart, tripEnd } =
-				MOCK_TRAVELLERS.NEW_TRAVELLER
-
-			// Intercept failure
-			cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*', {
-				statusCode: 500,
-				body: { error: 'Internal Server Error' },
-			}).as('registerTravellerFailed')
-
-			// Fill in the form
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
-				firstName,
-			)
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
-				lastName,
-			)
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
-			).type(tripDescription)
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
-				tripStart,
-			)
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
-				tripEnd,
-			)
-
-			// Choose a city through the (stubbed) city search
-			cy.selectCity()
-
-			// Submit the form
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
-			).click()
-
-			cy.wait('@registerTravellerFailed', { timeout: REQUEST_TIMEOUT })
-
-			// Check for error dialog
-			cy.get(DIALOG_SELECTORS.INVALID_TRAVELLER_REGISTRATION).should(
-				'be.visible',
-			)
-			cy.get(DIALOG_SELECTORS.INVALID_TRAVELLER_REGISTRATION).within(
-				() => {
-					cy.get(DIALOG_SELECTORS.TITLE).should(
-						'contain',
-						DIALOG_SELECTORS.MESSAGES.ERROR.TITLE,
-					)
-					cy.contains(
-						ERROR_MESSAGES.FAILED_TO_REGISTER_TRAVELLER,
-					).should('exist')
-					// Close the dialog
-					cy.get(DIALOG_SELECTORS.CLOSE_BUTTON).click()
-				},
-			)
-
-			// Ensure dialog is closed
-			cy.get(DIALOG_SELECTORS.INVALID_TRAVELLER_REGISTRATION).should(
-				'not.exist',
-			)
 		})
 	})
 })

@@ -1,6 +1,4 @@
 import { FILE_UPLOADER_SELECTORS } from '@/constants/test'
-import { GLOBAL } from '@/constants/ui'
-import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import AddFile from '@/components/forms/file-uploader/AddFile'
 
@@ -35,49 +33,6 @@ describe('<AddFile />', () => {
 		cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW_NAME).should(
 			'have.text',
 			'a.png',
-		)
-	})
-
-	it('removes a file', () => {
-		cy.mount(<AddFile />)
-		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
-			pngFile('a.png'),
-			{ force: true },
-		)
-
-		cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW_REMOVE)
-			.should(
-				'have.attr',
-				'aria-label',
-				GLOBAL.REMOVE_FILE_LABEL('a.png'),
-			)
-			.click()
-
-		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_LIST).should('not.exist')
-	})
-
-	it('shows an accessible error for an unsupported file', () => {
-		cy.mount(<AddFile />)
-
-		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
-			{
-				contents: Cypress.Buffer.from('x'),
-				fileName: 'notes.pdf',
-				mimeType: 'application/pdf',
-			},
-			{ force: true },
-		)
-
-		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_ERRORS)
-			.should('have.attr', 'role', 'alert')
-			.and(
-				'contain.text',
-				VALIDATION_MESSAGES.FILE_TYPE_INVALID('notes.pdf'),
-			)
-		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).should(
-			'have.attr',
-			'aria-invalid',
-			'true',
 		)
 	})
 

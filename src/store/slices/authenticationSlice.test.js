@@ -101,23 +101,6 @@ describe('authenticationSlice', () => {
 			expect(result).toBe(MOCK_KEYS.ID_TOKEN)
 		})
 
-		it('should return null when no token in state', () => {
-			const mockState = {
-				authentication: {
-					token: null,
-					userId: null,
-					userName: null,
-					userEmail: null,
-					didAutoLogout: false,
-					status: 'idle',
-					error: null,
-				},
-			}
-
-			const result = selectAuthenticationToken(mockState)
-			expect(result).toBeNull()
-		})
-
 		it('should select user profile from state', () => {
 			const mockState = {
 				authentication: {
