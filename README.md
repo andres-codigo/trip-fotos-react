@@ -318,17 +318,17 @@ Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools 
 - **Cypress** component tests (`*.cy.jsx`) sit in the same `__tests__/` folders; E2E specs live in `cypress/e2e/` and run in CI against the local Firebase emulators on every PR; one read-only smoke spec in `cypress/e2e-live/` runs against the real project on pushes to `main`.
 - **GitHub Actions** run Vitest, Cypress component and Cypress E2E tests on pull requests that touch code, label issues and PRs from [`.github/labels.json`](.github/labels.json) and move them across the project board. CodeQL scans every PR, and the **Protect main** ruleset requires a pull request to change `main`.
 
-| Workflow                          | File                                                               | Triggered On     |
-| --------------------------------- | ------------------------------------------------------------------ | ---------------- |
-| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`                          | PR/Manual        |
-| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml` (emulator and live smoke jobs) | Push/PR/Manual   |
-| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`                          | PR/Manual        |
-| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`                      | PR Target Events |
-| GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`                        | Issue Events     |
-| GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml`                     | PR Target Events |
-| GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`                          | Push/Manual      |
-| Release - Release Please          | `.github/workflows/release-please.yml`                             | Push             |
-| Guard - start-issue script        | `.github/workflows/start-issue-guard.yml`                          | PR Events        |
+| Workflow                          | File                                                                                      | Triggered On     |
+| --------------------------------- | ----------------------------------------------------------------------------------------- | ---------------- |
+| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`                                                 | PR/Manual        |
+| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml` (three parallel emulator groups and a live smoke job) | Push/PR/Manual   |
+| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`                                                 | PR/Manual        |
+| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`                                             | PR Target Events |
+| GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`                                               | Issue Events     |
+| GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml`                                            | PR Target Events |
+| GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`                                                 | Push/Manual      |
+| Release - Release Please          | `.github/workflows/release-please.yml`                                                    | Push             |
+| Guard - start-issue script        | `.github/workflows/start-issue-guard.yml`                                                 | PR Events        |
 
 The workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` repository secrets; only the live smoke job also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
 
@@ -382,7 +382,7 @@ trip-fotos-react/
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
-├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, seed-emulators.mjs with its test, dependency-check output)
+├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, seed-emulators.mjs and e2e-groups.mjs with their tests, dependency-check output)
 ├── src/
 │   ├── app/            # Main application component
 │   ├── assets/         # Fonts, SVGs, and other static assets
