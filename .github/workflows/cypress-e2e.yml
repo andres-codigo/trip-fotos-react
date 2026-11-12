@@ -7,18 +7,8 @@ on:
     push:
         branches:
             - main
-        paths:
-            - 'src/**'
-            - 'cypress/**'
-            - 'cypress.config.*'
-            - 'package.json'
-    pull_request:
-        branches:
-            - main
-        # Draft PRs wait for ready_for_review: /verify already ran the same gates locally
-        types: [opened, synchronize, reopened, ready_for_review]
-        # Only files the app, the emulators or the specs depend on
-        paths:
+        # The same paths as pull requests, so every merge that could affect a spec gets the full run
+        paths: &e2e-paths
             - 'src/**'
             - 'cypress/**'
             - 'cypress.config.js'
@@ -33,11 +23,21 @@ on:
             - 'vite.config.js'
             - '.github/workflows/cypress-e2e.yml'
             - '.github/actions/**'
+            - '.claude/skills/verify/run-e2e.mjs'
+            - '.claude/skills/verify/spec-results.mjs'
+    pull_request:
+        branches:
+            - main
+        # Draft PRs wait for ready_for_review: /verify already ran the same gates locally
+        types: [opened, synchronize, reopened, ready_for_review]
+        # Only files the app, the emulators or the specs depend on
+        paths: *e2e-paths
     workflow_dispatch:
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+    # A newer push supersedes a PR run, but every merge to main keeps its full run
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
     run-live-smoke-test:
@@ -83,17 +83,51 @@ jobs:
                   path: cypress/screenshots
                   retention-days: 7
 
+    plan-e2e-emulator-tests:
+        name: Plan the E2E groups
+        # Release-please PRs change only the version and changelog; main ran the full suite after each merge they release
+        if: github.event_name != 'pull_request' || (!github.event.pull_request.draft && !startsWith(github.head_ref, 'release-please--'))
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        outputs:
+            matrix: ${{ steps.plan.outputs.matrix }}
+            groups: ${{ steps.plan.outputs.groups }}
+
+        steps:
+            # A PR checks out its merge commit, whose first parent is main: the diff between them is the PR's change
+            - name: Checkout code
+              uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+              with:
+                  fetch-depth: 2
+
+            - name: Setup Node.js
+              uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+              with:
+                  node-version: '24'
+
+            # A PR runs only the specs cypress/impact.js maps its files to (all of them for shared files); main and manual runs run every spec
+            - name: Pick the specs and split them into groups
+              id: plan
+              env:
+                  EVENT: ${{ github.event_name }}
+              run: |
+                  if [ "$EVENT" = pull_request ]; then
+                      git diff --name-only HEAD^1 HEAD > "$RUNNER_TEMP/changed-files.txt"
+                      node scripts/e2e-groups.mjs "$RUNNER_TEMP/changed-files.txt"
+                  else
+                      node scripts/e2e-groups.mjs
+                  fi
+
     run-e2e-emulator-tests:
-        name: E2E group ${{ matrix.group }} of 3 (Firebase emulators)
-        # The PR run already passed these specs on the same code; pushes to main run only the live smoke test
-        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && !github.event.pull_request.draft && !startsWith(github.head_ref, 'release-please--'))
+        name: E2E group ${{ matrix.group }} of ${{ matrix.count }} (Firebase emulators)
+        needs: plan-e2e-emulator-tests
+        if: needs.plan-e2e-emulator-tests.outputs.groups != '0'
         runs-on: ubuntu-latest
         timeout-minutes: 30
         # Each group runs its own emulators; scripts/e2e-groups.mjs balances the specs by recorded time. Every group finishes, so one failure does not hide another
         strategy:
             fail-fast: false
-            matrix:
-                group: [1, 2, 3]
+            matrix: ${{ fromJSON(needs.plan-e2e-emulator-tests.outputs.matrix) }}
         # No secrets are needed, so this runs on every PR, Dependabot's included
         env:
             CI: 'true'
@@ -123,10 +157,9 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: Run this group's E2E specs against the emulators
-              run: |
-                  E2E_SPEC="$(node scripts/e2e-groups.mjs ${{ matrix.group }} 3)"
-                  echo "Specs: $E2E_SPEC"
-                  E2E_SPEC="$E2E_SPEC" npm run cy:run:e2e:emulators
+              env:
+                  E2E_SPEC: ${{ matrix.specs }}
+              run: npm run cy:run:e2e:emulators
 
             - name: Upload Cypress screenshots on failure
               uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -147,10 +180,24 @@ jobs:
     # One check name whatever the number of groups, for a ruleset or a reader to rely on
     e2e-emulator-summary:
         name: Run Cypress E2E Tests (Firebase emulators)
-        needs: run-e2e-emulator-tests
-        if: always() && needs.run-e2e-emulator-tests.result != 'skipped'
+        needs: [plan-e2e-emulator-tests, run-e2e-emulator-tests]
+        if: always() && needs.plan-e2e-emulator-tests.result != 'skipped'
         runs-on: ubuntu-latest
         timeout-minutes: 5
         steps:
+            # Skipped groups pass only when the plan ran and found no spec to run
             - name: Check every E2E group passed
-              run: test "${{ needs.run-e2e-emulator-tests.result }}" = success
+              env:
+                  PLAN: ${{ needs.plan-e2e-emulator-tests.result }}
+                  GROUPS: ${{ needs.run-e2e-emulator-tests.result }}
+                  EVENT: ${{ github.event_name }}
+              run: |
+                  if [ "$PLAN" = success ] && { [ "$GROUPS" = success ] || [ "$GROUPS" = skipped ]; }; then exit 0; fi
+                  if [ "$EVENT" = push ]; then
+                      message="The full E2E run on main failed after the merge of ${GITHUB_SHA::7} (plan: $PLAN, groups: $GROUPS). Fix main before the next release PR merges."
+                  else
+                      message="E2E failed (plan: $PLAN, groups: $GROUPS)."
+                  fi
+                  echo "::error::$message"
+                  echo "$message" >> "$GITHUB_STEP_SUMMARY"
+                  exit 1

@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest'
 
 import { suiteSpecs } from '../../.claude/skills/verify/spec-results.mjs'
 import {
+	MAX_GROUPS,
 	SPEC_SECONDS,
 	UNKNOWN_SPEC_SECONDS,
+	planMatrix,
+	planSpecs,
 	splitSpecs,
 } from '../e2e-groups.mjs'
 
@@ -42,5 +45,81 @@ describe('e2e-groups', () => {
 			seconds: UNKNOWN_SPEC_SECONDS,
 		})
 		expect(groups[1].specs).toEqual([])
+	})
+
+	describe('planSpecs', () => {
+		it('runs every spec on main and manual runs', () => {
+			expect(planSpecs(null, suite).specs).toEqual(suite)
+		})
+
+		it('runs only the specs for a page a PR touches', () => {
+			expect(
+				planSpecs(['src/pages/page-not-found/PageNotFound.jsx'], suite)
+					.specs,
+			).toEqual(['cypress/e2e/pages/PageNotFound.cy.js'])
+		})
+
+		it('runs a changed spec impact.js does not name yet', () => {
+			const spec = 'cypress/e2e/pages/New.cy.js'
+			expect(planSpecs([spec], [...suite, spec]).specs).toEqual([spec])
+		})
+
+		it.each([
+			'src/store/databaseRequest.js',
+			'src/components/layout/header/Header.jsx',
+			'cypress/support/commands.js',
+			'cypress/fixtures/travellers.json',
+			'scripts/seed-emulators.mjs',
+			'firebase/database.rules.json',
+			'package-lock.json',
+			'.github/workflows/cypress-e2e.yml',
+			'.claude/skills/verify/run-e2e.mjs',
+		])('runs every spec when %s changes', (file) => {
+			const plan = planSpecs(
+				['src/pages/page-not-found/PageNotFound.jsx', file],
+				suite,
+			)
+			expect(plan.specs).toEqual(suite)
+			expect(plan.reason).toMatch(/^every spec/)
+		})
+
+		it('runs no spec for tests, captures and files outside the app', () => {
+			expect(
+				planSpecs(
+					[
+						'src/pages/page-not-found/__tests__/PageNotFound.test.jsx',
+						'scripts/__tests__/e2e-groups.test.js',
+						'cypress/ui-check/capture.cy.js',
+						'docs/ci-cd.md',
+					],
+					suite,
+				).specs,
+			).toEqual([])
+		})
+	})
+
+	describe('planMatrix', () => {
+		it('runs a short plan in one group', () => {
+			expect(
+				planMatrix(['cypress/e2e/pages/PageNotFound.cy.js']),
+			).toEqual([
+				{
+					group: 1,
+					count: 1,
+					specs: 'cypress/e2e/pages/PageNotFound.cy.js',
+				},
+			])
+		})
+
+		it('splits the full suite across the most groups, none empty', () => {
+			const matrix = planMatrix(suite)
+			expect(matrix).toHaveLength(MAX_GROUPS)
+			expect(matrix.every(({ specs }) => specs.length)).toBe(true)
+			expect(matrix.every(({ count }) => count === MAX_GROUPS)).toBe(true)
+		})
+
+		it('plans no group when no spec runs', () => {
+			expect(planMatrix([])).toEqual([])
+		})
 	})
 })

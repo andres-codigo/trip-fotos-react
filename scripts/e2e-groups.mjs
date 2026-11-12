@@ -1,5 +1,8 @@
-// Splits the emulator E2E specs into balanced groups for the parallel CI jobs: `node scripts/e2e-groups.mjs <group> <count>` prints group <group> (1-based) as Cypress `--spec` input
+// Plans the emulator E2E jobs: `node scripts/e2e-groups.mjs [changed-files.txt]` picks the specs the listed files can affect (no list runs them all), splits them into balanced groups and writes the matrix to GITHUB_OUTPUT and the reason to GITHUB_STEP_SUMMARY when set
+import fs from 'node:fs'
+
 import { suiteSpecs } from '../.claude/skills/verify/spec-results.mjs'
+import { affectedSpecs } from '../cypress/impact.js'
 
 // Seconds per spec on the CI runner, Cypress start-up between specs included (run 43127128644, PR #704 (prune tests)); re-record when a spec grows or the slowest group drifts
 export const SPEC_SECONDS = {
@@ -20,6 +23,39 @@ export const SPEC_SECONDS = {
 // A spec with no recorded time still runs, weighted like an average one
 export const UNKNOWN_SPEC_SECONDS = 10
 
+// Each group starts its own emulators and build, so a short run is cheaper in one job
+export const SECONDS_PER_GROUP = 40
+export const MAX_GROUPS = 3
+
+// Files outside src/ that the workflow runs on and that every spec goes through: the emulators, seed data, fixtures, the build and this planner
+const FULL_RUN_FILES = [
+	'cypress/',
+	'cypress.config.js',
+	'scripts/',
+	'firebase/',
+	'firebase.json',
+	'.env.emulators',
+	'index.html',
+	'public/',
+	'package.json',
+	'package-lock.json',
+	'vite.config.js',
+	'.github/workflows/cypress-e2e.yml',
+	'.github/actions/',
+	'.claude/skills/verify/run-e2e.mjs',
+	'.claude/skills/verify/spec-results.mjs',
+]
+
+// The specs themselves (cypress/impact.js runs a changed one), captures and Vitest tests change no E2E run
+const NO_FULL_RUN = /^cypress\/(e2e|ui-check)\/|\/__tests__\//
+
+const fullRunFile = (files) =>
+	files.find(
+		(file) =>
+			!NO_FULL_RUN.test(file) &&
+			FULL_RUN_FILES.some((prefix) => file.startsWith(prefix)),
+	)
+
 const weight = (spec) => SPEC_SECONDS[spec] ?? UNKNOWN_SPEC_SECONDS
 
 // Longest first, each to the lightest group so far; sorting by name first keeps the split the same on every runner
@@ -39,24 +75,77 @@ export const splitSpecs = (specs, count) => {
 	return groups
 }
 
+const groupCount = (specs) => {
+	const seconds = specs.reduce((sum, spec) => sum + weight(spec), 0)
+	return Math.min(MAX_GROUPS, Math.ceil(seconds / SECONDS_PER_GROUP))
+}
+
+// null files (a push to main, a manual run) runs every spec
+export const planSpecs = (files, suite) => {
+	if (!files) return { specs: suite, reason: 'every spec (full run)' }
+	const shared = fullRunFile(files)
+	if (shared) {
+		return {
+			specs: suite,
+			reason: `every spec: ${shared} affects them all`,
+		}
+	}
+	const specs = affectedSpecs(files).filter((spec) => suite.includes(spec))
+	// A new spec impact.js does not name yet still runs when it changes
+	const added = files.filter(
+		(file) => suite.includes(file) && !specs.includes(file),
+	)
+	const scoped = [...specs, ...added]
+	if (scoped.length === suite.length) {
+		return { specs: suite, reason: 'every spec: a shared app file changed' }
+	}
+	return {
+		specs: scoped,
+		reason: scoped.length
+			? `${scoped.length} of ${suite.length} specs, for the changed files`
+			: 'no spec: the change affects no E2E spec',
+	}
+}
+
+export const planMatrix = (specs) => {
+	const count = groupCount(specs)
+	return splitSpecs(specs, count).map((group, index) => ({
+		group: index + 1,
+		count,
+		specs: group.specs.join(','),
+	}))
+}
+
+const readFiles = (listPath) =>
+	listPath
+		? fs
+				.readFileSync(listPath, 'utf8')
+				.split('\n')
+				.map((line) => line.trim())
+				.filter(Boolean)
+		: null
+
 const main = () => {
-	const [group, count] = process.argv.slice(2).map(Number)
-	if (
-		!Number.isInteger(count) ||
-		count < 1 ||
-		!(group >= 1 && group <= count)
-	) {
-		console.error('Usage: node scripts/e2e-groups.mjs <group> <count>')
-		process.exit(1)
+	const suite = suiteSpecs('e2e', process.cwd())
+	const { specs, reason } = planSpecs(readFiles(process.argv[2]), suite)
+	const include = planMatrix(specs)
+	const lines = [
+		`E2E: ${reason}`,
+		...include.map(
+			({ group, count, specs: list }) =>
+				`- Group ${group} of ${count}: ${list.split(',').join(', ')}`,
+		),
+	].join('\n')
+	console.log(lines)
+	if (process.env.GITHUB_STEP_SUMMARY) {
+		fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines}\n`)
 	}
-	const { specs } = splitSpecs(suiteSpecs('e2e', process.cwd()), count)[
-		group - 1
-	]
-	if (!specs.length) {
-		console.error(`E2E group ${group} of ${count} has no specs`)
-		process.exit(1)
+	if (process.env.GITHUB_OUTPUT) {
+		fs.appendFileSync(
+			process.env.GITHUB_OUTPUT,
+			`matrix=${JSON.stringify({ include })}\ngroups=${include.length}\n`,
+		)
 	}
-	console.log(specs.join(','))
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main()
