@@ -31,7 +31,8 @@ export const MAX_GROUPS = 3
 const FULL_RUN_FILES = [
 	'cypress/',
 	'cypress.config.js',
-	'scripts/',
+	'scripts/seed-emulators.mjs',
+	'scripts/e2e-groups.mjs',
 	'firebase/',
 	'firebase.json',
 	'.env.emulators',
@@ -46,8 +47,8 @@ const FULL_RUN_FILES = [
 	'.claude/skills/verify/spec-results.mjs',
 ]
 
-// The specs themselves (cypress/impact.js runs a changed one), captures and Vitest tests change no E2E run
-const NO_FULL_RUN = /^cypress\/(e2e|ui-check)\/|\/__tests__\//
+// The specs themselves (cypress/impact.js runs a changed one), captures, the live smoke spec and Vitest tests change no emulator run
+const NO_FULL_RUN = /^cypress\/(e2e|e2e-live|ui-check)\/|\/__tests__\//
 
 const fullRunFile = (files) =>
 	files.find(
