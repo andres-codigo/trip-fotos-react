@@ -26,7 +26,8 @@ const Privacy = () => {
 					When you sign up or log in, your email address and password
 					are sent to Firebase Authentication (Google) to create and
 					verify your account. Your password is never stored by Trip
-					Fotos itself.
+					Fotos itself. If you ask to reset your password, Firebase
+					Authentication emails a reset link to that address.
 				</p>
 
 				<h2 className="mt-6 mb-[1em] text-[1.17rem]">
@@ -34,9 +35,9 @@ const Privacy = () => {
 				</h2>
 				<p>
 					If you register as a traveller, the name, trip description,
-					trip dates, cities and photos you provide are stored in
-					Firebase Realtime Database and Cloud Storage, and are shown
-					to other signed-in users.
+					trip dates, cities, photos and any photo descriptions you
+					provide are stored in Firebase Realtime Database and Cloud
+					Storage, and are shown to other signed-in users.
 				</p>
 
 				<h2 className="mt-6 mb-[1em] text-[1.17rem]">Messages</h2>
