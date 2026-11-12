@@ -53,6 +53,9 @@ const shouldUpdate = (state) => {
 }
 
 // Every finished upload is pushed to uploadedRefs, so a failed save can remove the files it left behind
+// An empty description is left out, so the record holds only what the traveller wrote
+const altOf = (alt) => alt?.trim() || null
+
 const uploadPhotos = async (files, { userId, dispatch, uploadedRefs }) => {
 	const MAX_CONCURRENT_UPLOADS = 5
 	const imageQueue = [...files]
@@ -267,6 +270,7 @@ export const registerTraveller = createAsyncThunk(
 				files: imageUrls,
 				fileDimensions,
 				fileThumbnails,
+				fileAlts: (data.files || []).map(({ alt }) => altOf(alt)),
 				registered: new Date().toISOString(),
 			}
 
@@ -339,6 +343,10 @@ export const updateTraveller = createAsyncThunk(
 				fileThumbnails: [
 					...keptPhotos.map(({ thumbnails }) => thumbnails),
 					...uploaded.fileThumbnails,
+				],
+				fileAlts: [
+					...keptPhotos.map(({ alt }) => altOf(alt)),
+					...(data.files || []).map(({ alt }) => altOf(alt)),
 				],
 			}
 
@@ -420,6 +428,7 @@ export const updateTravellers = createAsyncThunk(
 				files: responseData[key].files,
 				fileDimensions: responseData[key].fileDimensions,
 				fileThumbnails: responseData[key].fileThumbnails,
+				fileAlts: responseData[key].fileAlts,
 				registered: responseData[key].registered,
 			}))
 

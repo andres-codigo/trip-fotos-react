@@ -4,6 +4,7 @@
 			".read": true,
 			"$uid": {
 				".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)",
+				".validate": "newData.hasChild('files')",
 				"tripStart": {
 					".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) && newData.parent().child('tripEnd').isString()"
 				},
@@ -25,6 +26,11 @@
 						"$other": {
 							".validate": false
 						}
+					}
+				},
+				"fileAlts": {
+					"$index": {
+						".validate": "$index.matches(/^[0-9]+$/) && newData.isString() && newData.val().length > 0 && newData.val().length <= 150"
 					}
 				},
 				"fileThumbnails": {

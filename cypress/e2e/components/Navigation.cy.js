@@ -32,6 +32,8 @@ describe('Not logged in > Navigation', () => {
 
 describe('Logged in, not a traveller > Navigation', () => {
 	beforeEach(() => {
+		// An earlier spec can leave a traveller record for this user, which swaps Register for My trip
+		cy.resetEmulators()
 		performLogin()
 	})
 

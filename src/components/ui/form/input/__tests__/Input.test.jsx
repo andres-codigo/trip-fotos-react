@@ -150,4 +150,68 @@ describe('<Input />', () => {
 			expect(input).toBeDisabled()
 		})
 	})
+	describe('Helper text, required mark and password', () => {
+		it('reads the helper text before the error, and hides the asterisk from screen readers', () => {
+			render(
+				<Input
+					id="pw"
+					label="Password"
+					value=""
+					onChange={() => {}}
+					helpText="At least 6 characters."
+					isValid={false}
+					message="Enter your password."
+					required
+				/>,
+			)
+			const input = screen.getByLabelText(/^Password/, {
+				selector: 'input',
+			})
+
+			expect(input).toHaveAttribute(
+				'aria-describedby',
+				'pw-help pw-error',
+			)
+			expect(screen.getByText('*')).toHaveAttribute('aria-hidden', 'true')
+		})
+
+		it('shows and hides a password, naming the button after what it does', () => {
+			render(
+				<Input
+					id="pw"
+					label="Password"
+					type="password"
+					value="secret12"
+					onChange={() => {}}
+				/>,
+			)
+			const input = screen.getByLabelText(/^Password/, {
+				selector: 'input',
+			})
+			expect(input).toHaveAttribute('type', 'password')
+
+			fireEvent.click(
+				screen.getByRole('button', { name: 'Show password' }),
+			)
+			expect(input).toHaveAttribute('type', 'text')
+
+			fireEvent.click(
+				screen.getByRole('button', { name: 'Hide password' }),
+			)
+			expect(input).toHaveAttribute('type', 'password')
+		})
+
+		it('gives other input types no show button', () => {
+			render(
+				<Input
+					id="e"
+					label="Email"
+					type="email"
+					value=""
+					onChange={() => {}}
+				/>,
+			)
+			expect(screen.queryByRole('button')).not.toBeInTheDocument()
+		})
+	})
 })

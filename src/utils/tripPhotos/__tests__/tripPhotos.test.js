@@ -11,10 +11,21 @@ describe('toTripPhotos', () => {
 				files: ['a', 'b'],
 				fileDimensions: [{ width: 4, height: 3 }],
 				fileThumbnails: [thumbnails],
+				fileAlts: [null, 'Prague at dusk'],
 			}),
 		).toEqual([
-			{ url: 'a', dimensions: { width: 4, height: 3 }, thumbnails },
-			{ url: 'b', dimensions: null, thumbnails: null },
+			{
+				url: 'a',
+				dimensions: { width: 4, height: 3 },
+				thumbnails,
+				alt: '',
+			},
+			{
+				url: 'b',
+				dimensions: null,
+				thumbnails: null,
+				alt: 'Prague at dusk',
+			},
 		])
 	})
 
@@ -25,8 +36,13 @@ describe('toTripPhotos', () => {
 				fileDimensions: { 1: { width: 1, height: 1 } },
 			}),
 		).toEqual([
-			{ url: 'a', dimensions: null, thumbnails: null },
-			{ url: 'b', dimensions: { width: 1, height: 1 }, thumbnails: null },
+			{ url: 'a', dimensions: null, thumbnails: null, alt: '' },
+			{
+				url: 'b',
+				dimensions: { width: 1, height: 1 },
+				thumbnails: null,
+				alt: '',
+			},
 		])
 	})
 

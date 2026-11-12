@@ -6,6 +6,7 @@ import { GLOBAL } from '@/constants/ui'
 
 import {
 	COMBOBOX_SELECTORS,
+	ERROR_SUMMARY_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 	MOCK_TRAVELLERS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
@@ -197,14 +198,12 @@ describe('<TravellerRegistrationForm />', () => {
 			).click()
 			cy.contains(VALIDATION_MESSAGES.FIRST_NAME_REQUIRED).should('exist')
 
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
-				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
-			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT)
+				.type(MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName)
+				.should('have.attr', 'aria-invalid', 'false')
 
-			// Error should be gone
-			cy.contains(VALIDATION_MESSAGES.FIRST_NAME_REQUIRED).should(
-				'not.exist',
-			)
+			// The field's own message goes; the summary keeps its entry until the next submit
+			cy.get('#firstName-error').should('not.exist')
 			// Other errors should still exist
 			cy.contains(VALIDATION_MESSAGES.LAST_NAME_REQUIRED).should('exist')
 			cy.contains(VALIDATION_MESSAGES.TRIP_DESCRIPTION_REQUIRED).should(
@@ -238,9 +237,11 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
 				'2025-03-19',
 			)
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
-				'2025-03-12',
-			)
+			// A new error shows once the field is left, not while typing
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT)
+				.type('2025-03-12')
+				.should('have.attr', 'aria-invalid', 'false')
+				.blur()
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).should(
 				'have.attr',
 				'aria-invalid',
@@ -260,18 +261,17 @@ describe('<TravellerRegistrationForm />', () => {
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT)
 				.should('have.attr', 'max')
 				.and('match', /^\d{4}-\d{2}-\d{2}$/)
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
-				'2999-01-01',
-			)
+			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT)
+				.type('2999-01-01')
+				.blur()
 			cy.contains(VALIDATION_MESSAGES.TRIP_DATE_IN_FUTURE).should(
 				'be.visible',
 			)
 		})
 
-		it('successfully submits with valid data', () => {
+		it('does not submit without a photo, and says so on the uploader and in the summary', () => {
 			render()
 
-			// Fill form
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
 				MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
 			)
@@ -289,28 +289,19 @@ describe('<TravellerRegistrationForm />', () => {
 			)
 			cy.selectCity()
 
-			// Mock console.log to avoid cluttering test output, though we spy on onSubmit now
-			cy.window().then((win) => {
-				cy.spy(win.console, 'log').as('consoleLog')
-			})
-
 			cy.get(
 				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
 			).click()
 
-			// Assert no errors
-			cy.contains(VALIDATION_MESSAGES.FIRST_NAME_REQUIRED).should(
-				'not.exist',
+			cy.get(ERROR_SUMMARY_SELECTORS.LINK)
+				.should('have.length', 1)
+				.and('have.text', VALIDATION_MESSAGES.PHOTOS_REQUIRED)
+			cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).should(
+				'have.attr',
+				'aria-invalid',
+				'true',
 			)
-
-			// Verify onSubmit was called via the hook's process
-			// Since useTravellerRegistration manages the submit internally and then calls onSubmit,
-			// we verify the form submission happened.
-			// However, looking at the code: submitHandler(onSubmit) is passed to <form onSubmit=...>
-			// If validation passes, submitHandler calls onSubmit(formData)
-
-			// We can verify the stub was called
-			cy.get('@onSubmit').should('have.been.called')
+			cy.get('@onSubmit').should('not.have.been.called')
 		})
 
 		it('submits selected photos with the form', () => {

@@ -15,9 +15,11 @@ export const ERROR_MESSAGES = Object.freeze({
 	INVALID_LOGIN_CREDENTIALS:
 		'The email or password you entered is incorrect.',
 	EMAIL_ALREADY_IN_USE:
-		'This e-mail address is already in use. Try signing in or use a different e-mail address.',
+		'This email address is already in use. Log in, or use a different email address.',
 	TOO_MANY_LOGIN_ATTEMPTS:
 		'Too many unsuccessful login attempts. Please try again later.',
+	PASSWORD_RESET_FAILED:
+		'The link could not be sent. Check your connection and try again.',
 
 	// Traveller-specific errors
 	FAILED_TO_REGISTER_TRAVELLER:

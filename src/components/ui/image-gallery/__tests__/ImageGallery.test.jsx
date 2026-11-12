@@ -21,6 +21,7 @@ const renderGallery = ({
 	initialEntry = '/',
 	dimensions,
 	thumbnails,
+	alts,
 } = {}) =>
 	render(
 		<MemoryRouter initialEntries={[initialEntry]}>
@@ -30,6 +31,7 @@ const renderGallery = ({
 					urls={urls}
 					dimensions={dimensions}
 					thumbnails={thumbnails}
+					alts={alts}
 					urlParam={urlParam}
 				/>
 			</ul>
@@ -45,6 +47,25 @@ const openAt = (position) =>
 const full = () => screen.getByTestId(IMAGE.FULL)
 
 describe('<ImageGallery />', () => {
+	it('uses a photo’s description as its alt text and caption, and the name and number otherwise', () => {
+		renderGallery({ alts: { 1: 'Charles Bridge at sunrise' } })
+		expect(
+			screen.getByRole('button', {
+				name: "View Ada's photo: Charles Bridge at sunrise",
+			}),
+		).toBeInTheDocument()
+
+		openAt(1)
+		expect(full()).toHaveAttribute('alt', 'Charles Bridge at sunrise')
+		expect(screen.getByTestId(IMAGE.CAPTION)).toHaveTextContent(
+			'Charles Bridge at sunrise',
+		)
+
+		fireEvent.click(screen.getByRole('button', { name: 'Next photo' }))
+		expect(full()).toHaveAttribute('alt', "Ada's photo 3")
+		expect(screen.queryByTestId(IMAGE.CAPTION)).not.toBeInTheDocument()
+	})
+
 	it('renders one thumbnail per url and no dialog', () => {
 		renderGallery()
 		expect(

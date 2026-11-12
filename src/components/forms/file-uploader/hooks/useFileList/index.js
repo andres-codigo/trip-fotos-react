@@ -59,6 +59,7 @@ const useFileList = () => {
 				size: file.size,
 				type: file.type,
 				url: URL.createObjectURL(file),
+				alt: '',
 			})
 		})
 
@@ -79,6 +80,14 @@ const useFileList = () => {
 		setFiles(next)
 	}, [])
 
+	const setAlt = useCallback((fileId, alt) => {
+		const next = filesRef.current.map((entry) =>
+			entry.id === fileId ? { ...entry, alt } : entry,
+		)
+		filesRef.current = next
+		setFiles(next)
+	}, [])
+
 	const clearFiles = useCallback(() => {
 		filesRef.current.forEach(({ url }) => URL.revokeObjectURL(url))
 		filesRef.current = []
@@ -86,7 +95,7 @@ const useFileList = () => {
 		setErrors([])
 	}, [])
 
-	return { files, errors, addFiles, removeFile, clearFiles }
+	return { files, errors, addFiles, removeFile, setAlt, clearFiles }
 }
 
 export default useFileList

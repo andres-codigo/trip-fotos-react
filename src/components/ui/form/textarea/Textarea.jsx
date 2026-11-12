@@ -5,7 +5,9 @@ import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import { cn } from '@/utils/cn'
 
 import {
+	describedBy,
 	fieldClasses,
+	helpTextClasses,
 	labelClasses,
 	requiredMarkClasses,
 } from '@/components/ui/form/fieldClasses'
@@ -22,6 +24,7 @@ const Textarea = ({
 	disabled = false,
 	required = false,
 	showRequiredMark = false,
+	helpText = '',
 	className = '',
 	'data-cy': dataCy,
 	'data-cy-error': dataCyError,
@@ -34,9 +37,20 @@ const Textarea = ({
 				className={labelClasses}>
 				{label + ' '}
 				{(showRequiredMark || required) && (
-					<span className={requiredMarkClasses}>*</span>
+					<span
+						aria-hidden="true"
+						className={requiredMarkClasses}>
+						*
+					</span>
 				)}
 			</label>
+		)}
+		{helpText && (
+			<p
+				id={`${id}-help`}
+				className={helpTextClasses}>
+				{helpText}
+			</p>
 		)}
 		<textarea
 			id={id}
@@ -50,7 +64,7 @@ const Textarea = ({
 			className={cn(fieldClasses, 'h-[9.375rem] resize-y', className)}
 			aria-required={required}
 			aria-invalid={!isValid}
-			aria-describedby={!isValid && message ? `${id}-error` : undefined}
+			aria-describedby={describedBy(id, helpText, !isValid && message)}
 			{...rest}
 		/>
 		{!isValid && message && (
@@ -76,6 +90,7 @@ Textarea.propTypes = {
 	disabled: PropTypes.bool,
 	required: PropTypes.bool,
 	showRequiredMark: PropTypes.bool,
+	helpText: PropTypes.string,
 	className: PropTypes.string,
 	'data-cy': PropTypes.string,
 	'data-cy-error': PropTypes.string,

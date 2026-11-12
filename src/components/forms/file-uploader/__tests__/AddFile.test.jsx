@@ -33,7 +33,7 @@ describe('<AddFile />', () => {
 		const input = screen.getByTestId(FILE_DROP.INPUT)
 		expect(input).toHaveAttribute('type', 'file')
 		expect(input).toHaveAttribute('multiple')
-		expect(screen.getByLabelText(/Drag and drop/)).toBe(input)
+		expect(screen.getByLabelText(/Drag photos here/)).toBe(input)
 	})
 
 	it('shows previews for selected files and no list when empty', () => {
@@ -117,5 +117,62 @@ describe('<AddFile />', () => {
 			}),
 		)
 		expect(onFilesUpdated).toHaveBeenLastCalledWith([])
+	})
+
+	it('passes each description up with its file, and shows the helper on the first row only', () => {
+		const onFilesUpdated = vi.fn()
+		render(<AddFile onFilesUpdated={onFilesUpdated} />)
+		selectFiles([
+			createFile({ name: 'a.png' }),
+			createFile({ name: 'b.png' }),
+		])
+
+		const fields = screen.getAllByLabelText(GLOBAL.PHOTO_ALT.LABEL)
+		expect(fields[0]).toHaveAccessibleDescription(GLOBAL.PHOTO_ALT.HELP)
+		expect(fields[1]).not.toHaveAttribute('aria-describedby')
+
+		fireEvent.change(fields[1], { target: { value: 'Prague at dusk' } })
+		expect(onFilesUpdated).toHaveBeenLastCalledWith([
+			expect.objectContaining({ name: 'a.png', alt: '' }),
+			expect.objectContaining({ name: 'b.png', alt: 'Prague at dusk' }),
+		])
+	})
+
+	it('moves focus to the next row after a removal, then to the uploader', () => {
+		render(<AddFile />)
+		selectFiles([
+			createFile({ name: 'a.png' }),
+			createFile({ name: 'b.png' }),
+		])
+
+		fireEvent.click(
+			screen.getByRole('button', {
+				name: GLOBAL.REMOVE_FILE_LABEL('a.png'),
+			}),
+		)
+		const next = screen.getByRole('button', {
+			name: GLOBAL.REMOVE_FILE_LABEL('b.png'),
+		})
+		expect(next).toHaveFocus()
+
+		fireEvent.click(next)
+		expect(screen.getByTestId(FILE_DROP.INPUT)).toHaveFocus()
+	})
+
+	it('reads the form’s helper and error before its own', () => {
+		render(
+			<AddFile
+				id="photos"
+				isInvalid
+				describedBy="photos-help photos-error-summary"
+			/>,
+		)
+		const input = screen.getByTestId(FILE_DROP.INPUT)
+
+		expect(input).toHaveAttribute('aria-invalid', 'true')
+		expect(input).toHaveAttribute(
+			'aria-describedby',
+			'photos-help photos-error-summary',
+		)
 	})
 })

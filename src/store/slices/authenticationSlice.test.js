@@ -14,6 +14,7 @@ import { ERROR_MESSAGES } from '@/constants/errors'
 
 import authenticationReducer, {
 	login,
+	sendPasswordReset,
 	tryLogin,
 	logout,
 	autoLogout,
@@ -27,12 +28,14 @@ import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
 import {
 	createUserWithEmailAndPassword,
+	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	signOut,
 } from 'firebase/auth'
 
 vi.mock('firebase/auth', () => ({
 	createUserWithEmailAndPassword: vi.fn(),
+	sendPasswordResetEmail: vi.fn(),
 	signInWithEmailAndPassword: vi.fn(),
 	signOut: vi.fn(() => Promise.resolve()),
 }))
@@ -818,5 +821,52 @@ describe('authenticationSlice', () => {
 				})
 			})
 		})
+	})
+
+	describe('sendPasswordReset', () => {
+		it('sends the reset email and resolves with the address', async () => {
+			sendPasswordResetEmail.mockResolvedValueOnce()
+
+			const result = await store.dispatch(
+				sendPasswordReset(MOCK_KEYS.EMAIL),
+			)
+
+			expect(sendPasswordResetEmail).toHaveBeenCalledWith(
+				firebaseAuth,
+				MOCK_KEYS.EMAIL,
+			)
+			expect(result.payload).toBe(MOCK_KEYS.EMAIL)
+		})
+
+		it('answers an unknown address like a sent link, so it never says whether an account exists', async () => {
+			sendPasswordResetEmail.mockRejectedValueOnce({
+				code: 'auth/user-not-found',
+			})
+
+			const result = await store.dispatch(
+				sendPasswordReset(MOCK_KEYS.EMAIL),
+			)
+
+			expect(sendPasswordReset.fulfilled.match(result)).toBe(true)
+		})
+
+		it.each([
+			['auth/too-many-requests', ERROR_MESSAGES.TOO_MANY_LOGIN_ATTEMPTS],
+			[
+				'auth/network-request-failed',
+				ERROR_MESSAGES.PASSWORD_RESET_FAILED,
+			],
+		])(
+			'rejects %s with a message the user can act on',
+			async (code, message) => {
+				sendPasswordResetEmail.mockRejectedValueOnce({ code })
+
+				const result = await store.dispatch(
+					sendPasswordReset(MOCK_KEYS.EMAIL),
+				)
+
+				expect(result.payload).toBe(message)
+			},
+		)
 	})
 })

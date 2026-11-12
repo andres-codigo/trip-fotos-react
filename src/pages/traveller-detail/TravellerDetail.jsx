@@ -243,7 +243,7 @@ const TravellerDetail = () => {
 								<BaseButton
 									isLink
 									to={addPhotosLink}
-									modeType="outline">
+									modeType="primary">
 									{TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL}
 								</BaseButton>
 							</section>
@@ -278,6 +278,7 @@ const TravellerDetail = () => {
 										urls={files}
 										dimensions={traveller?.fileDimensions}
 										thumbnails={traveller?.fileThumbnails}
+										alts={traveller?.fileAlts}
 										urlParam={
 											TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
 										}

@@ -116,25 +116,38 @@ const useTravellerRegistration = (initialTraveller = null) => {
 		}
 	}
 
+	const applyField = (prev, id, value) => {
+		const next = {
+			...prev,
+			[id]: { ...prev[id], value, ...validateField(id, value, prev) },
+		}
+
+		// A new start date can make or clear an end-date error, but an untouched end date stays quiet
+		if (id === TRIP_START && prev[TRIP_END].value) {
+			next[TRIP_END] = {
+				...prev[TRIP_END],
+				...validateField(TRIP_END, prev[TRIP_END].value, next),
+			}
+		}
+
+		return next
+	}
+
+	// Typing never raises a new error; it only clears or updates one the field already shows
 	const handleInputChange = (e) => {
 		const { id, value } = e.target
 
-		setFormData((prev) => {
-			const next = {
-				...prev,
-				[id]: { ...prev[id], value, ...validateField(id, value, prev) },
-			}
+		setFormData((prev) =>
+			prev[id].isValid
+				? { ...prev, [id]: { ...prev[id], value } }
+				: applyField(prev, id, value),
+		)
+	}
 
-			// A new start date can make or clear an end-date error, but an untouched end date stays quiet
-			if (id === TRIP_START && prev[TRIP_END].value) {
-				next[TRIP_END] = {
-					...prev[TRIP_END],
-					...validateField(TRIP_END, prev[TRIP_END].value, next),
-				}
-			}
+	const handleInputBlur = (e) => {
+		const { id, value } = e.target
 
-			return next
-		})
+		setFormData((prev) => applyField(prev, id, value))
 	}
 
 	const updateCities = (getNextCities) => {
@@ -188,36 +201,40 @@ const useTravellerRegistration = (initialTraveller = null) => {
 		})
 
 		setFormData(newFormData)
-		return isFormValid
+		return { isValid: isFormValid, data: newFormData }
 	}
 
-	const submitHandler = (onSubmitSuccess) => (e) => {
-		e.preventDefault()
+	const submitHandler =
+		(onSubmitSuccess, { isExtraValid = true, onInvalid } = {}) =>
+		(e) => {
+			e.preventDefault()
 
-		const isValid = validateForm()
-		if (!isValid) {
-			return
-		}
+			const { isValid, data } = validateForm()
+			if (!isValid || !isExtraValid) {
+				onInvalid?.(data)
+				return
+			}
 
-		const dataToSubmit = {
-			[FIRST_NAME]: formData[FIRST_NAME].value,
-			[LAST_NAME]: formData[LAST_NAME].value,
-			[TRIP_DESCRIPTION]: formData[TRIP_DESCRIPTION].value,
-			[TRIP_START]: formData[TRIP_START].value,
-			[TRIP_END]: formData[TRIP_END].value,
-			[CITIES]: formData[CITIES].value,
-			[FILES]: files,
-		}
+			const dataToSubmit = {
+				[FIRST_NAME]: formData[FIRST_NAME].value,
+				[LAST_NAME]: formData[LAST_NAME].value,
+				[TRIP_DESCRIPTION]: formData[TRIP_DESCRIPTION].value,
+				[TRIP_START]: formData[TRIP_START].value,
+				[TRIP_END]: formData[TRIP_END].value,
+				[CITIES]: formData[CITIES].value,
+				[FILES]: files,
+			}
 
-		if (onSubmitSuccess) {
-			onSubmitSuccess(dataToSubmit)
+			if (onSubmitSuccess) {
+				onSubmitSuccess(dataToSubmit)
+			}
 		}
-	}
 
 	return {
 		formData,
 		files,
 		handleInputChange,
+		handleInputBlur,
 		handleCityAdd,
 		handleCityRemove,
 		handleCitiesBlur,

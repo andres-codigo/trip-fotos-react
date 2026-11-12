@@ -13,13 +13,17 @@ export const validateEmail = (value) => {
 }
 
 export const validatePassword = (value) => {
-	const difference = 6 - value.length
+	if (!value) {
+		return {
+			isValid: false,
+			message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+		}
+	}
+
+	const isValid = value.length >= 6
 
 	return {
-		isValid: value.length >= 6,
-		message:
-			value.length >= 6
-				? ''
-				: VALIDATION_MESSAGES.PASSWORD_TOO_SHORT(difference),
+		isValid,
+		message: isValid ? '' : VALIDATION_MESSAGES.PASSWORD_TOO_SHORT,
 	}
 }

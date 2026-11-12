@@ -6,11 +6,18 @@ import { GLOBAL } from '@/constants/ui'
 
 const PLACEHOLDER_DIMENSIONS = { width: 4, height: 3 }
 
-const BaseImage = ({ title, url, dimensions, thumbnails, onOpen }) => {
+const BaseImage = ({
+	title,
+	url,
+	dimensions,
+	thumbnails,
+	description = '',
+	onOpen,
+}) => {
 	const [hasError, setHasError] = useState(false)
 	const [isThumbnailFailed, setIsThumbnailFailed] = useState(false)
 
-	const alt = `${title}'s photo`
+	const alt = description || `${title}'s photo`
 	const { width, height } = dimensions ?? PLACEHOLDER_DIMENSIONS
 
 	// Photos uploaded before thumbnails existed, or whose thumbnail fails, load the original
@@ -38,7 +45,11 @@ const BaseImage = ({ title, url, dimensions, thumbnails, onOpen }) => {
 				<button
 					type="button"
 					className="block h-full w-full cursor-pointer border-0 bg-transparent p-0"
-					aria-label={`View ${title}'s photo`}
+					aria-label={
+						description
+							? `View ${title}'s photo: ${description}`
+							: `View ${title}'s photo`
+					}
 					onClick={onOpen}
 					data-cy={IMAGE.BUTTON}>
 					<img
@@ -64,6 +75,7 @@ const BaseImage = ({ title, url, dimensions, thumbnails, onOpen }) => {
 
 BaseImage.propTypes = {
 	title: PropTypes.string.isRequired,
+	description: PropTypes.string,
 	url: PropTypes.string.isRequired,
 	dimensions: PropTypes.shape({
 		width: PropTypes.number.isRequired,

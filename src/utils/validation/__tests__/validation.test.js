@@ -7,7 +7,7 @@ import {
 	VALID_EMAILS,
 	INVALID_EMAILS,
 	VALID_PASSWORDS,
-	PASSWORD_CHARACTER_DIFFERENCE,
+	SHORT_PASSWORDS,
 } from './validationTestData'
 
 describe('validation utils', () => {
@@ -38,15 +38,20 @@ describe('validation utils', () => {
 			})
 		})
 
-		it('should provide correct character difference message', () => {
-			PASSWORD_CHARACTER_DIFFERENCE.forEach(
-				({ password, expectedDiff }) => {
-					const result = validatePassword(password)
-					expect(result.message).toBe(
-						VALIDATION_MESSAGES.PASSWORD_TOO_SHORT(expectedDiff),
-					)
-				},
-			)
+		it('asks for a password when there is none', () => {
+			expect(validatePassword('')).toEqual({
+				isValid: false,
+				message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+			})
+		})
+
+		it('gives one too-short message with no countdown', () => {
+			SHORT_PASSWORDS.forEach((password) => {
+				expect(validatePassword(password)).toEqual({
+					isValid: false,
+					message: VALIDATION_MESSAGES.PASSWORD_TOO_SHORT,
+				})
+			})
 		})
 	})
 })

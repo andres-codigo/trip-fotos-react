@@ -186,4 +186,22 @@ describe('useFileList', () => {
 		expect(result.current.removeFile).toBe(removeFile)
 		expect(result.current.clearFiles).toBe(clearFiles)
 	})
+
+	it('starts each file with no description and sets one by id', () => {
+		const { result } = renderHook(() => useFileList())
+		act(() =>
+			result.current.addFiles([
+				createFile({ name: 'a.png' }),
+				createFile({ name: 'b.png' }),
+			]),
+		)
+		const [, second] = result.current.files
+
+		act(() => result.current.setAlt(second.id, 'Prague at dusk'))
+
+		expect(result.current.files.map(({ alt }) => alt)).toEqual([
+			'',
+			'Prague at dusk',
+		])
+	})
 })

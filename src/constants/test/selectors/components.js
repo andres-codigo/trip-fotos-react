@@ -11,6 +11,7 @@ import {
 	ACCOUNT_MENU,
 	BADGE,
 	COMBOBOX,
+	INPUT,
 	CONTACT_TRAVELLER,
 	FILE_DROP,
 	FILE_PREVIEW,
@@ -18,12 +19,15 @@ import {
 	MESSAGE_ITEM,
 	MESSAGE_SKELETON,
 	MESSAGES_PAGE,
+	PASSWORD_RESET_FORM,
 	PROGRESS,
+	REQUIRED_LEGEND,
 	SHEET,
 	TAB_BAR,
 	TOAST,
 	TRAVELLER_DETAIL,
 	EDIT_TRIP,
+	ERROR_SUMMARY,
 	TRIP_PHOTOS,
 	TRAVELLER_FILTER,
 	TRAVELLER_ITEM,
@@ -48,6 +52,7 @@ export const COMMON_SELECTORS = {
 	IMAGE_GALLERY_PREVIOUS: getByDataCy(IMAGE.PREVIOUS),
 	IMAGE_GALLERY_NEXT: getByDataCy(IMAGE.NEXT),
 	IMAGE_GALLERY_COUNTER: getByDataCy(IMAGE.COUNTER),
+	IMAGE_GALLERY_CAPTION: getByDataCy(IMAGE.CAPTION),
 }
 
 /////
@@ -102,22 +107,15 @@ export const AUTHENTICATION_FORM_SELECTORS = {
 	// Form fields
 	AUTHENTICATION_FORM: getByDataCy('user-authentication-form'),
 	USER_AUTHENTICATION_TITLE: getByDataCy('user-authentication-form-title'),
-	// Email fields
-	EMAIL_LABEL: 'E-Mail',
 	EMAIL_INPUT: getByDataCy('email-input'),
 	EMAIL_ERROR_MESSAGE: getByDataCyError('email-error-message'),
-	// Password fields
-	PASSWORD_LABEL: 'Password',
 	PASSWORD_INPUT: getByDataCy('password-input'),
 	PASSWORD_ERROR_MESSAGE: getByDataCyError('password-error-message'),
-	// Submit buttons
-	SUBMIT_BUTTON_TEXT_LOGIN: 'Log in',
-	SIGNUP_TEXT_SUBMIT_BUTTON: 'Sign up',
 	LOGIN_SIGNUP_SUBMIT_BUTTON: getByDataCy('login-submit-button'),
 	// Toggle link for switching between login and signup
 	LOGIN_SIGNUP_TOGGLE_LINK: getByDataCy('login-signup-toggle-link'),
-	LOGIN_TEXT_TOGGLE_LINK: 'Switch to Login',
-	SIGNUP_TEXT_TOGGLE_LINK: 'Switch to Signup',
+	FORGOT_PASSWORD_LINK: getByDataCy('forgot-password-link'),
+	PASSWORD_TOGGLE: getByDataCy(INPUT.PASSWORD_TOGGLE),
 }
 
 export const FILE_UPLOADER_SELECTORS = {
@@ -129,6 +127,7 @@ export const FILE_UPLOADER_SELECTORS = {
 	FILE_PREVIEW_REMOVE: getByDataCy(FILE_PREVIEW.REMOVE_BUTTON),
 	FILE_PREVIEW_THUMBNAIL: getByDataCy(FILE_PREVIEW.THUMBNAIL),
 	FILE_PREVIEW_NAME: getByDataCy(FILE_PREVIEW.NAME),
+	FILE_PREVIEW_ALT_INPUT: getByDataCy(FILE_PREVIEW.ALT_INPUT),
 }
 
 export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
@@ -178,6 +177,15 @@ export const COMBOBOX_SELECTORS = {
 	STATUS: getByDataCy(COMBOBOX.STATUS),
 }
 
+export const ERROR_SUMMARY_SELECTORS = {
+	ROOT: getByDataCy(ERROR_SUMMARY.ROOT),
+	LINK: getByDataCy(ERROR_SUMMARY.LINK),
+}
+
+export const REQUIRED_LEGEND_SELECTORS = {
+	ROOT: getByDataCy(REQUIRED_LEGEND.ROOT),
+}
+
 export const SHEET_SELECTORS = {
 	ROOT: getByDataCy(SHEET.ID),
 	BACKDROP: getByDataCy(SHEET.BACKDROP),
@@ -200,7 +208,6 @@ export const DIALOG_SELECTORS = {
 	INVALID_TRAVELLER_REGISTRATION: getByDataCy(
 		'invalid-traveller-registration-dialog',
 	),
-	AUTHENTICATING: getByDataCy('authenticating-dialog'),
 	REGISTERING: getByDataCy('registering-dialog'),
 	// Dialog elements
 	TITLE: getByDataCy('title'),
@@ -317,4 +324,11 @@ export const MESSAGES_PAGE_SELECTORS = Object.fromEntries(
 
 export const MESSAGE_ITEM_SELECTORS = Object.fromEntries(
 	Object.entries(MESSAGE_ITEM).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const PASSWORD_RESET_FORM_SELECTORS = Object.fromEntries(
+	Object.entries(PASSWORD_RESET_FORM).map(([key, id]) => [
+		key,
+		key === 'EMAIL_ERROR' ? getByDataCyError(id) : getByDataCy(id),
+	]),
 )

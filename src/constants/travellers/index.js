@@ -84,7 +84,8 @@ export const TRAVELLER_DETAIL_CONFIG = Object.freeze({
 	PHOTOS_HEADING: 'Photos',
 	PHOTO_COUNT: (count) => `${count} ${count === 1 ? 'photo' : 'photos'}`,
 	ADD_PHOTOS_LABEL: 'Add photos',
-	NO_PHOTOS_MESSAGE: 'No photos on this trip yet.',
+	NO_PHOTOS_MESSAGE:
+		'Add at least one photo so other travellers can see your trip.',
 })
 
 const photosPhrase = (photoCount) => {
@@ -115,6 +116,7 @@ export const EDIT_TRIP_CONFIG = Object.freeze({
 
 export const TRIP_PHOTOS_CONFIG = Object.freeze({
 	LEGEND: 'Photos',
+	HELP: 'JPEG, PNG, WebP or GIF, up to 5 MB each.',
 	LIST_LABEL: 'Photos on this trip',
 	COUNT: (count) => `${count} ${count === 1 ? 'photo' : 'photos'}`,
 	COUNT_AFTER_SAVE: (total, removing, adding) =>
@@ -132,8 +134,6 @@ export const TRIP_PHOTOS_CONFIG = Object.freeze({
 	UNDO: 'Undo',
 	LAST_PHOTO_HINT:
 		'A trip needs at least one photo. Add another before removing this one.',
-	NONE_LEFT_ERROR:
-		'A trip needs at least one photo. Undo a removal or add a photo.',
 	EMPTY_HINT: 'No photos on this trip yet. Add some below.',
 })
 
@@ -148,7 +148,7 @@ export const CONTACT_TRAVELLER_CONFIG = Object.freeze({
 	REPLY_QUOTE: (name, when) =>
 		when ? `${name} wrote, ${when}:` : `${name} wrote:`,
 	BACK_TO_MESSAGES: 'Messages',
-	SUBMIT_LABEL: 'Send Message',
+	SUBMIT_LABEL: 'Send message',
 	SENDING_TITLE: 'Sending',
 	SENDING_MESSAGE: 'Sending your message, one moment please...',
 	SUCCESS_MESSAGE: 'Your message has been sent!',

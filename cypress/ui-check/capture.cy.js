@@ -13,16 +13,19 @@
 import { API_DATABASE } from '../../src/constants/api'
 import {
 	ACCOUNT_MENU_SELECTORS,
+	AUTHENTICATION_FORM_SELECTORS,
 	COMBOBOX_SELECTORS,
 	COMMON_SELECTORS,
 	CONTACT_TRAVELLER_SELECTORS,
 	DIALOG_SELECTORS,
 	EDIT_TRIP_SELECTORS,
+	ERROR_SUMMARY_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 	FOOTER_SELECTORS,
 	MESSAGE_ITEM_SELECTORS,
 	MESSAGE_SKELETON_SELECTORS,
 	MESSAGES_PAGE_SELECTORS,
+	PASSWORD_RESET_FORM_SELECTORS,
 	TAB_BAR_SELECTORS,
 	TOAST_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
@@ -392,6 +395,56 @@ describe(`UI check capture (${LABEL})`, () => {
 					freezeAnimation()
 					shot(`${name}-${width}`)
 				})
+			})
+		})
+
+		capture('auth-form-states', () => {
+			const {
+				EMAIL_INPUT,
+				PASSWORD_INPUT,
+				PASSWORD_ERROR_MESSAGE,
+				LOGIN_SIGNUP_SUBMIT_BUTTON,
+				LOGIN_SIGNUP_TOGGLE_LINK,
+				FORGOT_PASSWORD_LINK,
+				PASSWORD_TOGGLE,
+			} = AUTHENTICATION_FORM_SELECTORS
+			eachWidth((width) => {
+				visit(PATHS.AUTHENTICATION)
+				cy.get(LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+				cy.get(EMAIL_INPUT).should('have.attr', 'aria-invalid', 'true')
+				cy.get(EMAIL_INPUT).should('have.focus')
+				freezeAnimation()
+				shot(`login-errors-${width}`)
+
+				cy.get(LOGIN_SIGNUP_TOGGLE_LINK).click()
+				cy.get(EMAIL_INPUT).type('not-an-email')
+				cy.get(PASSWORD_INPUT).type('short')
+				cy.get(PASSWORD_TOGGLE).click()
+				cy.get(PASSWORD_INPUT).should('have.attr', 'type', 'text')
+				cy.get(LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+				cy.get(PASSWORD_ERROR_MESSAGE).should('be.visible')
+				shot(`signup-errors-password-shown-${width}`)
+
+				visit(PATHS.AUTHENTICATION)
+				cy.get(FORGOT_PASSWORD_LINK).click()
+				cy.get(PASSWORD_RESET_FORM_SELECTORS.ROOT).should('be.visible')
+				freezeAnimation()
+				shot(`password-reset-${width}`)
+
+				cy.get(PASSWORD_RESET_FORM_SELECTORS.SUBMIT).click()
+				cy.get(PASSWORD_RESET_FORM_SELECTORS.EMAIL_ERROR).should(
+					'be.visible',
+				)
+				shot(`password-reset-error-${width}`)
+
+				cy.get(PASSWORD_RESET_FORM_SELECTORS.EMAIL_INPUT).type(
+					TEST_USERS.TRAVELLER.EMAIL,
+				)
+				cy.get(PASSWORD_RESET_FORM_SELECTORS.SUBMIT).click()
+				cy.get(PASSWORD_RESET_FORM_SELECTORS.SENT, {
+					timeout: TIMEOUT,
+				}).should('be.visible')
+				shot(`password-reset-sent-${width}`)
 			})
 		})
 	})
@@ -896,6 +949,48 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		capture('register-errors', () => {
+			eachWidth((width) => {
+				visit(PATHS.REGISTER)
+				cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should(
+					'be.visible',
+				)
+				cy.get(
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
+				).click()
+				cy.get(ERROR_SUMMARY_SELECTORS.ROOT)
+					.should('be.visible')
+					.and('have.focus')
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).should(
+					'have.attr',
+					'aria-invalid',
+					'true',
+				)
+				freezeAnimation()
+				shot(`register-errors-${width}`)
+
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+					[
+						'cypress/fixtures/test-image.png',
+						{
+							contents: Cypress.Buffer.from('x'.repeat(2048)),
+							fileName: `${'a-very-long-photo-name-'.repeat(3)}.png`,
+							mimeType: 'image/png',
+						},
+					],
+					{ force: true },
+				)
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW_ALT_INPUT)
+					.first()
+					.type('Charles Bridge at sunrise')
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should(
+					'have.length',
+					2,
+				)
+				shot(`register-photo-rows-${width}`)
+			})
+		})
+
 		capture('register-files', () => {
 			eachWidth((width) => {
 				visit(PATHS.REGISTER)
@@ -932,7 +1027,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				freezeAnimation()
 				shot(`register-trip-filled-${width}`)
 
-				cy.get(TRIP_END_INPUT).clear().type('2025-03-10')
+				cy.get(TRIP_END_INPUT).clear().type('2025-03-10').blur()
 				cy.get(TRIP_END_INPUT).should(
 					'have.attr',
 					'aria-invalid',
@@ -940,7 +1035,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				)
 				shot(`register-trip-end-before-start-${width}`)
 
-				cy.get(TRIP_START_INPUT).clear().type('2999-01-01')
+				cy.get(TRIP_START_INPUT).clear().type('2999-01-01').blur()
 				cy.get(TRIP_START_INPUT).should(
 					'have.attr',
 					'aria-invalid',
@@ -1289,6 +1384,59 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
 			assertSettled()
 			shot('contact-sent')
+		})
+
+		capture('photo-text-states', () => {
+			const travellerPath = `travellers/${TEST_USERS.TRAVELLER.ID}`
+			cy.request({
+				method: 'PATCH',
+				url: emulatorDatabase(travellerPath),
+				headers: OWNER,
+				body: { fileAlts: { 0: 'Charles Bridge at sunrise' } },
+			})
+
+			eachWidth((width) => {
+				visit(editTripPath)
+				cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+				cy.get(TRIP_PHOTOS_SELECTORS.ALT_INPUT)
+					.eq(1)
+					.type('Old town square in the snow')
+				assertSettled()
+				freezeAnimation()
+				shot(`edit-trip-alt-text-${width}`)
+
+				visit(ownTripPath)
+				assertSettled()
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).first().click()
+				cy.get(COMMON_SELECTORS.IMAGE_GALLERY_CAPTION).should(
+					'have.text',
+					'Charles Bridge at sunrise',
+				)
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL).should(
+					'have.attr',
+					'alt',
+					'Charles Bridge at sunrise',
+				)
+				assertImagesLoaded()
+				freezeAnimation()
+				shot(`photo-dialog-caption-${width}`)
+			})
+
+			// A record no user could save now, as travellers registered before photos were required
+			cy.request({
+				method: 'DELETE',
+				url: emulatorDatabase(`${travellerPath}/files`),
+				headers: OWNER,
+			})
+			eachWidth((width) => {
+				visit(ownTripPath)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.NO_PHOTOS).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`own-trip-no-photos-${width}`)
+			})
 		})
 
 		capture('own-trip', () => {

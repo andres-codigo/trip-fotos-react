@@ -23,3 +23,33 @@ export const SESSION_STORAGE_KEYS = Object.freeze({
 	TOKEN_EXPIRATION: 'tokenExpiration',
 	IS_ADMIN: 'isAdmin',
 })
+
+export const AUTH_FORM_CONFIG = Object.freeze({
+	LOGIN_TITLE: 'Log in',
+	SIGNUP_TITLE: 'Create an account',
+	LOGIN_SUBMIT: 'Log in',
+	SIGNUP_SUBMIT: 'Create account',
+	LOGIN_BUSY: 'Logging in…',
+	SIGNUP_BUSY: 'Creating account…',
+	EMAIL_LABEL: 'Email',
+	PASSWORD_LABEL: 'Password',
+	PASSWORD_HELP: 'At least 6 characters.',
+	FORGOT_PASSWORD: 'Forgot password?',
+	TO_SIGNUP_PROMPT: 'New here?',
+	TO_SIGNUP: 'Create an account',
+	TO_LOGIN_PROMPT: 'Already have an account?',
+	TO_LOGIN: 'Log in',
+})
+
+export const PASSWORD_RESET_CONFIG = Object.freeze({
+	TITLE: 'Reset your password',
+	INTRO: 'Enter the email you log in with and we will send you a link to choose a new password.',
+	SUBMIT: 'Send reset link',
+	BUSY: 'Sending link…',
+	SENT_TITLE: 'Check your email',
+	SENT_MESSAGE: (email) =>
+		`If there is an account for ${email}, we have sent it a link to reset the password. The link works for an hour.`,
+	SENT_HINT_PREFIX: 'Nothing there? Check your spam folder, or',
+	SEND_AGAIN: 'send the link again',
+	BACK: 'Back to log in',
+})

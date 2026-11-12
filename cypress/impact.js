@@ -58,6 +58,10 @@ export const CAPTURES = {
 		title: 'captures the authentication, privacy and 404 pages',
 		areas: ['authentication', 'privacy', 'notFound'],
 	},
+	'auth-form-states': {
+		title: 'captures the log in, sign up and password reset forms in their error and sent states',
+		areas: ['authentication'],
+	},
 	'travellers-detail': {
 		title: 'captures the travellers list, a failing image and the detail page',
 		areas: ['travellers', 'detail', 'trips'],
@@ -90,6 +94,10 @@ export const CAPTURES = {
 		title: 'captures real hover and keyboard focus on the interactive controls',
 		areas: ['travellers'],
 	},
+	'register-errors': {
+		title: 'captures the register error summary and the photo rows with alt text at each width',
+		areas: ['register'],
+	},
 	'register-files': {
 		title: 'captures the register file list with previews and a rejected file at each width',
 		areas: ['register'],
@@ -121,6 +129,10 @@ export const CAPTURES = {
 	'contact-send': {
 		title: 'captures the contact form and a real send',
 		areas: ['contact', 'detail'],
+	},
+	'photo-text-states': {
+		title: 'captures photo alt text on the edit page and in the dialog, and an own trip with no photos',
+		areas: ['detail', 'edit', 'trips'],
 	},
 	'own-trip': {
 		title: 'captures your own trip and the edit page at each width',
