@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { TRIP_PHOTOS } from '@/constants/test'
 import { TRIP_PHOTOS_CONFIG } from '@/constants/travellers'
+import { GLOBAL } from '@/constants/ui'
+import { FILE_UPLOAD } from '@/constants/validation'
 
 import TripPhotos from '@/components/forms/trip-photos/TripPhotos'
 
@@ -20,7 +22,11 @@ const PHOTOS = [
 ]
 
 const renderPhotos = (props = {}) => {
-	const handlers = { onRemove: vi.fn(), onUndo: vi.fn() }
+	const handlers = {
+		onRemove: vi.fn(),
+		onUndo: vi.fn(),
+		onAltChange: vi.fn(),
+	}
 	const allProps = { photos: PHOTOS, ...handlers, ...props }
 	const view = render(<TripPhotos {...allProps} />)
 	const rerender = (next) =>
@@ -200,18 +206,28 @@ describe('<TripPhotos />', () => {
 		).not.toBeInTheDocument()
 	})
 
-	it('announces an error below the photos', () => {
-		renderPhotos({ error: TRIP_PHOTOS_CONFIG.NONE_LEFT_ERROR })
+	it('gives each photo a numbered, optional description, filled from what was saved', () => {
+		const { onAltChange } = renderPhotos({
+			alts: { [PHOTOS[1].url]: 'Old Town Square' },
+		})
 
-		const error = screen.getByTestId(TRIP_PHOTOS.ERROR)
-		expect(error).toHaveAttribute('role', 'alert')
-		expect(error).toHaveTextContent(TRIP_PHOTOS_CONFIG.NONE_LEFT_ERROR)
+		const fields = screen.getAllByTestId(TRIP_PHOTOS.ALT_INPUT)
+		expect(fields).toHaveLength(PHOTOS.length)
+		expect(fields[1]).toHaveValue('Old Town Square')
+		expect(
+			screen.getByLabelText(GLOBAL.PHOTO_ALT.LABEL_FOR(1)),
+		).toHaveAttribute('maxlength', String(FILE_UPLOAD.ALT_MAX_LENGTH))
+
+		fireEvent.change(fields[0], { target: { value: 'Charles Bridge' } })
+		expect(onAltChange).toHaveBeenCalledWith(
+			PHOTOS[0].url,
+			'Charles Bridge',
+		)
 	})
 
-	it('renders no error output without an error', () => {
-		renderPhotos()
+	it('locks the description of a photo marked for removal', () => {
+		renderPhotos({ removedUrls: [PHOTOS[0].url] })
 
-		expect(screen.queryByTestId(TRIP_PHOTOS.ERROR)).not.toBeInTheDocument()
-		expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+		expect(screen.getAllByTestId(TRIP_PHOTOS.ALT_INPUT)[0]).toBeDisabled()
 	})
 })

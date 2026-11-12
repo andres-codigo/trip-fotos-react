@@ -218,43 +218,37 @@ describe('useTravellerRegistration', () => {
 		consoleSpy.mockRestore()
 	})
 
-	it('should validate empty strings as invalid during input change', () => {
+	it('raises no error while typing, and flags an empty or blank field when it is left', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 
-		act(() => {
-			result.current.handleInputChange({
-				target: { id: 'firstName', value: '' }, // First empty
-			})
-		})
-
-		expect(result.current.formData.firstName.isValid).toBe(false)
-		expect(result.current.formData.firstName.message).toBe(
-			VALIDATION_MESSAGES.FIRST_NAME_REQUIRED,
-		)
-
-		// Change to whitespace only
-		act(() => {
-			result.current.handleInputChange({
-				target: { id: 'firstName', value: '   ' },
-			})
-		})
-
-		expect(result.current.formData.firstName.isValid).toBe(false)
-	})
-
-	it('should recover from invalid state when user corrects input', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-
-		// Set invalid initially
 		act(() => {
 			result.current.handleInputChange({
 				target: { id: 'firstName', value: '' },
 			})
 		})
+		expect(result.current.formData.firstName.isValid).toBe(true)
 
+		act(() => {
+			result.current.handleInputBlur({
+				target: { id: 'firstName', value: '   ' },
+			})
+		})
+		expect(result.current.formData.firstName).toMatchObject({
+			isValid: false,
+			message: VALIDATION_MESSAGES.FIRST_NAME_REQUIRED,
+		})
+	})
+
+	it('clears an error as the user types the fix', () => {
+		const { result } = renderHook(() => useTravellerRegistration())
+
+		act(() => {
+			result.current.handleInputBlur({
+				target: { id: 'firstName', value: '' },
+			})
+		})
 		expect(result.current.formData.firstName.isValid).toBe(false)
 
-		// User corrects input
 		act(() => {
 			result.current.handleInputChange({
 				target: {
@@ -264,8 +258,10 @@ describe('useTravellerRegistration', () => {
 			})
 		})
 
-		expect(result.current.formData.firstName.isValid).toBe(true)
-		expect(result.current.formData.firstName.message).toBe('')
+		expect(result.current.formData.firstName).toMatchObject({
+			isValid: true,
+			message: '',
+		})
 	})
 
 	it('submits the files reported by the uploader', () => {
@@ -328,9 +324,10 @@ describe('useTravellerRegistration', () => {
 	})
 
 	describe('trip dates', () => {
+		// A date is checked once it is chosen and the field is left
 		const change = (result, id, value) =>
 			act(() => {
-				result.current.handleInputChange({ target: { id, value } })
+				result.current.handleInputBlur({ target: { id, value } })
 			})
 
 		beforeEach(() => {

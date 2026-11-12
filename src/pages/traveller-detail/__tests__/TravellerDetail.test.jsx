@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
@@ -230,6 +230,20 @@ describe('<TravellerDetail />', () => {
 		expect(tiles[1]).toHaveAttribute('src', 'https://img/1.jpg')
 	})
 
+	it('describes a photo with its saved alt text', async () => {
+		stubFetch({
+			data: {
+				...traveller,
+				fileAlts: { 1: 'Shibuya crossing at night' },
+			},
+		})
+		renderPage()
+		const tiles = await screen.findAllByTestId(IMAGE.THUMBNAIL)
+
+		expect(tiles[1]).toHaveAttribute('alt', 'Shibuya crossing at night')
+		expect(tiles[0]).toHaveAttribute('alt', "Ada Lovelace's photo")
+	})
+
 	it('omits the photo list without files', async () => {
 		stubFetch({ data: { ...traveller, files: [] } })
 		renderPage()
@@ -343,6 +357,11 @@ describe('<TravellerDetail />', () => {
 					name: TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL,
 				}),
 			).toHaveLength(2)
+			expect(
+				within(empty).getByRole('link', {
+					name: TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL,
+				}),
+			).toHaveClass('bg-accent', 'text-on-accent')
 		})
 
 		it("says nothing about missing photos on someone else's trip", async () => {

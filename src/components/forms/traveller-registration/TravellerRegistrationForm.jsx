@@ -9,12 +9,16 @@ import {
 	TRAVELLER_ITEM_CONFIG,
 } from '@/constants/travellers'
 import { GLOBAL } from '@/constants/ui'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import Input from '@/components/ui/form/input/Input'
 import Textarea from '@/components/ui/form/textarea/Textarea'
 import Combobox from '@/components/ui/form/combobox/Combobox'
 import BaseButton from '@/components/ui/button/BaseButton'
 import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
+import ErrorSummary from '@/components/ui/form/error-summary/ErrorSummary'
+import RequiredLegend from '@/components/ui/form/required-legend/RequiredLegend'
+import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import AddFile from '@/components/forms/file-uploader/AddFile'
 import TripPhotos from '@/components/forms/trip-photos/TripPhotos'
 
@@ -23,17 +27,23 @@ import { cn } from '@/utils/cn'
 import { formatCity, getCityId } from '@/utils/formatCity'
 import { formatTripDays, getTripLength, toIsoDate } from '@/utils/tripDates'
 import { toTripPhotos } from '@/utils/tripPhotos'
-import { labelClasses } from '@/components/ui/form/fieldClasses'
+import {
+	helpTextClasses,
+	labelClasses,
+	requiredMarkClasses,
+} from '@/components/ui/form/fieldClasses'
 import useTravellerRegistration from './hooks/useTravellerRegistration'
 import useCitySearch from '@/components/forms/traveller-registration/hooks/useCitySearch'
 
 const TRIP_DATES_HINT_ID = 'trip-dates-hint'
+const PHOTOS_HELP_ID = 'photos-help'
+const PHOTOS_ERROR_ID = 'photos-error'
 
 const TravellerRegistrationForm = ({
 	isLoading = false,
 	onSubmit,
 	initialTraveller = null,
-	title = 'Register as a Traveller',
+	title = 'Register as a traveller',
 	submitLabel = 'Register',
 	actions = null,
 	focusPhotos = false,
@@ -44,7 +54,11 @@ const TravellerRegistrationForm = ({
 		[initialTraveller],
 	)
 	const [removedUrls, setRemovedUrls] = useState([])
+	const [alts, setAlts] = useState(() =>
+		Object.fromEntries(photos.map(({ url, alt }) => [url, alt])),
+	)
 	const [photosError, setPhotosError] = useState('')
+	const [summary, setSummary] = useState({ errors: [], focusKey: 0 })
 	const photosRef = useRef(null)
 
 	// "Add photos" lands here, so the uploader takes focus once the form is drawn
@@ -58,10 +72,11 @@ const TravellerRegistrationForm = ({
 		formData,
 		files,
 		handleInputChange,
+		handleInputBlur,
 		handleCityAdd,
 		handleCityRemove,
 		handleCitiesBlur,
-		handleFilesUpdated,
+		handleFilesUpdated: onFilesUpdated,
 		submitHandler,
 	} = useTravellerRegistration(initialTraveller)
 
@@ -97,8 +112,16 @@ const TravellerRegistrationForm = ({
 	} = TRAVELLER_REGISTRATION_FIELDS
 
 	const fieldConfig = {
-		[FIRST_NAME]: { label: 'First name', testId: 'first-name-input' },
-		[LAST_NAME]: { label: 'Last name', testId: 'last-name-input' },
+		[FIRST_NAME]: {
+			label: 'First name',
+			testId: 'first-name-input',
+			autoComplete: 'given-name',
+		},
+		[LAST_NAME]: {
+			label: 'Last name',
+			testId: 'last-name-input',
+			autoComplete: 'family-name',
+		},
 		[TRIP_DESCRIPTION]: {
 			label: 'About your trip',
 			testId: 'trip-description-input',
@@ -124,12 +147,13 @@ const TravellerRegistrationForm = ({
 			label: config.label,
 			value: fieldState.value,
 			onChange: handleInputChange,
-			onBlur: handleInputChange,
+			onBlur: handleInputBlur,
 			isValid: fieldState.isValid,
 			message: fieldState.message,
 			disabled: isLoading,
 			required: true,
 			showRequiredMark: true,
+			autoComplete: config.autoComplete,
 			'data-cy': config.testId,
 		}
 	}
@@ -150,7 +174,9 @@ const TravellerRegistrationForm = ({
 			: `${TRIP_DATES_HINT_ID} ${field}-error`,
 	})
 
-	const keptPhotos = photos.filter(({ url }) => !removedUrls.includes(url))
+	const keptPhotos = photos
+		.filter(({ url }) => !removedUrls.includes(url))
+		.map((photo) => ({ ...photo, alt: alts[photo.url] ?? '' }))
 	const removedPhotos = photos.filter(({ url }) => removedUrls.includes(url))
 
 	const handleRemovePhoto = (url) => {
@@ -161,28 +187,64 @@ const TravellerRegistrationForm = ({
 	const handleUndoPhoto = (url) =>
 		setRemovedUrls((urls) => urls.filter((removed) => removed !== url))
 
-	// A trip that had photos keeps at least one; an older trip with none can still be saved
+	const hasPhoto = keptPhotos.length + files.length > 0
+
 	const handleValidSubmit = (data) => {
-		if (photos.length > 0 && keptPhotos.length + data[FILES].length === 0) {
-			setPhotosError(TRIP_PHOTOS_CONFIG.NONE_LEFT_ERROR)
-			return
-		}
+		setPhotosError('')
+		setSummary((current) => ({ ...current, errors: [] }))
 		onSubmit(isEditing ? { ...data, keptPhotos, removedPhotos } : data)
+	}
+
+	// The summary lists what was wrong at the submit, in field order, until the next submit
+	const handleInvalidSubmit = (data) => {
+		const nextPhotosError = hasPhoto
+			? ''
+			: VALIDATION_MESSAGES.PHOTOS_REQUIRED
+		setPhotosError(nextPhotosError)
+
+		const errors = [
+			FIRST_NAME,
+			LAST_NAME,
+			TRIP_DESCRIPTION,
+			TRIP_START,
+			TRIP_END,
+			CITIES,
+		]
+			.filter((field) => !data[field].isValid && data[field].message)
+			.map((field) => ({ id: field, message: data[field].message }))
+		if (nextPhotosError)
+			errors.push({ id: FILES, message: nextPhotosError })
+
+		setSummary(({ focusKey }) => ({ errors, focusKey: focusKey + 1 }))
+	}
+
+	const handleFilesUpdated = (updatedFiles) => {
+		onFilesUpdated(updatedFiles)
+		if (updatedFiles.length) setPhotosError('')
 	}
 
 	return (
 		<form
-			onSubmit={submitHandler(handleValidSubmit)}
+			onSubmit={submitHandler(handleValidSubmit, {
+				isExtraValid: hasPhoto,
+				onInvalid: handleInvalidSubmit,
+			})}
 			noValidate
 			data-cy="traveller-registration-form"
 			aria-busy={isLoading}
 			aria-labelledby="traveller-registration-title">
 			<h1
 				id="traveller-registration-title"
-				className="mt-0 mb-[0.83em] text-[1.5rem]"
+				className="mt-0 mb-2 text-[1.5rem]"
 				data-cy="traveller-registration-form-title">
 				{title}
 			</h1>
+			<RequiredLegend className="mb-4" />
+			<ErrorSummary
+				errors={summary.errors}
+				focusKey={summary.focusKey}
+				className="mb-4"
+			/>
 			<LoadingAnnouncement isLoading={isLoading} />
 			<div className="my-2">
 				<Input {...getInputProps(FIRST_NAME)} />
@@ -320,19 +382,38 @@ const TravellerRegistrationForm = ({
 				data-cy="traveller-photos"
 				className="mx-0 mt-2 mb-6 flex scroll-mt-24 flex-col gap-4 border-0 p-0">
 				<legend className="mb-2 font-bold">
-					{isEditing
-						? TRIP_PHOTOS_CONFIG.LEGEND
-						: 'Photos (optional)'}
+					{TRIP_PHOTOS_CONFIG.LEGEND}{' '}
+					<span
+						aria-hidden="true"
+						className={requiredMarkClasses}>
+						*
+					</span>
 				</legend>
+				<p
+					id={PHOTOS_HELP_ID}
+					className={cn(helpTextClasses, 'mt-0 mb-0')}>
+					{TRIP_PHOTOS_CONFIG.HELP}
+				</p>
+				{photosError && (
+					<ErrorMessage
+						id={PHOTOS_ERROR_ID}
+						className="m-0 text-danger-text"
+						data-cy="photos-error">
+						{photosError}
+					</ErrorMessage>
+				)}
 				{isEditing && (
 					<TripPhotos
 						photos={photos}
 						removedUrls={removedUrls}
 						newCount={files.length}
+						alts={alts}
 						onRemove={handleRemovePhoto}
 						onUndo={handleUndoPhoto}
+						onAltChange={(url, alt) =>
+							setAlts((current) => ({ ...current, [url]: alt }))
+						}
 						disabled={isLoading}
-						error={photosError}
 					/>
 				)}
 				{/* A block wrapper, so the uploader's auto margins centre it rather than shrink it to its text */}
@@ -340,6 +421,12 @@ const TravellerRegistrationForm = ({
 					<AddFile
 						id={FILES}
 						onFilesUpdated={handleFilesUpdated}
+						isInvalid={Boolean(photosError)}
+						describedBy={
+							photosError
+								? `${PHOTOS_HELP_ID} ${PHOTOS_ERROR_ID}`
+								: PHOTOS_HELP_ID
+						}
 					/>
 				</div>
 			</fieldset>
@@ -381,6 +468,7 @@ TravellerRegistrationForm.propTypes = {
 			PropTypes.array,
 			PropTypes.object,
 		]),
+		fileAlts: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
 	}),
 	title: PropTypes.string,
 	submitLabel: PropTypes.string,

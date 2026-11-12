@@ -1,8 +1,15 @@
-import { render, fireEvent, screen, within } from '@testing-library/react'
+import { act, render, fireEvent, screen, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
-import { FILE_DROP, MOCK_CITIES, TRIP_PHOTOS, UI_TEXT } from '@/constants/test'
+import {
+	ERROR_SUMMARY,
+	FILE_DROP,
+	MOCK_CITIES,
+	REQUIRED_LEGEND,
+	TRIP_PHOTOS,
+	UI_TEXT,
+} from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 import {
 	TRAVELLER_REGISTRATION_FIELDS,
@@ -44,6 +51,18 @@ import useTravellerRegistration from '@/components/forms/traveller-registration/
 describe('<TravellerRegistrationForm />', () => {
 	const mockOnSubmit = vi.fn()
 
+	const submitWith =
+		(data) =>
+		(onSuccess, { isExtraValid = true, onInvalid } = {}) =>
+		(e) => {
+			e.preventDefault()
+			if (!isExtraValid) {
+				onInvalid?.(mockHookReturnValue.formData)
+				return
+			}
+			onSuccess?.(data)
+		}
+
 	const mockHookReturnValue = {
 		formData: {
 			firstName: { value: '', message: '', isValid: true },
@@ -53,23 +72,31 @@ describe('<TravellerRegistrationForm />', () => {
 			tripEnd: { value: '', message: '', isValid: true },
 			cities: { value: [], message: '', isValid: true },
 		},
+		files: [],
 		handleInputChange: vi.fn(),
+		handleInputBlur: vi.fn(),
 		handleCityAdd: vi.fn(),
 		handleCityRemove: vi.fn(),
 		handleCitiesBlur: vi.fn(),
 		handleFilesUpdated: vi.fn(),
-		submitHandler: (onSuccess) => (e) => {
-			e.preventDefault()
-			onSuccess?.({
-				firstName: '',
-				lastName: '',
-				tripDescription: '',
-				tripStart: '',
-				tripEnd: '',
-				cities: [],
-				files: [],
-			})
-		},
+		submitHandler:
+			(onSuccess, { isExtraValid = true, onInvalid } = {}) =>
+			(e) => {
+				e.preventDefault()
+				if (!isExtraValid) {
+					onInvalid?.(mockHookReturnValue.formData)
+					return
+				}
+				onSuccess?.({
+					firstName: '',
+					lastName: '',
+					tripDescription: '',
+					tripStart: '',
+					tripEnd: '',
+					cities: [],
+					files: [],
+				})
+			},
 	}
 
 	beforeEach(() => {
@@ -480,27 +507,76 @@ describe('<TravellerRegistrationForm />', () => {
 			const submitEvent = new Event('submit', { bubbles: true })
 			const preventDefaultSpy = vi.spyOn(submitEvent, 'preventDefault')
 
-			form.dispatchEvent(submitEvent)
+			act(() => {
+				form.dispatchEvent(submitEvent)
+			})
 			expect(preventDefaultSpy).toHaveBeenCalled()
 		})
 	})
 
-	it('renders the optional photo uploader in its own fieldset', () => {
+	it('renders the required photo uploader with its rule up front, in its own fieldset', () => {
 		render(<TravellerRegistrationForm onSubmit={vi.fn()} />)
 		const fieldset = screen.getByRole('group', {
-			name: 'Photos (optional)',
+			name: TRIP_PHOTOS_CONFIG.LEGEND,
 		})
-		expect(within(fieldset).getByTestId(FILE_DROP.INPUT)).toHaveAttribute(
-			'id',
-			TRAVELLER_REGISTRATION_FIELDS.FILES,
+		const input = within(fieldset).getByTestId(FILE_DROP.INPUT)
+		expect(input).toHaveAttribute('id', TRAVELLER_REGISTRATION_FIELDS.FILES)
+		expect(input).toHaveAccessibleDescription(TRIP_PHOTOS_CONFIG.HELP)
+		expect(screen.getByTestId(REQUIRED_LEGEND.ROOT)).toBeInTheDocument()
+	})
+
+	it('refuses a trip with no photo, listing every problem in a focused summary in field order', () => {
+		const formData = {
+			...mockHookReturnValue.formData,
+			firstName: {
+				value: '',
+				isValid: false,
+				message: VALIDATION_MESSAGES.FIRST_NAME_REQUIRED,
+			},
+			cities: {
+				value: [],
+				isValid: false,
+				message: VALIDATION_MESSAGES.CITIES_REQUIRED,
+			},
+		}
+		useTravellerRegistration.mockReturnValue({
+			...mockHookReturnValue,
+			formData,
+			submitHandler:
+				(_, { onInvalid }) =>
+				(e) => {
+					e.preventDefault()
+					onInvalid(formData)
+				},
+		})
+		render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+
+		fireEvent.submit(screen.getByTestId(FORM_SELECTORS.FORM))
+
+		const summary = screen.getByTestId(ERROR_SUMMARY.ROOT)
+		expect(summary).toHaveFocus()
+		expect(
+			within(summary)
+				.getAllByRole('link')
+				.map((link) => [link.textContent, link.getAttribute('href')]),
+		).toEqual([
+			[VALIDATION_MESSAGES.FIRST_NAME_REQUIRED, '#firstName'],
+			[VALIDATION_MESSAGES.CITIES_REQUIRED, '#cities'],
+			[VALIDATION_MESSAGES.PHOTOS_REQUIRED, '#files'],
+		])
+		expect(screen.getByTestId(FILE_DROP.INPUT)).toHaveAttribute(
+			'aria-invalid',
+			'true',
 		)
+		expect(mockOnSubmit).not.toHaveBeenCalled()
 	})
 
 	describe('Editing a trip', () => {
-		const photo = (n) => ({
+		const photo = (n, alt = '') => ({
 			url: `https://img/${n}.jpg`,
 			dimensions: { width: 4, height: 3 },
 			thumbnails: null,
+			alt,
 		})
 		const traveller = (count) => ({
 			firstName: 'Amara',
@@ -521,10 +597,7 @@ describe('<TravellerRegistrationForm />', () => {
 		const withFiles = (files) => ({
 			...mockHookReturnValue,
 			files,
-			submitHandler: (onSuccess) => (e) => {
-				e.preventDefault()
-				onSuccess({ ...fields, files })
-			},
+			submitHandler: submitWith({ ...fields, files }),
 		})
 		const renderEdit = (props = {}) =>
 			render(
@@ -610,29 +683,44 @@ describe('<TravellerRegistrationForm />', () => {
 
 		it('refuses to save a trip left with no photos', () => {
 			// One new file lets the last photo go; the file is then gone by submit
-			useTravellerRegistration.mockReturnValue({
-				...withFiles([{ id: 'new' }]),
-				submitHandler: (onSuccess) => (e) => {
-					e.preventDefault()
-					onSuccess({ ...fields, files: [] })
-				},
-			})
+			useTravellerRegistration.mockReturnValueOnce(
+				withFiles([{ id: 'new' }]),
+			)
 			renderEdit({ initialTraveller: traveller(1) })
 			fireEvent.click(screen.getByTestId(TRIP_PHOTOS.REMOVE))
 			submit()
 
 			expect(mockOnSubmit).not.toHaveBeenCalled()
-			expect(screen.getByTestId(TRIP_PHOTOS.ERROR)).toHaveTextContent(
-				TRIP_PHOTOS_CONFIG.NONE_LEFT_ERROR,
+			expect(screen.getByTestId('photos-error')).toHaveTextContent(
+				VALIDATION_MESSAGES.PHOTOS_REQUIRED,
 			)
 		})
 
-		it('saves an older trip that never had photos', () => {
+		it('asks an older trip that never had photos for one before it saves', () => {
 			renderEdit({ initialTraveller: { firstName: 'Kofi' } })
 			submit()
 
+			expect(mockOnSubmit).not.toHaveBeenCalled()
+			expect(screen.getByTestId(ERROR_SUMMARY.ROOT)).toHaveTextContent(
+				VALIDATION_MESSAGES.PHOTOS_REQUIRED,
+			)
+		})
+
+		it('saves the description written for a photo on the trip', () => {
+			renderEdit()
+			fireEvent.change(screen.getAllByTestId(TRIP_PHOTOS.ALT_INPUT)[1], {
+				target: { value: 'Old Town Square' },
+			})
+			submit()
+
 			expect(mockOnSubmit).toHaveBeenCalledWith(
-				expect.objectContaining({ keptPhotos: [], removedPhotos: [] }),
+				expect.objectContaining({
+					keptPhotos: [
+						photo(0),
+						photo(1, 'Old Town Square'),
+						photo(2),
+					],
+				}),
 			)
 		})
 
@@ -647,7 +735,10 @@ describe('<TravellerRegistrationForm />', () => {
 		})
 
 		it('submits Register data unchanged, with no photo lists', () => {
-			useTravellerRegistration.mockReturnValue(mockHookReturnValue)
+			useTravellerRegistration.mockReturnValue({
+				...mockHookReturnValue,
+				files: [{ id: 'new' }],
+			})
 			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
 			submit()
 

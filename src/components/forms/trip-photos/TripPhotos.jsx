@@ -7,7 +7,8 @@ import { GLOBAL } from '@/constants/ui'
 
 import { cn } from '@/utils/cn'
 
-import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
+import Input from '@/components/ui/form/input/Input'
+import { FILE_UPLOAD } from '@/constants/validation'
 
 const resetButtonClasses =
 	'cursor-pointer appearance-none border-0 bg-transparent p-0 disabled:cursor-not-allowed'
@@ -94,10 +95,11 @@ const TripPhotos = ({
 	photos,
 	removedUrls = [],
 	newCount = 0,
+	alts = {},
 	onRemove,
 	onUndo,
+	onAltChange,
 	disabled = false,
-	error = '',
 	className,
 }) => {
 	const hintId = useId()
@@ -127,14 +129,6 @@ const TripPhotos = ({
 		listRef.current?.children[index]?.querySelector('button')?.focus()
 	}, [photos, removedUrls])
 
-	const errorOutput = error ? (
-		<ErrorMessage
-			className="text-danger-text"
-			data-cy={TRIP_PHOTOS.ERROR}>
-			{error}
-		</ErrorMessage>
-	) : null
-
 	if (!total) {
 		return (
 			<div
@@ -143,7 +137,6 @@ const TripPhotos = ({
 				<p className="m-0 text-text-muted">
 					{TRIP_PHOTOS_CONFIG.EMPTY_HINT}
 				</p>
-				{errorOutput}
 			</div>
 		)
 	}
@@ -170,7 +163,7 @@ const TripPhotos = ({
 			<ul
 				ref={listRef}
 				aria-label={TRIP_PHOTOS_CONFIG.LIST_LABEL}
-				className="m-0 grid list-none grid-cols-3 gap-2 p-0 sm:grid-cols-4">
+				className="m-0 grid list-none grid-cols-2 gap-x-2 gap-y-4 p-0 sm:grid-cols-4">
 				{photos.map(({ url, dimensions, thumbnails }, index) => {
 					const isRemoved = removedUrls.includes(url)
 					const position = index + 1
@@ -178,56 +171,70 @@ const TripPhotos = ({
 					return (
 						<li
 							key={url}
-							className="relative aspect-square overflow-hidden rounded-sm bg-surface-sunken"
+							className="flex min-w-0 flex-col gap-2"
 							data-cy={TRIP_PHOTOS.TILE}>
-							<TilePhoto
-								url={url}
-								dimensions={dimensions}
-								thumbnails={thumbnails}
-								isRemoved={isRemoved}
-							/>
-							{isRemoved ? (
-								<div className="absolute inset-0 flex flex-col items-center justify-center p-1 text-center">
-									<span
-										className="text-xs text-text"
-										data-cy={TRIP_PHOTOS.REMOVED}>
-										{TRIP_PHOTOS_CONFIG.REMOVED_LABEL}
-									</span>
+							<div className="relative aspect-square overflow-hidden rounded-sm bg-surface-sunken">
+								<TilePhoto
+									url={url}
+									dimensions={dimensions}
+									thumbnails={thumbnails}
+									isRemoved={isRemoved}
+								/>
+								{isRemoved ? (
+									<div className="absolute inset-0 flex flex-col items-center justify-center p-1 text-center">
+										<span
+											className="text-xs text-text"
+											data-cy={TRIP_PHOTOS.REMOVED}>
+											{TRIP_PHOTOS_CONFIG.REMOVED_LABEL}
+										</span>
+										<button
+											type="button"
+											className={cn(
+												resetButtonClasses,
+												'min-h-11 px-2 text-sm font-semibold text-accent-text underline disabled:opacity-40',
+											)}
+											aria-label={TRIP_PHOTOS_CONFIG.UNDO_LABEL(
+												position,
+												total,
+											)}
+											disabled={disabled}
+											onClick={() => onUndo(url)}
+											data-cy={TRIP_PHOTOS.UNDO}>
+											{TRIP_PHOTOS_CONFIG.UNDO}
+										</button>
+									</div>
+								) : (
 									<button
 										type="button"
-										className={cn(
-											resetButtonClasses,
-											'min-h-11 px-2 text-sm font-semibold text-accent-text underline disabled:opacity-40',
-										)}
-										aria-label={TRIP_PHOTOS_CONFIG.UNDO_LABEL(
+										className={removeButtonClasses}
+										aria-label={TRIP_PHOTOS_CONFIG.REMOVE_LABEL(
 											position,
 											total,
 										)}
-										disabled={disabled}
-										onClick={() => onUndo(url)}
-										data-cy={TRIP_PHOTOS.UNDO}>
-										{TRIP_PHOTOS_CONFIG.UNDO}
+										aria-describedby={
+											isLastPhoto ? hintId : undefined
+										}
+										disabled={disabled || isLastPhoto}
+										onClick={() => onRemove(url)}
+										data-cy={TRIP_PHOTOS.REMOVE}>
+										<span className={discClasses}>
+											<CrossIcon />
+										</span>
 									</button>
-								</div>
-							) : (
-								<button
-									type="button"
-									className={removeButtonClasses}
-									aria-label={TRIP_PHOTOS_CONFIG.REMOVE_LABEL(
-										position,
-										total,
-									)}
-									aria-describedby={
-										isLastPhoto ? hintId : undefined
-									}
-									disabled={disabled || isLastPhoto}
-									onClick={() => onRemove(url)}
-									data-cy={TRIP_PHOTOS.REMOVE}>
-									<span className={discClasses}>
-										<CrossIcon />
-									</span>
-								</button>
-							)}
+								)}
+							</div>
+							<Input
+								id={`${hintId}-alt-${position}`}
+								label={GLOBAL.PHOTO_ALT.LABEL_FOR(position)}
+								value={alts[url] ?? ''}
+								onChange={(e) =>
+									onAltChange(url, e.target.value)
+								}
+								maxLength={FILE_UPLOAD.ALT_MAX_LENGTH}
+								disabled={disabled || isRemoved}
+								className="text-sm"
+								data-cy={TRIP_PHOTOS.ALT_INPUT}
+							/>
 						</li>
 					)
 				})}
@@ -240,7 +247,6 @@ const TripPhotos = ({
 					{TRIP_PHOTOS_CONFIG.LAST_PHOTO_HINT}
 				</p>
 			)}
-			{errorOutput}
 		</div>
 	)
 }
@@ -263,10 +269,11 @@ TripPhotos.propTypes = {
 	photos: PropTypes.arrayOf(photoShape).isRequired,
 	removedUrls: PropTypes.arrayOf(PropTypes.string),
 	newCount: PropTypes.number,
+	alts: PropTypes.objectOf(PropTypes.string),
 	onRemove: PropTypes.func.isRequired,
 	onUndo: PropTypes.func.isRequired,
+	onAltChange: PropTypes.func.isRequired,
 	disabled: PropTypes.bool,
-	error: PropTypes.string,
 	className: PropTypes.string,
 }
 

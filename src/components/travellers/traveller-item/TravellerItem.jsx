@@ -41,6 +41,7 @@ const TravellerItem = ({
 	files = [],
 	fileDimensions,
 	fileThumbnails,
+	fileAlts,
 }) => {
 	const [isDeleting, setIsDeleting] = useState(false)
 	const [error, setError] = useState(null)
@@ -176,6 +177,7 @@ const TravellerItem = ({
 								title={fullName}
 								dimensions={fileDimensions}
 								thumbnails={fileThumbnails}
+								alts={fileAlts}
 								urls={files.slice(
 									0,
 									TRAVELLER_ITEM_CONFIG.MAX_IMAGES,
@@ -267,6 +269,7 @@ TravellerItem.propTypes = {
 		PropTypes.arrayOf(PropTypes.array),
 		PropTypes.object,
 	]),
+	fileAlts: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
 }
 
 export default TravellerItem

@@ -13,7 +13,14 @@ const navClasses =
 	'h-10 w-10 flex-none cursor-pointer rounded-full border-0 bg-accent p-0 pb-[0.2rem] text-[1.75rem] leading-none text-on-accent disabled:cursor-default disabled:opacity-30 [@media(max-width:480px)]:h-8 [@media(max-width:480px)]:w-8 [@media(max-width:480px)]:text-2xl'
 
 // With a `urlParam` the open photo lives in the URL as a 1-based number, so it can be shared and Back closes it
-const ImageGallery = ({ title, urls, dimensions, thumbnails, urlParam }) => {
+const ImageGallery = ({
+	title,
+	urls,
+	dimensions,
+	thumbnails,
+	alts,
+	urlParam,
+}) => {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const [localIndex, setLocalIndex] = useState(null)
 	const [failed, setFailed] = useState(() => new Set())
@@ -63,7 +70,9 @@ const ImageGallery = ({ title, urls, dimensions, thumbnails, urlParam }) => {
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [isOpen, index, hasPrevious, hasNext, goTo])
 
-	const alt = `${title}'s photo ${isOpen ? index + 1 : ''}`.trim()
+	const description = isOpen ? (alts?.[index] ?? '') : ''
+	const alt =
+		description || `${title}'s photo ${isOpen ? index + 1 : ''}`.trim()
 
 	return (
 		<>
@@ -74,6 +83,7 @@ const ImageGallery = ({ title, urls, dimensions, thumbnails, urlParam }) => {
 					url={url}
 					dimensions={dimensions?.[position]}
 					thumbnails={thumbnails?.[position]}
+					description={alts?.[position] ?? ''}
 					onOpen={() => goTo(position, { replace: false })}
 				/>
 			))}
@@ -123,10 +133,17 @@ const ImageGallery = ({ title, urls, dimensions, thumbnails, urlParam }) => {
 									data-cy={IMAGE.FULL}
 								/>
 							)}
-							<figcaption
-								aria-live="polite"
-								data-cy={IMAGE.COUNTER}>
-								{index + 1} of {urls.length}
+							<figcaption aria-live="polite">
+								{description && (
+									<span
+										className="block text-text"
+										data-cy={IMAGE.CAPTION}>
+										{description}
+									</span>
+								)}
+								<span data-cy={IMAGE.COUNTER}>
+									{index + 1} of {urls.length}
+								</span>
 							</figcaption>
 						</figure>
 						<button
@@ -155,6 +172,11 @@ ImageGallery.propTypes = {
 	// The database stores a sparse array as an object keyed by position
 	thumbnails: PropTypes.oneOfType([
 		PropTypes.arrayOf(PropTypes.array),
+		PropTypes.object,
+	]),
+	// Aligned with urls, sparse like thumbnails
+	alts: PropTypes.oneOfType([
+		PropTypes.arrayOf(PropTypes.string),
 		PropTypes.object,
 	]),
 	urlParam: PropTypes.string,

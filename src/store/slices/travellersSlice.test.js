@@ -385,7 +385,13 @@ describe('travellersSlice', () => {
 			tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
 			tripEnd: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
 			cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
-			files: [{ name: 'test.jpg', file: new Blob() }],
+			files: [
+				{
+					name: 'test.jpg',
+					file: new Blob(),
+					alt: 'Lake Burley Griffin',
+				},
+			],
 		}
 
 		describe('success scenarios', () => {
@@ -416,6 +422,7 @@ describe('travellersSlice', () => {
 				})
 				// Trip length is worked out from the dates, so the old field is no longer written
 				const savedBody = JSON.parse(fetch.mock.calls.at(-1)[1].body)
+				expect(savedBody.fileAlts).toEqual(['Lake Burley Griffin'])
 				expect(savedBody).toMatchObject({
 					tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
 					tripEnd: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
@@ -1021,6 +1028,7 @@ describe('travellersSlice', () => {
 					files: [kept.url],
 					fileDimensions: [kept.dimensions],
 					fileThumbnails: [kept.thumbnails],
+					fileAlts: [null],
 				})
 				// registered is not part of an edit, so the stored date stays as it was
 				expect(savedBody()).not.toHaveProperty('registered')
@@ -1069,11 +1077,20 @@ describe('travellersSlice', () => {
 				await testStore.dispatch(
 					updateTraveller({
 						...edit,
-						files: [{ name: 'new.jpg', file: new Blob() }],
+						keptPhotos: [{ ...kept, alt: '  Shibuya crossing ' }],
+						files: [
+							{
+								name: 'new.jpg',
+								file: new Blob(),
+								alt: 'Ueno Park',
+							},
+						],
 					}),
 				)
 
 				const body = savedBody()
+				// Descriptions line up with the photos, trimmed
+				expect(body.fileAlts).toEqual(['Shibuya crossing', 'Ueno Park'])
 				expect(body.files).toEqual([
 					kept.url,
 					'https://mock-url.com/image.jpg',

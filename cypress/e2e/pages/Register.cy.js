@@ -1,7 +1,9 @@
 import {
+	ERROR_SUMMARY_SELECTORS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
+import { VALIDATION_MESSAGES } from '../../../src/constants/validation'
 import { GLOBAL } from '../../../src/constants/ui/global'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../../src/constants/travellers'
@@ -15,6 +17,7 @@ import { atPath } from '../../support/utils/waitForSuccess'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
+const PHOTO_ALT = 'Charles Bridge at sunrise'
 
 describe('Register Page', () => {
 	let uploadedImageUrls = []
@@ -38,54 +41,17 @@ describe('Register Page', () => {
 		cy.checkA11y()
 	})
 
-	it('successfully registers a traveller', () => {
-		const { firstName, lastName, tripDescription, tripStart, tripEnd } =
-			MOCK_TRAVELLERS.NEW_TRAVELLER
-
-		// Intercept the registration API call
-		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*').as(
-			'registerTraveller',
-		)
-
-		// Fill in the form
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
-			firstName,
-		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT).type(
-			lastName,
-		)
-		cy.get(
-			TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
-		).type(tripDescription)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT).type(
-			tripStart,
-		)
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
-			tripEnd,
-		)
-
-		// Choose a city through the (stubbed) city search
-		cy.selectCity()
-
-		// Submit the form
+	it('lists every problem in a focused summary when submitted empty, and a link moves to its field', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
 
-		// Wait for API call
-		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
-
-		// Verify redirection to Travellers page
-		cy.waitForSuccess(atPath(PATHS.TRAVELLERS))
-
-		// Verify success alert message
-		cy.get('[role="alert"]')
-			.should('be.visible')
-			.and('contain', TRAVELLER_REGISTRATION_SUCCESS_MESSAGE)
-		cy.assertTravellerPersisted(TEST_USERS.STANDARD.ID, {
-			firstName,
-			lastName,
-			tripStart,
-			tripEnd,
-		})
+		cy.get(ERROR_SUMMARY_SELECTORS.ROOT).should('have.focus')
+		cy.get(ERROR_SUMMARY_SELECTORS.LINK)
+			.should('have.length', 7)
+			.last()
+			.should('have.text', VALIDATION_MESSAGES.PHOTOS_REQUIRED)
+			.click()
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).should('have.focus')
+		cy.checkA11y()
 	})
 
 	it('registers a traveller with a photo uploaded to Storage', () => {
@@ -119,12 +85,14 @@ describe('Register Page', () => {
 			{ force: true },
 		)
 		cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should('have.length', 1)
+		cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW_ALT_INPUT).type(PHOTO_ALT)
 
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
 
 		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
 			.its('request.body')
 			.then((body) => {
+				expect(body.fileAlts).to.deep.equal([PHOTO_ALT])
 				expect(body.fileDimensions).to.have.length(body.files.length)
 				expect(body.fileDimensions[0].width).to.be.greaterThan(0)
 				expect(body.fileDimensions[0].height).to.be.greaterThan(0)
@@ -146,15 +114,20 @@ describe('Register Page', () => {
 			})
 
 		cy.waitForSuccess(atPath(PATHS.TRAVELLERS))
+		cy.get('[role="alert"]')
+			.should('be.visible')
+			.and('contain', TRAVELLER_REGISTRATION_SUCCESS_MESSAGE)
 		cy.assertTravellerPersisted(TEST_USERS.STANDARD.ID, {
 			firstName,
 			lastName,
+			tripStart,
+			tripEnd,
 		})
 	})
 })
 
 // Talks to the emulator directly, as a script could, so a pass proves the rules and not just the form
-describe('Traveller trip dates database rules', () => {
+describe('Traveller database rules', () => {
 	const save = (body) =>
 		cy.window().then((win) =>
 			cy.request({
@@ -173,6 +146,7 @@ describe('Traveller trip dates database rules', () => {
 		lastName: 'Test',
 		tripDescription: 'Checking the trip date rules.',
 		cities: ['tokyo'],
+		files: ['https://example.com/photo.jpg'],
 		...fields,
 	})
 
@@ -214,6 +188,28 @@ describe('Traveller trip dates database rules', () => {
 			.its('status')
 			.should('be.oneOf', [401, 403])
 		save(traveller({ daysInCity: '5' }))
+			.its('status')
+			.should('be.oneOf', [401, 403])
+	})
+
+	it('refuses a trip with no photos', () => {
+		save(
+			traveller({
+				tripStart: '2025-03-12',
+				tripEnd: '2025-03-19',
+				files: null,
+			}),
+		)
+			.its('status')
+			.should('be.oneOf', [401, 403])
+	})
+
+	it('accepts a photo description of up to 150 characters and refuses a longer one', () => {
+		const dates = { tripStart: '2025-03-12', tripEnd: '2025-03-19' }
+		save(traveller({ ...dates, fileAlts: ['a'.repeat(150)] }))
+			.its('status')
+			.should('eq', 200)
+		save(traveller({ ...dates, fileAlts: ['a'.repeat(151)] }))
 			.its('status')
 			.should('be.oneOf', [401, 403])
 	})
