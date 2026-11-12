@@ -1,22 +1,34 @@
 export const GLOBAL = Object.freeze({
 	SITE_NAME: 'Trip Fotos',
 
+	// FORMS
+	REQUIRED_LEGEND: 'required',
+	ERROR_SUMMARY_TITLE: 'There is a problem',
+	PASSWORD_TOGGLE: Object.freeze({
+		SHOW: 'Show',
+		HIDE: 'Hide',
+		FIELD: 'password',
+	}),
+
 	// DIALOG
 	ERROR_DIALOG_TITLE: 'An error occurred',
-	AUTHENTICATING_DIALOG_TITLE: 'Authenticating...',
 
 	// IMAGE UPLOAD
 	LOADING_IMAGE: 'loading',
 	REMOVE_FILE_LABEL: (name) => `Remove ${name}`,
 	FILE_DROP_TEXT: Object.freeze({
-		ACTIVE: 'Drop your files here',
+		ACTIVE: 'Drop your photos here',
 		ACTIVE_HINT: 'to add them',
-		IDLE: 'Drag and drop your files here',
+		IDLE: 'Drag photos here',
 		IDLE_HINT_PREFIX: 'or',
-		IDLE_HINT_ACTION: 'click here',
-		IDLE_HINT_SUFFIX: 'to select your files',
+		IDLE_HINT_ACTION: 'choose photos',
 	}),
 	FILE_LIST_LABEL: 'Selected files',
+	PHOTO_ALT: Object.freeze({
+		LABEL: 'Describe this photo (optional)',
+		LABEL_FOR: (position) => `Describe photo ${position} (optional)`,
+		HELP: 'For people who can’t see it, e.g. Charles Bridge at sunrise.',
+	}),
 
 	// CITY SEARCH
 	CITY_SEARCH_TEXT: Object.freeze({
@@ -47,7 +59,6 @@ export const GLOBAL = Object.freeze({
 	// SPINNER: always shown as visible text beside it
 	SPINNER_LABEL: {
 		DEFAULT: 'Loading…',
-		AUTHENTICATING: 'Authenticating…',
 		MESSAGES: 'Loading messages…',
 		TRAVELLER: 'Loading traveller…',
 		DELETING_MESSAGE: 'Deleting message…',

@@ -47,6 +47,7 @@ const BaseButton = ({
 	className,
 	'data-cy': dataCy,
 	ariaLabel,
+	busyLabel = '',
 	...props
 }) => {
 	const elementRef = useRef()
@@ -58,13 +59,16 @@ const BaseButton = ({
 	}, [isError])
 
 	const isButtonStyled = !isLink || Boolean(modeType)
+	const isBusy = !isLink && Boolean(busyLabel)
 
 	const combinedClassName = cn(
 		buttonVariants({
 			mode: isButtonStyled ? resolveMode(modeType) : null,
 			shape: isButtonStyled ? 'button' : 'link',
-			disabled: isButtonStyled && isDisabled,
+			// A busy button keeps its own look, so the press reads as in progress rather than refused
+			disabled: isButtonStyled && isDisabled && !isBusy,
 		}),
+		isBusy && 'cursor-progress gap-2',
 		className,
 	)
 
@@ -75,12 +79,24 @@ const BaseButton = ({
 					ref={elementRef}
 					className={combinedClassName}
 					data-cy={dataCy}
-					disabled={isDisabled}
+					disabled={isDisabled || isBusy}
+					aria-busy={isBusy || undefined}
 					{...(typeof children !== 'string'
 						? { 'aria-label': ariaLabel || 'Button' }
 						: {})}
 					{...props}>
-					{children}
+					{isBusy ? (
+						<>
+							<span
+								className="size-4 flex-none animate-spin rounded-full border-2 border-solid border-current border-r-transparent motion-reduce:animate-skeleton"
+								aria-hidden="true"
+								data-cy="base-button-spinner"
+							/>
+							{busyLabel}
+						</>
+					) : (
+						children
+					)}
 				</button>
 			) : isDisabled ? (
 				<span
@@ -122,6 +138,7 @@ BaseButton.propTypes = {
 	className: PropTypes.string,
 	'data-cy': PropTypes.string,
 	ariaLabel: PropTypes.string,
+	busyLabel: PropTypes.string,
 }
 
 export default BaseButton

@@ -6,14 +6,12 @@ export const TEST_IDS = {
 		LABEL: 'base-spinner-label',
 	},
 	BASE_CARD: 'base-card',
-	DIALOG: {
-		AUTHENTICATING: 'authenticating-dialog',
-	},
 	USER_AUTH: {
 		CONTAINER: 'authentication-main-container',
 	},
 	USER_AUTH_FORM: {
 		FORM: 'user-authentication-form',
+		FORM_TITLE: 'user-authentication-form-title',
 		EMAIL_INPUT: 'email-input',
 		PASSWORD_INPUT: 'password-input',
 		LOGIN_SUBMIT_BUTTON: 'login-submit-button',

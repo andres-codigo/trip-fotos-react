@@ -34,6 +34,11 @@ export const DIALOG = Object.freeze({
 	ROLE_ALERTDIALOG: 'alertdialog',
 })
 
+export const ERROR_SUMMARY = Object.freeze({
+	ROOT: 'error-summary',
+	LINK: 'error-summary-link',
+})
+
 export const FILE_DROP = Object.freeze({
 	ID: 'file-drop',
 	INPUT: 'file-drop-input',
@@ -46,6 +51,7 @@ export const FILE_PREVIEW = Object.freeze({
 	REMOVE_BUTTON: 'file-preview-remove',
 	THUMBNAIL: 'file-preview-thumbnail',
 	NAME: 'file-preview-name',
+	ALT_INPUT: 'file-preview-alt',
 })
 
 export const IMAGE = Object.freeze({
@@ -57,18 +63,24 @@ export const IMAGE = Object.freeze({
 	PREVIOUS: 'image-gallery-previous',
 	NEXT: 'image-gallery-next',
 	COUNTER: 'image-gallery-counter',
+	CAPTION: 'image-caption',
 })
 
 export const INPUT = Object.freeze({
 	ID: 'test-input',
 	ERROR_ID: 'test-input-error',
 	TYPES: ['text', 'password', 'email', 'number'],
+	PASSWORD_TOGGLE: 'password-toggle',
 })
 
 export const PROGRESS = Object.freeze({
 	ID: 'base-progress',
 	BAR: 'base-progress-bar',
 	LABEL: 'base-progress-label',
+})
+
+export const REQUIRED_LEGEND = Object.freeze({
+	ROOT: 'required-legend',
 })
 
 export const SHEET = Object.freeze({
@@ -107,7 +119,7 @@ export const UI_TEXT = {
 		REFRESH: 'Refresh',
 	},
 	FORMS: {
-		REGISTER_AS_TRAVELLER: 'Register as a Traveller',
+		REGISTER_AS_TRAVELLER: 'Register as a traveller',
 		CITIES_VISITED: 'Cities visited',
 	},
 }
@@ -198,7 +210,7 @@ export const TRIP_PHOTOS = Object.freeze({
 	REMOVED: 'trip-photos-removed',
 	UNDO: 'trip-photos-undo',
 	LAST_PHOTO_HINT: 'trip-photos-last-photo-hint',
-	ERROR: 'trip-photos-error',
+	ALT_INPUT: 'trip-photos-alt',
 })
 
 export const CONTACT_TRAVELLER = Object.freeze({
@@ -250,4 +262,18 @@ export const MESSAGE_ITEM = Object.freeze({
 	DELETE: 'message-item-delete',
 	DELETE_ERROR: 'message-item-delete-error',
 	TRY_AGAIN: 'message-item-try-again',
+})
+
+export const PASSWORD_RESET_FORM = Object.freeze({
+	ROOT: 'password-reset-form',
+	TITLE: 'password-reset-title',
+	BACK_TO_LOG_IN: 'password-reset-back-to-log-in',
+	EMAIL_INPUT: 'password-reset-email-input',
+	EMAIL_ERROR: 'password-reset-email-error',
+	SEND_ERROR: 'password-reset-send-error',
+	SUBMIT: 'password-reset-submit',
+	SENT: 'password-reset-sent',
+	SENT_MESSAGE: 'password-reset-sent-message',
+	SEND_AGAIN: 'password-reset-send-again',
+	BACK: 'password-reset-back',
 })

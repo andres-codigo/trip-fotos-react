@@ -1,8 +1,3 @@
-export const MOCK_MESSAGES = Object.freeze({
-	AUTHENTICATING_TITLE: 'Authenticating',
-	AUTHENTICATING_DETAILS: 'Authenticating your details, one moment please...',
-})
-
 export const MOCK_ERROR_MESSAGES = Object.freeze({
 	INITIAL_ERROR: 'Test error message',
 	LOAD_FAILED: 'Load failed',

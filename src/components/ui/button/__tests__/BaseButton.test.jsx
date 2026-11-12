@@ -387,4 +387,27 @@ describe('<BaseButton />', () => {
 			expect(span).not.toHaveAttribute('aria-label')
 		})
 	})
+	describe('Busy state', () => {
+		it('keeps the button, swaps in the -ing label and marks it busy', () => {
+			renderWithRouter(
+				<BaseButton
+					type="submit"
+					busyLabel="Logging in…">
+					Log in
+				</BaseButton>,
+			)
+			const button = screen.getByRole('button', { name: 'Logging in…' })
+
+			expect(button).toBeDisabled()
+			expect(button).toHaveAttribute('aria-busy', 'true')
+		})
+
+		it('is not busy without a busy label', () => {
+			renderWithRouter(<BaseButton type="submit">Log in</BaseButton>)
+
+			expect(
+				screen.getByRole('button', { name: 'Log in' }),
+			).not.toHaveAttribute('aria-busy')
+		})
+	})
 })

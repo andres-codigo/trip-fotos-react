@@ -5,3 +5,11 @@ export const fieldClasses =
 export const labelClasses = 'mb-2 block font-semibold'
 
 export const requiredMarkClasses = 'text-danger-text'
+
+export const helpTextClasses = '-mt-1 mb-2 text-sm text-text-muted'
+
+// Helper text is read before the error, so the rule comes before what broke it
+export const describedBy = (id, helpText, hasError) =>
+	[helpText && `${id}-help`, hasError && `${id}-error`]
+		.filter(Boolean)
+		.join(' ') || undefined
