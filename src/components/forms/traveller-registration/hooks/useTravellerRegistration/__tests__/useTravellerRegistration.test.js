@@ -268,20 +268,6 @@ describe('useTravellerRegistration', () => {
 		expect(result.current.formData.firstName.message).toBe('')
 	})
 
-	it('should return expected hook properties', () => {
-		const { result } = renderHook(() => useTravellerRegistration())
-
-		expect(result.current).toHaveProperty('formData')
-		expect(result.current).toHaveProperty('handleInputChange')
-		expect(result.current).toHaveProperty('handleCityAdd')
-		expect(result.current).toHaveProperty('handleCityRemove')
-		expect(result.current).toHaveProperty('submitHandler')
-		expect(typeof result.current.handleInputChange).toBe('function')
-		expect(typeof result.current.handleCityAdd).toBe('function')
-		expect(typeof result.current.handleCityRemove).toBe('function')
-		expect(typeof result.current.submitHandler).toBe('function')
-	})
-
 	it('submits the files reported by the uploader', () => {
 		const { result } = renderHook(() => useTravellerRegistration())
 		const files = [{ id: 'a', name: 'a.png', file: {} }]

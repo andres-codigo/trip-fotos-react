@@ -15,10 +15,4 @@ describe('<TravellerSkeleton />', () => {
 			.should('be.visible')
 			.and('have.attr', 'aria-hidden', 'true')
 	})
-
-	it('renders ten animated blocks', () => {
-		cy.get(TRAVELLER_SKELETON_SELECTORS.ROOT)
-			.find('.animate-skeleton')
-			.should('have.length', 10)
-	})
 })

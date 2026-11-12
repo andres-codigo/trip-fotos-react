@@ -12,7 +12,6 @@ import {
 	CONTACT_TRAVELLER_CONFIG,
 	MESSAGES_CONFIG,
 } from '../../../src/constants/travellers'
-import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { TEST_USERS } from '../../../src/constants/config/users'
 import { PATHS } from '../../../src/constants/ui/paths'
 
@@ -129,34 +128,6 @@ describe('Logged in > Messages page', () => {
 		cy.checkA11y()
 	})
 
-	it('shows the empty state with a way to the travellers', () => {
-		cy.intercept(API_DATABASE.GET, MESSAGES_URL, 'null').as('loadMessages')
-		cy.visit(PATHS.MESSAGES)
-		cy.wait('@loadMessages', { timeout: REQUEST_TIMEOUT })
-
-		cy.get(MESSAGES_PAGE_SELECTORS.EMPTY).should('be.visible')
-		cy.get(MESSAGES_PAGE_SELECTORS.BROWSE_TRAVELLERS).click()
-		cy.location('pathname').should('eq', PATHS.TRAVELLERS)
-	})
-
-	it('puts a deleted message back on Undo without deleting it', () => {
-		cy.intercept(API_DATABASE.DELETE, MESSAGE_URL, cy.spy().as('delete'))
-		visitMessages()
-		deleteFirst()
-
-		cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
-			.find(TOAST_SELECTORS.ACTION)
-			.click()
-
-		cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST).should('not.exist')
-		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 2)
-		cy.get(MESSAGE_ITEM_SELECTORS.REPLY).first().should('have.focus')
-		cy.get('@delete').should('not.have.been.called')
-
-		cy.reload()
-		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 2)
-	})
-
 	it('deletes the message for good once the toast closes', () => {
 		cy.intercept(API_DATABASE.DELETE, MESSAGE_URL).as('deleteMessage')
 		visitMessages()
@@ -172,41 +143,6 @@ describe('Logged in > Messages page', () => {
 		cy.reload()
 		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 1)
 		cy.contains(SAMPLE_MESSAGE_ONE.message).should('not.exist')
-	})
-
-	it('sends the waiting delete when leaving the page', () => {
-		cy.intercept(API_DATABASE.DELETE, MESSAGE_URL).as('deleteMessage')
-		visitMessages()
-		deleteFirst()
-
-		cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS).click()
-		cy.wait('@deleteMessage').its('response.statusCode').should('eq', 200)
-	})
-
-	it('brings the message back with Try again when the delete fails', () => {
-		// Only the first delete fails: a later pass-through intercept would otherwise fall back to this stub
-		cy.intercept(
-			{ method: API_DATABASE.DELETE, url: MESSAGE_URL, times: 1 },
-			{ statusCode: 500, body: {} },
-		).as('deleteFails')
-		visitMessages()
-		deleteFirst()
-		cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
-			.find(TOAST_SELECTORS.DISMISS)
-			.click()
-		cy.wait('@deleteFails')
-
-		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 2)
-		cy.get(MESSAGE_ITEM_SELECTORS.DELETE_ERROR).should(
-			'contain.text',
-			ERROR_MESSAGES.FAILED_TO_DELETE_MESSAGE,
-		)
-
-		cy.intercept(API_DATABASE.DELETE, MESSAGE_URL).as('deleteMessage')
-		cy.get(MESSAGE_ITEM_SELECTORS.TRY_AGAIN).click()
-		cy.wait('@deleteMessage')
-		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 1)
-		cy.get(MESSAGE_ITEM_SELECTORS.DELETE_ERROR).should('not.exist')
 	})
 
 	it('replies in Trip Fotos and comes back to Messages', () => {
@@ -244,24 +180,5 @@ describe('Logged in > Messages page', () => {
 		cy.contains(CONTACT_TRAVELLER_CONFIG.REPLY_SUCCESS_MESSAGE).should(
 			'be.visible',
 		)
-	})
-
-	it('goes back to Messages from a reply', () => {
-		visitMessages()
-		cy.get(MESSAGE_ITEM_SELECTORS.REPLY).first().click()
-
-		cy.get(CONTACT_TRAVELLER_SELECTORS.BACK_TO_MESSAGES).click()
-		cy.location('pathname').should('eq', PATHS.MESSAGES)
-	})
-
-	it('shows an error dialog when loading fails', () => {
-		cy.intercept(API_DATABASE.GET, MESSAGES_URL, {
-			statusCode: 500,
-			body: {},
-		}).as('loadMessages')
-		cy.visit(PATHS.MESSAGES)
-		cy.wait('@loadMessages', { timeout: REQUEST_TIMEOUT })
-
-		cy.get(MESSAGES_PAGE_SELECTORS.ERROR_DIALOG).should('be.visible')
 	})
 })

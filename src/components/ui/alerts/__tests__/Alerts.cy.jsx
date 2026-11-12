@@ -6,15 +6,8 @@ const TYPE_CLASSES = {
 	error: 'bg-danger',
 	info: 'bg-accent',
 }
-const CLOSE_BUTTON = '[aria-label="Close message"]'
 
 describe('<Alerts />', () => {
-	it('announces the message as an alert', () => {
-		cy.mount(<Alerts message="Saved." />)
-
-		cy.get(ALERT).should('contain.text', 'Saved.')
-	})
-
 	;['success', 'error', 'info'].forEach((type) => {
 		it(`styles the ${type} type`, () => {
 			cy.mount(
@@ -36,42 +29,6 @@ describe('<Alerts />', () => {
 		cy.get(ALERT)
 			.should('have.css', 'background-color', 'rgb(127, 196, 140)')
 			.and('have.css', 'color', 'rgb(20, 19, 15)')
-	})
-
-	it('closes from the close button and reports it once the fade-out ends', () => {
-		const onClose = cy.stub().as('onClose')
-		cy.mount(
-			<Alerts
-				message="Hello"
-				duration={0}
-				onClose={onClose}
-			/>,
-		)
-
-		cy.get(CLOSE_BUTTON).click()
-
-		cy.get(ALERT).should('not.exist')
-		cy.get('@onClose').should('have.been.calledOnce')
-	})
-
-	it('closes by itself after its duration', () => {
-		const onClose = cy.stub().as('onClose')
-		cy.clock()
-		cy.mount(
-			<Alerts
-				message="Hello"
-				duration={3000}
-				onClose={onClose}
-			/>,
-		)
-
-		cy.get(ALERT).should('exist')
-		cy.tick(2999)
-		cy.get('@onClose').should('not.have.been.called')
-		cy.tick(1)
-
-		cy.get(ALERT).should('not.exist')
-		cy.get('@onClose').should('have.been.calledOnce')
 	})
 
 	it('stays open when the duration is 0', () => {

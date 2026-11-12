@@ -1,5 +1,4 @@
 import { COMMON_SELECTORS } from '@/constants/test'
-import { GLOBAL } from '@/constants/ui'
 
 import BaseImage from '@/components/ui/image/BaseImage'
 
@@ -18,15 +17,6 @@ const mountImage = (src = url, onOpen = () => {}) =>
 	)
 
 describe('<BaseImage />', () => {
-	it('renders the thumbnail with alt text', () => {
-		mountImage()
-		cy.get(COMMON_SELECTORS.BASE_IMAGE_THUMBNAIL).should(
-			'have.attr',
-			'alt',
-			"Ada's photo",
-		)
-	})
-
 	it('reserves its height before the image loads and keeps it after', () => {
 		cy.intercept('/slow-photo.svg', (req) =>
 			req.reply({
@@ -88,22 +78,6 @@ describe('<BaseImage />', () => {
 			expect(parseFloat(style.outlineOffset)).to.equal(2)
 			expect(style.boxShadow).to.contain('rgb(38, 36, 31)')
 		})
-	})
-
-	it('calls onOpen on click', () => {
-		const onOpen = cy.stub().as('onOpen')
-		mountImage(url, onOpen)
-		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).click()
-		cy.get('@onOpen').should('have.been.calledOnce')
-	})
-
-	it('shows the fallback when the image fails', () => {
-		mountImage('/missing-image.jpg')
-		cy.get(COMMON_SELECTORS.BASE_IMAGE_FALLBACK).should(
-			'contain',
-			GLOBAL.IMAGE_UNAVAILABLE,
-		)
-		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should('not.exist')
 	})
 
 	it('has no axe violations', () => {

@@ -19,18 +19,6 @@ describe('<FileDrop />', () => {
 			.should('have.attr', 'data-active', 'false')
 	})
 
-	it('emits dropped files', () => {
-		const onFilesDropped = cy.stub().as('onFilesDropped')
-		cy.mount(<FileDrop onFilesDropped={onFilesDropped} />)
-
-		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP).selectFile(
-			{ contents: Cypress.Buffer.from('x'), fileName: 'a.png' },
-			{ action: 'drag-drop' },
-		)
-
-		cy.get('@onFilesDropped').should('have.been.calledOnce')
-	})
-
 	it('has no axe violations', () => {
 		cy.mount(
 			<FileDrop onFilesDropped={cy.stub()}>

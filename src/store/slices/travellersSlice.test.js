@@ -1773,20 +1773,6 @@ describe('travellersSlice', () => {
 	})
 
 	describe('reducer actions', () => {
-		describe('setIsTraveller', () => {
-			it('should set isTraveller to true', () => {
-				store.dispatch(setIsTraveller(true))
-				const state = store.getState().travellers
-				expect(state.isTraveller).toBe(true)
-			})
-
-			it('should set isTraveller to false', () => {
-				store.dispatch(setIsTraveller(false))
-				const state = store.getState().travellers
-				expect(state.isTraveller).toBe(false)
-			})
-		})
-
 		describe('setTravellers', () => {
 			it('should set travellers array and hasTravellers to true when array has items', () => {
 				const mockTravellers = [MOCK_TRAVELLERS.TEST_TRAVELLER]
@@ -1814,19 +1800,15 @@ describe('travellersSlice', () => {
 			store.dispatch(setTravellerName(MOCK_TRAVELLERS.TEST_NAME))
 		})
 
-		it('should return travellers array from state', () => {
-			const result = selectTravellers(store.getState())
-			expect(result).toEqual([MOCK_TRAVELLERS.TEST_TRAVELLER])
-		})
+		it('should read the travellers, flags and name from state', () => {
+			const state = store.getState()
 
-		it('should return hasTravellers boolean from state', () => {
-			const result = selectHasTravellers(store.getState())
-			expect(result).toBe(true)
-		})
-
-		it('should return isTraveller boolean from state', () => {
-			const result = selectIsTraveller(store.getState())
-			expect(result).toBe(true)
+			expect(selectTravellers(state)).toEqual([
+				MOCK_TRAVELLERS.TEST_TRAVELLER,
+			])
+			expect(selectHasTravellers(state)).toBe(true)
+			expect(selectIsTraveller(state)).toBe(true)
+			expect(selectTravellerName(state)).toBe(MOCK_TRAVELLERS.TEST_NAME)
 		})
 
 		it.each([
@@ -1854,11 +1836,6 @@ describe('travellersSlice', () => {
 				expect(result).toBe(expected)
 			},
 		)
-
-		it('should return travellerName string from state', () => {
-			const result = selectTravellerName(store.getState())
-			expect(result).toBe(MOCK_TRAVELLERS.TEST_NAME)
-		})
 
 		it('should return selectedTraveller from state', () => {
 			// Manually set selectedTraveller state

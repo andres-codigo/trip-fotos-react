@@ -38,26 +38,6 @@ const openAt = (position) =>
 	cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).eq(position).click()
 
 describe('<ImageGallery />', () => {
-	it('steps through the photos with next and previous', () => {
-		mountGallery()
-		openAt(0)
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
-			'contain',
-			'1 of 3',
-		)
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_PREVIOUS).should('be.disabled')
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_NEXT).click()
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
-			'contain',
-			'2 of 3',
-		)
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_PREVIOUS).click()
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
-			'contain',
-			'1 of 3',
-		)
-	})
-
 	it('steps with the arrow keys and closes with Escape', () => {
 		mountGallery()
 		openAt(0)

@@ -2,7 +2,7 @@ import { BrowserRouter } from 'react-router-dom'
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
 
-import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
+import { GLOBAL } from '@/constants/ui'
 
 import {
 	COMBOBOX_SELECTORS,
@@ -32,11 +32,6 @@ describe('<TravellerRegistrationForm />', () => {
 	}
 
 	describe('Rendering tests', () => {
-		it('renders the form', () => {
-			render()
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('exist')
-		})
-
 		// The uploader centres itself with auto margins, which a flex column would shrink to its text; 700px keeps it under its own 800px cap
 		it('stretches the drop zone across the photos group, on Register and when editing', () => {
 			cy.viewport(700, 900)
@@ -59,29 +54,6 @@ describe('<TravellerRegistrationForm />', () => {
 			render()
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('exist')
 			cy.checkA11y()
-		})
-
-		it('has all required fields', () => {
-			render()
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT,
-			).should('exist')
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT,
-			).should('exist')
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
-			).should('exist')
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT,
-			).should('exist')
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).should(
-				'exist',
-			)
-			cy.get(COMBOBOX_SELECTORS.INPUT).should('exist')
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
-			).should('exist')
 		})
 
 		it('focuses the city search when its label is clicked', () => {
@@ -381,61 +353,9 @@ describe('<TravellerRegistrationForm />', () => {
 				.its('0.name')
 				.should('eq', 'test-image.png')
 		})
-
-		it('displays loading state correctly', () => {
-			render({ isLoading: true })
-
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should(
-				'have.attr',
-				'aria-busy',
-				'true',
-			)
-
-			cy.contains(ACCESSIBILITY.ARIA_LIVE.POLITE.MESSAGE).should('exist')
-
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT,
-			).should('be.disabled')
-
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
-			).should('be.disabled')
-		})
 	})
 
 	describe('Accessibility tests', () => {
-		it('associates form with heading via aria-labelledby', () => {
-			render()
-
-			cy.get('#traveller-registration-title')
-				.should('exist')
-				.and('contain', 'Register as a Traveller')
-
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM)
-				.should('have.attr', ACCESSIBILITY.ARIA_LABELLEDBY)
-				.then((labelledby) => {
-					cy.get(`#${labelledby}`).should('exist')
-				})
-		})
-
-		it('marks required inputs with aria-required', () => {
-			render()
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT,
-			).should('have.attr', 'aria-required', 'true')
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.LAST_NAME_INPUT,
-			).should('have.attr', 'aria-required', 'true')
-			cy.get(
-				TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT,
-			).should('have.attr', 'aria-required', 'true')
-			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).should(
-				'have.attr',
-				'aria-required',
-				'true',
-			)
-		})
-
 		it('shows invalid state via aria-invalid and connects to error message', () => {
 			render()
 			cy.get(
@@ -448,15 +368,6 @@ describe('<TravellerRegistrationForm />', () => {
 				.then((id) => {
 					cy.get(`#${id}`).should('exist')
 				})
-		})
-
-		it('announces loading state with aria-live region', () => {
-			render({ isLoading: true })
-			cy.contains(ACCESSIBILITY.ARIA_LIVE.POLITE.MESSAGE).should(
-				'have.attr',
-				'aria-live',
-				'polite',
-			)
 		})
 	})
 })

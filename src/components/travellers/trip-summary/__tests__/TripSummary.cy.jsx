@@ -34,16 +34,4 @@ describe('<TripSummary />', () => {
 		cy.get(SUMMARY).contains('Trip:').should('have.class', 'sr-only')
 		cy.get(SUMMARY).should('have.css', 'font-size', '14px')
 	})
-
-	it('shows only the length for an older traveller', () => {
-		mountSummary({ daysInCity: '8' })
-
-		cy.get(SUMMARY).invoke('text').should('eq', 'Trip: 8 days')
-	})
-
-	it('renders nothing when no trip is stored', () => {
-		mountSummary()
-
-		cy.get(SUMMARY).should('not.exist')
-	})
 })

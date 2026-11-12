@@ -14,39 +14,25 @@ vi.mock('@/components/ui/card/BaseCard', () => ({
 
 describe('Privacy', () => {
 	describe('Rendering tests', () => {
-		it('<main> is the skip link target', () => {
+		it('renders <main> as the skip link target with its class and data attributes', () => {
 			render(<Privacy />)
 
 			const main = screen.getByRole('main')
 
 			expect(main).toHaveAttribute('id', ACCESSIBILITY.MAIN_CONTENT_ID)
 			expect(main).toHaveAttribute('tabindex', '-1')
+			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
+			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
+			expect(main).toHaveAttribute(
+				'data-cy-alt',
+				TEST_IDS.PRIVACY.CONTAINER,
+			)
 		})
 
 		it('sets the document title', () => {
 			render(<Privacy />)
 
 			expect(document.title).toBe(`Privacy policy · ${GLOBAL.SITE_NAME}`)
-		})
-
-		it('renders <main> with the shared and page classes', () => {
-			render(<Privacy />)
-
-			const main = screen.getByRole('main')
-
-			expect(main.className).toMatch(GLOBAL.CLASS_NAMES.MAIN_CONTAINER)
-		})
-
-		it('<main> element has correct data attributes', () => {
-			render(<Privacy />)
-
-			const main = screen.getByRole('main')
-
-			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
-			expect(main).toHaveAttribute(
-				'data-cy-alt',
-				TEST_IDS.PRIVACY.CONTAINER,
-			)
 		})
 
 		it('renders the page heading and each policy section', () => {

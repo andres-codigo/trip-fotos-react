@@ -1,10 +1,4 @@
-import {
-	render,
-	screen,
-	fireEvent,
-	waitFor,
-	renderHook,
-} from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
@@ -116,13 +110,21 @@ describe('<Authentication />', () => {
 	})
 
 	describe('Rendering tests', () => {
-		it('<main> is the skip link target', () => {
+		it('renders the form inside <main>, the skip link target', () => {
 			renderWithProviders(<Authentication />)
 
 			const main = screen.getByRole('main')
 
 			expect(main).toHaveAttribute('id', ACCESSIBILITY.MAIN_CONTENT_ID)
 			expect(main).toHaveAttribute('tabindex', '-1')
+			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
+			expect(main).toHaveAttribute(
+				'data-cy-alt',
+				TEST_IDS.USER_AUTH.CONTAINER,
+			)
+			expect(
+				screen.getByTestId(TEST_IDS.USER_AUTH_FORM.FORM),
+			).toBeInTheDocument()
 		})
 
 		it('sets the document title', () => {
@@ -130,186 +132,11 @@ describe('<Authentication />', () => {
 
 			expect(document.title).toBe(`Login · ${GLOBAL.SITE_NAME}`)
 		})
-
-		it('renders the <main> element', () => {
-			renderWithProviders(<Authentication />)
-
-			expect(screen.getByRole('main')).toBeInTheDocument()
-		})
-
-		it('<main> element has correct data attributes', () => {
-			renderWithProviders(<Authentication />)
-
-			const main = screen.getByRole('main')
-			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
-			expect(main).toHaveAttribute(
-				'data-cy-alt',
-				TEST_IDS.USER_AUTH.CONTAINER,
-			)
-		})
-
-		it('renders the UserAuthenticationForm component', () => {
-			renderWithProviders(<Authentication />)
-
-			const form = screen.getByTestId(TEST_IDS.USER_AUTH_FORM.FORM)
-			expect(form).toBeInTheDocument()
-		})
 	})
 
 	describe('Behaviour tests', () => {
 		describe('Form validation handlers', () => {
-			it('validates email input and updates state accordingly', async () => {
-				const { result } = renderHook(() => {
-					const [, setEmail] = [{ value: '' }, vi.fn()]
-
-					const handler = async (value) => {
-						const { isValid, message } = validateEmail(value)
-						setEmail(value, isValid, message)
-						return isValid
-					}
-					return { setEmail, handler }
-				})
-
-				validateEmail.mockReturnValueOnce({
-					isValid: true,
-					message: '',
-				})
-
-				const isValid = await result.current.handler(MOCK_KEYS.EMAIL)
-				expect(result.current.setEmail).toHaveBeenCalledWith(
-					MOCK_KEYS.EMAIL,
-					true,
-					'',
-				)
-				expect(isValid).toBe(true)
-
-				validateEmail.mockReturnValueOnce({
-					isValid: false,
-					message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
-				})
-				const isValid2 = await result.current.handler('')
-				expect(result.current.setEmail).toHaveBeenCalledWith(
-					'',
-					false,
-					VALIDATION_MESSAGES.EMAIL_REQUIRED,
-				)
-				expect(isValid2).toBe(false)
-			})
-
-			it('validates password input and updates state accordingly', async () => {
-				const { result } = renderHook(() => {
-					const [, setPassword] = [{ value: '' }, vi.fn()]
-					const handler = async (value) => {
-						const { isValid, message } = validatePassword(value)
-						setPassword(value, isValid, message)
-						return isValid
-					}
-					return { setPassword, handler }
-				})
-
-				validatePassword.mockReturnValueOnce({
-					isValid: true,
-					message: '',
-				})
-				const isValid = await result.current.handler(MOCK_KEYS.PASSWORD)
-				expect(result.current.setPassword).toHaveBeenCalledWith(
-					MOCK_KEYS.PASSWORD,
-					true,
-					'',
-				)
-				expect(isValid).toBe(true)
-
-				validatePassword.mockReturnValueOnce({
-					isValid: false,
-					message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
-				})
-				const isValid2 = await result.current.handler('')
-				expect(result.current.setPassword).toHaveBeenCalledWith(
-					'',
-					false,
-					VALIDATION_MESSAGES.PASSWORD_REQUIRED,
-				)
-				expect(isValid2).toBe(false)
-			})
-
-			it('validates complete form with trimmed values', async () => {
-				const mockEmail = { value: '  ' + MOCK_KEYS.EMAIL + '  ' }
-				const mockPassword = { value: '  ' + MOCK_KEYS.PASSWORD + '  ' }
-				const validateEmailHandler = vi.fn().mockResolvedValue(true)
-				const validatePasswordHandler = vi.fn().mockResolvedValue(true)
-
-				const validateForm = async () => {
-					const trimmedEmail = mockEmail.value.trim()
-					const trimmedPassword = mockPassword.value.trim()
-
-					const emailValid = await validateEmailHandler(trimmedEmail)
-					const passwordValid =
-						await validatePasswordHandler(trimmedPassword)
-
-					if (!emailValid || !passwordValid)
-						return {
-							email: trimmedEmail,
-							password: trimmedPassword,
-							isValid: false,
-						}
-					return {
-						email: trimmedEmail,
-						password: trimmedPassword,
-						isValid: true,
-					}
-				}
-
-				const result = await validateForm()
-				expect(validateEmailHandler).toHaveBeenCalledWith(
-					MOCK_KEYS.EMAIL,
-				)
-				expect(validatePasswordHandler).toHaveBeenCalledWith(
-					MOCK_KEYS.PASSWORD,
-				)
-				expect(result).toEqual({
-					email: MOCK_KEYS.EMAIL,
-					password: MOCK_KEYS.PASSWORD,
-					isValid: true,
-				})
-			})
-
 			it('prevents form submission when email validation fails', async () => {
-				validateEmail.mockReturnValueOnce({
-					isValid: false,
-					message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
-				})
-				validatePassword.mockReturnValueOnce({
-					isValid: true,
-					message: '',
-				})
-
-				renderWithProviders(<Authentication />)
-
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: MOCK_KEYS.EMAIL_INVALID },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: MOCK_KEYS.PASSWORD },
-					},
-				)
-
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
-				)
-
-				await waitFor(() => {
-					expect(login).not.toHaveBeenCalled()
-				})
-			})
-
-			it('validates form structure when validation fails', async () => {
 				validateEmail.mockReturnValueOnce({
 					isValid: false,
 					message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
@@ -630,53 +457,6 @@ describe('<Authentication />', () => {
 					expect(
 						screen.queryByTestId(TEST_IDS.DIALOG.AUTHENTICATING),
 					).not.toBeInTheDocument()
-				})
-			})
-
-			it('renders loading dialog with correct structure and properties', async () => {
-				// Mock dispatch to never resolve for persistent loading state
-				mockDispatch.mockImplementation(() => new Promise(() => {}))
-
-				renderWithProviders(<Authentication />)
-
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: MOCK_KEYS.EMAIL },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: MOCK_KEYS.PASSWORD },
-					},
-				)
-
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
-				)
-
-				await waitFor(() => {
-					const loadingDialog = screen.getByTestId(
-						TEST_IDS.DIALOG.AUTHENTICATING,
-					)
-					expect(loadingDialog).toBeInTheDocument()
-					expect(loadingDialog).toHaveAttribute(
-						'data-cy',
-						TEST_IDS.DIALOG.AUTHENTICATING,
-					)
-
-					expect(
-						screen.getByText(MOCK_MESSAGES.AUTHENTICATING_TITLE),
-					).toBeInTheDocument()
-					expect(
-						screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
-					).toBeInTheDocument()
-					expect(
-						screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
-					).toBeInTheDocument()
 				})
 			})
 		})

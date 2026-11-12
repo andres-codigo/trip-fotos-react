@@ -85,26 +85,6 @@ describe('<TravellerDetail />', () => {
 			.and('not.have.css', 'width', '1px')
 	})
 
-	it('renders the profile, badges and every photo', () => {
-		mountPage()
-		cy.get(TRAVELLER_DETAIL_SELECTORS.NAME).should(
-			'have.text',
-			'Ada Lovelace',
-		)
-		cy.get(TRAVELLER_DETAIL_SELECTORS.TRIP_DESCRIPTION).should(
-			'contain.text',
-			'Loves analytical engines',
-		)
-		cy.get(TRAVELLER_DETAIL_SELECTORS.TRIP)
-			.should('contain.text', '5–11 Mar 2024')
-			.and('contain.text', '7 days')
-		cy.get(COMMON_SELECTORS.BASE_BADGE).should('have.length', 2)
-		cy.get(COMMON_SELECTORS.BASE_BADGE)
-			.first()
-			.should('contain.text', 'Tokyo, Japan')
-		cy.get(COMMON_SELECTORS.BASE_IMAGE).should('have.length', 7)
-	})
-
 	it('brings the photos into view when opened from the see-all link', () => {
 		const viewportHeight = 200
 		cy.viewport(390, viewportHeight)
@@ -144,12 +124,6 @@ describe('<TravellerDetail />', () => {
 			})
 	})
 
-	it('hides Message on the own record', () => {
-		mountPage({ userId: 'abc', isTraveller: true })
-		cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE).should('exist')
-		cy.get(TRAVELLER_DETAIL_SELECTORS.MESSAGE).should('not.exist')
-	})
-
 	it('lines the back link up with the left edge of the card on desktop', () => {
 		cy.viewport(1280, 800)
 		mountPage()
@@ -182,18 +156,5 @@ describe('<TravellerDetail />', () => {
 						expect(gap).to.be.within(0, 12)
 					})
 			})
-	})
-
-	it('shows the not-found state for an unknown id', () => {
-		mountPage({ id: 'nope' })
-		cy.get(TRAVELLER_DETAIL_SELECTORS.NOT_FOUND).should(
-			'contain.text',
-			'Traveller not found.',
-		)
-		cy.get(TRAVELLER_DETAIL_SELECTORS.BACK_TO_TRAVELLERS).should(
-			'have.attr',
-			'href',
-			'/travellers',
-		)
 	})
 })

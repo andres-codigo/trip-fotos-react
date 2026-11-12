@@ -92,44 +92,16 @@ describe('Register', () => {
 		)
 	}
 
-	describe('Rendering tests', () => {
-		it('renders the <main> element', () => {
-			renderRegister()
+	it('renders the idle form in a card inside <main>', () => {
+		renderRegister()
 
-			expect(screen.getByRole('main')).toBeInTheDocument()
-		})
-
-		it('<main> element has correct data attributes', () => {
-			renderRegister()
-
-			const main = screen.getByRole('main')
-			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
-			expect(main).toHaveAttribute(
-				'data-cy-alt',
-				TEST_IDS.REGISTER.CONTAINER,
-			)
-		})
-
-		it('renders the BaseCard component', () => {
-			renderRegister()
-			expect(screen.getByTestId(TEST_IDS.BASE_CARD)).toBeInTheDocument()
-		})
-
-		it('renders the TravellerRegistrationForm within BaseCard', () => {
-			renderRegister()
-
-			const baseCard = screen.getByTestId(TEST_IDS.BASE_CARD)
-			expect(
-				within(baseCard).getByTestId('traveller-registration-form'),
-			).toBeInTheDocument()
-		})
-
-		it('passes correct props to TravellerRegistrationForm', () => {
-			renderRegister()
-
-			const form = screen.getByTestId('traveller-registration-form')
-			expect(form).toHaveAttribute('data-loading', 'false')
-		})
+		const main = screen.getByRole('main')
+		expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
+		expect(main).toHaveAttribute('data-cy-alt', TEST_IDS.REGISTER.CONTAINER)
+		const form = within(screen.getByTestId(TEST_IDS.BASE_CARD)).getByTestId(
+			'traveller-registration-form',
+		)
+		expect(form).toHaveAttribute('data-loading', 'false')
 	})
 
 	describe('Upload progress', () => {

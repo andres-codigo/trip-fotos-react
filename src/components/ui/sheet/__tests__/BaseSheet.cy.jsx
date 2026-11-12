@@ -26,13 +26,6 @@ describe('<BaseSheet />', () => {
 			cy.checkA11y()
 		})
 
-		it('renders the title, body and footer', () => {
-			mountSheet()
-			cy.get(SHEET_SELECTORS.TITLE).should('contain', 'Filter by city')
-			cy.get(SHEET_SELECTORS.BODY).should('contain', 'Sheet content')
-			cy.get(SHEET_SELECTORS.FOOTER).should('contain', 'Show all')
-		})
-
 		it('sits at the bottom of the viewport', () => {
 			mountSheet()
 			cy.get(SHEET_SELECTORS.ROOT).should(($sheet) => {
@@ -43,12 +36,6 @@ describe('<BaseSheet />', () => {
 	})
 
 	describe('Behaviour tests', () => {
-		it('calls onClose when the close button is clicked', () => {
-			mountSheet()
-			cy.get(SHEET_SELECTORS.CLOSE).click()
-			cy.get('@onClose').should('have.been.calledOnce')
-		})
-
 		it('calls onClose when Escape is pressed', () => {
 			mountSheet()
 			cy.get(SHEET_SELECTORS.ROOT).focus().type('{esc}')

@@ -2,163 +2,52 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 
 import BaseCard from '@/components/ui/card/BaseCard'
-import { COMMON_SELECTORS } from '@/constants/test'
 
-// Test selector constant
 const BASE_CARD_SELECTOR = 'base-card'
 
 describe('<BaseCard />', () => {
-	describe('Rendering tests', () => {
-		it('renders with children', () => {
-			render(
-				<BaseCard>
-					<h1>Card Content</h1>
-				</BaseCard>,
-			)
+	it('renders its children in a styled div', () => {
+		render(
+			<BaseCard>
+				<h1>Card Content</h1>
+				text
+			</BaseCard>,
+		)
 
-			expect(screen.getByText('Card Content')).toBeInTheDocument()
-			expect(screen.getByTestId(BASE_CARD_SELECTOR)).toBeInTheDocument()
-		})
-
-		it('renders with default data-cy attribute', () => {
-			render(<BaseCard>Content</BaseCard>)
-
-			expect(screen.getByTestId(BASE_CARD_SELECTOR)).toHaveAttribute(
-				'data-cy',
-				BASE_CARD_SELECTOR,
-			)
-		})
-
-		it('renders as a div element', () => {
-			const { container } = render(<BaseCard>Content</BaseCard>)
-
-			const card = container.querySelector('div')
-			expect(card).toBeInTheDocument()
-			expect(card?.tagName).toBe('DIV')
-		})
-
-		it('renders with base-card data-cy attribute', () => {
-			render(<BaseCard>Content</BaseCard>)
-
-			const card = screen.getByTestId(BASE_CARD_SELECTOR)
-			expect(card).toBeInTheDocument()
-		})
+		const card = screen.getByTestId(BASE_CARD_SELECTOR)
+		expect(card.tagName).toBe('DIV')
+		expect(card).toHaveClass('rounded-lg')
+		expect(card).toHaveTextContent('Card Contenttext')
 	})
 
-	describe('className composition tests', () => {
-		it('keeps a custom className alongside the card styles', () => {
-			render(<BaseCard className="custom-class">Content</BaseCard>)
+	it('keeps a custom className alongside the card styles', () => {
+		render(<BaseCard className="custom-class">Content</BaseCard>)
 
-			const card = screen.getByTestId(BASE_CARD_SELECTOR)
-			expect(card).toHaveClass('custom-class', 'rounded-lg')
-		})
-
-		it('applies the card styles when no custom className is provided', () => {
-			render(<BaseCard>Content</BaseCard>)
-
-			expect(screen.getByTestId(BASE_CARD_SELECTOR)).toHaveClass(
-				'rounded-lg',
-			)
-		})
-
-		it('lets a custom className override a conflicting utility', () => {
-			render(<BaseCard className="p-8">Content</BaseCard>)
-
-			const card = screen.getByTestId(BASE_CARD_SELECTOR)
-			expect(card).toHaveClass('p-8')
-			expect(card).not.toHaveClass('p-4')
-		})
+		expect(screen.getByTestId(BASE_CARD_SELECTOR)).toHaveClass(
+			'custom-class',
+			'rounded-lg',
+		)
 	})
 
-	describe('Props spreading tests', () => {
-		it('does not spread arbitrary props like id or role to the div element', () => {
-			const { container } = render(
-				<BaseCard
-					id="custom-id"
-					role="region"
-					aria-label="Card region">
-					Content
-				</BaseCard>,
-			)
+	it('lets a custom className override a conflicting utility', () => {
+		render(<BaseCard className="p-8">Content</BaseCard>)
 
-			const card = container.querySelector(COMMON_SELECTORS.BASE_CARD)
-			// BaseCard only accepts className and children props, others are not spread
-			expect(card).not.toHaveAttribute('id')
-			expect(card).not.toHaveAttribute('role')
-			expect(card).not.toHaveAttribute('aria-label')
-		})
+		const card = screen.getByTestId(BASE_CARD_SELECTOR)
+		expect(card).toHaveClass('p-8')
+		expect(card).not.toHaveClass('p-4')
 	})
 
-	describe('Children rendering tests', () => {
-		it('renders single child element', () => {
-			render(
-				<BaseCard>
-					<p>Single child</p>
-				</BaseCard>,
-			)
+	it('does not spread arbitrary props onto the div', () => {
+		render(
+			<BaseCard
+				id="custom-id"
+				role="region">
+				Content
+			</BaseCard>,
+		)
 
-			expect(screen.getByText('Single child')).toBeInTheDocument()
-		})
-
-		it('renders multiple child elements', () => {
-			render(
-				<BaseCard>
-					<h1>Title</h1>
-					<p>Content</p>
-					<button>Action</button>
-				</BaseCard>,
-			)
-
-			expect(screen.getByText('Title')).toBeInTheDocument()
-			expect(screen.getByText('Content')).toBeInTheDocument()
-			expect(screen.getByText('Action')).toBeInTheDocument()
-		})
-
-		it('renders text content as children', () => {
-			render(<BaseCard>Plain text content</BaseCard>)
-
-			expect(screen.getByText('Plain text content')).toBeInTheDocument()
-		})
-
-		it('renders null children gracefully', () => {
-			const { container } = render(<BaseCard>{null}</BaseCard>)
-
-			const card = container.querySelector('div')
-			expect(card).toBeInTheDocument()
-		})
-
-		it('renders mixed child types', () => {
-			render(
-				<BaseCard>
-					Text content
-					<span>Element</span>
-					{null}
-					{false}
-				</BaseCard>,
-			)
-
-			expect(screen.getByText('Text content')).toBeInTheDocument()
-			expect(screen.getByText('Element')).toBeInTheDocument()
-		})
-	})
-
-	describe('Prop validation', () => {
-		it('accepts className prop as string', () => {
-			const { container } = render(
-				<BaseCard className="test-class">Content</BaseCard>,
-			)
-
-			expect(container.querySelector('div')).toBeInTheDocument()
-		})
-
-		it('accepts children as node', () => {
-			const { container } = render(
-				<BaseCard>
-					<div>Complex child structure</div>
-				</BaseCard>,
-			)
-
-			expect(container.querySelector('div')).toBeInTheDocument()
-		})
+		const card = screen.getByTestId(BASE_CARD_SELECTOR)
+		expect(card).not.toHaveAttribute('id')
+		expect(card).not.toHaveAttribute('role')
 	})
 })

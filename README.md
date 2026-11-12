@@ -69,6 +69,8 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Next up** — in this order:
 
+- [#655](https://github.com/andres-codigo/trip-fotos-react/issues/655) — clearer forms: helper text, a required-fields legend, an error summary and consistent wording
+- [#656](https://github.com/andres-codigo/trip-fotos-react/issues/656) — a public travellers preview for logged-out visitors
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark redesign layout: a multi-column Travellers grid and the design system's layout proposals
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
