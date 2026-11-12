@@ -25,8 +25,4 @@ export const VALID_PASSWORDS = [
 	'P@ssw0rd123',
 ]
 
-export const PASSWORD_CHARACTER_DIFFERENCE = [
-	{ password: '', expectedDiff: 6 },
-	{ password: '123', expectedDiff: 3 },
-	{ password: '12345', expectedDiff: 1 },
-]
+export const SHORT_PASSWORDS = ['1', '123', '12345']

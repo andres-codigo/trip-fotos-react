@@ -27,13 +27,24 @@ const useContactTravellerForm = () => {
 		[MESSAGE]: { value: '', message: '', isValid: true },
 	})
 
+	// Typing never raises a new error; it only clears or updates one the field already shows
 	const handleInputChange = (e) => {
 		const { id, value } = e.target
-		const { isValid, message } = validateField(id, value)
 
 		setFormData((prev) => ({
 			...prev,
-			[id]: { ...prev[id], value, isValid, message },
+			[id]: prev[id].isValid
+				? { ...prev[id], value }
+				: { ...prev[id], value, ...validateField(id, value) },
+		}))
+	}
+
+	const handleInputBlur = (e) => {
+		const { id, value } = e.target
+
+		setFormData((prev) => ({
+			...prev,
+			[id]: { ...prev[id], value, ...validateField(id, value) },
 		}))
 	}
 
@@ -48,7 +59,11 @@ const useContactTravellerForm = () => {
 		)
 		setFormData(validated)
 
-		if (Object.values(validated).some((field) => !field.isValid)) {
+		const firstInvalid = Object.keys(validated).find(
+			(key) => !validated[key].isValid,
+		)
+		if (firstInvalid) {
+			document.getElementById(firstInvalid)?.focus()
 			return
 		}
 
@@ -57,7 +72,7 @@ const useContactTravellerForm = () => {
 		})
 	}
 
-	return { formData, handleInputChange, submitHandler }
+	return { formData, handleInputChange, handleInputBlur, submitHandler }
 }
 
 export default useContactTravellerForm
