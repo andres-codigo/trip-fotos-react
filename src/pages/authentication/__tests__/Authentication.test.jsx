@@ -5,13 +5,13 @@ import { BrowserRouter } from 'react-router-dom'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { API_DATABASE } from '@/constants/api'
+import { AUTH_FORM_CONFIG, PASSWORD_RESET_CONFIG } from '@/constants/auth'
 
 import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 import {
 	DIALOG,
 	MOCK_KEYS,
 	MOCK_LOGIN_PAYLOAD,
-	MOCK_MESSAGES,
 	TEST_IDS,
 } from '@/constants/test'
 
@@ -20,13 +20,17 @@ import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import { validateEmail, validatePassword } from '@/utils/validation'
 
-import { login } from '@/store/slices/authenticationSlice'
+import { login, sendPasswordReset } from '@/store/slices/authenticationSlice'
 
 import Authentication from '@/pages/authentication/Authentication'
 
-vi.mock('@/store/slices/authenticationSlice', () => ({
-	login: vi.fn(() => Promise.resolve({})),
-}))
+vi.mock('@/store/slices/authenticationSlice', () => {
+	const sendPasswordReset = vi.fn((email) => ({ type: 'reset', email }))
+	sendPasswordReset.rejected = {
+		match: (result) => result?.meta?.rejectedWithValue === true,
+	}
+	return { login: vi.fn(() => Promise.resolve({})), sendPasswordReset }
+})
 
 vi.mock('@/utils/validation', () => ({
 	validateEmail: vi.fn((v) => ({
@@ -130,7 +134,7 @@ describe('<Authentication />', () => {
 		it('sets the document title', () => {
 			renderWithProviders(<Authentication />)
 
-			expect(document.title).toBe(`Login · ${GLOBAL.SITE_NAME}`)
+			expect(document.title).toBe(`Log in · ${GLOBAL.SITE_NAME}`)
 		})
 	})
 
@@ -291,14 +295,19 @@ describe('<Authentication />', () => {
 					TEST_IDS.USER_AUTH_FORM.LOGIN_SIGNUP_TOGGLE_LINK,
 				)
 
-				expect(screen.getByText(/log in/i)).toBeInTheDocument()
+				const title = () =>
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.FORM_TITLE)
+				expect(title()).toHaveTextContent(AUTH_FORM_CONFIG.LOGIN_TITLE)
 
 				fireEvent.click(switchBtn)
-				expect(screen.getByText(/sign up/i)).toBeInTheDocument()
-				expect(document.title).toBe(`Signup · ${GLOBAL.SITE_NAME}`)
+				expect(title()).toHaveTextContent(AUTH_FORM_CONFIG.SIGNUP_TITLE)
+				expect(title()).toHaveFocus()
+				expect(document.title).toBe(
+					`${AUTH_FORM_CONFIG.SIGNUP_TITLE} · ${GLOBAL.SITE_NAME}`,
+				)
 
 				fireEvent.click(switchBtn)
-				expect(screen.getByText(/log in/i)).toBeInTheDocument()
+				expect(title()).toHaveTextContent(AUTH_FORM_CONFIG.LOGIN_TITLE)
 			})
 
 			it('dispatches login thunk with signup mode when component is in signup mode', async () => {
@@ -369,70 +378,62 @@ describe('<Authentication />', () => {
 		})
 
 		describe('Loading state management', () => {
-			it('displays loading dialog during authentication process', async () => {
-				// Mock dispatch to never resolve, keeping loading state active
-				mockDispatch.mockImplementation(() => new Promise(() => {}))
+			it('shows the busy button, not a dialog, while logging in, and clears it when done', async () => {
+				let resolveAuth
+				mockDispatch.mockReturnValueOnce(
+					new Promise((resolve) => {
+						resolveAuth = resolve
+					}),
+				)
 
 				renderWithProviders(<Authentication />)
-
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: MOCK_KEYS.EMAIL },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: MOCK_KEYS.PASSWORD },
-					},
-				)
-
+				fillLoginForm()
 				fireEvent.click(
 					screen.getByTestId(
 						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
 					),
 				)
 
-				await waitFor(() => {
-					expect(
-						screen.getByTestId(TEST_IDS.DIALOG.AUTHENTICATING),
-					).toBeInTheDocument()
-					expect(
-						screen.getByText('Authenticating'),
-					).toBeInTheDocument()
-					expect(
-						screen.getByText(MOCK_MESSAGES.AUTHENTICATING_DETAILS),
-					).toBeInTheDocument()
-					expect(
-						screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
-					).toBeInTheDocument()
+				const submit = screen.getByTestId(
+					TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
+				)
+				await waitFor(() =>
+					expect(submit).toHaveTextContent(
+						AUTH_FORM_CONFIG.LOGIN_BUSY,
+					),
+				)
+				expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+				resolveAuth({ meta: {} })
+				await waitFor(() =>
+					expect(submit).toHaveTextContent(
+						AUTH_FORM_CONFIG.LOGIN_SUBMIT,
+					),
+				)
+			})
+		})
+
+		describe('Validation timing and focus', () => {
+			it('raises no error while typing, then flags the field when it is left', () => {
+				validateEmail.mockReturnValueOnce({
+					isValid: false,
+					message: VALIDATION_MESSAGES.EMAIL_INVALID,
 				})
+				renderWithProviders(<Authentication />)
+				const input = screen.getByTestId(
+					TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT,
+				)
+
+				fireEvent.change(input, { target: { value: 'amara@' } })
+				expect(input).toHaveAttribute('aria-invalid', 'false')
+
+				fireEvent.blur(input)
+				expect(input).toHaveAttribute('aria-invalid', 'true')
 			})
 
-			it('hides loading dialog when authentication completes', async () => {
-				// Create controllable promise to simulate async authentication
-				let resolveAuth
-				const authPromise = new Promise((resolve) => {
-					resolveAuth = resolve
-				})
-
-				mockDispatch.mockReturnValueOnce(authPromise)
-
+			it('moves focus to the first invalid field on a failed submit', () => {
 				renderWithProviders(<Authentication />)
-
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: MOCK_KEYS.EMAIL },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: MOCK_KEYS.PASSWORD },
-					},
-				)
+				fillLoginForm(MOCK_KEYS.EMAIL, '')
 
 				fireEvent.click(
 					screen.getByTestId(
@@ -440,24 +441,100 @@ describe('<Authentication />', () => {
 					),
 				)
 
-				// Loading dialog
-				await waitFor(() => {
-					expect(
-						screen.getByTestId(TEST_IDS.DIALOG.AUTHENTICATING),
-					).toBeInTheDocument()
-				})
+				expect(
+					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
+				).toHaveFocus()
+				expect(login).not.toHaveBeenCalled()
+			})
+		})
 
-				// Simulate successful authentication completion
-				resolveAuth({
-					meta: {},
-				})
+		describe('Forgot password', () => {
+			const openReset = () =>
+				fireEvent.click(
+					screen.getByRole('button', {
+						name: AUTH_FORM_CONFIG.FORGOT_PASSWORD,
+					}),
+				)
 
-				// Loading dialog should disappear after completion
-				await waitFor(() => {
-					expect(
-						screen.queryByTestId(TEST_IDS.DIALOG.AUTHENTICATING),
-					).not.toBeInTheDocument()
+			it('opens the reset view with the email carried over and its heading focused', () => {
+				renderWithProviders(<Authentication />)
+				fillLoginForm()
+				openReset()
+
+				const heading = screen.getByRole('heading', {
+					name: PASSWORD_RESET_CONFIG.TITLE,
 				})
+				expect(heading).toHaveFocus()
+				expect(document.title).toBe(
+					`${PASSWORD_RESET_CONFIG.TITLE} · ${GLOBAL.SITE_NAME}`,
+				)
+				expect(
+					screen.getByLabelText(/^Email/, { selector: 'input' }),
+				).toHaveValue(MOCK_KEYS.EMAIL)
+			})
+
+			it('sends the reset and shows the same confirmation whatever the answer', async () => {
+				mockDispatch.mockResolvedValueOnce({ meta: {} })
+				renderWithProviders(<Authentication />)
+				fillLoginForm()
+				openReset()
+
+				fireEvent.click(
+					screen.getByRole('button', {
+						name: PASSWORD_RESET_CONFIG.SUBMIT,
+					}),
+				)
+
+				expect(sendPasswordReset).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
+				expect(
+					await screen.findByText(
+						PASSWORD_RESET_CONFIG.SENT_MESSAGE(MOCK_KEYS.EMAIL),
+					),
+				).toBeInTheDocument()
+			})
+
+			it('keeps the form and says so when the link could not be sent', async () => {
+				mockDispatch.mockResolvedValueOnce({
+					meta: { rejectedWithValue: true },
+					payload: ERROR_MESSAGES.PASSWORD_RESET_FAILED,
+				})
+				renderWithProviders(<Authentication />)
+				fillLoginForm()
+				openReset()
+
+				fireEvent.click(
+					screen.getByRole('button', {
+						name: PASSWORD_RESET_CONFIG.SUBMIT,
+					}),
+				)
+
+				expect(
+					await screen.findByText(
+						ERROR_MESSAGES.PASSWORD_RESET_FAILED,
+					),
+				).toBeInTheDocument()
+				expect(
+					screen.getByRole('button', {
+						name: PASSWORD_RESET_CONFIG.SUBMIT,
+					}),
+				).toBeInTheDocument()
+			})
+
+			it('goes back to Log in with its heading focused', () => {
+				renderWithProviders(<Authentication />)
+				openReset()
+
+				fireEvent.click(
+					screen.getAllByRole('button', {
+						name: PASSWORD_RESET_CONFIG.BACK,
+					})[0],
+				)
+
+				expect(
+					screen.getByRole('heading', {
+						name: AUTH_FORM_CONFIG.LOGIN_TITLE,
+					}),
+				).toHaveFocus()
 			})
 		})
 

@@ -1,8 +1,13 @@
 import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
+import {
+	AUTH_FORM_CONFIG,
+	PASSWORD_RESET_CONFIG,
+} from '../../../src/constants/auth'
 import { IDENTITY_TOOLKIT_ERRORS } from '../../../src/constants/test/mock-data/mock-api'
 import {
 	AUTHENTICATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
+	PASSWORD_RESET_FORM_SELECTORS,
 	TRAVELLERS_LIST_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 
@@ -59,7 +64,9 @@ describe('Form submission', () => {
 			.type(TEST_USERS.STANDARD.PASSWORD)
 			.type('{enter}')
 
-		cy.get(DIALOG_SELECTORS.AUTHENTICATING).should('exist')
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON)
+			.should('have.attr', 'aria-busy', 'true')
+			.and('contain.text', AUTH_FORM_CONFIG.LOGIN_BUSY)
 		cy.wait('@delayedLogin', { timeout: REQUEST_TIMEOUT })
 	})
 
@@ -157,5 +164,40 @@ describe('Sign-up journey', () => {
 			.click()
 
 		cy.location('pathname').should('eq', PATHS.REGISTER)
+	})
+})
+
+describe('Forgot password', () => {
+	beforeEach(() => {
+		cy.visit(loginUrl)
+	})
+
+	it('sends a reset link from the Login card and says to check email', () => {
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USERS.STANDARD.EMAIL,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.FORGOT_PASSWORD_LINK).click()
+
+		cy.get(PASSWORD_RESET_FORM_SELECTORS.TITLE).should('have.focus')
+		cy.get(PASSWORD_RESET_FORM_SELECTORS.EMAIL_INPUT).should(
+			'have.value',
+			TEST_USERS.STANDARD.EMAIL,
+		)
+		cy.checkA11y()
+
+		cy.get(PASSWORD_RESET_FORM_SELECTORS.SUBMIT).click()
+
+		cy.get(PASSWORD_RESET_FORM_SELECTORS.SENT_MESSAGE, {
+			timeout: REQUEST_TIMEOUT,
+		}).should(
+			'contain.text',
+			PASSWORD_RESET_CONFIG.SENT_MESSAGE(TEST_USERS.STANDARD.EMAIL),
+		)
+
+		cy.get(PASSWORD_RESET_FORM_SELECTORS.BACK).click()
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).should(
+			'contain.text',
+			AUTH_FORM_CONFIG.LOGIN_SUBMIT,
+		)
 	})
 })

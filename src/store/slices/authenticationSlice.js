@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import {
 	createUserWithEmailAndPassword,
+	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	signOut,
 } from 'firebase/auth'
@@ -62,6 +63,25 @@ export const login = createAsyncThunk(
 			return rejectWithValue(
 				FIREBASE_ERRORS.SDK_ERROR_CODES[error.code] ??
 					ERROR_MESSAGES.LOGIN_FAILED,
+			)
+		}
+	},
+)
+
+export const sendPasswordReset = createAsyncThunk(
+	AUTHENTICATION_ACTION_TYPES.SEND_PASSWORD_RESET,
+	async (email, { rejectWithValue }) => {
+		try {
+			await sendPasswordResetEmail(getFirebaseAuth(), email)
+			return email
+		} catch (error) {
+			// Answered like a sent link, so the page never tells anyone whether an account exists
+			if (error.code === 'auth/user-not-found') return email
+
+			return rejectWithValue(
+				error.code === 'auth/too-many-requests'
+					? ERROR_MESSAGES.TOO_MANY_LOGIN_ATTEMPTS
+					: ERROR_MESSAGES.PASSWORD_RESET_FAILED,
 			)
 		}
 	},

@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import { API_DATABASE } from '@/constants/api'
+import { AUTH_FORM_CONFIG, PASSWORD_RESET_CONFIG } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
-import { login } from '@/store/slices/authenticationSlice'
+import { login, sendPasswordReset } from '@/store/slices/authenticationSlice'
 
 import useFormField from '@/components/forms/user-authentication/hooks/useFormField'
 
@@ -16,9 +17,12 @@ import { validateEmail, validatePassword } from '@/utils/validation'
 import BaseCard from '@/components/ui/card/BaseCard'
 
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
-import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
+import PasswordResetForm from '@/components/forms/password-reset/PasswordResetForm'
 import UserAuthenticationForm from '@/components/forms/user-authentication/UserAuthenticationForm'
+
+const RESET_MODE = 'reset'
+const RESET_IDLE = { status: 'idle', error: '', sentTo: '' }
 
 const Authentication = () => {
 	const [email, setEmail] = useFormField('')
@@ -32,33 +36,53 @@ const Authentication = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
 
-	const validateEmailHandler = async (value) => {
+	const titleRef = useRef(null)
+	const hasSwitchedView = useRef(false)
+	const [reset, setReset] = useState(RESET_IDLE)
+
+	// The heading takes focus when the card swaps views, so a screen reader hears the new one
+	useEffect(() => {
+		if (!hasSwitchedView.current) return
+		titleRef.current?.focus()
+	}, [mode])
+
+	const validateEmailHandler = (value) => {
 		const { isValid, message } = validateEmail(value)
 		setEmail(value, isValid, message)
 		return isValid
 	}
 
-	const validatePasswordHandler = async (value) => {
+	const validatePasswordHandler = (value) => {
 		const { isValid, message } = validatePassword(value)
 		setPassword(value, isValid, message)
 		return isValid
 	}
 
-	const validateForm = async () => {
+	// Typing never raises a new error; it only clears or updates one the field already shows
+	const handleTyping = (field, setField, validate) => (e) => {
+		const { value } = e.target
+		if (field.isValid) {
+			setField(value)
+			return
+		}
+		validate(value)
+	}
+
+	const validateForm = () => {
 		const trimmedEmail = email.value.trim()
 		const trimmedPassword = password.value.trim()
 
-		const emailValid = await validateEmailHandler(trimmedEmail)
-		const passwordValid = await validatePasswordHandler(trimmedPassword)
+		const emailValid = validateEmailHandler(trimmedEmail)
+		const passwordValid = validatePasswordHandler(trimmedPassword)
 
-		if (!emailValid || !passwordValid)
-			return {
-				email: trimmedEmail,
-				password: trimmedPassword,
-				isValid: false,
-			}
+		if (!emailValid) document.getElementById('email')?.focus()
+		else if (!passwordValid) document.getElementById('password')?.focus()
 
-		return { email: trimmedEmail, password: trimmedPassword, isValid: true }
+		return {
+			email: trimmedEmail,
+			password: trimmedPassword,
+			isValid: emailValid && passwordValid,
+		}
 	}
 
 	const submitForm = async (e) => {
@@ -67,7 +91,7 @@ const Authentication = () => {
 			email: trimmedEmail,
 			password: trimmedPassword,
 			isValid,
-		} = await validateForm()
+		} = validateForm()
 
 		if (!isValid) return
 
@@ -101,15 +125,52 @@ const Authentication = () => {
 		}
 	}
 
-	const switchAuthMode = () => {
-		setMode((prevMode) =>
-			prevMode === API_DATABASE.AUTH_LOGIN_MODE
+	const switchView = (nextMode) => {
+		hasSwitchedView.current = true
+		setMode(nextMode)
+	}
+
+	const switchAuthMode = () =>
+		switchView(
+			mode === API_DATABASE.AUTH_LOGIN_MODE
 				? API_DATABASE.AUTH_SIGNUP_MODE
 				: API_DATABASE.AUTH_LOGIN_MODE,
 		)
+
+	const openReset = () => {
+		setReset(RESET_IDLE)
+		switchView(RESET_MODE)
+	}
+
+	const closeReset = () => switchView(API_DATABASE.AUTH_LOGIN_MODE)
+
+	const sendReset = async (address) => {
+		setReset({ status: 'sending', error: '', sentTo: '' })
+		const result = await dispatch(sendPasswordReset(address))
+
+		if (sendPasswordReset.rejected.match(result)) {
+			setReset({
+				status: 'idle',
+				error: handleApiError(
+					result.payload,
+					ERROR_MESSAGES.PASSWORD_RESET_FAILED,
+				),
+				sentTo: '',
+			})
+			return
+		}
+
+		setEmail(address)
+		setReset({ status: 'sent', error: '', sentTo: address })
 	}
 
 	const handleError = () => setError(null)
+
+	const pageTitle = {
+		[API_DATABASE.AUTH_LOGIN_MODE]: AUTH_FORM_CONFIG.LOGIN_TITLE,
+		[API_DATABASE.AUTH_SIGNUP_MODE]: AUTH_FORM_CONFIG.SIGNUP_TITLE,
+		[RESET_MODE]: PASSWORD_RESET_CONFIG.TITLE,
+	}[mode]
 
 	return (
 		<main
@@ -118,7 +179,7 @@ const Authentication = () => {
 			className="mainContainer cardPage"
 			data-cy="main-container"
 			data-cy-alt="authentication-main-container">
-			<title>{`${mode === API_DATABASE.AUTH_LOGIN_MODE ? 'Login' : 'Signup'} · ${GLOBAL.SITE_NAME}`}</title>
+			<title>{`${pageTitle} · ${GLOBAL.SITE_NAME}`}</title>
 			{error && (
 				<BaseDialog
 					show={true}
@@ -129,32 +190,46 @@ const Authentication = () => {
 					{error}
 				</BaseDialog>
 			)}
-			{isLoading && (
-				<BaseDialog
-					show={true}
-					title="Authenticating"
-					fixed
-					data-cy="authenticating-dialog">
-					Authenticating your details, one moment please...
-					<BaseSpinner label={GLOBAL.SPINNER_LABEL.AUTHENTICATING} />
-				</BaseDialog>
-			)}
 			<section>
 				<BaseCard>
-					<UserAuthenticationForm
-						email={email}
-						password={password}
-						mode={mode}
-						onEmailChange={(e) =>
-							validateEmailHandler(e.target.value)
-						}
-						onPasswordChange={(e) =>
-							validatePasswordHandler(e.target.value)
-						}
-						onSubmit={submitForm}
-						onSwitchMode={switchAuthMode}
-						isLoading={isLoading}
-					/>
+					{mode === RESET_MODE ? (
+						<PasswordResetForm
+							ref={titleRef}
+							initialEmail={email.value.trim()}
+							status={reset.status}
+							error={reset.error}
+							sentTo={reset.sentTo}
+							onSubmit={sendReset}
+							onBack={closeReset}
+						/>
+					) : (
+						<UserAuthenticationForm
+							ref={titleRef}
+							email={email}
+							password={password}
+							mode={mode}
+							onEmailChange={handleTyping(
+								email,
+								setEmail,
+								validateEmailHandler,
+							)}
+							onEmailBlur={(e) =>
+								validateEmailHandler(e.target.value.trim())
+							}
+							onPasswordChange={handleTyping(
+								password,
+								setPassword,
+								validatePasswordHandler,
+							)}
+							onPasswordBlur={(e) =>
+								validatePasswordHandler(e.target.value)
+							}
+							onSubmit={submitForm}
+							onSwitchMode={switchAuthMode}
+							onForgotPassword={openReset}
+							isLoading={isLoading}
+						/>
+					)}
 				</BaseCard>
 			</section>
 		</main>

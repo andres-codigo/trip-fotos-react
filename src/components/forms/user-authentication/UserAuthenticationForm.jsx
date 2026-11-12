@@ -1,137 +1,191 @@
+import { forwardRef } from 'react'
 import PropTypes from 'prop-types'
 
 import { API_DATABASE } from '@/constants/api'
+import { AUTH_FORM_CONFIG } from '@/constants/auth'
 import { renderVisuallyHiddenError } from '@/utils/form/errorUtils'
 
 import BaseButton from '@/components/ui/button/BaseButton'
 import Input from '@/components/ui/form/input/Input'
+import RequiredLegend from '@/components/ui/form/required-legend/RequiredLegend'
 import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
 
-const UserAuthenticationForm = ({
-	email,
-	password,
-	mode,
-	onEmailChange,
-	onPasswordChange,
-	onSubmit,
-	onSwitchMode,
-	isLoading = false,
-}) => {
-	const EMAIL_ID = 'email'
-	const PASSWORD_ID = 'password'
+const EMAIL_ID = 'email'
+const PASSWORD_ID = 'password'
 
-	const getInputProps = (field) => ({
-		id: field === EMAIL_ID ? EMAIL_ID : PASSWORD_ID,
-		label: field === EMAIL_ID ? 'E-Mail' : 'Password',
-		type: field === EMAIL_ID ? EMAIL_ID : PASSWORD_ID,
-		value: field === EMAIL_ID ? email.value : password.value,
-		onChange: field === EMAIL_ID ? onEmailChange : onPasswordChange,
-		onBlur: field === EMAIL_ID ? onEmailChange : onPasswordChange,
-		isValid: field === EMAIL_ID ? email.isValid : password.isValid,
-		message: field === EMAIL_ID ? email.message : password.message,
-		disabled: isLoading,
-		required: true,
-		showRequiredMark: true,
-		'data-cy': field === EMAIL_ID ? 'email-input' : 'password-input',
-		'data-cy-error':
-			field === EMAIL_ID
-				? 'email-error-message'
-				: 'password-error-message',
-		'aria-describedby':
-			!(field === EMAIL_ID ? email.isValid : password.isValid) &&
-			(field === EMAIL_ID ? email.message : password.message)
-				? field === EMAIL_ID
-					? 'email-error'
-					: 'password-error'
-				: undefined,
-	})
+const switchLinkClasses =
+	'inline-flex min-h-11 items-center text-accent-text underline underline-offset-4 hover:text-accent-hover'
 
-	const handleSignUpClick = (e) => {
-		e.preventDefault()
-		onSwitchMode(e)
-	}
+const UserAuthenticationForm = forwardRef(
+	(
+		{
+			email,
+			password,
+			mode,
+			onEmailChange,
+			onEmailBlur,
+			onPasswordChange,
+			onPasswordBlur,
+			onSubmit,
+			onSwitchMode,
+			onForgotPassword,
+			isLoading = false,
+		},
+		titleRef,
+	) => {
+		const isLogin = mode === API_DATABASE.AUTH_LOGIN_MODE
 
-	return (
-		<form
-			className="m-4 p-4"
-			onSubmit={onSubmit}
-			noValidate
-			data-cy="user-authentication-form"
-			aria-busy={isLoading}
-			aria-labelledby="user-authentication-form-title">
-			<h1
-				id="user-authentication-form-title"
-				className="mt-0 mb-[0.83em] text-[1.5rem]"
-				data-cy="user-authentication-form-title">
-				{mode === API_DATABASE.AUTH_LOGIN_MODE ? (
-					<>
-						Login <span className="sr-only">Form</span>
-					</>
-				) : (
-					<>
-						Signup <span className="sr-only">Form</span>
-					</>
-				)}
-			</h1>
-			<LoadingAnnouncement isLoading={isLoading} />
-			<div className="my-2">
-				<Input {...getInputProps(EMAIL_ID)} />
-				{renderVisuallyHiddenError(email, 'email-error', 'sr-only')}
-			</div>
-			<div className="my-2">
-				<Input {...getInputProps(PASSWORD_ID)} />
-				{renderVisuallyHiddenError(
-					password,
-					'password-error',
-					'sr-only',
-				)}
-			</div>
-			<div className="mt-5">
+		const handleSwitchClick = (e) => {
+			e.preventDefault()
+			onSwitchMode(e)
+		}
+
+		return (
+			<form
+				className="m-4 flex flex-col gap-4 p-4"
+				onSubmit={onSubmit}
+				noValidate
+				data-cy="user-authentication-form"
+				aria-busy={isLoading}
+				aria-labelledby="user-authentication-form-title">
+				<div className="flex flex-col gap-2">
+					<h1
+						ref={titleRef}
+						tabIndex={-1}
+						id="user-authentication-form-title"
+						className="m-0 text-[1.5rem]"
+						data-cy="user-authentication-form-title">
+						{isLogin
+							? AUTH_FORM_CONFIG.LOGIN_TITLE
+							: AUTH_FORM_CONFIG.SIGNUP_TITLE}
+					</h1>
+					<RequiredLegend />
+				</div>
+				<LoadingAnnouncement isLoading={isLoading} />
+				<div>
+					<Input
+						id={EMAIL_ID}
+						label={AUTH_FORM_CONFIG.EMAIL_LABEL}
+						type="email"
+						autoComplete="email"
+						value={email.value}
+						onChange={onEmailChange}
+						onBlur={onEmailBlur}
+						isValid={email.isValid}
+						message={email.message}
+						disabled={isLoading}
+						required
+						data-cy="email-input"
+						data-cy-error="email-error-message"
+					/>
+					{renderVisuallyHiddenError(
+						email,
+						'email-error-hidden',
+						'sr-only',
+					)}
+				</div>
+				<div className="flex flex-col items-start gap-1">
+					<div className="w-full">
+						<Input
+							id={PASSWORD_ID}
+							label={AUTH_FORM_CONFIG.PASSWORD_LABEL}
+							type="password"
+							autoComplete={
+								isLogin ? 'current-password' : 'new-password'
+							}
+							helpText={
+								isLogin ? '' : AUTH_FORM_CONFIG.PASSWORD_HELP
+							}
+							value={password.value}
+							onChange={onPasswordChange}
+							onBlur={onPasswordBlur}
+							isValid={password.isValid}
+							message={password.message}
+							disabled={isLoading}
+							required
+							data-cy="password-input"
+							data-cy-error="password-error-message"
+						/>
+						{renderVisuallyHiddenError(
+							password,
+							'password-error-hidden',
+							'sr-only',
+						)}
+					</div>
+					{isLogin && (
+						<BaseButton
+							type="button"
+							modeType="text"
+							className={switchLinkClasses}
+							onClick={onForgotPassword}
+							isDisabled={isLoading}
+							data-cy="forgot-password-link">
+							{AUTH_FORM_CONFIG.FORGOT_PASSWORD}
+						</BaseButton>
+					)}
+				</div>
 				<BaseButton
 					id="login-button"
 					type="submit"
-					className="w-[6.4375rem] [@media(max-width:1024px)]:w-full"
+					className="self-start [@media(max-width:1024px)]:w-full"
 					data-cy="login-submit-button"
-					isDisabled={isLoading}>
-					{mode === API_DATABASE.AUTH_LOGIN_MODE
-						? 'Log in'
-						: 'Sign up'}
+					busyLabel={
+						isLoading
+							? isLogin
+								? AUTH_FORM_CONFIG.LOGIN_BUSY
+								: AUTH_FORM_CONFIG.SIGNUP_BUSY
+							: ''
+					}>
+					{isLogin
+						? AUTH_FORM_CONFIG.LOGIN_SUBMIT
+						: AUTH_FORM_CONFIG.SIGNUP_SUBMIT}
 				</BaseButton>
-				<BaseButton
-					id="login-signup-toggle-link"
-					isLink
-					onClick={handleSignUpClick}
-					className="pl-2 text-accent-text hover:text-accent-hover [@media(max-width:1024px)]:w-full [@media(max-width:1024px)]:pt-5 [@media(max-width:1024px)]:text-center"
-					data-cy="login-signup-toggle-link"
-					isDisabled={isLoading}>
-					{mode === API_DATABASE.AUTH_LOGIN_MODE
-						? 'Switch to Signup'
-						: 'Switch to Login'}
-				</BaseButton>
-			</div>
-		</form>
-	)
-}
+				<p
+					className="m-0 text-text-muted"
+					data-cy="login-signup-toggle">
+					{isLogin
+						? AUTH_FORM_CONFIG.TO_SIGNUP_PROMPT
+						: AUTH_FORM_CONFIG.TO_LOGIN_PROMPT}{' '}
+					<BaseButton
+						type="button"
+						modeType="text"
+						id="login-signup-toggle-link"
+						className={switchLinkClasses}
+						onClick={handleSwitchClick}
+						data-cy="login-signup-toggle-link"
+						isDisabled={isLoading}>
+						{isLogin
+							? AUTH_FORM_CONFIG.TO_SIGNUP
+							: AUTH_FORM_CONFIG.TO_LOGIN}
+					</BaseButton>
+				</p>
+			</form>
+		)
+	},
+)
+
+UserAuthenticationForm.displayName = 'UserAuthenticationForm'
+
+const fieldShape = PropTypes.shape({
+	value: PropTypes.string.isRequired,
+	isValid: PropTypes.bool.isRequired,
+	message: PropTypes.string,
+})
 
 UserAuthenticationForm.propTypes = {
-	email: PropTypes.shape({
-		value: PropTypes.string.isRequired,
-		isValid: PropTypes.bool.isRequired,
-		message: PropTypes.string,
-	}),
-	password: PropTypes.shape({
-		value: PropTypes.string.isRequired,
-		isValid: PropTypes.bool.isRequired,
-		message: PropTypes.string,
-	}),
+	email: fieldShape,
+	password: fieldShape,
 	mode: PropTypes.oneOf([
 		API_DATABASE.AUTH_LOGIN_MODE,
 		API_DATABASE.AUTH_SIGNUP_MODE,
 	]).isRequired,
 	onEmailChange: PropTypes.func.isRequired,
+	onEmailBlur: PropTypes.func.isRequired,
 	onPasswordChange: PropTypes.func.isRequired,
+	onPasswordBlur: PropTypes.func.isRequired,
 	onSubmit: PropTypes.func.isRequired,
 	onSwitchMode: PropTypes.func.isRequired,
+	onForgotPassword: PropTypes.func.isRequired,
 	isLoading: PropTypes.bool,
 }
 
