@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.25.0...v0.25.1) (2026-11-12)
+
+
+### Enhancements
+
+* form helper text, required legend, error summary and consistent wording ([#705](https://github.com/andres-codigo/trip-fotos-react/issues/705)) ([0ea324b](https://github.com/andres-codigo/trip-fotos-react/commit/0ea324b43d9dc797794f11c5b7a649dbb09fb449))
+
 ## [0.25.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.24.1...v0.25.0) (2026-11-11)
 
 
