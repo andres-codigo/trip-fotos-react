@@ -35,6 +35,36 @@ describe('specsToRun', () => {
 			}),
 		).toBeNull())
 
+	it('keeps passes from an earlier tree when only specs it reruns changed since', () =>
+		expect(
+			specsToRun({
+				suite,
+				record: { tree: 't0', passed: ['a.cy.js', 'b.cy.js'] },
+				tree: 't1',
+				changed: ['b.cy.js'],
+			}),
+		).toEqual(['b.cy.js', 'c.cy.js']))
+
+	it('discards an earlier tree when a file other than a spec changed since', () =>
+		expect(
+			specsToRun({
+				suite,
+				record: { tree: 't0', passed: ['a.cy.js'] },
+				tree: 't1',
+				changed: ['b.cy.js', 'src/components/ui/Badge.jsx'],
+			}),
+		).toBeNull())
+
+	it('discards an earlier tree when git cannot tell what changed', () =>
+		expect(
+			specsToRun({
+				suite,
+				record: { tree: 't0', passed: ['a.cy.js'] },
+				tree: 't1',
+				changed: null,
+			}),
+		).toBeNull())
+
 	it('runs the whole suite when no spec passed', () =>
 		expect(
 			specsToRun({

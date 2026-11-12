@@ -72,10 +72,15 @@ export const readSpecResults = (file) => {
 	}
 }
 
-// The specs still to pass on this tree, or null for the whole suite. Results recorded on any other tree are discarded
-export const specsToRun = ({ suite, record, tree }) => {
-	if (record?.tree !== tree || !record.passed?.length) return null
+// The specs still to pass on this tree, or null for the whole suite. `changed` lists the files that affect this gate and differ from the recorded tree (null when git cannot tell): passes on an earlier tree survive only when every one of them is a spec in the suite, which then reruns
+export const specsToRun = ({ suite, record, tree, changed = null }) => {
+	if (!record?.passed?.length) return null
 	const passed = new Set(record.passed)
+	if (record.tree !== tree) {
+		if (!changed || changed.some((file) => !suite.includes(file)))
+			return null
+		changed.forEach((file) => passed.delete(file))
+	}
 	return suite.filter((spec) => !passed.has(spec))
 }
 

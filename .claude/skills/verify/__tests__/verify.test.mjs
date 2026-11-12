@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 
-import { findClash, recordGate, scheduleGates } from '../verify.mjs'
+import { findClash, planSpecs, recordGate, scheduleGates } from '../verify.mjs'
 
 describe('findClash', () => {
 	const quiet = {
@@ -155,4 +155,52 @@ describe('recordGate', () => {
 		recordGate({ ...state, status: 1 })
 		expect(state.specRecords).toEqual({})
 	})
+})
+
+describe('planSpecs', () => {
+	const suite = ['a.cy.js', 'b.cy.js', 'c.cy.js']
+	const base = { suite, record: undefined, tree: 't1', changed: [] }
+
+	it('runs only the affected E2E specs', () =>
+		expect(
+			planSpecs({ ...base, gate: 'e2e', affected: ['b.cy.js'] }),
+		).toEqual({ suite: ['b.cy.js'], specs: ['b.cy.js'], passed: [] }))
+
+	it('runs the whole E2E suite when no spec is affected', () =>
+		expect(planSpecs({ ...base, gate: 'e2e', affected: [] })).toEqual({
+			suite,
+			specs: null,
+			passed: [],
+		}))
+
+	it('runs the whole suite with all, whatever is affected or passed', () =>
+		expect(
+			planSpecs({
+				...base,
+				gate: 'e2e',
+				affected: ['b.cy.js'],
+				record: { tree: 't1', passed: ['a.cy.js'] },
+				all: true,
+			}),
+		).toEqual({ suite, specs: null, passed: [] }))
+
+	it('never scopes the component tests', () =>
+		expect(
+			planSpecs({ ...base, gate: 'ct', affected: ['b.cy.js'] }),
+		).toEqual({ suite, specs: null, passed: [] }))
+
+	it('carries passes from an earlier tree onto this one, less the specs that changed', () =>
+		expect(
+			planSpecs({
+				...base,
+				gate: 'ct',
+				affected: [],
+				record: { tree: 't0', passed: ['a.cy.js', 'b.cy.js'] },
+				changed: ['b.cy.js'],
+			}),
+		).toEqual({
+			suite,
+			specs: ['b.cy.js', 'c.cy.js'],
+			passed: ['a.cy.js'],
+		}))
 })

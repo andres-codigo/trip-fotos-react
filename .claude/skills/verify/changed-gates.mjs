@@ -4,6 +4,9 @@ const GATE_ORDER = [...ALL, 'yaml']
 
 // First match wins, so narrower patterns sit above broader ones
 const RULES = [
+	// Tests ship nothing, so neither the build nor E2E follows them
+	[/^src\/.*\.cy\.jsx?$/, ['lint', 'ct']],
+	[/^src\/(.*\/__tests__\/|.*\.test\.)/, ['lint', 'vitest']],
 	[/^src\//, ALL],
 	[/^package(-lock)?\.json$/, ALL],
 	[/^jsconfig\.json$/, ALL],
@@ -39,10 +42,14 @@ const E2E_ADVISED = [
 	[/^src\/constants\/(api|ui\/paths)/, 'API or route constants changed'],
 ]
 
+const isSrcTest = (file) =>
+	/^src\/(.*\/__tests__\/|.*\.(test|cy)\.jsx?$)/.test(file)
+
+const e2eReasons = (file) =>
+	isSrcTest(file) ? [] : E2E_ADVISED.filter(([pattern]) => pattern.test(file))
+
 // Files that can change how a page looks, so /ui-check comes before /verify; tests cannot
-const isUiFile = (file) =>
-	/^src\/.*\.(jsx|css)$/.test(file) &&
-	!/(\/__tests__\/|\.(test|cy)\.jsx$)/.test(file)
+const isUiFile = (file) => /^src\/.*\.(jsx|css)$/.test(file) && !isSrcTest(file)
 
 // Why /verify must wait for /ui-check, or null. A pass still holds after edits that touch no UI file (such as the tests for its fixes)
 export const uiCheckGap = (files, { tree, uiStatus = {}, changedSince }) => {
@@ -65,11 +72,7 @@ export const uiCheckGap = (files, { tree, uiStatus = {}, changedSince }) => {
 // The gates a file can affect, for deciding whether an earlier pass still holds; E2E also follows anything the build ships
 export const gatesForFile = (file) => {
 	const gates = new Set(RULES.find(([pattern]) => pattern.test(file))?.[1])
-	if (
-		gates.has('build') ||
-		E2E_ADVISED.some(([pattern]) => pattern.test(file))
-	)
-		gates.add('e2e')
+	if (gates.has('build') || e2eReasons(file).length) gates.add('e2e')
 	return gates
 }
 
@@ -93,9 +96,7 @@ export const planGates = (files, { e2e = false, all = false } = {}) => {
 	const reasons = [
 		...new Set(
 			files.flatMap((file) =>
-				E2E_ADVISED.filter(([pattern]) => pattern.test(file)).map(
-					([, reason]) => reason,
-				),
+				e2eReasons(file).map(([, reason]) => reason),
 			),
 		),
 	]
