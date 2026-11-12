@@ -65,7 +65,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Trip dates: travellers give the days their trip started and ended, and cards show when it was and how long it lasted, in place of the registration date
 - Better messages: the sender's name and when they wrote, unread markers and an unread count, Reply inside Trip Fotos, and Delete with Undo; messaging is now between travellers only, with no email shared
 - A friendlier city filter: tick cities to narrow the list, Show all cities to reset, and a Filter button that opens a sheet on phones
-- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs, faster local checks and E2E runs that rerun only failed tests, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
+- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs, faster local checks and E2E runs that rerun only failed tests, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
@@ -318,17 +318,17 @@ Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools 
 - **Cypress** component tests (`*.cy.jsx`) sit in the same `__tests__/` folders; E2E specs live in `cypress/e2e/` and run in CI against the local Firebase emulators on every PR; one read-only smoke spec in `cypress/e2e-live/` runs against the real project on pushes to `main`.
 - **GitHub Actions** run Vitest, Cypress component and Cypress E2E tests on pull requests that touch code, label issues and PRs from [`.github/labels.json`](.github/labels.json) and move them across the project board. CodeQL scans every PR, and the **Protect main** ruleset requires a pull request to change `main`.
 
-| Workflow                          | File                                                               | Triggered On     |
-| --------------------------------- | ------------------------------------------------------------------ | ---------------- |
-| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`                          | PR/Manual        |
-| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml` (emulator and live smoke jobs) | Push/PR/Manual   |
-| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`                          | PR/Manual        |
-| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`                      | PR Target Events |
-| GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`                        | Issue Events     |
-| GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml`                     | PR Target Events |
-| GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`                          | Push/Manual      |
-| Release - Release Please          | `.github/workflows/release-please.yml`                             | Push             |
-| Guard - start-issue script        | `.github/workflows/start-issue-guard.yml`                          | PR Events        |
+| Workflow                          | File                                                                                      | Triggered On     |
+| --------------------------------- | ----------------------------------------------------------------------------------------- | ---------------- |
+| Vitest - Run Unit Tests           | `.github/workflows/vitest-unit-tests.yml`                                                 | PR/Manual        |
+| Cypress - Run E2E Page Tests      | `.github/workflows/cypress-e2e.yml` (three parallel emulator groups and a live smoke job) | Push/PR/Manual   |
+| Cypress - Run Component Tests     | `.github/workflows/cypress-component.yml`                                                 | PR/Manual        |
+| GitHub - Auto Label Pull Requests | `.github/workflows/github-auto-label-prs.yml`                                             | PR Target Events |
+| GitHub - Issue Intake             | `.github/workflows/github-issue-intake.yml`                                               | Issue Events     |
+| GitHub - Project Item Lifecycle   | `.github/workflows/project-item-lifecycle.yml`                                            | PR Target Events |
+| GitHub - Label Sync               | `.github/workflows/github-label-sync.yml`                                                 | Push/Manual      |
+| Release - Release Please          | `.github/workflows/release-please.yml`                                                    | Push             |
+| Guard - start-issue script        | `.github/workflows/start-issue-guard.yml`                                                 | PR Events        |
 
 The workflows read the Firebase config from the `VITE_FIREBASE_*` and `VITE_DATABASE_URL` repository secrets; only the live smoke job also needs `VITE_API_URL`, `VITE_API_KEY`, `VITE_BACKEND_BASE_URL` and `CYPRESS_USER_*`.
 
@@ -382,7 +382,7 @@ trip-fotos-react/
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
-├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, seed-emulators.mjs with its test, dependency-check output)
+├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, seed-emulators.mjs and e2e-groups.mjs with their tests, dependency-check output)
 ├── src/
 │   ├── app/            # Main application component
 │   ├── assets/         # Fonts, SVGs, and other static assets
