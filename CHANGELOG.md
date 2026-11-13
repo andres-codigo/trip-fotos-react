@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.26.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.26.0...v0.26.1) (2026-11-13)
+
+
+### Enhancements
+
+* brand icons and og-image in the dark palette ([#717](https://github.com/andres-codigo/trip-fotos-react/issues/717)) ([06b00ea](https://github.com/andres-codigo/trip-fotos-react/commit/06b00ea0974425e0534623dc587ae45515f7156b))
+
 ## [0.26.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.25.2...v0.26.0) (2026-11-13)
 
 
