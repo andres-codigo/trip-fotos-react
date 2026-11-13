@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.26.1...v0.27.0) (2026-11-13)
+
+
+### Features
+
+* dark redesign layout: Travellers grid and the artifact's layout proposals ([#719](https://github.com/andres-codigo/trip-fotos-react/issues/719)) ([099e9a3](https://github.com/andres-codigo/trip-fotos-react/commit/099e9a310955f698eea6bbec839c558fb8a2c0db))
+
 ## [0.26.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.26.0...v0.26.1) (2026-11-13)
 
 
