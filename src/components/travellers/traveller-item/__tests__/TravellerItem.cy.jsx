@@ -7,7 +7,9 @@ import authenticationReducer from '@/store/slices/authenticationSlice'
 import travellersReducer from '@/store/slices/travellersSlice'
 
 import {
+	AVATAR_SELECTORS,
 	COMMON_SELECTORS,
+	YOU_TAG_SELECTORS,
 	TRAVELLER_ITEM,
 	TRAVELLER_ITEM_SELECTORS,
 } from '@/constants/test'
@@ -31,7 +33,12 @@ const photos = (n) =>
 	Array.from({ length: n }, (_, i) => `https://example.com/${i}.jpg`)
 
 describe('<TravellerItem />', () => {
-	const render = ({ props = {}, auth = {}, isTraveller = false } = {}) => {
+	const render = ({
+		props = {},
+		auth = {},
+		isTraveller = false,
+		width,
+	} = {}) => {
 		const store = configureTestStore({
 			reducer: {
 				authentication: authenticationReducer,
@@ -53,7 +60,7 @@ describe('<TravellerItem />', () => {
 		cy.mount(
 			<Provider store={store}>
 				<MemoryRouter>
-					<ul>
+					<ul style={width ? { width } : undefined}>
 						<TravellerItem
 							{...traveller}
 							{...props}
@@ -78,6 +85,47 @@ describe('<TravellerItem />', () => {
 		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_DIALOG).should('not.exist')
 		cy.focused().should('have.attr', 'data-cy', TRAVELLER_ITEM.DELETE)
 		cy.get('@deleteTraveller.all').should('have.length', 0)
+	})
+
+	it('opens with the initials avatar and marks only your own card', () => {
+		render()
+		cy.get(AVATAR_SELECTORS.ROOT).should('have.text', 'AL')
+		cy.get(YOU_TAG_SELECTORS.ROOT).should('not.exist')
+		cy.get(TRAVELLER_ITEM_SELECTORS.ROOT).should(
+			'have.css',
+			'outline-style',
+			'none',
+		)
+
+		render({ auth: { userId: traveller.id } })
+		cy.get(YOU_TAG_SELECTORS.ROOT).should('have.text', 'You')
+		// accent-text, 2px, drawn over the card edge
+		cy.get(TRAVELLER_ITEM_SELECTORS.ROOT)
+			.should('have.css', 'outline-color', 'rgb(169, 201, 138)')
+			.and('have.css', 'outline-width', '2px')
+			.and('have.css', 'outline-offset', '-2px')
+	})
+
+	// The card is narrow in the grid, so a second row of tiles sits as close as the tiles beside each other
+	;[
+		[1280, 340],
+		[390, 330],
+	].forEach(([viewport, width]) => {
+		it(`spaces photo rows like the tiles across them at ${viewport}px`, () => {
+			cy.viewport(viewport, 900)
+			render({ props: { files: photos(4) }, width })
+			cy.get(COMMON_SELECTORS.BASE_IMAGE).should(($tiles) => {
+				const [first, second] = [...$tiles].map((tile) =>
+					tile.getBoundingClientRect(),
+				)
+				const rowTwo = [...$tiles]
+					.map((tile) => tile.getBoundingClientRect())
+					.find((rect) => rect.top > first.bottom)
+				const across = second.left - first.right
+				const down = rowTwo.top - first.bottom
+				expect(Math.abs(down - across)).to.be.lessThan(6)
+			})
+		})
 	})
 
 	it('has no axe violations, with a named heading and image buttons', () => {

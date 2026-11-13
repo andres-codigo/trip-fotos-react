@@ -21,7 +21,7 @@ import BaseBadge from '@/components/ui/badge/BaseBadge'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import ImageGallery from '@/components/ui/image-gallery/ImageGallery'
-import TripSummary from '@/components/travellers/trip-summary/TripSummary'
+import TravellerCardHead from '@/components/travellers/traveller-card-head/TravellerCardHead'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 const shortenTripDescription = (tripDescription = '') =>
@@ -137,29 +137,29 @@ const TravellerItem = ({
 			) : (
 				<li
 					className={cn(
-						'my-4 list-none rounded-lg border border-border-strong p-4',
-						isOwnRecord && 'border-2',
+						'traveller-card',
+						// The own outline is a utility, so it would beat the global focus ring when Show more focuses this card
+						isOwnRecord &&
+							'outline-2 -outline-offset-2 outline-accent-text focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-focus',
 					)}
 					data-own={isOwnRecord}
 					data-cy={TRAVELLER_ITEM.ROOT}>
-					<h3
-						className="m-0 text-2xl leading-normal font-normal"
-						data-cy={TRAVELLER_ITEM.NAME}>
-						{fullName}
-					</h3>
-					<TripSummary
+					<TravellerCardHead
+						name={fullName}
+						isOwn={isOwnRecord}
 						tripStart={tripStart}
 						tripEnd={tripEnd}
 						daysInCity={daysInCity}
-						data-cy={TRAVELLER_ITEM.TRIP}
+						nameDataCy={TRAVELLER_ITEM.NAME}
+						tripDataCy={TRAVELLER_ITEM.TRIP}
 					/>
 					<p
-						className="italic"
+						className="mt-3.5 mb-3 italic"
 						data-cy={TRAVELLER_ITEM.TRIP_DESCRIPTION}>
 						{shortenTripDescription(tripDescription)}
 					</p>
 					<div
-						className="flex flex-wrap gap-2 pt-1 pb-4"
+						className="flex flex-wrap gap-2"
 						data-cy={TRAVELLER_ITEM.BADGES}>
 						{cities.map((city) => (
 							<BaseBadge
@@ -169,71 +169,79 @@ const TravellerItem = ({
 							/>
 						))}
 					</div>
-					{files.length > 0 && (
-						<ul
-							className="m-0 flex list-none flex-wrap gap-x-[2%] gap-y-8 py-4 pl-0 [@media(max-width:480px)]:mb-[0.9375rem] [@media(max-width:480px)]:gap-x-[4%] [@media(max-width:480px)]:gap-y-4 [@media(max-width:480px)]:py-2"
-							data-cy={TRAVELLER_ITEM.IMAGES_LIST}>
-							<ImageGallery
-								title={fullName}
-								dimensions={fileDimensions}
-								thumbnails={fileThumbnails}
-								alts={fileAlts}
-								urls={files.slice(
-									0,
-									TRAVELLER_ITEM_CONFIG.MAX_IMAGES,
+					{/* Photos and actions sit at the foot, so they line up across a row of equal-height cards */}
+					<div className="mt-auto flex flex-col pt-3.5">
+						{files.length > 0 && (
+							<ul
+								className="m-0 flex list-none flex-wrap gap-x-[2%] gap-y-2 pt-0 pb-4 pl-0 [@media(max-width:480px)]:gap-x-[4%] [@media(max-width:480px)]:gap-y-4"
+								data-cy={TRAVELLER_ITEM.IMAGES_LIST}>
+								<ImageGallery
+									title={fullName}
+									dimensions={fileDimensions}
+									thumbnails={fileThumbnails}
+									alts={fileAlts}
+									sizes={GLOBAL.IMAGE_CARD_THUMBNAIL_SIZES}
+									urls={files.slice(
+										0,
+										TRAVELLER_ITEM_CONFIG.MAX_IMAGES,
+									)}
+								/>
+								{files.length >
+									TRAVELLER_ITEM_CONFIG.MAX_IMAGES && (
+									<li className="relative w-[32%] overflow-hidden bg-accent font-medium text-on-accent tile-focus-ring [@media(max-width:480px)]:w-[48%]">
+										<Link
+											className="block h-full"
+											to={photosLink}
+											data-cy={
+												TRAVELLER_ITEM.SEE_ALL_LINK
+											}>
+											<span className="flex h-full items-center justify-center p-5 text-center">
+												See all {files.length} photos
+											</span>
+										</Link>
+									</li>
 								)}
-							/>
-							{files.length >
-								TRAVELLER_ITEM_CONFIG.MAX_IMAGES && (
-								<li className="relative w-[32%] overflow-hidden bg-accent font-medium text-on-accent tile-focus-ring [@media(max-width:480px)]:w-[48%]">
-									<Link
-										className="block h-full"
-										to={photosLink}
-										data-cy={TRAVELLER_ITEM.SEE_ALL_LINK}>
-										<span className="flex h-full items-center justify-center p-5 text-center">
-											See all {files.length} photos
-										</span>
-									</Link>
-								</li>
+							</ul>
+						)}
+						<div className="flex flex-wrap items-center justify-end gap-2">
+							{canContact && (
+								<BaseButton
+									isLink
+									to={contactLink}
+									modeType="outline"
+									data-cy={TRAVELLER_ITEM.MESSAGE}>
+									{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(
+										firstName,
+									)}
+								</BaseButton>
 							)}
-						</ul>
-					)}
-					<div className="flex flex-wrap items-center justify-end gap-2">
-						{canContact && (
+							{isOwnRecord && (
+								<BaseButton
+									isLink
+									to={editLink}
+									modeType="outline"
+									data-cy={TRAVELLER_ITEM.EDIT}>
+									{TRAVELLER_ITEM_CONFIG.EDIT_LABEL}
+								</BaseButton>
+							)}
 							<BaseButton
 								isLink
-								to={contactLink}
-								modeType="outline"
-								data-cy={TRAVELLER_ITEM.MESSAGE}>
-								{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(firstName)}
+								to={detailsLink}
+								modeType="primary"
+								data-cy={TRAVELLER_ITEM.VIEW_TRIP}>
+								{TRAVELLER_ITEM_CONFIG.VIEW_LABEL}
 							</BaseButton>
-						)}
-						{isOwnRecord && (
-							<BaseButton
-								isLink
-								to={editLink}
-								modeType="outline"
-								data-cy={TRAVELLER_ITEM.EDIT}>
-								{TRAVELLER_ITEM_CONFIG.EDIT_LABEL}
-							</BaseButton>
-						)}
-						<BaseButton
-							isLink
-							to={detailsLink}
-							modeType="primary"
-							data-cy={TRAVELLER_ITEM.VIEW_TRIP}>
-							{TRAVELLER_ITEM_CONFIG.VIEW_LABEL}
-						</BaseButton>
-						{canDelete && (
-							<BaseButton
-								type="button"
-								modeType="danger"
-								ref={deleteButtonRef}
-								onClick={openConfirm}
-								data-cy={TRAVELLER_ITEM.DELETE}>
-								Delete
-							</BaseButton>
-						)}
+							{canDelete && (
+								<BaseButton
+									type="button"
+									modeType="danger"
+									ref={deleteButtonRef}
+									onClick={openConfirm}
+									data-cy={TRAVELLER_ITEM.DELETE}>
+									Delete
+								</BaseButton>
+							)}
+						</div>
 					</div>
 				</li>
 			)}

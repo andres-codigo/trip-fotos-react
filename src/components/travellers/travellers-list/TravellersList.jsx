@@ -32,6 +32,10 @@ import TravellersWelcome from '@/components/travellers/travellers-welcome/Travel
 import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
 import usePaging from '@/components/travellers/travellers-list/hooks/usePaging'
 
+// One column on phones, two from 640px and three from 1024px, the maximum; rows stretch so cards in a row are equal height
+const GRID =
+	'm-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3'
+
 const SKELETON_KEYS = Array.from(
 	{ length: TRAVELLERS_LIST_CONFIG.PAGE_SIZE },
 	(_, index) => index,
@@ -166,7 +170,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 	return (
 		<>
 			{!isLoggedIn && <TravellersWelcome />}
-			{/* Refresh and Register wrap together below the heading when the row is too narrow, so neither overflows the card */}
+			{/* Refresh and Register wrap together below the heading when the row is too narrow, so neither overflows the page */}
 			<div
 				className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1"
 				data-cy="controls">
@@ -223,7 +227,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					</p>
 					<ul
 						aria-busy="true"
-						className="m-0 list-none p-0"
+						className={GRID}
 						data-cy="travellers-skeleton-list">
 						{SKELETON_KEYS.map((key) => (
 							<TravellerSkeleton
@@ -247,7 +251,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				<>
 					<ul
 						ref={listRef}
-						className="m-0 list-none p-0"
+						className={GRID}
 						data-cy="travellers-list">
 						{visibleItems.map((traveller) => (
 							<Item

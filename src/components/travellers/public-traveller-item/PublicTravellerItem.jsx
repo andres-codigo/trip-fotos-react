@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 
 import { PUBLIC_TRAVELLER_ITEM } from '@/constants/test'
 import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
-import { PATHS } from '@/constants/ui'
+import { GLOBAL, PATHS } from '@/constants/ui'
 
 import { formatCity, getCityId } from '@/utils/formatCity'
 import { publicName } from '@/utils/publicTrip'
@@ -10,7 +10,7 @@ import { publicName } from '@/utils/publicTrip'
 import BaseBadge from '@/components/ui/badge/BaseBadge'
 import BaseButton from '@/components/ui/button/BaseButton'
 import BaseImage from '@/components/ui/image/BaseImage'
-import TripSummary from '@/components/travellers/trip-summary/TripSummary'
+import TravellerCardHead from '@/components/travellers/traveller-card-head/TravellerCardHead'
 
 const PublicTravellerItem = ({
 	id,
@@ -30,21 +30,18 @@ const PublicTravellerItem = ({
 
 	return (
 		<li
-			className="my-4 list-none rounded-lg border border-border-strong p-4"
+			className="traveller-card"
 			data-cy={PUBLIC_TRAVELLER_ITEM.ROOT}>
-			<h3
-				className="m-0 text-2xl leading-normal font-normal"
-				data-cy={PUBLIC_TRAVELLER_ITEM.NAME}>
-				{name}
-			</h3>
-			<TripSummary
+			<TravellerCardHead
+				name={name}
 				tripStart={tripStart}
 				tripEnd={tripEnd}
 				daysInCity={daysInCity}
-				data-cy={PUBLIC_TRAVELLER_ITEM.TRIP}
+				nameDataCy={PUBLIC_TRAVELLER_ITEM.NAME}
+				tripDataCy={PUBLIC_TRAVELLER_ITEM.TRIP}
 			/>
 			<div
-				className="flex flex-wrap gap-2 pt-1 pb-4"
+				className="mt-3.5 flex flex-wrap gap-2"
 				data-cy={PUBLIC_TRAVELLER_ITEM.BADGES}>
 				{(cities ?? []).map((city) => (
 					<BaseBadge
@@ -54,27 +51,31 @@ const PublicTravellerItem = ({
 					/>
 				))}
 			</div>
-			{cover?.url && (
-				<ul
-					className="m-0 flex list-none flex-wrap gap-x-[2%] gap-y-8 py-4 pl-0 [@media(max-width:480px)]:mb-[0.9375rem] [@media(max-width:480px)]:gap-x-[4%] [@media(max-width:480px)]:gap-y-4 [@media(max-width:480px)]:py-2"
-					data-cy={PUBLIC_TRAVELLER_ITEM.COVER}>
-					<BaseImage
-						title={name}
-						url={cover.url}
-						dimensions={cover.dimensions ?? undefined}
-						thumbnails={cover.thumbnails ?? undefined}
-						description={cover.alt ?? ''}
-					/>
-				</ul>
-			)}
-			<div className="flex flex-wrap items-center justify-end gap-2">
-				<BaseButton
-					isLink
-					to={viewTripLink}
-					modeType="outline"
-					data-cy={PUBLIC_TRAVELLER_ITEM.VIEW_TRIP}>
-					{TRAVELLER_ITEM_CONFIG.VIEW_LABEL}
-				</BaseButton>
+			{/* The cover and View trip sit at the foot, so they line up across a row of equal-height cards */}
+			<div className="mt-auto flex flex-col pt-3.5">
+				{cover?.url && (
+					<ul
+						className="m-0 flex list-none flex-wrap gap-x-[2%] gap-y-2 pt-0 pb-4 pl-0 [@media(max-width:480px)]:gap-x-[4%] [@media(max-width:480px)]:gap-y-4"
+						data-cy={PUBLIC_TRAVELLER_ITEM.COVER}>
+						<BaseImage
+							title={name}
+							url={cover.url}
+							dimensions={cover.dimensions ?? undefined}
+							thumbnails={cover.thumbnails ?? undefined}
+							sizes={GLOBAL.IMAGE_CARD_THUMBNAIL_SIZES}
+							description={cover.alt ?? ''}
+						/>
+					</ul>
+				)}
+				<div className="flex flex-wrap items-center justify-end gap-2">
+					<BaseButton
+						isLink
+						to={viewTripLink}
+						modeType="outline"
+						data-cy={PUBLIC_TRAVELLER_ITEM.VIEW_TRIP}>
+						{TRAVELLER_ITEM_CONFIG.VIEW_LABEL}
+					</BaseButton>
+				</div>
 			</div>
 		</li>
 	)

@@ -131,6 +131,18 @@ describe('<TravellerDetail />', () => {
 		)
 	})
 
+	it('tags your own trip "You" after the name, and nobody else\'s', async () => {
+		const { unmount } = renderPage({ userId: 'abc' })
+		await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+		const name = screen.getByTestId(TRAVELLER_DETAIL.NAME)
+		expect(name.nextElementSibling).toHaveTextContent(/^You$/)
+		unmount()
+
+		renderPage({ userId: 'someone-else' })
+		await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
+		expect(screen.queryByText('You')).not.toBeInTheDocument()
+	})
+
 	it('renders the full profile and all photos', async () => {
 		renderPage()
 		expect(

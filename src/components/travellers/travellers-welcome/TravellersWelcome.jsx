@@ -19,16 +19,16 @@ const TravellersWelcome = ({ className }) => {
 
 	return (
 		// A labelled region rather than <section>: the unlayered page-shell section rule would override the flex layout and padding.
-		// Stacked at every width: the list card is about 620px wide on desktop, too narrow for copy and actions side by side
+		// Stacked below 1024px; from there the copy sits on the left and the actions on the right, Create an account above the Log in line, so reading and tab order are unchanged
 		<div
 			role="region"
 			aria-labelledby={headingId}
 			className={cn(
-				'mb-4 flex flex-col gap-4 rounded-lg border border-accent-text bg-surface-accent p-4.5',
+				'mb-4 flex flex-col gap-4 rounded-lg border border-accent-text bg-surface-accent p-4.5 lg:flex-row lg:items-center lg:justify-between lg:gap-8',
 				className,
 			)}
 			data-cy="travellers-welcome">
-			<div className="flex flex-col gap-1">
+			<div className="flex flex-col gap-1 lg:max-w-[60ch]">
 				<h2
 					id={headingId}
 					className="m-0 text-lg font-bold">
@@ -36,7 +36,7 @@ const TravellersWelcome = ({ className }) => {
 				</h2>
 				<p className="m-0">{TRAVELLERS_WELCOME_CONFIG.TEXT}</p>
 			</div>
-			<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+			<div className="flex flex-wrap items-center gap-x-4 gap-y-2 lg:flex-none lg:flex-col lg:items-end lg:gap-2">
 				<BaseButton
 					isLink
 					to={SIGNUP_PATH}

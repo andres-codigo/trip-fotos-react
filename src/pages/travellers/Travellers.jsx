@@ -5,7 +5,6 @@ import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 
 import TravellersList from '@/components/travellers/travellers-list/TravellersList'
 
-import BaseCard from '@/components/ui/card/BaseCard'
 import Alerts from '@/components/ui/alerts/Alerts'
 
 const Travellers = () => {
@@ -31,17 +30,18 @@ const Travellers = () => {
 			data-cy="main-container"
 			data-cy-alt="travellers-main-container">
 			<title>{`Travellers · ${GLOBAL.SITE_NAME}`}</title>
-			<section>
-				<BaseCard>
-					{alertMessage && (
-						<Alerts
-							message={alertMessage}
-							onClose={() => setAlertMessage(null)}
-						/>
-					)}
-					<TravellersList />
-				</BaseCard>
-			</section>
+			{/* No page card: the grid's own cards sit on the page background, capped at 1160px. A div, as the unlayered section rule would add padding */}
+			<div
+				className="mx-auto w-full max-w-290"
+				data-cy="travellers-page">
+				{alertMessage && (
+					<Alerts
+						message={alertMessage}
+						onClose={() => setAlertMessage(null)}
+					/>
+				)}
+				<TravellersList />
+			</div>
 		</main>
 	)
 }

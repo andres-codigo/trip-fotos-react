@@ -19,6 +19,7 @@ const ImageGallery = ({
 	dimensions,
 	thumbnails,
 	alts,
+	sizes,
 	urlParam,
 }) => {
 	const [searchParams, setSearchParams] = useSearchParams()
@@ -84,6 +85,7 @@ const ImageGallery = ({
 					dimensions={dimensions?.[position]}
 					thumbnails={thumbnails?.[position]}
 					description={alts?.[position] ?? ''}
+					sizes={sizes}
 					onOpen={() => goTo(position, { replace: false })}
 				/>
 			))}
@@ -174,6 +176,8 @@ ImageGallery.propTypes = {
 		PropTypes.arrayOf(PropTypes.array),
 		PropTypes.object,
 	]),
+	// Passed to each tile; BaseImage defaults to the page-card value
+	sizes: PropTypes.string,
 	// Aligned with urls, sparse like thumbnails
 	alts: PropTypes.oneOfType([
 		PropTypes.arrayOf(PropTypes.string),

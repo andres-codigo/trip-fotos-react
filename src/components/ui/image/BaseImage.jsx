@@ -13,6 +13,7 @@ const BaseImage = ({
 	dimensions,
 	thumbnails,
 	description = '',
+	sizes = GLOBAL.IMAGE_THUMBNAIL_SIZES,
 	onOpen,
 }) => {
 	const [hasError, setHasError] = useState(false)
@@ -35,7 +36,7 @@ const BaseImage = ({
 			srcSet={sources
 				?.map((source) => `${source.url} ${source.width}w`)
 				.join(', ')}
-			sizes={sources ? GLOBAL.IMAGE_THUMBNAIL_SIZES : undefined}
+			sizes={sources ? sizes : undefined}
 			alt={alt}
 			width={width}
 			height={height}
@@ -95,6 +96,8 @@ BaseImage.propTypes = {
 			url: PropTypes.string.isRequired,
 		}),
 	),
+	// The tile's rendered width, so the browser picks the smallest thumbnail that fills it
+	sizes: PropTypes.string,
 	// Without it the tile is a plain image, for a preview with nothing to enlarge
 	onOpen: PropTypes.func,
 }
