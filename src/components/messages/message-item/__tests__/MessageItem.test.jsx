@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { MESSAGE_ITEM, MOCK_INBOX } from '@/constants/test'
+import { MESSAGE_ACTIONS, MESSAGE_ITEM, MOCK_INBOX } from '@/constants/test'
 import { MESSAGES_CONFIG, SENDER_STATUS } from '@/constants/travellers'
 
 import MessageItem from '@/components/messages/message-item/MessageItem'
@@ -10,17 +10,9 @@ import { formatFullTime } from '@/utils/formatMessageTime'
 
 const { SAMPLE_MESSAGE_ONE, SAMPLE_MESSAGE_TWO } = MOCK_INBOX
 
-const CONTACT_STUB = 'contact-stub'
 const CARD_STUB = 'card-stub'
 const DELETE_ERROR = 'This message could not be deleted.'
 const LONG_MESSAGE = 'a'.repeat(MESSAGES_CONFIG.CLAMP_LENGTH + 1)
-
-const ContactStub = () => {
-	const location = useLocation()
-	return (
-		<p data-cy={CONTACT_STUB}>{JSON.stringify(location.state ?? null)}</p>
-	)
-}
 
 const travellerProps = {
 	id: SAMPLE_MESSAGE_ONE.id,
@@ -62,10 +54,6 @@ const renderItem = (props = {}) => {
 					}
 				/>
 				<Route
-					path="/travellers/:id/contact"
-					element={<ContactStub />}
-				/>
-				<Route
 					path="/travellers/:id"
 					element={<p data-cy={CARD_STUB}>Card</p>}
 				/>
@@ -78,7 +66,7 @@ const renderItem = (props = {}) => {
 
 describe('<MessageItem />', () => {
 	describe('Sender', () => {
-		it('links a traveller sender to their card and offers Reply', () => {
+		it('links a traveller sender to their card', () => {
 			renderItem()
 
 			const link = screen.getByTestId(MESSAGE_ITEM.SENDER_LINK)
@@ -90,13 +78,6 @@ describe('<MessageItem />', () => {
 			expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
 				SAMPLE_MESSAGE_ONE.senderName,
 			)
-			expect(screen.getByTestId(MESSAGE_ITEM.REPLY)).toHaveAttribute(
-				'href',
-				`/travellers/${SAMPLE_MESSAGE_ONE.senderId}/contact`,
-			)
-			expect(screen.getByTestId(MESSAGE_ITEM.REPLY)).toHaveTextContent(
-				MESSAGES_CONFIG.REPLY,
-			)
 		})
 
 		it('opens the traveller card from the sender link', () => {
@@ -107,7 +88,7 @@ describe('<MessageItem />', () => {
 			expect(screen.getByTestId(CARD_STUB)).toBeInTheDocument()
 		})
 
-		it('names an unknown sender "A traveller", with Reply but no card link', () => {
+		it('names an unknown sender "A traveller", with no card link', () => {
 			renderItem({
 				senderName: null,
 				senderStatus: SENDER_STATUS.UNKNOWN,
@@ -119,13 +100,9 @@ describe('<MessageItem />', () => {
 			expect(
 				screen.queryByTestId(MESSAGE_ITEM.SENDER_LINK),
 			).not.toBeInTheDocument()
-			expect(screen.getByTestId(MESSAGE_ITEM.REPLY)).toHaveAttribute(
-				'href',
-				`/travellers/${SAMPLE_MESSAGE_ONE.senderId}/contact`,
-			)
 		})
 
-		it('names a former traveller with no card link and no Reply', () => {
+		it('names a former traveller with no card link', () => {
 			renderItem({
 				senderName: null,
 				senderStatus: SENDER_STATUS.FORMER,
@@ -137,12 +114,9 @@ describe('<MessageItem />', () => {
 			expect(
 				screen.queryByTestId(MESSAGE_ITEM.SENDER_LINK),
 			).not.toBeInTheDocument()
-			expect(
-				screen.queryByTestId(MESSAGE_ITEM.REPLY),
-			).not.toBeInTheDocument()
 		})
 
-		it('shows a legacy sender email with a Reply by email mailto link', () => {
+		it('shows a legacy sender email with no card link', () => {
 			renderItem(legacyProps)
 
 			expect(screen.getByTestId(MESSAGE_ITEM.SENDER)).toHaveTextContent(
@@ -150,28 +124,6 @@ describe('<MessageItem />', () => {
 			)
 			expect(
 				screen.queryByTestId(MESSAGE_ITEM.SENDER_LINK),
-			).not.toBeInTheDocument()
-
-			const reply = screen.getByTestId(MESSAGE_ITEM.REPLY)
-			expect(reply).toHaveTextContent(MESSAGES_CONFIG.REPLY_BY_EMAIL)
-
-			const href = reply.getAttribute('href')
-			expect(href).toMatch(`mailto:${SAMPLE_MESSAGE_TWO.userEmail}?`)
-			expect(href).not.toContain('+')
-			const params = new URLSearchParams(href.split('?')[1])
-			expect(params.get('subject')).toBe(
-				MESSAGES_CONFIG.REPLY_EMAIL_SUBJECT,
-			)
-			expect(params.get('body')).toBe(
-				`\n\n> ${SAMPLE_MESSAGE_TWO.message}`,
-			)
-		})
-
-		it('shows no Reply for a legacy message without an email', () => {
-			renderItem({ ...legacyProps, userEmail: null })
-
-			expect(
-				screen.queryByTestId(MESSAGE_ITEM.REPLY),
 			).not.toBeInTheDocument()
 		})
 	})
@@ -289,41 +241,35 @@ describe('<MessageItem />', () => {
 		})
 	})
 
-	describe('Reply', () => {
-		it('passes the sender, message and time to the contact page', () => {
+	describe('Actions', () => {
+		it('renders the actions row spaced below the text', () => {
 			renderItem()
 
-			fireEvent.click(screen.getByTestId(MESSAGE_ITEM.REPLY))
-
-			expect(
-				JSON.parse(screen.getByTestId(CONTACT_STUB).textContent),
-			).toEqual({
-				replyTo: {
-					name: SAMPLE_MESSAGE_ONE.senderName,
-					message: SAMPLE_MESSAGE_ONE.message,
-					createdAt: SAMPLE_MESSAGE_ONE.createdAt,
-				},
-			})
+			const actions = screen.getByTestId(MESSAGE_ACTIONS.ROOT)
+			expect(screen.getByTestId(MESSAGE_ITEM.ROOT)).toContainElement(
+				actions,
+			)
+			expect(actions).toHaveClass('mt-3')
+			expect(screen.getByTestId(MESSAGE_ACTIONS.REPLY)).toHaveAttribute(
+				'href',
+				`/travellers/${SAMPLE_MESSAGE_ONE.senderId}/contact`,
+			)
 		})
-	})
 
-	describe('Delete', () => {
 		it('names the sender in the Delete label and calls onDelete with the id', () => {
-			const { onDelete, onRetry } = renderItem()
+			const { onDelete } = renderItem()
 
-			const button = screen.getByRole('button', {
-				name: MESSAGES_CONFIG.DELETE_LABEL(
-					SAMPLE_MESSAGE_ONE.senderName,
-				),
-			})
-			expect(button).toHaveTextContent(MESSAGES_CONFIG.DELETE)
-
-			fireEvent.click(button)
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: MESSAGES_CONFIG.DELETE_LABEL(
+						SAMPLE_MESSAGE_ONE.senderName,
+					),
+				}),
+			)
 
 			expect(onDelete).toHaveBeenCalledExactlyOnceWith(
 				SAMPLE_MESSAGE_ONE.id,
 			)
-			expect(onRetry).not.toHaveBeenCalled()
 		})
 
 		it('names a legacy sender by email in the Delete label', () => {
@@ -338,45 +284,32 @@ describe('<MessageItem />', () => {
 			).toBeInTheDocument()
 		})
 
-		it('shows no error alert without a delete error', () => {
-			renderItem()
+		it('names a former traveller in the Delete label', () => {
+			renderItem({ senderName: null, senderStatus: SENDER_STATUS.FORMER })
 
-			expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 			expect(
-				screen.queryByTestId(MESSAGE_ITEM.TRY_AGAIN),
-			).not.toBeInTheDocument()
+				screen.getByRole('button', {
+					name: MESSAGES_CONFIG.DELETE_LABEL(
+						MESSAGES_CONFIG.FORMER_TRAVELLER,
+					),
+				}),
+			).toBeInTheDocument()
 		})
 
-		it('shows the delete error with Try again, which calls onRetry with the id', () => {
+		it('shows the delete error inside the card and Try again calls onRetry', () => {
 			const { onRetry } = renderItem({ deleteError: DELETE_ERROR })
 
-			expect(screen.getByRole('alert')).toHaveTextContent(DELETE_ERROR)
+			const alert = screen.getByTestId(MESSAGE_ACTIONS.DELETE_ERROR)
+			expect(screen.getByTestId(MESSAGE_ITEM.ROOT)).toContainElement(
+				alert,
+			)
+			expect(alert).toHaveTextContent(DELETE_ERROR)
 
-			const retry = screen.getByTestId(MESSAGE_ITEM.TRY_AGAIN)
-			expect(retry).toHaveTextContent(MESSAGES_CONFIG.TRY_AGAIN)
-			expect(retry).toBeEnabled()
-			expect(retry).toHaveAttribute('aria-busy', 'false')
-
-			fireEvent.click(retry)
+			fireEvent.click(screen.getByTestId(MESSAGE_ACTIONS.TRY_AGAIN))
 
 			expect(onRetry).toHaveBeenCalledExactlyOnceWith(
 				SAMPLE_MESSAGE_ONE.id,
 			)
-		})
-
-		it('disables Try again while retrying', () => {
-			const { onRetry } = renderItem({
-				deleteError: DELETE_ERROR,
-				isRetrying: true,
-			})
-
-			const retry = screen.getByTestId(MESSAGE_ITEM.TRY_AGAIN)
-			expect(retry).toBeDisabled()
-			expect(retry).toHaveAttribute('aria-busy', 'true')
-
-			fireEvent.click(retry)
-
-			expect(onRetry).not.toHaveBeenCalled()
 		})
 	})
 })

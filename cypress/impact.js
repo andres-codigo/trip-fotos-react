@@ -123,7 +123,7 @@ export const CAPTURES = {
 		areas: ['messages'],
 	},
 	'messages-empty': {
-		title: 'captures Messages when empty',
+		title: 'captures Messages when empty and with one message',
 		areas: ['messages'],
 	},
 	'account-menu': {

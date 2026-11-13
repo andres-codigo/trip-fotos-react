@@ -1,4 +1,8 @@
-import { MESSAGE_ITEM_SELECTORS, MOCK_INBOX } from '@/constants/test'
+import {
+	MESSAGE_ACTIONS_SELECTORS,
+	MESSAGE_ITEM_SELECTORS,
+	MOCK_INBOX,
+} from '@/constants/test'
 import { MESSAGES_CONFIG } from '@/constants/travellers'
 
 import MessageItem from '@/components/messages/message-item/MessageItem'
@@ -61,7 +65,7 @@ describe('<MessageItem />', () => {
 				'contain',
 				SAMPLE_MESSAGE_ONE.senderName,
 			)
-			cy.get(MESSAGE_ITEM_SELECTORS.REPLY).should('be.visible')
+			cy.get(MESSAGE_ACTIONS_SELECTORS.REPLY).should('be.visible')
 			cy.checkA11y()
 		})
 	})
@@ -92,27 +96,12 @@ describe('<MessageItem />', () => {
 				'contain',
 				SAMPLE_MESSAGE_TWO.userEmail,
 			)
-			cy.get(MESSAGE_ITEM_SELECTORS.REPLY)
-				.should('contain', MESSAGES_CONFIG.REPLY_BY_EMAIL)
-				.and('have.attr', 'href')
-				.and('match', /^mailto:/)
+			cy.get(MESSAGE_ACTIONS_SELECTORS.REPLY).should(
+				'contain',
+				MESSAGES_CONFIG.REPLY_BY_EMAIL,
+			)
 			cy.get(MESSAGE_ITEM_SELECTORS.TIME).should('not.exist')
 			cy.checkA11y()
-		})
-	})
-
-	describe('Actions', () => {
-		// Both Reply variants are the card's primary action, so they share the button label weight
-		const assertWeight = (selector) =>
-			cy.get(selector).should('have.css', 'font-weight', '500')
-
-		it('gives Reply, Reply by email and Delete the same medium weight', () => {
-			mountItem()
-			assertWeight(MESSAGE_ITEM_SELECTORS.REPLY)
-			assertWeight(MESSAGE_ITEM_SELECTORS.DELETE)
-
-			mountItem(legacyProps)
-			assertWeight(MESSAGE_ITEM_SELECTORS.REPLY)
 		})
 	})
 
@@ -137,44 +126,15 @@ describe('<MessageItem />', () => {
 		})
 	})
 
-	describe('Delete', () => {
-		it('calls onDelete with the message id', () => {
-			mountItem()
-
-			cy.get(MESSAGE_ITEM_SELECTORS.DELETE)
-				.should(
-					'have.attr',
-					'aria-label',
-					MESSAGES_CONFIG.DELETE_LABEL(SAMPLE_MESSAGE_ONE.senderName),
-				)
-				.click()
-			cy.get('@onDelete').should(
-				'have.been.calledOnceWith',
-				SAMPLE_MESSAGE_ONE.id,
-			)
-		})
-
-		it('shows the error alert, and Try again calls onRetry', () => {
+	describe('Delete error', () => {
+		it('shows the error alert inside the card and passes a11y', () => {
 			mountItem({ deleteError: DELETE_ERROR })
 
-			cy.get(MESSAGE_ITEM_SELECTORS.DELETE_ERROR)
+			cy.get(MESSAGE_ITEM_SELECTORS.ROOT)
+				.find(MESSAGE_ACTIONS_SELECTORS.DELETE_ERROR)
 				.should('be.visible')
-				.and('have.attr', 'role', 'alert')
 				.and('contain', DELETE_ERROR)
 			cy.checkA11y()
-			cy.get(MESSAGE_ITEM_SELECTORS.TRY_AGAIN).click()
-			cy.get('@onRetry').should(
-				'have.been.calledOnceWith',
-				SAMPLE_MESSAGE_ONE.id,
-			)
-		})
-
-		it('disables Try again while retrying', () => {
-			mountItem({ deleteError: DELETE_ERROR, isRetrying: true })
-
-			cy.get(MESSAGE_ITEM_SELECTORS.TRY_AGAIN)
-				.should('be.disabled')
-				.and('have.attr', 'aria-busy', 'true')
 		})
 	})
 })

@@ -17,7 +17,10 @@ import {
 	FILE_DROP,
 	FILE_PREVIEW,
 	IMAGE,
+	MESSAGE_ACTIONS,
 	MESSAGE_ITEM,
+	MESSAGE_PANE,
+	MESSAGE_ROW,
 	MESSAGE_SKELETON,
 	MESSAGES_PAGE,
 	PASSWORD_RESET_FORM,
@@ -257,6 +260,8 @@ export const TRAVELLER_SKELETON_SELECTORS = {
 
 export const MESSAGE_SKELETON_SELECTORS = {
 	ROOT: getByDataCy(MESSAGE_SKELETON.ROOT),
+	ROW: getByDataCy(MESSAGE_SKELETON.ROW),
+	PANE: getByDataCy(MESSAGE_SKELETON.PANE),
 }
 
 export const TRAVELLER_ITEM_SELECTORS = {
@@ -367,6 +372,18 @@ export const MESSAGES_PAGE_SELECTORS = Object.fromEntries(
 
 export const MESSAGE_ITEM_SELECTORS = Object.fromEntries(
 	Object.entries(MESSAGE_ITEM).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const MESSAGE_ACTIONS_SELECTORS = Object.fromEntries(
+	Object.entries(MESSAGE_ACTIONS).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const MESSAGE_ROW_SELECTORS = Object.fromEntries(
+	Object.entries(MESSAGE_ROW).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const MESSAGE_PANE_SELECTORS = Object.fromEntries(
+	Object.entries(MESSAGE_PANE).map(([key, id]) => [key, getByDataCy(id)]),
 )
 
 export const PASSWORD_RESET_FORM_SELECTORS = Object.fromEntries(

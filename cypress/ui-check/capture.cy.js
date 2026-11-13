@@ -11,6 +11,7 @@
 //                    example `city-filter`); cypress/impact.js names each capture.
 //                    It keeps the label's other captures and retakes its own
 import { API_DATABASE } from '../../src/constants/api'
+import { MOCK_INBOX } from '../../src/constants/test/mock-data/mock-messages'
 import {
 	ACCOUNT_MENU_SELECTORS,
 	AUTHENTICATION_FORM_SELECTORS,
@@ -22,7 +23,10 @@ import {
 	ERROR_SUMMARY_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 	FOOTER_SELECTORS,
+	MESSAGE_ACTIONS_SELECTORS,
 	MESSAGE_ITEM_SELECTORS,
+	MESSAGE_PANE_SELECTORS,
+	MESSAGE_ROW_SELECTORS,
 	MESSAGE_SKELETON_SELECTORS,
 	MESSAGES_PAGE_SELECTORS,
 	PASSWORD_RESET_FORM_SELECTORS,
@@ -248,6 +252,15 @@ const markAllUnread = () =>
 			})
 		})
 
+// From 1024px Messages is an inbox: a row per message and the open one in a pane
+const isInbox = (width) => width >= 1024
+const messageEntries = (width) =>
+	isInbox(width) ? MESSAGE_ROW_SELECTORS.ROOT : MESSAGE_ITEM_SELECTORS.ROOT
+const openRow = (text) => {
+	cy.contains(MESSAGE_ROW_SELECTORS.LINK, text).click()
+	cy.contains(MESSAGE_PANE_SELECTORS.TEXT, text).should('be.visible')
+}
+
 // The account button can render before the restored session fills in the name, so a traveller's page is not settled until it shows
 const assertSignedInName = () =>
 	cy.window({ log: false }).then((win) => {
@@ -301,8 +314,12 @@ const assertSettled = () => {
 	cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST, {
 		timeout: TIMEOUT,
 	}).should('not.exist')
-	cy.get(MESSAGE_SKELETON_SELECTORS.ROOT, { timeout: TIMEOUT }).should(
-		'not.exist',
+	;[
+		MESSAGE_SKELETON_SELECTORS.ROOT,
+		MESSAGE_SKELETON_SELECTORS.ROW,
+		MESSAGE_SKELETON_SELECTORS.PANE,
+	].forEach((selector) =>
+		cy.get(selector, { timeout: TIMEOUT }).should('not.exist'),
 	)
 	assertSignedInName()
 	assertImagesLoaded()
@@ -1346,20 +1363,45 @@ describe(`UI check capture (${LABEL})`, () => {
 				).should('be.visible')
 
 				visit(PATHS.MESSAGES)
-				cy.get(MESSAGE_ITEM_SELECTORS.NEW_TAG).should('exist')
-				cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).should('exist')
-				assertSettled()
-				freezeAnimation()
-				shot(`messages-${width}`)
-				cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).click()
-				shot(`messages-show-all-${width}`)
+				if (isInbox(width)) {
+					cy.get(MESSAGE_PANE_SELECTORS.NEW_TAG).should('be.visible')
+					cy.get(MESSAGE_ROW_SELECTORS.ROOT).should('have.length', 4)
+					assertSettled()
+					freezeAnimation()
+					shot(`messages-${width}`)
+					openRow(LONG_MESSAGE)
+					shot(`messages-long-${width}`)
+					openRow('Thanks for the tips on Kyoto.')
+					shot(`messages-former-${width}`)
+					openRow(MOCK_INBOX.SAMPLE_MESSAGE_TWO.message)
+					shot(`messages-email-only-${width}`)
+				} else {
+					cy.get(MESSAGE_ITEM_SELECTORS.NEW_TAG).should('exist')
+					cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).should('exist')
+					assertSettled()
+					freezeAnimation()
+					shot(`messages-${width}`)
+					cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).click()
+					shot(`messages-show-all-${width}`)
+				}
 
 				// The page and the nav's unread count may each request messages, in either order, so every request is held until the shot
 				cy.intercept(API_DATABASE.GET, '**/messages/*.json*', (req) =>
 					req.on('response', (res) => res.setDelay(60000)),
 				).as('slowMessages')
 				visit(PATHS.MESSAGES)
-				cy.get(MESSAGE_SKELETON_SELECTORS.ROOT).should('have.length', 3)
+				if (isInbox(width)) {
+					cy.get(MESSAGE_SKELETON_SELECTORS.ROW).should(
+						'have.length',
+						5,
+					)
+					cy.get(MESSAGE_SKELETON_SELECTORS.PANE).should('be.visible')
+				} else {
+					cy.get(MESSAGE_SKELETON_SELECTORS.ROOT).should(
+						'have.length',
+						3,
+					)
+				}
 				freezeAnimation()
 				shot(`messages-loading-${width}`)
 				// The newest handler runs first, and continuing ends the chain, so this releases the hold
@@ -1369,7 +1411,7 @@ describe(`UI check capture (${LABEL})`, () => {
 
 				markAllUnread()
 				visit(PATHS.MESSAGES)
-				cy.get(MESSAGE_ITEM_SELECTORS.REPLY).first().click()
+				cy.get(MESSAGE_ACTIONS_SELECTORS.REPLY).first().click()
 				cy.get(CONTACT_TRAVELLER_SELECTORS.REPLY_QUOTE).should(
 					'be.visible',
 				)
@@ -1379,52 +1421,83 @@ describe(`UI check capture (${LABEL})`, () => {
 
 			cy.viewport(1280, HEIGHT)
 			visit(PATHS.MESSAGES)
-			cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+			cy.get(MESSAGE_ROW_SELECTORS.ROOT).should('have.length', 4)
 			assertSettled()
-			forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, ['hover'])
+			freezeAnimation()
+			// The second row: the first is open, with its own background
+			const SECOND_ROW = `${MESSAGE_ROW_SELECTORS.ROOT}:nth-child(2) ${MESSAGE_ROW_SELECTORS.LINK}`
+			forcePseudo(SECOND_ROW, ['hover'])
+			shot('hover-message-row')
+			forcePseudo(SECOND_ROW, ['focus', 'focus-visible'])
+			shot('focus-message-row')
+			forcePseudo(SECOND_ROW, [])
+			// Choosing a row moves focus to the sender heading in the pane
+			cy.get(SECOND_ROW).click()
+			cy.get(MESSAGE_PANE_SELECTORS.SENDER).should('have.focus')
+			forcePseudo(MESSAGE_PANE_SELECTORS.SENDER, [
+				'focus',
+				'focus-visible',
+			])
+			shot('focus-message-pane-heading')
+			forcePseudo(MESSAGE_PANE_SELECTORS.SENDER, [])
+			forcePseudo(MESSAGE_ACTIONS_SELECTORS.DELETE, ['hover'])
 			shot('hover-message-delete')
-			forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, [
+			forcePseudo(MESSAGE_ACTIONS_SELECTORS.DELETE, [
 				'focus',
 				'focus-visible',
 			])
 			shot('focus-message-delete')
-			forcePseudo(MESSAGE_ITEM_SELECTORS.DELETE, [])
+			forcePseudo(MESSAGE_ACTIONS_SELECTORS.DELETE, [])
 
 			eachWidth((width) => {
 				visit(PATHS.MESSAGES)
-				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
-				cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+				cy.get(messageEntries(width)).should('have.length', 4)
+				cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE).first().click()
 				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST).should('be.visible')
 				freezeAnimation()
 				shot(`messages-undo-toast-${width}`)
 				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
 					.find(TOAST_SELECTORS.ACTION)
 					.click()
-				cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
+				cy.get(messageEntries(width)).should('have.length', 4)
 
 				interceptOnce(API_DATABASE.DELETE, '**/messages/*/*.json*', {
 					statusCode: 500,
 					body: {},
 				}).as('failedDelete')
-				cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+				cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE).first().click()
 				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
 					.find(TOAST_SELECTORS.DISMISS)
 					.click()
 				cy.wait('@failedDelete')
-				cy.get(MESSAGE_ITEM_SELECTORS.DELETE_ERROR).should('be.visible')
+				cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE_ERROR).should(
+					'be.visible',
+				)
 				freezeAnimation()
 				shot(`messages-delete-failed-${width}`)
+
+				interceptOnce(API_DATABASE.DELETE, '**/messages/*/*.json*', {
+					statusCode: 500,
+					body: {},
+					delay: 60000,
+				})
+				cy.get(MESSAGE_ACTIONS_SELECTORS.TRY_AGAIN).click()
+				cy.get(MESSAGE_ACTIONS_SELECTORS.TRY_AGAIN).should(
+					'be.disabled',
+				)
+				freezeAnimation()
+				shot(`messages-trying-again-${width}`)
 			})
 
 			cy.viewport(1280, HEIGHT)
 			visit(PATHS.MESSAGES)
-			cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 4)
-			cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+			cy.get(MESSAGE_ROW_SELECTORS.ROOT).should('have.length', 4)
+			cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE).first().click()
 			cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
 				.find(TOAST_SELECTORS.DISMISS)
 				.click()
 			cy.reload()
-			cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 3)
+			cy.get(MESSAGE_ROW_SELECTORS.ROOT).should('have.length', 3)
 			assertSettled()
 			shot('messages-after-delete')
 		})
@@ -1437,6 +1510,25 @@ describe(`UI check capture (${LABEL})`, () => {
 				assertSettled()
 				freezeAnimation()
 				shot(`messages-empty-${width}`)
+			})
+
+			cy.clock(NOW, ['Date'])
+			cy.intercept(API_DATABASE.GET, '**/messages/*.json*', {
+				body: {
+					'capture-one': {
+						senderId: TEST_USERS.OTHER_TRAVELLER.ID,
+						message: MOCK_INBOX.SAMPLE_MESSAGE_ONE.message,
+						createdAt: NOW - 12 * 60 * 1000,
+						read: true,
+					},
+				},
+			})
+			eachWidth((width) => {
+				visit(PATHS.MESSAGES)
+				cy.get(messageEntries(width)).should('have.length', 1)
+				assertSettled()
+				freezeAnimation()
+				shot(`messages-one-${width}`)
 			})
 		})
 
