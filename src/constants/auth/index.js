@@ -39,6 +39,9 @@ export const AUTH_FORM_CONFIG = Object.freeze({
 	TO_SIGNUP: 'Create an account',
 	TO_LOGIN_PROMPT: 'Already have an account?',
 	TO_LOGIN: 'Log in',
+	MODE_PARAM: 'mode',
+	TRIP_NOTICE: (firstName) =>
+		`Log in or create an account to see ${firstName ? `${firstName}'s` : 'this'} trip.`,
 })
 
 export const PASSWORD_RESET_CONFIG = Object.freeze({

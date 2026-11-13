@@ -37,7 +37,10 @@ const Privacy = () => {
 					If you register as a traveller, the name, trip description,
 					trip dates, cities, photos and any photo descriptions you
 					provide are stored in Firebase Realtime Database and Cloud
-					Storage, and are shown to other signed-in users.
+					Storage, and are shown to other signed-in users. Anyone,
+					signed in or not, can see your first name and the initial of
+					your last name, your cities, your trip dates and your first
+					photo with its description.
 				</p>
 
 				<h2 className="mt-6 mb-[1em] text-[1.17rem]">Messages</h2>

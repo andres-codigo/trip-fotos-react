@@ -84,7 +84,9 @@ function AppRoutes() {
 	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
 	useEffect(() => {
 		const publicPaths = [
+			PATHS.HOME,
 			PATHS.AUTHENTICATION,
+			PATHS.TRAVELLERS,
 			PATHS.PRIVACY,
 			PATHS.PAGE_NOT_FOUND,
 		]
@@ -93,8 +95,6 @@ function AppRoutes() {
 		if (!isLoggedIn && !isPublic) {
 			// Only redirect if the route is a known protected route
 			const protectedPaths = [
-				PATHS.HOME,
-				PATHS.TRAVELLERS,
 				PATHS.REGISTER,
 				PATHS.MESSAGES,
 				PATHS.TRAVELLER_DETAIL,
@@ -106,7 +106,11 @@ function AppRoutes() {
 					matchPath(path, location.pathname),
 				)
 			) {
-				navigate(PATHS.AUTHENTICATION, { replace: true })
+				// Logging in returns the visitor to the page they asked for, such as a trip from the public list
+				navigate(
+					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent(location.pathname)}`,
+					{ replace: true },
+				)
 			}
 		}
 	}, [isLoggedIn, location.pathname, navigate])
@@ -125,7 +129,12 @@ function AppRoutes() {
 				<Routes>
 					<Route
 						path={PATHS.HOME}
-						element={<Travellers />}
+						element={
+							<Navigate
+								to={PATHS.TRAVELLERS}
+								replace
+							/>
+						}
 					/>
 					<Route
 						path={PATHS.AUTHENTICATION}

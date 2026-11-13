@@ -30,6 +30,7 @@ const UserAuthenticationForm = forwardRef(
 			onSwitchMode,
 			onForgotPassword,
 			isLoading = false,
+			notice,
 		},
 		titleRef,
 	) => {
@@ -59,6 +60,13 @@ const UserAuthenticationForm = forwardRef(
 							? AUTH_FORM_CONFIG.LOGIN_TITLE
 							: AUTH_FORM_CONFIG.SIGNUP_TITLE}
 					</h1>
+					{notice && (
+						<p
+							className="m-0 rounded-md bg-surface-accent px-3.5 py-2.5"
+							data-cy="user-authentication-form-notice">
+							{notice}
+						</p>
+					)}
 					<RequiredLegend />
 				</div>
 				<LoadingAnnouncement isLoading={isLoading} />
@@ -187,6 +195,7 @@ UserAuthenticationForm.propTypes = {
 	onSwitchMode: PropTypes.func.isRequired,
 	onForgotPassword: PropTypes.func.isRequired,
 	isLoading: PropTypes.bool,
+	notice: PropTypes.string,
 }
 
 export default UserAuthenticationForm

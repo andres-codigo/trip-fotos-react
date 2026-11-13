@@ -32,6 +32,10 @@ vi.mock('@/store/slices/travellersSlice', () => ({
 	loadTravellers: Object.assign(vi.fn(), {
 		rejected: { match: () => false },
 	}),
+	loadPublicTrips: Object.assign(vi.fn(), {
+		rejected: { match: () => false },
+	}),
+	selectPublicTrips: vi.fn(),
 	selectTravellers: vi.fn(),
 	selectHasTravellers: vi.fn(),
 	selectIsTraveller: vi.fn(),
@@ -61,6 +65,15 @@ vi.mock(
 vi.mock('@/components/travellers/traveller-item/TravellerItem', () => ({
 	default: () => <li data-cy="traveller-item">Traveller item</li>,
 }))
+
+vi.mock(
+	'@/components/travellers/public-traveller-item/PublicTravellerItem',
+	() => ({
+		default: () => (
+			<li data-cy="public-traveller-item">Public traveller item</li>
+		),
+	}),
+)
 
 import TravellersList from '@/components/travellers/travellers-list/TravellersList'
 import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
@@ -117,9 +130,14 @@ describe('<TravellersList />', () => {
 		vi.mocked(travellersSlice.loadTravellers).rejected = {
 			match: () => false,
 		}
+		vi.mocked(travellersSlice.loadPublicTrips).rejected = {
+			match: () => false,
+		}
+		// Signed in by default: most of these tests are about the full list
 		vi.mocked(authenticationSlice.selectIsAuthenticated).mockReturnValue(
-			false,
+			true,
 		)
+		vi.mocked(travellersSlice.selectPublicTrips).mockReturnValue([])
 		vi.mocked(
 			authenticationSlice.selectAuthenticationToken,
 		).mockReturnValue(null)
@@ -891,6 +909,166 @@ describe('<TravellersList />', () => {
 				MOCK_ERROR_MESSAGES.LOAD_FAILED,
 			)
 			expect(getItems()).toHaveLength(PAGE_SIZE)
+		})
+	})
+
+	describe('Logged out', () => {
+		const PUBLIC_TRIPS = [
+			{ id: 'amara', firstName: 'Amara', cities: ['prague'] },
+			{ id: 'kofi', firstName: 'Kofi', cities: ['tokyo'] },
+		]
+
+		beforeEach(() => {
+			vi.mocked(
+				authenticationSlice.selectIsAuthenticated,
+			).mockReturnValue(false)
+			vi.mocked(travellersSlice.selectTravellers).mockReturnValue(
+				MOCK_TRAVELLERS.SAMPLE_TRAVELLERS,
+			)
+			vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
+		})
+
+		const renderLoaded = async () => {
+			await act(async () => {
+				renderTravellersList()
+			})
+			await waitFor(() => {
+				expect(
+					screen.queryByTestId('travellers-loading'),
+				).not.toBeInTheDocument()
+			})
+		}
+
+		it('shows the welcome band and the public cards, never the full records', async () => {
+			vi.mocked(travellersSlice.selectPublicTrips).mockReturnValue(
+				PUBLIC_TRIPS,
+			)
+
+			await renderLoaded()
+
+			expect(
+				screen.getByRole('region', {
+					name: 'See where travellers have been',
+				}),
+			).toBeInTheDocument()
+			expect(screen.getAllByTestId('public-traveller-item')).toHaveLength(
+				PUBLIC_TRIPS.length,
+			)
+			expect(
+				screen.queryByTestId('traveller-item'),
+			).not.toBeInTheDocument()
+			expect(
+				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK),
+			).not.toBeInTheDocument()
+		})
+
+		it('stands public-shaped skeletons in while the preview loads', () => {
+			renderTravellersList({}, { shouldResolveSlowly: true })
+
+			const skeletons = screen.getAllByTestId(TRAVELLER_SKELETON.ROOT)
+			expect(
+				skeletons[0].querySelectorAll('.aspect-square'),
+			).toHaveLength(1)
+		})
+
+		it('loads the public summaries, not the full records', async () => {
+			vi.mocked(travellersSlice.selectPublicTrips).mockReturnValue(
+				PUBLIC_TRIPS,
+			)
+
+			await renderLoaded()
+
+			expect(travellersSlice.loadPublicTrips).toHaveBeenCalled()
+			expect(travellersSlice.loadTravellers).not.toHaveBeenCalled()
+		})
+
+		it('filters the public cards by city', async () => {
+			vi.mocked(travellersSlice.selectPublicTrips).mockReturnValue(
+				PUBLIC_TRIPS,
+			)
+
+			await renderLoaded()
+			fireEvent.click(screen.getByRole('checkbox', { name: /prague/i }))
+
+			expect(screen.getAllByTestId('public-traveller-item')).toHaveLength(
+				1,
+			)
+		})
+
+		it('says there are no trips yet, with no Refresh, when the list is empty', async () => {
+			await renderLoaded()
+
+			expect(screen.getByTestId('no-public-trips')).toHaveTextContent(
+				TRAVELLERS_LIST_CONFIG.NO_PUBLIC_TRIPS_TITLE,
+			)
+			expect(
+				screen.queryByRole('button', { name: 'Refresh travellers' }),
+			).not.toBeInTheDocument()
+			expect(
+				screen.queryByText('No travellers listed.'),
+			).not.toBeInTheDocument()
+			expect(
+				screen.getByRole('region', {
+					name: 'See where travellers have been',
+				}),
+			).toBeInTheDocument()
+		})
+
+		it('keeps the welcome band when the public list fails to load', async () => {
+			vi.mocked(travellersSlice.loadPublicTrips).rejected = {
+				match: () => true,
+			}
+
+			await renderLoaded()
+
+			expect(screen.getByRole(ALERT_ROLE)).toHaveTextContent(
+				TRAVELLERS_LIST_CONFIG.LOAD_ERROR_TITLE,
+			)
+			expect(
+				screen.getByRole('region', {
+					name: 'See where travellers have been',
+				}),
+			).toBeInTheDocument()
+			expect(
+				screen.queryByTestId('no-public-trips'),
+			).not.toBeInTheDocument()
+		})
+
+		it('swaps to the public list when the user logs out on the page', async () => {
+			vi.mocked(
+				authenticationSlice.selectIsAuthenticated,
+			).mockReturnValue(true)
+			const { rerender } = renderTravellersList()
+			await waitFor(() =>
+				expect(travellersSlice.loadTravellers).toHaveBeenCalled(),
+			)
+
+			vi.mocked(
+				authenticationSlice.selectIsAuthenticated,
+			).mockReturnValue(false)
+			vi.mocked(travellersSlice.selectPublicTrips).mockReturnValue(
+				PUBLIC_TRIPS,
+			)
+			await act(async () => {
+				rerender(
+					<Provider
+						store={{
+							getState: () => ({}),
+							dispatch: vi.fn(),
+							subscribe: () => () => {},
+						}}>
+						<BrowserRouter>
+							<TravellersList />
+						</BrowserRouter>
+					</Provider>,
+				)
+			})
+
+			await waitFor(() =>
+				expect(travellersSlice.loadPublicTrips).toHaveBeenCalledWith({
+					forceRefresh: true,
+				}),
+			)
 		})
 	})
 })

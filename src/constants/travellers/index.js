@@ -52,6 +52,16 @@ export const TRAVELLERS_LIST_CONFIG = Object.freeze({
 		`All ${total} ${isFiltered ? 'matching ' : ''}travellers shown`,
 	LOAD_ERROR_TITLE: 'Travellers could not be loaded.',
 	TRY_AGAIN: 'Try again',
+	NO_PUBLIC_TRIPS_TITLE: 'No trips to show yet.',
+	NO_PUBLIC_TRIPS_TEXT: 'Create an account and add the first one.',
+})
+
+export const TRAVELLERS_WELCOME_CONFIG = Object.freeze({
+	TITLE: 'See where travellers have been',
+	TEXT: 'Browse trips by city. Create an account to see every photo and message a traveller.',
+	CREATE_ACCOUNT: 'Create an account',
+	LOG_IN_PROMPT: 'Already have an account?',
+	LOG_IN: 'Log in',
 })
 
 export const TRAVELLER_FILTER_CONFIG = Object.freeze({

@@ -9,9 +9,23 @@ import { performLogin } from '../../support/utils/authHelpers'
 const REQUEST_TIMEOUT = 10000
 
 describe('App Routing', () => {
-	it('redirects unauthenticated users from protected routes to login', () => {
+	it('redirects unauthenticated users from protected routes to login, keeping the page to return to', () => {
+		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)
+		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
+		cy.location('search').should(
+			'eq',
+			`?redirect=${encodeURIComponent(PATHS.MESSAGES)}`,
+		)
+	})
+
+	it('lets unauthenticated users open the public travellers list', () => {
 		cy.visit(BASE_URL_CYPRESS + PATHS.TRAVELLERS)
-		cy.url().should('include', PATHS.AUTHENTICATION)
+		cy.location('pathname').should('eq', PATHS.TRAVELLERS)
+	})
+
+	it('sends everyone from home to the travellers list', () => {
+		cy.visit(BASE_URL_CYPRESS + PATHS.HOME)
+		cy.location('pathname').should('eq', PATHS.TRAVELLERS)
 	})
 
 	it('allows access to the authentication page', () => {

@@ -143,6 +143,15 @@ export const TRAVELLER_ITEM = Object.freeze({
 	EDIT: 'traveller-item-edit',
 })
 
+export const PUBLIC_TRAVELLER_ITEM = Object.freeze({
+	ROOT: 'public-traveller-item',
+	NAME: 'public-traveller-item-name',
+	TRIP: 'public-traveller-item-trip',
+	BADGES: 'public-traveller-item-badges',
+	COVER: 'public-traveller-item-cover',
+	VIEW_TRIP: 'public-traveller-item-view-trip',
+})
+
 export const TRAVELLER_SKELETON = Object.freeze({
 	ROOT: 'traveller-skeleton',
 })
@@ -224,6 +233,12 @@ export const CONTACT_TRAVELLER = Object.freeze({
 	SUBMIT: 'contact-submit-button',
 	SENDING_DIALOG: 'contact-sending-dialog',
 	ERROR_DIALOG: 'contact-error-dialog',
+})
+
+export const TRAVELLERS_WELCOME = Object.freeze({
+	ROOT: 'travellers-welcome',
+	CREATE_ACCOUNT: 'travellers-welcome-create-account',
+	LOG_IN: 'travellers-welcome-log-in',
 })
 
 export const TRAVELLER_FILTER = Object.freeze({

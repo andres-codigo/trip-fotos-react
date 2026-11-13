@@ -65,7 +65,7 @@ describe('Not logged in > PageNotFound page accessibility', () => {
 })
 
 describe('Not logged in > PageNotFound page', () => {
-	it('displays the 404 page and user can only navigate to the authentication page', () => {
+	it('displays the 404 page, its Log in action and the brand link to Travellers', () => {
 		const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 
 		cy.visit(BASE_URL_CYPRESS)
@@ -83,7 +83,7 @@ describe('Not logged in > PageNotFound page', () => {
 		cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK).as('header')
 		cy.get('@header')
 			.find('a')
-			.should('have.attr', 'href', PATHS.AUTHENTICATION)
+			.should('have.attr', 'href', PATHS.TRAVELLERS)
 
 		// Click the back to home link and verify url
 		cy.get(PAGE_NOT_FOUND_SELECTORS.ACTION).as('homeLink')

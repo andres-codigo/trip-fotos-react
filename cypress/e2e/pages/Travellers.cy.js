@@ -1,6 +1,9 @@
 import { API_DATABASE } from '../../../src/constants/api'
 import {
+	AUTHENTICATION_FORM_SELECTORS,
+	PUBLIC_TRAVELLER_ITEM_SELECTORS,
 	TRAVELLERS_LIST_SELECTORS,
+	TRAVELLERS_WELCOME_SELECTORS,
 	TRAVELLER_FILTER_SELECTORS,
 	TRAVELLER_ITEM_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
@@ -204,6 +207,85 @@ describe('Travellers page > admin and standard users', () => {
 			'have.length',
 			1,
 		)
+	})
+})
+
+describe('Travellers page > logged out', () => {
+	const { SAMPLE_TRAVELLER_ONE: FIRST, SAMPLE_TRAVELLER_TWO: SECOND } =
+		MOCK_TRAVELLERS
+
+	beforeEach(() => {
+		cy.resetEmulators()
+		cy.clearAllLocalStorage()
+		cy.visit(BASE_URL_CYPRESS + PATHS.TRAVELLERS)
+		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.ROOT, {
+			timeout: REQUEST_TIMEOUT,
+		}).should('have.length', 2)
+	})
+
+	it('has no axe violations', () => {
+		cy.checkA11y()
+	})
+
+	it('shows each trip as a preview, newest first, with no description or full name', () => {
+		cy.get(TRAVELLERS_WELCOME_SELECTORS.ROOT).should('be.visible')
+		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.NAME)
+			.first()
+			.should('have.text', `${FIRST.firstName} ${FIRST.lastName[0]}.`)
+		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.NAME)
+			.last()
+			.should('have.text', `${SECOND.firstName} ${SECOND.lastName[0]}.`)
+		// The seeded first traveller has four photos; only the cover is public
+		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.ROOT)
+			.first()
+			.find('img')
+			.should('have.length', 1)
+		cy.contains(FIRST.tripDescription).should('not.exist')
+		cy.contains(FIRST.lastName).should('not.exist')
+		cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should('not.exist')
+	})
+
+	it('narrows the preview by city', () => {
+		cy.contains(TRAVELLER_FILTER_SELECTORS.OPTION, 'Prague').click()
+		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.ROOT).should('have.length', 1)
+		cy.contains(FIRST.firstName).should('exist')
+	})
+
+	it('sends View trip to Log in, which names the trip and returns to it', () => {
+		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.VIEW_TRIP).first().click()
+
+		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
+		cy.get('[data-cy="user-authentication-form-notice"]').should(
+			'have.text',
+			`Log in or create an account to see ${FIRST.firstName}'s trip.`,
+		)
+
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
+			TEST_USERS.TRAVELLER.EMAIL,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
+			TEST_USERS.TRAVELLER.PASSWORD,
+			{ log: false },
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+
+		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
+			'eq',
+			`${PATHS.TRAVELLERS}/${TEST_USERS.TRAVELLER.ID}`,
+		)
+		cy.contains(FIRST.tripDescription).should('be.visible')
+	})
+
+	it('opens the sign-up form from Create an account', () => {
+		cy.get(TRAVELLERS_WELCOME_SELECTORS.CREATE_ACCOUNT).click()
+		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
+		cy.get('h1').should('have.text', 'Create an account')
+	})
+
+	it('offers Log in in the header', () => {
+		cy.get('[data-cy="site-header-log-in"]').click()
+		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
+		cy.get('[data-cy="site-header-log-in"]').should('not.exist')
 	})
 })
 

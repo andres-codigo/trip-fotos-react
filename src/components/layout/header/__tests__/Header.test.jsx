@@ -32,7 +32,8 @@ describe('<Header />', () => {
 		vi.resetModules()
 	})
 	describe('Behaviour tests', () => {
-		it('routes to authentication page when token is falsy', () => {
+		// Travellers is public, so the brand leads there signed in or not
+		it('routes to Travellers when token is falsy', () => {
 			const falsyValues = [null, undefined, '', false, 0]
 
 			falsyValues.forEach((falsyValue) => {
@@ -40,9 +41,35 @@ describe('<Header />', () => {
 				const link = screen.getByRole('link', {
 					name: 'Trip Fotos Home',
 				})
-				expect(link).toHaveAttribute('href', PATHS.AUTHENTICATION)
+				expect(link).toHaveAttribute('href', PATHS.TRAVELLERS)
 				unmount()
 			})
+		})
+
+		it('offers Log in to a logged-out visitor', () => {
+			renderWithProviders(null)
+
+			expect(
+				screen.getByRole('link', { name: 'Log in' }),
+			).toHaveAttribute('href', PATHS.AUTHENTICATION)
+		})
+
+		it('hides Log in on the login page itself', () => {
+			window.history.pushState({}, '', PATHS.AUTHENTICATION)
+			renderWithProviders(null)
+
+			expect(
+				screen.queryByRole('link', { name: 'Log in' }),
+			).not.toBeInTheDocument()
+			window.history.pushState({}, '', '/')
+		})
+
+		it('hides Log in once signed in', () => {
+			renderWithProviders('token')
+
+			expect(
+				screen.queryByRole('link', { name: 'Log in' }),
+			).not.toBeInTheDocument()
 		})
 
 		it('routes to Travellers when token is truthy', () => {

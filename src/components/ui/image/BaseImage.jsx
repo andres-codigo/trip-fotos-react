@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
 
+import { cn } from '@/utils/cn'
 import { IMAGE } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 
@@ -28,9 +29,28 @@ const BaseImage = ({
 	const handleError = () =>
 		sources ? setIsThumbnailFailed(true) : setHasError(true)
 
+	const image = (
+		<img
+			src={sources ? sources[0].url : url}
+			srcSet={sources
+				?.map((source) => `${source.url} ${source.width}w`)
+				.join(', ')}
+			sizes={sources ? GLOBAL.IMAGE_THUMBNAIL_SIZES : undefined}
+			alt={alt}
+			width={width}
+			height={height}
+			loading="lazy"
+			onError={handleError}
+			data-cy={IMAGE.THUMBNAIL}
+		/>
+	)
+
 	return (
 		<li
-			className="relative aspect-square w-[32%] overflow-hidden bg-surface-sunken tile-focus-ring [&_img]:block [&_img]:h-full [&_img]:w-full [&_img]:cursor-pointer [&_img]:object-cover [@media(max-width:480px)]:w-[48%]"
+			className={cn(
+				'relative aspect-square w-[32%] overflow-hidden bg-surface-sunken [&_img]:block [&_img]:h-full [&_img]:w-full [&_img]:object-cover [@media(max-width:480px)]:w-[48%]',
+				onOpen && 'tile-focus-ring [&_img]:cursor-pointer',
+			)}
 			data-cy={IMAGE.ID}>
 			{/* Nothing to enlarge, so the fallback is not a button */}
 			{hasError ? (
@@ -41,7 +61,7 @@ const BaseImage = ({
 					data-cy={IMAGE.FALLBACK}>
 					{GLOBAL.IMAGE_UNAVAILABLE}
 				</span>
-			) : (
+			) : onOpen ? (
 				<button
 					type="button"
 					className="block h-full w-full cursor-pointer border-0 bg-transparent p-0"
@@ -52,22 +72,10 @@ const BaseImage = ({
 					}
 					onClick={onOpen}
 					data-cy={IMAGE.BUTTON}>
-					<img
-						src={sources ? sources[0].url : url}
-						srcSet={sources
-							?.map((source) => `${source.url} ${source.width}w`)
-							.join(', ')}
-						sizes={
-							sources ? GLOBAL.IMAGE_THUMBNAIL_SIZES : undefined
-						}
-						alt={alt}
-						width={width}
-						height={height}
-						loading="lazy"
-						onError={handleError}
-						data-cy={IMAGE.THUMBNAIL}
-					/>
+					{image}
 				</button>
+			) : (
+				image
 			)}
 		</li>
 	)
@@ -87,7 +95,8 @@ BaseImage.propTypes = {
 			url: PropTypes.string.isRequired,
 		}),
 	),
-	onOpen: PropTypes.func.isRequired,
+	// Without it the tile is a plain image, for a preview with nothing to enlarge
+	onOpen: PropTypes.func,
 }
 
 export default BaseImage
