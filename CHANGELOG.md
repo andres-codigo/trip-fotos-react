@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.3](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.2...v0.27.3) (2026-11-13)
+
+
+### Enhancements
+
+* two-column Messages inbox on desktop ([#731](https://github.com/andres-codigo/trip-fotos-react/issues/731)) ([52ea159](https://github.com/andres-codigo/trip-fotos-react/commit/52ea15989e7337904ce05cea6ccfdaa024205db7))
+
 ## [0.27.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.1...v0.27.2) (2026-11-13)
 
 
