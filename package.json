@@ -24,7 +24,8 @@
 		"firebase:rules": "npx firebase-tools@15.34.2 deploy --only database,storage",
 		"emulators": "npx firebase-tools@15.34.2 emulators:start --project demo-trip-fotos",
 		"emulators:seed": "node scripts/seed-emulators.mjs",
-		"admin:claim": "node scripts/set-admin-claim.mjs"
+		"admin:claim": "node scripts/set-admin-claim.mjs",
+		"public-trips:backfill": "node --env-file-if-exists=.env scripts/backfill-public-trips.mjs"
 	},
 	"dependencies": {
 		"@radix-ui/react-dialog": "^1.3.1",

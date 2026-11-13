@@ -1,7 +1,7 @@
 {
 	"rules": {
 		"travellers": {
-			".read": true,
+			".read": "auth != null",
 			"$uid": {
 				".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)",
 				".validate": "newData.hasChild('files')",
@@ -49,6 +49,72 @@
 							}
 						}
 					}
+				}
+			}
+		},
+		"publicTrips": {
+			".read": true,
+			"$uid": {
+				".write": "auth != null && (auth.uid === $uid || auth.token.admin === true)",
+				".validate": "newData.hasChildren(['firstName', 'cities'])",
+				"firstName": {
+					".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+				},
+				"lastInitial": {
+					".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 2"
+				},
+				"cities": {
+					".validate": "newData.hasChildren()"
+				},
+				"tripStart": {
+					".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) && newData.parent().child('tripEnd').isString()"
+				},
+				"tripEnd": {
+					".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) && newData.parent().child('tripStart').isString() && newData.val() >= newData.parent().child('tripStart').val()"
+				},
+				"daysInCity": {
+					".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 366"
+				},
+				"cover": {
+					".validate": "newData.hasChild('url')",
+					"url": {
+						".validate": "newData.isString() && newData.val().length <= 2048"
+					},
+					"alt": {
+						".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 150"
+					},
+					"dimensions": {
+						".validate": "newData.hasChildren(['width', 'height'])",
+						"width": {
+							".validate": "newData.isNumber() && newData.val() > 0"
+						},
+						"height": {
+							".validate": "newData.isNumber() && newData.val() > 0"
+						},
+						"$other": {
+							".validate": false
+						}
+					},
+					"thumbnails": {
+						"$size": {
+							".validate": "$size.matches(/^[0-9]+$/) && newData.hasChildren(['width', 'url'])",
+							"width": {
+								".validate": "newData.isNumber() && newData.val() > 0"
+							},
+							"url": {
+								".validate": "newData.isString() && newData.val().length <= 2048"
+							},
+							"$other": {
+								".validate": false
+							}
+						}
+					},
+					"$other": {
+						".validate": false
+					}
+				},
+				"$other": {
+					".validate": false
 				}
 			}
 		},

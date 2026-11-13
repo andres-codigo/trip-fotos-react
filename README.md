@@ -179,6 +179,9 @@ npm run emulators:seed
 
 # Grant or remove the admin custom claim (see Setup > Admin Role)
 npm run admin:claim -- <email> [--remove]
+
+# Rebuild the public trip summaries from the traveller records (see Setup > Public trips)
+npm run public-trips:backfill [-- --write]
 ```
 
 <a id="setup"></a>
@@ -259,6 +262,17 @@ The admin role is a Firebase Auth custom claim (`admin: true`), so the database 
     ```
 
 3. The user must sign out and in again: claims are read from the ID token at sign-in, and stored as `isAdmin` in the authentication slice (`selectIsAdmin`).
+
+<a id="public-trips"></a>
+
+#### Public trips
+
+Logged-out visitors read `/publicTrips`, a summary of each trip (first name and last initial, cities, trip dates and the first photo); the full `/travellers` records need sign-in. The app writes both in one update, so they stay in step. To build the summaries for trips saved before they existed, or to rebuild them, run the backfill with the service-account key from Admin Role. It only counts until you add `--write`, and it runs before `npm run firebase:rules` deploys the rule that closes `/travellers`:
+
+```bash
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run public-trips:backfill
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run public-trips:backfill -- --write
+```
 
 ### Environment Variables
 

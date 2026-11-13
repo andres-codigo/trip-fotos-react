@@ -69,9 +69,11 @@ const fullName = ({ firstName, lastName } = {}) =>
 	[firstName, lastName].filter(Boolean).join(' ')
 
 // The name is looked up, not stored, so it follows a renamed card and cannot be faked by the sender
-const loadSender = async (senderId) => {
+const loadSender = async (senderId, token) => {
 	try {
-		const response = await databaseRequest(`/travellers/${senderId}`)
+		const response = await databaseRequest(`/travellers/${senderId}`, {
+			token,
+		})
 		const traveller = await response.json()
 
 		return traveller
@@ -109,7 +111,10 @@ export const loadMessages = createAsyncThunk(
 			]
 			const senders = Object.fromEntries(
 				await Promise.all(
-					senderIds.map(async (id) => [id, await loadSender(id)]),
+					senderIds.map(async (id) => [
+						id,
+						await loadSender(id, token),
+					]),
 				),
 			)
 

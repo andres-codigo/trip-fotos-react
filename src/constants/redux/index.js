@@ -8,6 +8,7 @@ const TRAVELLERS_BASE_ACTIONS = Object.freeze({
 	UPDATE_TRAVELLER: 'travellers/updateTraveller',
 	DELETE_TRAVELLER: 'travellers/deleteTraveller',
 	CHECK_IS_TRAVELLER: 'travellers/checkIsTraveller',
+	LOAD_PUBLIC_TRIPS: 'travellers/loadPublicTrips',
 })
 
 const MESSAGES_BASE_ACTIONS = Object.freeze({

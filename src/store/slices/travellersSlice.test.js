@@ -33,6 +33,8 @@ import travellersReducer, {
 	checkIsTraveller,
 	setIsTraveller,
 	setTravellers,
+	loadPublicTrips,
+	selectPublicTrips,
 	selectTravellers,
 	selectHasTravellers,
 	selectIsTraveller,
@@ -139,6 +141,11 @@ beforeEach(() => {
 
 setupMocks()
 
+// Register writes the trip and its public summary in one root update
+const savedUpdate = (call = -1) => JSON.parse(fetch.mock.calls.at(call)[1].body)
+const savedRecord = (call = -1) =>
+	savedUpdate(call)[`travellers/${MOCK_USER.USER_ID}`]
+
 describe('travellersSlice', () => {
 	describe('initial state', () => {
 		describe('success scenarios', () => {
@@ -150,6 +157,7 @@ describe('travellersSlice', () => {
 					isTravellerCheckedFor: null,
 					hasTravellers: false,
 					travellers: [],
+					publicTrips: [],
 					selectedTraveller: null,
 					lastFetch: null,
 					status: 'idle',
@@ -268,6 +276,10 @@ describe('travellersSlice', () => {
 				expect(result.payload).toEqual([
 					MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE,
 				])
+				// The full records need sign-in
+				expect(fetch.mock.calls[0][0]).toContain(
+					`/travellers.json?auth=${MOCK_USER.TOKEN}`,
+				)
 			})
 
 			it('should unshift logged-in traveller and dispatch setTravellerName', async () => {
@@ -421,13 +433,27 @@ describe('travellersSlice', () => {
 					files: ['https://mock-url.com/image.jpg'],
 				})
 				// Trip length is worked out from the dates, so the old field is no longer written
-				const savedBody = JSON.parse(fetch.mock.calls.at(-1)[1].body)
+				const savedBody = savedRecord()
 				expect(savedBody.fileAlts).toEqual(['Lake Burley Griffin'])
 				expect(savedBody).toMatchObject({
 					tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
 					tripEnd: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
 				})
 				expect(savedBody).not.toHaveProperty('daysInCity')
+				// The public summary goes in the same update, without the description
+				const summary =
+					savedUpdate()[`publicTrips/${MOCK_USER.USER_ID}`]
+				expect(summary).toMatchObject({
+					firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+					cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
+					tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
+					cover: {
+						url: 'https://mock-url.com/image.jpg',
+						alt: 'Lake Burley Griffin',
+					},
+				})
+				expect(summary).not.toHaveProperty('tripDescription')
+				expect(summary).not.toHaveProperty('lastName')
 
 				// Verify state updates
 				const state = store.getState().travellers
@@ -459,7 +485,7 @@ describe('travellersSlice', () => {
 					registerTraveller(mockRegistrationData),
 				)
 
-				const body = JSON.parse(fetch.mock.calls[0][1].body)
+				const body = savedRecord(0)
 				expect(body.files).toHaveLength(1)
 				expect(body.fileDimensions).toEqual([
 					{ width: 1600, height: 900 },
@@ -525,7 +551,7 @@ describe('travellersSlice', () => {
 						}),
 					)
 				})
-				const body = JSON.parse(fetch.mock.calls[0][1].body)
+				const body = savedRecord(0)
 				expect(body.fileThumbnails).toHaveLength(body.files.length)
 				expect(body.fileThumbnails[0]).toEqual(
 					GLOBAL.IMAGE_THUMBNAIL_WIDTHS.map((width) => ({
@@ -1001,7 +1027,13 @@ describe('travellersSlice', () => {
 				},
 			})
 
-		const savedBody = () => JSON.parse(fetch.mock.calls.at(-1)[1].body)
+		// The edit is one root update of each field plus the public summary
+		const savedBody = () =>
+			Object.fromEntries(
+				Object.entries(savedUpdate())
+					.filter(([path]) => path.startsWith('travellers/'))
+					.map(([path, value]) => [path.split('/').at(-1), value]),
+			)
 
 		describe('success scenarios', () => {
 			it('should patch the edited fields and the kept photos, dropping the old length', async () => {
@@ -1012,9 +1044,7 @@ describe('travellersSlice', () => {
 
 				expect(result.meta.requestStatus).toBe('fulfilled')
 				expect(fetch).toHaveBeenCalledWith(
-					expect.stringContaining(
-						`/travellers/${MOCK_USER.USER_ID}.json?auth=${MOCK_USER.TOKEN}`,
-					),
+					expect.stringContaining(`/.json?auth=${MOCK_USER.TOKEN}`),
 					expect.objectContaining({ method: 'PATCH' }),
 				)
 				expect(savedBody()).toEqual({
@@ -1032,6 +1062,22 @@ describe('travellersSlice', () => {
 				})
 				// registered is not part of an edit, so the stored date stays as it was
 				expect(savedBody()).not.toHaveProperty('registered')
+				expect(
+					savedUpdate()[`publicTrips/${MOCK_USER.USER_ID}`],
+				).toEqual({
+					firstName: 'Amara',
+					lastInitial: 'O',
+					cities: ['tokyo'],
+					tripStart: '2025-03-12',
+					tripEnd: '2025-03-19',
+					daysInCity: null,
+					cover: {
+						url: kept.url,
+						dimensions: kept.dimensions,
+						thumbnails: kept.thumbnails,
+						alt: null,
+					},
+				})
 			})
 
 			it('should delete each removed photo and its thumbnails only after the record is saved', async () => {
@@ -1171,6 +1217,9 @@ describe('travellersSlice', () => {
 				const result = await store.dispatch(loadTraveller(mockId))
 
 				expect(result.meta.requestStatus).toBe('fulfilled')
+				expect(fetch.mock.calls[0][0]).toContain(
+					`/travellers/${mockId}.json?auth=${MOCK_USER.TOKEN}`,
+				)
 				expect(result.payload).toEqual({
 					...mockTravellerData,
 					id: mockId,
@@ -1408,7 +1457,8 @@ describe('travellersSlice', () => {
 			messagesOk = true,
 		} = {}) =>
 			fetch.mockImplementation(async (url, options) => {
-				if (url.includes('/travellers/')) {
+				// The record and its public summary go in one root update
+				if (url.includes('/.json')) {
 					return { ok: travellerOk }
 				}
 				if (url.includes('/messages/')) {
@@ -1436,11 +1486,13 @@ describe('travellersSlice', () => {
 
 				expect(result.meta.requestStatus).toBe('fulfilled')
 				expect(fetch).toHaveBeenCalledWith(
-					expect.stringContaining(
-						`/travellers/${travellerId}.json?auth=${MOCK_USER.TOKEN}`,
-					),
-					expect.objectContaining({ method: 'DELETE' }),
+					expect.stringContaining(`/.json?auth=${MOCK_USER.TOKEN}`),
+					expect.objectContaining({ method: 'PATCH' }),
 				)
+				expect(savedUpdate(0)).toEqual({
+					[`travellers/${travellerId}`]: null,
+					[`publicTrips/${travellerId}`]: null,
+				})
 				expect(getFirebaseStorage).toHaveBeenCalled()
 				files.forEach((file) =>
 					expect(ref).toHaveBeenCalledWith(undefined, file),
@@ -1655,7 +1707,7 @@ describe('travellersSlice', () => {
 
 				expect(global.fetch).toHaveBeenCalledWith(
 					expect.stringContaining(
-						`/travellers/${MOCK_USER.USER_ID}.json?shallow=true`,
+						`/travellers/${MOCK_USER.USER_ID}.json?auth=${MOCK_USER.TOKEN}&shallow=true`,
 					),
 					expect.any(Object),
 				)
@@ -1787,6 +1839,67 @@ describe('travellersSlice', () => {
 				})
 			},
 		)
+
+		it('should drop the signed-in list, which is persisted, on logout', () => {
+			store.dispatch(
+				setTravellers([MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE]),
+			)
+
+			store.dispatch(logout.fulfilled(undefined, 'req'))
+
+			expect(store.getState().travellers).toMatchObject({
+				travellers: [],
+				hasTravellers: false,
+				lastFetch: null,
+			})
+		})
+	})
+
+	describe('loadPublicTrips', () => {
+		it('should read the public summaries without a token, newest trip first', async () => {
+			fetch.mockResolvedValueOnce({
+				ok: true,
+				json: async () => ({
+					older: { firstName: 'Kofi', tripStart: '2024-04-02' },
+					undated: { firstName: 'Noor', daysInCity: 5 },
+					newer: { firstName: 'Amara', tripStart: '2025-03-12' },
+				}),
+			})
+
+			const result = await store.dispatch(loadPublicTrips())
+
+			const [url, options] = fetch.mock.calls[0]
+			expect(url).toContain('/publicTrips.json')
+			expect(url).not.toContain('auth=')
+			expect(options.method).toBe('GET')
+			expect(result.payload.map(({ id }) => id)).toEqual([
+				'newer',
+				'older',
+				'undated',
+			])
+			expect(selectPublicTrips(store.getState())).toEqual(result.payload)
+		})
+
+		it('should return an empty list when nobody has a trip yet', async () => {
+			fetch.mockResolvedValueOnce({ ok: true, json: async () => null })
+
+			const result = await store.dispatch(loadPublicTrips())
+
+			expect(result.payload).toEqual([])
+		})
+
+		it('should reject with the handled error and keep the last list', async () => {
+			fetch.mockResolvedValueOnce({ ok: false })
+			handleApiError.mockReturnValueOnce(
+				'Travellers could not be loaded.',
+			)
+
+			const result = await store.dispatch(loadPublicTrips())
+
+			expect(result.meta.requestStatus).toBe('rejected')
+			expect(result.payload).toBe('Travellers could not be loaded.')
+			expect(selectPublicTrips(store.getState())).toEqual([])
+		})
 	})
 
 	describe('reducer actions', () => {

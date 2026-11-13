@@ -241,7 +241,8 @@ describe('messagesSlice', () => {
 				])
 			})
 
-			it('should send the inbox GET with the token and the sender lookup without', async () => {
+			// Traveller records need sign-in, so the sender lookup carries the token too
+			it('should send the inbox GET and the sender lookup with the token', async () => {
 				mockInbox(FIREBASE_INBOX, {
 					[SAMPLE_MESSAGE_ONE.senderId]: SENDER_CARD,
 				})
@@ -256,9 +257,8 @@ describe('messagesSlice', () => {
 				const lookups = travellerLookups()
 				expect(lookups).toHaveLength(1)
 				expect(lookups[0][0]).toContain(
-					`/travellers/${SAMPLE_MESSAGE_ONE.senderId}.json`,
+					`/travellers/${SAMPLE_MESSAGE_ONE.senderId}.json?auth=${MOCK_USER.TOKEN}`,
 				)
-				expect(lookups[0][0]).not.toContain('auth=')
 			})
 
 			it('should look up each sender once however many messages they sent', async () => {
