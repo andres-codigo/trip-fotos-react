@@ -201,8 +201,9 @@ const forcePseudo = (selector, states, { scroll = true } = {}) => {
 		)
 }
 
+// As the emulator's owner, so setup reads and writes pass the rules that keep traveller records behind sign-in
 const emulatorDatabase = (path) =>
-	`${Cypress.expose('VITE_DATABASE_URL')}/${path}.json?ns=${Cypress.expose('VITE_DATABASE_NAMESPACE')}`
+	`${Cypress.expose('VITE_DATABASE_URL')}/${path}.json?ns=${Cypress.expose('VITE_DATABASE_NAMESPACE')}&access_token=owner`
 
 const ownTripPath = `${PATHS.TRAVELLERS}/${TEST_USERS.TRAVELLER.ID}`
 const editTripPath = `${ownTripPath}/edit`
@@ -445,6 +446,140 @@ describe(`UI check capture (${LABEL})`, () => {
 					timeout: TIMEOUT,
 				}).should('be.visible')
 				shot(`password-reset-sent-${width}`)
+			})
+		})
+	})
+
+	context('logged out', () => {
+		capture('public-travellers', () => {
+			// Literal selectors keep the script loadable on main, which lacks the new ones
+			const card = '[data-cy="public-traveller-item"]'
+			const viewTrip = '[data-cy="public-traveller-item-view-trip"]'
+			const band = '[data-cy="travellers-welcome"]'
+			const filter = (name) => `[data-cy="traveller-filter-${name}"]`
+			const publicTrips = '**/publicTrips.json*'
+			const seeded = () =>
+				cy
+					.request(emulatorDatabase('publicTrips'))
+					.then(({ body }) => Object.values(body))
+
+			const atRest = (name, width) => {
+				visit(PATHS.TRAVELLERS)
+				cy.get(card, { timeout: TIMEOUT }).should('exist')
+				cy.get(band).should('be.visible')
+				assertSettled()
+				freezeAnimation()
+				shot(`${name}-${width}`)
+			}
+
+			eachWidth((width) => {
+				cy.clearAllLocalStorage()
+				atRest('public-travellers', width)
+
+				// Hover and keyboard focus on the first card's only action
+				forcePseudo(viewTrip, ['hover'])
+				shot(`public-view-trip-hover-${width}`)
+				forcePseudo(viewTrip, ['focus', 'focus-visible'])
+				shot(`public-view-trip-focus-${width}`)
+				forcePseudo(viewTrip, [])
+
+				// Narrowed by city: the sheet at 768px and below, inline above
+				cy.get('body').then(($body) => {
+					if ($body.find(`${filter('trigger')}:visible`).length) {
+						cy.get(filter('trigger')).click()
+						cy.get(filter('sheet'))
+							.contains(filter('option'), /prague/i)
+							.click()
+						cy.get(filter('show-matches')).click()
+						cy.get(filter('sheet')).should('not.exist')
+					} else {
+						cy.contains(filter('option'), /prague/i).click()
+					}
+				})
+				cy.get(card).should('have.length', 1)
+				shot(`public-travellers-narrowed-${width}`)
+
+				// Held open, so the skeletons stay on screen beside the band
+				interceptOnce('GET', publicTrips, (request) =>
+					request.on('response', (response) =>
+						response.setDelay(60000),
+					),
+				)
+				cy.clearAllLocalStorage()
+				visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST).should(
+					'be.visible',
+				)
+				cy.get(band).should('be.visible')
+				freezeAnimation()
+				shot(`public-travellers-loading-${width}`)
+
+				interceptOnce('GET', publicTrips, { statusCode: 500, body: {} })
+				cy.clearAllLocalStorage()
+				visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should(
+					'be.visible',
+				)
+				freezeAnimation()
+				shot(`public-travellers-error-${width}`)
+
+				interceptOnce('GET', publicTrips, { body: null })
+				cy.clearAllLocalStorage()
+				visit(PATHS.TRAVELLERS)
+				cy.get('[data-cy="no-public-trips"]').should('be.visible')
+				freezeAnimation()
+				shot(`public-travellers-empty-${width}`)
+
+				// The seeded summaries with the first cover pointed at an unreachable photo, then cloned to 30 for paging
+				seeded().then((trips) => {
+					const [first, ...rest] = trips
+					const broken = {
+						...first,
+						firstName: 'Broken',
+						cover: { url: BROKEN_IMAGE_URL, alt: 'Unreachable' },
+					}
+					interceptOnce('GET', publicTrips, {
+						body: { 'ui-check-broken': broken },
+					})
+					cy.clearAllLocalStorage()
+					visit(PATHS.TRAVELLERS)
+					cy.get(card).should('have.length', 1)
+					cy.contains('Image unavailable', {
+						timeout: TIMEOUT,
+					}).should('be.visible')
+					freezeAnimation()
+					shot(`public-travellers-broken-cover-${width}`)
+
+					const many = Object.fromEntries(
+						Array.from({ length: 30 }, (_, index) => [
+							`ui-check-public-${String(index).padStart(2, '0')}`,
+							{
+								...[first, ...rest][index % trips.length],
+								firstName: `Paged${index + 1}`,
+							},
+						]),
+					)
+					interceptOnce('GET', publicTrips, { body: many })
+					cy.clearAllLocalStorage()
+					visit(PATHS.TRAVELLERS)
+					cy.get(card).should('have.length', 12)
+					cy.get(TRAVELLERS_LIST_SELECTORS.SHOW_MORE).should(
+						'be.visible',
+					)
+					assertSettled()
+					freezeAnimation()
+					shot(`public-travellers-many-${width}`)
+				})
+
+				// View trip lands on Log in, which names the trip
+				cy.clearAllLocalStorage()
+				visit(PATHS.TRAVELLERS)
+				cy.get(viewTrip, { timeout: TIMEOUT }).first().click()
+				cy.get('[data-cy="user-authentication-form-notice"]').should(
+					'be.visible',
+				)
+				freezeAnimation()
+				shot(`public-login-from-trip-${width}`)
 			})
 		})
 	})
@@ -1657,8 +1792,9 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 
 			cy.viewport(390, HEIGHT)
-			const recordDelete = `**/travellers/${TEST_USERS.TRAVELLER.ID}.json*`
-			interceptOnce('DELETE', recordDelete, {
+			// The record and its public summary go in one root update
+			const recordDelete = '**/.json*'
+			interceptOnce('PATCH', recordDelete, {
 				statusCode: 500,
 				body: {},
 			}).as('failedDelete')
@@ -1670,7 +1806,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			freezeAnimation()
 			shot('edit-trip-delete-failed')
 
-			interceptOnce('DELETE', recordDelete, (req) =>
+			interceptOnce('PATCH', recordDelete, (req) =>
 				req.on('response', (res) => res.setDelay(4000)),
 			)
 			visit(editTripPath)

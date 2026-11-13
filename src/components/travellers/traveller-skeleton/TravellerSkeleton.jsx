@@ -1,9 +1,12 @@
+import PropTypes from 'prop-types'
+
 import { cn } from '@/utils/cn'
 import { TRAVELLER_SKELETON } from '@/constants/test'
 
 const BLOCK = 'block animate-skeleton rounded-lg bg-skeleton'
 
-const TravellerSkeleton = () => (
+// The public card has no description and one cover tile, so its stand-in matches that shape
+const TravellerSkeleton = ({ isPublic = false }) => (
 	<li
 		aria-hidden="true"
 		className="my-4 list-none rounded-lg border border-border-strong p-4"
@@ -16,16 +19,18 @@ const TravellerSkeleton = () => (
 					<span className={cn(BLOCK, 'h-3 w-[35%]')} />
 				</div>
 			</div>
-			<div className="flex flex-col gap-2">
-				<span className={cn(BLOCK, 'h-3 w-full')} />
-				<span className={cn(BLOCK, 'h-3 w-4/5')} />
-			</div>
+			{!isPublic && (
+				<div className="flex flex-col gap-2">
+					<span className={cn(BLOCK, 'h-3 w-full')} />
+					<span className={cn(BLOCK, 'h-3 w-4/5')} />
+				</div>
+			)}
 			<div className="flex gap-2">
 				<span className={cn(BLOCK, 'h-6 w-24 rounded-full')} />
 				<span className={cn(BLOCK, 'h-6 w-24 rounded-full')} />
 			</div>
 			<div className="flex gap-2">
-				{[0, 1, 2].map((tile) => (
+				{(isPublic ? [0] : [0, 1, 2]).map((tile) => (
 					<span
 						key={tile}
 						className={cn(
@@ -38,5 +43,9 @@ const TravellerSkeleton = () => (
 		</div>
 	</li>
 )
+
+TravellerSkeleton.propTypes = {
+	isPublic: PropTypes.bool,
+}
 
 export default TravellerSkeleton

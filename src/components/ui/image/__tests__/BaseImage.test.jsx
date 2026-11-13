@@ -99,4 +99,23 @@ describe('<BaseImage />', () => {
 		).toHaveTextContent(GLOBAL.IMAGE_UNAVAILABLE)
 		expect(screen.queryByRole('button')).not.toBeInTheDocument()
 	})
+
+	it('renders a plain image, not a button, when there is nothing to open', () => {
+		render(
+			<ul>
+				<BaseImage
+					title="Ada"
+					url={url}
+					thumbnails={thumbnails}
+				/>
+			</ul>,
+		)
+		const img = screen.getByAltText("Ada's photo")
+		expect(img).toHaveAttribute(
+			'srcset',
+			'https://example.com/ada-320w.jpg 320w, https://example.com/ada-640w.jpg 640w',
+		)
+		expect(img.closest('button')).toBeNull()
+		expect(screen.queryByRole('button')).not.toBeInTheDocument()
+	})
 })

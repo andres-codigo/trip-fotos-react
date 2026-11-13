@@ -12,9 +12,10 @@ import {
 import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
 
 import {
+	loadPublicTrips,
 	loadTravellers,
+	selectPublicTrips,
 	selectTravellers,
-	selectHasTravellers,
 	selectIsTraveller,
 	selectIsTravellerKnown,
 	selectLastFetch,
@@ -23,8 +24,10 @@ import {
 import BaseButton from '@/components/ui/button/BaseButton'
 
 import TravellerFilter from '@/components/travellers/traveller-filter/TravellerFilter'
+import PublicTravellerItem from '@/components/travellers/public-traveller-item/PublicTravellerItem'
 import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
 import TravellerSkeleton from '@/components/travellers/traveller-skeleton/TravellerSkeleton'
+import TravellersWelcome from '@/components/travellers/travellers-welcome/TravellersWelcome'
 
 import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
 import usePaging from '@/components/travellers/travellers-list/hooks/usePaging'
@@ -51,27 +54,31 @@ const RefreshIcon = () => (
 )
 
 const TravellersList = ({ initialError = false, isLoading = false }) => {
-	const travellers = useSelector(selectTravellers)
+	const isLoggedIn = useSelector(selectIsAuthenticated)
+	// Logged-out visitors see the public summaries; the full records need sign-in
+	const travellers = useSelector(
+		isLoggedIn ? selectTravellers : selectPublicTrips,
+	)
 	const lastFetch = useSelector(selectLastFetch)
 	const [error, setError] = useState(initialError)
 	const [shouldLoadOnMount] = useState(
 		() =>
 			!travellers ||
 			(Array.isArray(travellers) && travellers.length === 0) ||
-			!lastFetch,
+			(isLoggedIn && !lastFetch),
 	)
 	// Start in the loading state when a mount load is due, so the first paint never shows an enabled Register link that the load then disables
 	const [loading, setLoading] = useState(isLoading || shouldLoadOnMount)
 	const [refreshCount, setRefreshCount] = useState(0)
 	const hasInitialisedRef = useRef(false)
+	const wasLoggedInRef = useRef(isLoggedIn)
 	const listRef = useRef(null)
 
 	const dispatch = useDispatch()
-	const isLoggedIn = useSelector(selectIsAuthenticated)
 
 	const isTraveller = useSelector(selectIsTraveller)
 	const isTravellerKnown = useSelector(selectIsTravellerKnown)
-	const hasTravellers = useSelector(selectHasTravellers)
+	const hasTravellers = travellers?.length > 0
 	const {
 		options,
 		selectedIds,
@@ -101,11 +108,10 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					setError(null)
 				}
 
-				const result = await dispatch(
-					loadTravellers({ forceRefresh: refresh }),
-				)
+				const load = isLoggedIn ? loadTravellers : loadPublicTrips
+				const result = await dispatch(load({ forceRefresh: refresh }))
 
-				if (loadTravellers.rejected.match(result)) {
+				if (load.rejected.match(result)) {
 					setError(handleApiError(result.payload))
 				}
 				if (!silent) {
@@ -118,7 +124,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				}
 			}
 		},
-		[dispatch],
+		[dispatch, isLoggedIn],
 	)
 
 	// lastFetch is cleared on rehydrate, so a list not yet fetched this page load is loaded behind the spinner; a fetched one is revalidated quietly
@@ -130,6 +136,14 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 		// Intentionally only run on mount
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
+
+	// Logging out on this page swaps to the public list, which has to be fetched
+	useEffect(() => {
+		if (wasLoggedInRef.current === isLoggedIn) return
+		wasLoggedInRef.current = isLoggedIn
+		setRefreshCount((count) => count + 1)
+		loadTravellersHandler(true)
+	}, [isLoggedIn, loadTravellersHandler])
 
 	// Keyboard and screen-reader users land on the first card that Show more added, not back at the button
 	useEffect(() => {
@@ -146,24 +160,29 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 	}
 
 	const isPaged = total > TRAVELLERS_LIST_CONFIG.PAGE_SIZE
+	const isPublicEmpty = !isLoggedIn && !loading && !error && !hasTravellers
+	const Item = isLoggedIn ? TravellerItem : PublicTravellerItem
 
 	return (
 		<>
+			{!isLoggedIn && <TravellersWelcome />}
 			{/* Refresh and Register wrap together below the heading when the row is too narrow, so neither overflows the card */}
 			<div
 				className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1"
 				data-cy="controls">
 				<h1 className="my-0 grow">Travellers</h1>
 				<div className="ml-auto flex items-center gap-2">
-					<BaseButton
-						modeType="flat"
-						ariaLabel="Refresh travellers"
-						className="size-11 p-0 disabled:cursor-default disabled:opacity-50"
-						disabled={loading}
-						data-cy="refresh-button"
-						onClick={refreshTravellers}>
-						<RefreshIcon />
-					</BaseButton>
+					{!isPublicEmpty && (
+						<BaseButton
+							modeType="flat"
+							ariaLabel="Refresh travellers"
+							className="size-11 p-0 disabled:cursor-default disabled:opacity-50"
+							disabled={loading}
+							data-cy="refresh-button"
+							onClick={refreshTravellers}>
+							<RefreshIcon />
+						</BaseButton>
+					)}
 					{isLoggedIn && isTravellerKnown && !isTraveller && (
 						<BaseButton
 							isLink
@@ -207,7 +226,10 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 						className="m-0 list-none p-0"
 						data-cy="travellers-skeleton-list">
 						{SKELETON_KEYS.map((key) => (
-							<TravellerSkeleton key={key} />
+							<TravellerSkeleton
+								key={key}
+								isPublic={!isLoggedIn}
+							/>
 						))}
 					</ul>
 				</>
@@ -228,7 +250,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 						className="m-0 list-none p-0"
 						data-cy="travellers-list">
 						{visibleItems.map((traveller) => (
-							<TravellerItem
+							<Item
 								key={traveller.id}
 								{...traveller}
 							/>
@@ -287,7 +309,19 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					</BaseButton>
 				</div>
 			)}
-			{!loading && !error && !hasTravellers && (
+			{isPublicEmpty && (
+				<div
+					className="my-4 flex flex-col items-start gap-1 rounded-lg border border-border-card bg-surface p-5 shadow-card"
+					data-cy="no-public-trips">
+					<h2 className="m-0 text-lg font-bold">
+						{TRAVELLERS_LIST_CONFIG.NO_PUBLIC_TRIPS_TITLE}
+					</h2>
+					<p className="m-0 text-text-muted">
+						{TRAVELLERS_LIST_CONFIG.NO_PUBLIC_TRIPS_TEXT}
+					</p>
+				</div>
+			)}
+			{isLoggedIn && !loading && !error && !hasTravellers && (
 				<div
 					className="my-20 flex min-h-15 items-center justify-center"
 					data-cy="no-travellers-list">

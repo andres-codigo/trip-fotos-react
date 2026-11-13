@@ -32,6 +32,14 @@ vi.mock('@/store/slices/authenticationSlice', () => {
 	return { login: vi.fn(() => Promise.resolve({})), sendPasswordReset }
 })
 
+// The real slice pulls in auth selectors this file mocks away
+vi.mock('@/store/slices/travellersSlice', () => {
+	const none = []
+	return {
+		selectPublicTrips: (state) => state.travellers?.publicTrips ?? none,
+	}
+})
+
 vi.mock('@/utils/validation', () => ({
 	validateEmail: vi.fn((v) => ({
 		isValid: !!v,
@@ -53,8 +61,9 @@ vi.mock('react-router-dom', async () => {
 })
 
 const mockDispatch = vi.fn(() => Promise.resolve({}))
+let mockState = {}
 const mockStore = {
-	getState: () => ({}),
+	getState: () => mockState,
 	subscribe: () => () => {},
 	dispatch: mockDispatch,
 }
@@ -109,6 +118,8 @@ const expectNoErrorDialog = async () => {
 
 describe('<Authentication />', () => {
 	beforeEach(() => {
+		mockState = {}
+		window.history.pushState({}, '', PATHS.AUTHENTICATION)
 		mockDispatch.mockClear()
 		mockNavigate.mockClear()
 	})
@@ -606,6 +617,61 @@ describe('<Authentication />', () => {
 
 				await expectErrorDialog(ERROR_MESSAGES.LOGIN_FAILED)
 			})
+		})
+	})
+
+	describe('arriving from the public list', () => {
+		const notice = () =>
+			screen.queryByTestId('user-authentication-form-notice')
+		const visit = (search) =>
+			window.history.pushState({}, '', `${PATHS.AUTHENTICATION}${search}`)
+
+		it('names the trip the visitor wanted when it is in the public list', () => {
+			mockState = {
+				travellers: {
+					publicTrips: [{ id: 'amara', firstName: 'Amara' }],
+				},
+			}
+			visit(`?redirect=${encodeURIComponent('/travellers/amara')}`)
+
+			renderWithProviders(<Authentication />)
+
+			expect(notice()).toHaveTextContent(
+				"Log in or create an account to see Amara's trip.",
+			)
+		})
+
+		it('says "this trip" for a trip link opened directly', () => {
+			visit(`?redirect=${encodeURIComponent('/travellers/kofi')}`)
+
+			renderWithProviders(<Authentication />)
+
+			expect(notice()).toHaveTextContent(
+				'Log in or create an account to see this trip.',
+			)
+		})
+
+		it('shows no notice for any other redirect or none', () => {
+			visit(`?redirect=${encodeURIComponent(PATHS.MESSAGES)}`)
+			const { unmount } = renderWithProviders(<Authentication />)
+			expect(notice()).not.toBeInTheDocument()
+			unmount()
+
+			visit('')
+			renderWithProviders(<Authentication />)
+			expect(notice()).not.toBeInTheDocument()
+		})
+
+		it('opens in sign-up mode from Create an account', () => {
+			visit(
+				`?${AUTH_FORM_CONFIG.MODE_PARAM}=${API_DATABASE.AUTH_SIGNUP_MODE}`,
+			)
+
+			renderWithProviders(<Authentication />)
+
+			expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+				AUTH_FORM_CONFIG.SIGNUP_TITLE,
+			)
 		})
 	})
 })

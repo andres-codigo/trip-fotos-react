@@ -14,13 +14,13 @@ describe('<Header />', () => {
 					cy.mountWithProviders(<Header />, store)
 
 					cy.setViewportToMobile()
-					headerAssertions(PATHS.AUTHENTICATION, false, false, false)
+					headerAssertions(PATHS.TRAVELLERS, false, false, false)
 
 					cy.setViewportToTablet()
-					headerAssertions(PATHS.AUTHENTICATION, false, false, false)
+					headerAssertions(PATHS.TRAVELLERS, false, false, false)
 
 					cy.setViewportToDesktop()
-					headerAssertions(PATHS.AUTHENTICATION, false, false, false)
+					headerAssertions(PATHS.TRAVELLERS, false, false, false)
 				})
 			})
 		})
@@ -45,11 +45,12 @@ describe('<Header />', () => {
 
 	describe('Behaviour tests', () => {
 		describe('Not logged in', () => {
-			it('renders the site title link with the "/authentication" href and label', () => {
+			// Travellers is public, so the brand leads there signed in or not
+			it('renders the site title link with the "/travellers" href and label', () => {
 				cy.createMockStore(null).then((store) => {
 					cy.mountWithProviders(<Header />, store)
 					cy.get(`${HEADER_SELECTORS.SITE_HEADER_TITLE_LINK} a`)
-						.should('have.attr', 'href', PATHS.AUTHENTICATION)
+						.should('have.attr', 'href', PATHS.TRAVELLERS)
 						.and('have.attr', 'aria-label', 'Trip Fotos Home')
 						.and('contain.text', 'Trip Fotos')
 				})

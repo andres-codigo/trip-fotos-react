@@ -869,7 +869,10 @@ export const selectTravellers = createSelector(
 	(travellersState) => travellersState.travellers,
 )
 
-export const selectPublicTrips = (state) => state.travellers.publicTrips ?? []
+// One empty list, so a store persisted before publicTrips existed does not re-render every reader
+const NO_PUBLIC_TRIPS = []
+export const selectPublicTrips = (state) =>
+	state.travellers.publicTrips ?? NO_PUBLIC_TRIPS
 
 export const selectLastFetch = createSelector(
 	[selectTravellersState],

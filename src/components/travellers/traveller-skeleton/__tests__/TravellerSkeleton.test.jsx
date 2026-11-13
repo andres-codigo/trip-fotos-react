@@ -26,4 +26,15 @@ describe('TravellerSkeleton', () => {
 		)
 		expect(container.querySelectorAll('.animate-skeleton')).toHaveLength(10)
 	})
+
+	// A public card has no description and shows only its cover
+	it('takes the public card shape: no description lines and one photo tile', () => {
+		const { container } = render(
+			<ul>
+				<TravellerSkeleton isPublic />
+			</ul>,
+		)
+		expect(container.querySelectorAll('.animate-skeleton')).toHaveLength(6)
+		expect(container.querySelectorAll('.aspect-square')).toHaveLength(1)
+	})
 })

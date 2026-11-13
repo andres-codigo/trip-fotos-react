@@ -24,9 +24,10 @@ describe('Not logged in > Navigation', () => {
 		cy.get(TAB_BAR_SELECTORS.ROOT).should('not.exist')
 	})
 
-	it('links the brand to the log in page', () => {
+	// Travellers is public, so the brand leads there signed in or not
+	it('links the brand to the public Travellers list', () => {
 		cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK).click()
-		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
+		cy.url().should('eq', BASE_URL_CYPRESS + PATHS.TRAVELLERS)
 	})
 })
 

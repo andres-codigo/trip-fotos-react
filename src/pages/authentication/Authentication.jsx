@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { matchPath, useNavigate, useLocation } from 'react-router-dom'
 
 import { API_DATABASE } from '@/constants/api'
 import { AUTH_FORM_CONFIG, PASSWORD_RESET_CONFIG } from '@/constants/auth'
@@ -8,6 +8,7 @@ import { ERROR_MESSAGES } from '@/constants/errors'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import { login, sendPasswordReset } from '@/store/slices/authenticationSlice'
+import { selectPublicTrips } from '@/store/slices/travellersSlice'
 
 import useFormField from '@/components/forms/user-authentication/hooks/useFormField'
 
@@ -28,13 +29,32 @@ const Authentication = () => {
 	const [email, setEmail] = useFormField('')
 	const [password, setPassword] = useFormField('')
 
-	const [mode, setMode] = useState(API_DATABASE.AUTH_LOGIN_MODE)
-	const [isLoading, setIsLoading] = useState(false)
-	const [error, setError] = useState(false)
-
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
 	const location = useLocation()
+	const searchParams = new URLSearchParams(location.search)
+
+	// The welcome band's Create an account opens the form in sign-up mode
+	const [mode, setMode] = useState(() =>
+		searchParams.get(AUTH_FORM_CONFIG.MODE_PARAM) ===
+		API_DATABASE.AUTH_SIGNUP_MODE
+			? API_DATABASE.AUTH_SIGNUP_MODE
+			: API_DATABASE.AUTH_LOGIN_MODE,
+	)
+	const [isLoading, setIsLoading] = useState(false)
+	const [error, setError] = useState(false)
+
+	// A visitor sent here from a trip is told why; the name is known when they came from the public list
+	const tripId = matchPath(
+		PATHS.TRAVELLER_DETAIL,
+		searchParams.get('redirect') ?? '',
+	)?.params.id
+	const publicTrips = useSelector(selectPublicTrips)
+	const tripNotice = tripId
+		? AUTH_FORM_CONFIG.TRIP_NOTICE(
+				publicTrips.find(({ id }) => id === tripId)?.firstName,
+			)
+		: undefined
 
 	const titleRef = useRef(null)
 	const hasSwitchedView = useRef(false)
@@ -228,6 +248,7 @@ const Authentication = () => {
 							onSwitchMode={switchAuthMode}
 							onForgotPassword={openReset}
 							isLoading={isLoading}
+							notice={tripNotice}
 						/>
 					)}
 				</BaseCard>

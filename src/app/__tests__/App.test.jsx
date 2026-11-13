@@ -231,21 +231,36 @@ describe('App', () => {
 			setAuthState(null, false)
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.HOME,
+				pathname: PATHS.REGISTER,
 			})
 			vi.spyOn(router, 'useInRouterContext').mockReturnValue(true)
 
-			renderWithRoute(PATHS.HOME)
+			renderWithRoute(PATHS.REGISTER)
 
 			await waitFor(() => {
 				expect(navigateMock).toHaveBeenCalledWith(
-					PATHS.AUTHENTICATION,
-					{
-						replace: true,
-					},
+					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent(PATHS.REGISTER)}`,
+					{ replace: true },
 				)
 			})
 		})
+
+		it.each([PATHS.HOME, PATHS.TRAVELLERS])(
+			'lets a logged-out visitor stay on %s',
+			async (pathname) => {
+				setAuthState(null, false)
+				vi.spyOn(router, 'useLocation').mockReturnValue({ pathname })
+
+				renderWithRoute(pathname)
+
+				await waitFor(() => {
+					expect(navigateMock).not.toHaveBeenCalledWith(
+						expect.stringContaining(PATHS.AUTHENTICATION),
+						expect.anything(),
+					)
+				})
+			},
+		)
 
 		it('redirects to /authentication if not logged in and on a traveller detail route', async () => {
 			setAuthState(null, false)
@@ -258,10 +273,8 @@ describe('App', () => {
 
 			await waitFor(() => {
 				expect(navigateMock).toHaveBeenCalledWith(
-					PATHS.AUTHENTICATION,
-					{
-						replace: true,
-					},
+					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent('/travellers/abc123')}`,
+					{ replace: true },
 				)
 			})
 		})
@@ -294,10 +307,8 @@ describe('App', () => {
 
 			await waitFor(() => {
 				expect(navigateMock).toHaveBeenCalledWith(
-					PATHS.AUTHENTICATION,
-					{
-						replace: true,
-					},
+					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent('/travellers/abc123/contact')}`,
+					{ replace: true },
 				)
 			})
 		})
@@ -330,10 +341,8 @@ describe('App', () => {
 
 			await waitFor(() => {
 				expect(navigateMock).toHaveBeenCalledWith(
-					PATHS.AUTHENTICATION,
-					{
-						replace: true,
-					},
+					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent('/travellers/abc123/edit')}`,
+					{ replace: true },
 				)
 			})
 		})
@@ -401,7 +410,7 @@ describe('App', () => {
 
 			await waitFor(() => {
 				expect(navigateMock).toHaveBeenCalledWith(
-					PATHS.AUTHENTICATION,
+					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent(PATHS.MESSAGES)}`,
 					{ replace: true },
 				)
 			})
