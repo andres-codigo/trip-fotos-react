@@ -157,4 +157,92 @@ describe('<TravellerDetail />', () => {
 					})
 			})
 	})
+
+	describe('Layout either side of 1024px', () => {
+		const rects = () =>
+			cy
+				.get(TRAVELLER_DETAIL_SELECTORS.COLUMNS)
+				.then(($columns) =>
+					[...$columns[0].children].map((card) =>
+						card.getBoundingClientRect(),
+					),
+				)
+		// Tiles in the first row of the photo grid
+		const tilesInFirstRow = () =>
+			cy
+				.get(`${TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST} > li`)
+				.then(($tiles) => {
+					const top = $tiles[0].getBoundingClientRect().top
+					return [...$tiles].filter(
+						(tile) =>
+							Math.abs(tile.getBoundingClientRect().top - top) <
+							1,
+					).length
+				})
+
+		it('stacks the profile above the photos in the 640px column at 1023px', () => {
+			cy.viewport(1023, 900)
+			mountPage()
+			rects().then(([profile, photos]) => {
+				expect(profile.width).to.be.closeTo(640, 1)
+				expect(photos.left).to.be.closeTo(profile.left, 1)
+				expect(photos.top).to.be.greaterThan(profile.bottom)
+			})
+			tilesInFirstRow().should('equal', 3)
+		})
+
+		it('puts the profile in a 380px left column beside the photos from 1024px, three across', () => {
+			cy.viewport(1024, 900)
+			mountPage()
+			rects().then(([profile, photos]) => {
+				expect(profile.width).to.be.closeTo(380, 1)
+				expect(photos.left - profile.right).to.be.closeTo(24, 1)
+				expect(photos.top).to.be.closeTo(profile.top, 1)
+			})
+			tilesInFirstRow().should('equal', 3)
+		})
+
+		it('widens to the 1160px grid with four photos across at 1280px', () => {
+			cy.viewport(1280, 900)
+			mountPage()
+			cy.get(TRAVELLER_DETAIL_SELECTORS.LAYOUT)
+				.invoke('outerWidth')
+				.should('be.closeTo', 1160, 1)
+			rects().then(([profile, photos]) => {
+				expect(profile.width).to.be.closeTo(380, 1)
+				expect(photos.right - profile.left).to.be.closeTo(1160, 1)
+			})
+			tilesInFirstRow().should('equal', 4)
+		})
+
+		it('keeps not found in one 640px column at 1280px', () => {
+			cy.viewport(1280, 900)
+			mountPage({ id: 'nope' })
+			cy.get(TRAVELLER_DETAIL_SELECTORS.NOT_FOUND).should('be.visible')
+			cy.get(TRAVELLER_DETAIL_SELECTORS.LAYOUT)
+				.invoke('outerWidth')
+				.should('be.closeTo', 640, 1)
+		})
+
+		it('keeps the spinner where the name will be while loading at 1280px', () => {
+			cy.intercept('GET', '**/travellers/abc.json', {
+				body: traveller,
+				delay: 500,
+			})
+			cy.viewport(1280, 900)
+			mountPage()
+			// The visible icon, not its full-width wrapper, starts where the name will
+			cy.get(
+				`${TRAVELLER_DETAIL_SELECTORS.SPINNER} ${COMMON_SELECTORS.BASE_SPINNER_ICON}`,
+			).then(($icon) => {
+				const left = $icon[0].getBoundingClientRect().left
+				cy.get(TRAVELLER_DETAIL_SELECTORS.NAME).should(($name) => {
+					expect($name[0].getBoundingClientRect().left).to.be.closeTo(
+						left,
+						1,
+					)
+				})
+			})
+		})
+	})
 })

@@ -27,6 +27,10 @@ export const TRIP_DATES_CONFIG = Object.freeze({
 	MAX_DAYS: 366,
 })
 
+export const TRAVELLER_REGISTRATION_TEXT = Object.freeze({
+	TRIP_DETAILS_HEADING: 'Trip details',
+})
+
 export const TRAVELLER_REGISTRATION_SUCCESS_MESSAGE =
 	'You have been successfully registered as a traveller!'
 
@@ -159,6 +163,9 @@ export const CONTACT_TRAVELLER_CONFIG = Object.freeze({
 	REPLY_QUOTE: (name, when) =>
 		when ? `${name} wrote, ${when}:` : `${name} wrote:`,
 	BACK_TO_MESSAGES: 'Messages',
+	WRITING_TO: 'You’re writing to',
+	REPLYING_TO: 'Replying to',
+	VIEW_TRIP: (firstName) => `View ${firstName}’s trip`,
 	SUBMIT_LABEL: 'Send message',
 	SENDING_TITLE: 'Sending',
 	SENDING_MESSAGE: 'Sending your message, one moment please...',

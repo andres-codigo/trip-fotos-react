@@ -8,10 +8,8 @@ import {
 } from '@/store/slices/travellersSlice'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { handleApiError } from '@/utils/errorHandler'
-import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
-
-import BaseCard from '@/components/ui/card/BaseCard'
 
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseProgress from '@/components/ui/progress/BaseProgress'
@@ -96,14 +94,13 @@ const Register = () => {
 					)}
 				</BaseDialog>
 			)}
-			<section>
-				<BaseCard>
-					<TravellerRegistrationForm
-						isLoading={isLoading}
-						onSubmit={handleRegistrationSubmit}
-					/>
-				</BaseCard>
-			</section>
+			{/* A div, as the unlayered section rule would add padding */}
+			<div className={PAGE_LAYOUT.WIDE}>
+				<TravellerRegistrationForm
+					isLoading={isLoading}
+					onSubmit={handleRegistrationSubmit}
+				/>
+			</div>
 		</main>
 	)
 }

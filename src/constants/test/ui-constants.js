@@ -192,6 +192,8 @@ export const TAB_BAR = Object.freeze({
 
 export const TRAVELLER_DETAIL = Object.freeze({
 	ROOT: 'traveller-detail',
+	LAYOUT: 'traveller-detail-layout',
+	COLUMNS: 'traveller-detail-columns',
 	NAME: 'traveller-detail-name',
 	SPINNER: 'traveller-detail-spinner',
 	NOT_FOUND: 'traveller-detail-not-found',
@@ -211,6 +213,7 @@ export const TRAVELLER_DETAIL = Object.freeze({
 
 export const EDIT_TRIP = Object.freeze({
 	ROOT: 'edit-trip',
+	LAYOUT: 'edit-trip-layout',
 	BACK_TO_TRIP: 'edit-trip-back-to-trip',
 	CANCEL: 'edit-trip-cancel',
 	SAVING_DIALOG: 'edit-trip-saving-dialog',
@@ -240,6 +243,10 @@ export const CONTACT_TRAVELLER = Object.freeze({
 	FORM: 'contact-traveller-form',
 	BACK_TO_MESSAGES: 'contact-back-to-messages',
 	REPLY_QUOTE: 'contact-reply-quote',
+	COLUMNS: 'contact-columns',
+	RECIPIENT: 'contact-recipient',
+	RECIPIENT_DETAILS: 'contact-recipient-details',
+	VIEW_TRIP: 'contact-view-trip',
 	MESSAGE_INPUT: 'contact-message-input',
 	MESSAGE_ERROR: 'contact-message-error-message',
 	SUBMIT: 'contact-submit-button',

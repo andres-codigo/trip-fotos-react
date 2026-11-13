@@ -8,7 +8,7 @@ import {
 	TRAVELLER_DETAIL_CONFIG,
 	TRAVELLER_ITEM_CONFIG,
 } from '@/constants/travellers'
-import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
 
 import { formatCity, getCityId } from '@/utils/formatCity'
 
@@ -31,12 +31,11 @@ import YouTag from '@/components/travellers/you-tag/YouTag'
 
 import useScrollToAnchor from '@/pages/traveller-detail/hooks/useScrollToAnchor'
 
-// Cards after the profile are spaced apart (the back link comes first, so not-first cannot tell); the record's own cards get a heavier border
-const SECTION = 'mt-8'
+// The record's own cards get a heavier border
 const OWN = 'border-2 border-border-strong'
-// Three tiles across and two on narrow screens
+// Three tiles across, two on narrow screens and four once the photo column is at its widest
 const IMAGES_LIST =
-	'flex list-none flex-wrap gap-x-[2%] gap-y-8 px-0 py-4 [@media(width<=480px)]:gap-x-[4%] [@media(width<=480px)]:gap-y-4 [@media(width<=480px)]:py-2'
+	'flex list-none flex-wrap gap-x-[2%] gap-y-8 px-0 py-4 xl:[&>li]:w-[23.5%] [@media(width<=480px)]:gap-x-[4%] [@media(width<=480px)]:gap-y-4 [@media(width<=480px)]:py-2'
 
 const TravellerDetail = () => {
 	const { id } = useParams()
@@ -127,179 +126,214 @@ const TravellerDetail = () => {
 			className="mainContainer cardPage text-left"
 			data-cy={TRAVELLER_DETAIL.ROOT}>
 			<title>{`${fullName} · ${GLOBAL.SITE_NAME}`}</title>
-			{isLoading && heading}
-			{isLoading && (
-				<div
-					className="my-2"
-					data-cy={TRAVELLER_DETAIL.SPINNER}>
-					<BaseSpinner label={GLOBAL.SPINNER_LABEL.TRAVELLER} />
-				</div>
-			)}
-			{!isLoading && (
-				// The card's own column, so the link lines up with the card at every width
-				<div className="mx-auto mb-2 max-w-160">
-					<BaseButton
-						isLink
-						to={PATHS.TRAVELLERS}
-						ariaLabel={TRAVELLER_DETAIL_CONFIG.BACK_LABEL}
-						className="inline-flex min-h-11 items-center gap-1 text-text-link underline underline-offset-4"
-						data-cy={TRAVELLER_DETAIL.BACK_TO_TRAVELLERS}>
-						<svg
-							aria-hidden="true"
-							width="16"
-							height="16"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round">
-							<path d="m15 18-6-6 6-6" />
-						</svg>
-						{TRAVELLER_DETAIL_CONFIG.BACK_LABEL}
-					</BaseButton>
-				</div>
-			)}
-			{!isLoading && !showProfile && (
-				<BaseCard>
-					{heading}
-					<div data-cy={TRAVELLER_DETAIL.NOT_FOUND}>
-						<ErrorMessage>
-							{TRAVELLER_DETAIL_CONFIG.NOT_FOUND_MESSAGE}
-						</ErrorMessage>
+			{/* Not found stays in one column; loading takes the profile's width, so the spinner sits where the name will be */}
+			<div
+				className={
+					isLoading || showProfile
+						? PAGE_LAYOUT.WIDE
+						: PAGE_LAYOUT.NARROW
+				}
+				data-cy={TRAVELLER_DETAIL.LAYOUT}>
+				{isLoading && heading}
+				{isLoading && (
+					<div
+						className="my-2"
+						data-cy={TRAVELLER_DETAIL.SPINNER}>
+						{/* Where the name will be: the left column, at the card's padding and border */}
+						<BaseSpinner
+							label={GLOBAL.SPINNER_LABEL.TRAVELLER}
+							className="justify-start px-[1.0625rem] lg:max-w-[23.75rem]"
+						/>
 					</div>
-				</BaseCard>
-			)}
-			{showProfile && (
-				<>
-					<BaseCard className={cn(isOwnRecord && OWN)}>
-						{alertMessage && (
-							<div
-								className="mb-4"
-								data-cy={TRAVELLER_DETAIL.SAVED_ALERT}>
-								<Alerts
-									message={alertMessage}
-									onClose={() => setAlertMessage(null)}
-								/>
-							</div>
-						)}
+				)}
+				{!isLoading && (
+					<div className="mb-2">
+						<BaseButton
+							isLink
+							to={PATHS.TRAVELLERS}
+							ariaLabel={TRAVELLER_DETAIL_CONFIG.BACK_LABEL}
+							className="inline-flex min-h-11 items-center gap-1 text-text-link underline underline-offset-4"
+							data-cy={TRAVELLER_DETAIL.BACK_TO_TRAVELLERS}>
+							<svg
+								aria-hidden="true"
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round">
+								<path d="m15 18-6-6 6-6" />
+							</svg>
+							{TRAVELLER_DETAIL_CONFIG.BACK_LABEL}
+						</BaseButton>
+					</div>
+				)}
+				{!isLoading && !showProfile && (
+					<BaseCard>
 						{heading}
-						<section data-cy={TRAVELLER_DETAIL.PROFILE}>
-							<TripSummary
-								tripStart={traveller.tripStart}
-								tripEnd={traveller.tripEnd}
-								daysInCity={traveller.daysInCity}
-								data-cy={TRAVELLER_DETAIL.TRIP}
-							/>
-							<p
-								className="whitespace-pre-line italic"
-								data-cy={TRAVELLER_DETAIL.TRIP_DESCRIPTION}>
-								{traveller.tripDescription}
-							</p>
-							<div
-								className="flex flex-wrap gap-2 pt-1 pb-4"
-								data-cy={TRAVELLER_DETAIL.BADGES}>
-								{cities.map((city) => (
-									<BaseBadge
-										key={getCityId(city)}
-										type={getCityId(city)}
-										title={formatCity(city)}
+						<div data-cy={TRAVELLER_DETAIL.NOT_FOUND}>
+							<ErrorMessage>
+								{TRAVELLER_DETAIL_CONFIG.NOT_FOUND_MESSAGE}
+							</ErrorMessage>
+						</div>
+					</BaseCard>
+				)}
+				{showProfile && (
+					<div
+						className={cn(PAGE_LAYOUT.COLUMNS, 'gap-8')}
+						data-cy={TRAVELLER_DETAIL.COLUMNS}>
+						<BaseCard
+							className={cn(
+								PAGE_LAYOUT.COLUMN_CARD,
+								isOwnRecord && OWN,
+							)}>
+							{alertMessage && (
+								<div
+									className="mb-4"
+									data-cy={TRAVELLER_DETAIL.SAVED_ALERT}>
+									<Alerts
+										message={alertMessage}
+										onClose={() => setAlertMessage(null)}
 									/>
-								))}
-							</div>
-							{canContact && (
-								<div className="flex flex-wrap gap-2">
-									<BaseButton
-										isLink
-										to={`${PATHS.TRAVELLERS}/${id}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`}
-										modeType="primary"
-										data-cy={TRAVELLER_DETAIL.MESSAGE}>
-										{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(
-											traveller.firstName,
-										)}
-									</BaseButton>
 								</div>
 							)}
-							{isOwnRecord && (
-								<div className="flex flex-wrap gap-2">
-									<BaseButton
-										isLink
-										to={editLink}
-										modeType="outline"
-										data-cy={TRAVELLER_DETAIL.EDIT}>
-										{TRAVELLER_ITEM_CONFIG.EDIT_LABEL}
-									</BaseButton>
+							{heading}
+							<section data-cy={TRAVELLER_DETAIL.PROFILE}>
+								<TripSummary
+									tripStart={traveller.tripStart}
+									tripEnd={traveller.tripEnd}
+									daysInCity={traveller.daysInCity}
+									data-cy={TRAVELLER_DETAIL.TRIP}
+								/>
+								<p
+									className="whitespace-pre-line italic"
+									data-cy={TRAVELLER_DETAIL.TRIP_DESCRIPTION}>
+									{traveller.tripDescription}
+								</p>
+								<div
+									className="flex flex-wrap gap-2 pt-1 pb-4"
+									data-cy={TRAVELLER_DETAIL.BADGES}>
+									{cities.map((city) => (
+										<BaseBadge
+											key={getCityId(city)}
+											type={getCityId(city)}
+											title={formatCity(city)}
+										/>
+									))}
+								</div>
+								{canContact && (
+									<div className="flex flex-wrap gap-2">
+										<BaseButton
+											isLink
+											to={`${PATHS.TRAVELLERS}/${id}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`}
+											modeType="primary"
+											data-cy={TRAVELLER_DETAIL.MESSAGE}>
+											{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(
+												traveller.firstName,
+											)}
+										</BaseButton>
+									</div>
+								)}
+								{isOwnRecord && (
+									<div className="flex flex-wrap gap-2">
+										<BaseButton
+											isLink
+											to={editLink}
+											modeType="outline"
+											data-cy={TRAVELLER_DETAIL.EDIT}>
+											{TRAVELLER_ITEM_CONFIG.EDIT_LABEL}
+										</BaseButton>
+										<BaseButton
+											isLink
+											to={addPhotosLink}
+											modeType="outline"
+											data-cy={
+												TRAVELLER_DETAIL.ADD_PHOTOS
+											}>
+											{
+												TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL
+											}
+										</BaseButton>
+									</div>
+								)}
+							</section>
+						</BaseCard>
+						{isOwnRecord && files.length === 0 && (
+							<BaseCard
+								className={cn(PAGE_LAYOUT.COLUMN_CARD, OWN)}>
+								<section data-cy={TRAVELLER_DETAIL.NO_PHOTOS}>
+									<h2 className="mt-0">
+										{TRAVELLER_DETAIL_CONFIG.PHOTOS_HEADING}
+									</h2>
+									<p className="text-text-muted">
+										{
+											TRAVELLER_DETAIL_CONFIG.NO_PHOTOS_MESSAGE
+										}
+									</p>
 									<BaseButton
 										isLink
 										to={addPhotosLink}
-										modeType="outline"
-										data-cy={TRAVELLER_DETAIL.ADD_PHOTOS}>
+										modeType="primary">
 										{
 											TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL
 										}
 									</BaseButton>
+								</section>
+							</BaseCard>
+						)}
+						{files.length > 0 && (
+							<BaseCard
+								className={cn(
+									PAGE_LAYOUT.COLUMN_CARD,
+									isOwnRecord && OWN,
+								)}>
+								{/* The anchor holds the heading too, so a scroll to the photos shows it under the header */}
+								<div
+									id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
+									ref={photosRef}
+									className="scroll-mt-24">
+									<div className="flex flex-wrap items-baseline justify-between gap-2">
+										<h2
+											className="m-0"
+											data-cy={
+												TRAVELLER_DETAIL.PHOTOS_HEADING
+											}>
+											{
+												TRAVELLER_DETAIL_CONFIG.PHOTOS_HEADING
+											}
+										</h2>
+										<span className="text-sm text-text-muted">
+											{TRAVELLER_DETAIL_CONFIG.PHOTO_COUNT(
+												files.length,
+											)}
+										</span>
+									</div>
+									<ul
+										className={IMAGES_LIST}
+										data-cy={TRAVELLER_DETAIL.IMAGES_LIST}>
+										<ImageGallery
+											title={fullName}
+											urls={files}
+											dimensions={
+												traveller?.fileDimensions
+											}
+											thumbnails={
+												traveller?.fileThumbnails
+											}
+											alts={traveller?.fileAlts}
+											urlParam={
+												TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
+											}
+										/>
+									</ul>
 								</div>
-							)}
-						</section>
-					</BaseCard>
-					{isOwnRecord && files.length === 0 && (
-						<BaseCard className={cn(SECTION, OWN)}>
-							<section data-cy={TRAVELLER_DETAIL.NO_PHOTOS}>
-								<h2 className="mt-0">
-									{TRAVELLER_DETAIL_CONFIG.PHOTOS_HEADING}
-								</h2>
-								<p className="text-text-muted">
-									{TRAVELLER_DETAIL_CONFIG.NO_PHOTOS_MESSAGE}
-								</p>
-								<BaseButton
-									isLink
-									to={addPhotosLink}
-									modeType="primary">
-									{TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL}
-								</BaseButton>
-							</section>
-						</BaseCard>
-					)}
-					{files.length > 0 && (
-						<BaseCard className={cn(SECTION, isOwnRecord && OWN)}>
-							{/* The anchor holds the heading too, so a scroll to the photos shows it under the header */}
-							<div
-								id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
-								ref={photosRef}
-								className="scroll-mt-24">
-								<div className="flex flex-wrap items-baseline justify-between gap-2">
-									<h2
-										className="m-0"
-										data-cy={
-											TRAVELLER_DETAIL.PHOTOS_HEADING
-										}>
-										{TRAVELLER_DETAIL_CONFIG.PHOTOS_HEADING}
-									</h2>
-									<span className="text-sm text-text-muted">
-										{TRAVELLER_DETAIL_CONFIG.PHOTO_COUNT(
-											files.length,
-										)}
-									</span>
-								</div>
-								<ul
-									className={IMAGES_LIST}
-									data-cy={TRAVELLER_DETAIL.IMAGES_LIST}>
-									<ImageGallery
-										title={fullName}
-										urls={files}
-										dimensions={traveller?.fileDimensions}
-										thumbnails={traveller?.fileThumbnails}
-										alts={traveller?.fileAlts}
-										urlParam={
-											TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
-										}
-									/>
-								</ul>
-							</div>
-						</BaseCard>
-					)}
-				</>
-			)}
+							</BaseCard>
+						)}
+					</div>
+				)}
+			</div>
 		</main>
 	)
 }

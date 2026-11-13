@@ -54,6 +54,7 @@ vi.mock(
 			title,
 			submitLabel,
 			actions,
+			backLink,
 			focusPhotos,
 		}) {
 			const [firstName, setFirstName] = useState(
@@ -68,6 +69,7 @@ vi.mock(
 						event.preventDefault()
 						onSubmit({ firstName })
 					}}>
+					{backLink}
 					<h1>{title}</h1>
 					<label>
 						First name
