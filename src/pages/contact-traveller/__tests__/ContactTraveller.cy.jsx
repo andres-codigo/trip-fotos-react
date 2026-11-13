@@ -141,9 +141,31 @@ describe('<ContactTraveller />', () => {
 			})
 		})
 
-		it('stays one 640px column at 1280px when the traveller is not known', () => {
+		it('loads a traveller the store does not hold, then shows who you are writing to', () => {
+			const { id, ...record } = TRAVELLERS[0]
+			cy.intercept('GET', `**/travellers/${id}.json*`, {
+				body: record,
+			}).as('loadTraveller')
 			cy.viewport(1280, 900)
 			mountPage(null, [])
+			cy.wait('@loadTraveller')
+			cy.get(CONTACT_TRAVELLER_SELECTORS.RECIPIENT).should(
+				'contain.text',
+				'Ada Lovelace',
+			)
+			cy.get(CONTACT_TRAVELLER_SELECTORS.TITLE).should(
+				'have.text',
+				'Contact Ada',
+			)
+		})
+
+		it('stays one 640px column at 1280px when the traveller cannot be found', () => {
+			cy.intercept('GET', '**/travellers/abc.json*', {
+				body: null,
+			}).as('loadTraveller')
+			cy.viewport(1280, 900)
+			mountPage(null, [])
+			cy.wait('@loadTraveller')
 			cy.get(CONTACT_TRAVELLER_SELECTORS.RECIPIENT).should('not.exist')
 			cy.get(CONTACT_TRAVELLER_SELECTORS.FORM)
 				.closest(CONTACT_TRAVELLER_SELECTORS.COLUMNS)

@@ -131,7 +131,7 @@ export const CAPTURES = {
 		areas: ['travellers', 'detail', 'notFound'],
 	},
 	'contact-send': {
-		title: 'captures the contact form and a real send',
+		title: "captures the contact form with the recipient's photos and a real send",
 		areas: ['contact', 'detail'],
 	},
 	'photo-text-states': {

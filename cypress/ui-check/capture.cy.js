@@ -1496,11 +1496,35 @@ describe(`UI check capture (${LABEL})`, () => {
 		})
 
 		capture('contact-send', () => {
+			// The seeded recipient has no photos, so it borrows the owner's for the "You're writing to" row
+			cy.request({
+				url: emulatorDatabase(`travellers/${TEST_USERS.TRAVELLER.ID}`),
+				headers: OWNER,
+			}).then(({ body: seeded }) =>
+				cy.request({
+					method: 'PATCH',
+					url: emulatorDatabase(
+						`travellers/${TEST_USERS.OTHER_TRAVELLER.ID}`,
+					),
+					headers: OWNER,
+					body: {
+						files: seeded.files,
+						fileDimensions: seeded.fileDimensions,
+						fileThumbnails: seeded.fileThumbnails,
+					},
+				}),
+			)
 			eachWidth((width) => {
 				visit(
 					`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}/contact`,
 				)
 				cy.get(CONTACT_TRAVELLER_SELECTORS.FORM).should('be.visible')
+				if (width >= 1024) {
+					cy.get(
+						`${CONTACT_TRAVELLER_SELECTORS.RECIPIENT_DETAILS} li`,
+					).should('have.length', 3)
+				}
+				assertImagesLoaded()
 				freezeAnimation()
 				shot(`contact-${width}`)
 				cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()

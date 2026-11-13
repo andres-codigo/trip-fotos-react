@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 
@@ -17,6 +17,7 @@ import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
 import { selectUserId } from '@/store/slices/authenticationSlice'
 import { contactTraveller } from '@/store/slices/messagesSlice'
 import {
+	loadTraveller,
 	selectIsTraveller,
 	selectIsTravellerCheckedFor,
 	selectSelectedTraveller,
@@ -75,6 +76,14 @@ const ContactTraveller = () => {
 	}
 
 	const canContact = id !== userId && isTraveller
+	const needsTraveller = canContact && !replyTo && !traveller
+
+	// A link or a reload can open the page without the traveller in the store, which the side column needs
+	useEffect(() => {
+		if (needsTraveller) {
+			dispatch(loadTraveller(id))
+		}
+	}, [dispatch, id, needsTraveller])
 	const recipientName = [traveller?.firstName, traveller?.lastName]
 		.filter(Boolean)
 		.join(' ')

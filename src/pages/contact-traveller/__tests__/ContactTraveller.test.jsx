@@ -165,8 +165,10 @@ describe('<ContactTraveller />', () => {
 				`Travellers: ${CONTACT_TRAVELLER_CONFIG.SUCCESS_MESSAGE}`,
 			),
 		).toBeInTheDocument()
-		const [url, options] = fetchMock.mock.calls[0]
-		expect(url).toContain('/messages/abc.json')
+		// The page also loads the traveller it does not hold, so the post is found by its URL
+		const [, options] = fetchMock.mock.calls.find(([url]) =>
+			url.includes('/messages/abc.json'),
+		)
 		expect(JSON.parse(options.body)).toEqual({
 			senderId: 'me',
 			message: 'Hello',
