@@ -61,17 +61,16 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- Two-column pages on desktop: a traveller's trip beside their photos, Edit your trip and Register split into trip details and photos, and Contact and Reply showing who you're writing to beside the message
 - A Travellers card grid: two or three columns on wider screens, each card headed by the traveller's initials, and a "You" tag on your own card and trip
 - A new app icon, favicon and link-preview image in the dark palette: the camera in cream on a deep moss tile
 - A public preview: visitors who are not logged in can browse every trip, newest first, with the traveller's first name, dates, cities and first photo, filter by city, and sign up to see the full trip
 - Clearer forms: helper text and a required-fields legend, an error summary, one wording for every error, the password rule up front with Show password and Forgot password, a required photo on Register and optional alt text per photo
 - Easier getting around: a tab bar for Travellers, Messages and My trip on phones, Log out tucked into an account menu, and a way back to Travellers from every trip
-- Your name in the header on every page straight after a reload, not only once you have opened Travellers
 - Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, faster local checks that rerun only the checks and tests a change can affect, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
-- [#720](https://github.com/andres-codigo/trip-fotos-react/issues/720) — a two-column Traveller detail page on desktop
 - [#721](https://github.com/andres-codigo/trip-fotos-react/issues/721) — up to three photos on logged-out traveller cards
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
