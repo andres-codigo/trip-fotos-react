@@ -5,7 +5,7 @@ import { TRAVELLER_SKELETON } from '@/constants/test'
 
 const BLOCK = 'block animate-skeleton rounded-lg bg-skeleton'
 
-// The public card has no description and one cover tile, so its stand-in matches that shape
+// The public card has no description, so its stand-in leaves those lines out
 const TravellerSkeleton = ({ isPublic = false }) => (
 	<li
 		aria-hidden="true"
@@ -30,7 +30,7 @@ const TravellerSkeleton = ({ isPublic = false }) => (
 				<span className={cn(BLOCK, 'h-6 w-24 rounded-full')} />
 			</div>
 			<div className="flex gap-2">
-				{(isPublic ? [0] : [0, 1, 2]).map((tile) => (
+				{[0, 1, 2].map((tile) => (
 					<span
 						key={tile}
 						className={cn(

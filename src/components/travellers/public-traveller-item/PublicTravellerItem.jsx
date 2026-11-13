@@ -20,7 +20,7 @@ const PublicTravellerItem = ({
 	tripStart,
 	tripEnd,
 	daysInCity,
-	cover,
+	photos,
 }) => {
 	const name = publicName({ firstName, lastInitial })
 	// The full trip needs sign-in, so the link goes through it and comes back
@@ -51,20 +51,24 @@ const PublicTravellerItem = ({
 					/>
 				))}
 			</div>
-			{/* The cover and View trip sit at the foot, so they line up across a row of equal-height cards */}
+			{/* The photos and View trip sit at the foot, so they line up across a row of equal-height cards */}
 			<div className="mt-auto flex flex-col pt-3.5">
-				{cover?.url && (
+				{/* Three across at every width: the signed-in two per row on phones would leave the third photo alone */}
+				{photos?.length > 0 && (
 					<ul
-						className="m-0 flex list-none flex-wrap gap-x-[2%] gap-y-2 pt-0 pb-4 pl-0 [@media(max-width:480px)]:gap-x-[4%] [@media(max-width:480px)]:gap-y-4"
-						data-cy={PUBLIC_TRAVELLER_ITEM.COVER}>
-						<BaseImage
-							title={name}
-							url={cover.url}
-							dimensions={cover.dimensions ?? undefined}
-							thumbnails={cover.thumbnails ?? undefined}
-							sizes={GLOBAL.IMAGE_CARD_THUMBNAIL_SIZES}
-							description={cover.alt ?? ''}
-						/>
+						className="m-0 flex list-none gap-x-[2%] pt-0 pb-4 pl-0 [@media(max-width:480px)]:[&>li]:w-[32%]"
+						data-cy={PUBLIC_TRAVELLER_ITEM.PHOTOS}>
+						{photos.map((photo) => (
+							<BaseImage
+								key={photo.url}
+								title={name}
+								url={photo.url}
+								dimensions={photo.dimensions ?? undefined}
+								thumbnails={photo.thumbnails ?? undefined}
+								sizes={GLOBAL.IMAGE_CARD_THUMBNAIL_SIZES}
+								description={photo.alt ?? ''}
+							/>
+						))}
 					</ul>
 				)}
 				<div className="flex flex-wrap items-center justify-end gap-2">
@@ -99,20 +103,22 @@ PublicTravellerItem.propTypes = {
 	tripStart: PropTypes.string,
 	tripEnd: PropTypes.string,
 	daysInCity: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-	cover: PropTypes.shape({
-		url: PropTypes.string.isRequired,
-		dimensions: PropTypes.shape({
-			width: PropTypes.number,
-			height: PropTypes.number,
-		}),
-		thumbnails: PropTypes.arrayOf(
-			PropTypes.shape({
+	photos: PropTypes.arrayOf(
+		PropTypes.shape({
+			url: PropTypes.string.isRequired,
+			dimensions: PropTypes.shape({
 				width: PropTypes.number,
-				url: PropTypes.string,
+				height: PropTypes.number,
 			}),
-		),
-		alt: PropTypes.string,
-	}),
+			thumbnails: PropTypes.arrayOf(
+				PropTypes.shape({
+					width: PropTypes.number,
+					url: PropTypes.string,
+				}),
+			),
+			alt: PropTypes.string,
+		}),
+	),
 }
 
 export default PublicTravellerItem

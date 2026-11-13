@@ -966,9 +966,10 @@ describe('<TravellersList />', () => {
 			renderTravellersList({}, { shouldResolveSlowly: true })
 
 			const skeletons = screen.getAllByTestId(TRAVELLER_SKELETON.ROOT)
+			// Public cards have no description, so two fewer blocks than the signed-in ten
 			expect(
-				skeletons[0].querySelectorAll('.aspect-square'),
-			).toHaveLength(1)
+				skeletons[0].querySelectorAll('.animate-skeleton'),
+			).toHaveLength(8)
 		})
 
 		it('loads the public summaries, not the full records', async () => {

@@ -40,7 +40,7 @@ const Privacy = () => {
 					Storage, and are shown to other signed-in users. Anyone,
 					signed in or not, can see your first name and the initial of
 					your last name, your cities, your trip dates and your first
-					photo with its description.
+					three photos with their descriptions.
 				</p>
 
 				<h2 className="mt-6 mb-[1em] text-[1.17rem]">Messages</h2>

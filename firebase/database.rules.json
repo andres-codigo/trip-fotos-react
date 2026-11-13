@@ -113,6 +113,47 @@
 						".validate": false
 					}
 				},
+				"photos": {
+					".validate": "newData.hasChildren()",
+					"$index": {
+						".validate": "$index.matches(/^[0-2]$/) && newData.hasChild('url')",
+						"url": {
+							".validate": "newData.isString() && newData.val().length <= 2048"
+						},
+						"alt": {
+							".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 150"
+						},
+						"dimensions": {
+							".validate": "newData.hasChildren(['width', 'height'])",
+							"width": {
+								".validate": "newData.isNumber() && newData.val() > 0"
+							},
+							"height": {
+								".validate": "newData.isNumber() && newData.val() > 0"
+							},
+							"$other": {
+								".validate": false
+							}
+						},
+						"thumbnails": {
+							"$size": {
+								".validate": "$size.matches(/^[0-9]+$/) && newData.hasChildren(['width', 'url'])",
+								"width": {
+									".validate": "newData.isNumber() && newData.val() > 0"
+								},
+								"url": {
+									".validate": "newData.isString() && newData.val().length <= 2048"
+								},
+								"$other": {
+									".validate": false
+								}
+							}
+						},
+						"$other": {
+							".validate": false
+						}
+					}
+				},
 				"$other": {
 					".validate": false
 				}

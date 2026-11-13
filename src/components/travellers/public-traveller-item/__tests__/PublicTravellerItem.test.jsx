@@ -8,15 +8,22 @@ import { GLOBAL } from '@/constants/ui'
 
 import PublicTravellerItem from '@/components/travellers/public-traveller-item/PublicTravellerItem'
 
-const cover = {
-	url: 'https://example.com/amara.jpg',
+const photoOf = (name, alt) => ({
+	url: `https://example.com/${name}.jpg`,
 	dimensions: { width: 1600, height: 900 },
 	thumbnails: [
-		{ width: 640, url: 'https://example.com/amara-640w.jpg' },
-		{ width: 320, url: 'https://example.com/amara-320w.jpg' },
+		{ width: 640, url: `https://example.com/${name}-640w.jpg` },
+		{ width: 320, url: `https://example.com/${name}-320w.jpg` },
 	],
-	alt: 'Lanterns over a night market',
-}
+	alt,
+})
+
+const photos = [
+	photoOf('lanterns', 'Lanterns over a night market'),
+	photoOf('temple', 'A temple gate at dawn'),
+	photoOf('crossing', 'A crossing in the rain'),
+]
+const [cover] = photos
 
 const baseProps = {
 	id: 'abc',
@@ -28,7 +35,7 @@ const baseProps = {
 		'tokyo',
 		{ id: 'p1', city: 'Paris', region: 'IDF', country: 'France' },
 	],
-	cover,
+	photos,
 }
 
 const renderItem = (props = {}) =>
@@ -75,38 +82,56 @@ describe('<PublicTravellerItem />', () => {
 		expect(badges[1]).toHaveTextContent('Paris')
 	})
 
-	it('shows the cover as a plain image with its alt text and thumbnails', () => {
+	it('shows each photo as a plain image with its alt text and thumbnails, in order', () => {
 		renderItem()
-		const img = within(
-			screen.getByTestId(PUBLIC_TRAVELLER_ITEM.COVER),
-		).getByAltText(cover.alt)
-		expect(img).toHaveAttribute(
-			'srcset',
-			'https://example.com/amara-320w.jpg 320w, https://example.com/amara-640w.jpg 640w',
+		const images = within(
+			screen.getByTestId(PUBLIC_TRAVELLER_ITEM.PHOTOS),
+		).getAllByRole('img')
+		expect(images.map((img) => img.getAttribute('alt'))).toEqual(
+			photos.map(({ alt }) => alt),
 		)
-		expect(img.closest('a, button')).toBeNull()
+		expect(images[0]).toHaveAttribute(
+			'srcset',
+			'https://example.com/lanterns-320w.jpg 320w, https://example.com/lanterns-640w.jpg 640w',
+		)
+		images.forEach((img) => expect(img.closest('a, button')).toBeNull())
 		expect(screen.queryByRole('button')).not.toBeInTheDocument()
+		// No See all tile or photo count: the public card does not say how many there are
+		expect(screen.queryByText(/see all/i)).not.toBeInTheDocument()
 	})
 
-	it('names the cover after the traveller when it has no alt text', () => {
-		renderItem({ cover: { ...cover, alt: null } })
+	it('shows the one photo a trip with a single photo has', () => {
+		renderItem({ photos: [cover] })
+		expect(screen.getAllByTestId(IMAGE.ID)).toHaveLength(1)
+		expect(screen.getByAltText(cover.alt)).toBeInTheDocument()
+	})
+
+	it('names a photo after the traveller when it has no alt text', () => {
+		renderItem({ photos: [{ ...cover, alt: null }] })
 		expect(screen.getByAltText("Amara O.'s photo")).toBeInTheDocument()
 	})
 
-	it('shows no photo tile without a cover', () => {
-		renderItem({ cover: null })
+	it.each([
+		['no photos', null],
+		['an empty list', []],
+	])('shows no photo tiles with %s', (_, value) => {
+		renderItem({ photos: value })
 		expect(
-			screen.queryByTestId(PUBLIC_TRAVELLER_ITEM.COVER),
+			screen.queryByTestId(PUBLIC_TRAVELLER_ITEM.PHOTOS),
 		).not.toBeInTheDocument()
 		expect(screen.queryByRole('img')).not.toBeInTheDocument()
 	})
 
-	it('shows the unavailable tile when the cover fails to load', () => {
-		renderItem({ cover: { ...cover, thumbnails: null } })
+	it('shows the unavailable tile in place of a photo that fails to load, keeping the others', () => {
+		renderItem({
+			photos: [{ ...cover, thumbnails: null }, ...photos.slice(1)],
+		})
 		fireEvent.error(screen.getByAltText(cover.alt))
 		expect(screen.getByTestId(IMAGE.FALLBACK)).toHaveTextContent(
 			GLOBAL.IMAGE_UNAVAILABLE,
 		)
+		expect(screen.getAllByTestId(IMAGE.ID)).toHaveLength(3)
+		expect(screen.getByAltText(photos[1].alt)).toBeInTheDocument()
 	})
 
 	it('links View trip through sign-in, back to the full trip', () => {
