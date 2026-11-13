@@ -59,9 +59,8 @@ describe('Register Page', () => {
 			MOCK_TRAVELLERS.NEW_TRAVELLER
 
 		// A real Storage upload to the emulator (deleted in afterEach), not spied on: an intercepted upload stores an image the browser cannot show
-		cy.intercept(API_DATABASE.PUT, '**/travellers/*.json*').as(
-			'registerTraveller',
-		)
+		// The trip and its public summary are saved in one root update
+		cy.intercept(API_DATABASE.PATCH, '**/.json*').as('registerTraveller')
 
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT).type(
 			firstName,
@@ -91,6 +90,15 @@ describe('Register Page', () => {
 
 		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
 			.its('request.body')
+			.then((update) => {
+				expect(
+					update[`publicTrips/${TEST_USERS.STANDARD.ID}`],
+				).to.include({ firstName })
+				expect(
+					update[`publicTrips/${TEST_USERS.STANDARD.ID}`],
+				).not.to.have.property('tripDescription')
+				return update[`travellers/${TEST_USERS.STANDARD.ID}`]
+			})
 			.then((body) => {
 				expect(body.fileAlts).to.deep.equal([PHOTO_ALT])
 				expect(body.fileDimensions).to.have.length(body.files.length)

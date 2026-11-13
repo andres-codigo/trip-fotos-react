@@ -44,7 +44,8 @@ describe('Edit Trip page', () => {
 	// The seed restores the record, so each test starts from the seeded traveller
 	beforeEach(() => {
 		cy.resetEmulators()
-		cy.intercept(API_DATABASE.PATCH, '**/travellers/*.json*').as('saveTrip')
+		// The trip and its public summary are saved in one root update
+		cy.intercept(API_DATABASE.PATCH, '**/.json*').as('saveTrip')
 	})
 
 	// afterEach rather than the test body, so uploads are removed even when a later assertion fails
@@ -101,7 +102,10 @@ describe('Edit Trip page', () => {
 
 		cy.wait('@saveTrip', { timeout: REQUEST_TIMEOUT })
 			.its('request.body')
-			.then(({ files, fileThumbnails }) => {
+			.then((body) => {
+				const files = body[`travellers/${TRAVELLER_ID}/files`]
+				const fileThumbnails =
+					body[`travellers/${TRAVELLER_ID}/fileThumbnails`]
 				expect(files).to.have.length(SEEDED_PHOTO_COUNT + 1)
 				uploadedImageUrls.push(
 					files.at(-1),
@@ -136,7 +140,8 @@ describe('Edit Trip page', () => {
 		save()
 
 		cy.wait('@saveTrip', { timeout: REQUEST_TIMEOUT })
-			.its('request.body.files')
+			.its('request.body')
+			.its(`travellers/${TRAVELLER_ID}/files`)
 			.should('have.length', SEEDED_PHOTO_COUNT - 1)
 		cy.waitForSuccess(atPath(detailPath))
 		cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)

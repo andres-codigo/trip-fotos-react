@@ -8,6 +8,7 @@ import { getStorage } from 'firebase-admin/storage'
 
 import { MOCK_TRAVELLERS } from '../src/constants/test/mock-data/mock-travellers.js'
 import { MOCK_INBOX } from '../src/constants/test/mock-data/mock-messages.js'
+import { toPublicTrips } from '../src/utils/publicTrip/index.js'
 
 const PROJECT_ID = 'demo-trip-fotos'
 const DATABASE_URL = `https://${PROJECT_ID}-default-rtdb.firebaseio.com`
@@ -211,8 +212,10 @@ const writePhotos = async (bucket) => {
 
 const writeData = async (db, bucket, now) => {
 	await writePhotos(bucket)
+	const travellers = buildTravellers()
 	await db.ref().set({
-		travellers: buildTravellers(),
+		travellers,
+		publicTrips: toPublicTrips(travellers),
 		messages: buildMessages(now),
 	})
 }

@@ -181,9 +181,11 @@ Cypress.Commands.add(
 
 // Reads the record back from the emulator, so a pass means the write reached the database
 Cypress.Commands.add('assertTravellerPersisted', (uid, expected) => {
-	cy.request(
-		`${Cypress.expose('VITE_DATABASE_URL')}/travellers/${uid}.json?ns=${Cypress.expose('VITE_DATABASE_NAMESPACE')}`,
-	)
+	// The emulator's owner token reads past the rules, which keep traveller records behind sign-in
+	cy.request({
+		url: `${Cypress.expose('VITE_DATABASE_URL')}/travellers/${uid}.json?ns=${Cypress.expose('VITE_DATABASE_NAMESPACE')}`,
+		headers: { Authorization: 'Bearer owner' },
+	})
 		.its('body')
 		.should('include', expected)
 })

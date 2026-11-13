@@ -65,7 +65,7 @@ describe('<TravellerItem />', () => {
 	}
 
 	it('cancels the delete from the keyboard and restores focus', () => {
-		cy.intercept('DELETE', '**/travellers/abc.json*').as('deleteTraveller')
+		cy.intercept('PATCH', '**/.json*').as('deleteTraveller')
 		render({ auth: { isAdmin: true } })
 		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).click()
 		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_DIALOG).should('be.visible')

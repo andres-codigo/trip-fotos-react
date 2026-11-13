@@ -1562,7 +1562,7 @@ describe(`UI check capture (${LABEL})`, () => {
 
 		capture('edit-save', () => {
 			cy.viewport(390, HEIGHT)
-			interceptOnce('PATCH', '**/travellers/*.json*', {
+			interceptOnce('PATCH', '**/.json*', {
 				statusCode: 500,
 				body: {},
 			}).as('failedSave')
@@ -1576,7 +1576,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			freezeAnimation()
 			shot('edit-trip-save-failed')
 
-			interceptOnce('PATCH', '**/travellers/*.json*', (req) =>
+			interceptOnce('PATCH', '**/.json*', (req) =>
 				req.on('response', (res) => res.setDelay(4000)),
 			)
 			visit(editTripPath)

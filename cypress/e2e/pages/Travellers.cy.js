@@ -206,3 +206,137 @@ describe('Travellers page > admin and standard users', () => {
 		)
 	})
 })
+
+// Talks to the emulator directly, as a script could, so a pass proves the rules and not just the page
+describe('Public trips database rules', () => {
+	const PUBLIC_FIELDS = [
+		'firstName',
+		'lastInitial',
+		'cities',
+		'tripStart',
+		'tripEnd',
+		'daysInCity',
+		'cover',
+	]
+	const database = (path, { auth, ...options } = {}) =>
+		cy.request({
+			url: `${Cypress.expose('VITE_DATABASE_URL')}/${path}.json`,
+			qs: {
+				ns: Cypress.expose('VITE_DATABASE_NAMESPACE'),
+				...(auth && { auth }),
+			},
+			failOnStatusCode: false,
+			...options,
+		})
+	const signedIn = (path, options) =>
+		cy.window().then((win) =>
+			database(path, {
+				auth: win.localStorage.getItem('token'),
+				...options,
+			}),
+		)
+	const summary = (fields) => ({
+		firstName: 'Rules',
+		lastInitial: 'T',
+		cities: ['tokyo'],
+		...fields,
+	})
+
+	beforeEach(() => {
+		cy.resetEmulators()
+	})
+
+	it('keeps full traveller records from logged-out visitors', () => {
+		database('travellers').its('status').should('be.oneOf', [401, 403])
+		database(`travellers/${TEST_USERS.TRAVELLER.ID}`)
+			.its('status')
+			.should('be.oneOf', [401, 403])
+	})
+
+	it('lets anyone read the public summaries, which hold only the public fields', () => {
+		database('publicTrips').then(({ status, body }) => {
+			expect(status).to.eq(200)
+			expect(body).to.have.property(TEST_USERS.TRAVELLER.ID)
+			Object.values(body).forEach((trip) => {
+				expect(PUBLIC_FIELDS).to.include.members(Object.keys(trip))
+				if (trip.cover) {
+					expect(Object.keys(trip.cover)).to.include.members(['url'])
+				}
+			})
+		})
+	})
+
+	it('lets a signed-in user read the full records', () => {
+		cy.visit(loginUrl)
+		performLogin()
+		signedIn('travellers').its('status').should('eq', 200)
+	})
+
+	it('accepts a summary with only the public fields from its own traveller', () => {
+		cy.visit(loginUrl)
+		performLogin()
+		cy.window().then((win) =>
+			signedIn(`publicTrips/${win.localStorage.getItem('userId')}`, {
+				method: API_DATABASE.PUT,
+				body: summary({
+					tripStart: '2025-03-12',
+					tripEnd: '2025-03-19',
+					cover: {
+						url: 'https://example.com/photo.jpg',
+						alt: 'Tokyo',
+					},
+				}),
+			})
+				.its('status')
+				.should('eq', 200),
+		)
+	})
+
+	it('refuses a summary carrying a private field', () => {
+		cy.visit(loginUrl)
+		performLogin()
+		cy.window().then((win) => {
+			const path = `publicTrips/${win.localStorage.getItem('userId')}`
+			signedIn(path, {
+				method: API_DATABASE.PUT,
+				body: summary({ tripDescription: 'Private words.' }),
+			})
+				.its('status')
+				.should('be.oneOf', [401, 403])
+			signedIn(path, {
+				method: API_DATABASE.PUT,
+				body: summary({ lastName: 'Test' }),
+			})
+				.its('status')
+				.should('be.oneOf', [401, 403])
+			signedIn(path, {
+				method: API_DATABASE.PUT,
+				body: summary({
+					cover: { url: 'https://example.com/a.jpg', extra: 'x' },
+				}),
+			})
+				.its('status')
+				.should('be.oneOf', [401, 403])
+		})
+	})
+
+	it("refuses a summary written for someone else's trip", () => {
+		cy.visit(loginUrl)
+		performLogin()
+		signedIn(`publicTrips/${TEST_USERS.TRAVELLER.ID}`, {
+			method: API_DATABASE.PUT,
+			body: summary(),
+		})
+			.its('status')
+			.should('be.oneOf', [401, 403])
+	})
+
+	it('refuses any write from a logged-out visitor', () => {
+		database(`publicTrips/${TEST_USERS.TRAVELLER.ID}`, {
+			method: API_DATABASE.PUT,
+			body: summary(),
+		})
+			.its('status')
+			.should('be.oneOf', [401, 403])
+	})
+})

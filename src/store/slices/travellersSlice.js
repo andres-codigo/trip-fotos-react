@@ -37,11 +37,16 @@ import { databaseRequest } from '@/store/databaseRequest'
 
 import { handleApiError } from '@/utils/errorHandler'
 import { measureImage } from '@/utils/measureImage'
+import { byNewestTrip, toPublicTrip } from '@/utils/publicTrip'
 import { thumbnailUrlsOf } from '@/utils/tripPhotos'
 
 // The database turns a sparse array into an object, so both shapes are read the same way
 const thumbnailUrls = (fileThumbnails) =>
 	Object.values(fileThumbnails ?? {}).flatMap(thumbnailUrlsOf)
+
+// One multi-path update, so the public summary can never disagree with the trip it comes from
+const saveTrip = (token, updates) =>
+	databaseRequest('/', { method: API_DATABASE.PATCH, token, body: updates })
 
 const shouldUpdate = (state) => {
 	const lastFetch = state.lastFetch
@@ -275,10 +280,9 @@ export const registerTraveller = createAsyncThunk(
 			}
 
 			try {
-				await databaseRequest(`/travellers/${userId}`, {
-					method: API_DATABASE.PUT,
-					token,
-					body: travellerData,
+				await saveTrip(token, {
+					[`travellers/${userId}`]: travellerData,
+					[`publicTrips/${userId}`]: toPublicTrip(travellerData),
 				})
 			} catch {
 				// A bad status and a dropped connection both mean the record was not saved, which is what the user needs to hear
@@ -351,10 +355,14 @@ export const updateTraveller = createAsyncThunk(
 			}
 
 			try {
-				await databaseRequest(`/travellers/${userId}`, {
-					method: API_DATABASE.PATCH,
-					token,
-					body: changes,
+				await saveTrip(token, {
+					...Object.fromEntries(
+						Object.entries(changes).map(([field, value]) => [
+							`travellers/${userId}/${field}`,
+							value,
+						]),
+					),
+					[`publicTrips/${userId}`]: toPublicTrip(changes),
 				})
 			} catch {
 				throw new Error(ERROR_MESSAGES.FAILED_TO_SAVE_TRIP)
@@ -403,7 +411,9 @@ export const updateTravellers = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.UPDATE_TRAVELLERS,
 	async (_, { getState, rejectWithValue, dispatch }) => {
 		try {
-			const response = await databaseRequest('/travellers')
+			const response = await databaseRequest('/travellers', {
+				token: selectAuthenticationToken(getState()),
+			})
 
 			const responseData = await response.json()
 
@@ -479,9 +489,14 @@ export const updateTravellers = createAsyncThunk(
 
 export const loadTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLER,
-	async (travellerId, { rejectWithValue }) => {
+	async (travellerId, { getState, rejectWithValue }) => {
 		try {
-			const response = await databaseRequest(`/travellers/${travellerId}`)
+			const response = await databaseRequest(
+				`/travellers/${travellerId}`,
+				{
+					token: selectAuthenticationToken(getState()),
+				},
+			)
 
 			const responseData = await response.json()
 
@@ -506,12 +521,14 @@ export const loadTraveller = createAsyncThunk(
 )
 
 // The Auth display name can be missing (a failed name update at registration), so the nav takes the name from the record
-const loadOwnName = async (userId, dispatch) => {
+const loadOwnName = async (userId, token, dispatch) => {
 	try {
 		const [firstName, lastName] = await Promise.all(
 			['firstName', 'lastName'].map(async (field) =>
 				(
-					await databaseRequest(`/travellers/${userId}/${field}`)
+					await databaseRequest(`/travellers/${userId}/${field}`, {
+						token,
+					})
 				).json(),
 			),
 		)
@@ -525,17 +542,19 @@ const loadOwnName = async (userId, dispatch) => {
 
 export const checkIsTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.CHECK_IS_TRAVELLER,
-	async (userId, { dispatch, rejectWithValue }) => {
+	async (userId, { getState, dispatch, rejectWithValue }) => {
 		try {
+			const token = selectAuthenticationToken(getState())
 			// shallow avoids downloading the whole record just to test it exists
 			const response = await databaseRequest(`/travellers/${userId}`, {
+				token,
 				params: { shallow: true },
 			})
 
 			const responseData = await response.json()
 
 			if (responseData !== null) {
-				await loadOwnName(userId, dispatch)
+				await loadOwnName(userId, token, dispatch)
 			}
 
 			return responseData !== null
@@ -573,6 +592,28 @@ export const loadTravellers = createAsyncThunk(
 	},
 )
 
+// Logged-out visitors read the public summaries only; the full records need sign-in
+export const loadPublicTrips = createAsyncThunk(
+	TRAVELLERS_ACTION_TYPES.LOAD_PUBLIC_TRIPS,
+	async (_, { rejectWithValue }) => {
+		try {
+			const response = await databaseRequest('/publicTrips')
+			const responseData = await response.json()
+
+			return Object.entries(responseData ?? {})
+				.map(([id, trip]) => ({ ...trip, id }))
+				.sort(byNewestTrip)
+		} catch (error) {
+			return rejectWithValue(
+				handleApiError(
+					error,
+					API_ERROR_MESSAGE.LOAD_PUBLIC_TRIPS_CATCH,
+				),
+			)
+		}
+	},
+)
+
 export const deleteTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.DELETE_TRAVELLER,
 	async (
@@ -582,9 +623,9 @@ export const deleteTraveller = createAsyncThunk(
 		try {
 			const token = selectAuthenticationToken(getState())
 
-			await databaseRequest(`/travellers/${travellerId}`, {
-				method: API_DATABASE.DELETE,
-				token,
+			await saveTrip(token, {
+				[`travellers/${travellerId}`]: null,
+				[`publicTrips/${travellerId}`]: null,
 			})
 
 			const storage = getFirebaseStorage()
@@ -635,6 +676,7 @@ const travellersSlice = createSlice({
 		isTravellerCheckedFor: null,
 		hasTravellers: false,
 		travellers: [],
+		publicTrips: [],
 		selectedTraveller: null,
 		lastFetch: null,
 		status: 'idle',
@@ -781,6 +823,10 @@ const travellersSlice = createSlice({
 				state.error = action.payload
 			})
 
+			.addCase(loadPublicTrips.fulfilled, (state, action) => {
+				state.publicTrips = action.payload
+			})
+
 			// CHECK_IS_TRAVELLER async thunk handlers
 			// A failed check keeps the last known value rather than hiding traveller-only features
 			.addCase(checkIsTraveller.fulfilled, (state, action) => {
@@ -807,6 +853,10 @@ const travellersSlice = createSlice({
 					state.isTravellerCheckedFor = null
 					state.travellerName = ''
 					state.selectedTraveller = null
+					// The full records need sign-in, so they must not stay in this browser's storage
+					state.travellers = []
+					state.hasTravellers = false
+					state.lastFetch = null
 				},
 			)
 	},
@@ -818,6 +868,8 @@ export const selectTravellers = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.travellers,
 )
+
+export const selectPublicTrips = (state) => state.travellers.publicTrips ?? []
 
 export const selectLastFetch = createSelector(
 	[selectTravellersState],
