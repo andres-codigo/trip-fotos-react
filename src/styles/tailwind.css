@@ -376,6 +376,21 @@ section {
 	}
 }
 
+/* A Travellers grid card, its skeleton and the public summary: a surface card on bg, a column so the foot can sit at the bottom of an equal-height row */
+@utility traveller-card {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--border-card);
+	border-radius: var(--radius-lg);
+	background-color: var(--surface);
+	box-shadow: var(--shadow-card);
+	padding: 1rem;
+
+	@media (width >= 64rem) {
+		padding: 1.25rem;
+	}
+}
+
 /* Photo tiles: a ring over the photo has no guaranteed contrast, so it sits outside, past a 2px gap in the card's ground colour */
 @utility tile-focus-ring {
 	&:has(:focus-visible) {

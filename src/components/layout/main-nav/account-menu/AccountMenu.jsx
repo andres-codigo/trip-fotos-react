@@ -5,6 +5,7 @@ import { ACCOUNT_MENU } from '@/constants/test'
 import { NAVIGATION } from '@/constants/ui'
 
 import { cn } from '@/utils/cn'
+import { getInitials } from '@/utils/getInitials'
 
 const iconProps = {
 	'aria-hidden': true,
@@ -17,13 +18,6 @@ const iconProps = {
 }
 
 const getWords = (name) => name.trim().split(/\s+/).filter(Boolean)
-
-const getInitials = (name) => {
-	const words = getWords(name)
-	if (words.length === 0) return ''
-	const last = words.length > 1 ? words[words.length - 1][0] : ''
-	return `${words[0][0]}${last}`.toUpperCase()
-}
 
 function AccountMenu({ name, onLogOut, className }) {
 	const [isOpen, setIsOpen] = useState(false)

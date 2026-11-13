@@ -27,6 +27,7 @@ import ImageGallery from '@/components/ui/image-gallery/ImageGallery'
 import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 import TripSummary from '@/components/travellers/trip-summary/TripSummary'
+import YouTag from '@/components/travellers/you-tag/YouTag'
 
 import useScrollToAnchor from '@/pages/traveller-detail/hooks/useScrollToAnchor'
 
@@ -97,7 +98,7 @@ const TravellerDetail = () => {
 		isActive: shouldScrollToPhotos,
 	})
 
-	const heading = (
+	const name = (
 		<h1
 			className={cn(
 				'm-0 text-[1.5rem] font-normal',
@@ -108,6 +109,16 @@ const TravellerDetail = () => {
 			{fullName}
 		</h1>
 	)
+	// Your own trip carries the same "You" tag as its Travellers card, wrapping under a long name
+	const heading =
+		showProfile && isOwnRecord ? (
+			<div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+				{name}
+				<YouTag />
+			</div>
+		) : (
+			name
+		)
 
 	return (
 		<main

@@ -40,6 +40,7 @@ export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 	MESSAGE_LABEL: (firstName) => `Message ${firstName}`,
 	PHOTOS_ANCHOR: 'photos',
 	DELETE_DIALOG_TITLE: 'Delete traveller?',
+	YOU_LABEL: 'You',
 })
 
 export const TRAVELLERS_LIST_CONFIG = Object.freeze({

@@ -54,6 +54,24 @@ describe('<BaseImage />', () => {
 		expect(img).toHaveAttribute('sizes', GLOBAL.IMAGE_THUMBNAIL_SIZES)
 	})
 
+	// A Travellers grid card has narrower tiles than a page card, so it passes its own sizes
+	it('uses the sizes it is given for the srcset', () => {
+		render(
+			<ul>
+				<BaseImage
+					title="Ada"
+					url={url}
+					thumbnails={thumbnails}
+					sizes={GLOBAL.IMAGE_CARD_THUMBNAIL_SIZES}
+				/>
+			</ul>,
+		)
+		expect(screen.getByAltText("Ada's photo")).toHaveAttribute(
+			'sizes',
+			GLOBAL.IMAGE_CARD_THUMBNAIL_SIZES,
+		)
+	})
+
 	it('falls back to the original when a thumbnail fails, then to the unavailable state', () => {
 		renderImage(vi.fn(), undefined, thumbnails)
 		fireEvent.error(screen.getByAltText("Ada's photo"))

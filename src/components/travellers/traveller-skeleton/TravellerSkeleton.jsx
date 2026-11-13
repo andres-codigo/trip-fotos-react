@@ -9,11 +9,11 @@ const BLOCK = 'block animate-skeleton rounded-lg bg-skeleton'
 const TravellerSkeleton = ({ isPublic = false }) => (
 	<li
 		aria-hidden="true"
-		className="my-4 list-none rounded-lg border border-border-strong p-4"
+		className="traveller-card"
 		data-cy={TRAVELLER_SKELETON.ROOT}>
 		<div className="flex flex-col gap-3">
 			<div className="flex items-center gap-2">
-				<span className={cn(BLOCK, 'size-11 shrink-0 rounded-full')} />
+				<span className={cn(BLOCK, 'size-10 shrink-0 rounded-full')} />
 				<div className="flex flex-1 flex-col gap-2">
 					<span className={cn(BLOCK, 'h-[18px] w-3/5')} />
 					<span className={cn(BLOCK, 'h-3 w-[35%]')} />

@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-import { TEST_IDS } from '@/constants/test'
+import { COMMON_SELECTORS, TEST_IDS } from '@/constants/test'
 
 import Travellers from '@/pages/travellers/Travellers'
 import authenticationReducer from '@/store/slices/authenticationSlice'
@@ -93,6 +93,21 @@ describe('Travellers', () => {
 			).toBeInTheDocument()
 			expect(screen.getByText('Ada Lovelace')).toBeInTheDocument()
 			expect(screen.getByText('Grace Hopper')).toBeInTheDocument()
+		})
+
+		// The grid's cards sit on the page background, not inside a 640px page card
+		it('puts the list straight on the page, without a page card', async () => {
+			setupMocksForHasTravellers()
+
+			await act(async () => {
+				renderTravellers()
+			})
+
+			const main = screen.getByRole('main')
+			expect(main.querySelector(COMMON_SELECTORS.BASE_CARD)).toBeNull()
+			expect(screen.getByTestId('travellers-page')).toHaveClass(
+				'max-w-290',
+			)
 		})
 
 		it('renders the TravellersList component if there are no travellers', async () => {

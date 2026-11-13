@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import PublicTravellerItem from '@/components/travellers/public-traveller-item/PublicTravellerItem'
 
 import {
+	AVATAR_SELECTORS,
 	COMMON_SELECTORS,
 	PUBLIC_TRAVELLER_ITEM_SELECTORS,
 } from '@/constants/test'
@@ -28,6 +29,13 @@ const mountItem = (cover) =>
 	)
 
 describe('<PublicTravellerItem />', () => {
+	it("heads the card with the public name's initials", () => {
+		mountItem()
+		cy.get(AVATAR_SELECTORS.ROOT)
+			.should('have.text', 'AO')
+			.and('have.attr', 'aria-hidden', 'true')
+	})
+
 	it('shows the cover as one square gallery-sized tile', () => {
 		mountItem({ url: photo, alt: 'Lanterns over a night market' })
 		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.COVER).then(($list) => {

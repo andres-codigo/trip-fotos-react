@@ -47,9 +47,12 @@ export const GLOBAL = Object.freeze({
 	IMAGE_UNAVAILABLE: 'Image unavailable',
 	// Shortest side of each thumbnail made on upload, so a square tile is filled at 1x and 2x+ screens
 	IMAGE_THUMBNAIL_WIDTHS: Object.freeze([320, 640]),
-	// Tiles are 48% of the list on phones and 32% above that, in a card capped at 40rem
+	// Tiles are 48% of the list on phones and 32% above that, in a page card capped at 40rem
 	IMAGE_THUMBNAIL_SIZES:
 		'(max-width: 480px) 48vw, (max-width: 640px) 32vw, 200px',
+	// Travellers grid cards: one column under 640px, two to 1023px, then three in a page capped at 1160px (tiles about 90 to 110px)
+	IMAGE_CARD_THUMBNAIL_SIZES:
+		'(max-width: 480px) 48vw, (max-width: 639px) 32vw, (max-width: 1023px) 16vw, 110px',
 
 	// UPLOAD PROGRESS
 	REGISTERING_MESSAGE: 'Registering your details, one moment please...',

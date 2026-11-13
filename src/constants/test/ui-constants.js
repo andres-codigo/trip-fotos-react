@@ -1,3 +1,7 @@
+export const AVATAR = Object.freeze({
+	ROOT: 'initials-avatar',
+})
+
 export const BADGE = Object.freeze({
 	ID: 'base-badge',
 })
@@ -141,6 +145,14 @@ export const TRAVELLER_ITEM = Object.freeze({
 	DELETE_CANCEL: 'traveller-item-delete-cancel',
 	DELETE_CONFIRM: 'traveller-item-delete-confirm',
 	EDIT: 'traveller-item-edit',
+})
+
+export const YOU_TAG = Object.freeze({
+	ROOT: 'you-tag',
+})
+
+export const TRAVELLER_CARD_HEAD = Object.freeze({
+	ROOT: 'traveller-card-head',
 })
 
 export const PUBLIC_TRAVELLER_ITEM = Object.freeze({
