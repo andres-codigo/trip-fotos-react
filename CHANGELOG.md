@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.1...v0.27.2) (2026-11-13)
+
+
+### Enhancements
+
+* up to three photos on logged-out traveller cards ([#727](https://github.com/andres-codigo/trip-fotos-react/issues/727)) ([1f25bca](https://github.com/andres-codigo/trip-fotos-react/commit/1f25bca90171914cdcbf05204a5b68218364587c))
+
 ## [0.27.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.0...v0.27.1) (2026-11-13)
 
 
