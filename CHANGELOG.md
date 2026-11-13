@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.0...v0.27.1) (2026-11-13)
+
+
+### Enhancements
+
+* two-column pages on desktop ([#724](https://github.com/andres-codigo/trip-fotos-react/issues/724)) ([906c128](https://github.com/andres-codigo/trip-fotos-react/commit/906c1282d68afa73d54af66302b0a0f654f7fe17))
+
 ## [0.27.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.26.1...v0.27.0) (2026-11-13)
 
 
