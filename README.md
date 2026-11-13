@@ -71,7 +71,6 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Next up** — in this order:
 
-- [#721](https://github.com/andres-codigo/trip-fotos-react/issues/721) — up to three photos on logged-out traveller cards
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
 <a id="stack"></a>
