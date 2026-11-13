@@ -150,6 +150,10 @@ export const CAPTURES = {
 		title: 'captures a trip with one photo and with none',
 		areas: ['detail', 'edit', 'trips'],
 	},
+	'detail-states': {
+		title: 'captures the detail page loading, not found, saved and with a long name',
+		areas: ['detail', 'edit', 'trips'],
+	},
 	'edit-save': {
 		title: 'captures saving, a failed save and a real save',
 		areas: ['detail', 'edit', 'trips'],

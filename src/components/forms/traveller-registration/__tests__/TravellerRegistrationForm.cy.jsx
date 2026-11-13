@@ -361,4 +361,54 @@ describe('<TravellerRegistrationForm />', () => {
 				})
 		})
 	})
+
+	describe('Layout either side of 1024px', () => {
+		const rect = (selector) =>
+			cy.get(selector).then(($el) => $el[0].getBoundingClientRect())
+		const { TRIP_DETAILS, PHOTOS_SECTION, ACTIONS } =
+			TRAVELLER_REGISTRATION_FORM_SELECTORS
+
+		it('stacks Trip details, Photos and the actions at 1023px', () => {
+			cy.viewport(1023, 900)
+			render({ initialTraveller: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE })
+			rect(TRIP_DETAILS).then((details) => {
+				rect(PHOTOS_SECTION).then((photos) => {
+					expect(photos.left).to.be.closeTo(details.left, 1)
+					expect(photos.width).to.be.closeTo(details.width, 1)
+					expect(photos.top).to.be.at.least(details.bottom)
+					rect(ACTIONS)
+						.its('top')
+						.should('be.at.least', photos.bottom)
+				})
+			})
+			// One card below 1024px: the sections draw no edge of their own
+			cy.get(TRIP_DETAILS).should('have.css', 'border-top-width', '0px')
+			cy.contains('h2', 'Trip details').should('have.css', 'width', '1px')
+		})
+
+		it('puts Trip details in a 380px left column beside Photos from 1024px, with the actions under the photos', () => {
+			cy.viewport(1024, 900)
+			render({ initialTraveller: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE })
+			rect(TRIP_DETAILS).then((details) => {
+				expect(details.width).to.be.closeTo(380, 1)
+				rect(PHOTOS_SECTION).then((photos) => {
+					expect(photos.left - details.right).to.be.closeTo(24, 1)
+					expect(photos.top).to.be.closeTo(details.top, 1)
+					rect(ACTIONS).then((actions) => {
+						expect(actions.top).to.be.at.least(photos.bottom)
+						expect(actions.right).to.be.closeTo(photos.right, 1)
+					})
+				})
+			})
+			cy.get(TRIP_DETAILS).should('have.css', 'border-top-width', '1px')
+			cy.contains('h2', 'Trip details').should('be.visible')
+		})
+
+		it('keeps the submit button last in tab order', () => {
+			render()
+			cy.get('form :is(input, button, textarea, a[href])')
+				.last()
+				.should('have.attr', 'data-cy', 'register-button')
+		})
+	})
 })

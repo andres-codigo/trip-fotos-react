@@ -1,10 +1,4 @@
-import {
-	render,
-	screen,
-	fireEvent,
-	waitFor,
-	within,
-} from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import configureTestStore from '@/testUtils/configureTestStore'
@@ -92,15 +86,14 @@ describe('Register', () => {
 		)
 	}
 
-	it('renders the idle form in a card inside <main>', () => {
+	it('renders the idle form in the wide page column inside <main>', () => {
 		renderRegister()
 
 		const main = screen.getByRole('main')
 		expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
 		expect(main).toHaveAttribute('data-cy-alt', TEST_IDS.REGISTER.CONTAINER)
-		const form = within(screen.getByTestId(TEST_IDS.BASE_CARD)).getByTestId(
-			'traveller-registration-form',
-		)
+		const form = screen.getByTestId('traveller-registration-form')
+		expect(form.parentElement).toHaveClass('max-w-160', 'lg:max-w-290')
 		expect(form).toHaveAttribute('data-loading', 'false')
 	})
 

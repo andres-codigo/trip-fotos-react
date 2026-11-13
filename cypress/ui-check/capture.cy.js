@@ -1695,6 +1695,62 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		capture('detail-states', () => {
+			eachWidth((width) => {
+				// The page the session left open must finish its own requests first; then the record is held back, so the loading frame stays on screen
+				assertSettled()
+				interceptOnce(
+					'GET',
+					`**/travellers/${TEST_USERS.OTHER_TRAVELLER.ID}.json*`,
+					(req) => req.on('response', (res) => res.setDelay(4000)),
+				)
+				visit(`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}`)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.SPINNER).should('be.visible')
+				// A delay that missed would otherwise shoot the loaded page
+				cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE).should('not.exist')
+				freezeAnimation()
+				shot(`traveller-detail-loading-${width}`)
+
+				visit(`${PATHS.TRAVELLERS}/no-such-traveller`)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.NOT_FOUND).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`traveller-detail-not-found-${width}`)
+
+				visit(editTripPath)
+				cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+				cy.get(
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
+				).click()
+				cy.waitForSuccess(shows(TRAVELLER_DETAIL_SELECTORS.SAVED_ALERT))
+				assertSettled()
+				freezeAnimation()
+				shot(`own-trip-saved-${width}`)
+			})
+
+			cy.request({
+				method: 'PATCH',
+				url: emulatorDatabase(`travellers/${TEST_USERS.TRAVELLER.ID}`),
+				headers: OWNER,
+				body: {
+					firstName: 'María Fernanda',
+					lastName: 'Castellanos-Whitfield de la Torre',
+				},
+			})
+			eachWidth((width) => {
+				visit(ownTripPath)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.NAME).should(
+					'contain.text',
+					'Castellanos-Whitfield',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`own-trip-long-name-${width}`)
+			})
+		})
+
 		capture('edit-save', () => {
 			cy.viewport(390, HEIGHT)
 			interceptOnce('PATCH', '**/.json*', {

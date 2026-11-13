@@ -1,12 +1,16 @@
 import PropTypes from 'prop-types'
 
 import { GLOBAL } from '@/constants/ui'
+import { cn } from '@/utils/cn'
 
 // Turns, or pulses under reduced motion so loading never looks frozen; the label is always visible
-const BaseSpinner = ({ label = GLOBAL.SPINNER_LABEL.DEFAULT }) => {
+const BaseSpinner = ({ label = GLOBAL.SPINNER_LABEL.DEFAULT, className }) => {
 	return (
 		<div
-			className="flex h-full w-full items-center justify-center gap-3 text-text-muted"
+			className={cn(
+				'flex h-full w-full items-center justify-center gap-3 text-text-muted',
+				className,
+			)}
 			data-cy="base-spinner"
 			role="status"
 			aria-live="polite"
@@ -23,6 +27,7 @@ const BaseSpinner = ({ label = GLOBAL.SPINNER_LABEL.DEFAULT }) => {
 
 BaseSpinner.propTypes = {
 	label: PropTypes.string,
+	className: PropTypes.string,
 }
 
 export default BaseSpinner

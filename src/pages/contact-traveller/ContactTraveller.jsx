@@ -5,12 +5,14 @@ import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { handleApiError } from '@/utils/errorHandler'
 import { formatMessageTime } from '@/utils/formatMessageTime'
+import { formatCity, getCityId } from '@/utils/formatCity'
+import { cn } from '@/utils/cn'
 import { CONTACT_TRAVELLER } from '@/constants/test'
 import {
 	CONTACT_TRAVELLER_CONFIG,
 	MESSAGES_CONFIG,
 } from '@/constants/travellers'
-import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
 
 import { selectUserId } from '@/store/slices/authenticationSlice'
 import { contactTraveller } from '@/store/slices/messagesSlice'
@@ -21,12 +23,20 @@ import {
 	selectTravellers,
 } from '@/store/slices/travellersSlice'
 
+import BaseBadge from '@/components/ui/badge/BaseBadge'
 import BaseButton from '@/components/ui/button/BaseButton'
-import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
+import ImageGallery from '@/components/ui/image-gallery/ImageGallery'
+import InitialsAvatar from '@/components/ui/avatar/InitialsAvatar'
+import RequiredLegend from '@/components/ui/form/required-legend/RequiredLegend'
+import TripSummary from '@/components/travellers/trip-summary/TripSummary'
 
 import ContactTravellerForm from '@/components/forms/contact-traveller/ContactTravellerForm'
+
+// The side column shows the first three photos, one row of the Travellers card's tiles
+const RECIPIENT_PHOTOS = 3
+const SIDE_LABEL = 'm-0 hidden text-sm text-text-muted lg:block'
 
 const ContactTraveller = () => {
 	const { id } = useParams()
@@ -65,6 +75,10 @@ const ContactTraveller = () => {
 	}
 
 	const canContact = id !== userId && isTraveller
+	const recipientName = [traveller?.firstName, traveller?.lastName]
+		.filter(Boolean)
+		.join(' ')
+	const recipientPhotos = (traveller?.files ?? []).slice(0, RECIPIENT_PHOTOS)
 
 	const handleCloseError = () => setError(null)
 
@@ -109,6 +123,90 @@ const ContactTraveller = () => {
 		)
 	}
 
+	// The side column is the quoted message for a reply, else who you are writing to; without either the page stays one column
+	const quote = replyTo?.message ? (
+		<div className={cn(PAGE_LAYOUT.SECTION_CARD, 'flex flex-col gap-2')}>
+			<p className={SIDE_LABEL}>{CONTACT_TRAVELLER_CONFIG.REPLYING_TO}</p>
+			<blockquote
+				className="m-0 mb-4 rounded-sm bg-surface-sunken px-3 py-2.5 text-sm wrap-anywhere whitespace-pre-line text-text-muted lg:mb-0"
+				data-cy={CONTACT_TRAVELLER.REPLY_QUOTE}>
+				<p className="m-0 font-medium text-text">
+					{CONTACT_TRAVELLER_CONFIG.REPLY_QUOTE(
+						replyName || MESSAGES_CONFIG.UNKNOWN_TRAVELLER,
+						replyTo.createdAt
+							? formatMessageTime(replyTo.createdAt)
+							: null,
+					)}
+				</p>
+				<p className="m-0">{replyTo.message}</p>
+			</blockquote>
+		</div>
+	) : null
+	// Below 1024px the traveller is one line above the Message field
+	const recipient =
+		!replyTo && recipientName ? (
+			<div
+				className={cn(
+					PAGE_LAYOUT.SECTION_CARD,
+					'mb-4 flex flex-col gap-3 lg:mb-0',
+				)}
+				data-cy={CONTACT_TRAVELLER.RECIPIENT}>
+				<p className={SIDE_LABEL}>
+					{CONTACT_TRAVELLER_CONFIG.WRITING_TO}
+				</p>
+				<div className="flex items-center gap-3">
+					<InitialsAvatar name={recipientName} />
+					<div className="flex min-w-0 flex-col gap-0.5">
+						<p className="m-0 font-bold wrap-anywhere">
+							{recipientName}
+						</p>
+						<TripSummary
+							tripStart={traveller.tripStart}
+							tripEnd={traveller.tripEnd}
+							daysInCity={traveller.daysInCity}
+						/>
+					</div>
+				</div>
+				<div
+					className="hidden flex-col gap-3 lg:flex"
+					data-cy={CONTACT_TRAVELLER.RECIPIENT_DETAILS}>
+					{traveller.cities?.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{traveller.cities.map((city) => (
+								<BaseBadge
+									key={getCityId(city)}
+									type={getCityId(city)}
+									title={formatCity(city)}
+								/>
+							))}
+						</div>
+					)}
+					{recipientPhotos.length > 0 && (
+						<ul className="m-0 flex list-none flex-wrap gap-x-[2%] p-0">
+							<ImageGallery
+								title={recipientName}
+								urls={recipientPhotos}
+								dimensions={traveller.fileDimensions}
+								thumbnails={traveller.fileThumbnails}
+								alts={traveller.fileAlts}
+								sizes={GLOBAL.IMAGE_CARD_THUMBNAIL_SIZES}
+							/>
+						</ul>
+					)}
+					<BaseButton
+						isLink
+						to={`${PATHS.TRAVELLERS}/${id}`}
+						className="inline-flex min-h-11 items-center self-start text-text-link underline underline-offset-4"
+						data-cy={CONTACT_TRAVELLER.VIEW_TRIP}>
+						{CONTACT_TRAVELLER_CONFIG.VIEW_TRIP(
+							traveller.firstName,
+						)}
+					</BaseButton>
+				</div>
+			</div>
+		) : null
+	const side = quote ?? recipient
+
 	return (
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
@@ -137,7 +235,11 @@ const ContactTraveller = () => {
 					<BaseSpinner />
 				</BaseDialog>
 			)}
-			<BaseCard>
+			<div
+				className={cn(
+					side ? PAGE_LAYOUT.WIDE : PAGE_LAYOUT.NARROW,
+					PAGE_LAYOUT.PAGE_CARD,
+				)}>
 				{replyTo && (
 					<BaseButton
 						isLink
@@ -161,30 +263,23 @@ const ContactTraveller = () => {
 					</BaseButton>
 				)}
 				<h1
-					className="mt-0 mb-[0.83em] text-[1.5rem]"
+					className="mt-0 mb-2 text-[1.5rem]"
 					data-cy={CONTACT_TRAVELLER.TITLE}>
 					{title}
 				</h1>
-				{replyTo?.message && (
-					<blockquote
-						className="m-0 mb-4 rounded-sm bg-surface-sunken px-3 py-2.5 text-sm wrap-anywhere whitespace-pre-line text-text-muted"
-						data-cy={CONTACT_TRAVELLER.REPLY_QUOTE}>
-						<p className="m-0 font-medium text-text">
-							{CONTACT_TRAVELLER_CONFIG.REPLY_QUOTE(
-								replyName || MESSAGES_CONFIG.UNKNOWN_TRAVELLER,
-								replyTo.createdAt
-									? formatMessageTime(replyTo.createdAt)
-									: null,
-							)}
-						</p>
-						<p className="m-0">{replyTo.message}</p>
-					</blockquote>
-				)}
-				<ContactTravellerForm
-					isLoading={isLoading}
-					onSubmit={handleSubmit}
-				/>
-			</BaseCard>
+				<RequiredLegend className="mb-4" />
+				<div
+					className={cn(side && PAGE_LAYOUT.COLUMNS)}
+					data-cy={CONTACT_TRAVELLER.COLUMNS}>
+					{side}
+					<div className={cn(side && PAGE_LAYOUT.SECTION_CARD)}>
+						<ContactTravellerForm
+							isLoading={isLoading}
+							onSubmit={handleSubmit}
+						/>
+					</div>
+				</div>
+			</div>
 		</main>
 	)
 }

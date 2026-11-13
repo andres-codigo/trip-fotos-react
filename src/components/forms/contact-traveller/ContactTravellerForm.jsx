@@ -9,7 +9,6 @@ import {
 import BaseButton from '@/components/ui/button/BaseButton'
 import Textarea from '@/components/ui/form/textarea/Textarea'
 import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnnouncement'
-import RequiredLegend from '@/components/ui/form/required-legend/RequiredLegend'
 
 import useContactTravellerForm from './hooks/useContactTravellerForm'
 
@@ -37,12 +36,12 @@ const ContactTravellerForm = ({ isLoading = false, onSubmit }) => {
 			aria-busy={isLoading}
 			data-cy={CONTACT_TRAVELLER.FORM}>
 			<LoadingAnnouncement isLoading={isLoading} />
-			<RequiredLegend />
-			<div className="my-2">
+			<div className="my-2 lg:mt-0">
 				<Textarea
 					{...getFieldProps(MESSAGE)}
 					label="Message"
 					rows={5}
+					className="lg:h-[13.75rem]"
 					disabled={isLoading}
 					data-cy={CONTACT_TRAVELLER.MESSAGE_INPUT}
 					data-cy-error={CONTACT_TRAVELLER.MESSAGE_ERROR}

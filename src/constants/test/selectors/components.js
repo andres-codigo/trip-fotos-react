@@ -45,6 +45,7 @@ import {
 export const COMMON_SELECTORS = {
 	BASE_CARD: getByDataCy('base-card'),
 	BASE_SPINNER: getByDataCy('base-spinner'),
+	BASE_SPINNER_ICON: getByDataCy('base-spinner-icon'),
 	BASE_PROGRESS: getByDataCy(PROGRESS.ID),
 	BASE_PROGRESS_BAR: getByDataCy(PROGRESS.BAR),
 	BASE_PROGRESS_LABEL: getByDataCy(PROGRESS.LABEL),
@@ -145,6 +146,10 @@ export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	LAST_NAME_INPUT: getByDataCy('last-name-input'),
 	TRIP_DESCRIPTION_INPUT: getByDataCy('trip-description-input'),
 	TRIP_DATES: getByDataCy('trip-dates'),
+	COLUMNS: getByDataCy('traveller-registration-columns'),
+	TRIP_DETAILS: getByDataCy('trip-details'),
+	PHOTOS_SECTION: getByDataCy('traveller-photos-section'),
+	ACTIONS: getByDataCy('traveller-registration-actions'),
 	PHOTOS: getByDataCy('traveller-photos'),
 	TRIP_START_INPUT: getByDataCy('trip-start-input'),
 	TRIP_END_INPUT: getByDataCy('trip-end-input'),
@@ -292,6 +297,8 @@ export const PUBLIC_TRAVELLER_ITEM_SELECTORS = {
 
 export const TRAVELLER_DETAIL_SELECTORS = {
 	ROOT: getByDataCy(TRAVELLER_DETAIL.ROOT),
+	LAYOUT: getByDataCy(TRAVELLER_DETAIL.LAYOUT),
+	COLUMNS: getByDataCy(TRAVELLER_DETAIL.COLUMNS),
 	NAME: getByDataCy(TRAVELLER_DETAIL.NAME),
 	SPINNER: getByDataCy(TRAVELLER_DETAIL.SPINNER),
 	NOT_FOUND: getByDataCy(TRAVELLER_DETAIL.NOT_FOUND),
@@ -343,6 +350,10 @@ export const CONTACT_TRAVELLER_SELECTORS = {
 	FORM: getByDataCy(CONTACT_TRAVELLER.FORM),
 	BACK_TO_MESSAGES: getByDataCy(CONTACT_TRAVELLER.BACK_TO_MESSAGES),
 	REPLY_QUOTE: getByDataCy(CONTACT_TRAVELLER.REPLY_QUOTE),
+	COLUMNS: getByDataCy(CONTACT_TRAVELLER.COLUMNS),
+	RECIPIENT: getByDataCy(CONTACT_TRAVELLER.RECIPIENT),
+	RECIPIENT_DETAILS: getByDataCy(CONTACT_TRAVELLER.RECIPIENT_DETAILS),
+	VIEW_TRIP: getByDataCy(CONTACT_TRAVELLER.VIEW_TRIP),
 	MESSAGE_INPUT: getByDataCy(CONTACT_TRAVELLER.MESSAGE_INPUT),
 	MESSAGE_ERROR: getByDataCyError(CONTACT_TRAVELLER.MESSAGE_ERROR),
 	SUBMIT: getByDataCy(CONTACT_TRAVELLER.SUBMIT),
