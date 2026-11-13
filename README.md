@@ -61,17 +61,17 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- A public preview: visitors who are not logged in can browse every trip, newest first, with the traveller's first name, dates, cities and first photo, filter by city, and sign up to see the full trip
 - Clearer forms: helper text and a required-fields legend, an error summary, one wording for every error, the password rule up front with Show password and Forgot password, a required photo on Register and optional alt text per photo
 - Easier getting around: a tab bar for Travellers, Messages and My trip on phones, Log out tucked into an account menu, and a way back to Travellers from every trip
 - Your name in the header on every page straight after a reload, not only once you have opened Travellers
 - Edit your trip: change your details, add or remove photos (with Undo, nothing goes until you save), or delete your own profile, from Edit trip on your card and trip page
 - Trip dates: travellers give the days their trip started and ended, and cards show when it was and how long it lasted, in place of the registration date
-- Better messages: the sender's name and when they wrote, unread markers and an unread count, Reply inside Trip Fotos, and Delete with Undo; messaging is now between travellers only, with no email shared
 - Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, faster local checks that rerun only the checks and tests a change can affect, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
-- [#656](https://github.com/andres-codigo/trip-fotos-react/issues/656) — a public travellers preview for logged-out visitors
+- [#714](https://github.com/andres-codigo/trip-fotos-react/issues/714) — brand icons and the link-preview image in the dark palette
 - [#383](https://github.com/andres-codigo/trip-fotos-react/issues/383) — dark redesign layout: a multi-column Travellers grid and the design system's layout proposals
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
