@@ -61,7 +61,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
-- Two-column pages on desktop: a traveller's trip beside their photos, Edit your trip and Register split into trip details and photos, and Contact and Reply showing who you're writing to beside the message
+- Two-column pages on desktop: a traveller's trip beside their photos, Edit your trip and Register split into trip details and photos, Contact and Reply showing who you're writing to beside the message, and a Messages inbox with the open message beside the list
 - A Travellers card grid: two or three columns on wider screens, each card headed by the traveller's initials, and a "You" tag on your own card and trip
 - A new app icon, favicon and link-preview image in the dark palette: the camera in cream on a deep moss tile
 - A public preview: visitors who are not logged in can browse every trip, newest first, with the traveller's first name, dates, cities and first three photos, filter by city, and sign up to see the full trip
