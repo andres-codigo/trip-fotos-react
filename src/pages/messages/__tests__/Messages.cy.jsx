@@ -3,7 +3,10 @@ import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import {
+	MESSAGE_ACTIONS_SELECTORS,
 	MESSAGE_ITEM_SELECTORS,
+	MESSAGE_PANE_SELECTORS,
+	MESSAGE_ROW_SELECTORS,
 	MESSAGES_PAGE_SELECTORS,
 	MOCK_INBOX,
 	TOAST_SELECTORS,
@@ -77,12 +80,12 @@ describe('<Messages />', () => {
 	const deleteOf = (message) =>
 		cy
 			.contains(MESSAGE_ITEM_SELECTORS.ROOT, message.message)
-			.find(MESSAGE_ITEM_SELECTORS.DELETE)
+			.find(MESSAGE_ACTIONS_SELECTORS.DELETE)
 
 	const replyOf = (message) =>
 		cy
 			.contains(MESSAGE_ITEM_SELECTORS.ROOT, message.message)
-			.find(MESSAGE_ITEM_SELECTORS.REPLY)
+			.find(MESSAGE_ACTIONS_SELECTORS.REPLY)
 
 	it('lists the messages, marks the unread one read and passes a11y', () => {
 		mountPage()
@@ -140,12 +143,55 @@ describe('<Messages />', () => {
 		cy.get(TOAST_SELECTORS.DISMISS).click()
 
 		cy.wait('@deleteMessage')
-		cy.get(MESSAGE_ITEM_SELECTORS.DELETE_ERROR).should('be.visible')
+		cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE_ERROR).should('be.visible')
 		cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 2)
 		cy.checkA11y()
 
-		cy.get(MESSAGE_ITEM_SELECTORS.TRY_AGAIN).click()
+		cy.get(MESSAGE_ACTIONS_SELECTORS.TRY_AGAIN).click()
 		cy.wait('@deleteMessage')
-		cy.get(MESSAGE_ITEM_SELECTORS.DELETE_ERROR).should('be.visible')
+		cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE_ERROR).should('be.visible')
+	})
+
+	describe('Inbox either side of 1024px', () => {
+		const box = (selector) =>
+			cy.get(selector).then(($el) => $el[0].getBoundingClientRect())
+
+		it('stays the list of cards at 1023px', () => {
+			cy.viewport(1023, 900)
+			mountPage()
+
+			cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 2)
+			cy.get(MESSAGES_PAGE_SELECTORS.INBOX).should('not.exist')
+		})
+
+		it('puts a 380px list beside the reading pane from 1024px, and passes a11y', () => {
+			cy.viewport(1024, 900)
+			mountPage()
+
+			cy.get(MESSAGE_ROW_SELECTORS.ROOT).should('have.length', 2)
+			cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('not.exist')
+			box(MESSAGES_PAGE_SELECTORS.INBOX_LIST).then((list) => {
+				expect(list.width).to.be.closeTo(380, 0.5)
+				box(MESSAGE_PANE_SELECTORS.ROOT).then((pane) => {
+					expect(pane.left - list.right).to.be.closeTo(24, 0.5)
+					expect(pane.top).to.be.closeTo(list.top, 0.5)
+					expect(pane.width).to.be.greaterThan(450)
+				})
+			})
+			cy.get(MESSAGE_PANE_SELECTORS.SENDER).should(
+				'contain',
+				'Jane Smith',
+			)
+			cy.checkA11y()
+		})
+
+		it('caps the inbox at 1160px at 1280px', () => {
+			cy.viewport(1280, 900)
+			mountPage()
+
+			box(MESSAGES_PAGE_SELECTORS.INBOX).then((inbox) => {
+				expect(inbox.width).to.be.closeTo(1160, 0.5)
+			})
+		})
 	})
 })

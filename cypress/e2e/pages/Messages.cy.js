@@ -1,6 +1,7 @@
 import { API_DATABASE } from '../../../src/constants/api'
 import {
 	CONTACT_TRAVELLER_SELECTORS,
+	MESSAGE_ACTIONS_SELECTORS,
 	MESSAGE_ITEM_SELECTORS,
 	MESSAGES_PAGE_SELECTORS,
 	TOAST_SELECTORS,
@@ -31,7 +32,7 @@ const visitMessages = () => {
 }
 
 const deleteFirst = () => {
-	cy.get(MESSAGE_ITEM_SELECTORS.DELETE).first().click()
+	cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE).first().click()
 	cy.get(MESSAGE_ITEM_SELECTORS.ROOT).should('have.length', 1)
 	cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST).should('be.visible')
 }
@@ -65,7 +66,7 @@ describe('Logged in > Messages page', () => {
 				cy.get(MESSAGE_ITEM_SELECTORS.TIME)
 					.invoke('text')
 					.should('match', /^\d+ min ago$/)
-				cy.get(MESSAGE_ITEM_SELECTORS.REPLY).should(
+				cy.get(MESSAGE_ACTIONS_SELECTORS.REPLY).should(
 					'have.text',
 					MESSAGES_CONFIG.REPLY,
 				)
@@ -79,7 +80,7 @@ describe('Logged in > Messages page', () => {
 				)
 				cy.get(MESSAGE_ITEM_SELECTORS.NEW_TAG).should('not.exist')
 				cy.get(MESSAGE_ITEM_SELECTORS.TIME).should('not.exist')
-				cy.get(MESSAGE_ITEM_SELECTORS.REPLY)
+				cy.get(MESSAGE_ACTIONS_SELECTORS.REPLY)
 					.should('have.text', MESSAGES_CONFIG.REPLY_BY_EMAIL)
 					.and('have.attr', 'href')
 					.and('match', /^mailto:sender-two@example\.com\?/)
@@ -149,7 +150,7 @@ describe('Logged in > Messages page', () => {
 		cy.intercept(API_DATABASE.POST, MESSAGES_URL).as('sendReply')
 		visitMessages()
 
-		cy.get(MESSAGE_ITEM_SELECTORS.REPLY).first().click()
+		cy.get(MESSAGE_ACTIONS_SELECTORS.REPLY).first().click()
 		cy.location('pathname').should(
 			'eq',
 			`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}/contact`,

@@ -198,6 +198,7 @@ export const MESSAGES_CONFIG = Object.freeze({
 	SHOW_ALL: 'Show all',
 	SHOW_LESS: 'Show less',
 	TRY_AGAIN: 'Try again',
+	TRYING_AGAIN: 'Trying again…',
 	DELETED: 'Message deleted.',
 	UNDO: 'Undo',
 	UNDO_DURATION_MS: 8000,
@@ -210,6 +211,10 @@ export const MESSAGES_CONFIG = Object.freeze({
 		'When a traveller contacts you from your card, their message appears here.',
 	BROWSE_TRAVELLERS: 'Browse travellers',
 	SKELETON_COUNT: 3,
+	// From 1024px Messages is an inbox: a list beside a reading pane, the open message kept in ?message=
+	INBOX_SKELETON_COUNT: 5,
+	MESSAGE_PARAM: 'message',
+	NEW_ROW_HIDDEN: ', new',
 	UNREAD_LABEL: unreadLabel,
 	NAV_LABEL: (unread) =>
 		unread > 0 ? `Messages, ${unreadLabel(unread)}` : 'Messages',

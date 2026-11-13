@@ -7,28 +7,10 @@ import { PATHS } from '@/constants/ui'
 
 import { cn } from '@/utils/cn'
 import { formatFullTime, formatMessageTime } from '@/utils/formatMessageTime'
+import { senderLabel } from '@/utils/messageSender'
 
+import MessageActions from '@/components/messages/message-actions/MessageActions'
 import BaseButton from '@/components/ui/button/BaseButton'
-
-const actionClasses = 'min-h-11 px-4 py-0 font-medium'
-// Matches BaseButton's primary look, for the one action that is a mailto link rather than a route
-const mailtoClasses =
-	'inline-flex min-h-11 items-center justify-center rounded-pill border border-solid border-accent bg-accent px-4 font-medium text-on-accent no-underline hover:border-accent-hover hover:bg-accent-hover active:border-accent-hover active:bg-accent-hover'
-
-const senderLabel = ({ senderStatus, senderName, userEmail }) => {
-	if (senderStatus === SENDER_STATUS.LEGACY) return userEmail
-	if (senderStatus === SENDER_STATUS.FORMER)
-		return MESSAGES_CONFIG.FORMER_TRAVELLER
-	return senderName || MESSAGES_CONFIG.UNKNOWN_TRAVELLER
-}
-
-const mailtoHref = (email, message) =>
-	`mailto:${email}?${new URLSearchParams({
-		subject: MESSAGES_CONFIG.REPLY_EMAIL_SUBJECT,
-		body: `\n\n> ${message}`,
-	})
-		.toString()
-		.replace(/\+/g, '%20')}`
 
 const MessageItem = ({
 	id,
@@ -48,9 +30,6 @@ const MessageItem = ({
 
 	const sender = senderLabel({ senderStatus, senderName, userEmail })
 	const hasCard = senderStatus === SENDER_STATUS.TRAVELLER
-	const canReply =
-		senderStatus === SENDER_STATUS.TRAVELLER ||
-		senderStatus === SENDER_STATUS.UNKNOWN
 	const isLong = message.length > MESSAGES_CONFIG.CLAMP_LENGTH
 	const when = createdAt ? formatMessageTime(createdAt) : null
 
@@ -127,67 +106,21 @@ const MessageItem = ({
 						: MESSAGES_CONFIG.SHOW_ALL}
 				</button>
 			)}
-			<div className="mt-3 flex flex-wrap items-center gap-2">
-				{canReply && (
-					<BaseButton
-						isLink
-						modeType="primary"
-						to={`${PATHS.TRAVELLERS}/${senderId}/contact`}
-						state={{
-							replyTo: {
-								name: senderName,
-								message,
-								createdAt,
-							},
-						}}
-						className={actionClasses}
-						data-cy={MESSAGE_ITEM.REPLY}>
-						{MESSAGES_CONFIG.REPLY}
-					</BaseButton>
-				)}
-				{senderStatus === SENDER_STATUS.LEGACY && userEmail && (
-					<a
-						className={mailtoClasses}
-						href={mailtoHref(userEmail, message)}
-						data-cy={MESSAGE_ITEM.REPLY}>
-						{MESSAGES_CONFIG.REPLY_BY_EMAIL}
-					</a>
-				)}
-				<span className="flex-1" />
-				<BaseButton
-					type="button"
-					modeType="text"
-					className={cn(
-						actionClasses,
-						'rounded-pill px-3 text-text-muted hover:bg-danger-surface hover:text-danger-text active:bg-danger-surface active:text-danger-text',
-					)}
-					aria-label={MESSAGES_CONFIG.DELETE_LABEL(sender)}
-					onClick={() => onDelete(id)}
-					data-cy={MESSAGE_ITEM.DELETE}>
-					{MESSAGES_CONFIG.DELETE}
-				</BaseButton>
-			</div>
-			{deleteError && (
-				<div
-					role="alert"
-					className="mt-3 flex flex-wrap items-center gap-2.5 rounded-sm border border-danger bg-danger-surface px-3 py-2.5 text-sm"
-					data-cy={MESSAGE_ITEM.DELETE_ERROR}>
-					<span className="min-w-40 flex-1">{deleteError}</span>
-					<BaseButton
-						type="button"
-						modeType="text"
-						isDisabled={isRetrying}
-						aria-busy={isRetrying}
-						className={cn(
-							actionClasses,
-							'rounded-pill px-3 text-danger-text',
-						)}
-						onClick={() => onRetry(id)}
-						data-cy={MESSAGE_ITEM.TRY_AGAIN}>
-						{MESSAGES_CONFIG.TRY_AGAIN}
-					</BaseButton>
-				</div>
-			)}
+			<MessageActions
+				id={id}
+				senderId={senderId}
+				senderName={senderName}
+				senderStatus={senderStatus}
+				userEmail={userEmail}
+				message={message}
+				createdAt={createdAt}
+				sender={sender}
+				deleteError={deleteError}
+				isRetrying={isRetrying}
+				onDelete={onDelete}
+				onRetry={onRetry}
+				className="mt-3"
+			/>
 		</li>
 	)
 }

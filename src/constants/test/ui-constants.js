@@ -170,6 +170,8 @@ export const TRAVELLER_SKELETON = Object.freeze({
 
 export const MESSAGE_SKELETON = Object.freeze({
 	ROOT: 'message-skeleton',
+	ROW: 'message-skeleton-row',
+	PANE: 'message-skeleton-pane',
 })
 
 export const ACCOUNT_MENU = Object.freeze({
@@ -278,6 +280,8 @@ export const MESSAGES_PAGE = Object.freeze({
 	LOADING: 'messages-loading',
 	SUMMARY: 'messages-summary',
 	LIST: 'messages-list',
+	INBOX: 'messages-inbox',
+	INBOX_LIST: 'messages-inbox-list',
 	EMPTY: 'messages-empty',
 	BROWSE_TRAVELLERS: 'messages-browse-travellers',
 	UNDO_TOAST: 'messages-undo-toast',
@@ -292,10 +296,32 @@ export const MESSAGE_ITEM = Object.freeze({
 	TIME: 'message-item-time',
 	TEXT: 'message-item-text',
 	SHOW_ALL: 'message-item-show-all',
-	REPLY: 'message-item-reply',
-	DELETE: 'message-item-delete',
-	DELETE_ERROR: 'message-item-delete-error',
-	TRY_AGAIN: 'message-item-try-again',
+})
+
+export const MESSAGE_ACTIONS = Object.freeze({
+	ROOT: 'message-actions',
+	REPLY: 'message-actions-reply',
+	DELETE: 'message-actions-delete',
+	DELETE_ERROR: 'message-actions-delete-error',
+	TRY_AGAIN: 'message-actions-try-again',
+})
+
+export const MESSAGE_ROW = Object.freeze({
+	ROOT: 'message-row',
+	LINK: 'message-row-link',
+	DOT: 'message-row-dot',
+	SENDER: 'message-row-sender',
+	TIME: 'message-row-time',
+	PREVIEW: 'message-row-preview',
+})
+
+export const MESSAGE_PANE = Object.freeze({
+	ROOT: 'message-pane',
+	SENDER: 'message-pane-sender',
+	SENDER_LINK: 'message-pane-sender-link',
+	NEW_TAG: 'message-pane-new',
+	TIME: 'message-pane-time',
+	TEXT: 'message-pane-text',
 })
 
 export const PASSWORD_RESET_FORM = Object.freeze({

@@ -7,13 +7,20 @@ import {
 	within,
 } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
+import {
+	createMemoryRouter,
+	MemoryRouter,
+	RouterProvider,
+} from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
-import { describe, it, expect, afterEach, vi } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
 import {
+	MESSAGE_ACTIONS,
 	MESSAGE_ITEM,
+	MESSAGE_PANE,
+	MESSAGE_ROW,
 	MESSAGE_SKELETON,
 	MESSAGES_PAGE,
 	MOCK_INBOX,
@@ -124,10 +131,10 @@ const cardFor = (message) =>
 		.find((item) => item.textContent.includes(message.message))
 
 const deleteButton = (message) =>
-	within(cardFor(message)).getByTestId(MESSAGE_ITEM.DELETE)
+	within(cardFor(message)).getByTestId(MESSAGE_ACTIONS.DELETE)
 
 const replyButton = (message) =>
-	within(cardFor(message)).getByTestId(MESSAGE_ITEM.REPLY)
+	within(cardFor(message)).getByTestId(MESSAGE_ACTIONS.REPLY)
 
 const renderLoaded = async (options) => {
 	const fetchMock = stubDatabase(options)
@@ -137,6 +144,11 @@ const renderLoaded = async (options) => {
 }
 
 describe('Messages', () => {
+	// The card list below 1024px; the inbox tests widen the window
+	beforeEach(() => {
+		vi.stubGlobal('innerWidth', 768)
+	})
+
 	afterEach(() => {
 		vi.useRealTimers()
 		vi.unstubAllGlobals()
@@ -471,14 +483,16 @@ describe('Messages', () => {
 			fireEvent.click(deleteButton(SAMPLE_MESSAGE_ONE))
 			fireEvent.click(screen.getByTestId(TOAST.DISMISS))
 
-			const alert = await screen.findByTestId(MESSAGE_ITEM.DELETE_ERROR)
+			const alert = await screen.findByTestId(
+				MESSAGE_ACTIONS.DELETE_ERROR,
+			)
 			expect(alert).toHaveAttribute('role', 'alert')
 			expect(alert).toHaveTextContent(
 				ERROR_MESSAGES.FAILED_TO_DELETE_MESSAGE,
 			)
 			expect(cardFor(SAMPLE_MESSAGE_ONE)).toContainElement(alert)
 
-			const tryAgain = screen.getByTestId(MESSAGE_ITEM.TRY_AGAIN)
+			const tryAgain = screen.getByTestId(MESSAGE_ACTIONS.TRY_AGAIN)
 			fireEvent.click(tryAgain)
 
 			expect(tryAgain).toBeDisabled()
@@ -496,7 +510,7 @@ describe('Messages', () => {
 			)
 			expect(store.getState().messages.messages).toHaveLength(1)
 			expect(
-				screen.queryByTestId(MESSAGE_ITEM.DELETE_ERROR),
+				screen.queryByTestId(MESSAGE_ACTIONS.DELETE_ERROR),
 			).not.toBeInTheDocument()
 		})
 
@@ -507,15 +521,17 @@ describe('Messages', () => {
 
 			fireEvent.click(deleteButton(SAMPLE_MESSAGE_ONE))
 			fireEvent.click(screen.getByTestId(TOAST.DISMISS))
-			fireEvent.click(await screen.findByTestId(MESSAGE_ITEM.TRY_AGAIN))
+			fireEvent.click(
+				await screen.findByTestId(MESSAGE_ACTIONS.TRY_AGAIN),
+			)
 
 			await waitFor(() =>
 				expect(
-					screen.getByTestId(MESSAGE_ITEM.TRY_AGAIN),
+					screen.getByTestId(MESSAGE_ACTIONS.TRY_AGAIN),
 				).toBeEnabled(),
 			)
 			expect(
-				screen.getByTestId(MESSAGE_ITEM.DELETE_ERROR),
+				screen.getByTestId(MESSAGE_ACTIONS.DELETE_ERROR),
 			).toBeInTheDocument()
 			expect(cardFor(SAMPLE_MESSAGE_ONE)).toBeInTheDocument()
 		})
@@ -525,13 +541,13 @@ describe('Messages', () => {
 
 			fireEvent.click(deleteButton(SAMPLE_MESSAGE_ONE))
 			fireEvent.click(screen.getByTestId(TOAST.DISMISS))
-			await screen.findByTestId(MESSAGE_ITEM.DELETE_ERROR)
+			await screen.findByTestId(MESSAGE_ACTIONS.DELETE_ERROR)
 
 			fireEvent.click(deleteButton(SAMPLE_MESSAGE_ONE))
 			fireEvent.click(screen.getByTestId(TOAST.ACTION))
 
 			expect(
-				screen.queryByTestId(MESSAGE_ITEM.DELETE_ERROR),
+				screen.queryByTestId(MESSAGE_ACTIONS.DELETE_ERROR),
 			).not.toBeInTheDocument()
 		})
 	})
@@ -565,7 +581,7 @@ describe('Messages', () => {
 
 			expect(
 				within(screen.getByTestId(MESSAGE_ITEM.ROOT)).getByTestId(
-					MESSAGE_ITEM.DELETE,
+					MESSAGE_ACTIONS.DELETE,
 				),
 			).toHaveFocus()
 		})
@@ -579,6 +595,313 @@ describe('Messages', () => {
 
 			expect(screen.getByRole('heading', { level: 1 })).toHaveFocus()
 			expect(screen.getByTestId(MESSAGES_PAGE.EMPTY)).toBeInTheDocument()
+		})
+	})
+
+	describe('Inbox from 1024px', () => {
+		// Newest first: A is read, B the newest unread, C the oldest
+		const RECORD = (id, createdAt, read) => ({
+			senderId: SAMPLE_MESSAGE_ONE.senderId,
+			message: `Message ${id}`,
+			createdAt,
+			read,
+		})
+		const THREE = {
+			a: RECORD('a', SAMPLE_MESSAGE_ONE.createdAt + 3000, true),
+			b: RECORD('b', SAMPLE_MESSAGE_ONE.createdAt + 2000, false),
+			c: RECORD('c', SAMPLE_MESSAGE_ONE.createdAt + 1000, true),
+		}
+
+		beforeEach(() => {
+			vi.stubGlobal('innerWidth', 1280)
+		})
+
+		const renderInbox = async ({
+			inbox = THREE,
+			search = '',
+			...options
+		} = {}) => {
+			const fetchMock = stubDatabase({ inbox, ...options })
+			const store = configureTestStore({
+				reducer: {
+					authentication: authenticationReducer,
+					messages: messagesReducer,
+				},
+				preloadedState: {
+					authentication: {
+						...authenticationReducer(undefined, { type: '@@init' }),
+						userId: 'me',
+						token: 'token',
+					},
+				},
+			})
+			const router = createMemoryRouter(
+				[{ path: PATHS.MESSAGES, element: <Messages /> }],
+				{ initialEntries: [`${PATHS.MESSAGES}${search}`] },
+			)
+			render(
+				<Provider store={store}>
+					<RouterProvider router={router} />
+				</Provider>,
+			)
+			await screen.findByTestId(MESSAGES_PAGE.INBOX_LIST)
+			return { fetchMock, router }
+		}
+
+		const openParam = (router) =>
+			new URLSearchParams(router.state.location.search).get(
+				MESSAGES_CONFIG.MESSAGE_PARAM,
+			)
+		const rowLink = (id) =>
+			within(
+				screen
+					.getAllByTestId(MESSAGE_ROW.ROOT)
+					.find((row) => row.dataset.messageId === id),
+			).getByTestId(MESSAGE_ROW.LINK)
+		const pane = () => screen.getByTestId(MESSAGE_PANE.ROOT)
+		const paneDelete = () =>
+			within(pane()).getByTestId(MESSAGE_ACTIONS.DELETE)
+
+		it('lists every message beside the newest unread one, opened in place of the entry', async () => {
+			const { fetchMock, router } = await renderInbox()
+
+			const rows = screen.getAllByTestId(MESSAGE_ROW.ROOT)
+			expect(rows.map((row) => row.dataset.messageId)).toEqual([
+				'a',
+				'b',
+				'c',
+			])
+			expect(
+				screen.queryByTestId(MESSAGE_ITEM.ROOT),
+			).not.toBeInTheDocument()
+			expect(rowLink('b')).toHaveAttribute('aria-current', 'true')
+			expect(rowLink('a')).not.toHaveAttribute('aria-current')
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'b'),
+			)
+			expect(
+				within(pane()).getByTestId(MESSAGE_PANE.TEXT),
+			).toHaveTextContent('Message b')
+			expect(screen.getByTestId(MESSAGES_PAGE.SUMMARY)).toHaveTextContent(
+				MESSAGES_CONFIG.SUMMARY(1, 3),
+			)
+			await waitFor(() => expect(openParam(router)).toBe('b'))
+			expect(router.state.historyAction).toBe('REPLACE')
+			await waitFor(() =>
+				expect(requestsBy(fetchMock, 'PATCH')).toHaveLength(1),
+			)
+		})
+
+		it('keeps the unread marker on the row and New in the pane for the visit', async () => {
+			await renderInbox()
+
+			expect(rowLink('b')).toHaveAttribute('data-new')
+			expect(rowLink('a')).not.toHaveAttribute('data-new')
+			expect(
+				within(pane()).getByTestId(MESSAGE_PANE.NEW_TAG),
+			).toBeInTheDocument()
+		})
+
+		it('leaves the URL alone once the browser has moved to another entry, as a nav click does before this page leaves', async () => {
+			window.history.replaceState({ key: 'another-page' }, '')
+			try {
+				const { router } = await renderInbox()
+
+				expect(pane()).toHaveAttribute('data-message-id', 'b')
+				await act(async () => {})
+				expect(openParam(router)).toBeNull()
+				expect(router.state.historyAction).toBe('POP')
+			} finally {
+				window.history.replaceState(null, '')
+			}
+		})
+
+		it('opens the newest message when none is unread', async () => {
+			const { router } = await renderInbox({
+				inbox: { ...THREE, b: { ...THREE.b, read: true } },
+			})
+
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'a'),
+			)
+			await waitFor(() => expect(openParam(router)).toBe('a'))
+		})
+
+		it('opens the message a ?message= link names', async () => {
+			const { router } = await renderInbox({ search: '?message=c' })
+
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'c'),
+			)
+			expect(rowLink('c')).toHaveAttribute('aria-current', 'true')
+			expect(router.state.historyAction).toBe('POP')
+		})
+
+		it('opens the newest unread in place of an unknown ?message=', async () => {
+			const { router } = await renderInbox({ search: '?message=gone' })
+
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'b'),
+			)
+			await waitFor(() => expect(openParam(router)).toBe('b'))
+			expect(router.state.historyAction).toBe('REPLACE')
+		})
+
+		it('choosing a row pushes its ?message=, moves focus to the pane heading, and Back reopens the first', async () => {
+			const { router } = await renderInbox()
+			await waitFor(() => expect(openParam(router)).toBe('b'))
+
+			fireEvent.click(rowLink('c'))
+
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'c'),
+			)
+			expect(openParam(router)).toBe('c')
+			expect(router.state.historyAction).toBe('PUSH')
+			expect(
+				within(pane()).getByTestId(MESSAGE_PANE.SENDER),
+			).toHaveFocus()
+
+			await act(() => router.navigate(-1))
+
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'b'),
+			)
+		})
+
+		it('Delete opens the next older message with focus on its row, and Undo reopens the restored one', async () => {
+			const { fetchMock, router } = await renderInbox()
+			await waitFor(() => expect(openParam(router)).toBe('b'))
+
+			fireEvent.click(paneDelete())
+
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'c'),
+			)
+			expect(rowLink('c')).toHaveFocus()
+			expect(openParam(router)).toBe('c')
+			expect(router.state.historyAction).toBe('REPLACE')
+			expect(screen.getAllByTestId(MESSAGE_ROW.ROOT)).toHaveLength(2)
+			expect(screen.getByTestId(MESSAGES_PAGE.SUMMARY)).toHaveTextContent(
+				MESSAGES_CONFIG.SUMMARY(0, 2),
+			)
+			expect(
+				screen.getByTestId(MESSAGES_PAGE.UNDO_TOAST),
+			).toBeInTheDocument()
+
+			fireEvent.click(screen.getByTestId(TOAST.ACTION))
+
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'b'),
+			)
+			expect(rowLink('b')).toHaveFocus()
+			expect(openParam(router)).toBe('b')
+			await act(async () => {})
+			expect(deleteUrls(fetchMock)).toHaveLength(0)
+		})
+
+		it('Delete before the opened message reaches the URL still opens the next older one', async () => {
+			const { router } = await renderInbox()
+
+			fireEvent.click(paneDelete())
+
+			await waitFor(() => expect(openParam(router)).toBe('c'))
+			await act(async () => {})
+			expect(openParam(router)).toBe('c')
+			expect(pane()).toHaveAttribute('data-message-id', 'c')
+			expect(rowLink('c')).toHaveFocus()
+		})
+
+		it('Delete of the oldest message opens the newer one', async () => {
+			await renderInbox({ search: '?message=c' })
+
+			fireEvent.click(paneDelete())
+
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'b'),
+			)
+			expect(rowLink('b')).toHaveFocus()
+		})
+
+		it('Delete of the last message shows the empty state, focuses the heading and drops the param', async () => {
+			const { router } = await renderInbox({ inbox: { c: THREE.c } })
+			await waitFor(() => expect(openParam(router)).toBe('c'))
+
+			fireEvent.click(paneDelete())
+
+			expect(screen.getByTestId(MESSAGES_PAGE.EMPTY)).toBeInTheDocument()
+			expect(
+				screen.queryByTestId(MESSAGES_PAGE.INBOX),
+			).not.toBeInTheDocument()
+			expect(screen.getByRole('heading', { level: 1 })).toHaveFocus()
+			expect(openParam(router)).toBeNull()
+		})
+
+		it('a failed delete reopens the message with the error and Try again in the pane', async () => {
+			const { router } = await renderInbox({
+				deleteResponses: [failResponse()],
+			})
+			await waitFor(() => expect(openParam(router)).toBe('b'))
+
+			fireEvent.click(paneDelete())
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'c'),
+			)
+			fireEvent.click(screen.getByTestId(TOAST.DISMISS))
+
+			const alert = await screen.findByTestId(
+				MESSAGE_ACTIONS.DELETE_ERROR,
+			)
+			await waitFor(() =>
+				expect(pane()).toHaveAttribute('data-message-id', 'b'),
+			)
+			expect(pane()).toContainElement(alert)
+			expect(
+				within(pane()).getByTestId(MESSAGE_ACTIONS.TRY_AGAIN),
+			).toBeInTheDocument()
+			expect(openParam(router)).toBe('b')
+		})
+
+		it('shows skeleton rows beside a skeleton pane while loading', async () => {
+			const load = deferred()
+			stubDatabase({ loadResponse: load.promise })
+			renderPage()
+
+			expect(screen.getByTestId(MESSAGES_PAGE.INBOX)).toBeInTheDocument()
+			const rows = screen.getAllByTestId(MESSAGE_SKELETON.ROW)
+			expect(rows).toHaveLength(MESSAGES_CONFIG.INBOX_SKELETON_COUNT)
+			expect(rows[0].parentElement).toHaveAttribute('aria-busy', 'true')
+			expect(
+				screen.getByTestId(MESSAGE_SKELETON.PANE),
+			).toBeInTheDocument()
+			expect(screen.getByTestId(MESSAGES_PAGE.LOADING)).toHaveTextContent(
+				GLOBAL.SPINNER_LABEL.MESSAGES,
+			)
+
+			load.resolve(okResponse(INBOX))
+			await screen.findByTestId(MESSAGES_PAGE.INBOX_LIST)
+		})
+
+		it('keeps the one-column empty state with no messages', async () => {
+			stubDatabase({ inbox: null })
+			renderPage()
+
+			await screen.findByTestId(MESSAGES_PAGE.EMPTY)
+			expect(
+				screen.queryByTestId(MESSAGES_PAGE.INBOX),
+			).not.toBeInTheDocument()
+		})
+
+		it('ignores ?message= below 1024px and shows the cards', async () => {
+			vi.stubGlobal('innerWidth', 1023)
+			stubDatabase()
+			renderPage(`${PATHS.MESSAGES}?message=${SAMPLE_MESSAGE_TWO.id}`)
+
+			await screen.findByTestId(MESSAGES_PAGE.LIST)
+			expect(screen.getAllByTestId(MESSAGE_ITEM.ROOT)).toHaveLength(2)
+			expect(
+				screen.queryByTestId(MESSAGE_PANE.ROOT),
+			).not.toBeInTheDocument()
 		})
 	})
 })
