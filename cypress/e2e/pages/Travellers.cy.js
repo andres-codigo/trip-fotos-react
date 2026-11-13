@@ -402,6 +402,13 @@ describe('Public trips database rules', () => {
 			})
 				.its('status')
 				.should('be.oneOf', [401, 403])
+			// The legacy single cover gave way to photos in 0.27.2
+			signedIn(path, {
+				method: API_DATABASE.PUT,
+				body: summary({ cover: { url: 'https://example.com/a.jpg' } }),
+			})
+				.its('status')
+				.should('be.oneOf', [401, 403])
 			// A fourth photo would show more than the public preview allows
 			signedIn(path, {
 				method: API_DATABASE.PUT,
