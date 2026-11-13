@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.26.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.25.2...v0.26.0) (2026-11-13)
+
+
+### Features
+
+* public Travellers preview for logged-out visitors ([7513095](https://github.com/andres-codigo/trip-fotos-react/commit/75130955efd9e18af0cd768750bffe2f1f04fe66))
+* public trip summaries behind open read, full records behind sign-in ([8022e84](https://github.com/andres-codigo/trip-fotos-react/commit/8022e84651c2eb71ecb644cf77e978f5e2205e63))
+
 ## [0.25.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.25.1...v0.25.2) (2026-11-12)
 
 
