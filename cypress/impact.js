@@ -67,7 +67,7 @@ export const CAPTURES = {
 		areas: ['travellers', 'detail', 'trips'],
 	},
 	'public-travellers': {
-		title: 'captures the logged-out Travellers preview: rest, loading, error, empty, broken cover, many trips, filter, focus and Log in from a trip',
+		title: 'captures the logged-out Travellers preview: rest, loading, error, empty, broken photo, many trips, filter, focus and Log in from a trip',
 		areas: ['travellers', 'authentication', 'trips'],
 	},
 	'city-filter-many': {

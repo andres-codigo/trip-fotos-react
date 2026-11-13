@@ -447,10 +447,12 @@ describe('travellersSlice', () => {
 					firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
 					cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
 					tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
-					cover: {
-						url: 'https://mock-url.com/image.jpg',
-						alt: 'Lake Burley Griffin',
-					},
+					photos: [
+						expect.objectContaining({
+							url: 'https://mock-url.com/image.jpg',
+							alt: 'Lake Burley Griffin',
+						}),
+					],
 				})
 				expect(summary).not.toHaveProperty('tripDescription')
 				expect(summary).not.toHaveProperty('lastName')
@@ -1071,12 +1073,14 @@ describe('travellersSlice', () => {
 					tripStart: '2025-03-12',
 					tripEnd: '2025-03-19',
 					daysInCity: null,
-					cover: {
-						url: kept.url,
-						dimensions: kept.dimensions,
-						thumbnails: kept.thumbnails,
-						alt: null,
-					},
+					photos: [
+						{
+							url: kept.url,
+							dimensions: kept.dimensions,
+							thumbnails: kept.thumbnails,
+							alt: null,
+						},
+					],
 				})
 			})
 

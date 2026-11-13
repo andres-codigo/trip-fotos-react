@@ -530,13 +530,16 @@ describe(`UI check capture (${LABEL})`, () => {
 				freezeAnimation()
 				shot(`public-travellers-empty-${width}`)
 
-				// The seeded summaries with the first cover pointed at an unreachable photo, then cloned to 30 for paging
+				// The seeded summaries with the first photo pointed at an unreachable one, then cloned to 30 for paging
 				seeded().then((trips) => {
 					const [first, ...rest] = trips
 					const broken = {
 						...first,
 						firstName: 'Broken',
-						cover: { url: BROKEN_IMAGE_URL, alt: 'Unreachable' },
+						photos: [
+							{ url: BROKEN_IMAGE_URL, alt: 'Unreachable' },
+							...(first.photos ?? []).slice(1),
+						],
 					}
 					interceptOnce('GET', publicTrips, {
 						body: { 'ui-check-broken': broken },
@@ -548,7 +551,7 @@ describe(`UI check capture (${LABEL})`, () => {
 						timeout: TIMEOUT,
 					}).should('be.visible')
 					freezeAnimation()
-					shot(`public-travellers-broken-cover-${width}`)
+					shot(`public-travellers-broken-photo-${width}`)
 
 					const many = Object.fromEntries(
 						Array.from({ length: 30 }, (_, index) => [
@@ -1001,7 +1004,8 @@ describe(`UI check capture (${LABEL})`, () => {
 			eachWidth((width) => {
 				// The page the session left open loads the list too, after cy.visit resolves, so it must finish before the failure is stubbed
 				assertSettled()
-				interceptOnce('GET', '**/travellers.json*', {
+				// Every load fails, not just the first: a second load after sign-in settles would replace the error with the list
+				cy.intercept('GET', '**/travellers.json*', {
 					statusCode: 500,
 					body: {},
 				})

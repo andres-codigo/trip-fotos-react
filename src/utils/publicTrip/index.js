@@ -1,5 +1,8 @@
 // No imports, so the seed and backfill scripts can load it in Node without the @ alias
-const firstOf = (list) => Object.values(list ?? {})[0] ?? null
+// The database stores a list as an object and drops its null entries, so read by key, never by position
+const atIndex = (list, index) => list?.[index] ?? null
+
+const PUBLIC_PHOTO_LIMIT = 3
 
 // The fields anyone may read; everything else on a trip needs sign-in
 export const toPublicTrip = ({
@@ -14,7 +17,15 @@ export const toPublicTrip = ({
 	fileThumbnails,
 	fileAlts,
 } = {}) => {
-	const url = firstOf(files)
+	// The first photos in upload order, each with its own size, thumbnails and description
+	const photos = Object.values(files ?? {})
+		.slice(0, PUBLIC_PHOTO_LIMIT)
+		.map((url, index) => ({
+			url,
+			dimensions: atIndex(fileDimensions, index),
+			thumbnails: atIndex(fileThumbnails, index),
+			alt: atIndex(fileAlts, index),
+		}))
 	// Spread, so a last name starting with an emoji or accent pair keeps the whole character
 	const [lastInitial = null] = [...(lastName?.trim() ?? '')]
 
@@ -25,14 +36,7 @@ export const toPublicTrip = ({
 		tripStart: tripStart ?? null,
 		tripEnd: tripEnd ?? null,
 		daysInCity: daysInCity ?? null,
-		cover: url
-			? {
-					url,
-					dimensions: firstOf(fileDimensions),
-					thumbnails: firstOf(fileThumbnails),
-					alt: firstOf(fileAlts),
-				}
-			: null,
+		photos: photos.length ? photos : null,
 	}
 }
 

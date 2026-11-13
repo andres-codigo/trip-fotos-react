@@ -235,11 +235,11 @@ describe('Travellers page > logged out', () => {
 		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.NAME)
 			.last()
 			.should('have.text', `${SECOND.firstName} ${SECOND.lastName[0]}.`)
-		// The seeded first traveller has four photos; only the cover is public
+		// The seeded first traveller has four photos; only the first three are public
 		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.ROOT)
 			.first()
 			.find('img')
-			.should('have.length', 1)
+			.should('have.length', 3)
 		cy.contains(FIRST.tripDescription).should('not.exist')
 		cy.contains(FIRST.lastName).should('not.exist')
 		cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should('not.exist')
@@ -298,7 +298,7 @@ describe('Public trips database rules', () => {
 		'tripStart',
 		'tripEnd',
 		'daysInCity',
-		'cover',
+		'photos',
 	]
 	const database = (path, { auth, ...options } = {}) =>
 		cy.request({
@@ -341,9 +341,12 @@ describe('Public trips database rules', () => {
 			expect(body).to.have.property(TEST_USERS.TRAVELLER.ID)
 			Object.values(body).forEach((trip) => {
 				expect(PUBLIC_FIELDS).to.include.members(Object.keys(trip))
-				if (trip.cover) {
-					expect(Object.keys(trip.cover)).to.include.members(['url'])
-				}
+				Object.values(trip.photos ?? {}).forEach((photo) => {
+					expect(Object.keys(photo)).to.include.members(['url'])
+				})
+				expect(
+					Object.keys(trip.photos ?? {}),
+				).to.have.length.of.at.most(3)
 			})
 		})
 	})
@@ -363,10 +366,10 @@ describe('Public trips database rules', () => {
 				body: summary({
 					tripStart: '2025-03-12',
 					tripEnd: '2025-03-19',
-					cover: {
-						url: 'https://example.com/photo.jpg',
+					photos: [1, 2, 3].map((n) => ({
+						url: `https://example.com/photo-${n}.jpg`,
 						alt: 'Tokyo',
-					},
+					})),
 				}),
 			})
 				.its('status')
@@ -394,7 +397,18 @@ describe('Public trips database rules', () => {
 			signedIn(path, {
 				method: API_DATABASE.PUT,
 				body: summary({
-					cover: { url: 'https://example.com/a.jpg', extra: 'x' },
+					photos: [{ url: 'https://example.com/a.jpg', extra: 'x' }],
+				}),
+			})
+				.its('status')
+				.should('be.oneOf', [401, 403])
+			// A fourth photo would show more than the public preview allows
+			signedIn(path, {
+				method: API_DATABASE.PUT,
+				body: summary({
+					photos: [1, 2, 3, 4].map((n) => ({
+						url: `https://example.com/photo-${n}.jpg`,
+					})),
 				}),
 			})
 				.its('status')
