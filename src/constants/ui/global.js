@@ -44,7 +44,7 @@ export const GLOBAL = Object.freeze({
 	REMOVE_CITY_LABEL: (name) => `Remove ${name}`,
 
 	// IMAGE
-	IMAGE_UNAVAILABLE: 'Image unavailable',
+	IMAGE_UNAVAILABLE: 'Photo unavailable',
 	// Shortest side of each thumbnail made on upload, so a square tile is filled at 1x and 2x+ screens
 	IMAGE_THUMBNAIL_WIDTHS: Object.freeze([320, 640]),
 	// Tiles are 48% of the list on phones and 32% above that, in a page card capped at 40rem
@@ -64,6 +64,7 @@ export const GLOBAL = Object.freeze({
 		DEFAULT: 'Loading…',
 		MESSAGES: 'Loading messages…',
 		TRAVELLER: 'Loading traveller…',
+		PHOTO: 'Loading photo…',
 		DELETING_MESSAGE: 'Deleting message…',
 		DELETING_TRAVELLER: 'Deleting traveller…',
 	},

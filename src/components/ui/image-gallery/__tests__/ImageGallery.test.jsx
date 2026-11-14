@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 
 import { IMAGE } from '@/constants/test'
@@ -22,13 +22,14 @@ const renderGallery = ({
 	dimensions,
 	thumbnails,
 	alts,
+	galleryUrls = urls,
 } = {}) =>
 	render(
 		<MemoryRouter initialEntries={[initialEntry]}>
 			<ul>
 				<ImageGallery
 					title="Ada"
-					urls={urls}
+					urls={galleryUrls}
 					dimensions={dimensions}
 					thumbnails={thumbnails}
 					alts={alts}
@@ -162,7 +163,98 @@ describe('<ImageGallery />', () => {
 		)
 	})
 
+	it('loads only the open photo and its neighbours', () => {
+		renderGallery()
+		openAt(0)
+		const sources = [
+			...screen.getByRole('dialog').querySelectorAll('img'),
+		].map((img) => img.getAttribute('src'))
+		expect(sources).toEqual(['/a.jpg', '/b.jpg'])
+	})
+
+	it('shows the tile’s thumbnail until the full photo loads', () => {
+		renderGallery({
+			thumbnails: { 0: [{ width: 320, url: '/a-320w.jpg' }] },
+		})
+		openAt(0)
+		const dialog = screen.getByRole('dialog')
+		expect(dialog.querySelector('img[src="/a-320w.jpg"]')).not.toBeNull()
+		fireEvent.load(full())
+		expect(dialog.querySelector('img[src="/a-320w.jpg"]')).toBeNull()
+	})
+
+	it('holds a legacy photo’s place with a block in its shape', () => {
+		renderGallery({ dimensions: [{ width: 900, height: 1200 }] })
+		openAt(0)
+		expect(
+			screen
+				.getByRole('dialog')
+				.querySelector('svg[viewBox="0 0 900 1200"]'),
+		).not.toBeNull()
+	})
+
+	it('names a slow photo as loading, and only once it is slow', () => {
+		vi.useFakeTimers()
+		try {
+			renderGallery()
+			openAt(0)
+			expect(
+				screen.queryByText(GLOBAL.SPINNER_LABEL.PHOTO),
+			).not.toBeInTheDocument()
+			act(() => vi.advanceTimersByTime(400))
+			expect(
+				screen.getByText(GLOBAL.SPINNER_LABEL.PHOTO),
+			).toBeInTheDocument()
+			fireEvent.load(full())
+			expect(
+				screen.queryByText(GLOBAL.SPINNER_LABEL.PHOTO),
+			).not.toBeInTheDocument()
+		} finally {
+			vi.useRealTimers()
+		}
+	})
+
+	it('shows no arrows or counter for a single photo', () => {
+		renderGallery({ galleryUrls: ['/a.jpg'] })
+		openAt(0)
+		expect(full()).toHaveAttribute('src', '/a.jpg')
+		expect(screen.queryByTestId(IMAGE.PREVIOUS)).not.toBeInTheDocument()
+		expect(screen.queryByTestId(IMAGE.NEXT)).not.toBeInTheDocument()
+		expect(screen.queryByTestId(IMAGE.COUNTER)).not.toBeInTheDocument()
+	})
+
+	it('returns focus to the tile that opened it', async () => {
+		renderGallery()
+		const tile = screen.getAllByRole('button', { name: /View Ada/ })[1]
+		tile.focus()
+		fireEvent.click(tile)
+		fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+		await waitFor(() => expect(tile).toHaveFocus())
+	})
+
 	describe('with a urlParam', () => {
+		it('opens the photo a swipe settles on', () => {
+			vi.useFakeTimers()
+			try {
+				renderGallery({ urlParam: 'photo' })
+				openAt(0)
+				const track = screen.getByTestId(IMAGE.TRACK)
+				Object.defineProperty(track, 'clientWidth', { value: 390 })
+				track.scrollLeft = 780
+				fireEvent.scroll(track)
+				expect(screen.getByTestId('search')).toHaveTextContent(
+					'?photo=1',
+				)
+				act(() => vi.advanceTimersByTime(120))
+				expect(screen.getByTestId('search')).toHaveTextContent(
+					'?photo=3',
+				)
+				expect(full()).toHaveAttribute('src', '/c.jpg')
+			} finally {
+				vi.useRealTimers()
+			}
+		})
+
 		it('writes the 1-based photo number to the URL as it opens and steps', () => {
 			renderGallery({ urlParam: 'photo' })
 			expect(screen.getByTestId('search')).toHaveTextContent('')

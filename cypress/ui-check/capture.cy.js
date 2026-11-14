@@ -69,6 +69,8 @@ const WIDTH_SPEC = parseWidthSpec(Cypress.expose('UI_CHECK_WIDTHS'))
 const ONLY = parseOnly(Cypress.expose('UI_CHECK_ONLY'))
 // A filtered run overwrites its own shots rather than adding `name (1).png` beside them
 const SCREENSHOT = { overwrite: true }
+// The lightbox fills the screen; a full-page shot hides the scrollbar and widens its photo track without a re-snap, which a real resize never does
+const LIGHTBOX_SHOT = { capture: 'viewport' }
 const HEIGHT = 900
 const BROKEN_IMAGE_ID = 'ui-check-broken-image'
 const BROKEN_IMAGE_URL = 'http://localhost:1/unreachable.png'
@@ -612,7 +614,8 @@ describe(`UI check capture (${LABEL})`, () => {
 					cy.clearAllLocalStorage()
 					visit(PATHS.TRAVELLERS)
 					cy.get(card).should('have.length', 1)
-					cy.contains('Image unavailable', {
+					// Main still says "Image unavailable"; #737 changed the copy
+					cy.contains(/(Image|Photo) unavailable/, {
 						timeout: TIMEOUT,
 					}).should('be.visible')
 					freezeAnimation()
@@ -879,6 +882,11 @@ describe(`UI check capture (${LABEL})`, () => {
 						'<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480"/>',
 					headers: { 'content-type': 'image/svg+xml' },
 				}
+				// The square's tiles load from thumbnails, so only the lightbox meets its full photo failing
+				if (request.url === square.file) {
+					request.reply({ statusCode: 404 })
+					return
+				}
 				request.reply(
 					request.url === SLOW_PHOTO_URL
 						? { ...svg, delay: 60000 }
@@ -979,6 +987,104 @@ describe(`UI check capture (${LABEL})`, () => {
 				shot(`photo-states-detail-${suffix}`)
 			}
 
+			// The full-screen lightbox (#737), which main does not have: focus, every kind of photo, loading, failed and one photo
+			const lightboxStates = (width) => {
+				const closeButton = '[role="dialog"] button[aria-label="Close"]'
+				const settleOn = (position, count = 7) => {
+					cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
+						'have.text',
+						`${position + 1} of ${count}`,
+					)
+					cy.get(COMMON_SELECTORS.IMAGE_GALLERY_TRACK).should(
+						($track) =>
+							expect(
+								Math.abs(
+									$track[0].scrollLeft -
+										position * $track[0].clientWidth,
+								),
+							).to.be.lessThan(1),
+					)
+				}
+				const next = (times) =>
+					Cypress._.times(times, () =>
+						cy.get(COMMON_SELECTORS.IMAGE_GALLERY_NEXT).click(),
+					)
+
+				forcePseudo(closeButton, ['focus', 'focus-visible'], {
+					scroll: false,
+				})
+				shot(`photo-states-lightbox-focus-${width}`, LIGHTBOX_SHOT)
+				forcePseudo(closeButton, [], { scroll: false })
+
+				next(1)
+				settleOn(1)
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL)
+					.should('have.attr', 'src', portrait.file)
+					.and('be.visible')
+				shot(`photo-states-lightbox-portrait-${width}`, LIGHTBOX_SHOT)
+
+				// The held photo has no thumbnail, so its place is a skeleton block with the loading status
+				next(3)
+				settleOn(4)
+				cy.contains('[role="dialog"]', 'Loading photo…')
+				freezeAnimation()
+				shot(`photo-states-lightbox-loading-${width}`, LIGHTBOX_SHOT)
+
+				next(1)
+				settleOn(5)
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL)
+					.should('have.attr', 'src', panorama.file)
+					.and('be.visible')
+				shot(`photo-states-lightbox-panorama-${width}`, LIGHTBOX_SHOT)
+				// A phone held sideways: wide enough for the side arrows, short enough for the smaller ones
+				if (width === 1280) {
+					cy.viewport(844, 390)
+					settleOn(5)
+					shot(
+						'photo-states-lightbox-landscape-844x390',
+						LIGHTBOX_SHOT,
+					)
+					cy.viewport(width, HEIGHT)
+					settleOn(5)
+				}
+
+				next(1)
+				settleOn(6)
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_FALLBACK).should(
+					'contain.text',
+					'Photo unavailable',
+				)
+				cy.get(COMMON_SELECTORS.IMAGE_GALLERY_NEXT).should(
+					'be.disabled',
+				)
+				shot(
+					`photo-states-lightbox-last-failed-${width}`,
+					LIGHTBOX_SHOT,
+				)
+
+				cy.request({
+					method: 'PATCH',
+					url: emulatorDatabase(`travellers/${PHOTOS_ID}`),
+					body: {
+						files: [landscape.file],
+						fileThumbnails: [landscape.thumbnails],
+					},
+				})
+				visit(`${PATHS.TRAVELLERS}/${PHOTOS_ID}`)
+				assertSettled()
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).first().click()
+				cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL).should('be.visible')
+				cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
+					'not.exist',
+				)
+				shot(`photo-states-lightbox-one-photo-${width}`, LIGHTBOX_SHOT)
+				cy.request({
+					method: 'PATCH',
+					url: emulatorDatabase(`travellers/${PHOTOS_ID}`),
+					body: PHOTO_STATES,
+				})
+			}
+
 			eachWidth((width) => {
 				capture(width)
 				cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).first().click()
@@ -988,6 +1094,7 @@ describe(`UI check capture (${LABEL})`, () => {
 					.and(($img) => expect($img[0].naturalWidth).to.equal(1600))
 				freezeAnimation()
 				shot(`photo-states-dialog-${width}`)
+				if (isBranch) lightboxStates(width)
 			})
 
 			// A 2x screen picks the 640 thumbnails: same layout, so only the sources change
