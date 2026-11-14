@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 
 import * as redux from 'react-redux'
 import * as router from 'react-router-dom'
@@ -60,6 +60,15 @@ vi.mock('@/store/slices/travellersSlice', () => ({
 vi.mock('@/components/common/loading-fallback/LoadingFallback', () => ({
 	default: () => <div>Loading...</div>,
 }))
+
+vi.mock(
+	'@/components/travellers/travellers-page-skeleton/TravellersPageSkeleton',
+	() => ({ default: () => <div>TravellersPageSkeleton</div> }),
+)
+vi.mock(
+	'@/components/messages/messages-page-skeleton/MessagesPageSkeleton',
+	() => ({ default: () => <div>MessagesPageSkeleton</div> }),
+)
 
 vi.mock('@/components/layout/skip-link/SkipLink', () => ({
 	default: () => <div>SkipLink</div>,
@@ -127,6 +136,81 @@ describe('App', () => {
 
 	afterEach(() => {
 		vi.clearAllMocks()
+	})
+
+	// The page's code is still downloading on the first render, so the boundary's fallback shows
+	describe('Route fallbacks', () => {
+		it.each([
+			[PATHS.TRAVELLERS, 'TravellersPageSkeleton', 'TravellersPage'],
+			[PATHS.MESSAGES, 'MessagesPageSkeleton', 'MessagesPage'],
+		])(
+			'shows the page skeleton, not the spinner, while %s loads',
+			async (path, skeleton, page) => {
+				setAuthState('token', false)
+				vi.spyOn(router, 'useLocation').mockReturnValue({
+					pathname: path,
+				})
+
+				renderWithRoute(path)
+
+				expect(screen.getByText(skeleton)).toBeInTheDocument()
+				expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+				await waitFor(() => {
+					expect(screen.getByText(page)).toBeInTheDocument()
+				})
+			},
+		)
+
+		it('keeps the spinner for the other routes', async () => {
+			setAuthState(null, false)
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.PRIVACY,
+			})
+
+			renderWithRoute(PATHS.PRIVACY)
+
+			expect(screen.getByText('Loading...')).toBeInTheDocument()
+			await waitFor(() => {
+				expect(screen.getByText('PrivacyPage')).toBeInTheDocument()
+			})
+		})
+	})
+
+	describe('Prefetching the nav pages', () => {
+		afterEach(() => {
+			delete window.requestIdleCallback
+			delete window.cancelIdleCallback
+		})
+
+		it('waits for the browser to be idle and stops waiting on unmount', async () => {
+			window.requestIdleCallback = vi.fn(() => 7)
+			window.cancelIdleCallback = vi.fn()
+			setAuthState(null, false)
+
+			const { unmount } = renderWithRoute(PATHS.PRIVACY)
+
+			expect(window.requestIdleCallback).toHaveBeenCalledTimes(1)
+			await act(async () => {
+				window.requestIdleCallback.mock.calls[0][0]()
+			})
+			await waitFor(() => {
+				expect(screen.getByText('PrivacyPage')).toBeInTheDocument()
+			})
+			unmount()
+			expect(window.cancelIdleCallback).toHaveBeenCalledWith(7)
+		})
+
+		it('falls back to a timeout where the browser has no idle callback', async () => {
+			const setTimeoutSpy = vi.spyOn(window, 'setTimeout')
+			setAuthState(null, false)
+
+			renderWithRoute(PATHS.PRIVACY)
+
+			expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 0)
+			await waitFor(() => {
+				expect(screen.getByText('PrivacyPage')).toBeInTheDocument()
+			})
+		})
 	})
 
 	describe('Rendering tests', () => {

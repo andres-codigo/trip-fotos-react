@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import PropTypes from 'prop-types'
 
 import { handleApiError } from '@/utils/errorHandler'
-import { PATHS } from '@/constants/ui'
+import { PATHS, TRAVELLERS_GRID } from '@/constants/ui'
 import {
 	TRAVELLER_FILTER_CONFIG,
 	TRAVELLERS_LIST_CONFIG,
@@ -26,20 +26,11 @@ import BaseButton from '@/components/ui/button/BaseButton'
 import TravellerFilter from '@/components/travellers/traveller-filter/TravellerFilter'
 import PublicTravellerItem from '@/components/travellers/public-traveller-item/PublicTravellerItem'
 import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
-import TravellerSkeleton from '@/components/travellers/traveller-skeleton/TravellerSkeleton'
+import TravellersSkeleton from '@/components/travellers/travellers-skeleton/TravellersSkeleton'
 import TravellersWelcome from '@/components/travellers/travellers-welcome/TravellersWelcome'
 
 import useCityFilter from '@/components/travellers/travellers-list/hooks/useCityFilter'
 import usePaging from '@/components/travellers/travellers-list/hooks/usePaging'
-
-// One column on phones, two from 640px and three from 1024px, the maximum; rows stretch so cards in a row are equal height
-const GRID =
-	'm-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3'
-
-const SKELETON_KEYS = Array.from(
-	{ length: TRAVELLERS_LIST_CONFIG.PAGE_SIZE },
-	(_, index) => index,
-)
 
 const RefreshIcon = () => (
 	<svg
@@ -174,7 +165,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 			<div
 				className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1"
 				data-cy="controls">
-				<h1 className="my-0 grow">Travellers</h1>
+				<h1 className="my-0 grow">{TRAVELLERS_LIST_CONFIG.TITLE}</h1>
 				<div className="ml-auto flex items-center gap-2">
 					{!isPublicEmpty && (
 						<BaseButton
@@ -217,27 +208,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 					</BaseButton>
 				</div>
 			)}
-			{loading && (
-				<>
-					<p
-						role="status"
-						className="my-2 text-text-muted"
-						data-cy="travellers-loading">
-						{TRAVELLERS_LIST_CONFIG.LOADING_LABEL}
-					</p>
-					<ul
-						aria-busy="true"
-						className={GRID}
-						data-cy="travellers-skeleton-list">
-						{SKELETON_KEYS.map((key) => (
-							<TravellerSkeleton
-								key={key}
-								isPublic={!isLoggedIn}
-							/>
-						))}
-					</ul>
-				</>
-			)}
+			{loading && <TravellersSkeleton isPublic={!isLoggedIn} />}
 			{!loading && hasTravellers && options.length > 0 && (
 				<TravellerFilter
 					options={options}
@@ -251,7 +222,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				<>
 					<ul
 						ref={listRef}
-						className={GRID}
+						className={TRAVELLERS_GRID}
 						data-cy="travellers-list">
 						{visibleItems.map((traveller) => (
 							<Item

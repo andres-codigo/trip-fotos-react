@@ -7,7 +7,7 @@ import { cn } from '@/utils/cn'
 import { handleApiError } from '@/utils/errorHandler'
 import { TRAVELLER_ITEM } from '@/constants/test'
 import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
-import { GLOBAL, PATHS } from '@/constants/ui'
+import { CARD_PHOTOS, GLOBAL, PATHS } from '@/constants/ui'
 
 import { formatCity, getCityId } from '@/utils/formatCity'
 
@@ -173,7 +173,7 @@ const TravellerItem = ({
 					<div className="mt-auto flex flex-col pt-3.5">
 						{files.length > 0 && (
 							<ul
-								className="m-0 flex list-none flex-wrap gap-x-[2%] gap-y-2 pt-0 pb-4 pl-0 [@media(max-width:480px)]:gap-x-[4%] [@media(max-width:480px)]:gap-y-4"
+								className={CARD_PHOTOS.LIST}
 								data-cy={TRAVELLER_ITEM.IMAGES_LIST}>
 								<ImageGallery
 									title={fullName}
@@ -188,7 +188,11 @@ const TravellerItem = ({
 								/>
 								{files.length >
 									TRAVELLER_ITEM_CONFIG.MAX_IMAGES && (
-									<li className="relative w-[32%] overflow-hidden bg-accent font-medium text-on-accent tile-focus-ring [@media(max-width:480px)]:w-[48%]">
+									<li
+										className={cn(
+											'relative overflow-hidden bg-accent font-medium text-on-accent tile-focus-ring',
+											CARD_PHOTOS.TILE_WIDTH,
+										)}>
 										<Link
 											className="block h-full"
 											to={photosLink}

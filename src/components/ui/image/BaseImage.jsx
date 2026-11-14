@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import { cn } from '@/utils/cn'
 import { IMAGE } from '@/constants/test'
-import { GLOBAL } from '@/constants/ui'
+import { CARD_PHOTOS, GLOBAL } from '@/constants/ui'
 
 const PLACEHOLDER_DIMENSIONS = { width: 4, height: 3 }
 
@@ -49,7 +49,8 @@ const BaseImage = ({
 	return (
 		<li
 			className={cn(
-				'relative aspect-square w-[32%] overflow-hidden bg-surface-sunken [&_img]:block [&_img]:h-full [&_img]:w-full [&_img]:object-cover [@media(max-width:480px)]:w-[48%]',
+				'relative aspect-square overflow-hidden bg-surface-sunken [&_img]:block [&_img]:h-full [&_img]:w-full [&_img]:object-cover',
+				CARD_PHOTOS.TILE_WIDTH,
 				onOpen && 'tile-focus-ring [&_img]:cursor-pointer',
 			)}
 			data-cy={IMAGE.ID}>

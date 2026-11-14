@@ -33,6 +33,7 @@ describe('affectedCaptures', () => {
 	it('runs only the captures of the page a change touches', () => {
 		expect(affectedCaptures(['src/pages/messages/Messages.jsx'])).toEqual([
 			'messages-states',
+			'messages-fallback',
 			'messages-empty',
 		])
 	})

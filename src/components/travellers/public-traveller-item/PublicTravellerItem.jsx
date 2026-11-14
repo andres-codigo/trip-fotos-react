@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 
 import { PUBLIC_TRAVELLER_ITEM } from '@/constants/test'
 import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
-import { GLOBAL, PATHS } from '@/constants/ui'
+import { CARD_PHOTOS, GLOBAL, PATHS } from '@/constants/ui'
 
 import { cn } from '@/utils/cn'
 import { formatCity, getCityId } from '@/utils/formatCity'
@@ -64,10 +64,9 @@ const PublicTravellerItem = ({
 			</div>
 			{/* The photos and View trip sit at the foot, so they line up across a row of equal-height cards */}
 			<div className="mt-auto flex flex-col pt-3.5">
-				{/* Three across at every width: the signed-in two per row on phones would leave the third photo alone */}
 				{photos?.length > 0 && (
 					<ul
-						className="m-0 flex list-none gap-x-[2%] pt-0 pb-4 pl-0 [@media(max-width:480px)]:[&>li]:w-[32%]"
+						className={CARD_PHOTOS.PUBLIC_LIST}
 						data-cy={PUBLIC_TRAVELLER_ITEM.PHOTOS}>
 						{photos.map((photo) => (
 							<BaseImage

@@ -167,12 +167,40 @@ export const PUBLIC_TRAVELLER_ITEM = Object.freeze({
 
 export const TRAVELLER_SKELETON = Object.freeze({
 	ROOT: 'traveller-skeleton',
+	TEXT: 'traveller-skeleton-text',
+	PHOTOS: 'traveller-skeleton-photos',
+	BUTTON: 'traveller-skeleton-button',
 })
 
 export const MESSAGE_SKELETON = Object.freeze({
 	ROOT: 'message-skeleton',
 	ROW: 'message-skeleton-row',
 	PANE: 'message-skeleton-pane',
+})
+
+export const FILTER_SKELETON = Object.freeze({
+	ROOT: 'filter-skeleton',
+	INLINE: 'filter-skeleton-inline',
+	SEARCH: 'filter-skeleton-search',
+	TRIGGER: 'filter-skeleton-trigger',
+})
+
+export const TRAVELLERS_SKELETON = Object.freeze({
+	ROOT: 'travellers-skeleton',
+	LOADING: 'travellers-loading',
+	LIST: 'travellers-skeleton-list',
+})
+
+export const TRAVELLERS_PAGE_SKELETON = Object.freeze({
+	ROOT: 'travellers-page-skeleton',
+})
+
+export const MESSAGES_SKELETON = Object.freeze({
+	ROOT: 'messages-skeleton',
+})
+
+export const MESSAGES_PAGE_SKELETON = Object.freeze({
+	ROOT: 'messages-page-skeleton',
 })
 
 export const ACCOUNT_MENU = Object.freeze({
