@@ -158,6 +158,29 @@ describe('<BaseButton />', () => {
 			expect(span).toHaveClass('bg-surface-sunken', 'cursor-default')
 		})
 
+		it('only dims a disabled text button, with no fill or border', () => {
+			render(
+				<BaseButton
+					isDisabled
+					modeType={BUTTON.MODE.TEXT}
+					data-cy="disabled-text-button">
+					Forgot password?
+				</BaseButton>,
+			)
+
+			const button = screen.getByTestId('disabled-text-button')
+			expect(button).toBeDisabled()
+			expect(button).toHaveClass(
+				'bg-transparent',
+				'border-transparent',
+				'opacity-60',
+			)
+			expect(button).not.toHaveClass(
+				'bg-surface-sunken',
+				'border-border-strong',
+			)
+		})
+
 		it('spreads additional props to button element without conflicts', () => {
 			render(
 				<BaseButton
