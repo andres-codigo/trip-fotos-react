@@ -69,7 +69,7 @@ CI runs the full E2E suite on every pull request, so a local run is for earlier 
 
 Do this for any change that can alter how a page looks (styling, layout, spacing, markup), before the PR is marked ready. Passing tests do not show a visual regression: a shared class overridden by a page's own rule passed everything and was only visible on screen.
 
-Order: build the change, run its targeted tests, run this check and fix what it finds, then run `/verify` once and commit. `/verify` refuses to start while the branch changes `src/**/*.{jsx,css}` (tests aside) and `/ui-check` has not recorded `pass`; the pass holds through later edits that touch no UI file, such as the tests for its fixes.
+Order: build the change, run its targeted tests, run this check and fix what it finds, then run `/verify` once and commit. A change to the layout of a shared component or form section (flex or grid wrappers, column counts, widths, overlays inside tiles) gets a component test of the size or position first, failing on the broken layout: it finds the regression in seconds where a capture takes minutes. It does not replace this check. `/verify` refuses to start while the branch changes `src/**/*.{jsx,css}` (tests aside) and `/ui-check` has not recorded `pass`; the pass holds through later edits that touch no UI file, such as the tests for its fixes.
 
 - Run the committed capture script `cypress/ui-check/capture.cy.js` (`UI_CHECK=true`, with `UI_CHECK_LABEL` and optionally `UI_CHECK_WIDTHS`; it is not part of the E2E suite). It signs in as the seeded accounts and takes `cy.screenshot(name, { capture: 'fullPage' })` of every page and state at the two default widths, 390px (mobile) and 1280px (desktop). Widths can be set per capture: `UI_CHECK_WIDTHS=390,1280;edit=390,768,1280` adds 768 only to the captures whose id or title contains `edit`, so pass the tablet width only where the change touches the tablet layout. Add a page or state to it when a change needs one, with an entry in `cypress/impact.js` naming the areas it covers; do not write a throwaway spec.
 - Run only the captures the change can affect, on both refs: `.claude/skills/ui-check/affected.mjs` maps the branch diff through `cypress/impact.js` and prints their `UI_CHECK_ONLY`. A file no area claims (shared UI, layout, styles, the store) and any capture-script or seed change select every capture. Use the helpers in the script: `visit()` reloads even when only the hash changes, `interceptOnce()` stubs one request (so a failure stub never answers the real request after it), `cy.waitForSuccess()` fails as soon as an error dialog shows, and `assertSettled()` waits for spinners, skeleton lists and the signed-in traveller's name. Add 768px, and a width either side of a breakpoint, only when the change touches a breakpoint (the changed CSS defines its own, or a layout changes between widths): capture one just either side of it (for example 1023px and 1024px for a 1024px breakpoint). A viewport-only capture misses everything below the fold, such as the Register page's file input. Run it on your branch and on `main`.
@@ -90,11 +90,16 @@ Order: build the change, run its targeted tests, run this check and fix what it 
 - Shots go in `cypress/ui-check-captures/capture.cy.js/<label>/<capture>/`, outside `cypress/screenshots`, which component and E2E runs trash. A full run clears its label's folder, a filtered one each capture's folder as it starts, and `compare.mjs` compares only the captures the branch run took. Delete the branch shots and the crops (the folder is gitignored) afterwards; keep the `main` folder and its `main.json`, which the next check reuses while `main` is unchanged.
 - The seed uploads the seeded traveller's photos and thumbnails to the Storage emulator as real PNGs, so a capture or spec that removes them deletes real objects, as in production; every reset puts them back.
 
-Case-only renames of files (such as `register.jsx` to `Register.jsx`) can leave files missing when you `git switch` on a case-insensitive filesystem; `git restore` the affected folder if so.
+Case-only renames of files (such as `register.jsx` to `Register.jsx`) can leave files missing when you `git switch` on a case-insensitive filesystem; `git restore` the affected folder if so. After merging such a rename, local `main` can be left dirty: `git restore --source=origin/main --worktree -- <files>`, check `git diff origin/main` is empty, then `git reset --mixed origin/main`.
+
+Full-page shots show a duplicated sticky header and a clipped dialog fragment at the 720px seam. The same appears on `main`: it is the capture, not a bug.
 
 ## Required Updates
 
 Whenever components, pages, or store logic are modified, update the related tests in the same change.
+
+- Cover every new behaviour path, not only the headline one: for each changed path, name the test that fails without it.
+- When behaviour is replaced or removed, rewrite or delete the tests that covered it, so none keeps passing against behaviour that is gone. Grep tests, Cypress specs and docs for the old behaviour.
 
 ## Run Commands
 

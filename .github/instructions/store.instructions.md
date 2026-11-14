@@ -20,6 +20,7 @@ Thunks (`createAsyncThunk`) are the single standard for server data. There is no
 - **Auth and Storage** calls use the Firebase SDK from inside a thunk (`updateProfile` for the display name, not the Identity Toolkit REST API).
 - Components, hooks and pages never call the Realtime Database, Auth or Storage; they dispatch a thunk. The one exception is a third-party read-only lookup that is not app data, such as `useCitySearch` calling the Photon geocoder: it keeps its results in the hook, not Redux.
 - Each slice owns `status` and `error` for its thunks, set from `pending`/`fulfilled`/`rejected` extra reducers.
+- **Public trip summaries:** `/travellers` needs sign-in to read. `/publicTrips`, readable by anyone, holds the summary that `toPublicTrip` (`src/utils/publicTrip`) builds: first name, last initial, cities, trip dates and the first photos. Every thunk that creates, edits or deletes a traveller writes both paths in one root update (`publicTrips/<uid>` set or `null`), so the two never disagree. Adding a field to the summary makes it public: it is a privacy decision, so ask first.
 
 ### Shared Request Helper
 

@@ -51,7 +51,7 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 - **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request; CodeQL scanning and a ruleset protecting `main`
 - **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers; versioned Firebase security rules
 - **Project automation** — issues and pull requests are labelled from one `labels.json` and moved across the GitHub Project board by workflows
-- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook, an issue-before-edit hook, a verify-before-commit hook, and `/verify`, `/start-issue`, `/finish-pr` and `/ui-check` skills (see [AI Assistance](#ai-assistance))
+- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook, an issue-before-edit hook, a verify-before-commit hook, and `/verify`, `/start-issue`, `/finish-pr`, `/ui-check` and `/design-change` skills (see [AI Assistance](#ai-assistance))
 
 <a id="status"></a>
 

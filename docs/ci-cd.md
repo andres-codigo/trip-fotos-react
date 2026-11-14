@@ -112,7 +112,7 @@ While an issue has the `blocked` label its PR events leave it in Blocked; only a
 
 A refused label is removed again with a comment saying why. The Issue Intake workflow enforces all of this. Removing `in-progress` restores the status. An issue that keeps the label returns to In progress, not Ready, when its PR is closed without merging, and a merge removes the label. A draft PR that closes the issue also moves it to In progress; that path is not guarded.
 
-Epics (Kind = Epic, titled `Epic: ...`) group sub-issues in order. They are the one exception to Ready: they stay in Backlog until you add `in-progress` when the first sub-issue starts. An epic may carry an empty draft tracking PR that closes it; merging that PR would add nothing to `main`, so close it unmerged as part of [Closing an epic](#closing-an-epic).
+Epics (Kind = Epic, titled `Epic: ...`) group sub-issues in order. They are the one exception to Ready: they stay in Backlog until you add `in-progress` when the first sub-issue starts. An epic has no tracking PR or branch of its own; its work lands through its children. Older epics that carry an empty draft tracking PR close it unmerged as part of [Closing an epic](#closing-an-epic).
 
 Order within an epic:
 
@@ -134,7 +134,7 @@ The steps, for doing it by hand:
 
 For a just-created issue, the `opened` Issue Intake run takes 10 to 30 seconds to give the item its Triage Status. Only if the Status is still empty after about a minute, run `gh workflow run github-issue-intake.yml -f issue_number=N`. Labels given to `gh issue create --label` arrive inside the first 60 seconds and are ignored by design, so add an area label afterwards that is not already on the issue.
 
-Epics skip step 3 and go from Backlog straight to In progress.
+Epics skip step 3 and go from Backlog straight to In progress. Never run `start-issue.mjs` on an epic, because it would open a branch and draft PR. Set Kind, Workstream and an area label so the epic is in Backlog, add `in-progress`, then start its first child.
 
 ### Finishing an issue
 

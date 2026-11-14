@@ -89,6 +89,7 @@ See [testing.instructions.md](./testing.instructions.md) for broader Vitest/Cypr
 ## Styling
 
 - Style the page's layout with Tailwind utilities on its own elements; the root `<main>` keeps the global `mainContainer` and `cardPage` classes.
+- Set the page's width and columns with `PAGE_LAYOUT` (`src/constants/ui/layout.js`): `NARROW` for one 640px column, `WIDE` for a page that widens from 1024px. With `WIDE`, `COLUMNS` makes the 380px left column and the main column. Put `COLUMN_CARD` on a `BaseCard` inside a column. `LEFT_COLUMN` lines a lone card up with the left column, and `PAGE_CARD` with `SECTION_CARD` turns one card into a card per section from 1024px. Do not write page widths or `lg:` grids by hand.
 - Reusable component styling stays inside the component, not the page.
 - Follow the shared conventions in [styles.instructions.md](./styles.instructions.md).
 

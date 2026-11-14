@@ -71,6 +71,14 @@ Choose the element by what it does, then choose the look with `modeType`:
 - A link with no `modeType` renders as an inline text link. Give it a `modeType` to look like a button: `primary` (filled — the main action), `outline` (secondary), `danger` (destructive, e.g. Delete), `flat`, `text`. Use these rather than a local override class, so colours and hover states stay consistent; add a new mode to `BaseButton` if none fits.
 - One `primary` per action group; actions sit in a flex row spaced with `gap` (see [styles.instructions.md](./styles.instructions.md#spacing-between-siblings)).
 
+### Forms
+
+Build a form from the parts in `src/components/ui/form/`, not hand-rolled fields:
+
+- `Input`, `Textarea` and `Combobox` share `fieldClasses.js`: field, label, required-mark and help-text classes, and `describedBy(id, helpText, hasError)`. That helper points `aria-describedby` at `${id}-help`, then `${id}-error`. A custom field (such as a file drop) uses the same classes and helper.
+- A form with required fields shows `RequiredLegend` once, above its fields, and marks each required field with `showRequiredMark`. Help text says the rule before the user breaks it.
+- A form with several fields shows `ErrorSummary` above them. Pass the errors as `{ id, message }`, with `id` matching the field's id, and bump `focusKey` once per failed submit, so the summary takes focus then and not on every edit.
+
 ### Consistency
 
 Maintain **API consistency** (prop names, validation patterns) when creating similar UI components. This ensures developers can switch between components with minimal cognitive load.
