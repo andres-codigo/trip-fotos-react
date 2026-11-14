@@ -28,6 +28,17 @@ const buttonVariants = cva('border border-solid', {
 			false: '',
 		},
 	},
+	// Text and flat buttons read as links, so disabled only dims them; a sunken fill turned them into pills
+	compoundVariants: [
+		{
+			mode: ['text', 'flat'],
+			disabled: true,
+			className:
+				'border-transparent bg-transparent opacity-60 hover:bg-transparent active:bg-transparent',
+		},
+		{ mode: 'text', disabled: true, className: 'text-inherit' },
+		{ mode: 'flat', disabled: true, className: 'text-accent-text' },
+	],
 	defaultVariants: { mode: 'primary', shape: 'button', disabled: false },
 })
 

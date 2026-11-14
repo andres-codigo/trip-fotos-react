@@ -529,6 +529,20 @@ describe(`UI check capture (${LABEL})`, () => {
 					timeout: TIMEOUT,
 				}).should('be.visible')
 				shot(`password-reset-sent-${width}`)
+
+				visit(PATHS.AUTHENTICATION)
+				interceptOnce(API_DATABASE.POST, '**/*signInWithPassword*', {
+					statusCode: 500,
+					body: {},
+					delay: 60000,
+				})
+				cy.get(EMAIL_INPUT).type(TEST_USERS.TRAVELLER.EMAIL)
+				cy.get(PASSWORD_INPUT).type('not-checked-while-pending')
+				cy.get(LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+				cy.get(FORGOT_PASSWORD_LINK).should('be.disabled')
+				cy.get(LOGIN_SIGNUP_TOGGLE_LINK).should('be.disabled')
+				freezeAnimation()
+				shot(`login-busy-${width}`)
 			})
 		})
 	})

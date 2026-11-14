@@ -17,6 +17,7 @@ export const BUTTON = Object.freeze({
 		OUTLINE: 'outline',
 		DANGER: 'danger',
 		DANGER_OUTLINE: 'dangerOutline',
+		TEXT: 'text',
 	},
 })
 
