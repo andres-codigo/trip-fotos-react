@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.5](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.4...v0.27.5) (2026-11-14)
+
+
+### Enhancements
+
+* loading states that match the rendered Travellers page ([#741](https://github.com/andres-codigo/trip-fotos-react/issues/741)) ([63ca175](https://github.com/andres-codigo/trip-fotos-react/commit/63ca175e5809cd8a7e3ecd7d8ecd931a5227453b))
+
 ## [0.27.4](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.3...v0.27.4) (2026-11-14)
 
 
