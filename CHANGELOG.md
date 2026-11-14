@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.8](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.7...v0.27.8) (2026-11-14)
+
+
+### Bug Fixes
+
+* disabled text buttons show a pill background ([#750](https://github.com/andres-codigo/trip-fotos-react/issues/750)) ([ad3af1e](https://github.com/andres-codigo/trip-fotos-react/commit/ad3af1efac117ac6d58057977932dba2960ca524))
+
 ## [0.27.7](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.6...v0.27.7) (2026-11-14)
 
 
