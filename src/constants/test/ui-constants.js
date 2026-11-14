@@ -159,6 +159,7 @@ export const PUBLIC_TRAVELLER_ITEM = Object.freeze({
 	ROOT: 'public-traveller-item',
 	NAME: 'public-traveller-item-name',
 	TRIP: 'public-traveller-item-trip',
+	EXCERPT: 'public-traveller-item-excerpt',
 	BADGES: 'public-traveller-item-badges',
 	PHOTOS: 'public-traveller-item-photos',
 	VIEW_TRIP: 'public-traveller-item-view-trip',

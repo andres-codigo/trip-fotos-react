@@ -4,6 +4,7 @@ import { PUBLIC_TRAVELLER_ITEM } from '@/constants/test'
 import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
 import { GLOBAL, PATHS } from '@/constants/ui'
 
+import { cn } from '@/utils/cn'
 import { formatCity, getCityId } from '@/utils/formatCity'
 import { publicName } from '@/utils/publicTrip'
 
@@ -16,6 +17,7 @@ const PublicTravellerItem = ({
 	id,
 	firstName,
 	lastInitial,
+	tripExcerpt,
 	cities,
 	tripStart,
 	tripEnd,
@@ -40,8 +42,17 @@ const PublicTravellerItem = ({
 				nameDataCy={PUBLIC_TRAVELLER_ITEM.NAME}
 				tripDataCy={PUBLIC_TRAVELLER_ITEM.TRIP}
 			/>
+			{/* Only the opening of the description is public; the clamp ends it in an ellipsis */}
+			{tripExcerpt && (
+				<p
+					className="mt-3.5 mb-3 line-clamp-2 italic"
+					data-cy={PUBLIC_TRAVELLER_ITEM.EXCERPT}>
+					{tripExcerpt}
+				</p>
+			)}
+			{/* The same gaps as the signed-in card, whose badges sit under its description */}
 			<div
-				className="mt-3.5 flex flex-wrap gap-2"
+				className={cn('flex flex-wrap gap-2', !tripExcerpt && 'mt-3.5')}
 				data-cy={PUBLIC_TRAVELLER_ITEM.BADGES}>
 				{(cities ?? []).map((city) => (
 					<BaseBadge
@@ -89,6 +100,7 @@ PublicTravellerItem.propTypes = {
 	id: PropTypes.string.isRequired,
 	firstName: PropTypes.string,
 	lastInitial: PropTypes.string,
+	tripExcerpt: PropTypes.string,
 	cities: PropTypes.arrayOf(
 		PropTypes.oneOfType([
 			PropTypes.string,

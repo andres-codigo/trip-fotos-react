@@ -3,11 +3,26 @@
 const atIndex = (list, index) => list?.[index] ?? null
 
 const PUBLIC_PHOTO_LIMIT = 3
+// The rules refuse a longer excerpt, so keep the two in step
+export const PUBLIC_EXCERPT_LIMIT = 200
+
+// The opening of the description on one line, so the card's two-line clamp shows as much text as it can
+const toExcerpt = (description) => {
+	const text = description?.replace(/\s+/g, ' ').trim() ?? ''
+	// Cutting in the middle of an emoji would leave half of it, so drop a stray high surrogate
+	const excerpt = text
+		.slice(0, PUBLIC_EXCERPT_LIMIT)
+		.replace(/[\uD800-\uDBFF]$/, '')
+		.trimEnd()
+
+	return excerpt || null
+}
 
 // The fields anyone may read; everything else on a trip needs sign-in
 export const toPublicTrip = ({
 	firstName,
 	lastName,
+	tripDescription,
 	cities,
 	tripStart,
 	tripEnd,
@@ -32,6 +47,7 @@ export const toPublicTrip = ({
 	return {
 		firstName: firstName?.trim() ?? null,
 		lastInitial: lastInitial?.toLocaleUpperCase('en-GB') ?? null,
+		tripExcerpt: toExcerpt(tripDescription),
 		cities: cities ?? null,
 		tripStart: tripStart ?? null,
 		tripEnd: tripEnd ?? null,

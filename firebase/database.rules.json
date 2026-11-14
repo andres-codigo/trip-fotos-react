@@ -63,6 +63,9 @@
 				"lastInitial": {
 					".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 2"
 				},
+				"tripExcerpt": {
+					".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+				},
 				"cities": {
 					".validate": "newData.hasChildren()"
 				},

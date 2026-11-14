@@ -440,11 +440,13 @@ describe('travellersSlice', () => {
 					tripEnd: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripEnd,
 				})
 				expect(savedBody).not.toHaveProperty('daysInCity')
-				// The public summary goes in the same update, without the description
+				// The public summary goes in the same update, with only an excerpt of the description
 				const summary =
 					savedUpdate()[`publicTrips/${MOCK_USER.USER_ID}`]
 				expect(summary).toMatchObject({
 					firstName: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName,
+					tripExcerpt:
+						MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripDescription,
 					cities: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.cities,
 					tripStart: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.tripStart,
 					photos: [
@@ -1069,6 +1071,7 @@ describe('travellersSlice', () => {
 				).toEqual({
 					firstName: 'Amara',
 					lastInitial: 'O',
+					tripExcerpt: 'Cherry blossom season.',
 					cities: ['tokyo'],
 					tripStart: '2025-03-12',
 					tripEnd: '2025-03-19',

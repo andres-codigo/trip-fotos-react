@@ -39,7 +39,8 @@ const Privacy = () => {
 					provide are stored in Firebase Realtime Database and Cloud
 					Storage, and are shown to other signed-in users. Anyone,
 					signed in or not, can see your first name and the initial of
-					your last name, your cities, your trip dates and your first
+					your last name, the first 200 characters of your trip
+					description, your cities, your trip dates and your first
 					three photos with their descriptions.
 				</p>
 

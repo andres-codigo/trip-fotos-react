@@ -227,7 +227,7 @@ describe('Travellers page > logged out', () => {
 		cy.checkA11y()
 	})
 
-	it('shows each trip as a preview, newest first, with no description or full name', () => {
+	it('shows each trip as a preview, newest first, with a description excerpt but no full name', () => {
 		cy.get(TRAVELLERS_WELCOME_SELECTORS.ROOT).should('be.visible')
 		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.NAME)
 			.first()
@@ -240,7 +240,9 @@ describe('Travellers page > logged out', () => {
 			.first()
 			.find('img')
 			.should('have.length', 3)
-		cy.contains(FIRST.tripDescription).should('not.exist')
+		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.EXCERPT)
+			.first()
+			.should('have.text', FIRST.tripDescription)
 		cy.contains(FIRST.lastName).should('not.exist')
 		cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should('not.exist')
 	})
@@ -294,6 +296,7 @@ describe('Public trips database rules', () => {
 	const PUBLIC_FIELDS = [
 		'firstName',
 		'lastInitial',
+		'tripExcerpt',
 		'cities',
 		'tripStart',
 		'tripEnd',
@@ -364,6 +367,7 @@ describe('Public trips database rules', () => {
 			signedIn(`publicTrips/${win.localStorage.getItem('userId')}`, {
 				method: API_DATABASE.PUT,
 				body: summary({
+					tripExcerpt: 'Eight slow days in Prague.',
 					tripStart: '2025-03-12',
 					tripEnd: '2025-03-19',
 					photos: [1, 2, 3].map((n) => ({
@@ -406,6 +410,13 @@ describe('Public trips database rules', () => {
 			signedIn(path, {
 				method: API_DATABASE.PUT,
 				body: summary({ cover: { url: 'https://example.com/a.jpg' } }),
+			})
+				.its('status')
+				.should('be.oneOf', [401, 403])
+			// An excerpt past the limit would show more of the description than the card allows
+			signedIn(path, {
+				method: API_DATABASE.PUT,
+				body: summary({ tripExcerpt: 'a'.repeat(201) }),
 			})
 				.its('status')
 				.should('be.oneOf', [401, 403])
