@@ -153,6 +153,26 @@ const shot = (name, options = {}) => {
 	})
 }
 
+// Records each card's photo-row top, grouped by grid row, beside the shots: cards side by side should share one top
+const TRAVELLER_CARD =
+	'[data-cy="traveller-item"], [data-cy="public-traveller-item"]'
+const recordPhotoRows = (name) =>
+	cy.get(TRAVELLER_CARD).then(($cards) => {
+		const rows = {}
+		;[...$cards].forEach((card) => {
+			const photos = card.querySelector('ul')
+			if (!photos) return
+			const rowTop = Math.round(card.getBoundingClientRect().top)
+			;(rows[rowTop] ??= []).push(
+				Math.round(photos.getBoundingClientRect().top - rowTop),
+			)
+		})
+		cy.writeFile(
+			`cypress/ui-check-captures/capture.cy.js/${shotName(name)}-photo-rows.json`,
+			rows,
+		)
+	})
+
 // cy.visit keeps the page when only the hash differs, so reload to start the app afresh
 const visit = (path) =>
 	cy.url({ log: false }).then((current) => {
@@ -533,6 +553,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				assertSettled()
 				freezeAnimation()
 				shot(`${name}-${width}`)
+				recordPhotoRows(`${name}-${width}`)
 			}
 
 			eachWidth((width) => {
@@ -729,6 +750,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				}).should('exist')
 				freezeAnimation()
 				shot(`travellers-${width}`)
+				recordPhotoRows(`travellers-${width}`)
 
 				cy.get(TRAVELLER_ITEM_SELECTORS.VIEW_TRIP).first().click()
 				cy.get(TRAVELLER_DETAIL_SELECTORS.ROOT).should('be.visible')
@@ -1515,6 +1537,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				assertSettled()
 				freezeAnimation()
 				shot(`travellers-message-${width}`)
+				recordPhotoRows(`travellers-message-${width}`)
 
 				visit(`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}`)
 				cy.get(TRAVELLER_DETAIL_SELECTORS.MESSAGE).should('be.visible')

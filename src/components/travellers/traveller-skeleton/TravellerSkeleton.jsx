@@ -55,12 +55,13 @@ const TravellerSkeleton = ({ isPublic = false }) => (
 				</>
 			)}
 		</div>
-		<div className="flex flex-wrap gap-2">
+		{/* A tag's line of small text and its padding */}
+		<div className="flex flex-wrap gap-2 self-start text-sm">
 			<span
-				className={cn(BLOCK, 'h-[calc(1lh+1rem)] w-28 rounded-pill')}
+				className={cn(BLOCK, 'h-[calc(1lh+0.5rem)] w-24 rounded-pill')}
 			/>
 		</div>
-		<div className="mt-auto flex flex-col pt-3.5">
+		<div className="pt-3.5">
 			<ul
 				className={
 					isPublic ? CARD_PHOTOS.PUBLIC_LIST : CARD_PHOTOS.LIST
@@ -77,13 +78,13 @@ const TravellerSkeleton = ({ isPublic = false }) => (
 					/>
 				))}
 			</ul>
-			{/* View trip, the one action every card has, sized as a button with its border */}
-			<div className="flex justify-end">
-				<span
-					className={cn(BLOCK, 'h-[2.875rem] w-30 rounded-pill')}
-					data-cy={TRAVELLER_SKELETON.BUTTON}
-				/>
-			</div>
+		</div>
+		{/* View trip, the one action every card has, sized as a button with its border */}
+		<div className="flex justify-end self-end">
+			<span
+				className={cn(BLOCK, 'h-[2.875rem] w-30 rounded-pill')}
+				data-cy={TRAVELLER_SKELETON.BUTTON}
+			/>
 		</div>
 	</li>
 )

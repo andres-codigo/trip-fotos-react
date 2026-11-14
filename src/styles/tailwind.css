@@ -377,9 +377,13 @@ section {
 }
 
 /* A Travellers grid card, its skeleton and the public summary: a surface card on bg, a column so the foot can sit at the bottom of an equal-height row */
+/* Five rows (head, text, tags, photos, actions) shared with the cards beside it in TRAVELLERS_GRID */
 @utility traveller-card {
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	grid-row: span 5;
+	grid-template-rows: subgrid;
+	row-gap: 0;
+	margin-bottom: 1rem;
 	border: 1px solid var(--border-card);
 	border-radius: var(--radius-lg);
 	background-color: var(--surface);

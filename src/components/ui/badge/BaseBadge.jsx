@@ -6,7 +6,7 @@ import { BADGE } from '@/constants/test'
 import { getToneIndex } from '@/utils/getToneIndex'
 
 const badgeVariants = cva(
-	'inline-block rounded-pill px-6 py-2 uppercase select-none [@media(max-width:768px)]:px-3',
+	'inline-flex items-center gap-1 rounded-pill px-3 py-1 text-sm select-none',
 	{
 		variants: {
 			tone: {
@@ -29,6 +29,24 @@ const BaseBadge = ({ type, title }) => (
 	<span
 		className={badgeVariants({ tone: type ? getToneIndex(type) : 'none' })}
 		data-cy={BADGE.ID}>
+		{/* A pin marks it as a place, so it reads as a label rather than a button */}
+		<svg
+			aria-hidden="true"
+			focusable="false"
+			className="size-3.5 shrink-0"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round">
+			<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+			<circle
+				cx="12"
+				cy="9.5"
+				r="2.5"
+			/>
+		</svg>
 		{title}
 	</span>
 )
