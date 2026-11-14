@@ -91,9 +91,10 @@ describe('Register Page', () => {
 		cy.wait('@registerTraveller', { timeout: REQUEST_TIMEOUT })
 			.its('request.body')
 			.then((update) => {
+				// Only an excerpt of the description is public
 				expect(
 					update[`publicTrips/${TEST_USERS.STANDARD.ID}`],
-				).to.include({ firstName })
+				).to.include({ firstName, tripExcerpt: tripDescription })
 				expect(
 					update[`publicTrips/${TEST_USERS.STANDARD.ID}`],
 				).not.to.have.property('tripDescription')

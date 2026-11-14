@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
 	byNewestTrip,
+	PUBLIC_EXCERPT_LIMIT,
 	publicName,
 	toPublicTrip,
 	toPublicTrips,
@@ -36,6 +37,7 @@ describe('toPublicTrip', () => {
 		expect(toPublicTrip(record)).toEqual({
 			firstName: 'Amara',
 			lastInitial: 'O',
+			tripExcerpt: 'Eight slow days in Prague.',
 			cities: ['prague', 'tokyo'],
 			tripStart: '2025-03-12',
 			tripEnd: '2025-03-19',
@@ -63,6 +65,37 @@ describe('toPublicTrip', () => {
 		})
 	})
 
+	it('cuts the excerpt at the limit, on one line, trimmed', () => {
+		const excerptOf = (tripDescription) =>
+			toPublicTrip({ ...record, tripDescription }).tripExcerpt
+
+		expect(excerptOf('  Day one.\n\nDay  two.  ')).toBe('Day one. Day two.')
+		expect(excerptOf('a'.repeat(PUBLIC_EXCERPT_LIMIT + 50))).toBe(
+			'a'.repeat(PUBLIC_EXCERPT_LIMIT),
+		)
+		expect(excerptOf(`${'a'.repeat(PUBLIC_EXCERPT_LIMIT - 1)} b`)).toBe(
+			'a'.repeat(PUBLIC_EXCERPT_LIMIT - 1),
+		)
+	})
+
+	it('keeps a whole emoji rather than half of one at the cut', () => {
+		const excerpt = toPublicTrip({
+			...record,
+			tripDescription: `${'a'.repeat(PUBLIC_EXCERPT_LIMIT - 1)}🌸 more`,
+		}).tripExcerpt
+
+		expect(excerpt).toBe('a'.repeat(PUBLIC_EXCERPT_LIMIT - 1))
+	})
+
+	it.each([
+		['no description', undefined],
+		['a blank description', '   '],
+	])('leaves the excerpt null for %s', (_, tripDescription) => {
+		expect(
+			toPublicTrip({ ...record, tripDescription }).tripExcerpt,
+		).toBeNull()
+	})
+
 	it('keeps every photo of a trip with three or fewer', () => {
 		const photoUrls = (files) =>
 			toPublicTrip({ ...record, files }).photos.map(({ url }) => url)
@@ -82,11 +115,16 @@ describe('toPublicTrip', () => {
 		expect(toPublicTrip({ ...record, files }).photos).toBeNull()
 	})
 
-	it('never copies the trip description, the full last name, a fourth photo or the registration time', () => {
-		const json = JSON.stringify(toPublicTrip(record))
+	it('never copies the description past the excerpt, the full last name, a fourth photo or the registration time', () => {
+		const json = JSON.stringify(
+			toPublicTrip({
+				...record,
+				tripDescription: `${'a'.repeat(PUBLIC_EXCERPT_LIMIT)} Private words.`,
+			}),
+		)
 
 		for (const secret of [
-			'Eight slow days',
+			'Private words',
 			'okafor',
 			'photo-4',
 			'Kyoto in snow',
@@ -126,6 +164,7 @@ describe('toPublicTrip', () => {
 		expect(toPublicTrip({ firstName: 'Kofi', daysInCity: 8 })).toEqual({
 			firstName: 'Kofi',
 			lastInitial: null,
+			tripExcerpt: null,
 			cities: null,
 			tripStart: null,
 			tripEnd: null,

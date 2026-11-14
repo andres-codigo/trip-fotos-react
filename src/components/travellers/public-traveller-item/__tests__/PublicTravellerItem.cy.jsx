@@ -17,7 +17,7 @@ const photos = [
 	'A crossing in the rain',
 ].map((alt, index) => ({ url: `${photo}#${index}`, alt }))
 
-const mountItem = (photos, width = 600) =>
+const mountItem = (photos, width = 600, tripExcerpt) =>
 	cy.mount(
 		<MemoryRouter>
 			<ul style={{ width }}>
@@ -25,6 +25,7 @@ const mountItem = (photos, width = 600) =>
 					id="abc"
 					firstName="Amara"
 					lastInitial="O"
+					tripExcerpt={tripExcerpt}
 					tripStart="2024-03-05"
 					tripEnd="2024-03-11"
 					cities={['tokyo']}
@@ -40,6 +41,21 @@ describe('<PublicTravellerItem />', () => {
 		cy.get(AVATAR_SELECTORS.ROOT)
 			.should('have.text', 'AO')
 			.and('have.attr', 'aria-hidden', 'true')
+	})
+
+	it('clamps a long excerpt to two lines ending in an ellipsis', () => {
+		mountItem(undefined, 320, 'Eight slow days in Prague. '.repeat(7))
+		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.EXCERPT).should(($excerpt) => {
+			const excerpt = $excerpt[0]
+			const { lineHeight } = getComputedStyle(excerpt)
+			expect(excerpt.getBoundingClientRect().height).to.be.closeTo(
+				parseFloat(lineHeight) * 2,
+				1,
+			)
+			expect(excerpt.scrollHeight).to.be.greaterThan(excerpt.clientHeight)
+			expect($excerpt).to.have.css('-webkit-line-clamp', '2')
+			expect($excerpt).to.have.css('font-style', 'italic')
+		})
 	})
 
 	it('shows three photos as square gallery-sized tiles on one row', () => {

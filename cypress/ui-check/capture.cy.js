@@ -570,6 +570,32 @@ describe(`UI check capture (${LABEL})`, () => {
 					freezeAnimation()
 					shot(`public-travellers-broken-photo-${width}`)
 
+					// The seeded excerpts are short, so one long enough to clamp beside a card with none
+					interceptOnce('GET', publicTrips, {
+						body: {
+							'ui-check-long-excerpt': {
+								...first,
+								firstName: 'Long',
+								tripExcerpt:
+									'Eight slow days wandering the old town, the castle district and the river banks, with long lunches, late trams and a morning at the market. '
+										.repeat(2)
+										.slice(0, 200)
+										.trim(),
+							},
+							'ui-check-no-excerpt': {
+								...first,
+								firstName: 'None',
+								tripExcerpt: null,
+							},
+						},
+					})
+					cy.clearAllLocalStorage()
+					visit(PATHS.TRAVELLERS)
+					cy.get(card).should('have.length', 2)
+					assertSettled()
+					freezeAnimation()
+					shot(`public-travellers-excerpt-${width}`)
+
 					const many = Object.fromEntries(
 						Array.from({ length: 30 }, (_, index) => [
 							`ui-check-public-${String(index).padStart(2, '0')}`,

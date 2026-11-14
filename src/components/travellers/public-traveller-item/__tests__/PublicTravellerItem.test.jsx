@@ -29,6 +29,7 @@ const baseProps = {
 	id: 'abc',
 	firstName: 'Amara',
 	lastInitial: 'O',
+	tripExcerpt: 'Eight slow days between Tokyo and Paris.',
 	tripStart: '2024-03-05',
 	tripEnd: '2024-03-11',
 	cities: [
@@ -70,6 +71,20 @@ describe('<PublicTravellerItem />', () => {
 		const trip = screen.getByTestId(PUBLIC_TRAVELLER_ITEM.TRIP)
 		expect(trip).toHaveTextContent('5–11 Mar 2024')
 		expect(trip).toHaveTextContent('7 days')
+	})
+
+	it('shows the trip excerpt, clamped to two lines', () => {
+		renderItem()
+		expect(
+			screen.getByTestId(PUBLIC_TRAVELLER_ITEM.EXCERPT),
+		).toHaveTextContent('Eight slow days between Tokyo and Paris.')
+	})
+
+	it('leaves the excerpt out when the trip has none', () => {
+		renderItem({ tripExcerpt: null })
+		expect(
+			screen.queryByTestId(PUBLIC_TRAVELLER_ITEM.EXCERPT),
+		).not.toBeInTheDocument()
 	})
 
 	it('shows a badge per city', () => {
