@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.7](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.6...v0.27.7) (2026-11-14)
+
+
+### Enhancements
+
+* city chips as tags and a distinct Message action ([#745](https://github.com/andres-codigo/trip-fotos-react/issues/745)) ([47a971a](https://github.com/andres-codigo/trip-fotos-react/commit/47a971a0e0a10eabab4fe2f7d21c55415515610d))
+
 ## [0.27.6](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.5...v0.27.6) (2026-11-14)
 
 
