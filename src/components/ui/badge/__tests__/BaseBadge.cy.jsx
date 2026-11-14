@@ -4,11 +4,23 @@ import { TRAVELLER_AREAS } from '@/constants/travellers'
 import BaseBadge from '@/components/ui/badge/BaseBadge'
 
 describe('<BaseBadge />', () => {
-	it('renders the title visually uppercased', () => {
+	it('renders the title in sentence case after a hidden pin', () => {
 		cy.mount(<BaseBadge title="Prague" />)
 		cy.get(COMMON_SELECTORS.BASE_BADGE)
 			.should('have.text', 'Prague')
-			.and('have.css', 'text-transform', 'uppercase')
+			.and('have.css', 'text-transform', 'none')
+			.find('svg')
+			.should('have.attr', 'aria-hidden', 'true')
+	})
+
+	// A label is shorter than a button (46px), so the two cannot be mistaken for each other
+	it('is smaller than a button', () => {
+		cy.mount(<BaseBadge title="Prague" />)
+		cy.get(COMMON_SELECTORS.BASE_BADGE)
+			.should('have.css', 'font-size', '14px')
+			.and(($badge) =>
+				expect($badge[0].getBoundingClientRect().height).to.equal(28),
+			)
 	})
 
 	TRAVELLER_AREAS.forEach((area) => {

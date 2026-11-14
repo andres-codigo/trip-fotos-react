@@ -28,6 +28,7 @@ import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 import TripSummary from '@/components/travellers/trip-summary/TripSummary'
 import YouTag from '@/components/travellers/you-tag/YouTag'
+import TabBarIcon from '@/components/layout/tab-bar/TabBarIcon'
 
 import useScrollToAnchor from '@/pages/traveller-detail/hooks/useScrollToAnchor'
 
@@ -223,13 +224,22 @@ const TravellerDetail = () => {
 										/>
 									))}
 								</div>
+								{/* Ruled off from the tags and full width on phones, so it reads as the page's action */}
 								{canContact && (
-									<div className="flex flex-wrap gap-2">
+									<div className="border-t border-border pt-4">
 										<BaseButton
 											isLink
 											to={`${PATHS.TRAVELLERS}/${id}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`}
 											modeType="primary"
+											className="w-full gap-2 md:w-auto"
+											ariaLabel={TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(
+												traveller.firstName,
+											)}
 											data-cy={TRAVELLER_DETAIL.MESSAGE}>
+											<TabBarIcon
+												name="messages"
+												className="size-5"
+											/>
 											{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(
 												traveller.firstName,
 											)}

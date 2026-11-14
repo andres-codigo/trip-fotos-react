@@ -25,9 +25,9 @@ export const CARD_PHOTOS = Object.freeze({
 		'm-0 flex list-none gap-x-[2%] pt-0 pb-4 pl-0 [@media(max-width:480px)]:[&>li]:w-[32%]',
 })
 
-// One column on phones, two from 640px and three from 1024px, the maximum; rows stretch so cards in a row are equal height
+// One column on phones, two from 640px and three from 1024px, the maximum. Each card is a subgrid of five rows, so its parts line up with its neighbours'; a row gap would also open between those rows, so the cards' bottom margin spaces the grid rows and the list's negative one takes the last away
 export const TRAVELLERS_GRID =
-	'm-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3'
+	'mx-0 mt-0 -mb-4 grid list-none grid-cols-1 gap-x-4 gap-y-0 p-0 sm:grid-cols-2 lg:grid-cols-3'
 
 // The Messages lists, shared by the page and its skeleton
 export const MESSAGES_LAYOUT = Object.freeze({

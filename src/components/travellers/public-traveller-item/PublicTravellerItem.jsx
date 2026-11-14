@@ -43,16 +43,18 @@ const PublicTravellerItem = ({
 				tripDataCy={PUBLIC_TRAVELLER_ITEM.TRIP}
 			/>
 			{/* Only the opening of the description is public; the clamp ends it in an ellipsis */}
-			{tripExcerpt && (
-				<p
-					className="mt-3.5 mb-3 line-clamp-2 italic"
-					data-cy={PUBLIC_TRAVELLER_ITEM.EXCERPT}>
-					{tripExcerpt}
-				</p>
-			)}
-			{/* The same gaps as the signed-in card, whose badges sit under its description */}
+			{/* Always rendered, so the card keeps the five rows it shares with its neighbours; the clamp also needs a block parent, as a grid item it collapses to no height */}
+			<div className={cn('mt-3.5', tripExcerpt && 'mb-3')}>
+				{tripExcerpt && (
+					<p
+						className="m-0 line-clamp-2 italic"
+						data-cy={PUBLIC_TRAVELLER_ITEM.EXCERPT}>
+						{tripExcerpt}
+					</p>
+				)}
+			</div>
 			<div
-				className={cn('flex flex-wrap gap-2', !tripExcerpt && 'mt-3.5')}
+				className="flex flex-wrap gap-2 self-start"
 				data-cy={PUBLIC_TRAVELLER_ITEM.BADGES}>
 				{(cities ?? []).map((city) => (
 					<BaseBadge
@@ -62,8 +64,7 @@ const PublicTravellerItem = ({
 					/>
 				))}
 			</div>
-			{/* The photos and View trip sit at the foot, so they line up across a row of equal-height cards */}
-			<div className="mt-auto flex flex-col pt-3.5">
+			<div className="pt-3.5">
 				{photos?.length > 0 && (
 					<ul
 						className={CARD_PHOTOS.PUBLIC_LIST}
@@ -81,15 +82,15 @@ const PublicTravellerItem = ({
 						))}
 					</ul>
 				)}
-				<div className="flex flex-wrap items-center justify-end gap-2">
-					<BaseButton
-						isLink
-						to={viewTripLink}
-						modeType="outline"
-						data-cy={PUBLIC_TRAVELLER_ITEM.VIEW_TRIP}>
-						{TRAVELLER_ITEM_CONFIG.VIEW_LABEL}
-					</BaseButton>
-				</div>
+			</div>
+			<div className="flex flex-wrap items-center justify-end gap-2 self-end">
+				<BaseButton
+					isLink
+					to={viewTripLink}
+					modeType="outline"
+					data-cy={PUBLIC_TRAVELLER_ITEM.VIEW_TRIP}>
+					{TRAVELLER_ITEM_CONFIG.VIEW_LABEL}
+				</BaseButton>
 			</div>
 		</li>
 	)

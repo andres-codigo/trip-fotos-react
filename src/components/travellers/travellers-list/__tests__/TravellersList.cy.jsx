@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import {
+	COMMON_SELECTORS,
 	TRAVELLER_ITEM_SELECTORS,
 	TRAVELLERS_LIST_SELECTORS,
 } from '@/constants/test'
@@ -142,6 +143,63 @@ describe('<TravellersList />', () => {
 				),
 			)
 			expect(new Set(actionBottoms).size).to.equal(1)
+		})
+	})
+
+	// Two rows of photos beside one, under tags that wrap beside tags that do not: each part still starts level across the row
+	it('starts the tags and photo rows of cards side by side at the same height', () => {
+		const photos = (count) =>
+			Array.from(
+				{ length: count },
+				(_, index) =>
+					`data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"></svg>#${index}`,
+			)
+		const alignedTravellers = gridTravellers.map((traveller, index) => ({
+			...traveller,
+			cities:
+				index === 1
+					? ['tokyo', 'prague', 'vienna', 'krakow', 'lisbon', 'rome']
+					: ['tokyo'],
+			files: photos(index === 2 ? 6 : 1),
+		}))
+		const tops = (row, selector) =>
+			row.map((item) =>
+				Math.round(
+					item.querySelector(selector).getBoundingClientRect().top,
+				),
+			)
+		;[
+			[1280, 3],
+			[768, 2],
+		].forEach(([width, columns]) => {
+			cy.viewport(width, 900)
+			mountList({
+				travellers: alreadyLoaded({ travellers: alignedTravellers }),
+			})
+
+			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should(
+				($items) => {
+					const row = [...$items].slice(0, columns)
+					expect(
+						new Set(tops(row, TRAVELLER_ITEM_SELECTORS.BADGES))
+							.size,
+					).to.equal(1)
+					// A shorter tag row must not stretch its tags to its neighbour's height
+					row.forEach((item) =>
+						item
+							.querySelectorAll(COMMON_SELECTORS.BASE_BADGE)
+							.forEach((badge) =>
+								expect(
+									badge.getBoundingClientRect().height,
+								).to.equal(28),
+							),
+					)
+					expect(
+						new Set(tops(row, TRAVELLER_ITEM_SELECTORS.IMAGES_LIST))
+							.size,
+					).to.equal(1)
+				},
+			)
 		})
 	})
 

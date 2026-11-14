@@ -128,7 +128,7 @@ const TravellerItem = ({
 			)}
 			{isDeleting ? (
 				<li
-					className="my-2 list-none"
+					className="row-span-5 my-2 list-none"
 					data-cy={TRAVELLER_ITEM.SPINNER}>
 					<BaseSpinner
 						label={GLOBAL.SPINNER_LABEL.DELETING_TRAVELLER}
@@ -159,7 +159,7 @@ const TravellerItem = ({
 						{shortenTripDescription(tripDescription)}
 					</p>
 					<div
-						className="flex flex-wrap gap-2"
+						className="flex flex-wrap gap-2 self-start"
 						data-cy={TRAVELLER_ITEM.BADGES}>
 						{cities.map((city) => (
 							<BaseBadge
@@ -169,8 +169,8 @@ const TravellerItem = ({
 							/>
 						))}
 					</div>
-					{/* Photos and actions sit at the foot, so they line up across a row of equal-height cards */}
-					<div className="mt-auto flex flex-col pt-3.5">
+					{/* The photo row is always there, empty without photos, so the actions stay in the card's last row */}
+					<div className="pt-3.5">
 						{files.length > 0 && (
 							<ul
 								className={CARD_PHOTOS.LIST}
@@ -207,45 +207,43 @@ const TravellerItem = ({
 								)}
 							</ul>
 						)}
-						<div className="flex flex-wrap items-center justify-end gap-2">
-							{canContact && (
-								<BaseButton
-									isLink
-									to={contactLink}
-									modeType="outline"
-									data-cy={TRAVELLER_ITEM.MESSAGE}>
-									{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(
-										firstName,
-									)}
-								</BaseButton>
-							)}
-							{isOwnRecord && (
-								<BaseButton
-									isLink
-									to={editLink}
-									modeType="outline"
-									data-cy={TRAVELLER_ITEM.EDIT}>
-									{TRAVELLER_ITEM_CONFIG.EDIT_LABEL}
-								</BaseButton>
-							)}
+					</div>
+					<div className="flex flex-wrap items-center justify-end gap-2 self-end">
+						{canContact && (
 							<BaseButton
 								isLink
-								to={detailsLink}
-								modeType="primary"
-								data-cy={TRAVELLER_ITEM.VIEW_TRIP}>
-								{TRAVELLER_ITEM_CONFIG.VIEW_LABEL}
+								to={contactLink}
+								modeType="outline"
+								data-cy={TRAVELLER_ITEM.MESSAGE}>
+								{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(firstName)}
 							</BaseButton>
-							{canDelete && (
-								<BaseButton
-									type="button"
-									modeType="danger"
-									ref={deleteButtonRef}
-									onClick={openConfirm}
-									data-cy={TRAVELLER_ITEM.DELETE}>
-									Delete
-								</BaseButton>
-							)}
-						</div>
+						)}
+						{isOwnRecord && (
+							<BaseButton
+								isLink
+								to={editLink}
+								modeType="outline"
+								data-cy={TRAVELLER_ITEM.EDIT}>
+								{TRAVELLER_ITEM_CONFIG.EDIT_LABEL}
+							</BaseButton>
+						)}
+						<BaseButton
+							isLink
+							to={detailsLink}
+							modeType="primary"
+							data-cy={TRAVELLER_ITEM.VIEW_TRIP}>
+							{TRAVELLER_ITEM_CONFIG.VIEW_LABEL}
+						</BaseButton>
+						{canDelete && (
+							<BaseButton
+								type="button"
+								modeType="danger"
+								ref={deleteButtonRef}
+								onClick={openConfirm}
+								data-cy={TRAVELLER_ITEM.DELETE}>
+								Delete
+							</BaseButton>
+						)}
 					</div>
 				</li>
 			)}

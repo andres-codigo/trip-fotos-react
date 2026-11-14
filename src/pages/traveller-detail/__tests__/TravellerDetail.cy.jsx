@@ -124,6 +124,25 @@ describe('<TravellerDetail />', () => {
 			})
 	})
 
+	it('makes Message full width with an icon on phones and its own width above', () => {
+		cy.viewport(390, 800)
+		mountPage({ isTraveller: true })
+		cy.get(TRAVELLER_DETAIL_SELECTORS.MESSAGE)
+			.find('svg')
+			.should('have.attr', 'aria-hidden', 'true')
+		cy.get(TRAVELLER_DETAIL_SELECTORS.MESSAGE).should(($message) => {
+			const width = $message[0].getBoundingClientRect().width
+			const column = $message[0].parentElement.getBoundingClientRect()
+			expect(width).to.equal(column.width)
+		})
+		cy.viewport(1280, 800)
+		cy.get(TRAVELLER_DETAIL_SELECTORS.MESSAGE).should(($message) => {
+			const width = $message[0].getBoundingClientRect().width
+			const column = $message[0].parentElement.getBoundingClientRect()
+			expect(width).to.be.below(column.width)
+		})
+	})
+
 	it('lines the back link up with the left edge of the card on desktop', () => {
 		cy.viewport(1280, 800)
 		mountPage()
