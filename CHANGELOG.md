@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.4](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.3...v0.27.4) (2026-11-14)
+
+
+### Enhancements
+
+* two-line trip excerpt on public traveller cards ([#739](https://github.com/andres-codigo/trip-fotos-react/issues/739)) ([e2657da](https://github.com/andres-codigo/trip-fotos-react/commit/e2657dabf58e9dc0d434813537de497d246056ad))
+
 ## [0.27.3](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.2...v0.27.3) (2026-11-13)
 
 
