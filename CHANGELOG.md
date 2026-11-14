@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.6](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.5...v0.27.6) (2026-11-14)
+
+
+### Enhancements
+
+* full-screen photo lightbox ([#743](https://github.com/andres-codigo/trip-fotos-react/issues/743)) ([55291c5](https://github.com/andres-codigo/trip-fotos-react/commit/55291c5a05eb088f9bb1f2f7d6c2e7df429f57e2))
+
 ## [0.27.5](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.4...v0.27.5) (2026-11-14)
 
 
