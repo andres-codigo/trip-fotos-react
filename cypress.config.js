@@ -94,6 +94,16 @@ export default defineConfig({
 			)
 			// A `main` run records the captures it took on its commit, so the next /ui-check on the same main reuses them
 			if (isUiCheck) {
+				// The default 1280x720 window is smaller than a 1280x900 viewport, so a viewport shot gains the runner's scrollbars
+				on('before:browser:launch', (browser, options) => {
+					if (browser.name === 'electron') {
+						options.preferences.width = 1600
+						options.preferences.height = 1200
+					} else if (browser.family === 'chromium') {
+						options.args.push('--window-size=1600,1200')
+					}
+					return options
+				})
 				on('after:run', (results) => {
 					writeStamp({
 						projectDir: config.projectRoot,
