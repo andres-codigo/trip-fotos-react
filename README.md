@@ -71,6 +71,8 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Next up** — in this order:
 
+- [#748](https://github.com/andres-codigo/trip-fotos-react/issues/748) — scroll to the top on navigation
+- [#749](https://github.com/andres-codigo/trip-fotos-react/issues/749) — messages as conversation threads
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
 
 <a id="stack"></a>
