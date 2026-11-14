@@ -22,21 +22,48 @@ import SkipLink from '@/components/layout/skip-link/SkipLink'
 import Header from '@/components/layout/header/Header'
 import Footer from '@/components/layout/footer/Footer'
 import TabBar from '@/components/layout/tab-bar/TabBar'
-const Authentication = lazy(
-	() => import('@/pages/authentication/Authentication'),
-)
-const Register = lazy(() => import('@/pages/register/Register'))
-const Travellers = lazy(() => import('@/pages/travellers/Travellers'))
-const TravellerDetail = lazy(
-	() => import('@/pages/traveller-detail/TravellerDetail'),
-)
+import MessagesPageSkeleton from '@/components/messages/messages-page-skeleton/MessagesPageSkeleton'
+import TravellersPageSkeleton from '@/components/travellers/travellers-page-skeleton/TravellersPageSkeleton'
+
+const loadAuthentication = () => import('@/pages/authentication/Authentication')
+const loadRegister = () => import('@/pages/register/Register')
+const loadTravellers = () => import('@/pages/travellers/Travellers')
+const loadTravellerDetail = () =>
+	import('@/pages/traveller-detail/TravellerDetail')
+const loadMessages = () => import('@/pages/messages/Messages')
+
+const Authentication = lazy(loadAuthentication)
+const Register = lazy(loadRegister)
+const Travellers = lazy(loadTravellers)
+const TravellerDetail = lazy(loadTravellerDetail)
 const ContactTraveller = lazy(
 	() => import('@/pages/contact-traveller/ContactTraveller'),
 )
 const EditTrip = lazy(() => import('@/pages/edit-trip/EditTrip'))
-const Messages = lazy(() => import('@/pages/messages/Messages'))
+const Messages = lazy(loadMessages)
 const Privacy = lazy(() => import('@/pages/privacy/Privacy'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
+
+// The pages the header and tab bar link to (My trip is the detail page), so a tap on one does not wait for its code
+const NAV_PAGES = [
+	loadTravellers,
+	loadMessages,
+	loadTravellerDetail,
+	loadRegister,
+	loadAuthentication,
+]
+
+// Fetched once the browser is idle after the first paint, so the prefetch never competes with the page being opened; a failed fetch is retried by the route itself
+const prefetchNavPages = () => {
+	const prefetch = () => NAV_PAGES.forEach((load) => load().catch(() => {}))
+
+	if ('requestIdleCallback' in window) {
+		const id = window.requestIdleCallback(prefetch)
+		return () => window.cancelIdleCallback(id)
+	}
+	const id = window.setTimeout(prefetch, 0)
+	return () => window.clearTimeout(id)
+}
 
 function AppRoutes() {
 	const dispatch = useDispatch()
@@ -63,6 +90,8 @@ function AppRoutes() {
 			dispatch(checkIsTraveller(userId))
 		}
 	}, [userId, dispatch])
+
+	useEffect(prefetchNavPages, [])
 
 	// Watch for changes in `didAutoLogout` and redirect to the login page
 	useEffect(() => {
@@ -125,6 +154,7 @@ function AppRoutes() {
 			)}
 			<SkipLink />
 			<Header />
+			{/* Travellers and Messages have their own boundary, whose skeleton matches the page; the rest share the spinner */}
 			<Suspense fallback={<LoadingFallback />}>
 				<Routes>
 					<Route
@@ -146,7 +176,11 @@ function AppRoutes() {
 					/>
 					<Route
 						path={PATHS.TRAVELLERS}
-						element={<Travellers />}
+						element={
+							<Suspense fallback={<TravellersPageSkeleton />}>
+								<Travellers />
+							</Suspense>
+						}
 					/>
 					<Route
 						path={PATHS.TRAVELLER_DETAIL}
@@ -162,7 +196,11 @@ function AppRoutes() {
 					/>
 					<Route
 						path={PATHS.MESSAGES}
-						element={<Messages />}
+						element={
+							<Suspense fallback={<MessagesPageSkeleton />}>
+								<Messages />
+							</Suspense>
+						}
 					/>
 					<Route
 						path={PATHS.PRIVACY}

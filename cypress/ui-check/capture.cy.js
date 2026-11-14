@@ -349,6 +349,50 @@ const eachWidth = (callback) => {
 	})
 }
 
+// The page's code and its data held back: the route's skeleton first, then, once the code arrives, the page's own loading state, which should look the same. Literal selectors keep the script loadable on main, which lacks them
+const fallbackThenLoading = ({ path, chunk, data, loading, name }) => {
+	// Requests for the page's code wait here until the shot of the fallback is taken; a held request fails at the command timeout, so it is raised for the capture
+	const commandTimeout = Cypress.config('defaultCommandTimeout')
+	Cypress.config('defaultCommandTimeout', TIMEOUT)
+	const waiting = []
+	let isHolding = true
+	cy.intercept('GET', `**/assets/${chunk}-*.js`, () =>
+		isHolding ? new Promise((resolve) => waiting.push(resolve)) : undefined,
+	)
+	cy.intercept('GET', data, (request) =>
+		request.on('response', (response) => response.setDelay(60000)),
+	)
+	eachWidth((width) => {
+		cy.then(() => {
+			isHolding = true
+		})
+		visit(path)
+		cy.get(`[data-cy="${name}-page-skeleton"]`).should('be.visible')
+		// The header's nav is lazy too, so the shot waits for it rather than catching it mid-load
+		cy.window({ log: false }).then((win) => {
+			if (win.localStorage.getItem(SESSION_STORAGE_KEYS.USER_ID)) {
+				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON, {
+					timeout: TIMEOUT,
+				}).should('exist')
+			}
+		})
+		assertSignedInName()
+		freezeAnimation()
+		shot(`${name}-fallback-${width}`)
+		cy.then(() => {
+			isHolding = false
+			waiting.splice(0).forEach((release) => release())
+		})
+		cy.get(`[data-cy="${name}-page-skeleton"]`, {
+			timeout: TIMEOUT,
+		}).should('not.exist')
+		cy.get(loading).should('be.visible')
+		freezeAnimation()
+		shot(`${name}-loading-after-fallback-${width}`)
+	})
+	cy.then(() => Cypress.config('defaultCommandTimeout', commandTimeout))
+}
+
 // Skipped rather than left out, so the run lists what UI_CHECK_ONLY filtered away
 const capture = (id, test) => {
 	const entry = CAPTURES[id]
@@ -527,6 +571,10 @@ describe(`UI check capture (${LABEL})`, () => {
 				cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST).should(
 					'be.visible',
 				)
+				// The route fallback has the same skeletons; the disabled Refresh is the page's own, so its load has started and taken the held reply
+				cy.get(TRAVELLERS_LIST_SELECTORS.REFRESH_BUTTON).should(
+					'be.disabled',
+				)
 				cy.get(band).should('be.visible')
 				freezeAnimation()
 				shot(`public-travellers-loading-${width}`)
@@ -626,6 +674,17 @@ describe(`UI check capture (${LABEL})`, () => {
 				)
 				freezeAnimation()
 				shot(`public-login-from-trip-${width}`)
+			})
+		})
+
+		capture('public-travellers-fallback', () => {
+			cy.clearAllLocalStorage()
+			fallbackThenLoading({
+				path: PATHS.TRAVELLERS,
+				chunk: 'Travellers',
+				data: '**/publicTrips.json*',
+				loading: TRAVELLERS_LIST_SELECTORS.SKELETON_LIST,
+				name: 'travellers',
 			})
 		})
 	})
@@ -942,6 +1001,16 @@ describe(`UI check capture (${LABEL})`, () => {
 			capture('2x')
 		})
 
+		capture('travellers-fallback', () => {
+			fallbackThenLoading({
+				path: PATHS.TRAVELLERS,
+				chunk: 'Travellers',
+				data: '**/travellers.json*',
+				loading: TRAVELLERS_LIST_SELECTORS.SKELETON_LIST,
+				name: 'travellers',
+			})
+		})
+
 		capture('travellers-loading', () => {
 			// Held open so the skeleton cards, and the disabled Refresh and Register, stay on screen
 			cy.intercept('GET', '**/travellers.json*', (request) => {
@@ -951,7 +1020,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 			eachWidth((width) => {
 				visit(PATHS.TRAVELLERS)
-				cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
+				cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('exist')
 				cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST).should(
 					'be.visible',
 				)
@@ -1348,6 +1417,16 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		capture('messages-fallback', () => {
+			fallbackThenLoading({
+				path: PATHS.MESSAGES,
+				chunk: 'Messages',
+				data: '**/messages/*.json*',
+				loading: '[data-cy="messages-skeleton"]',
+				name: 'messages',
+			})
+		})
+
 		capture('messages-states', () => {
 			// Only Date, so the app's timers still run; message times then read the same in every run
 			cy.clock(NOW, ['Date'])
@@ -1416,6 +1495,9 @@ describe(`UI check capture (${LABEL})`, () => {
 					req.on('response', (res) => res.setDelay(60000)),
 				).as('slowMessages')
 				visit(PATHS.MESSAGES)
+				// The route fallback has the same skeletons, so the page's own status line shows the page has taken over
+				cy.get(MESSAGES_PAGE_SELECTORS.LOADING).should('be.visible')
+				assertSignedInName()
 				if (isInbox(width)) {
 					cy.get(MESSAGE_SKELETON_SELECTORS.ROW).should(
 						'have.length',
@@ -1641,6 +1723,10 @@ describe(`UI check capture (${LABEL})`, () => {
 					`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}/contact`,
 				)
 				cy.get(CONTACT_TRAVELLER_SELECTORS.FORM).should('be.visible')
+				// The seeded unread message shows on the nav once its own request answers, so the shot waits for it
+				cy.get('[data-cy="tab-bar-unread"], [data-cy="total-messages"]')
+					.filter(':visible')
+					.should('contain', '1')
 				if (width >= 1024) {
 					cy.get(
 						`${CONTACT_TRAVELLER_SELECTORS.RECIPIENT_DETAILS} li`,

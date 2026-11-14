@@ -61,10 +61,10 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- Steadier loading: Travellers and Messages show one skeleton shaped like the page from the first tap, with nothing jumping when the content arrives, and the main pages download in the background so moving between them is quicker
 - A taste of each trip for visitors: public trip cards show the first two lines of the trip description
 - Two-column pages on desktop: a traveller's trip beside their photos, Edit your trip and Register split into trip details and photos, Contact and Reply showing who you're writing to beside the message, and a Messages inbox with the open message beside the list
 - A Travellers card grid: two or three columns on wider screens, each card headed by the traveller's initials, and a "You" tag on your own card and trip
-- A new app icon, favicon and link-preview image in the dark palette: the camera in cream on a deep moss tile
 - A public preview: visitors who are not logged in can browse every trip, newest first, with the traveller's first name, dates, cities and first three photos, filter by city, and sign up to see the full trip
 - Clearer forms: helper text and a required-fields legend, an error summary, one wording for every error, the password rule up front with Show password and Forgot password, a required photo on Register and optional alt text per photo
 - Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, faster local checks that rerun only the checks and tests a change can affect, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo

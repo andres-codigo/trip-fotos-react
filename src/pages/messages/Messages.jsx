@@ -8,7 +8,13 @@ import { handleApiError } from '@/utils/errorHandler'
 import useViewport from '@/utils/useViewport'
 import { MESSAGE_ACTIONS, MESSAGE_ROW, MESSAGES_PAGE } from '@/constants/test'
 import { MESSAGES_CONFIG } from '@/constants/travellers'
-import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
+import {
+	ACCESSIBILITY,
+	GLOBAL,
+	MESSAGES_LAYOUT,
+	PAGE_LAYOUT,
+	PATHS,
+} from '@/constants/ui'
 
 import {
 	deleteMessage,
@@ -20,7 +26,7 @@ import {
 import MessageItem from '@/components/messages/message-item/MessageItem'
 import MessagePane from '@/components/messages/message-pane/MessagePane'
 import MessageRow from '@/components/messages/message-row/MessageRow'
-import MessageSkeleton from '@/components/messages/message-skeleton/MessageSkeleton'
+import MessagesSkeleton from '@/components/messages/messages-skeleton/MessagesSkeleton'
 
 import Alerts from '@/components/ui/alerts/Alerts'
 import BaseButton from '@/components/ui/button/BaseButton'
@@ -32,8 +38,6 @@ const HEADING = 'heading'
 const PANE_HEADING = 'pane-heading'
 const ITEM = 'item'
 const PARAM = MESSAGES_CONFIG.MESSAGE_PARAM
-const INBOX_LIST_CLASSES =
-	'm-0 list-none divide-y divide-border overflow-hidden rounded-lg border border-border-card bg-surface p-0 shadow-card'
 
 const without = (record, key) =>
 	Object.fromEntries(Object.entries(record).filter(([id]) => id !== key))
@@ -289,30 +293,13 @@ const Messages = () => {
 			{status}
 			<div className={PAGE_LAYOUT.COLUMNS}>
 				{isLoading ? (
-					<>
-						<ul
-							aria-busy="true"
-							className={INBOX_LIST_CLASSES}>
-							{Array.from(
-								{
-									length: MESSAGES_CONFIG.INBOX_SKELETON_COUNT,
-								},
-								(_, index) => (
-									<MessageSkeleton
-										key={index}
-										variant="row"
-									/>
-								),
-							)}
-						</ul>
-						<MessageSkeleton variant="pane" />
-					</>
+					<MessagesSkeleton isInbox />
 				) : (
 					<>
 						<ul
 							ref={listRef}
 							aria-label={MESSAGES_CONFIG.TITLE}
-							className={INBOX_LIST_CLASSES}
+							className={MESSAGES_LAYOUT.INBOX_LIST}
 							data-cy={MESSAGES_PAGE.INBOX_LIST}>
 							{visible.map((item) => (
 								<MessageRow
@@ -348,16 +335,7 @@ const Messages = () => {
 				{isLoading && (
 					<>
 						{status}
-						<ul
-							aria-busy="true"
-							className="m-0 flex list-none flex-col gap-3 p-0">
-							{Array.from(
-								{ length: MESSAGES_CONFIG.SKELETON_COUNT },
-								(_, index) => (
-									<MessageSkeleton key={index} />
-								),
-							)}
-						</ul>
+						<MessagesSkeleton />
 					</>
 				)}
 				{!isLoading && visible.length > 0 && (
@@ -365,7 +343,7 @@ const Messages = () => {
 						{status}
 						<ul
 							ref={listRef}
-							className="m-0 flex list-none flex-col gap-3 p-0"
+							className={MESSAGES_LAYOUT.CARD_LIST}
 							data-cy={MESSAGES_PAGE.LIST}>
 							{visible.map((item) => (
 								<MessageItem
@@ -410,7 +388,7 @@ const Messages = () => {
 			className={'mainContainer cardPage text-left'}
 			data-cy="main-container"
 			data-cy-alt="messages-main-container">
-			<title>{`Messages · ${GLOBAL.SITE_NAME}`}</title>
+			<title>{`${MESSAGES_CONFIG.TITLE} · ${GLOBAL.SITE_NAME}`}</title>
 			{error && (
 				<BaseDialog
 					show={true}

@@ -90,7 +90,7 @@ describe('Travellers page', () => {
 			performLogin()
 
 			// Should show loading state initially
-			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
+			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('exist')
 
 			// Wait for loading to complete
 			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {

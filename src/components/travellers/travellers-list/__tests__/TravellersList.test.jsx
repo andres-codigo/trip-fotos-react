@@ -1,4 +1,11 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import {
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+	act,
+	within,
+} from '@testing-library/react'
 import { Provider, useDispatch, useSelector } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
@@ -965,11 +972,11 @@ describe('<TravellersList />', () => {
 		it('stands public-shaped skeletons in while the preview loads', () => {
 			renderTravellersList({}, { shouldResolveSlowly: true })
 
-			const skeletons = screen.getAllByTestId(TRAVELLER_SKELETON.ROOT)
-			// Public cards have no description, so two fewer blocks than the signed-in ten
+			const [skeleton] = screen.getAllByTestId(TRAVELLER_SKELETON.ROOT)
+			// The public excerpt is clamped to two lines; the signed-in description runs to five
 			expect(
-				skeletons[0].querySelectorAll('.animate-skeleton'),
-			).toHaveLength(8)
+				within(skeleton).getByTestId(TRAVELLER_SKELETON.TEXT).children,
+			).toHaveLength(2)
 		})
 
 		it('loads the public summaries, not the full records', async () => {

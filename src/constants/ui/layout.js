@@ -14,3 +14,24 @@ export const PAGE_LAYOUT = Object.freeze({
 	SECTION_CARD:
 		'lg:rounded-lg lg:border lg:border-border-card lg:bg-surface lg:p-4 lg:shadow-card',
 })
+
+// The photo strip at the foot of a Travellers card, shared by the cards and their skeleton so the two cannot drift. Class names are written out whole, as Tailwind only finds literal ones
+export const CARD_PHOTOS = Object.freeze({
+	// Three tiles across; two from 480px down, where three would be too small to make out
+	TILE_WIDTH: 'w-[32%] [@media(max-width:480px)]:w-[48%]',
+	LIST: 'm-0 flex list-none flex-wrap gap-x-[2%] gap-y-2 pt-0 pb-4 pl-0 [@media(max-width:480px)]:gap-x-[4%] [@media(max-width:480px)]:gap-y-4',
+	// Three across at every width: two per row on phones would leave the third photo alone
+	PUBLIC_LIST:
+		'm-0 flex list-none gap-x-[2%] pt-0 pb-4 pl-0 [@media(max-width:480px)]:[&>li]:w-[32%]',
+})
+
+// One column on phones, two from 640px and three from 1024px, the maximum; rows stretch so cards in a row are equal height
+export const TRAVELLERS_GRID =
+	'm-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3'
+
+// The Messages lists, shared by the page and its skeleton
+export const MESSAGES_LAYOUT = Object.freeze({
+	INBOX_LIST:
+		'm-0 list-none divide-y divide-border overflow-hidden rounded-lg border border-border-card bg-surface p-0 shadow-card',
+	CARD_LIST: 'm-0 flex list-none flex-col gap-3 p-0',
+})

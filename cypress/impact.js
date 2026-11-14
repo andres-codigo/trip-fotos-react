@@ -82,6 +82,14 @@ export const CAPTURES = {
 		title: 'captures the travellers list while it loads',
 		areas: ['travellers'],
 	},
+	'public-travellers-fallback': {
+		title: 'captures the logged-out Travellers route fallback while its code loads, then the loading state it hands over to',
+		areas: ['travellers'],
+	},
+	'travellers-fallback': {
+		title: 'captures the Travellers route fallback while its code loads, then the loading state it hands over to',
+		areas: ['travellers'],
+	},
 	'travellers-paging': {
 		title: 'captures Travellers paging: first page, the focused new card, the last page',
 		areas: ['travellers'],
@@ -120,6 +128,10 @@ export const CAPTURES = {
 	},
 	'messages-states': {
 		title: 'captures the messages page in every state and a real delete',
+		areas: ['messages'],
+	},
+	'messages-fallback': {
+		title: 'captures the Messages route fallback while its code loads, then the loading state it hands over to',
 		areas: ['messages'],
 	},
 	'messages-empty': {

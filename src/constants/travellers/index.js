@@ -48,6 +48,7 @@ export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 })
 
 export const TRAVELLERS_LIST_CONFIG = Object.freeze({
+	TITLE: 'Travellers',
 	PAGE_SIZE: 12,
 	LOADING_LABEL: 'Loading travellers…',
 	SHOW_MORE: (count) => `Show ${count} more`,

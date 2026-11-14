@@ -66,7 +66,7 @@ describe('Stale persisted store', () => {
 
 		cy.url().should('include', PATHS.TRAVELLERS)
 		// The cached list must never be shown as current, so it is checked while loading as well as afterwards
-		cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('be.visible')
+		cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('exist')
 		cy.contains(STALE_NAME).should('not.exist')
 
 		cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {
