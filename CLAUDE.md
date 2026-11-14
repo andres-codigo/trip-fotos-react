@@ -8,7 +8,7 @@ Trip Fotos: a React/Firebase app for finding popular travel destinations tied to
 
 Branches must use a type prefix, enforced by the `require-open-pr` hook: `feature/` (new user-facing feature), `fix/` (bug fix), `docs/`, `refactor/` (no behaviour change), `enhancement/` (improvement to an existing feature), `chore/` (deps, config, CI) or `test/`. Example: `docs/update-constants-readme`, `fix/auth-redirect-loop`.
 
-Work from a Claude Design session (design system or UI redesign) never lands on `main` directly: create an issue and a `feature/` or `enhancement/` branch first, and reference the design artifact link in the issue.
+Work from a Claude Design session (design system or UI redesign) never lands on `main` directly: create an issue and a `feature/` or `enhancement/` branch first, and reference the design artifact link in the issue. `/design-change` runs the workflow, from brief to build.
 
 ## Finishing a PR
 
