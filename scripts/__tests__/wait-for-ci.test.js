@@ -1,11 +1,18 @@
 import { evaluate, parseArgs, summary } from '../wait-for-ci.mjs'
 
 const SINCE = Date.parse('2026-11-16T10:00:00Z')
-const run = (name, status, conclusion, createdAt = '2026-11-16T10:00:05Z') => ({
+const run = (
+	name,
+	status,
+	conclusion,
+	createdAt = '2026-11-16T10:00:05Z',
+	updatedAt = createdAt,
+) => ({
 	name,
 	status,
 	conclusion,
 	createdAt,
+	updatedAt,
 	databaseId: 1,
 })
 
@@ -38,7 +45,31 @@ describe('wait-for-ci', () => {
 			],
 			SINCE,
 		)
-		expect(summary(result)).toBe('CI passed: 2 runs')
+		expect(summary(result)).toBe(
+			'CI passed: 2 workflows; skipped: Dependabot',
+		)
+	})
+
+	it('counts only the latest-updated run of each workflow', () => {
+		const cancelled = run('Vitest', 'completed', 'cancelled')
+		const rerun = run(
+			'Vitest',
+			'in_progress',
+			'',
+			'2026-11-16T10:00:05Z',
+			'2026-11-16T10:02:00Z',
+		)
+		const skipped = run(
+			'Vitest',
+			'completed',
+			'skipped',
+			'2026-11-16T10:00:07Z',
+			'2026-11-16T10:00:10Z',
+		)
+		expect(evaluate([cancelled, skipped], SINCE).state).toBe('pass')
+		expect(evaluate([cancelled, skipped, rerun], SINCE).state).toBe(
+			'waiting',
+		)
 	})
 
 	it('fails and names the failed runs', () => {

@@ -8,10 +8,21 @@ const PASSED = new Set(['success', 'skipped', 'neutral'])
 const INTERVAL_MS = 30_000
 const NO_RUNS_MS = 3 * 60_000
 const TIMEOUT_MS = 45 * 60_000
+// Runs the ready event starts take a few seconds to be listed
+const SETTLE_MS = 60_000
 
-// Runs created before `since` (draft-time "skipping" runs) are ignored
+// Runs created before `since` (draft-time "skipping" runs) are ignored, and only
+// the latest-updated run of each workflow counts: a run a newer one cancelled,
+// or one re-run since, is superseded
 export const evaluate = (runs, since) => {
-	const recent = runs.filter((run) => Date.parse(run.createdAt) >= since)
+	const latest = new Map()
+	for (const run of runs) {
+		if (Date.parse(run.createdAt) < since) continue
+		const seen = latest.get(run.name)
+		if (!seen || Date.parse(run.updatedAt) > Date.parse(seen.updatedAt))
+			latest.set(run.name, run)
+	}
+	const recent = [...latest.values()]
 	if (recent.length === 0) return { state: 'none', runs: recent }
 	if (recent.some((run) => run.status !== 'completed'))
 		return { state: 'waiting', runs: recent }
@@ -19,8 +30,12 @@ export const evaluate = (runs, since) => {
 	return { state: failed.length ? 'fail' : 'pass', runs: recent, failed }
 }
 
+// Skipped runs are named: a test workflow that skips although the change
+// touches its paths is not a pass (docs/ci-cd.md § Finishing an issue)
 export const summary = ({ state, runs, failed = [] }) => {
-	if (state === 'pass') return `CI passed: ${runs.length} runs`
+	const skipped = runs.filter((run) => run.conclusion === 'skipped')
+	if (state === 'pass')
+		return `CI passed: ${runs.length} workflows${skipped.length ? `; skipped: ${skipped.map((run) => run.name).join('; ')}` : ''}`
 	if (state === 'fail')
 		return `CI failed: ${failed.map((run) => `${run.name} (${run.conclusion}, run ${run.databaseId})`).join('; ')}`
 	if (state === 'none') return 'CI: no run started'
@@ -48,7 +63,7 @@ const listRuns = (branch) =>
 				'--limit',
 				'50',
 				'--json',
-				'name,status,conclusion,createdAt,databaseId',
+				'name,status,conclusion,createdAt,updatedAt,databaseId',
 			],
 			{ encoding: 'utf8' },
 		),
@@ -67,8 +82,8 @@ const main = async () => {
 		const result = evaluate(listRuns(branch), since)
 		const waited = Date.now() - start
 		const done =
-			result.state === 'pass' ||
-			result.state === 'fail' ||
+			((result.state === 'pass' || result.state === 'fail') &&
+				waited >= SETTLE_MS) ||
 			(result.state === 'none' && waited >= NO_RUNS_MS) ||
 			waited >= TIMEOUT_MS
 		if (done) {
