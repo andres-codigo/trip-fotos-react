@@ -1,5 +1,5 @@
-import { render, screen, within } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
@@ -152,5 +152,41 @@ describe('<TabBar />', () => {
 		expect(screen.getByRole('link', { name: 'Messages' })).toBe(
 			screen.getByTestId(TAB_BAR.MESSAGES),
 		)
+	})
+
+	describe('scroll to the top', () => {
+		afterEach(() => vi.restoreAllMocks())
+
+		it('scrolls to the top when the current tab is tapped', () => {
+			const scrollTo = vi
+				.spyOn(window, 'scrollTo')
+				.mockImplementation(() => {})
+			renderTabBar()
+
+			fireEvent.click(
+				within(getNav()).getByRole('link', {
+					name: NAVIGATION.TRAVELLERS,
+				}),
+			)
+
+			expect(scrollTo).toHaveBeenCalledWith(
+				expect.objectContaining({ top: 0 }),
+			)
+		})
+
+		it('does not scroll from the tab for another page', () => {
+			const scrollTo = vi
+				.spyOn(window, 'scrollTo')
+				.mockImplementation(() => {})
+			renderTabBar()
+
+			fireEvent.click(
+				within(getNav()).getByRole('link', {
+					name: NAVIGATION.MY_TRIP,
+				}),
+			)
+
+			expect(scrollTo).not.toHaveBeenCalled()
+		})
 	})
 })

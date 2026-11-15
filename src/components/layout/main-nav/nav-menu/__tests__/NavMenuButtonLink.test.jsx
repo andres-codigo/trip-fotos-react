@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, describe, it, expect, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 
 import NavMenuButtonLink from '@/components/layout/main-nav/nav-menu/NavMenuButtonLink'
@@ -39,5 +39,33 @@ describe('<NavMenuButtonLink />', () => {
 
 		const link = screen.getByRole('link', { name: 'All travellers' })
 		expect(link).toHaveClass('extra')
+	})
+
+	describe('scroll to the top', () => {
+		afterEach(() => vi.restoreAllMocks())
+
+		it('scrolls to the top when the current page is tapped', () => {
+			const scrollTo = vi
+				.spyOn(window, 'scrollTo')
+				.mockImplementation(() => {})
+			renderLink({ isActive: true })
+
+			fireEvent.click(screen.getByRole('link', { name: 'Travellers' }))
+
+			expect(scrollTo).toHaveBeenCalledWith(
+				expect.objectContaining({ top: 0 }),
+			)
+		})
+
+		it('leaves the scroll to the route change for another page', () => {
+			const scrollTo = vi
+				.spyOn(window, 'scrollTo')
+				.mockImplementation(() => {})
+			renderLink()
+
+			fireEvent.click(screen.getByRole('link', { name: 'Travellers' }))
+
+			expect(scrollTo).not.toHaveBeenCalled()
+		})
 	})
 })

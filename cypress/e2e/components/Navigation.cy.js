@@ -1,12 +1,17 @@
 import {
 	ACCOUNT_MENU_SELECTORS,
+	COMMON_SELECTORS,
 	FOOTER_SELECTORS,
 	HEADER_SELECTORS,
 	TAB_BAR_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
+	TRAVELLER_DETAIL_SELECTORS,
+	TRAVELLER_REGISTRATION_FORM_SELECTORS,
+	TRAVELLERS_LIST_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { TEST_USERS } from '../../../src/constants/config/users'
+import { VIEWPORTS } from '../../../src/constants/config/viewports'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
@@ -143,5 +148,88 @@ describe('Logged in as a traveller > Navigation', () => {
 		cy.url().should('include', PATHS.AUTHENTICATION)
 		cy.visit(PATHS.MESSAGES)
 		cy.url().should('include', PATHS.AUTHENTICATION)
+	})
+})
+
+describe('Logged in as a traveller > Navigation > Scroll position', () => {
+	const MY_TRIP_PATH = `${PATHS.TRAVELLERS}/${TEST_USERS.TRAVELLER.ID}`
+
+	// Short enough that both pages scroll at either width
+	const HEIGHT = 500
+
+	const scrollDown = (
+		content = TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST,
+	) => {
+		cy.get(content).should('be.visible')
+		cy.scrollTo('bottom', { ensureScrollable: false })
+		cy.window().its('scrollY').should('be.gt', 0)
+	}
+	const shouldBeAtTop = () => cy.window().its('scrollY').should('eq', 0)
+
+	beforeEach(() => {
+		cy.resetEmulators()
+		performLogin(TEST_USERS.TRAVELLER.EMAIL, TEST_USERS.TRAVELLER.PASSWORD)
+	})
+
+	const WIDTHS = [
+		{
+			name: 'phone tab bar',
+			setViewport: () => cy.viewport(VIEWPORTS.MOBILE.WIDTH, HEIGHT),
+			travellers: TAB_BAR_SELECTORS.TRAVELLERS,
+			myTrip: TAB_BAR_SELECTORS.MY_TRIP,
+		},
+		{
+			name: 'desktop nav',
+			setViewport: () => cy.viewport(VIEWPORTS.DESKTOP.WIDTH, HEIGHT),
+			travellers: TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS,
+			myTrip: TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MY_TRIP,
+		},
+	]
+
+	WIDTHS.forEach(({ name, setViewport, travellers, myTrip }) => {
+		describe(name, () => {
+			beforeEach(() => {
+				setViewport()
+				cy.visit(PATHS.TRAVELLERS)
+			})
+
+			it('returns to the top when the current page is tapped', () => {
+				scrollDown()
+				cy.get(travellers).click()
+				shouldBeAtTop()
+			})
+
+			// Travellers is already in the store, so it renders full height at once rather than clamping the scroll while it loads
+			it('opens another page at the top', () => {
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
+					'be.visible',
+				)
+				cy.get(myTrip).click()
+				cy.url().should('eq', BASE_URL_CYPRESS + MY_TRIP_PATH)
+				cy.get(COMMON_SELECTORS.BASE_SPINNER).should('not.exist')
+				scrollDown(TRAVELLER_DETAIL_SELECTORS.NAME)
+				cy.get(travellers).click()
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST).should(
+					'be.visible',
+				)
+				shouldBeAtTop()
+			})
+
+			it('still lands on the photos for a #photos link', () => {
+				cy.get(myTrip).click()
+				cy.get(TRAVELLER_DETAIL_SELECTORS.ADD_PHOTOS).click()
+				cy.url().should('include', '#photos')
+				cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.PHOTOS_SECTION)
+					.should('be.visible')
+					.should(($section) => {
+						const { top, bottom } =
+							$section[0].getBoundingClientRect()
+						const win = $section[0].ownerDocument.defaultView
+						expect(top).to.be.lessThan(win.innerHeight)
+						expect(bottom).to.be.greaterThan(0)
+						expect(win.scrollY).to.be.greaterThan(0)
+					})
+			})
+		})
 	})
 })

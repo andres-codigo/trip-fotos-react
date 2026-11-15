@@ -9,6 +9,7 @@ import { NAVIGATION } from '@/constants/ui'
 import usePrimaryNavItems from '@/components/layout/main-nav/hooks/usePrimaryNavItems'
 
 import { cn } from '@/utils/cn'
+import { scrollToTop } from '@/utils/useScrollToTopOnNavigate'
 
 import TabBarIcon from './TabBarIcon'
 
@@ -56,6 +57,9 @@ function TabBar({ isTraveller, className }) {
 										data-cy={DATA_CY_BY_KEY[key]}
 										aria-current={
 											isActive ? 'page' : undefined
+										}
+										onClick={
+											isActive ? scrollToTop : undefined
 										}
 										className={cn(
 											'relative flex h-14 flex-col items-center justify-center gap-1 rounded-md text-text-muted hover:bg-surface-accent focus-visible:-outline-offset-3',

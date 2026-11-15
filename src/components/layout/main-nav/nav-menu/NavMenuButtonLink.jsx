@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
 import { cn } from '@/utils/cn'
+import { scrollToTop } from '@/utils/useScrollToTopOnNavigate'
 
 // The current page gets a 3px bar under the label, never colour alone; the ring sits inside so it clears the header edge
 const linkClasses =
@@ -21,6 +22,7 @@ const NavMenuButtonLink = ({
 		to={to}
 		className={cn(linkClasses, isActive && activeClasses, className)}
 		aria-current={isActive ? 'page' : undefined}
+		onClick={isActive ? scrollToTop : undefined}
 		aria-label={ariaLabel}
 		data-cy={dataCy}>
 		{children}
