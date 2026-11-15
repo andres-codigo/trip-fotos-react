@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.10](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.9...v0.27.10) (2026-11-15)
+
+
+### Enhancements
+
+* messages as conversation threads ([#754](https://github.com/andres-codigo/trip-fotos-react/issues/754)) ([2e0e37d](https://github.com/andres-codigo/trip-fotos-react/commit/2e0e37de7b8d7c350077cd4e952e64afd3519150))
+
 ## [0.27.9](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.8...v0.27.9) (2026-11-15)
 
 
