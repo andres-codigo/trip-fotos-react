@@ -93,10 +93,17 @@ const DB = Object.freeze({
 
 const okJson = (data) => ({ ok: true, json: async () => data })
 
+// Strips the base rather than parsing the URL: CI sets no VITE_BACKEND_BASE_URL, so the URL starts with "undefined"
+const pathOf = (url) =>
+	url
+		.slice(String(API_DATABASE.BASE_URL).length)
+		.split('?')[0]
+		.replace(/\.json$/, '')
+
 // Answers each read by its path, so the order of requests does not matter
 const mockDatabase = ({ failing } = {}) =>
 	fetch.mockImplementation(async (url, options = {}) => {
-		const path = new URL(url).pathname.replace(/\.json$/, '')
+		const path = pathOf(url)
 		if (failing && path.includes(failing)) return { ok: false, status: 500 }
 		if (options.method && options.method !== 'GET') return okJson(null)
 		if (path === `/userConversations/${ME}`)
@@ -113,7 +120,7 @@ const writes = () =>
 	fetch.mock.calls
 		.filter(([, options]) => options?.method && options.method !== 'GET')
 		.map(([url, options]) => ({
-			path: new URL(url).pathname,
+			path: `${pathOf(url)}.json`,
 			method: options.method,
 			body: options.body && JSON.parse(options.body),
 		}))

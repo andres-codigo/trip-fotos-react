@@ -21,6 +21,7 @@ import {
 	THREAD_NOTE,
 	TOAST,
 } from '@/constants/test'
+import { API_DATABASE } from '@/constants/api'
 import { MESSAGES_CONFIG } from '@/constants/travellers'
 import { GLOBAL, PATHS } from '@/constants/ui'
 
@@ -83,12 +84,13 @@ const THREAD = {
 const okResponse = (body) => ({ ok: true, json: async () => body })
 const failResponse = () => ({ ok: false, status: 500, json: async () => ({}) })
 
+// Strips the base rather than parsing the URL: CI sets no VITE_BACKEND_BASE_URL, so the URL starts with "undefined"
+const pathOf = (url) =>
+	url.slice(String(API_DATABASE.BASE_URL).length).split('?')[0]
+
 const stubDatabase = ({ list = LIST, legacy = LEGACY, listFails } = {}) => {
 	const fetchMock = vi.fn(async (url, { method } = {}) => {
-		const path = new URL(url, 'http://localhost').pathname.replace(
-			/\.json$/,
-			'',
-		)
+		const path = pathOf(url).replace(/\.json$/, '')
 		if (method && method !== 'GET') return okResponse(null)
 		if (path.endsWith(`/userConversations/${ME}`))
 			return listFails ? failResponse() : okResponse(list)
@@ -111,7 +113,7 @@ const writes = (fetchMock) =>
 	fetchMock.mock.calls
 		.filter(([, options]) => options?.method && options.method !== 'GET')
 		.map(([url, options]) => ({
-			path: new URL(url, 'http://localhost').pathname,
+			path: pathOf(url),
 			body: options.body && JSON.parse(options.body),
 		}))
 
@@ -281,7 +283,7 @@ describe('Messages page', () => {
 			renderPage(`${PATHS.MESSAGES}/${CID}`)
 
 			fetch.mockImplementation(async (url) => {
-				const path = new URL(url, 'http://localhost').pathname
+				const path = pathOf(url)
 				if (path.endsWith(`/travellers/${OTHER}.json`))
 					return okResponse({ firstName: 'Tomás', lastName: 'Silva' })
 				return okResponse(null)
