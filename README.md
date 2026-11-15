@@ -63,7 +63,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 - Clearer form errors: each field's error sits under its label with a "!" icon, so it is read before the field, and the trip dates stay on one line
 - Clearer menu hover: the menu items in the header and the tab bar show a plainly visible fill under the pointer, with readable labels
-- Email verification: new accounts confirm their email address before going on, with Check your inbox to send another link, check again or start over with a different address
+- Email verification: new accounts confirm their email address before going on, with Check your inbox to send another link, check again or start over with a different address, then continue to Register signed in, including from the email's Continue button
 - Messages as conversations: each person you message is one thread, like a phone text thread, with both sides in order, the reply box at the bottom, unread markers and delete with Undo
 - Pages open at the top: moving to another page starts at the top, and tapping the page you are on in the menu scrolls back up
 - Clearer trip cards: cities show as small tags with a pin, Message stands out as the action on a trip, and the photos on cards side by side line up
