@@ -6,3 +6,6 @@
 if (typeof window.AnimationEvent === 'undefined') {
 	window.AnimationEvent = window.Event
 }
+
+// jsdom logs "Not implemented" for scrollTo, which every route change now calls
+window.scrollTo = () => {}

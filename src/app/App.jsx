@@ -16,6 +16,8 @@ import { PATHS } from '@/constants/ui'
 import { selectUserId, tryLogin } from '@/store/slices/authenticationSlice'
 import { checkIsTraveller } from '@/store/slices/travellersSlice'
 
+import useScrollToTopOnNavigate from '@/utils/useScrollToTopOnNavigate'
+
 import LoadingFallback from '@/components/common/loading-fallback/LoadingFallback'
 
 import SkipLink from '@/components/layout/skip-link/SkipLink'
@@ -78,6 +80,8 @@ function AppRoutes() {
 		(state) => state.authentication.didAutoLogout,
 	)
 	const userId = useSelector(selectUserId)
+
+	useScrollToTopOnNavigate()
 
 	// Dispatch `tryLogin` on component mount
 	useEffect(() => {
