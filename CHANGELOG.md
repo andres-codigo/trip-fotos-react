@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.0...v0.28.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* nav hover fill is invisible on the header ([#772](https://github.com/andres-codigo/trip-fotos-react/issues/772)) ([bfb501e](https://github.com/andres-codigo/trip-fotos-react/commit/bfb501eb284133553f6c740d689c7dada6439014))
+
 ## [0.28.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.10...v0.28.0) (2026-11-15)
 
 
