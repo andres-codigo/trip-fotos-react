@@ -52,9 +52,22 @@ describe('affectedCaptures', () => {
 		for (const file of [
 			'src/components/ui/button/BaseButton.jsx',
 			'src/styles/index.css',
-			'src/components/layout/header/Header.jsx',
+			'src/components/layout/footer/Footer.jsx',
 		]) {
 			expect(affectedCaptures([file])).toEqual(Object.keys(CAPTURES))
+		}
+	})
+
+	it('runs the captures that show the header for a header, main nav or tab bar change', () => {
+		for (const file of [
+			'src/components/layout/header/Header.jsx',
+			'src/components/layout/main-nav/MainNav.jsx',
+			'src/components/layout/tab-bar/TabBar.jsx',
+		]) {
+			expect(affectedCaptures([file])).toEqual([
+				'public-pages',
+				'account-menu',
+			])
 		}
 	})
 
@@ -94,5 +107,8 @@ describe('affectedSpecs', () => {
 
 		expect(affectedSpecs(['cypress/support/commands.js'])).toEqual(all)
 		expect(affectedSpecs(['src/app/App.jsx'])).toEqual(all)
+		expect(
+			affectedSpecs(['src/components/layout/header/Header.jsx']),
+		).toEqual(all)
 	})
 })

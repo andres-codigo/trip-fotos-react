@@ -1,6 +1,7 @@
 // Which /ui-check captures and E2E specs a change can affect, read by
 // .claude/skills/ui-check/affected.mjs and /verify. A src/ file no area claims
-// (shared UI, layout, styles, the store, services, constants) affects them all
+// (shared UI, layout, styles, the store, services, constants) affects them all.
+// affected.mjs first drops the changes that reach no existing capture (see its narrow.mjs)
 
 const AREAS = {
 	authentication: [
@@ -35,6 +36,18 @@ const AREAS = {
 	trips: ['src/store/slices/travellersSlice.js', 'src/utils/tripPhotos/'],
 }
 
+// Captures only: the header, main nav and tab bar show on every page, so the
+// captures that show them logged out and signed in stand for the rest. E2E keeps
+// reading them as shared, as a spec can sign in or out through them
+const CAPTURE_AREAS = {
+	...AREAS,
+	header: [
+		'src/components/layout/header/',
+		'src/components/layout/main-nav/',
+		'src/components/layout/tab-bar/',
+	],
+}
+
 // Files that change how every capture is taken
 const CAPTURE_TOOLING = [
 	'cypress/ui-check/',
@@ -55,7 +68,7 @@ const E2E_TOOLING = [
 export const CAPTURES = {
 	'public-pages': {
 		title: 'captures the authentication, privacy and 404 pages',
-		areas: ['authentication', 'privacy', 'notFound'],
+		areas: ['authentication', 'privacy', 'notFound', 'header'],
 	},
 	'auth-form-states': {
 		title: 'captures the log in, sign up and password reset forms in their error and sent states',
@@ -147,7 +160,7 @@ export const CAPTURES = {
 	},
 	'account-menu': {
 		title: 'captures the open account menu, the tab bar, the foot of the page and the signed-in 404',
-		areas: ['travellers', 'detail', 'notFound'],
+		areas: ['travellers', 'detail', 'notFound', 'header'],
 	},
 	'photo-text-states': {
 		title: 'captures photo alt text on the edit page and in the dialog, and an own trip with no photos',
@@ -222,12 +235,12 @@ const startsWithAny = (file, prefixes) =>
 	prefixes.some((prefix) => file.startsWith(prefix))
 
 // The areas the changed files touch, or 'all' when one could touch every page
-export const affectedAreas = (files, tooling = []) => {
+export const affectedAreas = (files, tooling = [], claims = AREAS) => {
 	const areas = new Set()
 	for (const file of files) {
 		if (startsWithAny(file, tooling)) return ALL
 		if (!isAppFile(file)) continue
-		const matched = Object.entries(AREAS).filter(([, prefixes]) =>
+		const matched = Object.entries(claims).filter(([, prefixes]) =>
 			startsWithAny(file, prefixes),
 		)
 		if (!matched.length) return ALL
@@ -240,7 +253,7 @@ const touches = (areas, covered) =>
 	areas === ALL || covered.some((area) => areas.has(area))
 
 export const affectedCaptures = (files) => {
-	const areas = affectedAreas(files, CAPTURE_TOOLING)
+	const areas = affectedAreas(files, CAPTURE_TOOLING, CAPTURE_AREAS)
 	return Object.keys(CAPTURES).filter((id) =>
 		touches(areas, CAPTURES[id].areas),
 	)
