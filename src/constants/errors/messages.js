@@ -28,11 +28,9 @@ export const ERROR_MESSAGES = Object.freeze({
 		'Your changes were not saved. Your trip is as it was; please try again.',
 	FAILED_TO_DELETE_PROFILE:
 		'Your profile could not be deleted. Please try again.',
-	FAILED_TO_CONTACT_TRAVELLER:
-		"We couldn't send your message. Please try again.",
 
 	// Messages errors
 	INVALID_MESSAGE_PAYLOAD: 'Please write a message before sending it.',
-	FAILED_TO_DELETE_MESSAGE:
-		'This message could not be deleted. Check your connection and try again.',
+	FAILED_TO_DELETE_CONVERSATION:
+		'This conversation could not be deleted. Check your connection and try again.',
 })

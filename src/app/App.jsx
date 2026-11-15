@@ -9,6 +9,7 @@ import {
 	useLocation,
 	BrowserRouter,
 	useInRouterContext,
+	useParams,
 } from 'react-router-dom'
 
 import { PATHS } from '@/constants/ui'
@@ -16,6 +17,7 @@ import { PATHS } from '@/constants/ui'
 import { selectUserId, tryLogin } from '@/store/slices/authenticationSlice'
 import { checkIsTraveller } from '@/store/slices/travellersSlice'
 
+import { conversationId } from '@/utils/conversationId'
 import useScrollToTopOnNavigate from '@/utils/useScrollToTopOnNavigate'
 
 import LoadingFallback from '@/components/common/loading-fallback/LoadingFallback'
@@ -38,9 +40,6 @@ const Authentication = lazy(loadAuthentication)
 const Register = lazy(loadRegister)
 const Travellers = lazy(loadTravellers)
 const TravellerDetail = lazy(loadTravellerDetail)
-const ContactTraveller = lazy(
-	() => import('@/pages/contact-traveller/ContactTraveller'),
-)
 const EditTrip = lazy(() => import('@/pages/edit-trip/EditTrip'))
 const Messages = lazy(loadMessages)
 const Privacy = lazy(() => import('@/pages/privacy/Privacy'))
@@ -67,6 +66,25 @@ const prefetchNavPages = () => {
 	return () => window.clearTimeout(id)
 }
 
+// The Contact page went when Message started opening the thread; old links land on the conversation
+function ContactTravellerRedirect() {
+	const { id } = useParams()
+	const userId = useSelector(selectUserId)
+
+	if (!userId) return null
+
+	return (
+		<Navigate
+			to={
+				id === userId
+					? `${PATHS.TRAVELLERS}/${id}`
+					: `${PATHS.MESSAGES}/${conversationId(userId, id)}`
+			}
+			replace
+		/>
+	)
+}
+
 function AppRoutes() {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
@@ -80,6 +98,11 @@ function AppRoutes() {
 		(state) => state.authentication.didAutoLogout,
 	)
 	const userId = useSelector(selectUserId)
+
+	// Below 1024px the thread screen docks its reply box at the bottom edge, where the tab bar and footer would sit
+	const isThreadScreen = Boolean(
+		matchPath(PATHS.MESSAGE_THREAD, location.pathname),
+	)
 
 	useScrollToTopOnNavigate()
 
@@ -130,6 +153,7 @@ function AppRoutes() {
 			const protectedPaths = [
 				PATHS.REGISTER,
 				PATHS.MESSAGES,
+				PATHS.MESSAGE_THREAD,
 				PATHS.TRAVELLER_DETAIL,
 				PATHS.CONTACT_TRAVELLER,
 				PATHS.EDIT_TRAVELLER,
@@ -192,14 +216,15 @@ function AppRoutes() {
 					/>
 					<Route
 						path={PATHS.CONTACT_TRAVELLER}
-						element={<ContactTraveller />}
+						element={<ContactTravellerRedirect />}
 					/>
 					<Route
 						path={PATHS.EDIT_TRAVELLER}
 						element={<EditTrip />}
 					/>
+					{/* One route for the list and its threads, so moving between them keeps the page (and its Undo toast) */}
 					<Route
-						path={PATHS.MESSAGES}
+						path={`${PATHS.MESSAGES}/:conversationId?`}
 						element={
 							<Suspense fallback={<MessagesPageSkeleton />}>
 								<Messages />
@@ -225,8 +250,8 @@ function AppRoutes() {
 					/>
 				</Routes>
 			</Suspense>
-			<Footer />
-			<TabBar />
+			<Footer className={isThreadScreen ? 'max-lg:hidden' : undefined} />
+			<TabBar className={isThreadScreen ? 'mobile:hidden' : undefined} />
 		</>
 	)
 }

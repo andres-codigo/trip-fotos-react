@@ -174,12 +174,6 @@ export const TRAVELLER_SKELETON = Object.freeze({
 	BUTTON: 'traveller-skeleton-button',
 })
 
-export const MESSAGE_SKELETON = Object.freeze({
-	ROOT: 'message-skeleton',
-	ROW: 'message-skeleton-row',
-	PANE: 'message-skeleton-pane',
-})
-
 export const FILTER_SKELETON = Object.freeze({
 	ROOT: 'filter-skeleton',
 	INLINE: 'filter-skeleton-inline',
@@ -195,10 +189,6 @@ export const TRAVELLERS_SKELETON = Object.freeze({
 
 export const TRAVELLERS_PAGE_SKELETON = Object.freeze({
 	ROOT: 'travellers-page-skeleton',
-})
-
-export const MESSAGES_SKELETON = Object.freeze({
-	ROOT: 'messages-skeleton',
 })
 
 export const MESSAGES_PAGE_SKELETON = Object.freeze({
@@ -270,23 +260,6 @@ export const TRIP_PHOTOS = Object.freeze({
 	ALT_INPUT: 'trip-photos-alt',
 })
 
-export const CONTACT_TRAVELLER = Object.freeze({
-	ROOT: 'contact-traveller',
-	TITLE: 'contact-traveller-title',
-	FORM: 'contact-traveller-form',
-	BACK_TO_MESSAGES: 'contact-back-to-messages',
-	REPLY_QUOTE: 'contact-reply-quote',
-	COLUMNS: 'contact-columns',
-	RECIPIENT: 'contact-recipient',
-	RECIPIENT_DETAILS: 'contact-recipient-details',
-	VIEW_TRIP: 'contact-view-trip',
-	MESSAGE_INPUT: 'contact-message-input',
-	MESSAGE_ERROR: 'contact-message-error-message',
-	SUBMIT: 'contact-submit-button',
-	SENDING_DIALOG: 'contact-sending-dialog',
-	ERROR_DIALOG: 'contact-error-dialog',
-})
-
 export const TRAVELLERS_WELCOME = Object.freeze({
 	ROOT: 'travellers-welcome',
 	CREATE_ACCOUNT: 'travellers-welcome-create-account',
@@ -310,49 +283,79 @@ export const TRAVELLER_FILTER = Object.freeze({
 export const MESSAGES_PAGE = Object.freeze({
 	LOADING: 'messages-loading',
 	SUMMARY: 'messages-summary',
-	LIST: 'messages-list',
-	INBOX: 'messages-inbox',
-	INBOX_LIST: 'messages-inbox-list',
+	LIST_CARD: 'messages-list-card',
+	THREAD_CARD: 'messages-thread-card',
+	THREAD_COLUMN: 'messages-thread-column',
+	THREAD_ERROR: 'messages-thread-error',
+	THREAD_TRY_AGAIN: 'messages-thread-try-again',
 	EMPTY: 'messages-empty',
 	BROWSE_TRAVELLERS: 'messages-browse-travellers',
 	UNDO_TOAST: 'messages-undo-toast',
 	ERROR_DIALOG: 'messages-error-dialog',
 })
 
-export const MESSAGE_ITEM = Object.freeze({
-	ROOT: 'message-item',
-	SENDER: 'message-item-sender',
-	SENDER_LINK: 'message-item-sender-link',
-	NEW_TAG: 'message-item-new',
-	TIME: 'message-item-time',
-	TEXT: 'message-item-text',
-	SHOW_ALL: 'message-item-show-all',
+export const CONVERSATION_AVATAR = Object.freeze({
+	ROOT: 'conversation-avatar',
 })
 
-export const MESSAGE_ACTIONS = Object.freeze({
-	ROOT: 'message-actions',
-	REPLY: 'message-actions-reply',
-	DELETE: 'message-actions-delete',
-	DELETE_ERROR: 'message-actions-delete-error',
-	TRY_AGAIN: 'message-actions-try-again',
+export const CONVERSATION_ROW = Object.freeze({
+	ROOT: 'conversation-row',
+	LINK: 'conversation-row-link',
+	NAME: 'conversation-row-name',
+	TIME: 'conversation-row-time',
+	PREVIEW: 'conversation-row-preview',
+	DOT: 'conversation-row-dot',
 })
 
-export const MESSAGE_ROW = Object.freeze({
-	ROOT: 'message-row',
-	LINK: 'message-row-link',
-	DOT: 'message-row-dot',
-	SENDER: 'message-row-sender',
-	TIME: 'message-row-time',
-	PREVIEW: 'message-row-preview',
+export const CONVERSATION_LIST = Object.freeze({
+	ROOT: 'conversation-list',
 })
 
-export const MESSAGE_PANE = Object.freeze({
-	ROOT: 'message-pane',
-	SENDER: 'message-pane-sender',
-	SENDER_LINK: 'message-pane-sender-link',
-	NEW_TAG: 'message-pane-new',
-	TIME: 'message-pane-time',
-	TEXT: 'message-pane-text',
+export const CONVERSATION_SKELETON = Object.freeze({
+	LIST: 'conversation-skeleton-list',
+	ROW: 'conversation-skeleton-row',
+	THREAD: 'conversation-skeleton-thread',
+	HEADER: 'conversation-skeleton-header',
+})
+
+export const THREAD_HEADER = Object.freeze({
+	ROOT: 'thread-header',
+	BACK: 'thread-header-back',
+	NAME: 'thread-header-name',
+	NAME_LINK: 'thread-header-name-link',
+	SUBTITLE: 'thread-header-subtitle',
+	MENU_BUTTON: 'thread-header-menu-button',
+	MENU: 'thread-header-menu',
+	VIEW_CARD: 'thread-header-view-card',
+	DELETE: 'thread-header-delete',
+})
+
+export const MESSAGE_BUBBLE = Object.freeze({
+	ROOT: 'message-bubble',
+	TEXT: 'message-bubble-text',
+	TIME: 'message-bubble-time',
+	SENDING: 'message-bubble-sending',
+	FAILED: 'message-bubble-failed',
+	TRY_AGAIN: 'message-bubble-try-again',
+})
+
+export const MESSAGE_THREAD = Object.freeze({
+	ROOT: 'message-thread',
+	DAY: 'message-thread-day',
+	NEW_DIVIDER: 'message-thread-new',
+	HELLO: 'message-thread-hello',
+})
+
+export const REPLY_BOX = Object.freeze({
+	ROOT: 'reply-box',
+	INPUT: 'reply-box-input',
+	SEND: 'reply-box-send',
+})
+
+export const THREAD_NOTE = Object.freeze({
+	ROOT: 'thread-note',
+	EMAIL: 'thread-note-email',
+	REPLY_BY_EMAIL: 'thread-note-reply-by-email',
 })
 
 export const PASSWORD_RESET_FORM = Object.freeze({

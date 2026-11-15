@@ -11,24 +11,25 @@
 //                    example `city-filter`); cypress/impact.js names each capture.
 //                    It keeps the label's other captures and retakes its own
 import { API_DATABASE } from '../../src/constants/api'
-import { MOCK_INBOX } from '../../src/constants/test/mock-data/mock-messages'
+import { MOCK_THREADS } from '../../src/constants/test/mock-data/mock-messages'
+import { conversationId } from '../../src/utils/conversationId'
 import {
 	ACCOUNT_MENU_SELECTORS,
 	AUTHENTICATION_FORM_SELECTORS,
 	COMBOBOX_SELECTORS,
 	COMMON_SELECTORS,
-	CONTACT_TRAVELLER_SELECTORS,
 	DIALOG_SELECTORS,
 	EDIT_TRIP_SELECTORS,
 	ERROR_SUMMARY_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 	FOOTER_SELECTORS,
-	MESSAGE_ACTIONS_SELECTORS,
-	MESSAGE_ITEM_SELECTORS,
-	MESSAGE_PANE_SELECTORS,
-	MESSAGE_ROW_SELECTORS,
-	MESSAGE_SKELETON_SELECTORS,
+	CONVERSATION_ROW_SELECTORS,
+	MESSAGE_BUBBLE_SELECTORS,
+	MESSAGE_THREAD_SELECTORS,
 	MESSAGES_PAGE_SELECTORS,
+	REPLY_BOX_SELECTORS,
+	THREAD_HEADER_SELECTORS,
+	THREAD_NOTE_SELECTORS,
 	PASSWORD_RESET_FORM_SELECTORS,
 	TAB_BAR_SELECTORS,
 	TOAST_SELECTORS,
@@ -244,43 +245,33 @@ const NOW = (() => {
 	noon.setHours(12, 0, 0, 0)
 	return noon.getTime()
 })()
-// Shown as a date, so a fixed one reads the same on any day
-const FORMER_MESSAGE_TIME = new Date(2026, 0, 14, 9, 30).getTime()
 
 const LONG_MESSAGE =
 	'Hi! We are heading to Kyoto in late March and your photos of the Philosopher’s Path were the reason we booked. Could you tell us which end you started from, and whether early morning was quiet enough for photos without crowds? Also, was the ryokan near Nanzen-ji worth the price, or would you stay closer to Gion next time? Any tips on the day trip to Nara would be lovely too. Thank you so much for sharing all of this.'
 
-// Opening Messages marks everything read, so each width puts the unread state back first
-const markAllUnread = () =>
-	cy
-		.request({
-			url: emulatorDatabase(`messages/${TEST_USERS.TRAVELLER.ID}`),
-			headers: OWNER,
-		})
-		.then(({ body }) => {
-			const unread = Object.fromEntries(
-				Object.entries(body ?? {})
-					.filter(
-						([id, message]) =>
-							message.senderId && id !== 'capture-former',
-					)
-					.map(([id]) => [`${id}/read`, false]),
-			)
-			cy.request({
-				method: 'PATCH',
-				url: emulatorDatabase(`messages/${TEST_USERS.TRAVELLER.ID}`),
-				headers: OWNER,
-				body: unread,
-			})
-		})
+const ME = TEST_USERS.TRAVELLER.ID
+const OTHER = TEST_USERS.OTHER_TRAVELLER.ID
+const OTHER_CID = conversationId(ME, OTHER)
+const UNKNOWN_ID = 'capture-unknown-traveller'
+const UNKNOWN_CID = conversationId(ME, UNKNOWN_ID)
+const threadPath = (cid) => `${PATHS.MESSAGES}/${cid}`
+const OTHER_NAME = 'Jane Smith'
+// Messages is a list beside the open thread from 1024px; below it, the list and the thread are separate screens
+const isSplit = (width) => width >= 1024
 
-// From 1024px Messages is an inbox: a row per message and the open one in a pane
-const isInbox = (width) => width >= 1024
-const messageEntries = (width) =>
-	isInbox(width) ? MESSAGE_ROW_SELECTORS.ROOT : MESSAGE_ITEM_SELECTORS.ROOT
-const openRow = (text) => {
-	cy.contains(MESSAGE_ROW_SELECTORS.LINK, text).click()
-	cy.contains(MESSAGE_PANE_SELECTORS.TEXT, text).should('be.visible')
+// Opening a thread marks it read, so each width puts the unread state back first
+const markUnread = () =>
+	cy.request({
+		method: 'PATCH',
+		url: emulatorDatabase(`userConversations/${ME}/${OTHER_CID}`),
+		headers: OWNER,
+		body: { readAt: null },
+	})
+
+const openThread = (cid) => {
+	visit(threadPath(cid))
+	cy.get(MESSAGES_PAGE_SELECTORS.THREAD_CARD).should('be.visible')
+	cy.get(THREAD_HEADER_SELECTORS.NAME, { timeout: TIMEOUT }).should('exist')
 }
 
 // The account button can render before the restored session fills in the name, so a traveller's page is not settled until it shows
@@ -337,9 +328,9 @@ const assertSettled = () => {
 		timeout: TIMEOUT,
 	}).should('not.exist')
 	;[
-		MESSAGE_SKELETON_SELECTORS.ROOT,
-		MESSAGE_SKELETON_SELECTORS.ROW,
-		MESSAGE_SKELETON_SELECTORS.PANE,
+		'[data-cy="conversation-skeleton-list"]',
+		'[data-cy="conversation-skeleton-thread"]',
+		'[data-cy="conversation-skeleton-header"]',
 	].forEach((selector) =>
 		cy.get(selector, { timeout: TIMEOUT }).should('not.exist'),
 	)
@@ -1565,8 +1556,8 @@ describe(`UI check capture (${LABEL})`, () => {
 			fallbackThenLoading({
 				path: PATHS.MESSAGES,
 				chunk: 'Messages',
-				data: '**/messages/*.json*',
-				loading: '[data-cy="messages-skeleton"]',
+				data: '**/userConversations/*.json*',
+				loading: '[data-cy="messages-loading"]',
 				name: 'messages',
 			})
 		})
@@ -1574,29 +1565,42 @@ describe(`UI check capture (${LABEL})`, () => {
 		capture('messages-states', () => {
 			// Only Date, so the app's timers still run; message times then read the same in every run
 			cy.clock(NOW, ['Date'])
-			// Extra messages for the long-text and former-traveller states, written past the rules as the emulator owner
+			// A long first message, so the thread scrolls, and a conversation whose traveller cannot be looked up; written past the rules as the emulator owner
 			cy.request({
 				method: 'PATCH',
-				url: emulatorDatabase(`messages/${TEST_USERS.TRAVELLER.ID}`),
+				url: emulatorDatabase(''),
 				headers: OWNER,
 				body: {
-					'capture-long': {
-						senderId: TEST_USERS.OTHER_TRAVELLER.ID,
-						message: LONG_MESSAGE,
-						createdAt: NOW - 2 * 60 * 60 * 1000,
-						read: false,
-					},
-					'capture-former': {
-						senderId: 'capture-removed-traveller',
-						message: 'Thanks for the tips on Kyoto.',
-						createdAt: FORMER_MESSAGE_TIME,
-						read: true,
+					[`conversations/${OTHER_CID}/messages/-OCapture0000000001`]:
+						{
+							senderId: OTHER,
+							message: LONG_MESSAGE,
+							createdAt: NOW - 3 * 24 * 60 * 60 * 1000,
+						},
+					[`conversations/${UNKNOWN_CID}/messages/-OCapture0000000002`]:
+						{
+							senderId: UNKNOWN_ID,
+							message: 'Is the Porto walk free?',
+							createdAt: NOW - 20 * 60 * 60 * 1000,
+						},
+					[`userConversations/${ME}/${UNKNOWN_CID}`]: {
+						otherId: UNKNOWN_ID,
+						lastId: '-OCapture0000000002',
+						lastMessage: 'Is the Porto walk free?',
+						lastSenderId: UNKNOWN_ID,
+						lastAt: NOW - 20 * 60 * 60 * 1000,
+						readAt: NOW - 20 * 60 * 60 * 1000,
 					},
 				},
 			})
+			cy.intercept(
+				API_DATABASE.GET,
+				`**/travellers/${UNKNOWN_ID}.json*`,
+				{ statusCode: 500, body: {} },
+			)
 
 			eachWidth((width) => {
-				markAllUnread()
+				markUnread()
 				visit(PATHS.TRAVELLERS)
 				cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES, {
 					timeout: TIMEOUT,
@@ -1611,176 +1615,223 @@ describe(`UI check capture (${LABEL})`, () => {
 						: TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES,
 				).should('be.visible')
 
+				// The list alone below 1024px; from 1024px the unread thread opens beside it
 				visit(PATHS.MESSAGES)
-				if (isInbox(width)) {
-					cy.get(MESSAGE_PANE_SELECTORS.NEW_TAG).should('be.visible')
-					cy.get(MESSAGE_ROW_SELECTORS.ROOT).should('have.length', 4)
-					assertSettled()
-					freezeAnimation()
-					shot(`messages-${width}`)
-					openRow(LONG_MESSAGE)
-					shot(`messages-long-${width}`)
-					openRow('Thanks for the tips on Kyoto.')
-					shot(`messages-former-${width}`)
-					openRow(MOCK_INBOX.SAMPLE_MESSAGE_TWO.message)
-					shot(`messages-email-only-${width}`)
-				} else {
-					cy.get(MESSAGE_ITEM_SELECTORS.NEW_TAG).should('exist')
-					cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).should('exist')
-					assertSettled()
-					freezeAnimation()
-					shot(`messages-${width}`)
-					cy.get(MESSAGE_ITEM_SELECTORS.SHOW_ALL).click()
-					shot(`messages-show-all-${width}`)
-				}
-
-				// The page and the nav's unread count may each request messages, in either order, so every request is held until the shot
-				cy.intercept(API_DATABASE.GET, '**/messages/*.json*', (req) =>
-					req.on('response', (res) => res.setDelay(60000)),
-				).as('slowMessages')
-				visit(PATHS.MESSAGES)
-				// The route fallback has the same skeletons, so the page's own status line shows the page has taken over
-				cy.get(MESSAGES_PAGE_SELECTORS.LOADING).should('be.visible')
-				assertSignedInName()
-				if (isInbox(width)) {
-					cy.get(MESSAGE_SKELETON_SELECTORS.ROW).should(
-						'have.length',
-						5,
+				cy.get(CONVERSATION_ROW_SELECTORS.ROOT).should('have.length', 4)
+				if (isSplit(width)) {
+					cy.get(MESSAGE_THREAD_SELECTORS.NEW_DIVIDER).should(
+						'be.visible',
 					)
-					cy.get(MESSAGE_SKELETON_SELECTORS.PANE).should('be.visible')
 				} else {
-					cy.get(MESSAGE_SKELETON_SELECTORS.ROOT).should(
+					cy.get(CONVERSATION_ROW_SELECTORS.DOT).should(
 						'have.length',
-						3,
+						1,
 					)
 				}
+				assertSettled()
 				freezeAnimation()
-				shot(`messages-loading-${width}`)
-				// The newest handler runs first, and continuing ends the chain, so this releases the hold
-				cy.intercept(API_DATABASE.GET, '**/messages/*.json*', (req) =>
-					req.continue(),
-				)
+				shot(`messages-${width}`)
+				const SECOND_ROW = `${CONVERSATION_ROW_SELECTORS.ROOT}:nth-child(2) ${CONVERSATION_ROW_SELECTORS.LINK}`
+				forcePseudo(SECOND_ROW, ['focus', 'focus-visible'])
+				shot(`messages-row-focus-${width}`)
+				forcePseudo(SECOND_ROW, ['hover'])
+				shot(`messages-row-hover-${width}`)
+				forcePseudo(SECOND_ROW, [])
 
-				markAllUnread()
+				// The unread thread on its own screen, with "New"
+				markUnread()
+				openThread(OTHER_CID)
+				cy.get(MESSAGE_THREAD_SELECTORS.NEW_DIVIDER).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`thread-new-${width}`)
+
+				// Keyboard in the thread: a draft in the reply box, its focus ring drawn
+				cy.get(REPLY_BOX_SELECTORS.INPUT).type('Yes! 7 it is.')
+				forcePseudo(REPLY_BOX_SELECTORS.INPUT, [
+					'focus',
+					'focus-visible',
+				])
+				shot(`thread-draft-${width}`)
+				forcePseudo(REPLY_BOX_SELECTORS.INPUT, [])
+
+				// The menu
+				cy.get(THREAD_HEADER_SELECTORS.MENU_BUTTON).click()
+				cy.get(THREAD_HEADER_SELECTORS.MENU).should('be.visible')
+				shot(`thread-menu-${width}`)
+				cy.get(THREAD_HEADER_SELECTORS.MENU_BUTTON).click()
+
+				// Sending, held until the shot; then failed
+				interceptOnce(API_DATABASE.PATCH, '**/.json*', {
+					statusCode: 500,
+					body: {},
+					delay: 60000,
+				})
+				cy.get(REPLY_BOX_SELECTORS.SEND).click()
+				cy.get(MESSAGE_BUBBLE_SELECTORS.SENDING).should('be.visible')
+				freezeAnimation()
+				shot(`thread-sending-${width}`)
+				openThread(OTHER_CID)
+				interceptOnce(API_DATABASE.PATCH, '**/.json*', {
+					statusCode: 500,
+					body: {},
+				})
+				cy.get(REPLY_BOX_SELECTORS.INPUT).type('Yes! 7 it is.')
+				cy.get(REPLY_BOX_SELECTORS.SEND).click()
+				cy.get(MESSAGE_BUBBLE_SELECTORS.FAILED).should('be.visible')
+				freezeAnimation()
+				shot(`thread-send-failed-${width}`)
+
+				// A former traveller, an unknown sender and an email-only message
 				visit(PATHS.MESSAGES)
-				cy.get(MESSAGE_ACTIONS_SELECTORS.REPLY).first().click()
-				cy.get(CONTACT_TRAVELLER_SELECTORS.REPLY_QUOTE).should(
+				cy.contains(
+					CONVERSATION_ROW_SELECTORS.LINK,
+					'A former traveller',
+				).click()
+				cy.get(THREAD_NOTE_SELECTORS.ROOT).should('be.visible')
+				assertSettled()
+				freezeAnimation()
+				shot(`thread-former-${width}`)
+				openThread(UNKNOWN_CID)
+				cy.contains(
+					MESSAGE_BUBBLE_SELECTORS.ROOT,
+					'Is the Porto walk free?',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`thread-unknown-${width}`)
+				visit(PATHS.MESSAGES)
+				cy.contains(
+					CONVERSATION_ROW_SELECTORS.LINK,
+					MOCK_THREADS.LEGACY.userEmail,
+				).click()
+				cy.get(THREAD_NOTE_SELECTORS.REPLY_BY_EMAIL).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`thread-email-only-${width}`)
+
+				// The thread failing to load, with Try again
+				interceptOnce(
+					API_DATABASE.GET,
+					`**/conversations/${OTHER_CID}/messages.json*`,
+					{ statusCode: 500, body: {} },
+				)
+				openThread(OTHER_CID)
+				cy.get(MESSAGES_PAGE_SELECTORS.THREAD_ERROR).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`thread-load-error-${width}`)
+
+				// The thread loading: its header from the list, skeleton bubbles below
+				cy.intercept(
+					API_DATABASE.GET,
+					`**/conversations/${OTHER_CID}/messages.json*`,
+					(req) => req.on('response', (res) => res.setDelay(60000)),
+				)
+				openThread(OTHER_CID)
+				cy.get('[data-cy="conversation-skeleton-thread"]').should(
 					'be.visible',
 				)
 				freezeAnimation()
-				shot(`contact-reply-${width}`)
-			})
+				shot(`thread-loading-${width}`)
+				cy.intercept(
+					API_DATABASE.GET,
+					`**/conversations/${OTHER_CID}/messages.json*`,
+					(req) => req.continue(),
+				)
 
-			cy.viewport(1280, HEIGHT)
-			visit(PATHS.MESSAGES)
-			cy.get(MESSAGE_ROW_SELECTORS.ROOT).should('have.length', 4)
-			assertSettled()
-			freezeAnimation()
-			// The second row: the first is open, with its own background
-			const SECOND_ROW = `${MESSAGE_ROW_SELECTORS.ROOT}:nth-child(2) ${MESSAGE_ROW_SELECTORS.LINK}`
-			forcePseudo(SECOND_ROW, ['hover'])
-			shot('hover-message-row')
-			forcePseudo(SECOND_ROW, ['focus', 'focus-visible'])
-			shot('focus-message-row')
-			forcePseudo(SECOND_ROW, [])
-			// Choosing a row moves focus to the sender heading in the pane
-			cy.get(SECOND_ROW).click()
-			cy.get(MESSAGE_PANE_SELECTORS.SENDER).should('have.focus')
-			forcePseudo(MESSAGE_PANE_SELECTORS.SENDER, [
-				'focus',
-				'focus-visible',
-			])
-			shot('focus-message-pane-heading')
-			forcePseudo(MESSAGE_PANE_SELECTORS.SENDER, [])
-			forcePseudo(MESSAGE_ACTIONS_SELECTORS.DELETE, ['hover'])
-			shot('hover-message-delete')
-			forcePseudo(MESSAGE_ACTIONS_SELECTORS.DELETE, [
-				'focus',
-				'focus-visible',
-			])
-			shot('focus-message-delete')
-			forcePseudo(MESSAGE_ACTIONS_SELECTORS.DELETE, [])
-
-			eachWidth((width) => {
+				// The list loading, every request held until the shot
+				cy.intercept(
+					API_DATABASE.GET,
+					'**/userConversations/*.json*',
+					(req) => req.on('response', (res) => res.setDelay(60000)),
+				)
 				visit(PATHS.MESSAGES)
-				cy.get(messageEntries(width)).should('have.length', 4)
-				cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE).first().click()
+				cy.get(MESSAGES_PAGE_SELECTORS.LOADING).should('be.visible')
+				assertSignedInName()
+				freezeAnimation()
+				shot(`messages-loading-${width}`)
+				cy.intercept(
+					API_DATABASE.GET,
+					'**/userConversations/*.json*',
+					(req) => req.continue(),
+				)
+
+				// Delete: the toast, then Undo
+				openThread(OTHER_CID)
+				cy.get(MESSAGE_BUBBLE_SELECTORS.ROOT).should('exist')
+				cy.get(THREAD_HEADER_SELECTORS.MENU_BUTTON).click()
+				cy.get(THREAD_HEADER_SELECTORS.DELETE).click()
 				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST).should('be.visible')
+				assertSettled()
 				freezeAnimation()
 				shot(`messages-undo-toast-${width}`)
 				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
 					.find(TOAST_SELECTORS.ACTION)
 					.click()
-				cy.get(messageEntries(width)).should('have.length', 4)
-
-				interceptOnce(API_DATABASE.DELETE, '**/messages/*/*.json*', {
-					statusCode: 500,
-					body: {},
-				}).as('failedDelete')
-				cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE).first().click()
-				cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
-					.find(TOAST_SELECTORS.DISMISS)
-					.click()
-				cy.wait('@failedDelete')
-				cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE_ERROR).should(
-					'be.visible',
-				)
-				freezeAnimation()
-				shot(`messages-delete-failed-${width}`)
-
-				interceptOnce(API_DATABASE.DELETE, '**/messages/*/*.json*', {
-					statusCode: 500,
-					body: {},
-					delay: 60000,
-				})
-				cy.get(MESSAGE_ACTIONS_SELECTORS.TRY_AGAIN).click()
-				cy.get(MESSAGE_ACTIONS_SELECTORS.TRY_AGAIN).should(
-					'be.disabled',
-				)
-				freezeAnimation()
-				shot(`messages-trying-again-${width}`)
+				cy.get(CONVERSATION_ROW_SELECTORS.ROOT).should('have.length', 4)
 			})
 
+			// A real send and a real delete
 			cy.viewport(1280, HEIGHT)
-			visit(PATHS.MESSAGES)
-			cy.get(MESSAGE_ROW_SELECTORS.ROOT).should('have.length', 4)
-			cy.get(MESSAGE_ACTIONS_SELECTORS.DELETE).first().click()
+			openThread(OTHER_CID)
+			cy.get(REPLY_BOX_SELECTORS.INPUT).type(
+				'Sent by the capture script.',
+			)
+			cy.get(REPLY_BOX_SELECTORS.SEND).click()
+			cy.contains(
+				MESSAGE_BUBBLE_SELECTORS.ROOT,
+				'Sent by the capture script.',
+			).should('have.attr', 'data-status', 'sent')
+			cy.get(THREAD_HEADER_SELECTORS.MENU_BUTTON).click()
+			cy.get(THREAD_HEADER_SELECTORS.DELETE).click()
 			cy.get(MESSAGES_PAGE_SELECTORS.UNDO_TOAST)
 				.find(TOAST_SELECTORS.DISMISS)
 				.click()
 			cy.reload()
-			cy.get(MESSAGE_ROW_SELECTORS.ROOT).should('have.length', 3)
+			cy.get(CONVERSATION_ROW_SELECTORS.ROOT).should('have.length', 3)
 			assertSettled()
+			freezeAnimation()
 			shot('messages-after-delete')
 		})
 
 		capture('messages-empty', () => {
-			cy.intercept(API_DATABASE.GET, '**/messages/*.json*', 'null')
+			cy.intercept(
+				API_DATABASE.GET,
+				'**/userConversations/*.json*',
+				'null',
+			)
+			cy.intercept(API_DATABASE.GET, '**/legacyMessages/*.json*', 'null')
+			cy.intercept(
+				API_DATABASE.GET,
+				'**/conversations/*/messages.json*',
+				'null',
+			)
 			eachWidth((width) => {
 				visit(PATHS.MESSAGES)
 				cy.get(MESSAGES_PAGE_SELECTORS.EMPTY).should('be.visible')
 				assertSettled()
 				freezeAnimation()
 				shot(`messages-empty-${width}`)
-			})
 
-			cy.clock(NOW, ['Date'])
-			cy.intercept(API_DATABASE.GET, '**/messages/*.json*', {
-				body: {
-					'capture-one': {
-						senderId: TEST_USERS.OTHER_TRAVELLER.ID,
-						message: MOCK_INBOX.SAMPLE_MESSAGE_ONE.message,
-						createdAt: NOW - 12 * 60 * 1000,
-						read: true,
-					},
-				},
-			})
-			eachWidth((width) => {
-				visit(PATHS.MESSAGES)
-				cy.get(messageEntries(width)).should('have.length', 1)
+				// A first message to a traveller: the thread says hello
+				visit(threadPath(OTHER_CID))
+				cy.get(MESSAGE_THREAD_SELECTORS.HELLO, {
+					timeout: TIMEOUT,
+				}).should('be.visible')
+				cy.get(THREAD_HEADER_SELECTORS.NAME).should(
+					'contain.text',
+					OTHER_NAME,
+				)
 				assertSettled()
 				freezeAnimation()
-				shot(`messages-one-${width}`)
+				shot(`thread-hello-${width}`)
 			})
 		})
 
@@ -1841,60 +1892,6 @@ describe(`UI check capture (${LABEL})`, () => {
 				freezeAnimation()
 				shot(`not-found-signed-in-${width}`)
 			})
-		})
-
-		capture('contact-send', () => {
-			// The seeded recipient has no photos, so it borrows the owner's for the "You're writing to" row
-			cy.request({
-				url: emulatorDatabase(`travellers/${TEST_USERS.TRAVELLER.ID}`),
-				headers: OWNER,
-			}).then(({ body: seeded }) =>
-				cy.request({
-					method: 'PATCH',
-					url: emulatorDatabase(
-						`travellers/${TEST_USERS.OTHER_TRAVELLER.ID}`,
-					),
-					headers: OWNER,
-					body: {
-						files: seeded.files,
-						fileDimensions: seeded.fileDimensions,
-						fileThumbnails: seeded.fileThumbnails,
-					},
-				}),
-			)
-			eachWidth((width) => {
-				visit(
-					`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}/contact`,
-				)
-				cy.get(CONTACT_TRAVELLER_SELECTORS.FORM).should('be.visible')
-				// The seeded unread message shows on the nav once its own request answers, so the shot waits for it
-				cy.get('[data-cy="tab-bar-unread"], [data-cy="total-messages"]')
-					.filter(':visible')
-					.should('contain', '1')
-				if (width >= 1024) {
-					cy.get(
-						`${CONTACT_TRAVELLER_SELECTORS.RECIPIENT_DETAILS} li`,
-					).should('have.length', 3)
-				}
-				assertImagesLoaded()
-				freezeAnimation()
-				shot(`contact-${width}`)
-				cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()
-				shot(`contact-validation-${width}`)
-			})
-
-			cy.viewport(1280, HEIGHT)
-			visit(
-				`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}/contact`,
-			)
-			cy.get(CONTACT_TRAVELLER_SELECTORS.MESSAGE_INPUT).type(
-				'Sent by the capture script.',
-			)
-			cy.get(CONTACT_TRAVELLER_SELECTORS.SUBMIT).click()
-			cy.get(CONTACT_TRAVELLER_SELECTORS.ROOT).should('not.exist')
-			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM).should('exist')
-			assertSettled()
-			shot('contact-sent')
 		})
 
 		capture('photo-text-states', () => {

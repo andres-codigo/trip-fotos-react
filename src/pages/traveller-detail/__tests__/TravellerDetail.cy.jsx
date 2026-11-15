@@ -113,7 +113,7 @@ describe('<TravellerDetail />', () => {
 		mountPage({ isTraveller: true })
 		cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE)
 			.find(TRAVELLER_DETAIL_SELECTORS.MESSAGE)
-			.should('have.attr', 'href', '/travellers/abc/contact')
+			.should('have.attr', 'href', '/messages/abc_me')
 			.and('have.text', 'Message Ada')
 			.then(($message) => {
 				cy.get(TRAVELLER_DETAIL_SELECTORS.BADGES).then(($badges) => {

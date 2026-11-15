@@ -5,14 +5,14 @@ import { useLocation } from 'react-router-dom'
 import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
 import { NAVIGATION, PATHS } from '@/constants/ui'
 import { selectUserId } from '@/store/slices/authenticationSlice'
-import { selectUnreadMessagesCount } from '@/store/slices/messagesSlice'
+import { selectUnreadConversationsCount } from '@/store/slices/messagesSlice'
 import { selectIsTraveller } from '@/store/slices/travellersSlice'
 
 // Shared by the desktop nav and the tab bar; isTraveller overrides the store value when given
 function usePrimaryNavItems({ isTraveller } = {}) {
 	const isTravellerFromStore = useSelector(selectIsTraveller)
 	const userId = useSelector(selectUserId)
-	const unreadMessages = useSelector(selectUnreadMessagesCount)
+	const unreadMessages = useSelector(selectUnreadConversationsCount)
 	const { pathname } = useLocation()
 
 	const resolvedIsTraveller = isTraveller ?? isTravellerFromStore
@@ -45,7 +45,9 @@ function usePrimaryNavItems({ isTraveller } = {}) {
 				key: 'messages',
 				label: NAVIGATION.MESSAGES,
 				to: PATHS.MESSAGES,
-				isActive: pathname === PATHS.MESSAGES,
+				isActive:
+					pathname === PATHS.MESSAGES ||
+					pathname.startsWith(`${PATHS.MESSAGES}/`),
 				unreadMessages,
 			},
 			{

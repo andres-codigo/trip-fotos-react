@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import MessagesPageSkeleton from '@/components/messages/messages-page-skeleton/MessagesPageSkeleton'
-import { MESSAGE_SKELETON, MESSAGES_PAGE_SKELETON } from '@/constants/test'
+import { CONVERSATION_SKELETON, MESSAGES_PAGE_SKELETON } from '@/constants/test'
 import { MESSAGES_CONFIG } from '@/constants/travellers'
 import { GLOBAL } from '@/constants/ui'
 
@@ -36,21 +36,25 @@ describe('MessagesPageSkeleton', () => {
 		)
 	})
 
-	it('shows the inbox rows and pane from the tablet breakpoint', () => {
+	it('shows the list rows beside a thread from the tablet breakpoint', () => {
 		viewport.width = GLOBAL.BREAKPOINT.TABLET
 		const { container } = render(<MessagesPageSkeleton />)
-		expect(byDataCy(container, MESSAGE_SKELETON.ROW)).toHaveLength(
-			MESSAGES_CONFIG.INBOX_SKELETON_COUNT,
+		expect(byDataCy(container, CONVERSATION_SKELETON.ROW)).toHaveLength(
+			MESSAGES_CONFIG.DESKTOP_LIST_SKELETON_COUNT,
 		)
-		expect(byDataCy(container, MESSAGE_SKELETON.PANE)).toHaveLength(1)
+		expect(byDataCy(container, CONVERSATION_SKELETON.THREAD)).toHaveLength(
+			1,
+		)
 	})
 
-	it('shows card skeletons in the page card below it', () => {
+	it('shows the list alone below it', () => {
 		viewport.width = GLOBAL.BREAKPOINT.TABLET - 1
 		const { container } = render(<MessagesPageSkeleton />)
-		expect(byDataCy(container, MESSAGE_SKELETON.ROOT)).toHaveLength(
-			MESSAGES_CONFIG.SKELETON_COUNT,
+		expect(byDataCy(container, CONVERSATION_SKELETON.ROW)).toHaveLength(
+			MESSAGES_CONFIG.LIST_SKELETON_COUNT,
 		)
-		expect(byDataCy(container, MESSAGE_SKELETON.ROW)).toHaveLength(0)
+		expect(byDataCy(container, CONVERSATION_SKELETON.THREAD)).toHaveLength(
+			0,
+		)
 	})
 })

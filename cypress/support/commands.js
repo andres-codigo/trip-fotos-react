@@ -45,9 +45,11 @@ Cypress.Commands.add('createMockStore', (authToken = null) => {
 				error: null,
 			},
 			messages: {
-				messages: [],
-				status: 'idle',
-				error: null,
+				conversations: [],
+				legacyMessages: [],
+				conversationsStatus: 'idle',
+				conversationsError: null,
+				threads: {},
 			},
 		},
 	})

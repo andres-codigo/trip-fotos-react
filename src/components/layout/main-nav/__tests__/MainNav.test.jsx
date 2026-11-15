@@ -1,3 +1,4 @@
+import { mockConversationSummary } from '@/constants/test'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
@@ -33,7 +34,7 @@ const createStore = ({ travellerName = 'Ada Lovelace', messages = [] } = {}) =>
 			},
 			messages: {
 				...messagesReducer(undefined, { type: '@@init' }),
-				messages,
+				conversations: messages,
 			},
 		},
 	})
@@ -141,15 +142,15 @@ describe('<MainNav />', () => {
 			renderNav({
 				store: createStore({
 					messages: [
-						{ id: 'm1', read: false },
-						{ id: 'm2', read: true },
+						mockConversationSummary('m1', true),
+						mockConversationSummary('m2', false),
 					],
 				}),
 			})
 
 			expect(
 				within(mainNav()).getByRole('link', {
-					name: 'Messages, 1 unread message',
+					name: 'Messages, 1 unread conversation',
 				}),
 			).toBeInTheDocument()
 		})

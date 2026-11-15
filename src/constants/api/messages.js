@@ -16,10 +16,6 @@ export const API_ERROR_MESSAGE = Object.freeze({
 	DELETE_TRAVELLER_CATCH: 'An error occurred while deleting traveller ',
 	DELETE_TRAVELLER_MESSAGES_CATCH:
 		'An error occurred while deleting messages for traveller ',
-	CONTACT_TRAVELLER_CATCH: 'An error occurred while contacting traveller ',
-	LOAD_MESSAGES_CATCH: 'An error occurred while loading messages ',
-	DELETE_MESSAGE_CATCH: 'An error occurred while deleting message ',
-	MARK_MESSAGES_READ_CATCH: 'An error occurred while marking messages read ',
 	LOAD_CONVERSATIONS_CATCH: 'An error occurred while loading conversations ',
 	LOAD_THREAD_CATCH: 'An error occurred while loading conversation ',
 	SEND_MESSAGE_CATCH: 'An error occurred while sending a message to ',

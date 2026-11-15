@@ -10,6 +10,7 @@ import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
 import { CARD_PHOTOS, GLOBAL, PATHS } from '@/constants/ui'
 
 import { formatCity, getCityId } from '@/utils/formatCity'
+import { conversationId } from '@/utils/conversationId'
 
 import { selectIsAdmin, selectUserId } from '@/store/slices/authenticationSlice'
 import {
@@ -56,10 +57,12 @@ const TravellerItem = ({
 	const fullName = `${firstName} ${lastName}`
 	const detailsLink = `${PATHS.TRAVELLERS}/${id}`
 	const photosLink = `${detailsLink}#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
-	const contactLink = `${detailsLink}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`
 	const editLink = `${detailsLink}${TRAVELLER_ITEM_CONFIG.EDIT_PATH_SEGMENT}`
 	const isOwnRecord = id === userId
 	const canContact = !isOwnRecord && isTraveller
+	const messageLink = canContact
+		? `${PATHS.MESSAGES}/${conversationId(userId, id)}`
+		: null
 	const canDelete = isAdmin && !isOwnRecord
 
 	const openConfirm = () => setIsConfirming(true)
@@ -212,7 +215,7 @@ const TravellerItem = ({
 						{canContact && (
 							<BaseButton
 								isLink
-								to={contactLink}
+								to={messageLink}
 								modeType="outline"
 								data-cy={TRAVELLER_ITEM.MESSAGE}>
 								{TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(firstName)}

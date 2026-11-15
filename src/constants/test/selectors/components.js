@@ -13,16 +13,19 @@ import {
 	BADGE,
 	COMBOBOX,
 	INPUT,
-	CONTACT_TRAVELLER,
 	FILE_DROP,
 	FILE_PREVIEW,
 	IMAGE,
-	MESSAGE_ACTIONS,
-	MESSAGE_ITEM,
-	MESSAGE_PANE,
-	MESSAGE_ROW,
-	MESSAGE_SKELETON,
+	CONVERSATION_AVATAR,
+	CONVERSATION_LIST,
+	CONVERSATION_ROW,
+	CONVERSATION_SKELETON,
+	MESSAGE_BUBBLE,
+	MESSAGE_THREAD,
 	MESSAGES_PAGE,
+	REPLY_BOX,
+	THREAD_HEADER,
+	THREAD_NOTE,
 	PASSWORD_RESET_FORM,
 	PROGRESS,
 	PUBLIC_TRAVELLER_ITEM,
@@ -36,7 +39,6 @@ import {
 	ERROR_SUMMARY,
 	FILTER_SKELETON,
 	MESSAGES_PAGE_SKELETON,
-	MESSAGES_SKELETON,
 	TRAVELLERS_PAGE_SKELETON,
 	TRAVELLERS_SKELETON,
 	TRIP_PHOTOS,
@@ -267,12 +269,6 @@ export const TRAVELLER_SKELETON_SELECTORS = {
 	BUTTON: getByDataCy(TRAVELLER_SKELETON.BUTTON),
 }
 
-export const MESSAGE_SKELETON_SELECTORS = {
-	ROOT: getByDataCy(MESSAGE_SKELETON.ROOT),
-	ROW: getByDataCy(MESSAGE_SKELETON.ROW),
-	PANE: getByDataCy(MESSAGE_SKELETON.PANE),
-}
-
 export const FILTER_SKELETON_SELECTORS = {
 	ROOT: getByDataCy(FILTER_SKELETON.ROOT),
 	INLINE: getByDataCy(FILTER_SKELETON.INLINE),
@@ -288,10 +284,6 @@ export const TRAVELLERS_SKELETON_SELECTORS = {
 
 export const TRAVELLERS_PAGE_SKELETON_SELECTORS = {
 	ROOT: getByDataCy(TRAVELLERS_PAGE_SKELETON.ROOT),
-}
-
-export const MESSAGES_SKELETON_SELECTORS = {
-	ROOT: getByDataCy(MESSAGES_SKELETON.ROOT),
 }
 
 export const MESSAGES_PAGE_SKELETON_SELECTORS = {
@@ -384,41 +376,53 @@ export const TRAVELLERS_WELCOME_SELECTORS = {
 	LOG_IN: getByDataCy(TRAVELLERS_WELCOME.LOG_IN),
 }
 
-export const CONTACT_TRAVELLER_SELECTORS = {
-	ROOT: getByDataCy(CONTACT_TRAVELLER.ROOT),
-	TITLE: getByDataCy(CONTACT_TRAVELLER.TITLE),
-	FORM: getByDataCy(CONTACT_TRAVELLER.FORM),
-	BACK_TO_MESSAGES: getByDataCy(CONTACT_TRAVELLER.BACK_TO_MESSAGES),
-	REPLY_QUOTE: getByDataCy(CONTACT_TRAVELLER.REPLY_QUOTE),
-	COLUMNS: getByDataCy(CONTACT_TRAVELLER.COLUMNS),
-	RECIPIENT: getByDataCy(CONTACT_TRAVELLER.RECIPIENT),
-	RECIPIENT_DETAILS: getByDataCy(CONTACT_TRAVELLER.RECIPIENT_DETAILS),
-	VIEW_TRIP: getByDataCy(CONTACT_TRAVELLER.VIEW_TRIP),
-	MESSAGE_INPUT: getByDataCy(CONTACT_TRAVELLER.MESSAGE_INPUT),
-	MESSAGE_ERROR: getByDataCyError(CONTACT_TRAVELLER.MESSAGE_ERROR),
-	SUBMIT: getByDataCy(CONTACT_TRAVELLER.SUBMIT),
-	SENDING_DIALOG: getByDataCy(CONTACT_TRAVELLER.SENDING_DIALOG),
-	ERROR_DIALOG: getByDataCy(CONTACT_TRAVELLER.ERROR_DIALOG),
-}
-
 export const MESSAGES_PAGE_SELECTORS = Object.fromEntries(
 	Object.entries(MESSAGES_PAGE).map(([key, id]) => [key, getByDataCy(id)]),
 )
 
-export const MESSAGE_ITEM_SELECTORS = Object.fromEntries(
-	Object.entries(MESSAGE_ITEM).map(([key, id]) => [key, getByDataCy(id)]),
+export const CONVERSATION_AVATAR_SELECTORS = Object.fromEntries(
+	Object.entries(CONVERSATION_AVATAR).map(([key, id]) => [
+		key,
+		getByDataCy(id),
+	]),
 )
 
-export const MESSAGE_ACTIONS_SELECTORS = Object.fromEntries(
-	Object.entries(MESSAGE_ACTIONS).map(([key, id]) => [key, getByDataCy(id)]),
+export const CONVERSATION_ROW_SELECTORS = Object.fromEntries(
+	Object.entries(CONVERSATION_ROW).map(([key, id]) => [key, getByDataCy(id)]),
 )
 
-export const MESSAGE_ROW_SELECTORS = Object.fromEntries(
-	Object.entries(MESSAGE_ROW).map(([key, id]) => [key, getByDataCy(id)]),
+export const CONVERSATION_LIST_SELECTORS = Object.fromEntries(
+	Object.entries(CONVERSATION_LIST).map(([key, id]) => [
+		key,
+		getByDataCy(id),
+	]),
 )
 
-export const MESSAGE_PANE_SELECTORS = Object.fromEntries(
-	Object.entries(MESSAGE_PANE).map(([key, id]) => [key, getByDataCy(id)]),
+export const CONVERSATION_SKELETON_SELECTORS = Object.fromEntries(
+	Object.entries(CONVERSATION_SKELETON).map(([key, id]) => [
+		key,
+		getByDataCy(id),
+	]),
+)
+
+export const THREAD_HEADER_SELECTORS = Object.fromEntries(
+	Object.entries(THREAD_HEADER).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const MESSAGE_BUBBLE_SELECTORS = Object.fromEntries(
+	Object.entries(MESSAGE_BUBBLE).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const MESSAGE_THREAD_SELECTORS = Object.fromEntries(
+	Object.entries(MESSAGE_THREAD).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const REPLY_BOX_SELECTORS = Object.fromEntries(
+	Object.entries(REPLY_BOX).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const THREAD_NOTE_SELECTORS = Object.fromEntries(
+	Object.entries(THREAD_NOTE).map(([key, id]) => [key, getByDataCy(id)]),
 )
 
 export const PASSWORD_RESET_FORM_SELECTORS = Object.fromEntries(

@@ -32,3 +32,41 @@ export const formatMessageTime = (time, now = Date.now()) => {
 		year: 'numeric',
 	})
 }
+
+export const formatClockTime = (time) =>
+	new Date(time).toLocaleTimeString('en-GB', {
+		hour: '2-digit',
+		minute: '2-digit',
+		hourCycle: 'h23',
+	})
+
+const datePart = (parts, type) => parts.find((part) => part.type === type).value
+
+export const formatDayLabel = (time, now = Date.now()) => {
+	const day = startOfDay(time)
+	const today = startOfDay(now)
+	if (day === today) return 'Today'
+
+	const yesterday = new Date(today)
+	yesterday.setDate(yesterday.getDate() - 1)
+	if (day === yesterday.getTime()) return 'Yesterday'
+
+	const date = new Date(time)
+	if (date.getFullYear() !== new Date(now).getFullYear()) {
+		return date.toLocaleDateString('en-GB', {
+			day: 'numeric',
+			month: 'short',
+			year: 'numeric',
+		})
+	}
+
+	// Built from parts: some ICU versions put a comma after the weekday
+	const parts = new Intl.DateTimeFormat('en-GB', {
+		weekday: 'short',
+		day: 'numeric',
+		month: 'short',
+	}).formatToParts(date)
+	return ['weekday', 'day', 'month']
+		.map((type) => datePart(parts, type))
+		.join(' ')
+}

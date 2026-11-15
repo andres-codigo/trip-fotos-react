@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
-import { TAB_BAR } from '@/constants/test'
+import { TAB_BAR, mockConversationSummary } from '@/constants/test'
 import { NAVIGATION, PATHS } from '@/constants/ui'
 
 import authenticationReducer from '@/store/slices/authenticationSlice'
@@ -42,7 +42,7 @@ const createStore = ({
 				userId: USER_ID,
 			},
 			travellers: { ...initial.travellers, isTraveller },
-			messages: { ...initial.messages, messages },
+			messages: { ...initial.messages, conversations: messages },
 		},
 	})
 }
@@ -133,20 +133,22 @@ describe('<TabBar />', () => {
 	it('shows the unread count and names it in the Messages link', () => {
 		renderTabBar({
 			messages: [
-				{ id: 'm1', read: false },
-				{ id: 'm2', read: false },
-				{ id: 'm3', read: true },
+				mockConversationSummary('m1', true),
+				mockConversationSummary('m2', true),
+				mockConversationSummary('m3', false),
 			],
 		})
 
 		expect(screen.getByTestId(TAB_BAR.UNREAD)).toHaveTextContent('2')
 		expect(
-			screen.getByRole('link', { name: 'Messages, 2 unread messages' }),
+			screen.getByRole('link', {
+				name: 'Messages, 2 unread conversations',
+			}),
 		).toBe(screen.getByTestId(TAB_BAR.MESSAGES))
 	})
 
 	it('shows no count and a plain name when nothing is unread', () => {
-		renderTabBar({ messages: [{ id: 'm1', read: true }] })
+		renderTabBar({ messages: [mockConversationSummary('m1', false)] })
 
 		expect(screen.queryByTestId(TAB_BAR.UNREAD)).not.toBeInTheDocument()
 		expect(screen.getByRole('link', { name: 'Messages' })).toBe(

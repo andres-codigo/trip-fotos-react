@@ -12,10 +12,6 @@ const TRAVELLERS_BASE_ACTIONS = Object.freeze({
 })
 
 const MESSAGES_BASE_ACTIONS = Object.freeze({
-	CONTACT_TRAVELLER: 'messages/contactTraveller',
-	LOAD_MESSAGES: 'messages/loadMessages',
-	DELETE_MESSAGE: 'messages/deleteMessage',
-	MARK_MESSAGES_READ: 'messages/markMessagesRead',
 	DELETE_TRAVELLER_MESSAGES: 'messages/deleteTravellerMessages',
 	LOAD_CONVERSATIONS: 'messages/loadConversations',
 	LOAD_THREAD: 'messages/loadThread',
@@ -71,18 +67,6 @@ export const MESSAGES_ACTION_TYPES = Object.freeze({
 	...MESSAGES_BASE_ACTIONS,
 
 	// Async thunk action types
-	CONTACT_TRAVELLER_ASYNC: createAsyncActionTypes(
-		MESSAGES_BASE_ACTIONS.CONTACT_TRAVELLER,
-	),
-	LOAD_MESSAGES_ASYNC: createAsyncActionTypes(
-		MESSAGES_BASE_ACTIONS.LOAD_MESSAGES,
-	),
-	DELETE_MESSAGE_ASYNC: createAsyncActionTypes(
-		MESSAGES_BASE_ACTIONS.DELETE_MESSAGE,
-	),
-	MARK_MESSAGES_READ_ASYNC: createAsyncActionTypes(
-		MESSAGES_BASE_ACTIONS.MARK_MESSAGES_READ,
-	),
 	DELETE_TRAVELLER_MESSAGES_ASYNC: createAsyncActionTypes(
 		MESSAGES_BASE_ACTIONS.DELETE_TRAVELLER_MESSAGES,
 	),

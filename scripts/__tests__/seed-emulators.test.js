@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-	MOCK_INBOX,
-	MOCK_THREADS,
-} from '@/constants/test/mock-data/mock-messages'
+import { MOCK_THREADS } from '@/constants/test/mock-data/mock-messages'
 import { TONE_COUNT, getToneIndex } from '@/utils/getToneIndex'
 
 import { decodePng } from '../../.claude/skills/ui-check/compare.mjs'
@@ -12,7 +9,6 @@ import {
 	SEED_USERS,
 	assertEmulatorsOnly,
 	buildConversations,
-	buildMessages,
 	buildTravellers,
 	needsFullSeed,
 	solidPng,
@@ -113,40 +109,6 @@ describe('seed-emulators', () => {
 				].sort(),
 			)
 		})
-
-		it('gives the first traveller a message from the second, with the fields the rules require of a new message', () => {
-			const messages = buildMessages()[SEED_USERS.TRAVELLER_ONE.uid]
-			const fromTraveller = messages[MOCK_INBOX.SAMPLE_MESSAGE_ONE.id]
-
-			expect(Object.keys(fromTraveller).sort()).toEqual([
-				'createdAt',
-				'message',
-				'read',
-				'senderId',
-			])
-			expect(fromTraveller.senderId).toBe(SEED_USERS.TRAVELLER_TWO.uid)
-			expect(fromTraveller.read).toBe(false)
-			expect(typeof fromTraveller.createdAt).toBe('number')
-		})
-
-		it('keeps one older message with only an email, as stored before messaging was travellers-only', () => {
-			const older =
-				buildMessages()[SEED_USERS.TRAVELLER_ONE.uid][
-					MOCK_INBOX.SAMPLE_MESSAGE_TWO.id
-				]
-
-			expect(Object.keys(older).sort()).toEqual(['message', 'userEmail'])
-		})
-	})
-
-	it('dates the unread message from the clock it is given', () => {
-		const now = Date.UTC(2026, 5, 15, 12)
-		const message =
-			buildMessages(now)[SEED_USERS.TRAVELLER_ONE.uid][
-				MOCK_INBOX.SAMPLE_MESSAGE_ONE.id
-			]
-
-		expect(message.createdAt).toBe(now - 12 * 60 * 1000)
 	})
 
 	describe('buildConversations', () => {

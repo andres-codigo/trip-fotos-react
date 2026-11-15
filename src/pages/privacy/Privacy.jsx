@@ -46,12 +46,14 @@ const Privacy = () => {
 
 				<h2 className="mt-6 mb-[1em] text-[1.17rem]">Messages</h2>
 				<p>
-					Registered travellers can message each other. A message
-					keeps your account id, so the traveller you write to sees
-					your traveller name and can reply in Trip Fotos, along with
-					the time it was sent and whether they have read it. Your
-					email address is not shared with them. Messages sent before
-					this change keep the email they were sent with.
+					Registered travellers can message each other. Both sides of
+					a conversation are stored together, so you and the traveller
+					you write to each see the whole thread: your traveller name,
+					what was written and when, and whether you have read it.
+					Your email address is not shared with them. Deleting a
+					conversation removes it from your Messages only; the other
+					traveller keeps their copy. Messages sent before
+					conversations keep the email address they were sent with.
 				</p>
 
 				<h2 className="mt-6 mb-[1em] text-[1.17rem]">City search</h2>

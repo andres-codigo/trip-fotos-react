@@ -1461,7 +1461,7 @@ describe('travellersSlice', () => {
 
 		const isMessagesUpdate = (options) =>
 			Object.keys(JSON.parse(options?.body ?? '{}')).some((path) =>
-				path.startsWith('messages/'),
+				path.startsWith('userConversations/'),
 			)
 
 		const messagesUpdates = () =>
@@ -1515,7 +1515,6 @@ describe('travellersSlice', () => {
 				)
 				expect(deleteObject).toHaveBeenCalledTimes(files.length)
 				expect(savedUpdate(1)).toEqual({
-					[`messages/${travellerId}`]: null,
 					[`userConversations/${travellerId}`]: null,
 					[`legacyMessages/${travellerId}`]: null,
 				})

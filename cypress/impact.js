@@ -29,10 +29,6 @@ const AREAS = {
 		'src/components/messages/',
 		'src/store/slices/messagesSlice.js',
 	],
-	contact: [
-		'src/pages/contact-traveller/',
-		'src/components/forms/contact-traveller/',
-	],
 	trips: ['src/store/slices/travellersSlice.js', 'src/utils/tripPhotos/'],
 }
 
@@ -124,10 +120,10 @@ export const CAPTURES = {
 	},
 	'message-button': {
 		title: 'captures the travellers list and a profile with the Message button',
-		areas: ['travellers', 'detail', 'contact'],
+		areas: ['travellers', 'detail'],
 	},
 	'messages-states': {
-		title: 'captures the messages page in every state and a real delete',
+		title: 'captures the messages list and threads in every state, a real send and a real delete',
 		areas: ['messages'],
 	},
 	'messages-fallback': {
@@ -135,16 +131,12 @@ export const CAPTURES = {
 		areas: ['messages'],
 	},
 	'messages-empty': {
-		title: 'captures Messages when empty and with one message',
+		title: 'captures Messages when empty and a first message saying hello',
 		areas: ['messages'],
 	},
 	'account-menu': {
 		title: 'captures the open account menu, the tab bar, the foot of the page and the signed-in 404',
 		areas: ['travellers', 'detail', 'notFound'],
-	},
-	'contact-send': {
-		title: "captures the contact form with the recipient's photos and a real send",
-		areas: ['contact', 'detail'],
 	},
 	'photo-text-states': {
 		title: 'captures photo alt text on the edit page and in the dialog, and an own trip with no photos',
@@ -198,9 +190,9 @@ export const E2E_SPECS = {
 		'privacy',
 	],
 	'cypress/e2e/pages/Authentication.cy.js': ['authentication'],
-	'cypress/e2e/pages/ContactTraveller.cy.js': ['contact', 'detail'],
+	'cypress/e2e/pages/ContactTraveller.cy.js': ['messages', 'detail'],
 	'cypress/e2e/pages/EditTrip.cy.js': ['edit', 'detail', 'trips'],
-	'cypress/e2e/pages/Messages.cy.js': ['messages', 'contact'],
+	'cypress/e2e/pages/Messages.cy.js': ['messages'],
 	'cypress/e2e/pages/PageNotFound.cy.js': ['notFound'],
 	'cypress/e2e/pages/Privacy.cy.js': ['privacy'],
 	'cypress/e2e/pages/Register.cy.js': ['register', 'trips'],

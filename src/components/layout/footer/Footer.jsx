@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
+import PropTypes from 'prop-types'
 
 import { PATHS } from '@/constants/ui'
 
-function Footer() {
+import { cn } from '@/utils/cn'
+
+function Footer({ className }) {
 	return (
 		<footer
-			className="flex justify-center border-x-0 border-t border-b-0 border-solid border-border px-5 py-6"
+			className={cn(
+				'flex justify-center border-x-0 border-t border-b-0 border-solid border-border px-5 py-6',
+				className,
+			)}
 			data-cy="site-footer">
 			<Link
 				to={PATHS.PRIVACY}
@@ -15,6 +21,10 @@ function Footer() {
 			</Link>
 		</footer>
 	)
+}
+
+Footer.propTypes = {
+	className: PropTypes.string,
 }
 
 export default Footer

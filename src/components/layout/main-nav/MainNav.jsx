@@ -5,8 +5,8 @@ import PropTypes from 'prop-types'
 import { NAVIGATION } from '@/constants/ui'
 
 import {
-	loadMessages,
-	selectUnreadMessagesCount,
+	loadConversations,
+	selectUnreadConversationsCount,
 } from '@/store/slices/messagesSlice'
 
 import useLoggedInTravellerNameDefault from './hooks/useLoggedInTravellerName'
@@ -30,7 +30,7 @@ function MainNav({
 		(state) => state.travellers.isTraveller,
 	)
 	const isTraveller = isTravellerProp ?? isTravellerFromStore
-	const unreadMessages = useSelector(selectUnreadMessagesCount)
+	const unreadMessages = useSelector(selectUnreadConversationsCount)
 	const navItems = usePrimaryNavItems({ isTraveller })
 
 	const [travellerName, setTravellerName] = useLoggedInTravellerName()
@@ -44,7 +44,7 @@ function MainNav({
 	// Messages are traveller-only; loading here keeps the count current without opening the Messages page
 	useEffect(() => {
 		if (isLoggedIn && isTraveller) {
-			dispatch(loadMessages())
+			dispatch(loadConversations())
 		}
 	}, [isLoggedIn, isTraveller, dispatch])
 

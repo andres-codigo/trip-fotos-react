@@ -19,14 +19,12 @@ import {
 import { databaseRequest } from '@/store/databaseRequest'
 
 import { handleApiError } from '@/utils/errorHandler'
+import { formatCity } from '@/utils/formatCity'
 import { conversationId, otherMemberId, pushId } from '@/utils/conversationId'
 
 const isBlank = (value) => typeof value !== 'string' || value.trim() === ''
 
 const initialState = {
-	messages: [],
-	status: 'idle',
-	error: null,
 	conversations: [],
 	legacyMessages: [],
 	conversationsStatus: 'idle',
@@ -34,45 +32,12 @@ const initialState = {
 	threads: {},
 }
 
-export const contactTraveller = createAsyncThunk(
-	MESSAGES_ACTION_TYPES.CONTACT_TRAVELLER,
-	async ({ travellerId, message }, { getState, rejectWithValue }) => {
-		if (isBlank(travellerId) || isBlank(message)) {
-			return rejectWithValue(ERROR_MESSAGES.INVALID_MESSAGE_PAYLOAD)
-		}
-
-		try {
-			const senderId = selectUserId(getState())
-			const token = selectAuthenticationToken(getState())
-
-			// The rules accept a message only from a signed-in traveller writing as themselves, so no email is stored
-			const response = await databaseRequest(`/messages/${travellerId}`, {
-				method: API_DATABASE.POST,
-				token,
-				body: {
-					senderId,
-					message,
-					createdAt: API_DATABASE.SERVER_TIMESTAMP,
-					read: false,
-				},
-			})
-
-			const responseData = await response.json()
-
-			return { id: responseData.name, travellerId, senderId, message }
-		} catch (error) {
-			return rejectWithValue(
-				handleApiError(
-					error,
-					`${API_ERROR_MESSAGE.CONTACT_TRAVELLER_CATCH}${travellerId}.`,
-				),
-			)
-		}
-	},
-)
-
 const fullName = ({ firstName, lastName } = {}) =>
 	[firstName, lastName].filter(Boolean).join(' ')
+
+// The thread header names one place, the city without its country
+const firstCity = (cities) =>
+	cities?.[0] ? formatCity(cities[0]).split(',')[0] : null
 
 // The name is looked up, not stored, so it follows a renamed card and cannot be faked by the sender
 const loadSender = async (senderId, token) => {
@@ -83,125 +48,16 @@ const loadSender = async (senderId, token) => {
 		const traveller = await response.json()
 
 		return traveller
-			? { status: SENDER_STATUS.TRAVELLER, name: fullName(traveller) }
-			: { status: SENDER_STATUS.FORMER, name: null }
+			? {
+					status: SENDER_STATUS.TRAVELLER,
+					name: fullName(traveller),
+					place: firstCity(traveller.cities),
+				}
+			: { status: SENDER_STATUS.FORMER, name: null, place: null }
 	} catch {
-		return { status: SENDER_STATUS.UNKNOWN, name: null }
+		return { status: SENDER_STATUS.UNKNOWN, name: null, place: null }
 	}
 }
-
-const newestFirst = (a, b) => (b.createdAt ?? -1) - (a.createdAt ?? -1)
-
-export const loadMessages = createAsyncThunk(
-	MESSAGES_ACTION_TYPES.LOAD_MESSAGES,
-	async (_, { getState, rejectWithValue }) => {
-		try {
-			const userId = selectUserId(getState())
-			const token = selectAuthenticationToken(getState())
-
-			const response = await databaseRequest(`/messages/${userId}`, {
-				token,
-			})
-
-			const responseData = await response.json()
-
-			if (!responseData) {
-				return []
-			}
-
-			const entries = Object.entries(responseData)
-			const senderIds = [
-				...new Set(
-					entries.map(([, item]) => item.senderId).filter(Boolean),
-				),
-			]
-			const senders = Object.fromEntries(
-				await Promise.all(
-					senderIds.map(async (id) => [
-						id,
-						await loadSender(id, token),
-					]),
-				),
-			)
-
-			return entries
-				.map(([key, item]) => {
-					const sender = item.senderId
-						? senders[item.senderId]
-						: { status: SENDER_STATUS.LEGACY, name: null }
-
-					return {
-						id: key,
-						travellerId: userId,
-						senderId: item.senderId ?? null,
-						senderName: sender.name,
-						senderStatus: sender.status,
-						userEmail: item.userEmail ?? null,
-						message: item.message,
-						createdAt: item.createdAt ?? null,
-						// Older messages have no read flag and count as read
-						read: item.read !== false,
-					}
-				})
-				.sort(newestFirst)
-		} catch (error) {
-			return rejectWithValue(
-				handleApiError(error, API_ERROR_MESSAGE.LOAD_MESSAGES_CATCH),
-			)
-		}
-	},
-)
-
-export const markMessagesRead = createAsyncThunk(
-	MESSAGES_ACTION_TYPES.MARK_MESSAGES_READ,
-	async (messageIds, { getState, rejectWithValue }) => {
-		try {
-			const userId = selectUserId(getState())
-			const token = selectAuthenticationToken(getState())
-
-			await databaseRequest(`/messages/${userId}`, {
-				method: API_DATABASE.PATCH,
-				token,
-				body: Object.fromEntries(
-					messageIds.map((id) => [`${id}/read`, true]),
-				),
-			})
-
-			return messageIds
-		} catch (error) {
-			return rejectWithValue(
-				handleApiError(
-					error,
-					API_ERROR_MESSAGE.MARK_MESSAGES_READ_CATCH,
-				),
-			)
-		}
-	},
-)
-
-export const deleteMessage = createAsyncThunk(
-	MESSAGES_ACTION_TYPES.DELETE_MESSAGE,
-	async (messageId, { getState, rejectWithValue }) => {
-		try {
-			const userId = selectUserId(getState())
-			const token = selectAuthenticationToken(getState())
-
-			await databaseRequest(`/messages/${userId}/${messageId}`, {
-				method: API_DATABASE.DELETE,
-				token,
-			})
-
-			return messageId
-		} catch (error) {
-			return rejectWithValue(
-				handleApiError(
-					error,
-					`${API_ERROR_MESSAGE.DELETE_MESSAGE_CATCH}${messageId}.`,
-				),
-			)
-		}
-	},
-)
 
 // Your side only: the other member keeps the conversation, and a reply to a former traveller is refused by the rules
 export const deleteTravellerMessages = createAsyncThunk(
@@ -214,7 +70,6 @@ export const deleteTravellerMessages = createAsyncThunk(
 				method: API_DATABASE.PATCH,
 				token,
 				body: {
-					[`messages/${travellerId}`]: null,
 					[`userConversations/${travellerId}`]: null,
 					[`legacyMessages/${travellerId}`]: null,
 				},
@@ -284,6 +139,7 @@ export const loadConversations = createAsyncThunk(
 						otherId: entry.otherId,
 						otherName: others[entry.otherId].name,
 						otherStatus: others[entry.otherId].status,
+						otherPlace: others[entry.otherId].place,
 						lastId: entry.lastId,
 						lastMessage: entry.lastMessage,
 						lastSenderId: entry.lastSenderId,
@@ -330,6 +186,7 @@ export const loadThread = createAsyncThunk(
 					? {
 							name: known.otherName,
 							status: known.otherStatus,
+							place: known.otherPlace,
 						}
 					: loadSender(otherId, token),
 			])
@@ -340,6 +197,7 @@ export const loadThread = createAsyncThunk(
 				otherId,
 				otherName: other.name,
 				otherStatus: other.status,
+				otherPlace: other.place ?? null,
 				messages: Object.entries(stored ?? {})
 					.map(([id, item]) => ({
 						id,
@@ -507,12 +365,6 @@ export const deleteLegacyMessage = createAsyncThunk(
 	},
 )
 
-const setRead = (state, ids, read) => {
-	state.messages.forEach((message) => {
-		if (ids.includes(message.id)) message.read = read
-	})
-}
-
 const threadMessage = (state, cid, id) =>
 	state.threads[cid]?.messages.find((message) => message.id === id)
 
@@ -533,51 +385,6 @@ const messagesSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder
-			// CONTACT_TRAVELLER async thunk handlers
-			.addCase(contactTraveller.pending, (state) => {
-				state.status = 'loading'
-				state.error = null
-			})
-			.addCase(contactTraveller.fulfilled, (state) => {
-				// The sender is not the recipient, so the message is not added to the local list
-				state.status = 'succeeded'
-			})
-			.addCase(contactTraveller.rejected, (state, action) => {
-				state.status = 'failed'
-				state.error = action.payload
-			})
-
-			// LOAD_MESSAGES async thunk handlers
-			.addCase(loadMessages.pending, (state) => {
-				state.status = 'loading'
-				state.error = null
-			})
-			.addCase(loadMessages.fulfilled, (state, action) => {
-				state.status = 'succeeded'
-				state.messages = action.payload
-			})
-			.addCase(loadMessages.rejected, (state, action) => {
-				state.status = 'failed'
-				state.error = action.payload
-			})
-
-			// MARK_MESSAGES_READ async thunk handlers
-			// The nav count drops at once; a failed write puts the flags back so the count is right next visit
-			.addCase(markMessagesRead.pending, (state, action) => {
-				setRead(state, action.meta.arg, true)
-			})
-			.addCase(markMessagesRead.rejected, (state, action) => {
-				setRead(state, action.meta.arg, false)
-			})
-
-			// DELETE_MESSAGE async thunk handlers
-			// Deletes run in the background after the Undo toast, so they leave the page's load status alone
-			.addCase(deleteMessage.fulfilled, (state, action) => {
-				state.messages = state.messages.filter(
-					(message) => message.id !== action.payload,
-				)
-			})
-
 			// LOAD_CONVERSATIONS async thunk handlers
 			.addCase(loadConversations.pending, (state) => {
 				state.conversationsStatus = 'loading'
@@ -667,6 +474,7 @@ const messagesSlice = createSlice({
 						otherName: thread.otherName ?? null,
 						otherStatus:
 							thread.otherStatus ?? SENDER_STATUS.TRAVELLER,
+						otherPlace: thread.otherPlace ?? null,
 						readAt: null,
 						clearedAt: null,
 						...summary,
@@ -733,36 +541,6 @@ const messagesSlice = createSlice({
 })
 
 export const selectMessagesState = (state) => state.messages
-
-export const selectMessages = createSelector(
-	[selectMessagesState],
-	(messagesState) => messagesState.messages,
-)
-
-export const selectHasMessages = createSelector(
-	[selectMessages],
-	(messages) => messages.length > 0,
-)
-
-export const selectMessagesCount = createSelector(
-	[selectMessages],
-	(messages) => messages.length,
-)
-
-export const selectUnreadMessagesCount = createSelector(
-	[selectMessages],
-	(messages) => messages.filter((message) => !message.read).length,
-)
-
-export const selectMessagesStatus = createSelector(
-	[selectMessagesState],
-	(messagesState) => messagesState.status,
-)
-
-export const selectMessagesError = createSelector(
-	[selectMessagesState],
-	(messagesState) => messagesState.error,
-)
 
 export const { dismissFailedMessage } = messagesSlice.actions
 

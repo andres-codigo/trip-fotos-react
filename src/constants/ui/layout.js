@@ -30,8 +30,3 @@ export const TRAVELLERS_GRID =
 	'mx-0 mt-0 -mb-4 grid list-none grid-cols-1 gap-x-4 gap-y-0 p-0 sm:grid-cols-2 lg:grid-cols-3'
 
 // The Messages lists, shared by the page and its skeleton
-export const MESSAGES_LAYOUT = Object.freeze({
-	INBOX_LIST:
-		'm-0 list-none divide-y divide-border overflow-hidden rounded-lg border border-border-card bg-surface p-0 shadow-card',
-	CARD_LIST: 'm-0 flex list-none flex-col gap-3 p-0',
-})

@@ -11,6 +11,7 @@ import {
 import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
 
 import { formatCity, getCityId } from '@/utils/formatCity'
+import { conversationId } from '@/utils/conversationId'
 
 import { selectUserId } from '@/store/slices/authenticationSlice'
 import {
@@ -229,7 +230,7 @@ const TravellerDetail = () => {
 									<div className="border-t border-border pt-4">
 										<BaseButton
 											isLink
-											to={`${PATHS.TRAVELLERS}/${id}${TRAVELLER_ITEM_CONFIG.CONTACT_PATH_SEGMENT}`}
+											to={`${PATHS.MESSAGES}/${conversationId(userId, id)}`}
 											modeType="primary"
 											className="w-full gap-2 md:w-auto"
 											ariaLabel={TRAVELLER_ITEM_CONFIG.MESSAGE_LABEL(

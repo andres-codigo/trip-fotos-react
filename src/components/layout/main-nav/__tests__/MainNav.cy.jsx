@@ -5,6 +5,7 @@ import configureTestStore from '@/testUtils/configureTestStore'
 import {
 	ACCOUNT_MENU_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
+	mockConversationSummary,
 } from '@/constants/test'
 import { PATHS } from '@/constants/ui'
 
@@ -37,7 +38,7 @@ const createStore = () =>
 			},
 			messages: {
 				...messagesReducer(undefined, { type: '@@init' }),
-				messages: [{ id: 'm1', read: false }],
+				conversations: [mockConversationSummary('m1', true)],
 			},
 		},
 	})

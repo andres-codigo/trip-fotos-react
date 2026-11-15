@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useSelector } from 'react-redux'
 
 import usePrimaryNavItems from '@/components/layout/main-nav/hooks/usePrimaryNavItems'
-import { MOCK_USER } from '@/constants/test'
+import { MOCK_USER, mockConversationSummary } from '@/constants/test'
 import { TRAVELLER_ITEM_CONFIG } from '@/constants/travellers'
 import { NAVIGATION, PATHS } from '@/constants/ui'
 
@@ -23,17 +23,17 @@ const OWN_DETAIL_PATH = `${PATHS.TRAVELLERS}/${MOCK_USER.USER_ID}`
 const OWN_EDIT_PATH = `${OWN_DETAIL_PATH}${TRAVELLER_ITEM_CONFIG.EDIT_PATH_SEGMENT}`
 const OTHER_DETAIL_PATH = `${PATHS.TRAVELLERS}/another-user-id`
 
-// Three messages, two unread
+// Three conversations, two unread
 const mockMessages = [
-	{ id: 1, read: false },
-	{ id: 2, read: false },
-	{ id: 3, read: true },
+	mockConversationSummary('1', true),
+	mockConversationSummary('2', true),
+	mockConversationSummary('3', false),
 ]
 
 const mockState = (isTraveller) => ({
 	authentication: { userId: MOCK_USER.USER_ID },
 	travellers: { isTraveller },
-	messages: { messages: mockMessages },
+	messages: { conversations: mockMessages },
 })
 
 const setPathname = (pathname) => mockUseLocation.mockReturnValue({ pathname })
@@ -114,7 +114,9 @@ describe('usePrimaryNavItems', () => {
 			vi.mocked(useSelector).mockImplementation((selector) =>
 				selector({
 					...mockState(true),
-					messages: { messages: [{ id: 1, read: true }] },
+					messages: {
+						conversations: [mockConversationSummary('1', false)],
+					},
 				}),
 			)
 

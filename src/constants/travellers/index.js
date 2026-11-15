@@ -37,7 +37,6 @@ export const TRAVELLER_REGISTRATION_SUCCESS_MESSAGE =
 export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 	TRIP_DESCRIPTION_MAX_LENGTH: 250,
 	MAX_IMAGES: 5,
-	CONTACT_PATH_SEGMENT: '/contact',
 	EDIT_PATH_SEGMENT: '/edit',
 	EDIT_LABEL: 'Edit trip',
 	VIEW_LABEL: 'View trip',
@@ -153,27 +152,6 @@ export const TRIP_PHOTOS_CONFIG = Object.freeze({
 	EMPTY_HINT: 'No photos on this trip yet. Add some below.',
 })
 
-export const CONTACT_TRAVELLER_FIELDS = Object.freeze({
-	MESSAGE: 'message',
-})
-
-export const CONTACT_TRAVELLER_CONFIG = Object.freeze({
-	FALLBACK_TITLE: 'Contact traveller',
-	TITLE: (firstName) => `Contact ${firstName}`,
-	REPLY_TITLE: (name) => `Reply to ${name}`,
-	REPLY_QUOTE: (name, when) =>
-		when ? `${name} wrote, ${when}:` : `${name} wrote:`,
-	BACK_TO_MESSAGES: 'Messages',
-	WRITING_TO: 'You’re writing to',
-	REPLYING_TO: 'Replying to',
-	VIEW_TRIP: (firstName) => `View ${firstName}’s trip`,
-	SUBMIT_LABEL: 'Send message',
-	SENDING_TITLE: 'Sending',
-	SENDING_MESSAGE: 'Sending your message, one moment please...',
-	SUCCESS_MESSAGE: 'Your message has been sent!',
-	REPLY_SUCCESS_MESSAGE: 'Your reply has been sent!',
-})
-
 // Where a message's sender name comes from: a traveller card, a removed card, a failed lookup, or an older message that stored only an email
 export const SENDER_STATUS = Object.freeze({
 	TRAVELLER: 'traveller',
@@ -183,39 +161,58 @@ export const SENDER_STATUS = Object.freeze({
 })
 
 const unreadLabel = (unread) =>
-	`${unread} unread message${unread === 1 ? '' : 's'}`
+	`${unread} unread conversation${unread === 1 ? '' : 's'}`
 
 export const MESSAGES_CONFIG = Object.freeze({
 	TITLE: 'Messages',
 	FORMER_TRAVELLER: 'A former traveller',
 	UNKNOWN_TRAVELLER: 'A traveller',
-	NEW_TAG: 'New',
-	NEW_TAG_HIDDEN: ' message',
-	REPLY: 'Reply',
+	YOU: 'You',
+	YOU_PREFIX: 'You: ',
+	NEW_DIVIDER: 'New',
+	NEW_ROW_HIDDEN: ', new',
+	TRAVELLER_SUBTITLE: (place) =>
+		place ? `Traveller · ${place}` : 'Traveller',
+	FORMER_SUBTITLE: 'Left Trip Fotos',
+	LEGACY_SUBTITLE: 'Before travellers-only messages',
+	BACK_LABEL: 'Back to messages',
+	OPTIONS_LABEL: 'Conversation options',
+	VIEW_CARD: 'View traveller card',
+	DELETE_CONVERSATION: 'Delete conversation',
+	REPLY_LABEL: (name) => `Message ${name}`,
+	REPLY_PLACEHOLDER: 'Message',
+	SEND: 'Send',
+	SENDING: 'Sending…',
+	NOT_SENT: 'Not sent.',
+	TRY_AGAIN: 'Try again',
+	SAY_HELLO: (name) =>
+		`This is the start of your conversation with ${name}. Say hello.`,
+	SAY_HELLO_PREVIEW: 'Say hello',
+	FORMER_NOTE_TITLE: 'This traveller has left Trip Fotos.',
+	FORMER_NOTE: 'You can read this conversation but not reply.',
+	LEGACY_NOTE:
+		'This message was sent by email address, before messages were for travellers only.',
 	REPLY_BY_EMAIL: 'Reply by email',
 	REPLY_EMAIL_SUBJECT: 'Re: your message on Trip Fotos',
-	DELETE: 'Delete',
-	DELETE_LABEL: (sender) => `Delete message from ${sender}`,
-	SHOW_ALL: 'Show all',
-	SHOW_LESS: 'Show less',
-	TRY_AGAIN: 'Try again',
-	TRYING_AGAIN: 'Trying again…',
-	DELETED: 'Message deleted.',
+	THREAD_LOAD_ERROR:
+		'This conversation could not be loaded. Check your connection and try again.',
+	THREAD_LABEL: (name) => `Conversation with ${name}`,
+	DELETED: 'Conversation deleted.',
 	UNDO: 'Undo',
 	UNDO_DURATION_MS: 8000,
-	// About five lines at the card's width; shorter texts never show "Show all"
-	CLAMP_LENGTH: 260,
+	// Mirrors the message length limit in firebase/database.rules.json
+	MAX_LENGTH: 5000,
+	REPLY_MAX_LINES: 5,
 	SUMMARY: (unread, total) =>
-		`${unread > 0 ? `${unread} unread · ` : ''}${total} message${total === 1 ? '' : 's'}`,
+		`${unread > 0 ? `${unread} unread · ` : ''}${total} conversation${total === 1 ? '' : 's'}`,
 	EMPTY_TITLE: 'No messages yet',
 	EMPTY_TEXT:
-		'When a traveller contacts you from your card, their message appears here.',
+		'Message a traveller from their card and your conversation appears here.',
 	BROWSE_TRAVELLERS: 'Browse travellers',
-	SKELETON_COUNT: 3,
-	// From 1024px Messages is an inbox: a list beside a reading pane, the open message kept in ?message=
-	INBOX_SKELETON_COUNT: 5,
-	MESSAGE_PARAM: 'message',
-	NEW_ROW_HIDDEN: ', new',
+	LIST_SKELETON_COUNT: 4,
+	DESKTOP_LIST_SKELETON_COUNT: 5,
+	// Email-only messages from before travellers-only messages have no conversation id, so their route carries this prefix
+	LEGACY_ID_PREFIX: 'email-',
 	UNREAD_LABEL: unreadLabel,
 	NAV_LABEL: (unread) =>
 		unread > 0 ? `Messages, ${unreadLabel(unread)}` : 'Messages',

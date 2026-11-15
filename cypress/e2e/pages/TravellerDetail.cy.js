@@ -1,12 +1,13 @@
 import {
 	COMMON_SELECTORS,
-	CONTACT_TRAVELLER_SELECTORS,
+	REPLY_BOX_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
 	TRAVELLER_ITEM_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-travellers'
 import { TEST_USERS } from '../../../src/constants/config/users'
 import { PATHS } from '../../../src/constants/ui/paths'
+import { conversationId } from '../../../src/utils/conversationId'
 
 import { performLogin } from '../../support/utils/authHelpers'
 
@@ -81,7 +82,7 @@ describe('Traveller Detail page', () => {
 		cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL).should('not.exist')
 	})
 
-	it('leads a traveller to the contact form for another traveller', () => {
+	it('opens the conversation with another traveller from Message', () => {
 		performLogin(
 			TEST_USERS.TRAVELLER.EMAIL,
 			TEST_USERS.TRAVELLER.PASSWORD,
@@ -96,8 +97,11 @@ describe('Traveller Detail page', () => {
 
 		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
 			'eq',
-			`${detailPath(TEST_USERS.OTHER_TRAVELLER.ID)}/contact`,
+			`${PATHS.MESSAGES}/${conversationId(
+				TEST_USERS.TRAVELLER.ID,
+				TEST_USERS.OTHER_TRAVELLER.ID,
+			)}`,
 		)
-		cy.get(CONTACT_TRAVELLER_SELECTORS.FORM).should('be.visible')
+		cy.get(REPLY_BOX_SELECTORS.INPUT).should('be.visible')
 	})
 })

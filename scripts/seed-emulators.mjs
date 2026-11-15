@@ -7,10 +7,7 @@ import { getDatabase } from 'firebase-admin/database'
 import { getStorage } from 'firebase-admin/storage'
 
 import { MOCK_TRAVELLERS } from '../src/constants/test/mock-data/mock-travellers.js'
-import {
-	MOCK_INBOX,
-	MOCK_THREADS,
-} from '../src/constants/test/mock-data/mock-messages.js'
+import { MOCK_THREADS } from '../src/constants/test/mock-data/mock-messages.js'
 import { toPublicTrips } from '../src/utils/publicTrip/index.js'
 import { conversationId } from '../src/utils/conversationId/index.js'
 
@@ -152,24 +149,6 @@ export const buildTravellers = () => {
 	}
 }
 
-// `now` lets /ui-check seed against the clock it freezes, so "12 min ago" reads the same in every run
-export const buildMessages = (now = Date.now()) => ({
-	[SEED_USERS.TRAVELLER_ONE.uid]: {
-		// From the other seeded traveller, unread, so the card, Reply and the nav count all render
-		[MOCK_INBOX.SAMPLE_MESSAGE_ONE.id]: {
-			senderId: SEED_USERS.TRAVELLER_TWO.uid,
-			message: MOCK_INBOX.SAMPLE_MESSAGE_ONE.message,
-			createdAt: now - 12 * 60 * 1000,
-			read: false,
-		},
-		// An older message with only an email, as stored before messaging was travellers-only
-		[MOCK_INBOX.SAMPLE_MESSAGE_TWO.id]: {
-			userEmail: MOCK_INBOX.SAMPLE_MESSAGE_TWO.userEmail,
-			message: MOCK_INBOX.SAMPLE_MESSAGE_TWO.message,
-		},
-	},
-})
-
 const thread = (me, other, messages, now, { read }) => {
 	const cid = conversationId(me, other)
 	const stored = messages.map(({ id, fromOther, message, ago }) => ({
@@ -196,7 +175,7 @@ const thread = (me, other, messages, now, { read }) => {
 	}
 }
 
-// One thread both seeded travellers wrote in (unread for the first), one from a former traveller, and one email-only message
+// `now` lets /ui-check seed against the clock it freezes, so "12 min ago" reads the same in every run. One thread both seeded travellers wrote in (unread for the first), one from a former traveller, and one email-only message
 export const buildConversations = (now = Date.now()) => {
 	const one = SEED_USERS.TRAVELLER_ONE.uid
 	const two = SEED_USERS.TRAVELLER_TWO.uid
@@ -273,7 +252,6 @@ const writeData = async (db, bucket, now) => {
 	await db.ref().set({
 		travellers,
 		publicTrips: toPublicTrips(travellers),
-		messages: buildMessages(now),
 		...buildConversations(now),
 	})
 }

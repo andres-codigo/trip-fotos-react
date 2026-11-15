@@ -1,97 +1,107 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useLocation, useSearchParams } from 'react-router-dom'
+import { useDispatch, useSelector, useStore } from 'react-redux'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
-import { cn } from '@/utils/cn'
-import { handleApiError } from '@/utils/errorHandler'
-import useViewport from '@/utils/useViewport'
-import { MESSAGE_ACTIONS, MESSAGE_ROW, MESSAGES_PAGE } from '@/constants/test'
-import { MESSAGES_CONFIG } from '@/constants/travellers'
-import {
-	ACCESSIBILITY,
-	GLOBAL,
-	MESSAGES_LAYOUT,
-	PAGE_LAYOUT,
-	PATHS,
-} from '@/constants/ui'
+import { MESSAGES_PAGE } from '@/constants/test'
+import { MESSAGES_CONFIG, SENDER_STATUS } from '@/constants/travellers'
+import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
 
+import { selectUserId } from '@/store/slices/authenticationSlice'
 import {
-	deleteMessage,
-	loadMessages,
-	markMessagesRead,
-	selectMessages,
+	deleteConversation,
+	deleteLegacyMessage,
+	dismissFailedMessage,
+	loadConversations,
+	loadThread,
+	markConversationRead,
+	selectConversations,
+	selectIsConversationUnread,
+	selectLegacyMessages,
+	selectThread,
+	selectUnreadConversationsCount,
+	sendMessage,
 } from '@/store/slices/messagesSlice'
 
-import MessageItem from '@/components/messages/message-item/MessageItem'
-import MessagePane from '@/components/messages/message-pane/MessagePane'
-import MessageRow from '@/components/messages/message-row/MessageRow'
-import MessagesSkeleton from '@/components/messages/messages-skeleton/MessagesSkeleton'
+import { cn } from '@/utils/cn'
+import { otherMemberId } from '@/utils/conversationId'
+import { handleApiError } from '@/utils/errorHandler'
+import { senderLabel } from '@/utils/messageSender'
+import useViewport from '@/utils/useViewport'
+
+import ConversationList from '@/components/messages/conversation-list/ConversationList'
+import ConversationSkeleton from '@/components/messages/conversation-skeleton/ConversationSkeleton'
+import MessageThread from '@/components/messages/message-thread/MessageThread'
+import ReplyBox from '@/components/messages/reply-box/ReplyBox'
+import ThreadHeader from '@/components/messages/thread-header/ThreadHeader'
+import ThreadNote from '@/components/messages/thread-note/ThreadNote'
 
 import Alerts from '@/components/ui/alerts/Alerts'
 import BaseButton from '@/components/ui/button/BaseButton'
-import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import Toast from '@/components/ui/toast/Toast'
 
-const HEADING = 'heading'
-const PANE_HEADING = 'pane-heading'
-const ITEM = 'item'
-const PARAM = MESSAGES_CONFIG.MESSAGE_PARAM
+const LEGACY_PREFIX = MESSAGES_CONFIG.LEGACY_ID_PREFIX
+const isLegacyId = (id) => id?.startsWith(LEGACY_PREFIX) ?? false
 
-const without = (record, key) =>
-	Object.fromEntries(Object.entries(record).filter(([id]) => id !== key))
+const CARD = 'rounded-lg border border-border-card shadow-card'
+const LIST_CARD = cn(CARD, 'overflow-hidden bg-surface')
+
+const subtitleFor = ({ status, place }) => {
+	if (status === SENDER_STATUS.TRAVELLER)
+		return MESSAGES_CONFIG.TRAVELLER_SUBTITLE(place)
+	if (status === SENDER_STATUS.FORMER) return MESSAGES_CONFIG.FORMER_SUBTITLE
+	if (status === SENDER_STATUS.LEGACY) return MESSAGES_CONFIG.LEGACY_SUBTITLE
+	return null
+}
 
 const Messages = () => {
+	const { conversationId: openId = null } = useParams()
 	const location = useLocation()
-	const [searchParams, setSearchParams] = useSearchParams()
+	const navigate = useNavigate()
+	const dispatch = useDispatch()
+	const store = useStore()
 	const { width } = useViewport()
 	const isWide = width >= GLOBAL.BREAKPOINT.TABLET
+
+	const userId = useSelector(selectUserId)
+	const conversations = useSelector(selectConversations)
+	const legacyMessages = useSelector(selectLegacyMessages)
+	const unreadCount = useSelector(selectUnreadConversationsCount)
+	const thread = useSelector((state) =>
+		openId && !isLegacyId(openId) ? selectThread(state, openId) : null,
+	)
 
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState(null)
 	const [alertMessage, setAlertMessage] = useState(
 		() => location.state?.alertMessage || null,
 	)
-	// Messages unread when the page opened keep their marker for the visit, though they are marked read at once
-	const [newIds, setNewIds] = useState([])
 	const [pendingId, setPendingId] = useState(null)
-	const [failed, setFailed] = useState({})
-	const [retrying, setRetrying] = useState({})
+	// Where unread messages started when each thread was first opened this visit, so "New" stays after they are marked read
+	const [newSince, setNewSince] = useState({})
 
-	const dispatch = useDispatch()
-	const messages = useSelector(selectMessages)
-
-	const listRef = useRef(null)
-	const headingRef = useRef(null)
-	const paneHeadingRef = useRef(null)
 	const pendingRef = useRef(null)
-	// A failed delete reopens its message in the inbox pane; null below 1024px and once the page has gone
-	const reopenRef = useRef(null)
-	// The message asked of the router (null for none) until the URL shows it
-	const requestedRef = useRef(undefined)
-	// Set by a delete, Undo or a chosen row, then moved to once the page has re-rendered
+	const headingRef = useRef(null)
+	const threadHeadingRef = useRef(null)
+	const replyRef = useRef(null)
+	const listRef = useRef(null)
+	// Set by an action, then moved to once the page has re-rendered with its target
 	const focusTargetRef = useRef(null)
 
 	useEffect(() => {
 		if (alertMessage) {
-			window.history.replaceState({}, document.title)
+			window.history.replaceState(window.history.state, document.title)
 		}
 	}, [alertMessage])
 
 	useEffect(() => {
 		let isActive = true
 
-		dispatch(loadMessages()).then((result) => {
+		dispatch(loadConversations()).then((result) => {
 			if (!isActive) return
-			if (loadMessages.rejected.match(result)) {
+			if (loadConversations.rejected.match(result)) {
 				setError(handleApiError(result.payload))
-			} else {
-				const unread = result.payload
-					.filter((message) => !message.read)
-					.map((message) => message.id)
-				setNewIds(unread)
-				if (unread.length > 0) dispatch(markMessagesRead(unread))
 			}
 			setIsLoading(false)
 		})
@@ -101,17 +111,131 @@ const Messages = () => {
 		}
 	}, [dispatch])
 
-	const sendDelete = useCallback(
-		(id) =>
-			dispatch(deleteMessage(id)).then((result) => {
-				if (deleteMessage.rejected.match(result)) {
-					setFailed((prev) => ({
-						...prev,
-						[id]: ERROR_MESSAGES.FAILED_TO_DELETE_MESSAGE,
-					}))
-					reopenRef.current?.(id)
-				}
+	const rows = [
+		...conversations.map((conversation) => ({
+			id: conversation.id,
+			to: `${PATHS.MESSAGES}/${conversation.id}`,
+			name: senderLabel({
+				senderStatus: conversation.otherStatus,
+				senderName: conversation.otherName,
 			}),
+			status: conversation.otherStatus,
+			place: conversation.otherPlace ?? null,
+			otherId: conversation.otherId,
+			lastMessage: conversation.lastMessage,
+			lastAt: conversation.lastAt,
+			isLastMine: conversation.lastSenderId === userId,
+			isUnread:
+				!conversation.readPending &&
+				conversation.lastSenderId !== userId &&
+				conversation.lastAt > (conversation.readAt ?? 0),
+			readAt: conversation.readAt ?? 0,
+		})),
+		...legacyMessages.map((item) => ({
+			id: `${LEGACY_PREFIX}${item.id}`,
+			legacyId: item.id,
+			to: `${PATHS.MESSAGES}/${LEGACY_PREFIX}${item.id}`,
+			name: item.userEmail,
+			status: SENDER_STATUS.LEGACY,
+			place: null,
+			otherId: null,
+			userEmail: item.userEmail,
+			lastMessage: item.message,
+			lastAt: null,
+			isLastMine: false,
+			isUnread: false,
+		})),
+	]
+	const visible = rows.filter(({ id }) => id !== pendingId)
+
+	const isLegacyOpen = isLegacyId(openId)
+	const openRow = rows.find(({ id }) => id === openId) ?? null
+	const otherId =
+		openId && !isLegacyOpen && userId ? otherMemberId(openId, userId) : null
+	const isMember =
+		!openId ||
+		isLegacyOpen ||
+		(Boolean(userId) && openId.split('_').includes(userId))
+
+	// A thread opened from a traveller's card, with nothing said yet, is listed while it is open
+	const draftRow =
+		!isLoading &&
+		openId &&
+		!isLegacyOpen &&
+		!openRow &&
+		openId !== pendingId &&
+		thread?.otherStatus
+			? {
+					id: openId,
+					to: `${PATHS.MESSAGES}/${openId}`,
+					name: senderLabel({
+						senderStatus: thread.otherStatus,
+						senderName: thread.otherName,
+					}),
+					status: thread.otherStatus,
+					place: thread.otherPlace ?? null,
+					otherId,
+					lastMessage: MESSAGES_CONFIG.SAY_HELLO_PREVIEW,
+					lastAt: null,
+					isLastMine: false,
+					isUnread: false,
+				}
+			: null
+	const listed = draftRow ? [draftRow, ...visible] : visible
+
+	// Marked read once the thread has loaded; where unread messages started is kept for the visit, so "New" stays
+	useEffect(() => {
+		if (isLoading || !openId || isLegacyOpen || !isMember) return
+		let isActive = true
+		dispatch(loadThread(openId)).then((result) => {
+			if (!isActive || !loadThread.fulfilled.match(result)) return
+			const state = store.getState()
+			if (!selectIsConversationUnread(state, openId)) return
+			const readAt =
+				selectConversations(state).find(({ id }) => id === openId)
+					?.readAt ?? 0
+			setNewSince((prev) =>
+				openId in prev ? prev : { ...prev, [openId]: readAt },
+			)
+			dispatch(markConversationRead(openId))
+		})
+		return () => {
+			isActive = false
+		}
+	}, [dispatch, store, isLoading, openId, isLegacyOpen, isMember])
+
+	// Replacing the entry keeps one Back leaving the page; the router can still be showing this page after the browser moved on, when replacing would pull the visitor back
+	const openConversation = useCallback(
+		(id, { replace = false } = {}) => {
+			const currentKey = window.history.state?.key
+			if (replace && currentKey && currentKey !== location.key) return
+			navigate(id ? `${PATHS.MESSAGES}/${id}` : PATHS.MESSAGES, {
+				replace,
+			})
+		},
+		[location.key, navigate],
+	)
+
+	// From 1024px a conversation is always open beside the list
+	const firstId = visible[0]?.id ?? null
+	useEffect(() => {
+		if (!isWide || isLoading || openId || !firstId) return
+		openConversation(firstId, { replace: true })
+	}, [isWide, isLoading, openId, firstId, openConversation])
+
+	const sendDelete = useCallback(
+		(id) => {
+			const action = isLegacyId(id)
+				? deleteLegacyMessage(id.slice(LEGACY_PREFIX.length))
+				: deleteConversation(id)
+			return dispatch(action).then((result) => {
+				if (result.meta.requestStatus === 'rejected') {
+					setAlertMessage(
+						ERROR_MESSAGES.FAILED_TO_DELETE_CONVERSATION,
+					)
+				}
+			})
+		},
 		[dispatch],
 	)
 
@@ -128,93 +252,55 @@ const Messages = () => {
 		[sendDelete],
 	)
 
-	const visible = messages.filter((message) => message.id !== pendingId)
-
-	const paramId = searchParams.get(PARAM)
-	const isInbox = isWide && (isLoading || visible.length > 0)
-	// A message just deleted from the pane hands over to its neighbour, the next older one where there is one
-	const paramIndex = messages.findIndex((message) => message.id === paramId)
-	const openMessage = isInbox
-		? (visible.find((message) => message.id === paramId) ??
-			(paramIndex === -1
-				? undefined
-				: (visible[paramIndex] ?? visible[paramIndex - 1])) ??
-			visible.find((message) => newIds.includes(message.id)) ??
-			visible[0])
-		: undefined
-	const openId = openMessage?.id ?? null
-
-	// The router renders a navigation as a transition, so this page can still be on screen after the browser has moved on; replacing the entry then would pull the visitor back
-	const openInPane = useCallback(
-		(id) => {
-			const currentKey = window.history.state?.key
-			if (currentKey && currentKey !== location.key) return
-			requestedRef.current = id ?? null
-			setSearchParams(id ? { [PARAM]: id } : {}, { replace: true })
-		},
-		[location.key, setSearchParams],
-	)
-
-	// The message opened on load, or in place of a missing one, replaces the entry, so one Back still leaves the page
-	useEffect(() => {
-		// Until a message this page asked for reaches the URL, the stale param would open the wrong one
-		if (requestedRef.current !== undefined) {
-			if (requestedRef.current !== paramId) return
-			requestedRef.current = undefined
-		}
-		if (!isInbox || isLoading || !openId || openId === paramId) return
-		openInPane(openId)
-	}, [isInbox, isLoading, openId, paramId, openInPane])
-
-	useEffect(() => {
-		reopenRef.current = isWide ? openInPane : null
-		return () => {
-			reopenRef.current = null
-		}
-	}, [isWide, openInPane])
-
-	// The router applies a navigation in a later render, so a target waits until its message is open (or, for the heading, none is left)
 	useEffect(() => {
 		const target = focusTargetRef.current
 		if (!target) return
-		if (target.type === HEADING) {
-			if (visible.length > 0) return
+		if (target.type === 'reply') {
+			if (openId !== target.id) return
+			;(replyRef.current ?? threadHeadingRef.current)?.focus()
+		} else if (target.type === 'heading') {
+			if (openId) return
 			headingRef.current?.focus()
 		} else {
-			if (isInbox && openId !== target.id) return
-			if (target.type === PANE_HEADING) {
-				paneHeadingRef.current?.focus()
-			} else {
-				const item = listRef.current?.querySelector(
-					`[data-message-id="${target.id}"]`,
-				)
-				item?.querySelector(
-					`[data-cy="${MESSAGE_ROW.LINK}"], [data-cy="${MESSAGE_ACTIONS.REPLY}"], [data-cy="${MESSAGE_ACTIONS.DELETE}"]`,
-				)?.focus()
-			}
+			const link = listRef.current?.querySelector(
+				`[data-conversation-id="${target.id}"] a`,
+			)
+			if (!link) return
+			link.focus()
 		}
 		focusTargetRef.current = null
 	})
 
-	const handleDelete = (id) => {
+	const handleSelect = (id) => {
+		focusTargetRef.current = { type: 'reply', id }
+	}
+
+	const handleDelete = () => {
+		const id = openId
 		if (pendingRef.current) sendDelete(pendingRef.current)
 
-		const index = visible.findIndex((message) => message.id === id)
+		const index = visible.findIndex((row) => row.id === id)
 		const next = visible[index + 1] ?? visible[index - 1]
 
-		setFailed((prev) => without(prev, id))
-		focusTargetRef.current = next
-			? { type: ITEM, id: next.id }
-			: { type: HEADING }
 		setPending(id)
-		if (isWide) openInPane(next?.id)
+		if (isWide && next) {
+			focusTargetRef.current = { type: 'reply', id: next.id }
+			openConversation(next.id, { replace: true })
+		} else {
+			focusTargetRef.current = { type: 'heading' }
+			openConversation(null, { replace: true })
+		}
 	}
 
 	const handleUndo = () => {
 		const id = pendingRef.current
-		focusTargetRef.current = { type: ITEM, id }
 		setPending(null)
-		if (isWide) openInPane(id)
+		if (isWide) {
+			focusTargetRef.current = { type: 'reply', id }
+			openConversation(id, { replace: true })
+		} else {
+			focusTargetRef.current = { type: 'row', id }
+		}
 	}
 
 	const handleToastClose = () => {
@@ -223,25 +309,37 @@ const Messages = () => {
 		if (id) sendDelete(id)
 	}
 
+	const handleSend = (message) => {
+		dispatch(sendMessage({ otherId, message }))
+	}
+
 	const handleRetry = (id) => {
-		setRetrying((prev) => ({ ...prev, [id]: true }))
-		sendDelete(id).then(() => setRetrying((prev) => without(prev, id)))
+		const failed = thread?.messages.find((item) => item.id === id)
+		if (!failed) return
+		dispatch(dismissFailedMessage({ cid: openId, id }))
+		dispatch(sendMessage({ otherId, message: failed.message }))
 	}
 
-	const handleSelect = (id) => {
-		focusTargetRef.current = { type: PANE_HEADING, id }
+	if (!isMember) {
+		return (
+			<Navigate
+				to={PATHS.MESSAGES}
+				replace
+			/>
+		)
 	}
 
-	const unreadCount = visible.filter((message) =>
-		newIds.includes(message.id),
-	).length
+	if (!isLoading && isLegacyOpen && !openRow && openId !== pendingId) {
+		return (
+			<Navigate
+				to={PATHS.MESSAGES}
+				replace
+			/>
+		)
+	}
 
-	const alert = alertMessage && (
-		<Alerts
-			message={alertMessage}
-			onClose={() => setAlertMessage(null)}
-		/>
-	)
+	const isEmpty = !isLoading && listed.length === 0
+	const showThread = Boolean(openId) && openId !== pendingId
 
 	const heading = (
 		<h1
@@ -252,140 +350,205 @@ const Messages = () => {
 		</h1>
 	)
 
-	// The inbox head sits 16px above its columns, as the design draws it
-	const statusClasses = cn(
-		'mt-1 text-sm text-text-muted',
-		isInbox ? 'mb-4' : 'mb-3.5',
-	)
-	const status = isLoading ? (
+	const status = (
 		<p
 			role="status"
-			className={statusClasses}
-			data-cy={MESSAGES_PAGE.LOADING}>
-			{GLOBAL.SPINNER_LABEL.MESSAGES}
-		</p>
-	) : (
-		<p
-			role="status"
-			className={statusClasses}
-			data-cy={MESSAGES_PAGE.SUMMARY}>
-			{MESSAGES_CONFIG.SUMMARY(unreadCount, visible.length)}
+			className="mt-1 mb-3 text-sm text-text-muted lg:mb-4"
+			data-cy={isLoading ? MESSAGES_PAGE.LOADING : MESSAGES_PAGE.SUMMARY}>
+			{isLoading
+				? GLOBAL.SPINNER_LABEL.MESSAGES
+				: !isEmpty &&
+					MESSAGES_CONFIG.SUMMARY(unreadCount, listed.length)}
 		</p>
 	)
 
-	const messageProps = (item) => ({
-		id: item.id,
-		senderId: item.senderId,
-		senderName: item.senderName,
-		senderStatus: item.senderStatus,
-		userEmail: item.userEmail,
-		message: item.message,
-		createdAt: item.createdAt,
-		isNew: newIds.includes(item.id),
-	})
-
-	const inbox = (
+	const empty = (
 		<div
-			className={PAGE_LAYOUT.WIDE}
-			data-cy={MESSAGES_PAGE.INBOX}>
-			{alert && <div className="mb-4">{alert}</div>}
-			{heading}
-			{status}
-			<div className={PAGE_LAYOUT.COLUMNS}>
-				{isLoading ? (
-					<MessagesSkeleton isInbox />
+			className="px-3 py-7 text-center"
+			data-cy={MESSAGES_PAGE.EMPTY}>
+			<h2 className="mt-0 mb-1.5 text-xl font-bold">
+				{MESSAGES_CONFIG.EMPTY_TITLE}
+			</h2>
+			<p className="mx-auto mt-0 mb-4 max-w-[30ch] text-text-muted">
+				{MESSAGES_CONFIG.EMPTY_TEXT}
+			</p>
+			<BaseButton
+				isLink
+				modeType="outline"
+				to={PATHS.TRAVELLERS}
+				data-cy={MESSAGES_PAGE.BROWSE_TRAVELLERS}>
+				{MESSAGES_CONFIG.BROWSE_TRAVELLERS}
+			</BaseButton>
+		</div>
+	)
+
+	const listCard = (
+		<div
+			ref={listRef}
+			className={cn(LIST_CARD, showThread && 'max-lg:hidden')}
+			data-cy={MESSAGES_PAGE.LIST_CARD}>
+			{isLoading && (
+				<ConversationSkeleton
+					variant="list"
+					count={
+						isWide
+							? MESSAGES_CONFIG.DESKTOP_LIST_SKELETON_COUNT
+							: MESSAGES_CONFIG.LIST_SKELETON_COUNT
+					}
+				/>
+			)}
+			{isEmpty && empty}
+			{!isLoading && !isEmpty && (
+				<ConversationList
+					conversations={listed}
+					openId={showThread ? openId : null}
+					label={MESSAGES_CONFIG.TITLE}
+					onSelect={handleSelect}
+				/>
+			)}
+		</div>
+	)
+
+	const header = openRow ?? draftRow
+	const threadName =
+		header?.name ??
+		(thread?.otherStatus
+			? senderLabel({
+					senderStatus: thread.otherStatus,
+					senderName: thread.otherName,
+				})
+			: null)
+	const threadStatus = header?.status ?? thread?.otherStatus ?? null
+	const canReply =
+		!isLegacyOpen &&
+		threadStatus !== SENDER_STATUS.FORMER &&
+		(threadStatus !== null || thread?.status === 'failed')
+	const isThreadLoading =
+		!isLegacyOpen &&
+		(isLoading ||
+			!thread ||
+			(thread.status === 'loading' &&
+				thread.status !== 'succeeded' &&
+				thread.messages.length === 0))
+
+	const legacyMessage =
+		isLegacyOpen && openRow
+			? [
+					{
+						id: openRow.legacyId,
+						senderId: null,
+						message: openRow.lastMessage,
+						createdAt: null,
+						status: 'sent',
+					},
+				]
+			: null
+
+	const threadCard = showThread && (
+		<div
+			role="region"
+			aria-label={
+				threadName
+					? MESSAGES_CONFIG.THREAD_LABEL(threadName)
+					: undefined
+			}
+			className={cn(
+				'flex min-h-0 flex-col bg-bg',
+				'max-lg:fixed max-lg:inset-x-0 max-lg:top-20 max-lg:bottom-0 max-lg:z-[1]',
+				'lg:h-[calc(100dvh-15rem)] lg:min-h-[28rem] lg:overflow-hidden',
+				CARD,
+				'max-lg:rounded-none max-lg:border-0 max-lg:shadow-none',
+			)}
+			data-cy={MESSAGES_PAGE.THREAD_CARD}>
+			{/* Below 1024px the thread fills the screen, so its content keeps the list's 640px column */}
+			<div
+				className="mx-auto flex min-h-0 w-full max-w-160 flex-1 flex-col lg:max-w-none"
+				data-cy={MESSAGES_PAGE.THREAD_COLUMN}>
+				{threadName ? (
+					<ThreadHeader
+						name={threadName}
+						status={threadStatus}
+						otherId={otherId}
+						subtitle={subtitleFor({
+							status: threadStatus,
+							place: header?.place ?? thread?.otherPlace,
+						})}
+						backTo={PATHS.MESSAGES}
+						onDelete={handleDelete}
+						headingRef={threadHeadingRef}
+					/>
 				) : (
-					<>
-						<ul
-							ref={listRef}
-							aria-label={MESSAGES_CONFIG.TITLE}
-							className={MESSAGES_LAYOUT.INBOX_LIST}
-							data-cy={MESSAGES_PAGE.INBOX_LIST}>
-							{visible.map((item) => (
-								<MessageRow
-									key={item.id}
-									{...messageProps(item)}
-									isOpen={item.id === openId}
-									onSelect={handleSelect}
-								/>
-							))}
-						</ul>
-						{openMessage && (
-							<MessagePane
-								key={openMessage.id}
-								{...messageProps(openMessage)}
-								headingRef={paneHeadingRef}
-								deleteError={failed[openMessage.id] ?? null}
-								isRetrying={Boolean(retrying[openMessage.id])}
-								onDelete={handleDelete}
-								onRetry={handleRetry}
-							/>
+					<ConversationSkeleton variant="header" />
+				)}
+				{thread?.status === 'failed' && (
+					<div
+						role="alert"
+						className="mx-3 mt-2 flex flex-wrap items-center gap-2.5 rounded-sm border border-danger bg-danger-surface px-3 py-2 text-sm"
+						data-cy={MESSAGES_PAGE.THREAD_ERROR}>
+						<span className="min-w-36 flex-1">
+							{MESSAGES_CONFIG.THREAD_LOAD_ERROR}
+						</span>
+						<button
+							type="button"
+							className="min-h-11 cursor-pointer rounded-pill border-0 bg-transparent px-3 font-sans text-[0.9375rem] font-medium text-danger-text underline underline-offset-4"
+							onClick={() => dispatch(loadThread(openId))}
+							data-cy={MESSAGES_PAGE.THREAD_TRY_AGAIN}>
+							{MESSAGES_CONFIG.TRY_AGAIN}
+						</button>
+					</div>
+				)}
+				<MessageThread
+					key={`thread-${openId}`}
+					messages={legacyMessage ?? thread?.messages ?? []}
+					userId={userId}
+					otherName={threadName ?? MESSAGES_CONFIG.UNKNOWN_TRAVELLER}
+					newFromId={
+						openId in newSince
+							? (thread?.messages.find(
+									(item) =>
+										item.senderId !== userId &&
+										item.createdAt > newSince[openId],
+								)?.id ?? null)
+							: null
+					}
+					isLoading={isThreadLoading}
+					canSayHello={thread?.status !== 'failed'}
+					onRetry={handleRetry}
+					label={MESSAGES_CONFIG.TITLE}
+					className="min-h-0 flex-1"
+				/>
+				{isLegacyOpen && openRow && (
+					<ThreadNote
+						status={SENDER_STATUS.LEGACY}
+						email={openRow.userEmail}
+						message={openRow.lastMessage}
+					/>
+				)}
+				{threadStatus === SENDER_STATUS.FORMER && (
+					<ThreadNote status={SENDER_STATUS.FORMER} />
+				)}
+				{canReply && (
+					<ReplyBox
+						key={`reply-${openId}`}
+						label={MESSAGES_CONFIG.REPLY_LABEL(
+							threadName ?? MESSAGES_CONFIG.UNKNOWN_TRAVELLER,
 						)}
-					</>
+						onSend={handleSend}
+						inputRef={replyRef}
+					/>
 				)}
 			</div>
 		</div>
 	)
 
-	const cards = (
-		<section>
-			<BaseCard>
-				{alert}
-				{heading}
-				{isLoading && (
-					<>
-						{status}
-						<MessagesSkeleton />
-					</>
-				)}
-				{!isLoading && visible.length > 0 && (
-					<>
-						{status}
-						<ul
-							ref={listRef}
-							className={MESSAGES_LAYOUT.CARD_LIST}
-							data-cy={MESSAGES_PAGE.LIST}>
-							{visible.map((item) => (
-								<MessageItem
-									key={item.id}
-									{...messageProps(item)}
-									deleteError={failed[item.id] ?? null}
-									isRetrying={Boolean(retrying[item.id])}
-									onDelete={handleDelete}
-									onRetry={handleRetry}
-								/>
-							))}
-						</ul>
-					</>
-				)}
-				{!isLoading && visible.length === 0 && (
-					<div
-						className="px-1 pt-3 pb-1 text-center"
-						data-cy={MESSAGES_PAGE.EMPTY}>
-						<h2 className="mt-0 mb-1.5 text-xl font-bold">
-							{MESSAGES_CONFIG.EMPTY_TITLE}
-						</h2>
-						<p className="mx-auto mt-0 mb-4 max-w-[30ch] text-text-muted">
-							{MESSAGES_CONFIG.EMPTY_TEXT}
-						</p>
-						<BaseButton
-							isLink
-							modeType="outline"
-							to={PATHS.TRAVELLERS}
-							data-cy={MESSAGES_PAGE.BROWSE_TRAVELLERS}>
-							{MESSAGES_CONFIG.BROWSE_TRAVELLERS}
-						</BaseButton>
-					</div>
-				)}
-			</BaseCard>
-		</section>
-	)
+	// No split until there is a conversation, as drawn
+	const isSplit = !isEmpty
 
 	return (
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className={'mainContainer cardPage text-left'}
+			className="mainContainer cardPage text-left"
 			data-cy="main-container"
 			data-cy-alt="messages-main-container">
 			<title>{`${MESSAGES_CONFIG.TITLE} · ${GLOBAL.SITE_NAME}`}</title>
@@ -399,7 +562,41 @@ const Messages = () => {
 					{error}
 				</BaseDialog>
 			)}
-			{isInbox ? inbox : cards}
+			<div className={PAGE_LAYOUT.WIDE}>
+				{alertMessage && (
+					<div className="mb-4">
+						<Alerts
+							message={alertMessage}
+							onClose={() => setAlertMessage(null)}
+						/>
+					</div>
+				)}
+				<div className={cn(showThread && 'max-lg:sr-only')}>
+					{heading}
+					{status}
+				</div>
+				{isSplit ? (
+					<div className={PAGE_LAYOUT.COLUMNS}>
+						{listCard}
+						{threadCard}
+						{!showThread && isLoading && isWide && (
+							<div
+								aria-hidden="true"
+								className={cn(
+									CARD,
+									'flex h-[calc(100dvh-15rem)] min-h-[28rem] flex-col overflow-hidden bg-bg',
+								)}>
+								<ConversationSkeleton variant="header" />
+								<div className="mt-auto p-3">
+									<ConversationSkeleton variant="thread" />
+								</div>
+							</div>
+						)}
+					</div>
+				) : (
+					<div className="max-w-[32.5rem]">{listCard}</div>
+				)}
+			</div>
 			{pendingId && (
 				<Toast
 					key={pendingId}
