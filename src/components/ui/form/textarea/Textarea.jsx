@@ -7,6 +7,7 @@ import { cn } from '@/utils/cn'
 import {
 	describedBy,
 	fieldClasses,
+	fieldErrorClasses,
 	helpTextClasses,
 	labelClasses,
 	requiredMarkClasses,
@@ -52,6 +53,15 @@ const Textarea = ({
 				{helpText}
 			</p>
 		)}
+		{!isValid && message && (
+			<ErrorMessage
+				id={`${id}-error`}
+				className={fieldErrorClasses}
+				hasIcon
+				data-cy-error={dataCyError}>
+				{message}
+			</ErrorMessage>
+		)}
 		<textarea
 			id={id}
 			value={value}
@@ -67,14 +77,6 @@ const Textarea = ({
 			aria-describedby={describedBy(id, helpText, !isValid && message)}
 			{...rest}
 		/>
-		{!isValid && message && (
-			<ErrorMessage
-				id={`${id}-error`}
-				className="mt-1 text-danger-text"
-				data-cy-error={dataCyError}>
-				{message}
-			</ErrorMessage>
-		)}
 	</div>
 )
 

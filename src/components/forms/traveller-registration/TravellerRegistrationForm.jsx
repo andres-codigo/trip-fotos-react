@@ -29,6 +29,7 @@ import { formatCity, getCityId } from '@/utils/formatCity'
 import { formatTripDays, getTripLength, toIsoDate } from '@/utils/tripDates'
 import { toTripPhotos } from '@/utils/tripPhotos'
 import {
+	fieldErrorClasses,
 	helpTextClasses,
 	labelClasses,
 	requiredMarkClasses,
@@ -297,7 +298,8 @@ const TravellerRegistrationForm = ({
 						<legend className={labelClasses}>
 							{TRIP_DATES_CONFIG.LEGEND}
 						</legend>
-						<div className="grid grid-cols-2 gap-2.5">
+						{/* One date's error must not push its field below the other's, so each field sits at the foot of its column */}
+						<div className="grid grid-cols-2 gap-2.5 [&>div]:flex [&>div]:flex-col [&>div>input]:mt-auto">
 							<Input {...getDateInputProps(TRIP_START)} />
 							<Input {...getDateInputProps(TRIP_END)} />
 						</div>
@@ -340,11 +342,7 @@ const TravellerRegistrationForm = ({
 							onBlur={handleCitiesBlur}
 							statusMessage={citySearchMessage}
 							isValid={formData[CITIES].isValid}
-							describedBy={
-								formData[CITIES].isValid
-									? undefined
-									: 'cities-error'
-							}
+							message={formData[CITIES].message}
 							disabled={isLoading}
 							required
 						/>
@@ -383,21 +381,11 @@ const TravellerRegistrationForm = ({
 								})}
 							</ul>
 						)}
-						{!formData[CITIES].isValid &&
-							formData[CITIES].message && (
-								<>
-									<p
-										id="cities-error"
-										className="mt-1 text-danger-text">
-										{formData[CITIES].message}
-									</p>
-									{renderVisuallyHiddenError(
-										formData[CITIES],
-										'cities-error-hidden',
-										'sr-only',
-									)}
-								</>
-							)}
+						{renderVisuallyHiddenError(
+							formData[CITIES],
+							'cities-error-hidden',
+							'sr-only',
+						)}
 					</div>
 				</div>
 
@@ -427,7 +415,8 @@ const TravellerRegistrationForm = ({
 							{photosError && (
 								<ErrorMessage
 									id={PHOTOS_ERROR_ID}
-									className="m-0 text-danger-text"
+									className={cn(fieldErrorClasses, 'm-0')}
+									hasIcon
 									data-cy="photos-error">
 									{photosError}
 								</ErrorMessage>

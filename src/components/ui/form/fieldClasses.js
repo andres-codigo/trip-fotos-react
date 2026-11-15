@@ -13,3 +13,7 @@ export const describedBy = (id, helpText, hasError) =>
 	[helpText && `${id}-help`, hasError && `${id}-error`]
 		.filter(Boolean)
 		.join(' ') || undefined
+
+// Between the label (and any helper text) and the field, so the error is read before the field
+export const fieldErrorClasses =
+	'-mt-1 mb-2 flex gap-1.5 text-sm font-medium text-danger-text'

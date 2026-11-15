@@ -3,8 +3,11 @@ import PropTypes from 'prop-types'
 
 import { COMBOBOX } from '@/constants/test'
 
+import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
+
 import {
 	fieldClasses,
+	fieldErrorClasses,
 	labelClasses,
 	requiredMarkClasses,
 } from '@/components/ui/form/fieldClasses'
@@ -20,6 +23,7 @@ const Combobox = ({
 	statusMessage = '',
 	placeholder,
 	isValid = true,
+	message = '',
 	describedBy,
 	disabled = false,
 	required = false,
@@ -32,6 +36,8 @@ const Combobox = ({
 	const listboxId = `${id}-listbox`
 	const statusId = `${id}-status`
 	const optionId = (index) => `${id}-option-${index}`
+	const errorId = `${id}-error`
+	const hasError = !isValid && Boolean(message)
 	const showListbox = isOpen && options.length > 0
 
 	useEffect(() => {
@@ -106,6 +112,14 @@ const Combobox = ({
 					</span>
 				)}
 			</label>
+			{hasError && (
+				<ErrorMessage
+					id={errorId}
+					className={fieldErrorClasses}
+					hasIcon>
+					{message}
+				</ErrorMessage>
+			)}
 			<input
 				id={id}
 				type="text"
@@ -122,8 +136,9 @@ const Combobox = ({
 				aria-invalid={!isValid}
 				aria-required={required}
 				aria-describedby={
-					[statusId, describedBy].filter(Boolean).join(' ') ||
-					undefined
+					[statusId, describedBy, hasError && errorId]
+						.filter(Boolean)
+						.join(' ') || undefined
 				}
 				placeholder={placeholder}
 				value={value}
@@ -192,6 +207,7 @@ Combobox.propTypes = {
 	statusMessage: PropTypes.string,
 	placeholder: PropTypes.string,
 	isValid: PropTypes.bool,
+	message: PropTypes.string,
 	describedBy: PropTypes.string,
 	disabled: PropTypes.bool,
 	required: PropTypes.bool,

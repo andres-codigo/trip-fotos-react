@@ -11,6 +11,7 @@ import { cn } from '@/utils/cn'
 import {
 	describedBy,
 	fieldClasses,
+	fieldErrorClasses,
 	helpTextClasses,
 	labelClasses,
 	requiredMarkClasses,
@@ -78,6 +79,15 @@ const Input = ({
 					{helpText}
 				</p>
 			)}
+			{!isValid && message && (
+				<ErrorMessage
+					id={`${id}-error`}
+					className={fieldErrorClasses}
+					hasIcon
+					data-cy-error={dataCyError}>
+					{message}
+				</ErrorMessage>
+			)}
 			{isPassword ? (
 				<div className="relative">
 					{field}
@@ -98,14 +108,6 @@ const Input = ({
 				</div>
 			) : (
 				field
-			)}
-			{!isValid && message && (
-				<ErrorMessage
-					id={`${id}-error`}
-					className="mt-1 text-danger-text"
-					data-cy-error={dataCyError}>
-					{message}
-				</ErrorMessage>
 			)}
 		</div>
 	)

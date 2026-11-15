@@ -175,6 +175,38 @@ describe('<Input />', () => {
 			expect(screen.getByText('*')).toHaveAttribute('aria-hidden', 'true')
 		})
 
+		it('puts the error under the label and helper text, before the field, with a hidden "!" icon', () => {
+			render(
+				<Input
+					id="pw"
+					label="Password"
+					type="password"
+					value=""
+					onChange={() => {}}
+					helpText="At least 6 characters."
+					isValid={false}
+					message="Enter your password."
+				/>,
+			)
+			const label = screen.getByText(/^Password/, { selector: 'label' })
+			const help = screen.getByText('At least 6 characters.')
+			const error = screen.getByRole('alert')
+			const input = screen.getByLabelText(/^Password/, {
+				selector: 'input',
+			})
+
+			const follows = (a, b) =>
+				Boolean(
+					a.compareDocumentPosition(b) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+				)
+			expect(follows(label, help)).toBe(true)
+			expect(follows(help, error)).toBe(true)
+			expect(follows(error, input)).toBe(true)
+			expect(error).toHaveTextContent('!Enter your password.')
+			expect(screen.getByText('!')).toHaveAttribute('aria-hidden', 'true')
+		})
+
 		it('shows and hides a password, naming the button after what it does', () => {
 			render(
 				<Input
