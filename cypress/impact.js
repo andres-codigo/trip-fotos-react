@@ -6,6 +6,9 @@ const AREAS = {
 	authentication: [
 		'src/pages/authentication/',
 		'src/components/forms/user-authentication/',
+		'src/components/forms/verify-email/',
+		'src/components/forms/new-password/',
+		'src/pages/auth-action/',
 		'src/store/slices/authenticationSlice.js',
 	],
 	privacy: ['src/pages/privacy/'],
@@ -56,6 +59,14 @@ export const CAPTURES = {
 	},
 	'auth-form-states': {
 		title: 'captures the log in, sign up and password reset forms in their error and sent states',
+		areas: ['authentication'],
+	},
+	'verify-inbox': {
+		title: 'captures Check your inbox after sign-up, sent, refused, not yet verified, resent and checking',
+		areas: ['authentication'],
+	},
+	'auth-action': {
+		title: 'captures the email-link page: verified, already verified, expired, invalid, network, loading and the password reset states',
 		areas: ['authentication'],
 	},
 	'travellers-detail': {

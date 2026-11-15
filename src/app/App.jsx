@@ -14,7 +14,11 @@ import {
 
 import { PATHS } from '@/constants/ui'
 
-import { selectUserId, tryLogin } from '@/store/slices/authenticationSlice'
+import {
+	selectAwaitingVerification,
+	selectUserId,
+	tryLogin,
+} from '@/store/slices/authenticationSlice'
 import { checkIsTraveller } from '@/store/slices/travellersSlice'
 
 import { conversationId } from '@/utils/conversationId'
@@ -43,6 +47,7 @@ const TravellerDetail = lazy(loadTravellerDetail)
 const EditTrip = lazy(() => import('@/pages/edit-trip/EditTrip'))
 const Messages = lazy(loadMessages)
 const Privacy = lazy(() => import('@/pages/privacy/Privacy'))
+const AuthAction = lazy(() => import('@/pages/auth-action/AuthAction'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
 // The pages the header and tab bar link to (My trip is the detail page), so a tap on one does not wait for its code
@@ -98,6 +103,7 @@ function AppRoutes() {
 		(state) => state.authentication.didAutoLogout,
 	)
 	const userId = useSelector(selectUserId)
+	const awaitingVerification = useSelector(selectAwaitingVerification)
 
 	// Below 1024px the thread screen docks its reply box at the bottom edge, where the tab bar and footer would sit
 	const isThreadScreen = Boolean(
@@ -127,15 +133,25 @@ function AppRoutes() {
 		}
 	}, [didAutoLogout, navigate])
 
-	// A signed-in user has no use for the login form; the login page honours the same redirect target
+	// A signed-in user has no use for the login form, unless sign-up has just swapped it to Check your inbox; the login page honours the same redirect target
 	useEffect(() => {
-		if (isLoggedIn && location.pathname === PATHS.AUTHENTICATION) {
+		if (
+			isLoggedIn &&
+			!awaitingVerification &&
+			location.pathname === PATHS.AUTHENTICATION
+		) {
 			const redirectUrl =
 				new URLSearchParams(location.search).get('redirect') ||
 				PATHS.TRAVELLERS
 			navigate(redirectUrl, { replace: true })
 		}
-	}, [isLoggedIn, location.pathname, location.search, navigate])
+	}, [
+		isLoggedIn,
+		awaitingVerification,
+		location.pathname,
+		location.search,
+		navigate,
+	])
 
 	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
 	useEffect(() => {
@@ -230,6 +246,10 @@ function AppRoutes() {
 								<Messages />
 							</Suspense>
 						}
+					/>
+					<Route
+						path={PATHS.AUTH_ACTION}
+						element={<AuthAction />}
 					/>
 					<Route
 						path={PATHS.PRIVACY}

@@ -15,6 +15,12 @@ import { ERROR_MESSAGES } from '@/constants/errors'
 import authenticationReducer, {
 	login,
 	sendPasswordReset,
+	resendVerification,
+	refreshVerification,
+	startAgain,
+	applyEmailVerification,
+	checkPasswordResetCode,
+	confirmPasswordReset,
 	tryLogin,
 	logout,
 	autoLogout,
@@ -27,14 +33,26 @@ import authenticationReducer, {
 import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
 import {
+	applyActionCode,
+	confirmPasswordReset as confirmFirebasePasswordReset,
 	createUserWithEmailAndPassword,
+	deleteUser,
+	sendEmailVerification,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	signOut,
+	verifyPasswordResetCode,
 } from 'firebase/auth'
 
+import { ACTION_CODE_ERRORS, SESSION_STORAGE_KEYS } from '@/constants/auth'
+
 vi.mock('firebase/auth', () => ({
+	applyActionCode: vi.fn(),
+	confirmPasswordReset: vi.fn(),
 	createUserWithEmailAndPassword: vi.fn(),
+	deleteUser: vi.fn(),
+	sendEmailVerification: vi.fn(() => Promise.resolve()),
+	verifyPasswordResetCode: vi.fn(),
 	sendPasswordResetEmail: vi.fn(),
 	signInWithEmailAndPassword: vi.fn(),
 	signOut: vi.fn(() => Promise.resolve()),
@@ -133,6 +151,8 @@ describe('authenticationSlice', () => {
 				userName: null,
 				userEmail: null,
 				isAdmin: false,
+				emailVerified: false,
+				awaitingVerification: false,
 				didAutoLogout: false,
 				status: 'idle',
 				error: null,
@@ -163,6 +183,8 @@ describe('authenticationSlice', () => {
 				userName: null,
 				userEmail: null,
 				isAdmin: false,
+				emailVerified: false,
+				awaitingVerification: false,
 				didAutoLogout: false,
 				status: 'idle',
 				error: null,
@@ -868,5 +890,227 @@ describe('authenticationSlice', () => {
 				expect(result.payload).toBe(message)
 			},
 		)
+	})
+
+	describe('email verification', () => {
+		const sessionUser = (overrides = {}) => ({
+			uid: MOCK_KEYS.LOCAL_ID,
+			email: MOCK_KEYS.EMAIL,
+			displayName: '',
+			emailVerified: false,
+			reload: vi.fn(() => Promise.resolve()),
+			getIdTokenResult: vi.fn().mockResolvedValue({
+				token: 'fresh-token',
+				expirationTime: new Date(Date.now() + 3600000).toISOString(),
+				claims: {},
+			}),
+			...overrides,
+		})
+
+		beforeEach(() => {
+			localStorage.getItem.mockImplementation((key) =>
+				key === SESSION_STORAGE_KEYS.USER_ID
+					? MOCK_KEYS.LOCAL_ID
+					: null,
+			)
+		})
+
+		it('sends the verification email on sign-up and waits on Check your inbox', async () => {
+			const user = sessionUser()
+			createUserWithEmailAndPassword.mockResolvedValueOnce({ user })
+
+			await store.dispatch(
+				login({
+					mode: API_DATABASE.AUTH_SIGNUP_MODE,
+					email: MOCK_KEYS.EMAIL,
+					password: MOCK_KEYS.PASSWORD,
+				}),
+			)
+
+			expect(sendEmailVerification).toHaveBeenCalledWith(user)
+			const state = store.getState().authentication
+			expect(state.awaitingVerification).toBe(true)
+			expect(state.emailVerified).toBe(false)
+		})
+
+		it('still signs up when the first email fails, so Check your inbox can send another', async () => {
+			createUserWithEmailAndPassword.mockResolvedValueOnce({
+				user: sessionUser(),
+			})
+			sendEmailVerification.mockRejectedValueOnce({
+				code: 'auth/network-request-failed',
+			})
+
+			const result = await store.dispatch(
+				login({
+					mode: API_DATABASE.AUTH_SIGNUP_MODE,
+					email: MOCK_KEYS.EMAIL,
+					password: MOCK_KEYS.PASSWORD,
+				}),
+			)
+
+			expect(login.fulfilled.match(result)).toBe(true)
+		})
+
+		it('sends no email on log in', async () => {
+			signInWithEmailAndPassword.mockResolvedValueOnce({
+				user: sessionUser({ emailVerified: true }),
+			})
+
+			await store.dispatch(
+				login({
+					mode: API_DATABASE.AUTH_LOGIN_MODE,
+					email: MOCK_KEYS.EMAIL,
+					password: MOCK_KEYS.PASSWORD,
+				}),
+			)
+
+			expect(sendEmailVerification).not.toHaveBeenCalled()
+			const state = store.getState().authentication
+			expect(state.awaitingVerification).toBe(false)
+			expect(state.emailVerified).toBe(true)
+		})
+
+		it.each([
+			['auth/too-many-requests', ERROR_MESSAGES.TOO_MANY_EMAILS],
+			[
+				'auth/network-request-failed',
+				ERROR_MESSAGES.VERIFICATION_EMAIL_FAILED,
+			],
+		])('rejects a resend with %s as a message', async (code, message) => {
+			firebaseAuth.currentUser = sessionUser()
+			sendEmailVerification.mockRejectedValueOnce({ code })
+
+			const result = await store.dispatch(resendVerification())
+
+			expect(result.payload).toBe(message)
+		})
+
+		it('refreshes the token once the address is verified, so the rules see it', async () => {
+			const user = sessionUser()
+			user.reload.mockImplementationOnce(async () => {
+				user.emailVerified = true
+			})
+			firebaseAuth.currentUser = user
+
+			const result = await store.dispatch(refreshVerification())
+
+			expect(user.getIdTokenResult).toHaveBeenCalledWith(true)
+			expect(result.payload.emailVerified).toBe(true)
+			const state = store.getState().authentication
+			expect(state.emailVerified).toBe(true)
+			expect(state.token).toBe('fresh-token')
+			expect(localStorage.setItem).toHaveBeenCalledWith(
+				SESSION_STORAGE_KEYS.TOKEN,
+				'fresh-token',
+			)
+		})
+
+		it('leaves the token alone while the address is unverified', async () => {
+			const user = sessionUser()
+			firebaseAuth.currentUser = user
+
+			const result = await store.dispatch(refreshVerification())
+
+			expect(result.payload).toEqual({ emailVerified: false })
+			expect(user.getIdTokenResult).not.toHaveBeenCalled()
+		})
+
+		it('deletes the new account and signs out on Start again', async () => {
+			const user = sessionUser()
+			firebaseAuth.currentUser = user
+			deleteUser.mockResolvedValueOnce()
+
+			const result = await store.dispatch(startAgain())
+
+			expect(deleteUser).toHaveBeenCalledWith(user)
+			expect(localStorage.removeItem).toHaveBeenCalledWith(
+				SESSION_STORAGE_KEYS.TOKEN,
+			)
+			expect(result.payload).toBe(MOCK_KEYS.EMAIL)
+		})
+
+		it('applies the link and refreshes a signed-in session', async () => {
+			const user = sessionUser()
+			user.reload.mockImplementation(async () => {
+				user.emailVerified = true
+			})
+			firebaseAuth.currentUser = user
+			applyActionCode.mockResolvedValueOnce()
+
+			const result = await store.dispatch(applyEmailVerification('code'))
+
+			expect(applyActionCode).toHaveBeenCalledWith(firebaseAuth, 'code')
+			expect(result.payload).toEqual({
+				signedIn: true,
+				alreadyVerified: false,
+			})
+			expect(store.getState().authentication.emailVerified).toBe(true)
+		})
+
+		it('applies the link signed out, on another device', async () => {
+			firebaseAuth.currentUser = null
+			applyActionCode.mockResolvedValueOnce()
+
+			const result = await store.dispatch(applyEmailVerification('code'))
+
+			expect(result.payload).toEqual({
+				signedIn: false,
+				alreadyVerified: false,
+			})
+		})
+
+		it('treats a used link as done when the account is already verified', async () => {
+			firebaseAuth.currentUser = sessionUser({ emailVerified: true })
+			applyActionCode.mockRejectedValueOnce({
+				code: 'auth/invalid-action-code',
+			})
+
+			const result = await store.dispatch(applyEmailVerification('code'))
+
+			expect(result.payload).toEqual({
+				signedIn: true,
+				alreadyVerified: true,
+			})
+		})
+
+		it.each([
+			['auth/expired-action-code', ACTION_CODE_ERRORS.EXPIRED],
+			['auth/invalid-action-code', ACTION_CODE_ERRORS.EXPIRED],
+			['auth/network-request-failed', ACTION_CODE_ERRORS.NETWORK],
+			['auth/internal-error', ACTION_CODE_ERRORS.INVALID],
+		])('rejects a failed link (%s) with a reason', async (code, reason) => {
+			firebaseAuth.currentUser = sessionUser()
+			applyActionCode.mockRejectedValueOnce({ code })
+
+			const result = await store.dispatch(applyEmailVerification('code'))
+
+			expect(result.payload).toBe(reason)
+		})
+
+		it('resolves a reset code to its address', async () => {
+			verifyPasswordResetCode.mockResolvedValueOnce(MOCK_KEYS.EMAIL)
+
+			const result = await store.dispatch(checkPasswordResetCode('code'))
+
+			expect(result.payload).toBe(MOCK_KEYS.EMAIL)
+		})
+
+		it('rejects a weak new password with a reason the form shows', async () => {
+			confirmFirebasePasswordReset.mockRejectedValueOnce({
+				code: 'auth/weak-password',
+			})
+
+			const result = await store.dispatch(
+				confirmPasswordReset({ code: 'code', password: 'abc' }),
+			)
+
+			expect(confirmFirebasePasswordReset).toHaveBeenCalledWith(
+				firebaseAuth,
+				'code',
+				'abc',
+			)
+			expect(result.payload).toBe(ACTION_CODE_ERRORS.WEAK_PASSWORD)
+		})
 	})
 })

@@ -18,6 +18,7 @@ const MY_TRIP_PATH = `${PATHS.TRAVELLERS}/${USER_ID}`
 
 const createStore = ({
 	token = 'token',
+	awaitingVerification = false,
 	isTraveller = true,
 	messages = [],
 } = {}) => {
@@ -39,6 +40,7 @@ const createStore = ({
 			authentication: {
 				...initial.authentication,
 				token,
+				awaitingVerification,
 				userId: USER_ID,
 			},
 			travellers: { ...initial.travellers, isTraveller },
@@ -62,6 +64,12 @@ const getNav = () =>
 describe('<TabBar />', () => {
 	it('renders nothing when the user is not logged in', () => {
 		const { container } = renderTabBar({ token: null })
+
+		expect(container).toBeEmptyDOMElement()
+	})
+
+	it('renders nothing while a new account is on Check your inbox', () => {
+		const { container } = renderTabBar({ awaitingVerification: true })
 
 		expect(container).toBeEmptyDOMElement()
 	})

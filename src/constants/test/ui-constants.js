@@ -79,6 +79,10 @@ export const INPUT = Object.freeze({
 	PASSWORD_TOGGLE: 'password-toggle',
 })
 
+export const INLINE_ALERT = Object.freeze({
+	ID: 'inline-alert',
+})
+
 export const PROGRESS = Object.freeze({
 	ID: 'base-progress',
 	BAR: 'base-progress-bar',
@@ -370,4 +374,39 @@ export const PASSWORD_RESET_FORM = Object.freeze({
 	SENT_MESSAGE: 'password-reset-sent-message',
 	SEND_AGAIN: 'password-reset-send-again',
 	BACK: 'password-reset-back',
+})
+
+export const NEW_PASSWORD_FORM = Object.freeze({
+	ROOT: 'new-password-form',
+	TITLE: 'new-password-title',
+	FOR: 'new-password-for',
+	PASSWORD_INPUT: 'new-password-input',
+	PASSWORD_ERROR: 'new-password-error',
+	SAVE_PASSWORD: 'new-password-save-password',
+})
+
+export const AUTH_ACTION_PAGE = Object.freeze({
+	VIEW: 'auth-action-view',
+	TITLE: 'auth-action-title',
+	TICK: 'auth-action-tick',
+	TEXT: 'auth-action-text',
+	ALERT: 'auth-action-alert',
+	EXPIRED_SENT: 'auth-action-expired-sent',
+	REGISTER: 'auth-action-register',
+	GO_TO_TRAVELLERS: 'auth-action-go-to-travellers',
+	LOG_IN: 'auth-action-log-in',
+	SEND_NEW_LINK: 'auth-action-send-new-link',
+	TRY_AGAIN: 'auth-action-try-again',
+	RESET_PASSWORD: 'auth-action-reset-password',
+})
+
+export const VERIFY_EMAIL_INBOX = Object.freeze({
+	ROOT: 'verify-email-inbox',
+	TITLE: 'verify-email-inbox-title',
+	STATUS: 'verify-email-inbox-status',
+	ERROR: 'verify-email-inbox-error',
+	HINT: 'verify-email-inbox-hint',
+	SEND_AGAIN: 'verify-email-inbox-send-again',
+	CHECK: 'verify-email-inbox-check',
+	START_AGAIN: 'verify-email-inbox-start-again',
 })

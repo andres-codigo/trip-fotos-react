@@ -20,6 +20,13 @@ export const ERROR_MESSAGES = Object.freeze({
 		'Too many unsuccessful login attempts. Please try again later.',
 	PASSWORD_RESET_FAILED:
 		'The link could not be sent. Check your connection and try again.',
+	TOO_MANY_EMAILS: 'Too many emails sent. Wait a few minutes and try again.',
+	VERIFICATION_EMAIL_FAILED:
+		'The link could not be sent. Check your connection and try again.',
+	VERIFICATION_CHECK_FAILED:
+		'We could not check your email. Check your connection and try again.',
+	START_AGAIN_FAILED:
+		'We could not start again. Check your connection and try again.',
 
 	// Traveller-specific errors
 	FAILED_TO_REGISTER_TRAVELLER:

@@ -21,8 +21,11 @@ const DATA_CY_BY_KEY = Object.freeze({
 })
 
 function TabBar({ isTraveller, className }) {
-	const isLoggedIn = useSelector((state) =>
-		Boolean(state.authentication.token),
+	// Hidden on Check your inbox, as the header's places are
+	const isLoggedIn = useSelector(
+		(state) =>
+			Boolean(state.authentication.token) &&
+			!state.authentication.awaitingVerification,
 	)
 	const items = usePrimaryNavItems({ isTraveller })
 
