@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.10...v0.28.0) (2026-11-15)
+
+
+### Features
+
+* email verification on sign-up and a branded auth action page ([#766](https://github.com/andres-codigo/trip-fotos-react/issues/766)) ([9a202fc](https://github.com/andres-codigo/trip-fotos-react/commit/9a202fc035379cf5490034ca051a42533771983b))
+
 ## [0.27.10](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.9...v0.27.10) (2026-11-15)
 
 
