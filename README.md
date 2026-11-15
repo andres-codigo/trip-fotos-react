@@ -288,6 +288,8 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run messages:migrate
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run messages:migrate -- --write
 ```
 
+Rerunning it is safe: a traveller whose conversation entry already holds a newer message keeps it.
+
 ### Environment Variables
 
 Copy [`.env.example`](.env.example) to `.env` and fill in the values from your Firebase web app's `firebaseConfig`:

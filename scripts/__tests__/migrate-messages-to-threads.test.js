@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { toThreads } from '../migrate-messages-to-threads.mjs'
+import { summarise, toThreads } from '../migrate-messages-to-threads.mjs'
 
 const ME = 'uid-a'
 const OTHER = 'uid-b'
@@ -97,7 +97,45 @@ describe('toThreads', () => {
 		).toEqual([])
 	})
 
+	it('leaves an entry that already holds a newer message, updating the member whose entry is older', () => {
+		const update = toThreads(
+			{ [ME]: { m1: { senderId: OTHER, message: 'Hi', createdAt: 10 } } },
+			{
+				[ME]: { [CID]: { lastAt: 20 } },
+				[OTHER]: { [CID]: { lastAt: 5 } },
+			},
+		)
+
+		expect(
+			Object.keys(update).filter((path) =>
+				path.startsWith(`userConversations/${ME}/`),
+			),
+		).toEqual([])
+		expect(update[`userConversations/${OTHER}/${CID}/lastAt`]).toBe(10)
+		expect(update[`conversations/${CID}/messages/m1`]).toBeDefined()
+	})
+
 	it('removes /messages in the same update, even when it is empty', () => {
 		expect(toThreads(null)).toEqual({ messages: null })
+	})
+})
+
+describe('summarise', () => {
+	it('counts one entry per member, read or not', () => {
+		const update = toThreads({
+			[ME]: {
+				m1: {
+					senderId: OTHER,
+					message: 'Hi',
+					createdAt: 10,
+					read: false,
+				},
+				m2: { userEmail: 'old@example.com', message: 'Hello' },
+			},
+		})
+
+		expect(summarise(update)).toBe(
+			'1 messages into 2 conversation entries, 1 email-only messages',
+		)
 	})
 })

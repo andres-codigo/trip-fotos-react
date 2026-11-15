@@ -27,8 +27,10 @@ const ROOT_URL = '**/.json*'
 const ME = () => TEST_USERS.TRAVELLER.ID
 const OTHER = () => TEST_USERS.OTHER_TRAVELLER.ID
 const CID = () => conversationId(ME(), OTHER())
+const ME_NAME = 'John Doe'
 const OTHER_NAME = 'Jane Smith'
 const REPLY = 'Walk up and take the tram down.'
+const ANSWER = 'Will do, thanks!'
 
 const visitMessages = (path = PATHS.MESSAGES) => {
 	cy.intercept(API_DATABASE.GET, LIST_URL).as('loadConversations')
@@ -36,14 +38,11 @@ const visitMessages = (path = PATHS.MESSAGES) => {
 	cy.wait('@loadConversations', { timeout: REQUEST_TIMEOUT })
 }
 
-const openOtherThread = () => {
+const openOtherThread = (length = MOCK_THREADS.TWO_SIDED.length) => {
 	visitMessages()
 	cy.contains(CONVERSATION_ROW_SELECTORS.LINK, OTHER_NAME).click()
 	cy.location('pathname').should('eq', `${PATHS.MESSAGES}/${CID()}`)
-	cy.get(MESSAGE_BUBBLE_SELECTORS.ROOT).should(
-		'have.length',
-		MOCK_THREADS.TWO_SIDED.length,
-	)
+	cy.get(MESSAGE_BUBBLE_SELECTORS.ROOT).should('have.length', length)
 }
 
 // Signs in as the seeded traveller: an unread two-sided thread with the other traveller, a read one from a former traveller, and one email-only message
@@ -96,7 +95,8 @@ describe('Logged in > Messages page', () => {
 		cy.get(MESSAGE_THREAD_SELECTORS.NEW_DIVIDER).should('not.exist')
 	})
 
-	it('sends a reply that both members can read', () => {
+	it('lets the two travellers message back and forth, each seeing the whole thread', () => {
+		const total = MOCK_THREADS.TWO_SIDED.length
 		cy.intercept(API_DATABASE.PATCH, ROOT_URL).as('send')
 		openOtherThread()
 
@@ -106,14 +106,62 @@ describe('Logged in > Messages page', () => {
 			.its('response.statusCode')
 			.should('eq', 200)
 		cy.get(REPLY_BOX_SELECTORS.INPUT).should('have.value', '')
-		cy.contains(MESSAGE_BUBBLE_SELECTORS.ROOT, REPLY).should('be.visible')
-
-		cy.reload()
-		cy.contains(MESSAGE_BUBBLE_SELECTORS.ROOT, REPLY).should('be.visible')
+		cy.contains(MESSAGE_BUBBLE_SELECTORS.ROOT, REPLY)
+			.should('be.visible')
+			.and('have.attr', 'data-mine')
 		cy.visit(PATHS.MESSAGES)
 		cy.contains(
 			CONVERSATION_ROW_SELECTORS.PREVIEW,
 			`${MESSAGES_CONFIG.YOU_PREFIX}${REPLY}`,
+		)
+
+		// The other traveller sees the reply unread, from the first, and answers it
+		performLogin(
+			TEST_USERS.OTHER_TRAVELLER.EMAIL,
+			TEST_USERS.OTHER_TRAVELLER.PASSWORD,
+			PATHS.TRAVELLERS,
+		)
+		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES, {
+			timeout: REQUEST_TIMEOUT,
+		}).should('have.text', '1')
+		visitMessages()
+		cy.contains(CONVERSATION_ROW_SELECTORS.PREVIEW, REPLY)
+		cy.contains(CONVERSATION_ROW_SELECTORS.LINK, ME_NAME).click()
+		cy.location('pathname').should('eq', `${PATHS.MESSAGES}/${CID()}`)
+		cy.get(MESSAGE_BUBBLE_SELECTORS.ROOT).should('have.length', total + 1)
+		cy.contains(MESSAGE_BUBBLE_SELECTORS.ROOT, REPLY).should(
+			'not.have.attr',
+			'data-mine',
+		)
+		cy.get(MESSAGE_THREAD_SELECTORS.NEW_DIVIDER).should('be.visible')
+		cy.get(REPLY_BOX_SELECTORS.INPUT).type(ANSWER)
+		cy.get(REPLY_BOX_SELECTORS.SEND).click()
+		cy.wait('@send', { timeout: REQUEST_TIMEOUT })
+			.its('response.statusCode')
+			.should('eq', 200)
+		cy.contains(MESSAGE_BUBBLE_SELECTORS.ROOT, ANSWER).should(
+			'have.attr',
+			'data-mine',
+		)
+
+		// Back as the first traveller, the answer closes the thread in order
+		performLogin(
+			TEST_USERS.TRAVELLER.EMAIL,
+			TEST_USERS.TRAVELLER.PASSWORD,
+			PATHS.TRAVELLERS,
+		)
+		openOtherThread(total + 2)
+		// Each text starts with a screen-reader prefix (sender and time), so only the endings are compared
+		cy.get(MESSAGE_BUBBLE_SELECTORS.TEXT).then(($texts) => {
+			const [reply, answer] = [...$texts]
+				.slice(-2)
+				.map((text) => text.textContent)
+			expect(reply.endsWith(REPLY), reply).to.equal(true)
+			expect(answer.endsWith(ANSWER), answer).to.equal(true)
+		})
+		cy.contains(MESSAGE_BUBBLE_SELECTORS.ROOT, ANSWER).should(
+			'not.have.attr',
+			'data-mine',
 		)
 	})
 
