@@ -13,7 +13,6 @@ import { ERROR_MESSAGES } from '@/constants/errors'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import {
-	authActions,
 	login,
 	refreshVerification,
 	resendVerification,
@@ -175,11 +174,9 @@ const Authentication = () => {
 	const redirectTarget = (fallback) =>
 		new URLSearchParams(location.search).get('redirect') || fallback
 
-	// A new account's next step is its trip, unless it came here from a page it asked for
-	const continueVerified = () => {
+	// A new account's next step is its trip, unless it came here from a page it asked for. App clears Check your inbox once the page has changed; clearing it here first would let the login page's own redirect send the traveller to Travellers instead
+	const continueVerified = () =>
 		navigate(redirectTarget(PATHS.REGISTER), { replace: true })
-		dispatch(authActions.clearAwaitingVerification())
-	}
 
 	const checkVerified = async ({ quiet = false } = {}) => {
 		if (!quiet) setVerify((v) => ({ ...v, isChecking: true, error: '' }))

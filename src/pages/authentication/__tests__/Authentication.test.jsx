@@ -750,7 +750,8 @@ describe('<Authentication />', () => {
 					replace: true,
 				}),
 			)
-			expect(authActions.clearAwaitingVerification).toHaveBeenCalled()
+			// App clears it once the page has changed, so the login page's own redirect cannot win
+			expect(authActions.clearAwaitingVerification).not.toHaveBeenCalled()
 		})
 
 		it('says so when the address is not verified yet', async () => {

@@ -8,6 +8,7 @@ import {
 } from '../../../src/constants/auth'
 import { IDENTITY_TOOLKIT_ERRORS } from '../../../src/constants/test/mock-data/mock-api'
 import {
+	ACCOUNT_MENU_SELECTORS,
 	AUTHENTICATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
 	PASSWORD_RESET_FORM_SELECTORS,
@@ -139,6 +140,73 @@ describe('Sign-up journey', () => {
 	beforeEach(() => {
 		cy.resetEmulators()
 		cy.visit(loginUrl)
+	})
+
+	const signUp = (email) => {
+		cy.interceptLogin(
+			API_DATABASE.POST,
+			`${API_DATABASE.URL}signUp?key=${API_DATABASE.KEY}`,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK).click()
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(email)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
+			TEST_USERS.STANDARD.PASSWORD,
+		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+		cy.get('h1', { timeout: REQUEST_TIMEOUT }).should(
+			'have.text',
+			VERIFY_EMAIL_CONFIG.TITLE,
+		)
+	}
+
+	// Firebase's default email page verifies the address in another tab, as production does until the custom action URL is set
+	const verifyElsewhere = (email) =>
+		cy
+			.request(
+				`${new URL(API_DATABASE.URL).origin}/emulator/v1/projects/${Cypress.expose('FIREBASE_PROJECT_ID')}/oobCodes`,
+			)
+			.then(({ body }) => {
+				const { oobCode } = body.oobCodes.find(
+					(code) =>
+						code.email === email &&
+						code.requestType === 'VERIFY_EMAIL',
+				)
+				cy.request(
+					API_DATABASE.POST,
+					`${API_DATABASE.URL}update?key=${API_DATABASE.KEY}`,
+					{ oobCode },
+				)
+			})
+
+	const shouldBeSignedInOnRegister = () => {
+		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
+			'eq',
+			PATHS.REGISTER,
+		)
+		cy.get(ACCOUNT_MENU_SELECTORS.BUTTON, {
+			timeout: REQUEST_TIMEOUT,
+		}).should('be.visible')
+	}
+
+	it("continues to Register signed in when I've verified finds the address verified", () => {
+		const email = `checked-${Date.now()}@example.com`
+		signUp(email)
+		verifyElsewhere(email)
+
+		cy.contains('button', VERIFY_EMAIL_CONFIG.CHECK).click()
+
+		shouldBeSignedInOnRegister()
+	})
+
+	it("lands signed in on Register from the default email page's Continue button", () => {
+		const email = `continued-${Date.now()}@example.com`
+		signUp(email)
+		verifyElsewhere(email)
+
+		cy.visit(BASE_URL_CYPRESS + PATHS.REGISTER)
+
+		shouldBeSignedInOnRegister()
 	})
 
 	it('signs a new user up, verifies the email from its link and continues to Register', () => {

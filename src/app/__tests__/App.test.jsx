@@ -49,6 +49,11 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 	tryLogin: () => ({
 		type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN_ASYNC.PENDING,
 	}),
+	authActions: {
+		clearAwaitingVerification: () => ({
+			type: 'authentication/clearAwaitingVerification',
+		}),
+	},
 	selectUserId: (state) => state.authentication.userId,
 	selectAwaitingVerification: (state) =>
 		state.authentication.awaitingVerification,
@@ -367,6 +372,41 @@ describe('App', () => {
 	})
 
 	describe('Behaviour tests', () => {
+		// The flag is persisted, so a new tab from the verification email's Continue button starts with it set
+		it.each([PATHS.MESSAGES, PATHS.TRAVELLERS])(
+			'clears Check your inbox on %s',
+			async (pathname) => {
+				const dispatch = vi.fn()
+				useDispatchMock.mockReturnValue(dispatch)
+				setAuthState('token', false, 'user-1', true)
+				vi.spyOn(router, 'useLocation').mockReturnValue({ pathname })
+
+				renderWithRoute(pathname)
+
+				await waitFor(() =>
+					expect(dispatch).toHaveBeenCalledWith({
+						type: 'authentication/clearAwaitingVerification',
+					}),
+				)
+			},
+		)
+
+		it('keeps Check your inbox on the login page', async () => {
+			const dispatch = vi.fn()
+			useDispatchMock.mockReturnValue(dispatch)
+			setAuthState('token', false, 'user-1', true)
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTHENTICATION,
+			})
+
+			renderWithRoute(PATHS.AUTHENTICATION)
+
+			await waitFor(() => expect(dispatch).toHaveBeenCalled())
+			expect(dispatch).not.toHaveBeenCalledWith({
+				type: 'authentication/clearAwaitingVerification',
+			})
+		})
+
 		it('redirects to /authentication if not logged in and on protected route', async () => {
 			setAuthState(null, false)
 
