@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.5](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.4...v0.28.5) (2026-11-15)
+
+
+### Bug Fixes
+
+* wait-for-ci reports a pass while a workflow's real run is still going ([#784](https://github.com/andres-codigo/trip-fotos-react/issues/784)) ([28896ae](https://github.com/andres-codigo/trip-fotos-react/commit/28896aead937e833f27584a15ad74294f0e72772))
+
 ## [0.28.4](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.3...v0.28.4) (2026-11-15)
 
 
