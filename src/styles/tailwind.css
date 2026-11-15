@@ -31,6 +31,8 @@
 	--on-accent: #14130f;
 	--accent-text: #a9c98a;
 	--header: #1b1a16;
+	/* Nav item hover fill on header: 3.03:1 on header, on-header text 4.74:1 on it */
+	--header-active: #5c6b4a;
 	--on-header: #efe9da;
 	--on-header-hover: #a9c98a;
 	--focus: #fff3c4;
@@ -78,6 +80,7 @@
 	--color-on-accent: var(--on-accent);
 	--color-accent-text: var(--accent-text);
 	--color-header: var(--header);
+	--color-header-active: var(--header-active);
 	--color-on-header: var(--on-header);
 	--color-on-header-hover: var(--on-header-hover);
 	--color-focus: var(--focus);

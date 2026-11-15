@@ -2137,6 +2137,15 @@ describe(`UI check capture (${LABEL})`, () => {
 						: TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MY_TRIP
 				forcePseudo(place, ['hover'], { scroll: false })
 				shot(`nav-hover-${width}`, { capture: 'viewport' })
+				// The current place hovered: its bar stays and its label takes on-header on the header-active fill
+				const current =
+					width <= 768
+						? TAB_BAR_SELECTORS.TRAVELLERS
+						: TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_TRAVELLERS
+				forcePseudo(place, [], { scroll: false })
+				forcePseudo(current, ['hover'], { scroll: false })
+				shot(`nav-hover-current-${width}`, { capture: 'viewport' })
+				forcePseudo(current, [], { scroll: false })
 				forcePseudo(place, ['focus', 'focus-visible'], {
 					scroll: false,
 				})
