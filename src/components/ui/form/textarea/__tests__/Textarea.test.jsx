@@ -102,6 +102,35 @@ describe('<Textarea />', () => {
 			expect(alert).toHaveAttribute('data-cy-error', 'cy-notes-error')
 		})
 
+		it('puts the error under the label and helper text, before the textarea, with a hidden "!" icon', () => {
+			renderTextarea({
+				label: 'About your trip',
+				helpText: 'A line or two.',
+				isValid: false,
+				message: 'Tell other travellers about your trip.',
+			})
+			const label = screen.getByText(/^About your trip/, {
+				selector: 'label',
+			})
+			const help = screen.getByText('A line or two.')
+			const error = screen.getByRole('alert')
+			const textarea = screen.getByRole('textbox')
+
+			const follows = (a, b) =>
+				Boolean(
+					a.compareDocumentPosition(b) &
+					Node.DOCUMENT_POSITION_FOLLOWING,
+				)
+			expect(follows(label, help)).toBe(true)
+			expect(follows(help, error)).toBe(true)
+			expect(follows(error, textarea)).toBe(true)
+			expect(screen.getByText('!')).toHaveAttribute('aria-hidden', 'true')
+			expect(textarea).toHaveAttribute(
+				'aria-describedby',
+				'notes-help notes-error',
+			)
+		})
+
 		it('shows no alert when invalid without a message', () => {
 			renderTextarea({ isValid: false })
 

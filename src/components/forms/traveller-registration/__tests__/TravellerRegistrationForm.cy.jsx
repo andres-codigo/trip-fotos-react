@@ -256,6 +256,28 @@ describe('<TravellerRegistrationForm />', () => {
 			)
 		})
 
+		it('keeps From and To on one line when only one has an error, at mobile and desktop widths', () => {
+			const { TRIP_START_INPUT, TRIP_END_INPUT } =
+				TRAVELLER_REGISTRATION_FORM_SELECTORS
+			;[390, 1280].forEach((width) => {
+				cy.viewport(width, 900)
+				render()
+				cy.get(TRIP_START_INPUT).type('2025-03-19')
+				cy.get(TRIP_END_INPUT).type('2025-03-12').blur()
+				cy.contains(VALIDATION_MESSAGES.TRIP_END_BEFORE_START).should(
+					'be.visible',
+				)
+				cy.get(TRIP_START_INPUT).then(([from]) => {
+					cy.get(TRIP_END_INPUT).then(([to]) => {
+						expect(to.getBoundingClientRect().top).to.be.closeTo(
+							from.getBoundingClientRect().top,
+							1,
+						)
+					})
+				})
+			})
+		})
+
 		it('refuses a trip date in the future, and caps the calendar at today', () => {
 			render()
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_START_INPUT)

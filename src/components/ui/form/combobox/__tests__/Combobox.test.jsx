@@ -158,6 +158,35 @@ describe('<Combobox />', () => {
 		expect(input).toHaveAttribute('aria-required', 'true')
 	})
 
+	it('shows its own error under the label, before the input, with a hidden "!" icon', () => {
+		render(
+			<Harness
+				statusMessage="2 cities found."
+				isValid={false}
+				message="Add at least one city."
+			/>,
+		)
+		const label = screen.getByText(/^Search for a city/, {
+			selector: 'label',
+		})
+		const error = screen.getByRole('alert')
+		const input = getInput()
+
+		expect(error).toHaveTextContent('Add at least one city.')
+		expect(
+			label.compareDocumentPosition(error) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy()
+		expect(
+			error.compareDocumentPosition(input) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy()
+		expect(screen.getByText('!')).toHaveAttribute('aria-hidden', 'true')
+		expect(input.getAttribute('aria-describedby')).toBe(
+			`${screen.getByTestId(COMBOBOX.STATUS).id} ${error.id}`,
+		)
+	})
+
 	it('marks a required field visually and focuses the input from its label', () => {
 		render(<Harness required />)
 		const label = screen.getByText('Search for a city', { exact: false })

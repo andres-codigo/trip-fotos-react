@@ -1643,6 +1643,22 @@ describe(`UI check capture (${LABEL})`, () => {
 				freezeAnimation()
 				shot(`register-errors-${width}`)
 
+				// Each summary link focuses its own field, the error now sitting between its label and the field
+				const { FIRST_NAME_INPUT, TRIP_START_INPUT } =
+					TRAVELLER_REGISTRATION_FORM_SELECTORS
+				cy.get(ERROR_SUMMARY_SELECTORS.LINK).should('have.length', 7)
+				cy.get(ERROR_SUMMARY_SELECTORS.LINK).eq(3).click()
+				cy.get(TRIP_START_INPUT).should('have.focus')
+				cy.get(ERROR_SUMMARY_SELECTORS.LINK).eq(6).click()
+				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).should(
+					'have.focus',
+				)
+				cy.get(ERROR_SUMMARY_SELECTORS.LINK).first().click()
+				cy.get(FIRST_NAME_INPUT).should('have.focus')
+				cy.get(ERROR_SUMMARY_SELECTORS.LINK).eq(5).click()
+				cy.get(COMBOBOX_SELECTORS.INPUT).should('have.focus')
+				shot(`register-errors-cities-link-${width}`)
+
 				cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
 					[
 						'cypress/fixtures/test-image.png',
@@ -2304,6 +2320,24 @@ describe(`UI check capture (${LABEL})`, () => {
 					.type('2020-01-01')
 					.blur()
 				shot(`edit-trip-invalid-${width}`)
+
+				cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT)
+					.clear()
+					.blur()
+				cy.get(
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DESCRIPTION_INPUT,
+				).clear()
+				cy.get(
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON,
+				).click()
+				cy.get(ERROR_SUMMARY_SELECTORS.ROOT)
+					.should('be.visible')
+					.and('have.focus')
+				cy.get(ERROR_SUMMARY_SELECTORS.LINK).first().click()
+				cy.get(
+					TRAVELLER_REGISTRATION_FORM_SELECTORS.FIRST_NAME_INPUT,
+				).should('have.focus')
+				shot(`edit-trip-errors-${width}`)
 			})
 		})
 

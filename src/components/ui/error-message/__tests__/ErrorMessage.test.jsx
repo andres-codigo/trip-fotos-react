@@ -27,4 +27,15 @@ describe('<ErrorMessage />', () => {
 		expect(alert).toHaveClass('error')
 		expect(alert).toHaveAttribute('data-cy-error', 'email')
 	})
+
+	it('adds a "!" icon hidden from screen readers only when asked', () => {
+		const { rerender } = render(
+			<ErrorMessage>Enter your name.</ErrorMessage>,
+		)
+		expect(screen.queryByText('!')).not.toBeInTheDocument()
+
+		rerender(<ErrorMessage hasIcon>Enter your name.</ErrorMessage>)
+		expect(screen.getByText('!')).toHaveAttribute('aria-hidden', 'true')
+		expect(screen.getByRole('alert')).toHaveTextContent('!Enter your name.')
+	})
 })

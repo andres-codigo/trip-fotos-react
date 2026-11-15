@@ -5,11 +5,14 @@ import { FILE_UPLOAD } from '@/constants/validation'
 import { FILE_DROP, FILE_PREVIEW } from '@/constants/test'
 import { GLOBAL } from '@/constants/ui'
 
+import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 import FileDrop from '@/components/forms/file-uploader/file-drop/FileDrop'
 import FilePreview from '@/components/forms/file-uploader/file-preview/FilePreview'
 import useFileList from '@/components/forms/file-uploader/hooks/useFileList'
 
 import { cn } from '@/utils/cn'
+
+import { fieldErrorClasses } from '@/components/ui/form/fieldClasses'
 
 const { FILE_DROP_TEXT } = GLOBAL
 
@@ -70,6 +73,24 @@ const AddFile = ({
 
 	return (
 		<div className="mx-auto flex flex-col gap-4 text-center">
+			{errors.length > 0 && (
+				<div
+					id={errorId}
+					role="alert"
+					className="flex flex-col gap-1 text-left"
+					data-cy={FILE_DROP.ERRORS}>
+					{errors.map((error) => (
+						<ErrorMessage
+							key={error}
+							// One alert for the list, so each message is not announced twice
+							role={undefined}
+							className={cn(fieldErrorClasses, 'm-0')}
+							hasIcon>
+							{error}
+						</ErrorMessage>
+					))}
+				</div>
+			)}
 			<FileDrop
 				onFilesDropped={addFiles}
 				className={cn(
@@ -134,17 +155,6 @@ const AddFile = ({
 					</>
 				)}
 			</FileDrop>
-			{errors.length > 0 && (
-				<div
-					id={errorId}
-					role="alert"
-					className="text-danger-text [&>p]:my-1"
-					data-cy={FILE_DROP.ERRORS}>
-					{errors.map((error) => (
-						<p key={error}>{error}</p>
-					))}
-				</div>
-			)}
 		</div>
 	)
 }
