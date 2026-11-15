@@ -26,3 +26,10 @@ import { failOnConsole } from './utils/failOnConsole'
 Cypress.Commands.add('mount', mount)
 
 failOnConsole()
+
+// Specs use example.com photo URLs, which answer with a web page: an <img> that errors swaps the photo button for its fallback whenever the network wins the race
+beforeEach(() => {
+	cy.intercept('GET', 'https://example.com/**', {
+		fixture: 'test-photo.png',
+	})
+})
