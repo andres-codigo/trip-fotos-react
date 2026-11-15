@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.9](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.8...v0.27.9) (2026-11-15)
+
+
+### Bug Fixes
+
+* scroll to the top on navigation ([#752](https://github.com/andres-codigo/trip-fotos-react/issues/752)) ([d5009d2](https://github.com/andres-codigo/trip-fotos-react/commit/d5009d2ac0c2ad2985b4cc0a64b05c6ecae6fdd5))
+
 ## [0.27.8](https://github.com/andres-codigo/trip-fotos-react/compare/v0.27.7...v0.27.8) (2026-11-14)
 
 
