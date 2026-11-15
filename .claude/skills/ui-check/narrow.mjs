@@ -65,18 +65,12 @@ export const captureScriptParts = (source) =>
 		{ captures: {}, leaves: [] },
 	)
 
-// The captures a script change adds, or null when it changes an existing capture or anything they share
-export const addedCaptures = (before, after) => {
+// The captures a script change adds or edits, or null when it changes anything they share.
+// Each capture starts from the seed data, so an edit to one body changes no other capture's images; a removed one leaves none to compare
+export const changedCaptures = (before, after) => {
 	if (before == null || after == null) return null
 	const old = captureScriptParts(before)
 	const next = captureScriptParts(after)
-	if (
-		Object.entries(old.captures).some(
-			([id, body]) => next.captures[id] !== body,
-		)
-	) {
-		return null
-	}
 	const unmatched = [...next.leaves]
 	for (const { key } of old.leaves) {
 		const index = unmatched.findIndex((leaf) => leaf.key === key)
@@ -85,7 +79,9 @@ export const addedCaptures = (before, after) => {
 	}
 	// A new hook or call runs for the captures beside it; a new helper runs only where a new capture calls it
 	if (unmatched.some(({ declaration }) => !declaration)) return null
-	return Object.keys(next.captures).filter((id) => !(id in old.captures))
+	return Object.keys(next.captures).filter(
+		(id) => old.captures[id] !== next.captures[id],
+	)
 }
 
 // The line numbers inside each `expose: { ... }` block
@@ -125,14 +121,14 @@ export const onlyAddsExposeKeys = (diff, after) => {
 	)
 }
 
-// The files impact.js should still read, and the captures a script change adds.
+// The files impact.js should still read, and the captures a script change adds or edits.
 // `git` answers per file: isNew, before and after (text or null), diff (`git diff -U0` against the base)
 export const narrowChange = (files, git) => {
 	const kept = []
 	const added = []
 	for (const file of files) {
 		if (file === CAPTURE_SCRIPT) {
-			const ids = addedCaptures(git.before(file), git.after(file))
+			const ids = changedCaptures(git.before(file), git.after(file))
 			if (ids) {
 				added.push(...ids)
 				continue
