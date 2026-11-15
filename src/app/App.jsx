@@ -15,6 +15,7 @@ import {
 import { PATHS } from '@/constants/ui'
 
 import {
+	authActions,
 	selectAwaitingVerification,
 	selectUserId,
 	tryLogin,
@@ -152,6 +153,16 @@ function AppRoutes() {
 		location.search,
 		navigate,
 	])
+
+	// Check your inbox only lives on the login page; the flag is persisted, so leaving it set elsewhere (a new tab from the email's Continue button, or moving on once verified) would show a signed-in traveller the signed-out header
+	useEffect(() => {
+		if (
+			awaitingVerification &&
+			location.pathname !== PATHS.AUTHENTICATION
+		) {
+			dispatch(authActions.clearAwaitingVerification())
+		}
+	}, [awaitingVerification, location.pathname, dispatch])
 
 	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
 	useEffect(() => {
