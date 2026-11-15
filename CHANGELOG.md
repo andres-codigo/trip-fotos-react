@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.1...v0.28.2) (2026-11-15)
+
+
+### Bug Fixes
+
+* field errors sit under the label with a "!" icon, as designed ([#776](https://github.com/andres-codigo/trip-fotos-react/issues/776)) ([692130e](https://github.com/andres-codigo/trip-fotos-react/commit/692130ed26fb843e5ecb440814152f732e407c47))
+
 ## [0.28.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.0...v0.28.1) (2026-11-15)
 
 
