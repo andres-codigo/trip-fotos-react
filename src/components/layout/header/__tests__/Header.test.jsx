@@ -8,16 +8,21 @@ import { PATHS } from '@/constants/ui'
 
 import Header from '@/components/layout/header/Header'
 
-const createMockStore = (token) => {
+vi.mock('@/components/layout/main-nav/MainNav', () => ({
+	default: ({ isLoggedIn }) =>
+		isLoggedIn ? <nav aria-label="Main">places</nav> : null,
+}))
+
+const createMockStore = (token, awaitingVerification = false) => {
 	return configureTestStore({
 		reducer: {
-			authentication: (state = { token }) => state,
+			authentication: (state = { token, awaitingVerification }) => state,
 		},
 	})
 }
 
-const renderWithProviders = (token) => {
-	const store = createMockStore(token)
+const renderWithProviders = (token, awaitingVerification) => {
+	const store = createMockStore(token, awaitingVerification)
 	return render(
 		<Provider store={store}>
 			<BrowserRouter>
@@ -54,15 +59,18 @@ describe('<Header />', () => {
 			).toHaveAttribute('href', PATHS.AUTHENTICATION)
 		})
 
-		it('hides Log in on the login page itself', () => {
-			window.history.pushState({}, '', PATHS.AUTHENTICATION)
-			renderWithProviders(null)
+		it.each([PATHS.AUTHENTICATION, PATHS.AUTH_ACTION])(
+			'hides Log in on %s, which offers its own way in',
+			(path) => {
+				window.history.pushState({}, '', path)
+				renderWithProviders(null)
 
-			expect(
-				screen.queryByRole('link', { name: 'Log in' }),
-			).not.toBeInTheDocument()
-			window.history.pushState({}, '', '/')
-		})
+				expect(
+					screen.queryByRole('link', { name: 'Log in' }),
+				).not.toBeInTheDocument()
+				window.history.pushState({}, '', '/')
+			},
+		)
 
 		it('hides Log in once signed in', () => {
 			renderWithProviders('token')
@@ -84,5 +92,28 @@ describe('<Header />', () => {
 				unmount()
 			})
 		})
+	})
+
+	it('shows the places once signed in', async () => {
+		renderWithProviders('token')
+
+		expect(
+			await screen.findByRole('navigation', { name: 'Main' }),
+		).toBeInTheDocument()
+	})
+
+	it('shows no places while a new account is on Check your inbox', async () => {
+		window.history.pushState({}, '', PATHS.AUTHENTICATION)
+		renderWithProviders('token', true)
+
+		await screen.findByRole('link', { name: 'Trip Fotos Home' })
+		await new Promise((resolve) => setTimeout(resolve, 0))
+		expect(
+			screen.queryByRole('navigation', { name: 'Main' }),
+		).not.toBeInTheDocument()
+		expect(
+			screen.queryByRole('link', { name: 'Log in' }),
+		).not.toBeInTheDocument()
+		window.history.pushState({}, '', '/')
 	})
 })

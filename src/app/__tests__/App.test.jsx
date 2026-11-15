@@ -32,6 +32,7 @@ vi.mock('@/constants/ui', () => ({
 	PATHS: {
 		HOME: '/home',
 		AUTHENTICATION: '/authentication',
+		AUTH_ACTION: '/auth/action',
 		TRAVELLERS: '/travellers',
 		TRAVELLER_DETAIL: '/travellers/:id',
 		CONTACT_TRAVELLER: '/travellers/:id/contact',
@@ -49,6 +50,8 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 		type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN_ASYNC.PENDING,
 	}),
 	selectUserId: (state) => state.authentication.userId,
+	selectAwaitingVerification: (state) =>
+		state.authentication.awaitingVerification,
 }))
 
 vi.mock('@/store/slices/travellersSlice', () => ({
@@ -98,6 +101,9 @@ vi.mock('@/pages/edit-trip/EditTrip', () => ({
 vi.mock('@/pages/messages/Messages', () => ({
 	default: () => <div>MessagesPage</div>,
 }))
+vi.mock('@/pages/auth-action/AuthAction', () => ({
+	default: () => <div>AuthActionPage</div>,
+}))
 vi.mock('@/pages/privacy/Privacy', () => ({
 	default: () => <div>PrivacyPage</div>,
 }))
@@ -118,9 +124,21 @@ describe('App', () => {
 	let useDispatchMock
 	let navigateMock
 
-	function setAuthState(token = null, didAutoLogout = false, userId = null) {
+	function setAuthState(
+		token = null,
+		didAutoLogout = false,
+		userId = null,
+		awaitingVerification = false,
+	) {
 		useSelectorMock.mockImplementation((fn) =>
-			fn({ authentication: { token, didAutoLogout, userId } }),
+			fn({
+				authentication: {
+					token,
+					didAutoLogout,
+					userId,
+					awaitingVerification,
+				},
+			}),
 		)
 	}
 
@@ -245,6 +263,46 @@ describe('App', () => {
 			await waitFor(() => {
 				expect(screen.getByText('UserAuthPage')).toBeInTheDocument()
 			})
+		})
+
+		it('moves a signed-in user off the login page', () => {
+			setAuthState('token', false, 'u1')
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTHENTICATION,
+				search: '',
+			})
+
+			renderWithRoute(PATHS.AUTHENTICATION)
+
+			expect(navigateMock).toHaveBeenCalledWith(PATHS.TRAVELLERS, {
+				replace: true,
+			})
+		})
+
+		it('keeps a new account on the login page while it shows Check your inbox', () => {
+			setAuthState('token', false, 'u1', true)
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTHENTICATION,
+				search: '',
+			})
+
+			renderWithRoute(PATHS.AUTHENTICATION)
+
+			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
+		it('opens the email-link page without signing in', async () => {
+			setAuthState(null, false)
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTH_ACTION,
+			})
+
+			renderWithRoute(PATHS.AUTH_ACTION)
+
+			expect(navigateMock).not.toHaveBeenCalled()
+			expect(
+				await screen.findByText('AuthActionPage'),
+			).toBeInTheDocument()
 		})
 
 		it('renders PrivacyPage without redirecting when not logged in', async () => {

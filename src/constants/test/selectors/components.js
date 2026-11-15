@@ -16,6 +16,7 @@ import {
 	FILE_DROP,
 	FILE_PREVIEW,
 	IMAGE,
+	INLINE_ALERT,
 	CONVERSATION_AVATAR,
 	CONVERSATION_LIST,
 	CONVERSATION_ROW,
@@ -27,6 +28,9 @@ import {
 	THREAD_HEADER,
 	THREAD_NOTE,
 	PASSWORD_RESET_FORM,
+	NEW_PASSWORD_FORM,
+	AUTH_ACTION_PAGE,
+	VERIFY_EMAIL_INBOX,
 	PROGRESS,
 	PUBLIC_TRAVELLER_ITEM,
 	REQUIRED_LEGEND,
@@ -60,6 +64,7 @@ export const COMMON_SELECTORS = {
 	BASE_PROGRESS_BAR: getByDataCy(PROGRESS.BAR),
 	BASE_PROGRESS_LABEL: getByDataCy(PROGRESS.LABEL),
 	BASE_BADGE: getByDataCy(BADGE.ID),
+	INLINE_ALERT: getByDataCy(INLINE_ALERT.ID),
 	BASE_IMAGE: getByDataCy(IMAGE.ID),
 	BASE_IMAGE_BUTTON: getByDataCy(IMAGE.BUTTON),
 	BASE_IMAGE_THUMBNAIL: getByDataCy(IMAGE.THUMBNAIL),
@@ -429,5 +434,23 @@ export const PASSWORD_RESET_FORM_SELECTORS = Object.fromEntries(
 	Object.entries(PASSWORD_RESET_FORM).map(([key, id]) => [
 		key,
 		key === 'EMAIL_ERROR' ? getByDataCyError(id) : getByDataCy(id),
+	]),
+)
+
+export const NEW_PASSWORD_FORM_SELECTORS = Object.fromEntries(
+	Object.entries(NEW_PASSWORD_FORM).map(([key, id]) => [
+		key,
+		key === 'PASSWORD_ERROR' ? getByDataCyError(id) : getByDataCy(id),
+	]),
+)
+
+export const AUTH_ACTION_PAGE_SELECTORS = Object.fromEntries(
+	Object.entries(AUTH_ACTION_PAGE).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const VERIFY_EMAIL_INBOX_SELECTORS = Object.fromEntries(
+	Object.entries(VERIFY_EMAIL_INBOX).map(([key, id]) => [
+		key,
+		getByDataCy(id),
 	]),
 )

@@ -64,6 +64,7 @@ export default defineConfig({
 		VITE_DATABASE_URL: process.env.VITE_BACKEND_BASE_URL,
 		VITE_DATABASE_NAMESPACE: process.env.VITE_DATABASE_NAMESPACE,
 		USE_EMULATORS: String(useEmulators),
+		FIREBASE_PROJECT_ID: process.env.VITE_FIREBASE_PROJECT_ID,
 		// Read only by cypress/ui-check/capture.cy.js
 		UI_CHECK_LABEL: process.env.UI_CHECK_LABEL,
 		UI_CHECK_WIDTHS: process.env.UI_CHECK_WIDTHS,

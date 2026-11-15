@@ -5,7 +5,11 @@ import { BrowserRouter } from 'react-router-dom'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { API_DATABASE } from '@/constants/api'
-import { AUTH_FORM_CONFIG, PASSWORD_RESET_CONFIG } from '@/constants/auth'
+import {
+	AUTH_FORM_CONFIG,
+	PASSWORD_RESET_CONFIG,
+	VERIFY_EMAIL_CONFIG,
+} from '@/constants/auth'
 
 import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
 import {
@@ -20,16 +24,38 @@ import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import { validateEmail, validatePassword } from '@/utils/validation'
 
-import { login, sendPasswordReset } from '@/store/slices/authenticationSlice'
+import {
+	authActions,
+	login,
+	sendPasswordReset,
+} from '@/store/slices/authenticationSlice'
 
 import Authentication from '@/pages/authentication/Authentication'
 
 vi.mock('@/store/slices/authenticationSlice', () => {
-	const sendPasswordReset = vi.fn((email) => ({ type: 'reset', email }))
-	sendPasswordReset.rejected = {
+	const rejected = {
 		match: (result) => result?.meta?.rejectedWithValue === true,
 	}
-	return { login: vi.fn(() => Promise.resolve({})), sendPasswordReset }
+	const thunk = (type) =>
+		Object.assign(
+			vi.fn(() => ({ type })),
+			{ rejected },
+		)
+	return {
+		login: vi.fn(() => Promise.resolve({})),
+		sendPasswordReset: Object.assign(
+			vi.fn((email) => ({ type: 'reset', email })),
+			{ rejected },
+		),
+		refreshVerification: thunk('refresh'),
+		resendVerification: thunk('resend'),
+		startAgain: thunk('startAgain'),
+		authActions: {
+			clearAwaitingVerification: vi.fn(() => ({
+				type: 'clearAwaitingVerification',
+			})),
+		},
+	}
 })
 
 // The real slice pulls in auth selectors this file mocks away
@@ -673,5 +699,160 @@ describe('<Authentication />', () => {
 				AUTH_FORM_CONFIG.SIGNUP_TITLE,
 			)
 		})
+	})
+
+	describe('Check your inbox', () => {
+		const signUp = async () => {
+			mockDispatch.mockResolvedValueOnce({
+				meta: {},
+				payload: { awaitingVerification: true },
+			})
+			renderWithProviders(<Authentication />)
+			fireEvent.click(
+				screen.getByTestId(
+					TEST_IDS.USER_AUTH_FORM.LOGIN_SIGNUP_TOGGLE_LINK,
+				),
+			)
+			fillAndSubmitLoginForm()
+			const heading = await screen.findByRole('heading', {
+				name: VERIFY_EMAIL_CONFIG.TITLE,
+			})
+			// The heading can show before the view's effects run; its focus marks that they have
+			await waitFor(() => expect(heading).toHaveFocus())
+			return heading
+		}
+
+		it('swaps the sign-up card to Check your inbox, with its heading focused, instead of moving on', async () => {
+			const heading = await signUp()
+
+			expect(heading).toHaveFocus()
+			expect(document.title).toBe(
+				`${VERIFY_EMAIL_CONFIG.TITLE} · ${GLOBAL.SITE_NAME}`,
+			)
+			expect(screen.getByRole('status')).toHaveTextContent(
+				MOCK_KEYS.EMAIL,
+			)
+			expect(mockNavigate).not.toHaveBeenCalled()
+		})
+
+		it("continues to Register once I've verified finds the address verified", async () => {
+			await signUp()
+			mockDispatch.mockResolvedValueOnce({
+				payload: { emailVerified: true },
+			})
+
+			fireEvent.click(
+				screen.getByRole('button', { name: VERIFY_EMAIL_CONFIG.CHECK }),
+			)
+
+			await waitFor(() =>
+				expect(mockNavigate).toHaveBeenCalledWith(PATHS.REGISTER, {
+					replace: true,
+				}),
+			)
+			expect(authActions.clearAwaitingVerification).toHaveBeenCalled()
+		})
+
+		it('says so when the address is not verified yet', async () => {
+			await signUp()
+			mockDispatch.mockResolvedValueOnce({
+				payload: { emailVerified: false },
+			})
+
+			fireEvent.click(
+				screen.getByRole('button', { name: VERIFY_EMAIL_CONFIG.CHECK }),
+			)
+
+			expect(
+				await screen.findByText(
+					VERIFY_EMAIL_CONFIG.NOT_YET(MOCK_KEYS.EMAIL),
+				),
+			).toBeInTheDocument()
+			expect(mockNavigate).not.toHaveBeenCalled()
+		})
+
+		it('checks again on its own when the tab comes back into view', async () => {
+			await signUp()
+			mockDispatch.mockResolvedValueOnce({
+				payload: { emailVerified: true },
+			})
+
+			document.dispatchEvent(new Event('visibilitychange'))
+
+			await waitFor(() =>
+				expect(mockNavigate).toHaveBeenCalledWith(PATHS.REGISTER, {
+					replace: true,
+				}),
+			)
+		})
+
+		it('sends another link and says to use the newest email', async () => {
+			await signUp()
+			mockDispatch.mockResolvedValueOnce({ payload: MOCK_KEYS.EMAIL })
+
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: VERIFY_EMAIL_CONFIG.SEND_AGAIN,
+				}),
+			)
+
+			expect(
+				await screen.findByText(VERIFY_EMAIL_CONFIG.RESENT_PREFIX, {
+					exact: false,
+				}),
+			).toBeInTheDocument()
+		})
+
+		it('shows why a resend was refused', async () => {
+			await signUp()
+			mockDispatch.mockResolvedValueOnce({
+				meta: { rejectedWithValue: true },
+				payload: ERROR_MESSAGES.TOO_MANY_EMAILS,
+			})
+
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: VERIFY_EMAIL_CONFIG.SEND_AGAIN,
+				}),
+			)
+
+			expect(
+				await screen.findByText(ERROR_MESSAGES.TOO_MANY_EMAILS),
+			).toBeInTheDocument()
+		})
+
+		it('starts again on Create an account with the email kept to correct', async () => {
+			await signUp()
+			mockDispatch.mockResolvedValueOnce({ payload: MOCK_KEYS.EMAIL })
+
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: VERIFY_EMAIL_CONFIG.START_AGAIN,
+				}),
+			)
+
+			expect(
+				await screen.findByRole('heading', {
+					name: AUTH_FORM_CONFIG.SIGNUP_TITLE,
+				}),
+			).toHaveFocus()
+			expect(
+				screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+			).toHaveValue(MOCK_KEYS.EMAIL)
+		})
+	})
+
+	it('opens the reset view from the email page', () => {
+		window.history.pushState(
+			{},
+			'',
+			`${PATHS.AUTHENTICATION}?${AUTH_FORM_CONFIG.MODE_PARAM}=reset`,
+		)
+
+		renderWithProviders(<Authentication />)
+
+		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+			PASSWORD_RESET_CONFIG.TITLE,
+		)
 	})
 })

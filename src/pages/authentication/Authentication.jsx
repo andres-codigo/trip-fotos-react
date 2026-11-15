@@ -3,11 +3,23 @@ import { useDispatch, useSelector } from 'react-redux'
 import { matchPath, useNavigate, useLocation } from 'react-router-dom'
 
 import { API_DATABASE } from '@/constants/api'
-import { AUTH_FORM_CONFIG, PASSWORD_RESET_CONFIG } from '@/constants/auth'
+import {
+	AUTH_FORM_CONFIG,
+	PASSWORD_RESET_CONFIG,
+	RESEND_COOLDOWN_SECONDS,
+	VERIFY_EMAIL_CONFIG,
+} from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
-import { login, sendPasswordReset } from '@/store/slices/authenticationSlice'
+import {
+	authActions,
+	login,
+	refreshVerification,
+	resendVerification,
+	sendPasswordReset,
+	startAgain,
+} from '@/store/slices/authenticationSlice'
 import { selectPublicTrips } from '@/store/slices/travellersSlice'
 
 import useFormField from '@/components/forms/user-authentication/hooks/useFormField'
@@ -20,10 +32,26 @@ import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 
 import PasswordResetForm from '@/components/forms/password-reset/PasswordResetForm'
+import VerifyEmailInbox from '@/components/forms/verify-email/VerifyEmailInbox'
 import UserAuthenticationForm from '@/components/forms/user-authentication/UserAuthenticationForm'
 
 const RESET_MODE = 'reset'
 const RESET_IDLE = { status: 'idle', error: '', sentTo: '' }
+const VERIFY_MODE = 'verify'
+const VERIFY_IDLE = {
+	email: '',
+	resent: false,
+	cooldownEndsAt: null,
+	isSending: false,
+	isChecking: false,
+	error: '',
+}
+
+// The welcome band opens sign-up, and the email-link page's expired reset opens the reset view
+const initialMode = (param) =>
+	param === API_DATABASE.AUTH_SIGNUP_MODE || param === RESET_MODE
+		? param
+		: API_DATABASE.AUTH_LOGIN_MODE
 
 const Authentication = () => {
 	const [email, setEmail] = useFormField('')
@@ -34,12 +62,8 @@ const Authentication = () => {
 	const location = useLocation()
 	const searchParams = new URLSearchParams(location.search)
 
-	// The welcome band's Create an account opens the form in sign-up mode
 	const [mode, setMode] = useState(() =>
-		searchParams.get(AUTH_FORM_CONFIG.MODE_PARAM) ===
-		API_DATABASE.AUTH_SIGNUP_MODE
-			? API_DATABASE.AUTH_SIGNUP_MODE
-			: API_DATABASE.AUTH_LOGIN_MODE,
+		initialMode(searchParams.get(AUTH_FORM_CONFIG.MODE_PARAM)),
 	)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState(false)
@@ -59,6 +83,7 @@ const Authentication = () => {
 	const titleRef = useRef(null)
 	const hasSwitchedView = useRef(false)
 	const [reset, setReset] = useState(RESET_IDLE)
+	const [verify, setVerify] = useState(VERIFY_IDLE)
 
 	// The heading takes focus when the card swaps views, so a screen reader hears the new one
 	useEffect(() => {
@@ -130,20 +155,90 @@ const Authentication = () => {
 				throw new Error(result.payload)
 			}
 
-			setEmail('')
 			setPassword('')
 
-			const redirectUrl =
-				new URLSearchParams(location.search).get('redirect') ||
-				PATHS.TRAVELLERS
+			if (result.payload?.awaitingVerification) {
+				setVerify({ ...VERIFY_IDLE, email: trimmedEmail })
+				switchView(VERIFY_MODE)
+				return
+			}
 
-			navigate(redirectUrl)
+			setEmail('')
+			navigate(redirectTarget(PATHS.TRAVELLERS))
 		} catch (error) {
 			setError(handleApiError(error, ERROR_MESSAGES.LOGIN_FAILED))
 		} finally {
 			setIsLoading(false)
 		}
 	}
+
+	const redirectTarget = (fallback) =>
+		new URLSearchParams(location.search).get('redirect') || fallback
+
+	// A new account's next step is its trip, unless it came here from a page it asked for
+	const continueVerified = () => {
+		navigate(redirectTarget(PATHS.REGISTER), { replace: true })
+		dispatch(authActions.clearAwaitingVerification())
+	}
+
+	const checkVerified = async ({ quiet = false } = {}) => {
+		if (!quiet) setVerify((v) => ({ ...v, isChecking: true, error: '' }))
+		const result = await dispatch(refreshVerification())
+
+		if (result.payload?.emailVerified) {
+			continueVerified()
+			return
+		}
+		if (quiet) return
+
+		setVerify((v) => ({
+			...v,
+			isChecking: false,
+			error: refreshVerification.rejected.match(result)
+				? result.payload
+				: VERIFY_EMAIL_CONFIG.NOT_YET(v.email),
+		}))
+	}
+
+	const resendLink = async () => {
+		setVerify((v) => ({ ...v, isSending: true, error: '' }))
+		const result = await dispatch(resendVerification())
+
+		setVerify((v) =>
+			resendVerification.rejected.match(result)
+				? { ...v, isSending: false, error: result.payload }
+				: {
+						...v,
+						isSending: false,
+						resent: true,
+						cooldownEndsAt:
+							Date.now() + RESEND_COOLDOWN_SECONDS * 1000,
+					},
+		)
+	}
+
+	const startOver = async () => {
+		const result = await dispatch(startAgain())
+
+		if (startAgain.rejected.match(result)) {
+			setVerify((v) => ({ ...v, error: result.payload }))
+			return
+		}
+		setVerify(VERIFY_IDLE)
+		switchView(API_DATABASE.AUTH_SIGNUP_MODE)
+	}
+
+	// Coming back from the mail app checks again, so the button is a fallback rather than the only way on
+	useEffect(() => {
+		if (mode !== VERIFY_MODE) return
+		const onVisible = () => {
+			if (document.visibilityState === 'visible') {
+				checkVerified({ quiet: true })
+			}
+		}
+		document.addEventListener('visibilitychange', onVisible)
+		return () => document.removeEventListener('visibilitychange', onVisible)
+	})
 
 	const switchView = (nextMode) => {
 		hasSwitchedView.current = true
@@ -190,6 +285,7 @@ const Authentication = () => {
 		[API_DATABASE.AUTH_LOGIN_MODE]: AUTH_FORM_CONFIG.LOGIN_TITLE,
 		[API_DATABASE.AUTH_SIGNUP_MODE]: AUTH_FORM_CONFIG.SIGNUP_TITLE,
 		[RESET_MODE]: PASSWORD_RESET_CONFIG.TITLE,
+		[VERIFY_MODE]: VERIFY_EMAIL_CONFIG.TITLE,
 	}[mode]
 
 	return (
@@ -212,7 +308,20 @@ const Authentication = () => {
 			)}
 			<section>
 				<BaseCard>
-					{mode === RESET_MODE ? (
+					{mode === VERIFY_MODE ? (
+						<VerifyEmailInbox
+							ref={titleRef}
+							email={verify.email}
+							resent={verify.resent}
+							cooldownEndsAt={verify.cooldownEndsAt}
+							isSending={verify.isSending}
+							isChecking={verify.isChecking}
+							error={verify.error}
+							onResend={resendLink}
+							onCheck={() => checkVerified()}
+							onStartAgain={startOver}
+						/>
+					) : mode === RESET_MODE ? (
 						<PasswordResetForm
 							ref={titleRef}
 							initialEmail={email.value.trim()}

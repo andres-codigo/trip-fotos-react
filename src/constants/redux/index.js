@@ -27,6 +27,12 @@ const AUTHENTICATION_BASE_ACTIONS = Object.freeze({
 	LOGOUT: 'authentication/logout',
 	AUTO_LOGOUT: 'authentication/autoLogout',
 	SEND_PASSWORD_RESET: 'authentication/sendPasswordReset',
+	RESEND_VERIFICATION: 'authentication/resendVerification',
+	REFRESH_VERIFICATION: 'authentication/refreshVerification',
+	START_AGAIN: 'authentication/startAgain',
+	APPLY_EMAIL_VERIFICATION: 'authentication/applyEmailVerification',
+	CHECK_PASSWORD_RESET_CODE: 'authentication/checkPasswordResetCode',
+	CONFIRM_PASSWORD_RESET: 'authentication/confirmPasswordReset',
 })
 
 // Helper function to create async thunk action types

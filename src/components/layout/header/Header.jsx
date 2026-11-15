@@ -10,13 +10,18 @@ import BaseButton from '@/components/ui/button/BaseButton'
 const MainNav = lazy(() => import('@/components/layout/main-nav/MainNav'))
 
 function Header() {
+	// A new account on Check your inbox is shown the signed-out chrome, so its only ways on are in the card
 	const isLoggedIn = useSelector(
-		// Treat all falsy as false
-		(state) => Boolean(state.authentication.token),
+		(state) =>
+			Boolean(state.authentication.token) &&
+			!state.authentication.awaitingVerification,
 	)
 	const { pathname } = useLocation()
-	// Travellers is public, so a logged-out visitor needs a way in from every page but the login form itself
-	const showLogIn = !isLoggedIn && pathname !== PATHS.AUTHENTICATION
+	// Travellers is public, so a logged-out visitor needs a way in from every page but the login form and the email-link page, which offers its own next step
+	const showLogIn =
+		!isLoggedIn &&
+		pathname !== PATHS.AUTHENTICATION &&
+		pathname !== PATHS.AUTH_ACTION
 	return (
 		<header
 			className="fixed z-[1] flex h-20 w-full items-center justify-between bg-header pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]"

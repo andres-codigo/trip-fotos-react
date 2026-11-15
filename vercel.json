@@ -5,6 +5,10 @@
 			"destination": "/"
 		},
 		{
+			"source": "/auth/action",
+			"destination": "/"
+		},
+		{
 			"source": "/travellers/:id",
 			"destination": "/"
 		},

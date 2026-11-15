@@ -1,14 +1,16 @@
 import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
 import {
+	AUTH_ACTION_CONFIG,
+	AUTH_ACTION_MODES,
 	AUTH_FORM_CONFIG,
 	PASSWORD_RESET_CONFIG,
+	VERIFY_EMAIL_CONFIG,
 } from '../../../src/constants/auth'
 import { IDENTITY_TOOLKIT_ERRORS } from '../../../src/constants/test/mock-data/mock-api'
 import {
 	AUTHENTICATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
 	PASSWORD_RESET_FORM_SELECTORS,
-	TRAVELLERS_LIST_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
@@ -139,30 +141,49 @@ describe('Sign-up journey', () => {
 		cy.visit(loginUrl)
 	})
 
-	it('signs a new user up and lets them reach the registration form', () => {
+	it('signs a new user up, verifies the email from its link and continues to Register', () => {
+		const email = `new-user-${Date.now()}@example.com`
 		cy.interceptLogin(
 			API_DATABASE.POST,
 			`${API_DATABASE.URL}signUp?key=${API_DATABASE.KEY}`,
 		)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK).click()
-		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
-			`new-user-${Date.now()}@example.com`,
-		)
+		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(email)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
 			TEST_USERS.STANDARD.PASSWORD,
 		)
 		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
 		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
 
-		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
-			'eq',
-			PATHS.TRAVELLERS,
-		)
-		// The link is aria-disabled while the list loads
-		cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK)
-			.should('not.have.attr', 'aria-disabled', 'true')
-			.click()
+		cy.get('h1', { timeout: REQUEST_TIMEOUT })
+			.should('have.text', VERIFY_EMAIL_CONFIG.TITLE)
+			.and('have.focus')
+		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
 
+		// The auth emulator keeps every email link it would have sent
+		cy.request(
+			`${new URL(API_DATABASE.URL).origin}/emulator/v1/projects/${Cypress.expose('FIREBASE_PROJECT_ID')}/oobCodes`,
+		).then(({ body }) => {
+			const { oobCode, oobLink } = body.oobCodes.find(
+				(code) =>
+					code.email === email && code.requestType === 'VERIFY_EMAIL',
+			)
+			// Firebase's default email page offers this as a Continue button back to the app
+			cy.location('origin').then((origin) => {
+				expect(
+					new URL(oobLink).searchParams.get('continueUrl'),
+				).to.equal(`${origin}${PATHS.REGISTER}`)
+			})
+			cy.visit(
+				`${PATHS.AUTH_ACTION}?mode=${AUTH_ACTION_MODES.VERIFY_EMAIL}&oobCode=${oobCode}`,
+			)
+		})
+
+		cy.get('h1', { timeout: REQUEST_TIMEOUT }).should(
+			'have.text',
+			AUTH_ACTION_CONFIG.VERIFIED_TITLE,
+		)
+		cy.contains('a, button', AUTH_ACTION_CONFIG.REGISTER).click()
 		cy.location('pathname').should('eq', PATHS.REGISTER)
 	})
 })

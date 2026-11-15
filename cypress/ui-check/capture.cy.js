@@ -232,6 +232,85 @@ const forcePseudo = (selector, states, { scroll = true } = {}) => {
 const emulatorDatabase = (path) =>
 	`${Cypress.expose('VITE_DATABASE_URL')}/${path}.json?ns=${Cypress.expose('VITE_DATABASE_NAMESPACE')}&access_token=owner`
 
+// Email-link accounts are made through the Auth emulator's REST API, so each width gets fresh ones and no seeded password changes
+const AUTH_REST = Cypress.expose('API_URL')
+const AUTH_EMULATOR = new URL(AUTH_REST).origin
+const NEW_PASSWORD = 'capture-password'
+const authRest = (method, body) =>
+	cy
+		.request(
+			'POST',
+			`${AUTH_REST}${method}?key=${Cypress.expose('API_KEY')}`,
+			body,
+		)
+		.its('body')
+const newAccount = (name) => {
+	const email = `${name}-${Date.now()}@example.com`
+	return authRest('signUp', {
+		email,
+		password: NEW_PASSWORD,
+		returnSecureToken: true,
+	}).then(({ idToken }) => ({ email, idToken }))
+}
+const sendVerifyLink = ({ idToken }) =>
+	authRest('sendOobCode', { requestType: 'VERIFY_EMAIL', idToken })
+const latestOobCode = (email, requestType) =>
+	cy
+		.request(
+			`${AUTH_EMULATOR}/emulator/v1/projects/${Cypress.expose('FIREBASE_PROJECT_ID')}/oobCodes`,
+		)
+		.its('body.oobCodes')
+		.then(
+			(codes) =>
+				codes
+					.filter(
+						(code) =>
+							code.email === email &&
+							code.requestType === requestType,
+					)
+					.at(-1).oobCode,
+		)
+const actionPath = (mode, code) =>
+	`${PATHS.AUTH_ACTION}?mode=${mode}&oobCode=${code}`
+// Literal selectors keep the script loadable on main, which lacks them
+const ACTION_TITLE =
+	'[data-cy="auth-action-title"], [data-cy="new-password-title"]'
+const INBOX = {
+	ROOT: '[data-cy="verify-email-inbox"]',
+	ERROR: '[data-cy="verify-email-inbox-error"]',
+	SEND_AGAIN: '[data-cy="verify-email-inbox-send-again"]',
+	CHECK: '[data-cy="verify-email-inbox-check"]',
+	STATUS: '[data-cy="verify-email-inbox-status"]',
+}
+// The browser retries a POST whose connection drops, so a one-shot network error is answered by the retry; this fails every attempt while it is on
+const networkDown = { on: false }
+const failWhileDown = (url) =>
+	cy.intercept({ method: API_DATABASE.POST, url }, (req) => {
+		if (networkDown.on) req.destroy()
+	})
+const networkShot = (path, name) => {
+	cy.then(() => {
+		networkDown.on = true
+	})
+	visit(path)
+	cy.get('[data-cy="auth-action-try-again"]', { timeout: TIMEOUT }).should(
+		'be.visible',
+	)
+	freezeAnimation()
+	shot(name)
+	cy.then(() => {
+		networkDown.on = false
+	})
+}
+
+const actionShot = (path, title, name) => {
+	visit(path)
+	cy.get(ACTION_TITLE, { timeout: TIMEOUT }).should('have.text', title)
+	cy.get(COMMON_SELECTORS.BASE_SPINNER).should('not.exist')
+	freezeAnimation()
+	shot(name)
+}
+
 const ownTripPath = `${PATHS.TRAVELLERS}/${TEST_USERS.TRAVELLER.ID}`
 const editTripPath = `${ownTripPath}/edit`
 
@@ -534,6 +613,216 @@ describe(`UI check capture (${LABEL})`, () => {
 				cy.get(LOGIN_SIGNUP_TOGGLE_LINK).should('be.disabled')
 				freezeAnimation()
 				shot(`login-busy-${width}`)
+			})
+		})
+	})
+
+	context('email verification', () => {
+		capture('verify-inbox', () => {
+			const { EMAIL_INPUT, PASSWORD_INPUT, LOGIN_SIGNUP_SUBMIT_BUTTON } =
+				AUTHENTICATION_FORM_SELECTORS
+			eachWidth((width) => {
+				visit(
+					`${PATHS.AUTHENTICATION}?mode=${API_DATABASE.AUTH_SIGNUP_MODE}`,
+				)
+				cy.get(EMAIL_INPUT).type(
+					`inbox-${width}-${Date.now()}@example.com`,
+				)
+				cy.get(PASSWORD_INPUT).type(NEW_PASSWORD)
+				cy.get(LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+				cy.get(INBOX.ROOT, { timeout: TIMEOUT }).should('be.visible')
+				cy.focused().should('have.text', 'Check your inbox')
+				freezeAnimation()
+				shot(`sent-${width}`)
+
+				interceptOnce(API_DATABASE.POST, '**/accounts:sendOobCode*', {
+					statusCode: 400,
+					body: { error: { message: 'TOO_MANY_ATTEMPTS_TRY_LATER' } },
+				})
+				cy.get(INBOX.SEND_AGAIN).click()
+				cy.get(INBOX.ERROR).should('contain', 'Too many emails')
+				shot(`too-many-${width}`)
+
+				cy.get(INBOX.CHECK).click()
+				cy.get(INBOX.ERROR).should('contain', 'not verified yet')
+				shot(`not-yet-${width}`)
+
+				cy.get(INBOX.SEND_AGAIN).click()
+				cy.get(INBOX.STATUS).should('contain', 'another link')
+				shot(`resent-cooldown-${width}`)
+
+				interceptOnce(API_DATABASE.POST, '**/accounts:lookup*', {
+					statusCode: 500,
+					body: {},
+					delay: 60000,
+				})
+				cy.get(INBOX.CHECK).click()
+				cy.get(INBOX.CHECK).should('have.attr', 'aria-busy', 'true')
+				freezeAnimation()
+				shot(`checking-${width}`)
+			})
+		})
+
+		capture('auth-action', () => {
+			failWhileDown('**/accounts:update*')
+			failWhileDown('**/accounts:resetPassword*')
+			eachWidth((width) => {
+				// Signed in, not yet a traveller
+				newAccount(`verify-${width}`).then((account) => {
+					sendVerifyLink(account)
+					performLogin(account.email, NEW_PASSWORD)
+					latestOobCode(account.email, 'VERIFY_EMAIL').then(
+						(code) => {
+							actionShot(
+								actionPath('verifyEmail', code),
+								'Your email is verified',
+								`verified-${width}`,
+							)
+							actionShot(
+								actionPath('verifyEmail', code),
+								'Your email is already verified',
+								`already-verified-${width}`,
+							)
+						},
+					)
+				})
+
+				// Signed in and unverified, with a used or old link
+				newAccount(`expired-${width}`).then((account) => {
+					performLogin(account.email, NEW_PASSWORD)
+					interceptOnce(API_DATABASE.POST, '**/accounts:update*', {
+						statusCode: 500,
+						body: {},
+						delay: 60000,
+					})
+					visit(actionPath('verifyEmail', 'capture-loading'))
+					cy.contains(
+						'[data-cy="auth-action-view"]',
+						'Checking your link',
+						{
+							timeout: TIMEOUT,
+						},
+					).should('be.visible')
+					freezeAnimation()
+					shot(`loading-${width}`)
+
+					networkShot(
+						actionPath('verifyEmail', 'capture-network'),
+						`network-${width}`,
+					)
+
+					actionShot(
+						actionPath('verifyEmail', 'capture-expired'),
+						'This link has expired',
+						`expired-${width}`,
+					)
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:sendOobCode*',
+						{
+							statusCode: 400,
+							body: {
+								error: {
+									message: 'TOO_MANY_ATTEMPTS_TRY_LATER',
+								},
+							},
+						},
+					)
+					cy.get('[data-cy="auth-action-send-new-link"]').click()
+					cy.get('[data-cy="auth-action-alert"]').should('be.visible')
+					shot(`expired-send-failed-${width}`)
+					cy.get('[data-cy="auth-action-send-new-link"]').click()
+					cy.get('[data-cy="auth-action-expired-sent"]', {
+						timeout: TIMEOUT,
+					}).should('be.visible')
+					shot(`expired-sent-${width}`)
+				})
+
+				// Signed out, as on another device
+				newAccount(`signed-out-${width}`).then((account) => {
+					sendVerifyLink(account)
+					cy.clearLocalStorage()
+					latestOobCode(account.email, 'VERIFY_EMAIL').then((code) =>
+						actionShot(
+							actionPath('verifyEmail', code),
+							'Your email is verified',
+							`verified-signed-out-${width}`,
+						),
+					)
+					actionShot(
+						actionPath('verifyEmail', 'capture-expired'),
+						'This link has expired',
+						`expired-signed-out-${width}`,
+					)
+					actionShot(
+						PATHS.AUTH_ACTION,
+						'This link is not valid',
+						`invalid-${width}`,
+					)
+				})
+
+				// Password reset
+				newAccount(`reset-${width}`).then(({ email }) => {
+					authRest('sendOobCode', {
+						requestType: 'PASSWORD_RESET',
+						email,
+					})
+					latestOobCode(email, 'PASSWORD_RESET').then((code) => {
+						actionShot(
+							actionPath('resetPassword', code),
+							'Choose a new password',
+							`reset-form-${width}`,
+						)
+						cy.get('[data-cy="new-password-save-password"]').click()
+						cy.get('[data-cy="new-password-input"]').should(
+							'have.attr',
+							'aria-invalid',
+							'true',
+						)
+						shot(`reset-error-${width}`)
+
+						interceptOnce(
+							API_DATABASE.POST,
+							'**/accounts:resetPassword*',
+							{ statusCode: 500, body: {}, delay: 60000 },
+						)
+						cy.get('[data-cy="new-password-input"]').type(
+							NEW_PASSWORD,
+						)
+						cy.get('[data-cy="new-password-save-password"]').click()
+						cy.get('[data-cy="new-password-save-password"]').should(
+							'have.attr',
+							'aria-busy',
+							'true',
+						)
+						freezeAnimation()
+						shot(`reset-saving-${width}`)
+
+						actionShot(
+							actionPath('resetPassword', code),
+							'Choose a new password',
+							`reset-form-again-${width}`,
+						)
+						cy.get('[data-cy="new-password-input"]').type(
+							NEW_PASSWORD,
+						)
+						cy.get('[data-cy="new-password-save-password"]').click()
+						cy.get(ACTION_TITLE, { timeout: TIMEOUT }).should(
+							'have.text',
+							'Your password has been changed',
+						)
+						shot(`reset-done-${width}`)
+					})
+					actionShot(
+						actionPath('resetPassword', 'capture-expired'),
+						'This reset link has expired',
+						`reset-expired-${width}`,
+					)
+					networkShot(
+						actionPath('resetPassword', 'capture-network'),
+						`reset-network-${width}`,
+					)
+				})
 			})
 		})
 	})
