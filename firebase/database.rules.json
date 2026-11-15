@@ -149,6 +149,81 @@
 					}
 				}
 			}
+		},
+		"conversations": {
+			"$cid": {
+				".read": "auth != null && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid))",
+				"messages": {
+					"$messageId": {
+						".write": "auth != null && !data.exists() && newData.exists() && ((auth.uid < $cid.replace(auth.uid + '_', '').replace('_' + auth.uid, '') && $cid === auth.uid + '_' + $cid.replace(auth.uid + '_', '').replace('_' + auth.uid, '')) || ($cid.replace(auth.uid + '_', '').replace('_' + auth.uid, '') < auth.uid && $cid === $cid.replace(auth.uid + '_', '').replace('_' + auth.uid, '') + '_' + auth.uid)) && root.child('travellers/' + auth.uid).exists() && root.child('travellers/' + $cid.replace(auth.uid + '_', '').replace('_' + auth.uid, '')).exists()",
+						".validate": "$messageId.matches(/^[-0-9A-Za-z_]{20}$/) && newData.hasChildren(['senderId', 'message', 'createdAt'])",
+						"senderId": {
+							".validate": "newData.isString() && newData.val() === auth.uid"
+						},
+						"message": {
+							".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 5000"
+						},
+						"createdAt": {
+							".validate": "newData.isNumber() && newData.val() === now"
+						},
+						"$other": {
+							".validate": false
+						}
+					}
+				},
+				"$other": {
+					".validate": false
+				}
+			}
+		},
+		"userConversations": {
+			"$uid": {
+				".read": "auth != null && auth.uid === $uid",
+				".write": "auth != null && !newData.exists() && (auth.uid === $uid || auth.token.admin === true)",
+				"$cid": {
+					".validate": "newData.hasChildren(['otherId', 'lastId', 'lastMessage', 'lastSenderId', 'lastAt'])",
+					"otherId": {
+						".write": "auth != null && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid)) && ($cid.beginsWith($uid + '_') || $cid.endsWith('_' + $uid))",
+						".validate": "newData.isString() && (($uid < newData.val() && $cid === $uid + '_' + newData.val()) || (newData.val() < $uid && $cid === newData.val() + '_' + $uid))"
+					},
+					"lastId": {
+						".write": "auth != null && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid)) && ($cid.beginsWith($uid + '_') || $cid.endsWith('_' + $uid))",
+						".validate": "newData.isString() && !root.child('conversations/' + $cid + '/messages/' + newData.val()).exists() && newData.parent().parent().parent().parent().child('conversations/' + $cid + '/messages/' + newData.parent().child('lastId').val()).exists()"
+					},
+					"lastMessage": {
+						".write": "auth != null && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid)) && ($cid.beginsWith($uid + '_') || $cid.endsWith('_' + $uid))",
+						".validate": "newData.isString() && newData.val() === newData.parent().parent().parent().parent().child('conversations/' + $cid + '/messages/' + newData.parent().child('lastId').val()).child('message').val()"
+					},
+					"lastSenderId": {
+						".write": "auth != null && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid)) && ($cid.beginsWith($uid + '_') || $cid.endsWith('_' + $uid))",
+						".validate": "newData.isString() && newData.val() === auth.uid"
+					},
+					"lastAt": {
+						".write": "auth != null && ($cid.beginsWith(auth.uid + '_') || $cid.endsWith('_' + auth.uid)) && ($cid.beginsWith($uid + '_') || $cid.endsWith('_' + $uid))",
+						".validate": "newData.isNumber() && newData.val() === now"
+					},
+					"readAt": {
+						".write": "auth != null && auth.uid === $uid",
+						".validate": "newData.isNumber() && newData.val() === now"
+					},
+					"clearedAt": {
+						".write": "auth != null && auth.uid === $uid",
+						".validate": "newData.isNumber() && newData.val() === now"
+					},
+					"$other": {
+						".validate": false
+					}
+				}
+			}
+		},
+		"legacyMessages": {
+			"$uid": {
+				".read": "auth != null && (auth.uid === $uid || auth.token.admin === true)",
+				".write": "auth != null && !newData.exists() && (auth.uid === $uid || auth.token.admin === true)",
+				"$messageId": {
+					".write": "auth != null && !newData.exists() && (auth.uid === $uid || auth.token.admin === true)"
+				}
+			}
 		}
 	}
 }

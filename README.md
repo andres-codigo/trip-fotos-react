@@ -182,6 +182,9 @@ npm run admin:claim -- <email> [--remove]
 
 # Rebuild the public trip summaries from the traveller records (see Setup > Public trips)
 npm run public-trips:backfill [-- --write]
+
+# Move messages into conversation threads (see Setup > Message threads)
+npm run messages:migrate [-- --write]
 ```
 
 <a id="setup"></a>
@@ -272,6 +275,17 @@ Logged-out visitors read `/publicTrips`, a summary of each trip (first name and 
 ```bash
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run public-trips:backfill
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run public-trips:backfill -- --write
+```
+
+<a id="message-threads"></a>
+
+#### Message threads
+
+Messages live in conversations both travellers see (`/conversations`, with a per-traveller summary in `/userConversations`); messages stored before that sit in each recipient's `/messages` inbox. The migration moves each one from a traveller into its conversation and each email-only one to `/legacyMessages` (read-only), then removes `/messages`. It only counts until you add `--write`. Deploy the rules first, then run it, then deploy the app:
+
+```bash
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run messages:migrate
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run messages:migrate -- --write
 ```
 
 ### Environment Variables

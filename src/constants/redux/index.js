@@ -17,6 +17,12 @@ const MESSAGES_BASE_ACTIONS = Object.freeze({
 	DELETE_MESSAGE: 'messages/deleteMessage',
 	MARK_MESSAGES_READ: 'messages/markMessagesRead',
 	DELETE_TRAVELLER_MESSAGES: 'messages/deleteTravellerMessages',
+	LOAD_CONVERSATIONS: 'messages/loadConversations',
+	LOAD_THREAD: 'messages/loadThread',
+	SEND_MESSAGE: 'messages/sendMessage',
+	MARK_CONVERSATION_READ: 'messages/markConversationRead',
+	DELETE_CONVERSATION: 'messages/deleteConversation',
+	DELETE_LEGACY_MESSAGE: 'messages/deleteLegacyMessage',
 })
 
 const AUTHENTICATION_BASE_ACTIONS = Object.freeze({

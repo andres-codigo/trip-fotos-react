@@ -114,6 +114,11 @@ describe('messagesSlice', () => {
 					messages: [],
 					status: 'idle',
 					error: null,
+					conversations: [],
+					legacyMessages: [],
+					conversationsStatus: 'idle',
+					conversationsError: null,
+					threads: {},
 				})
 			})
 		})
@@ -610,7 +615,7 @@ describe('messagesSlice', () => {
 		const travellerId = 'traveller-to-delete'
 
 		describe('success scenarios', () => {
-			it('should send an authorised DELETE for the traveller messages', async () => {
+			it('should remove the inbox, conversation entries and legacy messages in one authorised update', async () => {
 				fetch.mockResolvedValueOnce({ ok: true })
 
 				const result = await store.dispatch(
@@ -619,12 +624,14 @@ describe('messagesSlice', () => {
 
 				expect(result.meta.requestStatus).toBe('fulfilled')
 				expect(result.payload).toBe(travellerId)
-				expect(fetch).toHaveBeenCalledWith(
-					expect.stringContaining(
-						`/messages/${travellerId}.json?auth=${MOCK_USER.TOKEN}`,
-					),
-					expect.objectContaining({ method: 'DELETE' }),
-				)
+				const [url, options] = fetch.mock.calls[0]
+				expect(url).toContain(`/.json?auth=${MOCK_USER.TOKEN}`)
+				expect(options.method).toBe('PATCH')
+				expect(JSON.parse(options.body)).toEqual({
+					[`messages/${travellerId}`]: null,
+					[`userConversations/${travellerId}`]: null,
+					[`legacyMessages/${travellerId}`]: null,
+				})
 			})
 		})
 
@@ -667,6 +674,11 @@ describe('messagesSlice', () => {
 					messages: [],
 					status: 'idle',
 					error: null,
+					conversations: [],
+					legacyMessages: [],
+					conversationsStatus: 'idle',
+					conversationsError: null,
+					threads: {},
 				})
 			})
 		})
