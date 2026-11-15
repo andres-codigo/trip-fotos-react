@@ -50,15 +50,8 @@ describe('wait-for-ci', () => {
 		)
 	})
 
-	it('counts only the latest-updated run of each workflow', () => {
+	it('lets a newer run stand for one it cancelled, and waits on a re-run', () => {
 		const cancelled = run('Vitest', 'completed', 'cancelled')
-		const rerun = run(
-			'Vitest',
-			'in_progress',
-			'',
-			'2026-11-16T10:00:05Z',
-			'2026-11-16T10:02:00Z',
-		)
 		const skipped = run(
 			'Vitest',
 			'completed',
@@ -66,10 +59,63 @@ describe('wait-for-ci', () => {
 			'2026-11-16T10:00:07Z',
 			'2026-11-16T10:00:10Z',
 		)
-		expect(evaluate([cancelled, skipped], SINCE).state).toBe('pass')
-		expect(evaluate([cancelled, skipped, rerun], SINCE).state).toBe(
-			'waiting',
+		const rerun = { ...cancelled, status: 'in_progress', conclusion: '' }
+
+		expect(summary(evaluate([cancelled, skipped], SINCE))).toBe(
+			'CI passed: 1 workflows; skipped: Vitest',
 		)
+		expect(evaluate([rerun, skipped], SINCE).state).toBe('waiting')
+		expect(
+			evaluate([{ ...cancelled, conclusion: 'success' }, skipped], SINCE)
+				.runs[0].conclusion,
+		).toBe('success')
+	})
+
+	it('waits on the real run the ready event starts beside a skipped one', () => {
+		// PR #781: the skipped run completed first, with a later updatedAt than the real run had while it ran
+		const skipped = run(
+			'Vitest',
+			'completed',
+			'skipped',
+			'2026-11-16T10:00:36Z',
+			'2026-11-16T10:00:47Z',
+		)
+		const real = run(
+			'Vitest',
+			'in_progress',
+			'',
+			'2026-11-16T10:00:39Z',
+			'2026-11-16T10:00:40Z',
+		)
+
+		expect(evaluate([skipped, real], SINCE).state).toBe('waiting')
+		for (const conclusion of ['success', 'failure']) {
+			const result = evaluate(
+				[
+					skipped,
+					{
+						...real,
+						status: 'completed',
+						conclusion,
+						updatedAt: '2026-11-16T10:02:16Z',
+					},
+				],
+				SINCE,
+			)
+			expect(result.runs.map((r) => r.conclusion)).toEqual([conclusion])
+		}
+	})
+
+	it('lets a run that ran outrank a later skipped one', () => {
+		const result = evaluate(
+			[
+				run('Vitest', 'completed', 'failure'),
+				run('Vitest', 'completed', 'skipped', '2026-11-16T10:01:00Z'),
+			],
+			SINCE,
+		)
+
+		expect(result.state).toBe('fail')
 	})
 
 	it('fails and names the failed runs', () => {
