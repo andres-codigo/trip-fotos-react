@@ -411,7 +411,7 @@ trip-fotos-react/
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
-├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, seed-emulators.mjs and e2e-groups.mjs with their tests, dependency-check output)
+├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, seed-emulators.mjs, e2e-groups.mjs and wait-for-ci.mjs with their tests, dependency-check output)
 ├── src/
 │   ├── app/            # Main application component
 │   ├── assets/         # Fonts, SVGs, and other static assets

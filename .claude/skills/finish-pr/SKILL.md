@@ -17,7 +17,7 @@ Finish the PR for the current branch (or `$ARGUMENTS`), yourself and without ask
 
 ## Merge
 
-Follow [Finishing an issue](../../../docs/ci-cd.md#finishing-an-issue): mark ready, wait for the runs the ready event starts (the draft-time "skipping" rows are not a pass: poll `gh run list --branch <branch>` until none is incomplete), check every check is green, merge, delete the head and merged local branches, re-read the Status.
+Follow [Finishing an issue](../../../docs/ci-cd.md#finishing-an-issue): mark ready, wait for the runs the ready event starts (the draft-time "skipping" rows are not a pass: run `node scripts/wait-for-ci.mjs <branch>` with `run_in_background` straight after marking ready and wait for its one-line result, never polling by hand), check every check is green, merge, delete the head and merged local branches, re-read the Status.
 
 - **Squash-merge** by default; **rebase-merge** multi-commit PRs whose commits are individually meaningful. Merge commits are disabled.
 
