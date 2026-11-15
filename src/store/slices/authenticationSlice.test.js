@@ -11,6 +11,7 @@ import {
 
 import { API_ERROR_MESSAGE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { PATHS } from '@/constants/ui'
 
 import authenticationReducer, {
 	login,
@@ -97,6 +98,8 @@ const initialiseStore = () => {
 }
 
 setupMocks()
+
+const ORIGIN = 'https://trip-fotos.example'
 
 describe('authenticationSlice', () => {
 	beforeEach(() => {
@@ -846,6 +849,11 @@ describe('authenticationSlice', () => {
 	})
 
 	describe('sendPasswordReset', () => {
+		beforeEach(() => {
+			vi.stubGlobal('window', { location: { origin: ORIGIN } })
+			return () => vi.unstubAllGlobals()
+		})
+
 		it('sends the reset email and resolves with the address', async () => {
 			sendPasswordResetEmail.mockResolvedValueOnce()
 
@@ -856,8 +864,27 @@ describe('authenticationSlice', () => {
 			expect(sendPasswordResetEmail).toHaveBeenCalledWith(
 				firebaseAuth,
 				MOCK_KEYS.EMAIL,
+				{ url: `${ORIGIN}${PATHS.AUTHENTICATION}` },
 			)
 			expect(result.payload).toBe(MOCK_KEYS.EMAIL)
+		})
+
+		it('sends the reset email without the Continue link when the domain is not authorised', async () => {
+			sendPasswordResetEmail
+				.mockRejectedValueOnce({
+					code: 'auth/unauthorized-continue-uri',
+				})
+				.mockResolvedValueOnce()
+
+			const result = await store.dispatch(
+				sendPasswordReset(MOCK_KEYS.EMAIL),
+			)
+
+			expect(sendPasswordResetEmail).toHaveBeenLastCalledWith(
+				firebaseAuth,
+				MOCK_KEYS.EMAIL,
+			)
+			expect(sendPasswordReset.fulfilled.match(result)).toBe(true)
 		})
 
 		it('answers an unknown address like a sent link, so it never says whether an account exists', async () => {
@@ -893,6 +920,11 @@ describe('authenticationSlice', () => {
 	})
 
 	describe('email verification', () => {
+		beforeEach(() => {
+			vi.stubGlobal('window', { location: { origin: ORIGIN } })
+			return () => vi.unstubAllGlobals()
+		})
+
 		const sessionUser = (overrides = {}) => ({
 			uid: MOCK_KEYS.LOCAL_ID,
 			email: MOCK_KEYS.EMAIL,
@@ -927,7 +959,9 @@ describe('authenticationSlice', () => {
 				}),
 			)
 
-			expect(sendEmailVerification).toHaveBeenCalledWith(user)
+			expect(sendEmailVerification).toHaveBeenCalledWith(user, {
+				url: `${ORIGIN}${PATHS.REGISTER}`,
+			})
 			const state = store.getState().authentication
 			expect(state.awaitingVerification).toBe(true)
 			expect(state.emailVerified).toBe(false)
@@ -969,6 +1003,21 @@ describe('authenticationSlice', () => {
 			const state = store.getState().authentication
 			expect(state.awaitingVerification).toBe(false)
 			expect(state.emailVerified).toBe(true)
+		})
+
+		it('resends without the Continue link when the domain is not authorised', async () => {
+			const user = sessionUser()
+			firebaseAuth.currentUser = user
+			sendEmailVerification
+				.mockRejectedValueOnce({
+					code: 'auth/unauthorized-continue-uri',
+				})
+				.mockResolvedValueOnce()
+
+			const result = await store.dispatch(resendVerification())
+
+			expect(sendEmailVerification).toHaveBeenLastCalledWith(user)
+			expect(resendVerification.fulfilled.match(result)).toBe(true)
 		})
 
 		it.each([

@@ -164,10 +164,16 @@ describe('Sign-up journey', () => {
 		cy.request(
 			`${new URL(API_DATABASE.URL).origin}/emulator/v1/projects/${Cypress.expose('FIREBASE_PROJECT_ID')}/oobCodes`,
 		).then(({ body }) => {
-			const { oobCode } = body.oobCodes.find(
+			const { oobCode, oobLink } = body.oobCodes.find(
 				(code) =>
 					code.email === email && code.requestType === 'VERIFY_EMAIL',
 			)
+			// Firebase's default email page offers this as a Continue button back to the app
+			cy.location('origin').then((origin) => {
+				expect(
+					new URL(oobLink).searchParams.get('continueUrl'),
+				).to.equal(`${origin}${PATHS.REGISTER}`)
+			})
 			cy.visit(
 				`${PATHS.AUTH_ACTION}?mode=${AUTH_ACTION_MODES.VERIFY_EMAIL}&oobCode=${oobCode}`,
 			)

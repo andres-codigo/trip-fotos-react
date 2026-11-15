@@ -22,8 +22,26 @@ import {
 	SESSION_STORAGE_KEYS,
 } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { PATHS } from '@/constants/ui'
 
 let timer
+
+// Firebase's default email page shows a Continue button back to this path. Preview
+// domains are not authorised, so those emails go without the button rather than not at all
+const sendWithContinue = async (send, path) => {
+	try {
+		await send({ url: `${window.location.origin}${path}` })
+	} catch (error) {
+		if (error.code !== 'auth/unauthorized-continue-uri') throw error
+		await send()
+	}
+}
+
+const sendVerification = (user) =>
+	sendWithContinue(
+		(...settings) => sendEmailVerification(user, ...settings),
+		PATHS.REGISTER,
+	)
 
 const persistSession = async (user, dispatch, forceRefresh = false) => {
 	const { token, expirationTime, claims } =
@@ -85,7 +103,7 @@ export const login = createAsyncThunk(
 			)
 
 			// A failed send still leaves the account; Check your inbox offers to send it again
-			if (isSignup) await sendEmailVerification(user).catch(() => {})
+			if (isSignup) await sendVerification(user).catch(() => {})
 
 			return {
 				...(await persistSession(user, dispatch)),
@@ -105,7 +123,7 @@ export const resendVerification = createAsyncThunk(
 	async (_, { rejectWithValue }) => {
 		try {
 			const user = getFirebaseAuth().currentUser
-			await sendEmailVerification(user)
+			await sendVerification(user)
 			return user.email
 		} catch (error) {
 			return rejectWithValue(
@@ -209,7 +227,15 @@ export const sendPasswordReset = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.SEND_PASSWORD_RESET,
 	async (email, { rejectWithValue }) => {
 		try {
-			await sendPasswordResetEmail(getFirebaseAuth(), email)
+			await sendWithContinue(
+				(...settings) =>
+					sendPasswordResetEmail(
+						getFirebaseAuth(),
+						email,
+						...settings,
+					),
+				PATHS.AUTHENTICATION,
+			)
 			return email
 		} catch (error) {
 			// Answered like a sent link, so the page never tells anyone whether an account exists

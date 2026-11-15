@@ -714,9 +714,12 @@ describe('<Authentication />', () => {
 				),
 			)
 			fillAndSubmitLoginForm()
-			return screen.findByRole('heading', {
+			const heading = await screen.findByRole('heading', {
 				name: VERIFY_EMAIL_CONFIG.TITLE,
 			})
+			// The heading can show before the view's effects run; its focus marks that they have
+			await waitFor(() => expect(heading).toHaveFocus())
+			return heading
 		}
 
 		it('swaps the sign-up card to Check your inbox, with its heading focused, instead of moving on', async () => {
