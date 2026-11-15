@@ -11,21 +11,36 @@ const TIMEOUT_MS = 45 * 60_000
 // Runs the ready event starts take a few seconds to be listed
 const SETTLE_MS = 60_000
 
-// Runs created before `since` (draft-time "skipping" runs) are ignored, and only
-// the latest-updated run of each workflow counts: a run a newer one cancelled,
-// or one re-run since, is superseded
+// Runs created before `since` (draft-time "skipping" runs) are ignored. Any
+// incomplete run keeps the wait going. Then one run stands for each workflow:
+// a cancelled run a newer one replaced drops out, a non-skipped run outranks a
+// skipped one (the ready event can start both), and the newest created wins
+const created = (run) => Date.parse(run.createdAt)
+
+const standing = (runs) => {
+	const live = runs.filter(
+		(run) =>
+			run.conclusion !== 'cancelled' ||
+			!runs.some((other) => created(other) > created(run)),
+	)
+	const ran = live.filter((run) => run.conclusion !== 'skipped')
+	return (ran.length ? ran : live).reduce((a, b) =>
+		created(b) > created(a) ? b : a,
+	)
+}
+
 export const evaluate = (runs, since) => {
-	const latest = new Map()
+	const byWorkflow = new Map()
 	for (const run of runs) {
-		if (Date.parse(run.createdAt) < since) continue
-		const seen = latest.get(run.name)
-		if (!seen || Date.parse(run.updatedAt) > Date.parse(seen.updatedAt))
-			latest.set(run.name, run)
+		if (created(run) < since) continue
+		byWorkflow.set(run.name, [...(byWorkflow.get(run.name) ?? []), run])
 	}
-	const recent = [...latest.values()]
-	if (recent.length === 0) return { state: 'none', runs: recent }
-	if (recent.some((run) => run.status !== 'completed'))
-		return { state: 'waiting', runs: recent }
+	if (byWorkflow.size === 0) return { state: 'none', runs: [] }
+	const open = [...byWorkflow.values()]
+		.flat()
+		.filter((run) => run.status !== 'completed')
+	if (open.length) return { state: 'waiting', runs: open }
+	const recent = [...byWorkflow.values()].map(standing)
 	const failed = recent.filter((run) => !PASSED.has(run.conclusion))
 	return { state: failed.length ? 'fail' : 'pass', runs: recent, failed }
 }
