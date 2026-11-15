@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.6](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.5...v0.28.6) (2026-11-15)
+
+
+### Bug Fixes
+
+* verified sign-up lands on Register logged out ([#787](https://github.com/andres-codigo/trip-fotos-react/issues/787)) ([d940218](https://github.com/andres-codigo/trip-fotos-react/commit/d9402181d4bef9f03b22ad745c77398c9abb0dc9))
+
 ## [0.28.5](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.4...v0.28.5) (2026-11-15)
 
 
