@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.3](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.2...v0.28.3) (2026-11-15)
+
+
+### Enhancements
+
+* narrow /ui-check affected captures for additive script and constants changes ([#778](https://github.com/andres-codigo/trip-fotos-react/issues/778)) ([0e5f850](https://github.com/andres-codigo/trip-fotos-react/commit/0e5f8506ef27a059d9e5761c6d0234b8c28433f5))
+
 ## [0.28.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.1...v0.28.2) (2026-11-15)
 
 
