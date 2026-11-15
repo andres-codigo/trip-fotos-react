@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.4](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.3...v0.28.4) (2026-11-15)
+
+
+### Enhancements
+
+* an edited /ui-check capture selects only itself ([#781](https://github.com/andres-codigo/trip-fotos-react/issues/781)) ([c6a9ec4](https://github.com/andres-codigo/trip-fotos-react/commit/c6a9ec4cfec7d5d6f7b8ab21508e52a358d36044))
+
 ## [0.28.3](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.2...v0.28.3) (2026-11-15)
 
 
