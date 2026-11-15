@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { addedCaptures, narrowChange, onlyAddsExposeKeys } from '../narrow.mjs'
+import {
+	changedCaptures,
+	narrowChange,
+	onlyAddsExposeKeys,
+} from '../narrow.mjs'
 import { CAPTURES, affectedCaptures } from '../../../../cypress/impact.js'
 
 const script = ({ imports = '', helpers = '', hooks = '', captures = '' }) =>
@@ -32,7 +36,7 @@ const NEW_CAPTURE = [
 	'\t\t})',
 ].join('\n')
 
-describe('addedCaptures', () => {
+describe('changedCaptures', () => {
 	const before = script({})
 
 	it('selects only the captures an additive change adds', () => {
@@ -44,7 +48,7 @@ describe('addedCaptures', () => {
 			captures: NEW_CAPTURE,
 		})
 
-		expect(addedCaptures(before, after)).toEqual(['verify-inbox'])
+		expect(changedCaptures(before, after)).toEqual(['verify-inbox'])
 	})
 
 	it('reads a name added to an existing import as additive', () => {
@@ -53,12 +57,12 @@ describe('addedCaptures', () => {
 			'import {\n\tAUTH_PATHS,\n\tPATHS,\n}',
 		)
 
-		expect(addedCaptures(before, after)).toEqual(['verify-inbox'])
+		expect(changedCaptures(before, after)).toEqual(['verify-inbox'])
 	})
 
 	it('ignores a comment-only edit', () => {
 		expect(
-			addedCaptures(
+			changedCaptures(
 				before,
 				`// Captures\n${before}`.replace(
 					'\t\t\tvisit(',
@@ -68,18 +72,41 @@ describe('addedCaptures', () => {
 		).toEqual([])
 	})
 
-	it('runs everything when an existing capture body changes', () => {
+	it('selects only the capture an edit changes, beside the ones it adds', () => {
+		const edited = (text) =>
+			text.replace('PATHS.HOME)\n\t\t})', 'PATHS.ROOT)\n\t\t})')
+
+		expect(changedCaptures(before, edited(before))).toEqual([
+			'public-pages',
+		])
 		expect(
-			addedCaptures(
+			changedCaptures(before, edited(script({ captures: NEW_CAPTURE }))),
+		).toEqual(['public-pages', 'verify-inbox'])
+	})
+
+	it('selects nothing for a removed capture', () => {
+		const withTwo = script({ captures: NEW_CAPTURE })
+
+		expect(changedCaptures(withTwo, before)).toEqual([])
+	})
+
+	it('runs everything when a shared helper changes beside an edited capture', () => {
+		expect(
+			changedCaptures(
 				before,
-				before.replace('PATHS.HOME)\n\t\t})', 'PATHS.ROOT)\n\t\t})'),
+				before
+					.replace('PATHS.HOME)\n\t\t})', 'PATHS.ROOT)\n\t\t})')
+					.replace(
+						'cy.visit(path)',
+						'cy.visit(path, { log: false })',
+					),
 			),
 		).toBeNull()
 	})
 
 	it('runs everything when a shared helper changes or goes', () => {
 		expect(
-			addedCaptures(
+			changedCaptures(
 				before,
 				before.replace(
 					'cy.visit(path)',
@@ -88,7 +115,7 @@ describe('addedCaptures', () => {
 			),
 		).toBeNull()
 		expect(
-			addedCaptures(
+			changedCaptures(
 				before,
 				before.replace('const visit = (path) => cy.visit(path)', ''),
 			),
@@ -97,7 +124,7 @@ describe('addedCaptures', () => {
 
 	it('runs everything when a line is added inside a shared helper or hook', () => {
 		expect(
-			addedCaptures(
+			changedCaptures(
 				before,
 				before.replace(
 					"\t\tcy.task('resetEmulatorData')",
@@ -109,7 +136,7 @@ describe('addedCaptures', () => {
 
 	it('runs everything when a new hook joins the captures already there', () => {
 		expect(
-			addedCaptures(
+			changedCaptures(
 				before,
 				script({ hooks: '\tafterEach(() => cy.clearCookies())' }),
 			),
@@ -117,8 +144,8 @@ describe('addedCaptures', () => {
 	})
 
 	it('runs everything when the script is new or removed', () => {
-		expect(addedCaptures(null, before)).toBeNull()
-		expect(addedCaptures(before, null)).toBeNull()
+		expect(changedCaptures(null, before)).toBeNull()
+		expect(changedCaptures(before, null)).toBeNull()
 	})
 })
 
