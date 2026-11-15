@@ -67,7 +67,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Pages open at the top: moving to another page starts at the top, and tapping the page you are on in the menu scrolls back up
 - Clearer trip cards: cities show as small tags with a pin, Message stands out as the action on a trip, and the photos on cards side by side line up
 - Full-screen photos: a traveller's photos open full screen, with swipe and next/previous buttons, a photo counter and a skeleton while each one loads
-- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, faster local checks that rerun only the checks and tests a change can affect, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
+- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, CI waits that report once instead of polling, faster local checks that rerun only the checks and tests a change can affect, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
 
@@ -411,7 +411,7 @@ trip-fotos-react/
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
-├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, seed-emulators.mjs and e2e-groups.mjs with their tests, dependency-check output)
+├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, seed-emulators.mjs, e2e-groups.mjs and wait-for-ci.mjs with their tests, dependency-check output)
 ├── src/
 │   ├── app/            # Main application component
 │   ├── assets/         # Fonts, SVGs, and other static assets
