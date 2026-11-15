@@ -35,7 +35,10 @@ function TabBar({ isTraveller, className }) {
 			{/* Holds the bar's height in the page flow, so the footer scrolls clear of the fixed bar */}
 			<div
 				aria-hidden="true"
-				className="hidden h-[calc(3.75rem+1px+env(safe-area-inset-bottom))] flex-none mobile:block"
+				className={cn(
+					'hidden h-[calc(3.75rem+1px+env(safe-area-inset-bottom))] flex-none mobile:block',
+					className,
+				)}
 				data-cy={TAB_BAR.SPACER}
 			/>
 			<nav

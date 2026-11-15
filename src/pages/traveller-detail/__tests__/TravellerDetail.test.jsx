@@ -282,7 +282,7 @@ describe('<TravellerDetail />', () => {
 		const message = screen.getByRole('link', { name: 'Message Ada' })
 		expect(profile).toContainElement(message)
 		expect(message).toHaveAttribute('data-cy', TRAVELLER_DETAIL.MESSAGE)
-		expect(message).toHaveAttribute('href', '/travellers/abc/contact')
+		expect(message).toHaveAttribute('href', '/messages/abc_me')
 	})
 
 	it('hides Message on the own record', async () => {

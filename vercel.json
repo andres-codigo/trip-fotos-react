@@ -15,6 +15,10 @@
 		{
 			"source": "/travellers/:id/edit",
 			"destination": "/"
+		},
+		{
+			"source": "/messages/:conversationId",
+			"destination": "/"
 		}
 	],
 	"trailingSlash": false,

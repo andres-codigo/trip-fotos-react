@@ -4,26 +4,14 @@ import { MESSAGES_PAGE_SKELETON } from '@/constants/test'
 import { MESSAGES_CONFIG } from '@/constants/travellers'
 import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT } from '@/constants/ui'
 
-import MessagesSkeleton from '@/components/messages/messages-skeleton/MessagesSkeleton'
+import ConversationSkeleton from '@/components/messages/conversation-skeleton/ConversationSkeleton'
 
-import BaseCard from '@/components/ui/card/BaseCard'
+const CARD = 'rounded-lg border border-border-card shadow-card'
 
 // The route fallback while the page's code downloads: the page's own loading state, so it takes over with nothing moving
 const MessagesPageSkeleton = () => {
 	const { width } = useViewport()
-	const isInbox = width >= GLOBAL.BREAKPOINT.TABLET
-
-	const heading = <h1 className="mt-0 mb-1">{MESSAGES_CONFIG.TITLE}</h1>
-	const status = (
-		<p
-			role="status"
-			className={cn(
-				'mt-1 text-sm text-text-muted',
-				isInbox ? 'mb-4' : 'mb-3.5',
-			)}>
-			{GLOBAL.SPINNER_LABEL.MESSAGES}
-		</p>
-	)
+	const isWide = width >= GLOBAL.BREAKPOINT.TABLET
 
 	return (
 		<main
@@ -32,23 +20,38 @@ const MessagesPageSkeleton = () => {
 			className="mainContainer cardPage text-left"
 			data-cy={MESSAGES_PAGE_SKELETON.ROOT}>
 			<title>{`${MESSAGES_CONFIG.TITLE} · ${GLOBAL.SITE_NAME}`}</title>
-			{isInbox ? (
-				<div className={PAGE_LAYOUT.WIDE}>
-					{heading}
-					{status}
-					<div className={PAGE_LAYOUT.COLUMNS}>
-						<MessagesSkeleton isInbox />
+			<div className={PAGE_LAYOUT.WIDE}>
+				<h1 className="mt-0 mb-1">{MESSAGES_CONFIG.TITLE}</h1>
+				<p
+					role="status"
+					className="mt-1 mb-3 text-sm text-text-muted lg:mb-4">
+					{GLOBAL.SPINNER_LABEL.MESSAGES}
+				</p>
+				<div className={PAGE_LAYOUT.COLUMNS}>
+					<div className={cn(CARD, 'overflow-hidden bg-surface')}>
+						<ConversationSkeleton
+							variant="list"
+							count={
+								isWide
+									? MESSAGES_CONFIG.DESKTOP_LIST_SKELETON_COUNT
+									: MESSAGES_CONFIG.LIST_SKELETON_COUNT
+							}
+						/>
 					</div>
+					{isWide && (
+						<div
+							className={cn(
+								CARD,
+								'flex h-[calc(100dvh-15rem)] min-h-[28rem] flex-col overflow-hidden bg-bg',
+							)}>
+							<ConversationSkeleton variant="header" />
+							<div className="mt-auto p-3">
+								<ConversationSkeleton variant="thread" />
+							</div>
+						</div>
+					)}
 				</div>
-			) : (
-				<section>
-					<BaseCard>
-						{heading}
-						{status}
-						<MessagesSkeleton />
-					</BaseCard>
-				</section>
-			)}
+			</div>
 		</main>
 	)
 }

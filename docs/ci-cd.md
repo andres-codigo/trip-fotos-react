@@ -140,6 +140,8 @@ Epics skip step 3 and go from Backlog straight to In progress. Never run `start-
 
 Once the change passes `/verify` and the PR is ready for review:
 
+**Deploy order:** merging deploys the app (Vercel builds `main`), so a PR that changes `firebase/database.rules.json` or the data's shape gets its rules and data in first. Before step 2, deploy the rules with `npm run firebase:rules`, then run the PR's migration or backfill dry, check its counts and run it with `-- --write` (as `npm run messages:migrate` did for message threads, and `npm run public-trips:backfill` for public trips), then merge.
+
 1. Wait for the runs that marking it ready starts: for a few seconds `gh pr checks` still shows the draft-time runs as "skipping", which is not a pass. Poll `gh run list --branch <branch>` until no run created at or after the ready event is incomplete, then check that every check passed (a skipped Dependabot job is fine; a test job that skips although the change touches its trigger paths is not). If a check fails, stop and report it.
 2. Squash-merge (or rebase-merge a multi-commit PR whose commits are individually meaningful) and delete the head branch, then delete the merged local branch.
 3. Run `node .claude/skills/verify/reset-checks.mjs cache`: a squash merge leaves `main` with the verified tree, so the old `/verify` and `/ui-check` ticks would still match.

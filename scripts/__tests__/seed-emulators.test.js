@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { MOCK_INBOX } from '@/constants/test/mock-data/mock-messages'
+import { MOCK_THREADS } from '@/constants/test/mock-data/mock-messages'
 import { TONE_COUNT, getToneIndex } from '@/utils/getToneIndex'
 
 import { decodePng } from '../../.claude/skills/ui-check/compare.mjs'
 import {
+	SEED_FORMER_ID,
 	SEED_USERS,
 	assertEmulatorsOnly,
-	buildMessages,
+	buildConversations,
 	buildTravellers,
 	needsFullSeed,
 	solidPng,
@@ -108,40 +109,63 @@ describe('seed-emulators', () => {
 				].sort(),
 			)
 		})
-
-		it('gives the first traveller a message from the second, with the fields the rules require of a new message', () => {
-			const messages = buildMessages()[SEED_USERS.TRAVELLER_ONE.uid]
-			const fromTraveller = messages[MOCK_INBOX.SAMPLE_MESSAGE_ONE.id]
-
-			expect(Object.keys(fromTraveller).sort()).toEqual([
-				'createdAt',
-				'message',
-				'read',
-				'senderId',
-			])
-			expect(fromTraveller.senderId).toBe(SEED_USERS.TRAVELLER_TWO.uid)
-			expect(fromTraveller.read).toBe(false)
-			expect(typeof fromTraveller.createdAt).toBe('number')
-		})
-
-		it('keeps one older message with only an email, as stored before messaging was travellers-only', () => {
-			const older =
-				buildMessages()[SEED_USERS.TRAVELLER_ONE.uid][
-					MOCK_INBOX.SAMPLE_MESSAGE_TWO.id
-				]
-
-			expect(Object.keys(older).sort()).toEqual(['message', 'userEmail'])
-		})
 	})
 
-	it('dates the unread message from the clock it is given', () => {
+	describe('buildConversations', () => {
 		const now = Date.UTC(2026, 5, 15, 12)
-		const message =
-			buildMessages(now)[SEED_USERS.TRAVELLER_ONE.uid][
-				MOCK_INBOX.SAMPLE_MESSAGE_ONE.id
-			]
+		const one = SEED_USERS.TRAVELLER_ONE.uid
+		const two = SEED_USERS.TRAVELLER_TWO.uid
+		const twoSidedId = [one, two].sort().join('_')
+		const formerId = [one, SEED_FORMER_ID].sort().join('_')
+		const { conversations, userConversations, legacyMessages } =
+			buildConversations(now)
 
-		expect(message.createdAt).toBe(now - 12 * 60 * 1000)
+		it('stores a thread both travellers wrote in, with the fields the rules require of a message', () => {
+			const messages = Object.values(conversations[twoSidedId].messages)
+
+			expect(messages.map(({ senderId }) => senderId)).toEqual([
+				two,
+				one,
+				two,
+			])
+			messages.forEach((message) =>
+				expect(Object.keys(message).sort()).toEqual([
+					'createdAt',
+					'message',
+					'senderId',
+				]),
+			)
+		})
+
+		it('dates the last message from the clock it is given', () => {
+			const last = MOCK_THREADS.TWO_SIDED.at(-1)
+
+			expect(userConversations[one][twoSidedId].lastAt).toBe(
+				now - last.ago,
+			)
+		})
+
+		it('leaves the thread unread for the first traveller, whom the second wrote to last', () => {
+			const entry = userConversations[one][twoSidedId]
+
+			expect(entry.lastSenderId).toBe(two)
+			expect(entry.readAt).toBeUndefined()
+			expect(userConversations[two][twoSidedId].otherId).toBe(one)
+		})
+
+		it('keeps a read thread from a former traveller, with no entry of their own', () => {
+			expect(userConversations[one][formerId].readAt).toBe(
+				userConversations[one][formerId].lastAt,
+			)
+			expect(userConversations[SEED_FORMER_ID]).toBeUndefined()
+		})
+
+		it('keeps one email-only message apart from the threads', () => {
+			expect(legacyMessages[one][MOCK_THREADS.LEGACY.id]).toEqual({
+				userEmail: MOCK_THREADS.LEGACY.userEmail,
+				message: MOCK_THREADS.LEGACY.message,
+			})
+		})
 	})
 
 	it('writes a PNG of the given size and colour', () => {

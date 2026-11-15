@@ -7,8 +7,9 @@ import { getDatabase } from 'firebase-admin/database'
 import { getStorage } from 'firebase-admin/storage'
 
 import { MOCK_TRAVELLERS } from '../src/constants/test/mock-data/mock-travellers.js'
-import { MOCK_INBOX } from '../src/constants/test/mock-data/mock-messages.js'
+import { MOCK_THREADS } from '../src/constants/test/mock-data/mock-messages.js'
 import { toPublicTrips } from '../src/utils/publicTrip/index.js'
+import { conversationId } from '../src/utils/conversationId/index.js'
 
 const PROJECT_ID = 'demo-trip-fotos'
 const DATABASE_URL = `https://${PROJECT_ID}-default-rtdb.firebaseio.com`
@@ -29,6 +30,8 @@ export const SEED_USERS = Object.freeze({
 	ADMIN: { uid: 'seed-admin', email: 'admin@example.com', admin: true },
 })
 export const SEED_PASSWORD = PASSWORD
+// No account or card: a traveller who has since deleted their profile
+export const SEED_FORMER_ID = 'seed-former'
 
 // One city per badge tone (see getToneIndex), so every tone renders
 const CITIES_ALL_TONES = [
@@ -146,23 +149,56 @@ export const buildTravellers = () => {
 	}
 }
 
-// `now` lets /ui-check seed against the clock it freezes, so "12 min ago" reads the same in every run
-export const buildMessages = (now = Date.now()) => ({
-	[SEED_USERS.TRAVELLER_ONE.uid]: {
-		// From the other seeded traveller, unread, so the card, Reply and the nav count all render
-		[MOCK_INBOX.SAMPLE_MESSAGE_ONE.id]: {
-			senderId: SEED_USERS.TRAVELLER_TWO.uid,
-			message: MOCK_INBOX.SAMPLE_MESSAGE_ONE.message,
-			createdAt: now - 12 * 60 * 1000,
-			read: false,
+const thread = (me, other, messages, now, { read }) => {
+	const cid = conversationId(me, other)
+	const stored = messages.map(({ id, fromOther, message, ago }) => ({
+		id,
+		senderId: fromOther ? other : me,
+		message,
+		createdAt: now - ago,
+	}))
+	const last = stored.at(-1)
+	const summary = (otherId) => ({
+		otherId,
+		lastId: last.id,
+		lastMessage: last.message,
+		lastSenderId: last.senderId,
+		lastAt: last.createdAt,
+	})
+	return {
+		cid,
+		messages: Object.fromEntries(
+			stored.map(({ id, ...message }) => [id, message]),
+		),
+		[me]: { ...summary(other), ...(read && { readAt: last.createdAt }) },
+		[other]: summary(me),
+	}
+}
+
+// `now` lets /ui-check seed against the clock it freezes, so "12 min ago" reads the same in every run. One thread both seeded travellers wrote in (unread for the first), one from a former traveller, and one email-only message
+export const buildConversations = (now = Date.now()) => {
+	const one = SEED_USERS.TRAVELLER_ONE.uid
+	const two = SEED_USERS.TRAVELLER_TWO.uid
+	const twoSided = thread(one, two, MOCK_THREADS.TWO_SIDED, now, {
+		read: false,
+	})
+	const former = thread(one, SEED_FORMER_ID, MOCK_THREADS.FORMER, now, {
+		read: true,
+	})
+	const { id, ...legacy } = MOCK_THREADS.LEGACY
+	return {
+		conversations: {
+			[twoSided.cid]: { messages: twoSided.messages },
+			[former.cid]: { messages: former.messages },
 		},
-		// An older message with only an email, as stored before messaging was travellers-only
-		[MOCK_INBOX.SAMPLE_MESSAGE_TWO.id]: {
-			userEmail: MOCK_INBOX.SAMPLE_MESSAGE_TWO.userEmail,
-			message: MOCK_INBOX.SAMPLE_MESSAGE_TWO.message,
+		// The former traveller's own entries went with their profile
+		userConversations: {
+			[one]: { [twoSided.cid]: twoSided[one], [former.cid]: former[one] },
+			[two]: { [twoSided.cid]: twoSided[two] },
 		},
-	},
-})
+		legacyMessages: { [one]: { [id]: legacy } },
+	}
+}
 
 export const assertEmulatorsOnly = (env = process.env) => {
 	const missing = REQUIRED_HOSTS.filter((name) => !env[name])
@@ -216,7 +252,7 @@ const writeData = async (db, bucket, now) => {
 	await db.ref().set({
 		travellers,
 		publicTrips: toPublicTrips(travellers),
-		messages: buildMessages(now),
+		...buildConversations(now),
 	})
 }
 

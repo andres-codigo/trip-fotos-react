@@ -1459,17 +1459,26 @@ describe('travellersSlice', () => {
 				},
 			})
 
+		const isMessagesUpdate = (options) =>
+			Object.keys(JSON.parse(options?.body ?? '{}')).some((path) =>
+				path.startsWith('userConversations/'),
+			)
+
+		const messagesUpdates = () =>
+			fetch.mock.calls.filter(([, options]) => isMessagesUpdate(options))
+
 		const mockFetchByUrl = ({
 			travellerOk = true,
 			messagesOk = true,
 		} = {}) =>
 			fetch.mockImplementation(async (url, options) => {
-				// The record and its public summary go in one root update
+				// The record and its public summary go in one root update, the messages in another
 				if (url.includes('/.json')) {
-					return { ok: travellerOk }
-				}
-				if (url.includes('/messages/')) {
-					return { ok: messagesOk }
+					return {
+						ok: isMessagesUpdate(options)
+							? messagesOk
+							: travellerOk,
+					}
 				}
 				if (options?.method === 'GET') {
 					return {
@@ -1505,10 +1514,10 @@ describe('travellersSlice', () => {
 					expect(ref).toHaveBeenCalledWith(undefined, file),
 				)
 				expect(deleteObject).toHaveBeenCalledTimes(files.length)
-				expect(fetch).toHaveBeenCalledWith(
-					expect.stringContaining(`/messages/${travellerId}.json`),
-					expect.objectContaining({ method: 'DELETE' }),
-				)
+				expect(savedUpdate(1)).toEqual({
+					[`userConversations/${travellerId}`]: null,
+					[`legacyMessages/${travellerId}`]: null,
+				})
 				// The cache is still fresh, so a GET proves the refresh was forced
 				expect(fetch).toHaveBeenCalledWith(
 					expect.stringContaining('/travellers.json'),
@@ -1655,10 +1664,7 @@ describe('travellersSlice', () => {
 				)
 
 				expect(result.meta.requestStatus).toBe('rejected')
-				expect(fetch).not.toHaveBeenCalledWith(
-					expect.stringContaining('/messages/'),
-					expect.anything(),
-				)
+				expect(messagesUpdates()).toEqual([])
 				expect(testStore.getState().travellers.status).toBe('failed')
 			})
 

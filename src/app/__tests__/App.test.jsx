@@ -38,6 +38,7 @@ vi.mock('@/constants/ui', () => ({
 		EDIT_TRAVELLER: '/travellers/:id/edit',
 		REGISTER: '/register',
 		MESSAGES: '/messages',
+		MESSAGE_THREAD: '/messages/:conversationId',
 		PRIVACY: '/privacy',
 		PAGE_NOT_FOUND: '/404',
 	},
@@ -77,10 +78,10 @@ vi.mock('@/components/layout/header/Header', () => ({
 	default: () => <div>Header</div>,
 }))
 vi.mock('@/components/layout/tab-bar/TabBar', () => ({
-	default: () => <div>TabBar</div>,
+	default: ({ className }) => <div data-class={className}>TabBar</div>,
 }))
 vi.mock('@/components/layout/footer/Footer', () => ({
-	default: () => <div>Footer</div>,
+	default: ({ className }) => <div data-class={className}>Footer</div>,
 }))
 vi.mock('@/pages/authentication/Authentication', () => ({
 	default: () => <div>UserAuthPage</div>,
@@ -90,9 +91,6 @@ vi.mock('@/pages/travellers/Travellers', () => ({
 }))
 vi.mock('@/pages/traveller-detail/TravellerDetail', () => ({
 	default: () => <div>TravellerDetailPage</div>,
-}))
-vi.mock('@/pages/contact-traveller/ContactTraveller', () => ({
-	default: () => <div>ContactTravellerPage</div>,
 }))
 vi.mock('@/pages/edit-trip/EditTrip', () => ({
 	default: () => <div>EditTripPage</div>,
@@ -397,8 +395,9 @@ describe('App', () => {
 			})
 		})
 
-		it('renders ContactTravellerPage when logged in and on a contact traveller route', async () => {
-			setAuthState('token', false)
+		it('sends a contact link to the conversation with that traveller', async () => {
+			useDispatchMock.mockReturnValue(vi.fn())
+			setAuthState('token', false, 'user-1')
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: '/travellers/abc123/contact',
@@ -407,11 +406,31 @@ describe('App', () => {
 			renderWithRoute('/travellers/abc123/contact')
 
 			await waitFor(() => {
-				expect(
-					screen.getByText('ContactTravellerPage'),
-				).toBeInTheDocument()
+				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
 			})
-			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
+		it('hides the tab bar and footer below 1024px on a thread', async () => {
+			useDispatchMock.mockReturnValue(vi.fn())
+			setAuthState('token', false, 'user-1')
+
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: '/messages/abc123_user-1',
+			})
+
+			renderWithRoute('/messages/abc123_user-1')
+
+			await waitFor(() => {
+				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
+			})
+			expect(screen.getByText('TabBar')).toHaveAttribute(
+				'data-class',
+				'mobile:hidden',
+			)
+			expect(screen.getByText('Footer')).toHaveAttribute(
+				'data-class',
+				'max-lg:hidden',
+			)
 		})
 
 		it('redirects to /authentication if not logged in and on an edit trip route', async () => {

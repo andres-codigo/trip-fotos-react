@@ -30,20 +30,24 @@ describe('<NavMenuMessagesLink />', () => {
 
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('have.text', '3')
 		cy.get('li a')
-			.should('have.attr', 'aria-label', 'Messages, 3 unread messages')
+			.should(
+				'have.attr',
+				'aria-label',
+				'Messages, 3 unread conversations',
+			)
 			.invoke('prop', 'innerText')
 			.then((text) => text.replace(/\s+/g, ' ').trim())
 			.should('eq', 'Messages 3')
 	})
 
-	it('uses the singular for one unread message', () => {
+	it('uses the singular for one unread conversation', () => {
 		mountLink({ unreadMessages: 1 })
 
 		cy.get(TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES).should('have.text', '1')
 		cy.get('li a').should(
 			'have.attr',
 			'aria-label',
-			'Messages, 1 unread message',
+			'Messages, 1 unread conversation',
 		)
 	})
 

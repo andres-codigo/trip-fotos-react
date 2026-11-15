@@ -210,12 +210,12 @@ describe('<TravellerItem />', () => {
 			).toHaveAttribute('href', '/travellers/abc')
 		})
 
-		it('shows contact for another traveller when registered', () => {
+		it('links Message to the conversation with another traveller when registered', () => {
 			setup({ isTraveller: true })
 			renderItem()
 			expect(screen.getByTestId(TRAVELLER_ITEM.MESSAGE)).toHaveAttribute(
 				'href',
-				'/travellers/abc/contact',
+				'/messages/abc_me',
 			)
 		})
 

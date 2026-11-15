@@ -2,7 +2,7 @@ import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
-import { TAB_BAR_SELECTORS } from '@/constants/test'
+import { TAB_BAR_SELECTORS, mockConversationSummary } from '@/constants/test'
 import { NAVIGATION, PATHS } from '@/constants/ui'
 
 import authenticationReducer from '@/store/slices/authenticationSlice'
@@ -32,7 +32,7 @@ const createStore = ({ isTraveller, messages }) => {
 				userId: USER_ID,
 			},
 			travellers: { ...initial.travellers, isTraveller },
-			messages: { ...initial.messages, messages },
+			messages: { ...initial.messages, conversations: messages },
 		},
 	})
 }
@@ -146,13 +146,13 @@ describe('<TabBar />', () => {
 			cy.viewport(390, 844)
 			mountTabBar({
 				messages: [
-					{ id: 'm1', read: false },
-					{ id: 'm2', read: false },
+					mockConversationSummary('m1', true),
+					mockConversationSummary('m2', true),
 				],
 			})
 
 			cy.get(TAB_BAR_SELECTORS.MESSAGES)
-				.should('contain.text', 'Messages, 2 unread messages')
+				.should('contain.text', 'Messages, 2 unread conversations')
 				.and('not.have.attr', 'aria-label')
 			cy.checkA11y()
 			cy.get(TAB_BAR_SELECTORS.UNREAD)

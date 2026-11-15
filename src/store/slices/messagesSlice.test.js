@@ -1,37 +1,33 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import configureTestStore from '@/testUtils/configureTestStore'
 
-import { MOCK_USER, MOCK_INBOX } from '@/constants/test'
-
+import { MOCK_USER, MOCK_THREADS } from '@/constants/test'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
 import { SENDER_STATUS } from '@/constants/travellers'
 
 import messagesReducer, {
-	contactTraveller,
-	loadMessages,
-	deleteMessage,
+	loadConversations,
+	loadThread,
+	sendMessage,
+	markConversationRead,
+	deleteConversation,
+	deleteLegacyMessage,
 	deleteTravellerMessages,
-	markMessagesRead,
-	selectMessagesState,
-	selectMessages,
-	selectHasMessages,
-	selectMessagesCount,
-	selectUnreadMessagesCount,
-	selectMessagesStatus,
-	selectMessagesError,
+	dismissFailedMessage,
+	selectConversations,
+	selectLegacyMessages,
+	selectConversationsStatus,
+	selectConversationsError,
+	selectThread,
+	selectIsConversationUnread,
+	selectUnreadConversationsCount,
 } from './messagesSlice'
 
 import { logout } from './authenticationSlice'
-import { handleApiError } from '@/utils/errorHandler'
-
-import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
 vi.mock('@/utils/errorHandler', () => ({
-	handleApiError: vi.fn((error, message) => {
-		const errorMessage = error?.message || error
-		return `${message}: ${errorMessage}`
-	}),
+	handleApiError: vi.fn((error, message) => `${message}: ${error?.message}`),
 }))
 
 vi.mock('./authenticationSlice', async () => {
@@ -43,566 +39,503 @@ vi.mock('./authenticationSlice', async () => {
 	}
 })
 
-let store
+const ME = MOCK_USER.USER_ID
+const { OTHER_ID, FORMER_ID, LEGACY } = MOCK_THREADS
+const cidWith = (other) => [ME, other].sort().join('_')
+const CID = cidWith(OTHER_ID)
+const FORMER_CID = cidWith(FORMER_ID)
+const CLEARED_CID = cidWith('mock-cleared-id')
 
-const initialiseStore = () => {
-	store = configureTestStore({
-		reducer: {
-			messages: messagesReducer,
+const NOW = 1794290000000
+const stored = MOCK_THREADS.TWO_SIDED.map(
+	({ id, fromOther, message, ago }) => ({
+		id,
+		senderId: fromOther ? OTHER_ID : ME,
+		message,
+		createdAt: NOW - ago,
+	}),
+)
+const last = stored.at(-1)
+
+const DB = Object.freeze({
+	userConversations: {
+		[CID]: {
+			otherId: OTHER_ID,
+			lastId: last.id,
+			lastMessage: last.message,
+			lastSenderId: OTHER_ID,
+			lastAt: last.createdAt,
 		},
-	})
-}
-
-beforeEach(() => {
-	initialiseStore()
-	vi.clearAllMocks()
-	if (!vi.isMockFunction(global.fetch)) {
-		global.fetch = vi.fn()
-	}
-	// mockInbox sets a lasting implementation, so clear it between tests
-	fetch.mockReset()
-})
-
-setupMocks()
-
-const { SAMPLE_MESSAGE_ONE, SAMPLE_MESSAGE_TWO } = MOCK_INBOX
-
-const SENDER_CARD = Object.freeze({ firstName: 'Jane', lastName: 'Smith' })
-
-// Stored shape: a traveller's message has a sender id, time and read flag; an older one only an email
-const FIREBASE_INBOX = Object.freeze({
-	[SAMPLE_MESSAGE_TWO.id]: {
-		userEmail: SAMPLE_MESSAGE_TWO.userEmail,
-		message: SAMPLE_MESSAGE_TWO.message,
+		[FORMER_CID]: {
+			otherId: FORMER_ID,
+			lastId: 'former-last',
+			lastMessage: 'Old news',
+			lastSenderId: FORMER_ID,
+			lastAt: NOW - 100000000,
+			readAt: NOW - 100000000,
+		},
+		// Cleared after its last message, so it stays hidden
+		[CLEARED_CID]: {
+			otherId: 'mock-cleared-id',
+			lastId: 'cleared-last',
+			lastMessage: 'Gone',
+			lastSenderId: 'mock-cleared-id',
+			lastAt: NOW - 5000,
+			clearedAt: NOW - 1000,
+		},
 	},
-	[SAMPLE_MESSAGE_ONE.id]: {
-		senderId: SAMPLE_MESSAGE_ONE.senderId,
-		message: SAMPLE_MESSAGE_ONE.message,
-		createdAt: SAMPLE_MESSAGE_ONE.createdAt,
-		read: false,
+	legacyMessages: {
+		[LEGACY.id]: { userEmail: LEGACY.userEmail, message: LEGACY.message },
 	},
+	messages: Object.fromEntries(stored.map(({ id, ...item }) => [id, item])),
+	travellers: { [OTHER_ID]: { firstName: 'Jane', lastName: 'Smith' } },
 })
 
 const okJson = (data) => ({ ok: true, json: async () => data })
 
-// Answers the inbox GET and each sender lookup by URL, so the order of lookups does not matter
-const mockInbox = (inbox, travellers = {}) => {
-	fetch.mockImplementation(async (url) => {
-		const traveller = url.match(/\/travellers\/([^.]+)\.json/)
-		if (!traveller) return okJson(inbox)
-		const card = travellers[traveller[1]]
-		if (card instanceof Error) throw card
-		if (card === 'not-ok') return { ok: false, status: 500 }
-		return okJson(card ?? null)
+// Strips the base rather than parsing the URL: CI sets no VITE_BACKEND_BASE_URL, so the URL starts with "undefined"
+const pathOf = (url) =>
+	url
+		.slice(String(API_DATABASE.BASE_URL).length)
+		.split('?')[0]
+		.replace(/\.json$/, '')
+
+// Answers each read by its path, so the order of requests does not matter
+const mockDatabase = ({ failing } = {}) =>
+	fetch.mockImplementation(async (url, options = {}) => {
+		const path = pathOf(url)
+		if (failing && path.includes(failing)) return { ok: false, status: 500 }
+		if (options.method && options.method !== 'GET') return okJson(null)
+		if (path === `/userConversations/${ME}`)
+			return okJson(DB.userConversations)
+		if (path === `/legacyMessages/${ME}`) return okJson(DB.legacyMessages)
+		if (path === `/conversations/${CID}/messages`)
+			return okJson(DB.messages)
+		const traveller = path.match(/^\/travellers\/(.+)$/)
+		if (traveller) return okJson(DB.travellers[traveller[1]] ?? null)
+		throw new Error(`Unexpected request: ${url}`)
 	})
-}
 
-const travellerLookups = () =>
-	fetch.mock.calls.filter(([url]) => url.includes('/travellers/'))
+const writes = () =>
+	fetch.mock.calls
+		.filter(([, options]) => options?.method && options.method !== 'GET')
+		.map(([url, options]) => ({
+			path: `${pathOf(url)}.json`,
+			method: options.method,
+			body: options.body && JSON.parse(options.body),
+		}))
 
-const seedMessages = async () => {
-	mockInbox(FIREBASE_INBOX, { [SAMPLE_MESSAGE_ONE.senderId]: SENDER_CARD })
-	await store.dispatch(loadMessages())
+let store
+
+beforeEach(() => {
+	store = configureTestStore({ reducer: { messages: messagesReducer } })
+	vi.clearAllMocks()
+	if (!vi.isMockFunction(global.fetch)) global.fetch = vi.fn()
 	fetch.mockReset()
-}
+	mockDatabase()
+})
+
+const conversation = (cid) =>
+	selectConversations(store.getState()).find(({ id }) => id === cid)
 
 describe('messagesSlice', () => {
 	describe('initial state', () => {
-		describe('success scenarios', () => {
-			it('should initialise with default state', () => {
-				expect(store.getState().messages).toEqual({
-					messages: [],
-					status: 'idle',
-					error: null,
-				})
+		it('starts with no conversations, legacy messages or threads', () => {
+			expect(store.getState().messages).toEqual({
+				conversations: [],
+				legacyMessages: [],
+				conversationsStatus: 'idle',
+				conversationsError: null,
+				threads: {},
 			})
 		})
 	})
 
-	describe('contactTraveller', () => {
-		const payload = {
-			travellerId: MOCK_INBOX.TRAVELLER_ID,
-			message: 'Hello there',
-		}
-
+	describe('loadConversations', () => {
 		describe('success scenarios', () => {
-			it('should POST an authorised message as the signed-in sender and not store it', async () => {
-				fetch.mockResolvedValueOnce(
-					okJson({ name: MOCK_INBOX.NEW_MESSAGE_ID }),
-				)
+			it('lists the visible conversations newest first, with the other member looked up', async () => {
+				await store.dispatch(loadConversations())
 
-				const result = await store.dispatch(contactTraveller(payload))
-
-				expect(result.meta.requestStatus).toBe('fulfilled')
-				expect(result.payload).toEqual({
-					id: MOCK_INBOX.NEW_MESSAGE_ID,
-					travellerId: payload.travellerId,
-					senderId: MOCK_USER.USER_ID,
-					message: payload.message,
+				const conversations = selectConversations(store.getState())
+				expect(conversations.map(({ id }) => id)).toEqual([
+					CID,
+					FORMER_CID,
+				])
+				expect(conversations[0]).toMatchObject({
+					otherId: OTHER_ID,
+					otherName: 'Jane Smith',
+					otherStatus: SENDER_STATUS.TRAVELLER,
+					lastMessage: last.message,
+					readAt: null,
 				})
-
-				const [url, options] = fetch.mock.calls[0]
-				expect(url).toContain(
-					`/messages/${payload.travellerId}.json?auth=${MOCK_USER.TOKEN}`,
+				expect(conversations[1].otherStatus).toBe(SENDER_STATUS.FORMER)
+				expect(selectConversationsStatus(store.getState())).toBe(
+					'succeeded',
 				)
-				expect(options.method).toBe('POST')
-				expect(JSON.parse(options.body)).toEqual({
-					senderId: MOCK_USER.USER_ID,
-					message: payload.message,
-					createdAt: API_DATABASE.SERVER_TIMESTAMP,
-					read: false,
-				})
-
-				expect(store.getState().messages.status).toBe('succeeded')
-				expect(store.getState().messages.messages).toEqual([])
 			})
 
-			it('should ignore an email passed by an older caller', async () => {
-				fetch.mockResolvedValueOnce(
-					okJson({ name: MOCK_INBOX.NEW_MESSAGE_ID }),
+			it('loads the email-only messages apart from the conversations', async () => {
+				await store.dispatch(loadConversations())
+
+				expect(selectLegacyMessages(store.getState())).toEqual([
+					{
+						id: LEGACY.id,
+						userEmail: LEGACY.userEmail,
+						message: LEGACY.message,
+					},
+				])
+			})
+
+			it('counts a conversation the other member wrote in since it was read as unread', async () => {
+				await store.dispatch(loadConversations())
+
+				expect(selectUnreadConversationsCount(store.getState())).toBe(1)
+				expect(selectIsConversationUnread(store.getState(), CID)).toBe(
+					true,
+				)
+				expect(
+					selectIsConversationUnread(store.getState(), FORMER_CID),
+				).toBe(false)
+			})
+
+			it('treats an empty inbox as no conversations', async () => {
+				fetch.mockImplementation(async () => okJson(null))
+
+				await store.dispatch(loadConversations())
+
+				expect(selectConversations(store.getState())).toEqual([])
+				expect(selectLegacyMessages(store.getState())).toEqual([])
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('sets the error when the list cannot be read', async () => {
+				mockDatabase({ failing: '/userConversations/' })
+
+				await store.dispatch(loadConversations())
+
+				expect(selectConversationsStatus(store.getState())).toBe(
+					'failed',
+				)
+				expect(selectConversationsError(store.getState())).toContain(
+					API_ERROR_MESSAGE.LOAD_CONVERSATIONS_CATCH,
+				)
+			})
+		})
+	})
+
+	describe('loadThread', () => {
+		describe('success scenarios', () => {
+			it('loads the messages oldest first, with the other member from the list', async () => {
+				await store.dispatch(loadConversations())
+				fetch.mockClear()
+
+				await store.dispatch(loadThread(CID))
+
+				const thread = selectThread(store.getState(), CID)
+				expect(thread.status).toBe('succeeded')
+				expect(thread.otherName).toBe('Jane Smith')
+				expect(thread.messages.map(({ id }) => id)).toEqual(
+					stored.map(({ id }) => id),
+				)
+				expect(
+					fetch.mock.calls.some(([url]) =>
+						url.includes('/travellers/'),
+					),
+				).toBe(false)
+			})
+
+			it('looks the other member up when the conversation is not listed yet', async () => {
+				await store.dispatch(loadThread(CID))
+
+				expect(selectThread(store.getState(), CID)).toMatchObject({
+					otherId: OTHER_ID,
+					otherName: 'Jane Smith',
+					otherStatus: SENDER_STATUS.TRAVELLER,
+				})
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('sets the thread error when the messages cannot be read', async () => {
+				mockDatabase({ failing: '/conversations/' })
+
+				await store.dispatch(loadThread(CID))
+
+				const thread = selectThread(store.getState(), CID)
+				expect(thread.status).toBe('failed')
+				expect(thread.error).toContain(
+					API_ERROR_MESSAGE.LOAD_THREAD_CATCH,
+				)
+			})
+		})
+	})
+
+	describe('sendMessage', () => {
+		const payload = { otherId: OTHER_ID, message: 'See you in Porto!' }
+
+		describe('success scenarios', () => {
+			it('writes the message and both summaries in one authorised update, keyed by a push id', async () => {
+				const result = await store.dispatch(sendMessage(payload))
+
+				expect(result.meta.requestStatus).toBe('fulfilled')
+				const id = result.payload.id
+				expect(id).toMatch(/^[-0-9A-Za-z_]{20}$/)
+				const [write] = writes()
+				expect(write.path).toBe('/.json')
+				expect(write.method).toBe('PATCH')
+				const summary = {
+					lastId: id,
+					lastMessage: payload.message,
+					lastSenderId: ME,
+					lastAt: API_DATABASE.SERVER_TIMESTAMP,
+				}
+				expect(write.body).toEqual({
+					[`conversations/${CID}/messages/${id}`]: {
+						senderId: ME,
+						message: payload.message,
+						createdAt: API_DATABASE.SERVER_TIMESTAMP,
+					},
+					...Object.fromEntries(
+						Object.entries({ otherId: OTHER_ID, ...summary }).map(
+							([key, value]) => [
+								`userConversations/${ME}/${CID}/${key}`,
+								value,
+							],
+						),
+					),
+					...Object.fromEntries(
+						Object.entries({ otherId: ME, ...summary }).map(
+							([key, value]) => [
+								`userConversations/${OTHER_ID}/${CID}/${key}`,
+								value,
+							],
+						),
+					),
+				})
+			})
+
+			it('shows the message at once as sending, then sent', async () => {
+				let release
+				fetch.mockImplementationOnce(
+					() => new Promise((resolve) => (release = resolve)),
 				)
 
+				const sending = store.dispatch(sendMessage(payload))
+				const pending = selectThread(store.getState(), CID).messages
+				expect(pending).toEqual([
+					expect.objectContaining({
+						senderId: ME,
+						message: payload.message,
+						status: 'sending',
+					}),
+				])
+
+				release({ ok: true })
+				await sending
+
+				expect(
+					selectThread(store.getState(), CID).messages[0].status,
+				).toBe('sent')
+			})
+
+			it('moves the conversation to the top of the list with the new message', async () => {
+				await store.dispatch(loadConversations())
 				await store.dispatch(
-					contactTraveller({ ...payload, email: 'x@example.com' }),
+					sendMessage({ otherId: FORMER_ID, message: 'Hi' }),
 				)
 
-				expect(
-					JSON.parse(fetch.mock.calls[0][1].body),
-				).not.toHaveProperty('userEmail')
+				const [first] = selectConversations(store.getState())
+				expect(first).toMatchObject({
+					id: FORMER_CID,
+					lastMessage: 'Hi',
+					lastSenderId: ME,
+				})
 			})
 
-			it('should set the status to loading while sending', () => {
-				fetch.mockReturnValueOnce(new Promise(() => {}))
+			it('adds a new conversation to the list', async () => {
+				await store.dispatch(loadThread(CID))
+				await store.dispatch(sendMessage(payload))
 
-				store.dispatch(contactTraveller(payload))
-
-				expect(store.getState().messages.status).toBe('loading')
-				expect(store.getState().messages.error).toBeNull()
+				expect(conversation(CID)).toMatchObject({
+					otherId: OTHER_ID,
+					otherName: 'Jane Smith',
+					lastMessage: payload.message,
+				})
 			})
 		})
 
 		describe('failure scenarios', () => {
-			it.each([
-				['travellerId', { travellerId: '' }],
-				['travellerId', { travellerId: undefined }],
-				['message', { message: '   ' }],
-				['message', { message: undefined }],
-			])(
-				'should reject without fetching when %s is blank',
-				async (_, override) => {
-					const result = await store.dispatch(
-						contactTraveller({ ...payload, ...override }),
-					)
-
-					expect(result.meta.requestStatus).toBe('rejected')
-					expect(result.payload).toBe(
-						ERROR_MESSAGES.INVALID_MESSAGE_PAYLOAD,
-					)
-					expect(fetch).not.toHaveBeenCalled()
-					expect(store.getState().messages.status).toBe('failed')
-					expect(store.getState().messages.error).toBe(
-						ERROR_MESSAGES.INVALID_MESSAGE_PAYLOAD,
-					)
-				},
-			)
-
-			it('should reject when the response is not ok', async () => {
-				fetch.mockResolvedValueOnce({ ok: false, status: 500 })
-
-				const result = await store.dispatch(contactTraveller(payload))
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(result.payload).toContain(
-					`${API_ERROR_MESSAGE.CONTACT_TRAVELLER_CATCH}${payload.travellerId}`,
-				)
-				expect(result.payload).toContain(ERROR_MESSAGES.REQUEST_ERROR)
-			})
-
-			it('should reject on a network error', async () => {
-				fetch.mockRejectedValueOnce(new Error('Network Error'))
-
-				const result = await store.dispatch(contactTraveller(payload))
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(handleApiError).toHaveBeenCalled()
-			})
-		})
-	})
-
-	describe('loadMessages', () => {
-		describe('success scenarios', () => {
-			it('should GET the authorised messages, look up senders and sort newest first', async () => {
-				await seedMessages()
-
-				expect(store.getState().messages.status).toBe('succeeded')
-				expect(store.getState().messages.messages).toEqual([
-					SAMPLE_MESSAGE_ONE,
-					SAMPLE_MESSAGE_TWO,
-				])
-			})
-
-			// Traveller records need sign-in, so the sender lookup carries the token too
-			it('should send the inbox GET and the sender lookup with the token', async () => {
-				mockInbox(FIREBASE_INBOX, {
-					[SAMPLE_MESSAGE_ONE.senderId]: SENDER_CARD,
-				})
-
-				await store.dispatch(loadMessages())
-
-				const [url, options] = fetch.mock.calls[0]
-				expect(url).toContain(
-					`/messages/${MOCK_USER.USER_ID}.json?auth=${MOCK_USER.TOKEN}`,
-				)
-				expect(options.method).toBe('GET')
-				const lookups = travellerLookups()
-				expect(lookups).toHaveLength(1)
-				expect(lookups[0][0]).toContain(
-					`/travellers/${SAMPLE_MESSAGE_ONE.senderId}.json?auth=${MOCK_USER.TOKEN}`,
-				)
-			})
-
-			it('should look up each sender once however many messages they sent', async () => {
-				mockInbox(
-					{
-						a: { senderId: 's1', message: 'One', createdAt: 1 },
-						b: { senderId: 's1', message: 'Two', createdAt: 2 },
-						c: { senderId: 's2', message: 'Three', createdAt: 3 },
-					},
-					{
-						s1: { firstName: 'Ana' },
-						s2: { firstName: 'Bo', lastName: 'Li' },
-					},
-				)
-
-				const result = await store.dispatch(loadMessages())
-
-				expect(travellerLookups()).toHaveLength(2)
-				expect(
-					result.payload.map(({ id, senderName }) => [
-						id,
-						senderName,
-					]),
-				).toEqual([
-					['c', 'Bo Li'],
-					['b', 'Ana'],
-					['a', 'Ana'],
-				])
-			})
-
-			it('should mark a sender whose card is gone as a former traveller', async () => {
-				mockInbox({
-					a: { senderId: 'gone', message: 'Hi', createdAt: 1 },
-				})
-
-				const result = await store.dispatch(loadMessages())
-
-				expect(result.payload[0]).toMatchObject({
-					senderId: 'gone',
-					senderName: null,
-					senderStatus: SENDER_STATUS.FORMER,
-				})
-			})
-
-			it.each([
-				['is not ok', 'not-ok'],
-				['fails on the network', new Error('Network Error')],
-			])(
-				'should mark the sender unknown, and still load, when the lookup %s',
-				async (_, outcome) => {
-					mockInbox(
-						{ a: { senderId: 's1', message: 'Hi', createdAt: 1 } },
-						{ s1: outcome },
-					)
-
-					const result = await store.dispatch(loadMessages())
-
-					expect(result.meta.requestStatus).toBe('fulfilled')
-					expect(result.payload[0]).toMatchObject({
-						senderName: null,
-						senderStatus: SENDER_STATUS.UNKNOWN,
-					})
-				},
-			)
-
-			it('should treat a message without a sender id as legacy and not look it up', async () => {
-				mockInbox({
-					a: { userEmail: 'old@example.com', message: 'Hi' },
-				})
-
-				const result = await store.dispatch(loadMessages())
-
-				expect(travellerLookups()).toHaveLength(0)
-				expect(result.payload[0]).toEqual({
-					id: 'a',
-					travellerId: MOCK_USER.USER_ID,
-					senderId: null,
-					senderName: null,
-					senderStatus: SENDER_STATUS.LEGACY,
-					userEmail: 'old@example.com',
-					message: 'Hi',
-					createdAt: null,
-					read: true,
-				})
-			})
-
-			it('should count only an explicit read false as unread', async () => {
-				mockInbox(
-					{
-						a: {
-							senderId: 's1',
-							message: 'A',
-							createdAt: 3,
-							read: false,
-						},
-						b: {
-							senderId: 's1',
-							message: 'B',
-							createdAt: 2,
-							read: true,
-						},
-						c: { senderId: 's1', message: 'C', createdAt: 1 },
-					},
-					{ s1: SENDER_CARD },
-				)
-
-				const result = await store.dispatch(loadMessages())
-
-				expect(result.payload.map(({ read }) => read)).toEqual([
-					false,
-					true,
-					true,
-				])
-			})
-
-			it('should sort dated messages newest first and undated ones last', async () => {
-				mockInbox({
-					old: { userEmail: 'a@example.com', message: 'Undated' },
-					early: { senderId: 's1', message: 'Early', createdAt: 100 },
-					late: { senderId: 's1', message: 'Late', createdAt: 200 },
-				})
-
-				const result = await store.dispatch(loadMessages())
-
-				expect(result.payload.map(({ id }) => id)).toEqual([
-					'late',
-					'early',
-					'old',
-				])
-			})
-
-			it('should return an empty array for a null response', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => null,
-				})
-
-				const result = await store.dispatch(loadMessages())
-
-				expect(result.payload).toEqual([])
-			})
-
-			it('should return an empty array for an empty object response', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({}),
-				})
-
-				const result = await store.dispatch(loadMessages())
-
-				expect(result.payload).toEqual([])
-			})
-		})
-
-		describe('failure scenarios', () => {
-			it('should reject when the response is not ok', async () => {
-				fetch.mockResolvedValueOnce({ ok: false, status: 401 })
-
-				const result = await store.dispatch(loadMessages())
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(result.payload).toContain(
-					API_ERROR_MESSAGE.LOAD_MESSAGES_CATCH,
-				)
-				expect(store.getState().messages.status).toBe('failed')
-				expect(store.getState().messages.error).toBe(result.payload)
-			})
-
-			it('should reject on a network error', async () => {
-				fetch.mockRejectedValueOnce(new Error('Network Error'))
-
-				const result = await store.dispatch(loadMessages())
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(handleApiError).toHaveBeenCalled()
-			})
-		})
-	})
-
-	describe('deleteMessage', () => {
-		describe('success scenarios', () => {
-			it('should send an authorised DELETE and remove the message locally', async () => {
-				await seedMessages()
-				fetch.mockResolvedValueOnce({ ok: true })
-
-				const result = await store.dispatch(
-					deleteMessage(SAMPLE_MESSAGE_ONE.id),
-				)
-
-				expect(result.meta.requestStatus).toBe('fulfilled')
-				expect(result.payload).toBe(SAMPLE_MESSAGE_ONE.id)
-
-				const [url, options] = fetch.mock.calls[0]
-				expect(url).toContain(
-					`/messages/${MOCK_USER.USER_ID}/${SAMPLE_MESSAGE_ONE.id}.json?auth=${MOCK_USER.TOKEN}`,
-				)
-				expect(options.method).toBe('DELETE')
-				expect(fetch).toHaveBeenCalledTimes(1)
-				expect(store.getState().messages.messages).toEqual([
-					SAMPLE_MESSAGE_TWO,
-				])
-			})
-
-			it('should leave the load status alone while a delete runs', async () => {
-				await seedMessages()
-				fetch.mockReturnValueOnce(new Promise(() => {}))
-
-				store.dispatch(deleteMessage(SAMPLE_MESSAGE_ONE.id))
-
-				expect(store.getState().messages.status).toBe('succeeded')
-				expect(store.getState().messages.messages).toHaveLength(2)
-			})
-		})
-
-		describe('failure scenarios', () => {
-			it('should reject and keep the message when the response is not ok', async () => {
-				await seedMessages()
+			it('keeps a failed message, marked, until it is dismissed', async () => {
 				fetch.mockResolvedValueOnce({ ok: false, status: 403 })
 
-				const result = await store.dispatch(
-					deleteMessage(SAMPLE_MESSAGE_ONE.id),
-				)
+				const result = await store.dispatch(sendMessage(payload))
 
 				expect(result.meta.requestStatus).toBe('rejected')
 				expect(result.payload).toContain(
-					`${API_ERROR_MESSAGE.DELETE_MESSAGE_CATCH}${SAMPLE_MESSAGE_ONE.id}`,
+					`${API_ERROR_MESSAGE.SEND_MESSAGE_CATCH}${OTHER_ID}`,
 				)
-				expect(store.getState().messages.messages).toHaveLength(2)
-				expect(store.getState().messages.status).toBe('succeeded')
-				expect(store.getState().messages.error).toBeNull()
+				const [failed] = selectThread(store.getState(), CID).messages
+				expect(failed.status).toBe('failed')
+
+				store.dispatch(
+					dismissFailedMessage({ cid: CID, id: failed.id }),
+				)
+
+				expect(selectThread(store.getState(), CID).messages).toEqual([])
 			})
 
-			it('should reject on a network error', async () => {
-				fetch.mockRejectedValueOnce(new Error('Network Error'))
+			it('keeps a message still sending when the thread reloads under it', async () => {
+				fetch.mockImplementationOnce(() => new Promise(() => {}))
+				store.dispatch(sendMessage(payload))
 
-				const result = await store.dispatch(
-					deleteMessage(SAMPLE_MESSAGE_ONE.id),
+				await store.dispatch(loadThread(CID))
+
+				const messages = selectThread(store.getState(), CID).messages
+				expect(messages.at(-1)).toMatchObject({
+					message: payload.message,
+					status: 'sending',
+				})
+				expect(messages).toHaveLength(stored.length + 1)
+			})
+
+			it.each([
+				['an empty message', { otherId: OTHER_ID, message: '  ' }],
+				['no recipient', { otherId: '', message: 'Hi' }],
+			])('rejects %s without writing or showing it', async (_, arg) => {
+				const result = await store.dispatch(sendMessage(arg))
+
+				expect(result.payload).toBe(
+					ERROR_MESSAGES.INVALID_MESSAGE_PAYLOAD,
 				)
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(handleApiError).toHaveBeenCalled()
+				expect(fetch).not.toHaveBeenCalled()
+				expect(store.getState().messages.threads).toEqual({})
 			})
 		})
 	})
 
-	describe('markMessagesRead', () => {
+	describe('markConversationRead', () => {
 		describe('success scenarios', () => {
-			it('should PATCH each read flag with the token and keep them read', async () => {
-				await seedMessages()
-				fetch.mockResolvedValueOnce({ ok: true })
-				const ids = [SAMPLE_MESSAGE_ONE.id, SAMPLE_MESSAGE_TWO.id]
+			it('stamps readAt for the signed-in member only', async () => {
+				await store.dispatch(loadConversations())
+				fetch.mockClear()
 
-				const result = await store.dispatch(markMessagesRead(ids))
+				await store.dispatch(markConversationRead(CID))
 
-				expect(result.meta.requestStatus).toBe('fulfilled')
-				expect(result.payload).toEqual(ids)
-				const [url, options] = fetch.mock.calls[0]
-				expect(url).toContain(
-					`/messages/${MOCK_USER.USER_ID}.json?auth=${MOCK_USER.TOKEN}`,
-				)
-				expect(options.method).toBe('PATCH')
-				expect(JSON.parse(options.body)).toEqual({
-					[`${SAMPLE_MESSAGE_ONE.id}/read`]: true,
-					[`${SAMPLE_MESSAGE_TWO.id}/read`]: true,
-				})
-				expect(
-					store
-						.getState()
-						.messages.messages.every(({ read }) => read),
-				).toBe(true)
-			})
-
-			it('should mark the messages read at once, before the write finishes', async () => {
-				await seedMessages()
-				fetch.mockReturnValueOnce(new Promise(() => {}))
-
-				store.dispatch(markMessagesRead([SAMPLE_MESSAGE_ONE.id]))
-
-				expect(selectUnreadMessagesCount(store.getState())).toBe(0)
-				expect(store.getState().messages.status).toBe('succeeded')
-			})
-
-			it('should leave messages not in the list untouched', async () => {
-				mockInbox(
+				expect(writes()).toEqual([
 					{
-						a: {
-							senderId: 's1',
-							message: 'A',
-							createdAt: 2,
-							read: false,
-						},
-						b: {
-							senderId: 's1',
-							message: 'B',
-							createdAt: 1,
-							read: false,
-						},
+						path: `/userConversations/${ME}/${CID}.json`,
+						method: 'PATCH',
+						body: { readAt: API_DATABASE.SERVER_TIMESTAMP },
 					},
-					{ s1: SENDER_CARD },
-				)
-				await store.dispatch(loadMessages())
-				fetch.mockReset()
-				fetch.mockResolvedValueOnce({ ok: true })
-
-				await store.dispatch(markMessagesRead(['a']))
-
-				expect(
-					store
-						.getState()
-						.messages.messages.map(({ id, read }) => [id, read]),
-				).toEqual([
-					['a', true],
-					['b', false],
 				])
+				expect(selectUnreadConversationsCount(store.getState())).toBe(0)
+			})
+
+			it('drops the unread count before the write returns', async () => {
+				await store.dispatch(loadConversations())
+				fetch.mockImplementationOnce(() => new Promise(() => {}))
+
+				store.dispatch(markConversationRead(CID))
+
+				expect(selectUnreadConversationsCount(store.getState())).toBe(0)
 			})
 		})
 
 		describe('failure scenarios', () => {
-			it.each([
-				['the response is not ok', () => ({ ok: false, status: 403 })],
-				[
-					'the network fails',
-					() => Promise.reject(new Error('Network Error')),
-				],
-			])(
-				'should reject and put the unread flag back when %s',
-				async (_, respond) => {
-					await seedMessages()
-					fetch.mockImplementationOnce(async () => respond())
+			it('brings the unread count back when the write fails', async () => {
+				await store.dispatch(loadConversations())
+				fetch.mockResolvedValueOnce({ ok: false, status: 500 })
 
-					const result = await store.dispatch(
-						markMessagesRead([SAMPLE_MESSAGE_ONE.id]),
-					)
+				const result = await store.dispatch(markConversationRead(CID))
 
-					expect(result.meta.requestStatus).toBe('rejected')
-					expect(result.payload).toContain(
-						API_ERROR_MESSAGE.MARK_MESSAGES_READ_CATCH,
-					)
-					expect(handleApiError).toHaveBeenCalled()
-					expect(selectUnreadMessagesCount(store.getState())).toBe(1)
-					expect(store.getState().messages.status).toBe('succeeded')
-					expect(store.getState().messages.error).toBeNull()
+				expect(result.payload).toContain(
+					API_ERROR_MESSAGE.MARK_CONVERSATION_READ_CATCH,
+				)
+				expect(selectUnreadConversationsCount(store.getState())).toBe(1)
+			})
+		})
+	})
+
+	describe('deleteConversation', () => {
+		describe('success scenarios', () => {
+			it('clears the conversation for the signed-in member and drops it from the list', async () => {
+				await store.dispatch(loadConversations())
+				await store.dispatch(loadThread(CID))
+				fetch.mockClear()
+
+				await store.dispatch(deleteConversation(CID))
+
+				expect(writes()).toEqual([
+					{
+						path: `/userConversations/${ME}/${CID}.json`,
+						method: 'PATCH',
+						body: {
+							readAt: API_DATABASE.SERVER_TIMESTAMP,
+							clearedAt: API_DATABASE.SERVER_TIMESTAMP,
+						},
+					},
+				])
+				expect(conversation(CID)).toBeUndefined()
+				expect(selectThread(store.getState(), CID)).toBeNull()
+			})
+		})
+
+		describe('failure scenarios', () => {
+			it('keeps the conversation when the write fails', async () => {
+				await store.dispatch(loadConversations())
+				fetch.mockResolvedValueOnce({ ok: false, status: 500 })
+
+				const result = await store.dispatch(deleteConversation(CID))
+
+				expect(result.payload).toContain(
+					API_ERROR_MESSAGE.DELETE_CONVERSATION_CATCH,
+				)
+				expect(conversation(CID)).toBeDefined()
+			})
+		})
+	})
+
+	describe('deleteLegacyMessage', () => {
+		it('deletes the email-only message and drops it from the list', async () => {
+			await store.dispatch(loadConversations())
+			fetch.mockClear()
+
+			await store.dispatch(deleteLegacyMessage(LEGACY.id))
+
+			expect(writes()).toEqual([
+				{
+					path: `/legacyMessages/${ME}/${LEGACY.id}.json`,
+					method: 'DELETE',
+					body: undefined,
 				},
+			])
+			expect(selectLegacyMessages(store.getState())).toEqual([])
+		})
+
+		it('keeps the message when the delete fails', async () => {
+			await store.dispatch(loadConversations())
+			fetch.mockResolvedValueOnce({ ok: false, status: 500 })
+
+			const result = await store.dispatch(deleteLegacyMessage(LEGACY.id))
+
+			expect(result.payload).toContain(
+				API_ERROR_MESSAGE.DELETE_LEGACY_MESSAGE_CATCH,
 			)
+			expect(selectLegacyMessages(store.getState())).toHaveLength(1)
+		})
+	})
+
+	describe('logout', () => {
+		it('clears conversations and threads so they do not leak between users', async () => {
+			await store.dispatch(loadConversations())
+			await store.dispatch(loadThread(CID))
+
+			await store.dispatch(logout())
+
+			expect(selectConversations(store.getState())).toEqual([])
+			expect(selectLegacyMessages(store.getState())).toEqual([])
+			expect(store.getState().messages.threads).toEqual({})
 		})
 	})
 
@@ -610,26 +543,31 @@ describe('messagesSlice', () => {
 		const travellerId = 'traveller-to-delete'
 
 		describe('success scenarios', () => {
-			it('should send an authorised DELETE for the traveller messages', async () => {
-				fetch.mockResolvedValueOnce({ ok: true })
-
+			it('removes the conversation entries and legacy messages in one authorised update', async () => {
 				const result = await store.dispatch(
 					deleteTravellerMessages(travellerId),
 				)
 
 				expect(result.meta.requestStatus).toBe('fulfilled')
 				expect(result.payload).toBe(travellerId)
-				expect(fetch).toHaveBeenCalledWith(
-					expect.stringContaining(
-						`/messages/${travellerId}.json?auth=${MOCK_USER.TOKEN}`,
-					),
-					expect.objectContaining({ method: 'DELETE' }),
+				expect(fetch.mock.calls[0][0]).toContain(
+					`/.json?auth=${MOCK_USER.TOKEN}`,
 				)
+				expect(writes()).toEqual([
+					{
+						path: '/.json',
+						method: API_DATABASE.PATCH,
+						body: {
+							[`userConversations/${travellerId}`]: null,
+							[`legacyMessages/${travellerId}`]: null,
+						},
+					},
+				])
 			})
 		})
 
 		describe('failure scenarios', () => {
-			it('should reject when the response is not ok', async () => {
+			it('rejects when the update fails', async () => {
 				fetch.mockResolvedValueOnce({ ok: false, status: 401 })
 
 				const result = await store.dispatch(
@@ -639,71 +577,6 @@ describe('messagesSlice', () => {
 				expect(result.meta.requestStatus).toBe('rejected')
 				expect(result.payload).toContain(
 					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_MESSAGES_CATCH}${travellerId}`,
-				)
-			})
-
-			it('should reject on a network error', async () => {
-				fetch.mockRejectedValueOnce(new Error('Network Error'))
-
-				const result = await store.dispatch(
-					deleteTravellerMessages(travellerId),
-				)
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(handleApiError).toHaveBeenCalled()
-			})
-		})
-	})
-
-	describe('logout', () => {
-		describe('success scenarios', () => {
-			it('should reset the state so messages do not leak between users', async () => {
-				await seedMessages()
-				expect(store.getState().messages.messages).toHaveLength(2)
-
-				await store.dispatch(logout())
-
-				expect(store.getState().messages).toEqual({
-					messages: [],
-					status: 'idle',
-					error: null,
-				})
-			})
-		})
-	})
-
-	describe('selectors', () => {
-		describe('success scenarios', () => {
-			it('should select state, list, count and flags when empty', () => {
-				const state = store.getState()
-
-				expect(selectMessagesState(state)).toBe(state.messages)
-				expect(selectMessages(state)).toEqual([])
-				expect(selectHasMessages(state)).toBe(false)
-				expect(selectMessagesCount(state)).toBe(0)
-				expect(selectUnreadMessagesCount(state)).toBe(0)
-				expect(selectMessagesStatus(state)).toBe('idle')
-				expect(selectMessagesError(state)).toBeNull()
-			})
-
-			it('should select populated messages and count', async () => {
-				await seedMessages()
-				const state = store.getState()
-
-				expect(selectMessages(state)).toHaveLength(2)
-				expect(selectHasMessages(state)).toBe(true)
-				expect(selectMessagesCount(state)).toBe(2)
-				expect(selectUnreadMessagesCount(state)).toBe(1)
-				expect(selectMessagesStatus(state)).toBe('succeeded')
-			})
-
-			it('should select the error after a failure', async () => {
-				fetch.mockResolvedValueOnce({ ok: false, status: 500 })
-				await store.dispatch(loadMessages())
-
-				expect(selectMessagesStatus(store.getState())).toBe('failed')
-				expect(selectMessagesError(store.getState())).toContain(
-					API_ERROR_MESSAGE.LOAD_MESSAGES_CATCH,
 				)
 			})
 		})

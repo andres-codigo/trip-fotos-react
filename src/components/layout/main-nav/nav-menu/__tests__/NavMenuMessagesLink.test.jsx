@@ -36,7 +36,7 @@ describe('<NavMenuMessagesLink />', () => {
 		renderLink({ unreadMessages: 12 })
 
 		const link = screen.getByRole('link', {
-			name: 'Messages, 12 unread messages',
+			name: 'Messages, 12 unread conversations',
 		})
 		expect(link.querySelector(countSelector)).toHaveTextContent('12')
 	})

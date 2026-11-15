@@ -16,10 +16,14 @@ export const API_ERROR_MESSAGE = Object.freeze({
 	DELETE_TRAVELLER_CATCH: 'An error occurred while deleting traveller ',
 	DELETE_TRAVELLER_MESSAGES_CATCH:
 		'An error occurred while deleting messages for traveller ',
-	CONTACT_TRAVELLER_CATCH: 'An error occurred while contacting traveller ',
-	LOAD_MESSAGES_CATCH: 'An error occurred while loading messages ',
-	DELETE_MESSAGE_CATCH: 'An error occurred while deleting message ',
-	MARK_MESSAGES_READ_CATCH: 'An error occurred while marking messages read ',
+	LOAD_CONVERSATIONS_CATCH: 'An error occurred while loading conversations ',
+	LOAD_THREAD_CATCH: 'An error occurred while loading conversation ',
+	SEND_MESSAGE_CATCH: 'An error occurred while sending a message to ',
+	MARK_CONVERSATION_READ_CATCH:
+		'An error occurred while marking conversation read ',
+	DELETE_CONVERSATION_CATCH: 'An error occurred while deleting conversation ',
+	DELETE_LEGACY_MESSAGE_CATCH:
+		'An error occurred while deleting legacy message ',
 
 	// API Response Codes/Strings
 	STORAGE_OBJECT_NOT_FOUND: 'storage/object-not-found',
