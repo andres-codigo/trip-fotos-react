@@ -61,12 +61,12 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- Email verification: new accounts confirm their email address before going on, with Check your inbox to send another link, check again or start over with a different address
 - Messages as conversations: each person you message is one thread, like a phone text thread, with both sides in order, the reply box at the bottom, unread markers and delete with Undo
 - Pages open at the top: moving to another page starts at the top, and tapping the page you are on in the menu scrolls back up
 - Clearer trip cards: cities show as small tags with a pin, Message stands out as the action on a trip, and the photos on cards side by side line up
 - Full-screen photos: a traveller's photos open full screen, with swipe and next/previous buttons, a photo counter and a skeleton while each one loads
 - Steadier loading: Travellers and Messages show one skeleton shaped like the page from the first tap, with nothing jumping when the content arrives, and the main pages download in the background so moving between them is quicker
-- A taste of each trip for visitors: public trip cards show the first two lines of the trip description
 - Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, faster local checks that rerun only the checks and tests a change can affect, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
