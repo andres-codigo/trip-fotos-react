@@ -1,3 +1,5 @@
+import { MemoryRouter } from 'react-router-dom'
+
 import { ACCOUNT_MENU_SELECTORS } from '@/constants/test'
 import { NAVIGATION } from '@/constants/ui'
 
@@ -7,13 +9,16 @@ const NAME = 'Ada Lovelace'
 
 const mountMenu = (props = {}) =>
 	cy.mount(
-		<div className="flex justify-end bg-header p-4">
-			<AccountMenu
-				name={NAME}
-				onLogOut={cy.stub().as('onLogOut')}
-				{...props}
-			/>
-		</div>,
+		<MemoryRouter>
+			<div className="flex justify-end bg-header p-4">
+				<AccountMenu
+					name={NAME}
+					email="ada@example.com"
+					onLogOut={cy.stub().as('onLogOut')}
+					{...props}
+				/>
+			</div>
+		</MemoryRouter>,
 	)
 
 const assertWithinViewport = (selector) =>
@@ -117,8 +122,8 @@ describe('<AccountMenu />', () => {
 				cy.checkA11y()
 			})
 
-			it('shows the fallback label and no signed-in block without a name', () => {
-				mountMenu({ name: '' })
+			it('shows the fallback label and no signed-in block without a name or email', () => {
+				mountMenu({ name: '', email: '' })
 				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should(
 					'contain',
 					NAVIGATION.ACCOUNT_FALLBACK,
@@ -153,6 +158,8 @@ describe('<AccountMenu />', () => {
 				'aria-expanded',
 				'true',
 			)
+			cy.press(Cypress.Keyboard.Keys.TAB)
+			cy.get(ACCOUNT_MENU_SELECTORS.ACCOUNT_SETTINGS).should('have.focus')
 			cy.press(Cypress.Keyboard.Keys.TAB)
 			cy.get(ACCOUNT_MENU_SELECTORS.LOG_OUT).should('have.focus')
 			cy.focused().type('{esc}')

@@ -38,6 +38,7 @@ vi.mock('@/constants/ui', () => ({
 		MESSAGES: '/messages',
 		MESSAGE_THREAD: '/messages/:conversationId',
 		PRIVACY: '/privacy',
+		ACCOUNT: '/account',
 		PAGE_NOT_FOUND: '/404',
 	},
 }))
@@ -112,6 +113,9 @@ vi.mock('@/pages/messages/Messages', () => ({
 }))
 vi.mock('@/pages/auth-action/AuthAction', () => ({
 	default: () => <div>AuthActionPage</div>,
+}))
+vi.mock('@/pages/account/Account', () => ({
+	default: () => <div>AccountPage</div>,
 }))
 vi.mock('@/pages/privacy/Privacy', () => ({
 	default: () => <div>PrivacyPage</div>,
@@ -271,6 +275,7 @@ describe('App', () => {
 			'/messages/u1_u2',
 			PATHS.AUTH_ACTION,
 			PATHS.AUTHENTICATION,
+			PATHS.ACCOUNT,
 		])('leaves it to the page on %s', (path) => {
 			setAuthState({ userId: 'u1', emailVerified: false })
 

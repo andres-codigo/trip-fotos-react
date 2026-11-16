@@ -6,6 +6,10 @@ export const BADGE = Object.freeze({
 	ID: 'base-badge',
 })
 
+export const VERIFIED_CHIP = Object.freeze({
+	ROOT: 'verified-chip',
+})
+
 export const BUTTON = Object.freeze({
 	ID: 'test-button',
 	LINK_ID: 'test-link',
@@ -204,6 +208,8 @@ export const ACCOUNT_MENU = Object.freeze({
 	BUTTON: 'account-menu-button',
 	PANEL: 'account-menu-panel',
 	SIGNED_IN_AS: 'account-menu-signed-in-as',
+	EMAIL: 'account-menu-email',
+	ACCOUNT_SETTINGS: 'account-menu-account-settings',
 	LOG_OUT: 'account-menu-log-out',
 })
 
@@ -376,6 +382,18 @@ export const PASSWORD_RESET_FORM = Object.freeze({
 	BACK: 'password-reset-back',
 })
 
+export const CHANGE_PASSWORD_FORM = Object.freeze({
+	ROOT: 'change-password-form',
+	TITLE: 'change-password-title',
+	CURRENT_PASSWORD_INPUT: 'change-password-current-input',
+	CURRENT_PASSWORD_ERROR: 'change-password-current-error',
+	NEW_PASSWORD_INPUT: 'change-password-new-input',
+	NEW_PASSWORD_ERROR: 'change-password-new-error',
+	CANCEL: 'change-password-cancel',
+	SAVE_PASSWORD: 'change-password-save-password',
+	ALERT: 'change-password-alert',
+})
+
 export const NEW_PASSWORD_FORM = Object.freeze({
 	ROOT: 'new-password-form',
 	TITLE: 'new-password-title',
@@ -398,6 +416,17 @@ export const AUTH_ACTION_PAGE = Object.freeze({
 	SEND_NEW_LINK: 'auth-action-send-new-link',
 	TRY_AGAIN: 'auth-action-try-again',
 	RESET_PASSWORD: 'auth-action-reset-password',
+})
+
+export const ACCOUNT_PAGE = Object.freeze({
+	TITLE: 'account-title',
+	EMAIL_SECTION: 'account-email-section',
+	EMAIL: 'account-email',
+	EMAIL_MESSAGE: 'account-email-message',
+	SEND_AGAIN: 'account-send-again',
+	PASSWORD_SECTION: 'account-password-section',
+	CHANGE_PASSWORD: 'account-change-password',
+	PASSWORD_CHANGED: 'account-password-changed',
 })
 
 export const VERIFY_EMAIL_INBOX = Object.freeze({

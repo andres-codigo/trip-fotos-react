@@ -1,12 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ACCOUNT_MENU } from '@/constants/test'
-import { NAVIGATION } from '@/constants/ui'
+import { VERIFIED_CHIP_CONFIG } from '@/constants/auth'
+import { NAVIGATION, PATHS } from '@/constants/ui'
 
 import AccountMenu from '@/components/layout/main-nav/account-menu/AccountMenu'
 
 const NAME = 'Ada Byron Lovelace'
+const EMAIL = 'ada@example.com'
 
 const renderMenu = (props = {}) => {
 	const onLogOut = vi.fn()
@@ -16,6 +19,7 @@ const renderMenu = (props = {}) => {
 			onLogOut={onLogOut}
 			{...props}
 		/>,
+		{ wrapper: MemoryRouter },
 	)
 	return { onLogOut, button: screen.getByTestId(ACCOUNT_MENU.BUTTON) }
 }
@@ -95,6 +99,44 @@ describe('<AccountMenu />', () => {
 				screen.queryByTestId(ACCOUNT_MENU.SIGNED_IN_AS),
 			).not.toBeInTheDocument()
 			expect(screen.getByTestId(ACCOUNT_MENU.LOG_OUT)).toBeInTheDocument()
+		})
+
+		it('shows the email under the name, and a Not verified chip only while unverified', () => {
+			const { button } = renderMenu({ email: EMAIL })
+			fireEvent.click(button)
+			expect(screen.getByTestId(ACCOUNT_MENU.EMAIL)).toHaveTextContent(
+				EMAIL,
+			)
+			expect(
+				screen.queryByText(VERIFIED_CHIP_CONFIG.NOT_VERIFIED),
+			).not.toBeInTheDocument()
+		})
+
+		it('marks an unverified email', () => {
+			const { button } = renderMenu({
+				name: '',
+				email: EMAIL,
+				emailVerified: false,
+			})
+			fireEvent.click(button)
+			expect(
+				screen.getByTestId(ACCOUNT_MENU.SIGNED_IN_AS),
+			).toHaveTextContent(VERIFIED_CHIP_CONFIG.NOT_VERIFIED)
+		})
+
+		it('links to Account settings before Log out and closes on the click', () => {
+			const { button } = renderMenu()
+			fireEvent.click(button)
+			const link = screen.getByTestId(ACCOUNT_MENU.ACCOUNT_SETTINGS)
+			expect(link).toHaveAttribute('href', PATHS.ACCOUNT)
+			expect(link).toHaveTextContent(NAVIGATION.ACCOUNT_SETTINGS)
+			expect(
+				link.compareDocumentPosition(
+					screen.getByTestId(ACCOUNT_MENU.LOG_OUT),
+				) & Node.DOCUMENT_POSITION_FOLLOWING,
+			).toBeTruthy()
+			fireEvent.click(link)
+			expect(queryPanel()).not.toBeInTheDocument()
 		})
 
 		it('calls onLogOut with the event and closes', () => {

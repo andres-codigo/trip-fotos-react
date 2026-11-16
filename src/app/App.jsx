@@ -53,6 +53,7 @@ const EditTrip = lazy(() => import('@/pages/edit-trip/EditTrip'))
 const Messages = lazy(loadMessages)
 const Privacy = lazy(() => import('@/pages/privacy/Privacy'))
 const AuthAction = lazy(() => import('@/pages/auth-action/AuthAction'))
+const Account = lazy(() => import('@/pages/account/Account'))
 import PageNotFound from '@/pages/page-not-found/PageNotFound'
 
 // The pages the header and tab bar link to (My trip is the detail page), so a tap on one does not wait for its code
@@ -91,15 +92,17 @@ const PROTECTED_PATHS = [
 	PATHS.TRAVELLER_DETAIL,
 	PATHS.CONTACT_TRAVELLER,
 	PATHS.EDIT_TRAVELLER,
+	PATHS.ACCOUNT,
 ]
 
-// Login shows Check your inbox and the action page its own card; the rest carry a note in place of the action, which says the same
+// Login shows Check your inbox, the action page its own card and Account its own Send the link again; the rest carry a note in place of the action, which says the same
 const NO_STRIP_PATHS = [
 	PATHS.AUTHENTICATION,
 	PATHS.AUTH_ACTION,
 	PATHS.REGISTER,
 	PATHS.EDIT_TRAVELLER,
 	PATHS.MESSAGE_THREAD,
+	PATHS.ACCOUNT,
 ]
 
 const isProtectedPath = (pathname) =>
@@ -290,6 +293,10 @@ function AppRoutes() {
 					<Route
 						path={PATHS.AUTH_ACTION}
 						element={<AuthAction />}
+					/>
+					<Route
+						path={PATHS.ACCOUNT}
+						element={<Account />}
 					/>
 					<Route
 						path={PATHS.PRIVACY}

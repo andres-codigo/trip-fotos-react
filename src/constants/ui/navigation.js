@@ -7,6 +7,7 @@ export const NAVIGATION = Object.freeze({
 	ACCOUNT_LABEL: (name) => (name ? `Account, ${name}` : 'Account'),
 	ACCOUNT_FALLBACK: 'Account',
 	SIGNED_IN_AS: 'Signed in as',
+	ACCOUNT_SETTINGS: 'Account settings',
 	LOG_OUT: 'Log out',
 })
 

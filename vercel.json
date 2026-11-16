@@ -1,7 +1,7 @@
 {
 	"rewrites": [
 		{
-			"source": "/:path(authentication|travellers|register|messages|privacy|404)",
+			"source": "/:path(authentication|travellers|register|messages|privacy|account|404)",
 			"destination": "/"
 		},
 		{

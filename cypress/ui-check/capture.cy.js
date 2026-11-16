@@ -823,6 +823,170 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		capture('account-settings', () => {
+			// Literal selectors keep the script loadable on main, which lacks them
+			const page = (part) => `[data-cy="account-${part}"]`
+			const form = (part) =>
+				part.endsWith('-error')
+					? `[data-cy-error="change-password-${part}"]`
+					: `[data-cy="change-password-${part}"]`
+			const CURRENT = form('current-input')
+			const NEW = form('new-input')
+			const SAVE = form('save-password')
+			const settledShot = (name) => {
+				assertSettled()
+				freezeAnimation()
+				shot(name)
+			}
+			const openForm = () => {
+				visit(PATHS.ACCOUNT)
+				cy.get(page('change-password'), { timeout: TIMEOUT }).click()
+				cy.get(CURRENT).should('have.focus')
+			}
+			const fill = (current, next) => {
+				cy.get(CURRENT).type(current)
+				cy.get(NEW).type(next)
+			}
+
+			eachWidth((width) => {
+				performLogin()
+				visit(PATHS.ACCOUNT)
+				cy.get(page('email'), { timeout: TIMEOUT }).should(
+					'have.text',
+					TEST_USERS.STANDARD.EMAIL,
+				)
+				settledShot(`verified-${width}`)
+
+				// A fresh unverified account, so the saved password change touches no seeded login
+				const email = `account-${width}-${Date.now()}@example.com`
+				authRest('signUp', {
+					email,
+					password: NEW_PASSWORD,
+					returnSecureToken: true,
+				}).then(() => {
+					performLogin(email, NEW_PASSWORD)
+
+					visit(PATHS.ACCOUNT)
+					cy.get(page('email'), { timeout: TIMEOUT }).should(
+						'have.text',
+						email,
+					)
+					cy.get('[data-cy="verify-email-strip"]').should('not.exist')
+					settledShot(`unverified-${width}`)
+
+					cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
+					cy.get(ACCOUNT_MENU_SELECTORS.PANEL).should(
+						'contain',
+						'Not verified',
+					)
+					forcePseudo(
+						'[data-cy="account-menu-account-settings"]',
+						['focus', 'focus-visible'],
+						{ scroll: false },
+					)
+					shot(`menu-unverified-${width}`, { capture: 'viewport' })
+					forcePseudo(
+						'[data-cy="account-menu-account-settings"]',
+						[],
+						{
+							scroll: false,
+						},
+					)
+					cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
+
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:sendOobCode*',
+						{
+							statusCode: 500,
+							body: {},
+							delay: 60000,
+						},
+					)
+					cy.get(page('send-again')).click()
+					cy.get(page('send-again')).should(
+						'have.attr',
+						'aria-busy',
+						'true',
+					)
+					freezeAnimation()
+					shot(`sending-${width}`)
+
+					visit(PATHS.ACCOUNT)
+					cy.get(page('send-again'), { timeout: TIMEOUT }).click()
+					cy.get(page('email-message')).should('contain', 'Sent.')
+					settledShot(`sent-${width}`)
+
+					openForm()
+					settledShot(`password-open-${width}`)
+					forcePseudo(form('cancel'), ['focus', 'focus-visible'])
+					shot(`password-cancel-focus-${width}`)
+					forcePseudo(form('cancel'), [])
+
+					cy.get(SAVE).click()
+					cy.get(form('current-error')).should('be.visible')
+					settledShot(`password-empty-${width}`)
+
+					cy.get(CURRENT).type('not-the-password')
+					cy.get(NEW).type('abc').blur()
+					cy.get(form('new-error')).should('contain', '6 characters')
+					settledShot(`password-short-${width}`)
+
+					openForm()
+					fill('not-the-password', 'another-password')
+					cy.get(SAVE).click()
+					cy.get(form('current-error'), { timeout: TIMEOUT }).should(
+						'contain',
+						'not right',
+					)
+					settledShot(`password-wrong-${width}`)
+
+					openForm()
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:signInWithPassword*',
+						{
+							statusCode: 400,
+							body: {
+								error: {
+									message: 'TOO_MANY_ATTEMPTS_TRY_LATER',
+								},
+							},
+						},
+					)
+					fill(NEW_PASSWORD, 'another-password')
+					cy.get(SAVE).click()
+					cy.get(form('alert'), { timeout: TIMEOUT }).should(
+						'contain',
+						'Too many attempts',
+					)
+					settledShot(`password-too-many-${width}`)
+
+					openForm()
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:signInWithPassword*',
+						{ statusCode: 500, body: {}, delay: 60000 },
+					)
+					fill(NEW_PASSWORD, 'another-password')
+					cy.get(SAVE).click()
+					cy.get(SAVE).should('have.attr', 'aria-busy', 'true')
+					freezeAnimation()
+					shot(`password-saving-${width}`)
+
+					openForm()
+					fill(NEW_PASSWORD, 'capture-password-changed')
+					cy.get(SAVE).click()
+					cy.get(page('password-changed'), {
+						timeout: TIMEOUT,
+					}).should('be.visible')
+					cy.get(page('change-password')).should('have.focus')
+					cy.get(page('email')).should('have.text', email)
+					settledShot(`password-changed-${width}`)
+				})
+			})
+		})
+
 		capture('auth-action', () => {
 			failWhileDown('**/accounts:update*')
 			failWhileDown('**/accounts:resetPassword*')
