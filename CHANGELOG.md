@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.8](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.7...v0.28.8) (2026-11-16)
+
+
+### Enhancements
+
+* keep Check your inbox after a reload ([#792](https://github.com/andres-codigo/trip-fotos-react/issues/792)) ([06b68c9](https://github.com/andres-codigo/trip-fotos-react/commit/06b68c9338687045475c798aed5d09e68f7798c2))
+
 ## [0.28.7](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.6...v0.28.7) (2026-11-16)
 
 
