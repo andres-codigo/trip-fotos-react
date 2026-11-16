@@ -987,6 +987,166 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		capture('change-email', () => {
+			// Literal selectors keep the script loadable on main, which lacks them
+			const page = (part) => `[data-cy="account-${part}"]`
+			const form = (part) =>
+				part.endsWith('-error')
+					? `[data-cy-error="change-email-${part}"]`
+					: `[data-cy="change-email-${part}"]`
+			const NEW = form('new-input')
+			const CURRENT = form('current-input')
+			const SEND = form('send-link')
+			const settledShot = (name) => {
+				assertSettled()
+				freezeAnimation()
+				shot(name)
+			}
+			const openForm = () => {
+				visit(PATHS.ACCOUNT)
+				cy.get(page('change-email'), { timeout: TIMEOUT }).click()
+				cy.get(NEW).should('have.focus')
+			}
+			const fill = (email, password) => {
+				cy.get(NEW).type(email)
+				cy.get(CURRENT).type(password)
+			}
+
+			eachWidth((width) => {
+				performLogin()
+				openForm()
+				settledShot(`open-${width}`)
+
+				cy.get(SEND).click()
+				cy.get(form('current-error')).should('be.visible')
+				settledShot(`empty-${width}`)
+
+				cy.get(NEW).clear().type(TEST_USERS.STANDARD.EMAIL)
+				cy.get(SEND).click()
+				cy.get(form('new-error')).should(
+					'contain',
+					'already your email',
+				)
+				settledShot(`same-${width}`)
+
+				openForm()
+				fill(`new-${width}@example.org`, 'not-the-password')
+				cy.get(SEND).click()
+				cy.get(form('current-error'), { timeout: TIMEOUT }).should(
+					'contain',
+					'not right',
+				)
+				settledShot(`wrong-${width}`)
+
+				// A fresh account, so the real link sent below changes no seeded login
+				newAccount(`change-${width}`).then(({ email }) => {
+					performLogin(email, NEW_PASSWORD)
+
+					openForm()
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:sendOobCode*',
+						{
+							statusCode: 400,
+							body: { error: { message: 'EMAIL_EXISTS' } },
+						},
+					)
+					fill(`taken-${width}@example.org`, NEW_PASSWORD)
+					cy.get(SEND).click()
+					cy.get(form('alert'), { timeout: TIMEOUT }).should(
+						'contain',
+						'cannot be used',
+					)
+					settledShot(`taken-${width}`)
+
+					openForm()
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:sendOobCode*',
+						{ statusCode: 500, body: {}, delay: 60000 },
+					)
+					fill(`new-${width}@example.org`, NEW_PASSWORD)
+					cy.get(SEND).click()
+					cy.get(SEND).should('have.attr', 'aria-busy', 'true')
+					freezeAnimation()
+					shot(`sending-${width}`)
+
+					openForm()
+					fill(`new-${width}@example.org`, NEW_PASSWORD)
+					cy.get(SEND).click()
+					cy.get(page('email-sent'), { timeout: TIMEOUT })
+						.should('contain', `new-${width}@example.org`)
+						.and('have.focus')
+					cy.get(page('email')).should('have.text', email)
+					settledShot(`sent-${width}`)
+
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:sendOobCode*',
+						{
+							statusCode: 400,
+							body: {
+								error: {
+									message: 'TOO_MANY_ATTEMPTS_TRY_LATER',
+								},
+							},
+						},
+					)
+					cy.get(page('email-send-again')).click()
+					cy.get(page('email-sent-error')).should('be.visible')
+					settledShot(`send-again-failed-${width}`)
+
+					cy.get(page('email-send-again')).click()
+					cy.get(page('email-sent-hint'), {
+						timeout: TIMEOUT,
+					}).should('contain', 'seconds')
+					freezeAnimation()
+					shot(`send-again-resting-${width}`)
+				})
+			})
+		})
+
+		capture('auth-action-email-change', () => {
+			eachWidth((width) => {
+				newAccount(`changed-${width}`).then(({ email, idToken }) => {
+					const newEmail = `changed-new-${width}-${Date.now()}@example.org`
+					performLogin(email, NEW_PASSWORD)
+					authRest('sendOobCode', {
+						requestType: 'VERIFY_AND_CHANGE_EMAIL',
+						idToken,
+						newEmail,
+					})
+					latestOobCode(email, 'VERIFY_AND_CHANGE_EMAIL').then(
+						(code) =>
+							actionShot(
+								actionPath('verifyAndChangeEmail', code),
+								'Your email has changed',
+								`changed-${width}`,
+							),
+					)
+
+					// The Auth emulator never sends the old address its recover link, so that link's answers are stubbed
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:resetPassword*',
+						{
+							email,
+							newEmail,
+							requestType: 'RECOVER_EMAIL',
+						},
+					)
+					interceptOnce(API_DATABASE.POST, '**/accounts:update*', {
+						email,
+					})
+					actionShot(
+						actionPath('recoverEmail', 'capture-recover'),
+						'Your email has been changed back',
+						`recovered-${width}`,
+					)
+				})
+			})
+		})
+
 		capture('auth-action', () => {
 			failWhileDown('**/accounts:update*')
 			failWhileDown('**/accounts:resetPassword*')

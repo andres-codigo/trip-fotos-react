@@ -29,6 +29,11 @@ export const ERROR_MESSAGES = Object.freeze({
 		'We could not start again. Check your connection and try again.',
 	WRONG_CURRENT_PASSWORD: 'That password is not right. Try again.',
 	TOO_MANY_ATTEMPTS: 'Too many attempts. Wait a few minutes and try again.',
+	EMAIL_CANNOT_BE_USED: 'That email cannot be used. Try another.',
+	EMAIL_CHANGE_FAILED:
+		'The link could not be sent. Check your connection and try again.',
+	EMAIL_CHANGE_SIGN_IN_AGAIN:
+		'For your safety, enter your current password again to send a new link.',
 	PASSWORD_CHANGE_FAILED:
 		'Your password was not changed. Check your connection and try again.',
 

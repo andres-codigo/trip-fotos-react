@@ -97,6 +97,14 @@ export const CAPTURES = {
 		title: 'captures Account settings verified and not, sending the link, the account menu unverified, and the change password form open, invalid, refused, saving and saved',
 		areas: ['account'],
 	},
+	'change-email': {
+		title: 'captures the change email form open, invalid, refused, sending and sent, with send it again resting and refused',
+		areas: ['account'],
+	},
+	'auth-action-email-change': {
+		title: 'captures the email-link page for a changed email and one changed back',
+		areas: ['authentication'],
+	},
 	'auth-action': {
 		title: 'captures the email-link page: verified, already verified, expired, invalid, network, loading and the password reset states',
 		areas: ['authentication'],

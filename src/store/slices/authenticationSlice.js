@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
 import {
 	applyActionCode,
+	checkActionCode,
 	confirmPasswordReset as confirmFirebasePasswordReset,
 	createUserWithEmailAndPassword,
 	deleteUser,
@@ -12,6 +13,7 @@ import {
 	signInWithEmailAndPassword,
 	signOut,
 	updatePassword,
+	verifyBeforeUpdateEmail,
 	verifyPasswordResetCode,
 } from 'firebase/auth'
 
@@ -337,6 +339,84 @@ export const changePassword = createAsyncThunk(
 				CHANGE_PASSWORD_ERRORS[error?.code] ??
 					ERROR_MESSAGES.PASSWORD_CHANGE_FAILED,
 			)
+		}
+	},
+)
+
+const CHANGE_EMAIL_ERRORS = {
+	'auth/invalid-credential': ERROR_MESSAGES.WRONG_CURRENT_PASSWORD,
+	'auth/wrong-password': ERROR_MESSAGES.WRONG_CURRENT_PASSWORD,
+	'auth/email-already-in-use': ERROR_MESSAGES.EMAIL_CANNOT_BE_USED,
+	'auth/invalid-email': ERROR_MESSAGES.EMAIL_CANNOT_BE_USED,
+	'auth/invalid-new-email': ERROR_MESSAGES.EMAIL_CANNOT_BE_USED,
+	'auth/too-many-requests': ERROR_MESSAGES.TOO_MANY_ATTEMPTS,
+	'auth/requires-recent-login': ERROR_MESSAGES.EMAIL_CHANGE_SIGN_IN_AGAIN,
+}
+
+// The link signs the user out on every device, so its Continue button goes to Log in
+const sendEmailChange = (user, newEmail) =>
+	sendWithContinue(
+		(...settings) => verifyBeforeUpdateEmail(user, newEmail, ...settings),
+		PATHS.AUTHENTICATION,
+	)
+
+export const changeEmail = createAsyncThunk(
+	AUTHENTICATION_ACTION_TYPES.CHANGE_EMAIL,
+	async ({ newEmail, currentPassword }, { rejectWithValue }) => {
+		try {
+			const auth = getFirebaseAuth()
+			await auth.authStateReady()
+			const user = auth.currentUser
+
+			await reauthenticateWithCredential(
+				user,
+				EmailAuthProvider.credential(user.email, currentPassword),
+			)
+			await sendEmailChange(user, newEmail)
+			return newEmail
+		} catch (error) {
+			return rejectWithValue(
+				CHANGE_EMAIL_ERRORS[error?.code] ??
+					ERROR_MESSAGES.EMAIL_CHANGE_FAILED,
+			)
+		}
+	},
+)
+
+// Sent without the password, so once the sign-in is no longer recent Firebase asks for it again
+export const resendEmailChange = createAsyncThunk(
+	AUTHENTICATION_ACTION_TYPES.RESEND_EMAIL_CHANGE,
+	async (newEmail, { rejectWithValue }) => {
+		try {
+			const auth = getFirebaseAuth()
+			await auth.authStateReady()
+			await sendEmailChange(auth.currentUser, newEmail)
+			return newEmail
+		} catch (error) {
+			return rejectWithValue(
+				error?.code === 'auth/too-many-requests'
+					? ERROR_MESSAGES.TOO_MANY_EMAILS
+					: (CHANGE_EMAIL_ERRORS[error?.code] ??
+							ERROR_MESSAGES.EMAIL_CHANGE_FAILED),
+			)
+		}
+	},
+)
+
+// Both links change the account's email, which revokes every session, so this device signs out too
+export const applyEmailChange = createAsyncThunk(
+	AUTHENTICATION_ACTION_TYPES.APPLY_EMAIL_CHANGE,
+	async (code, { dispatch, rejectWithValue }) => {
+		const auth = getFirebaseAuth()
+		await auth.authStateReady()
+
+		try {
+			const { data } = await checkActionCode(auth, code)
+			await applyActionCode(auth, code)
+			if (auth.currentUser) await dispatch(logout())
+			return data.email
+		} catch (error) {
+			return rejectWithValue(actionCodeReason(error))
 		}
 	},
 )

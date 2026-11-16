@@ -148,4 +148,39 @@ describe('<AuthAction />', () => {
 		cy.get(AUTH_ACTION_PAGE_SELECTORS.TRY_AGAIN).should('be.visible')
 		cy.checkA11y()
 	})
+
+	;[
+		{
+			mode: 'verifyAndChangeEmail',
+			requestType: 'VERIFY_AND_CHANGE_EMAIL',
+			title: AUTH_ACTION_CONFIG.EMAIL_CHANGED_TITLE,
+			shown: 'ada.new@example.org',
+		},
+		{
+			mode: 'recoverEmail',
+			requestType: 'RECOVER_EMAIL',
+			title: AUTH_ACTION_CONFIG.EMAIL_RECOVERED_TITLE,
+			shown: EMAIL,
+		},
+	].forEach(({ mode, requestType, title, shown }) => {
+		it(`applies a ${mode} link and names the address now in use`, () => {
+			cy.viewport(390, 800)
+			cy.intercept('POST', RESET_PASSWORD_URL, {
+				email: EMAIL,
+				newEmail: 'ada.new@example.org',
+				requestType,
+			}).as('check')
+			cy.intercept('POST', APPLY_CODE_URL, { email: shown }).as('apply')
+			mountPage(mode)
+
+			cy.wait('@check')
+			cy.wait('@apply').its('request.body.oobCode').should('eq', CODE)
+			cy.get(AUTH_ACTION_PAGE_SELECTORS.TITLE)
+				.should('have.text', title)
+				.and('have.focus')
+			cy.get(AUTH_ACTION_PAGE_SELECTORS.EMAIL).should('have.text', shown)
+			cy.get(AUTH_ACTION_PAGE_SELECTORS.LOG_IN).should('be.visible')
+			cy.checkA11y()
+		})
+	})
 })

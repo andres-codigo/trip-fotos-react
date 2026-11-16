@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import { API_DATABASE } from '@/constants/api'
@@ -19,6 +19,9 @@ import authenticationReducer, {
 	checkPasswordResetCode,
 	confirmPasswordReset,
 	changePassword,
+	changeEmail,
+	resendEmailChange,
+	applyEmailChange,
 	logout,
 	watchSession,
 	getSessionToken,
@@ -33,6 +36,7 @@ import { setupMocks } from '@/testUtils/vitest/testingLibrarySetup'
 
 import {
 	applyActionCode,
+	checkActionCode,
 	confirmPasswordReset as confirmFirebasePasswordReset,
 	createUserWithEmailAndPassword,
 	deleteUser,
@@ -44,6 +48,7 @@ import {
 	signInWithEmailAndPassword,
 	signOut,
 	updatePassword,
+	verifyBeforeUpdateEmail,
 	verifyPasswordResetCode,
 } from 'firebase/auth'
 
@@ -51,6 +56,8 @@ import { ACTION_CODE_ERRORS } from '@/constants/auth'
 
 vi.mock('firebase/auth', () => ({
 	applyActionCode: vi.fn(),
+	checkActionCode: vi.fn(),
+	verifyBeforeUpdateEmail: vi.fn(),
 	confirmPasswordReset: vi.fn(),
 	createUserWithEmailAndPassword: vi.fn(),
 	deleteUser: vi.fn(),
@@ -931,6 +938,154 @@ describe('authenticationSlice', () => {
 
 			expect(result.payload).toBe(VALIDATION_MESSAGES.PASSWORD_TOO_SHORT)
 		})
+	})
+
+	describe('changeEmail', () => {
+		const NEW_EMAIL = 'new@example.org'
+		const fields = { newEmail: NEW_EMAIL, currentPassword: 'secret' }
+		let user
+
+		beforeEach(() => {
+			vi.stubGlobal('window', { location: { origin: ORIGIN } })
+			user = { email: MOCK_KEYS.EMAIL }
+			firebaseAuth.currentUser = user
+			return () => {
+				firebaseAuth.currentUser = null
+				vi.unstubAllGlobals()
+			}
+		})
+
+		it('re-authenticates, then sends the link to the new address with Log in to continue', async () => {
+			reauthenticateWithCredential.mockResolvedValueOnce()
+			verifyBeforeUpdateEmail.mockResolvedValueOnce()
+
+			const result = await store.dispatch(changeEmail(fields))
+
+			expect(result.payload).toBe(NEW_EMAIL)
+			expect(reauthenticateWithCredential).toHaveBeenCalledWith(user, {
+				email: MOCK_KEYS.EMAIL,
+				password: 'secret',
+			})
+			expect(verifyBeforeUpdateEmail).toHaveBeenCalledWith(
+				user,
+				NEW_EMAIL,
+				{ url: `${ORIGIN}${PATHS.AUTHENTICATION}` },
+			)
+		})
+
+		it.each([
+			['auth/invalid-credential', ERROR_MESSAGES.WRONG_CURRENT_PASSWORD],
+			['auth/too-many-requests', ERROR_MESSAGES.TOO_MANY_ATTEMPTS],
+			['auth/network-request-failed', ERROR_MESSAGES.EMAIL_CHANGE_FAILED],
+		])(
+			'rejects a %s re-authentication with its message and sends nothing',
+			async (code, message) => {
+				reauthenticateWithCredential.mockRejectedValueOnce({ code })
+
+				const result = await store.dispatch(changeEmail(fields))
+
+				expect(result.payload).toBe(message)
+				expect(verifyBeforeUpdateEmail).not.toHaveBeenCalled()
+			},
+		)
+
+		it.each(['auth/email-already-in-use', 'auth/invalid-new-email'])(
+			'rejects %s as an address that cannot be used',
+			async (code) => {
+				reauthenticateWithCredential.mockResolvedValueOnce()
+				verifyBeforeUpdateEmail.mockRejectedValueOnce({ code })
+
+				const result = await store.dispatch(changeEmail(fields))
+
+				expect(result.payload).toBe(ERROR_MESSAGES.EMAIL_CANNOT_BE_USED)
+			},
+		)
+	})
+
+	describe('resendEmailChange', () => {
+		const NEW_EMAIL = 'new@example.org'
+
+		beforeEach(() => {
+			vi.stubGlobal('window', { location: { origin: ORIGIN } })
+			firebaseAuth.currentUser = { email: MOCK_KEYS.EMAIL }
+			return () => {
+				firebaseAuth.currentUser = null
+				vi.unstubAllGlobals()
+			}
+		})
+
+		it('sends the link again without re-authenticating', async () => {
+			verifyBeforeUpdateEmail.mockResolvedValueOnce()
+
+			const result = await store.dispatch(resendEmailChange(NEW_EMAIL))
+
+			expect(result.payload).toBe(NEW_EMAIL)
+			expect(reauthenticateWithCredential).not.toHaveBeenCalled()
+		})
+
+		it.each([
+			[
+				'auth/requires-recent-login',
+				ERROR_MESSAGES.EMAIL_CHANGE_SIGN_IN_AGAIN,
+			],
+			['auth/too-many-requests', ERROR_MESSAGES.TOO_MANY_EMAILS],
+			['auth/network-request-failed', ERROR_MESSAGES.EMAIL_CHANGE_FAILED],
+		])('rejects %s with its message', async (code, message) => {
+			verifyBeforeUpdateEmail.mockRejectedValueOnce({ code })
+
+			const result = await store.dispatch(resendEmailChange(NEW_EMAIL))
+
+			expect(result.payload).toBe(message)
+		})
+	})
+
+	describe('applyEmailChange', () => {
+		afterEach(() => {
+			firebaseAuth.currentUser = null
+		})
+
+		it('applies the link, signs this device out and resolves with the address it names', async () => {
+			firebaseAuth.currentUser = { uid: MOCK_KEYS.USER_ID }
+			checkActionCode.mockResolvedValueOnce({
+				data: { email: 'new@example.org' },
+			})
+			applyActionCode.mockResolvedValueOnce()
+
+			const result = await store.dispatch(applyEmailChange('code'))
+
+			expect(result.payload).toBe('new@example.org')
+			expect(applyActionCode).toHaveBeenCalledWith(firebaseAuth, 'code')
+			expect(signOut).toHaveBeenCalled()
+		})
+
+		it('does not sign out when no one is signed in', async () => {
+			checkActionCode.mockResolvedValueOnce({
+				data: { email: 'old@example.org' },
+			})
+			applyActionCode.mockResolvedValueOnce()
+
+			firebaseAuth.currentUser = null
+			signOut.mockClear()
+
+			await store.dispatch(applyEmailChange('code'))
+
+			expect(signOut).not.toHaveBeenCalled()
+		})
+
+		it.each([
+			['auth/invalid-action-code', ACTION_CODE_ERRORS.EXPIRED],
+			['auth/network-request-failed', ACTION_CODE_ERRORS.NETWORK],
+		])(
+			'rejects a %s link with its reason and changes nothing',
+			async (code, reason) => {
+				checkActionCode.mockRejectedValueOnce({ code })
+
+				const result = await store.dispatch(applyEmailChange('code'))
+
+				expect(result.payload).toBe(reason)
+				expect(applyActionCode).not.toHaveBeenCalled()
+			},
+		)
 	})
 
 	describe('email verification', () => {

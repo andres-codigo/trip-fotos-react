@@ -11,6 +11,7 @@ import {
 	ACCOUNT_MENU,
 	AVATAR,
 	BADGE,
+	CHANGE_EMAIL_FORM,
 	CHANGE_PASSWORD_FORM,
 	COMBOBOX,
 	INPUT,
@@ -453,6 +454,13 @@ export const NEW_PASSWORD_FORM_SELECTORS = Object.fromEntries(
 
 export const CHANGE_PASSWORD_FORM_SELECTORS = Object.fromEntries(
 	Object.entries(CHANGE_PASSWORD_FORM).map(([key, id]) => [
+		key,
+		key.endsWith('_ERROR') ? getByDataCyError(id) : getByDataCy(id),
+	]),
+)
+
+export const CHANGE_EMAIL_FORM_SELECTORS = Object.fromEntries(
+	Object.entries(CHANGE_EMAIL_FORM).map(([key, id]) => [
 		key,
 		key.endsWith('_ERROR') ? getByDataCyError(id) : getByDataCy(id),
 	]),

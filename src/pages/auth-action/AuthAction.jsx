@@ -15,6 +15,7 @@ import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import {
+	applyEmailChange,
 	applyEmailVerification,
 	checkPasswordResetCode,
 	confirmPasswordReset,
@@ -44,6 +45,13 @@ const VIEWS = Object.freeze({
 	FORM: 'form',
 	DONE: 'done',
 	RESET_EXPIRED: 'resetExpired',
+	EMAIL_CHANGED: 'emailChanged',
+	EMAIL_RECOVERED: 'emailRecovered',
+})
+
+const EMAIL_CHANGE_VIEWS = Object.freeze({
+	[AUTH_ACTION_MODES.VERIFY_AND_CHANGE_EMAIL]: VIEWS.EMAIL_CHANGED,
+	[AUTH_ACTION_MODES.RECOVER_EMAIL]: VIEWS.EMAIL_RECOVERED,
 })
 
 const STEPS = Object.freeze({ CHECK: 'check', CONFIRM: 'confirm' })
@@ -111,6 +119,27 @@ const travellersButton = (modeType) => (
 	/>
 )
 
+const resetPasswordButton = (modeType) => (
+	<LinkButton
+		to={`${PATHS.AUTHENTICATION}?${AUTH_FORM_CONFIG.MODE_PARAM}=reset`}
+		label={AUTH_ACTION_CONFIG.RESET_PASSWORD}
+		dataCy={AUTH_ACTION_PAGE.RESET_PASSWORD}
+		modeType={modeType}
+	/>
+)
+
+const withEmail = (prefix, email, suffix) => (
+	<>
+		{prefix}{' '}
+		<strong
+			className="font-medium wrap-anywhere"
+			data-cy={AUTH_ACTION_PAGE.EMAIL}>
+			{email}
+		</strong>
+		{suffix}
+	</>
+)
+
 const errorAlert = (message) => (
 	<InlineAlert data-cy={AUTH_ACTION_PAGE.ALERT}>{message}</InlineAlert>
 )
@@ -172,6 +201,24 @@ const AuthAction = () => {
 				return
 			}
 			show({ status: verifyFailureView(result.payload) })
+			return
+		}
+
+		if (EMAIL_CHANGE_VIEWS[mode]) {
+			const result = await dispatch(applyEmailChange(code))
+			if (applyEmailChange.fulfilled.match(result)) {
+				show({
+					status: EMAIL_CHANGE_VIEWS[mode],
+					email: result.payload,
+				})
+				return
+			}
+			// An expired change link has no new link to send, so it reads as not valid
+			show(
+				result.payload === ACTION_CODE_ERRORS.NETWORK
+					? { status: VIEWS.NETWORK, step: STEPS.CHECK }
+					: { status: VIEWS.INVALID },
+			)
 			return
 		}
 
@@ -363,12 +410,37 @@ const AuthAction = () => {
 				return {
 					title: AUTH_ACTION_CONFIG.RESET_EXPIRED_TITLE,
 					text: AUTH_ACTION_CONFIG.RESET_EXPIRED_TEXT,
+					actions: resetPasswordButton(),
+				}
+			case VIEWS.EMAIL_CHANGED:
+				return {
+					tick: true,
+					title: AUTH_ACTION_CONFIG.EMAIL_CHANGED_TITLE,
+					text: withEmail(
+						AUTH_ACTION_CONFIG.EMAIL_CHANGED_PREFIX,
+						view.email,
+						AUTH_ACTION_CONFIG.EMAIL_CHANGED_SUFFIX,
+					),
+					actions: logInButton,
+				}
+			case VIEWS.EMAIL_RECOVERED:
+				return {
+					title: AUTH_ACTION_CONFIG.EMAIL_RECOVERED_TITLE,
+					text: withEmail(
+						AUTH_ACTION_CONFIG.EMAIL_RECOVERED_PREFIX,
+						view.email,
+						AUTH_ACTION_CONFIG.EMAIL_RECOVERED_SUFFIX,
+					),
 					actions: (
-						<LinkButton
-							to={`${PATHS.AUTHENTICATION}?${AUTH_FORM_CONFIG.MODE_PARAM}=reset`}
-							label={AUTH_ACTION_CONFIG.RESET_PASSWORD}
-							dataCy={AUTH_ACTION_PAGE.RESET_PASSWORD}
-						/>
+						<div className="flex flex-col-reverse gap-3 lg:flex-row">
+							<LinkButton
+								to={PATHS.AUTHENTICATION}
+								label={AUTH_ACTION_CONFIG.LOG_IN}
+								dataCy={AUTH_ACTION_PAGE.LOG_IN}
+								modeType="outline"
+							/>
+							{resetPasswordButton()}
+						</div>
 					),
 				}
 			default:

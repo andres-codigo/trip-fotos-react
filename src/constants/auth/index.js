@@ -123,6 +123,8 @@ export const ACTION_CODE_ERROR_CODES = Object.freeze({
 export const AUTH_ACTION_MODES = Object.freeze({
 	VERIFY_EMAIL: 'verifyEmail',
 	RESET_PASSWORD: 'resetPassword',
+	VERIFY_AND_CHANGE_EMAIL: 'verifyAndChangeEmail',
+	RECOVER_EMAIL: 'recoverEmail',
 })
 
 export const AUTH_ACTION_CONFIG = Object.freeze({
@@ -165,6 +167,14 @@ export const AUTH_ACTION_CONFIG = Object.freeze({
 	SAVE_PASSWORD: 'Save password',
 	SAVING: 'Saving…',
 	RESET_PASSWORD: 'Reset your password',
+	EMAIL_CHANGED_TITLE: 'Your email has changed',
+	EMAIL_CHANGED_PREFIX: 'Log in with',
+	EMAIL_CHANGED_SUFFIX:
+		' from now on. You have been logged out on every device.',
+	EMAIL_RECOVERED_TITLE: 'Your email has been changed back',
+	EMAIL_RECOVERED_PREFIX: 'Your account uses',
+	EMAIL_RECOVERED_SUFFIX:
+		' again. If you did not ask for the change, reset your password now.',
 })
 
 export const ACCOUNT_SETTINGS_CONFIG = Object.freeze({
@@ -176,6 +186,10 @@ export const ACCOUNT_SETTINGS_CONFIG = Object.freeze({
 	PASSWORD_HELP: 'Use at least 6 characters.',
 	CHANGE_PASSWORD: 'Change password',
 	PASSWORD_CHANGED: 'Your password has been changed.',
+	CHANGE_EMAIL: 'Change email',
+	EMAIL_SENT_PREFIX: 'We have sent a link to',
+	EMAIL_SENT_SUFFIX: (oldEmail) =>
+		`. Your email changes when you open it. Until then, keep logging in with ${oldEmail}.`,
 })
 
 export const VERIFIED_CHIP_CONFIG = Object.freeze({
@@ -191,4 +205,17 @@ export const CHANGE_PASSWORD_CONFIG = Object.freeze({
 	SAVE_PASSWORD: 'Save password',
 	SAVING: 'Saving…',
 	CURRENT_REQUIRED: 'Enter your current password.',
+})
+
+export const CHANGE_EMAIL_CONFIG = Object.freeze({
+	TITLE: 'Change email',
+	INTRO: 'We send a link to the new address. Your email changes when you open it, and you log in again with it.',
+	NEW_EMAIL_LABEL: 'New email',
+	CURRENT_PASSWORD_LABEL: 'Current password',
+	CURRENT_PASSWORD_HELP: 'We ask for it to keep your account safe.',
+	CANCEL: 'Cancel',
+	SEND_LINK: 'Send verification link',
+	SENDING: 'Sending…',
+	CURRENT_REQUIRED: 'Enter your current password.',
+	SAME_EMAIL: 'That is already your email.',
 })
