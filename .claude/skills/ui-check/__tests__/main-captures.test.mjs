@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vitest'
 import {
 	capturedWidths,
 	mergeStamp,
+	moveStamp,
 	neededWidths,
 	reuseVerdict,
+	staleCaptures,
 } from '../main-captures.mjs'
 import { CAPTURES } from '../../../../cypress/impact.js'
 
@@ -121,5 +123,148 @@ describe('recording the main captures', () => {
 		expect(neededWidths('390;edit-save=768', 'edit-save')).toEqual({
 			'edit-save': [768],
 		})
+	})
+})
+
+describe('following main to a newer commit', () => {
+	const pkg = (version, react = '^19.0.0') =>
+		JSON.stringify({ name: 'trip-fotos', version, dependencies: { react } })
+	const lock = (version) =>
+		JSON.stringify({
+			version,
+			packages: { '': { version }, 'node_modules/react': {} },
+		})
+	const capture = (id, body) =>
+		`\tcapture('${id}', () => {\n\t\t${body}\n\t})`
+	const script = (...captures) =>
+		`describe('UI check capture', () => {\n${captures.join('\n')}\n})\n`
+	// Answers as narrowChange expects, from file contents before and after
+	const repo = (before, after = {}) => ({
+		isNew: (file) => !(file in before),
+		before: (file) => before[file] ?? null,
+		after: (file) => after[file] ?? null,
+		diff: () => '',
+	})
+
+	it('keeps every capture after a release commit', () => {
+		const files = [
+			'CHANGELOG.md',
+			'package.json',
+			'package-lock.json',
+			'config/release-please-manifest.json',
+		]
+		const git = repo(
+			{
+				'package.json': pkg('0.28.7'),
+				'package-lock.json': lock('0.28.7'),
+			},
+			{
+				'package.json': pkg('0.28.8'),
+				'package-lock.json': lock('0.28.8'),
+			},
+		)
+
+		expect(staleCaptures(files, git)).toEqual([])
+	})
+
+	it.each([
+		['docs and tests', ['README.md', 'src/app/__tests__/App.test.jsx']],
+		['an E2E spec', ['cypress/e2e/pages/Authentication.cy.js']],
+	])('keeps every capture after %s', (_, files) => {
+		expect(staleCaptures(files, repo({}))).toEqual([])
+	})
+
+	it('retakes only the captures an area maps to', () => {
+		const stale = staleCaptures(
+			['src/pages/privacy/Privacy.jsx'],
+			repo({ 'src/pages/privacy/Privacy.jsx': '' }),
+		)
+
+		expect(stale).toEqual(['public-pages'])
+	})
+
+	it('retakes only the capture whose body changed', () => {
+		const file = 'cypress/ui-check/capture.cy.js'
+		const git = repo(
+			{
+				[file]: script(
+					capture('public-pages', 'a()'),
+					capture('own-trip', 'b()'),
+				),
+			},
+			{
+				[file]: script(
+					capture('public-pages', 'a()'),
+					capture('own-trip', 'c()'),
+				),
+			},
+		)
+
+		expect(staleCaptures([file], git)).toEqual(['own-trip'])
+	})
+
+	it.each([
+		['a shared file', ['src/app/App.jsx'], { 'src/app/App.jsx': '' }, {}],
+		['the selection helper', ['cypress/ui-check/selection.js'], {}, {}],
+		['the seed data', ['scripts/seed-emulators.mjs'], {}, {}],
+		['the HTML shell', ['index.html'], {}, {}],
+		[
+			'shared capture setup',
+			['cypress/ui-check/capture.cy.js'],
+			{
+				'cypress/ui-check/capture.cy.js': script(
+					capture('own-trip', 'b()'),
+				),
+			},
+			{
+				'cypress/ui-check/capture.cy.js': `beforeEach(() => reset())\n${script(capture('own-trip', 'b()'))}`,
+			},
+		],
+		[
+			'a dependency bump',
+			['package.json'],
+			{ 'package.json': pkg('0.28.7') },
+			{ 'package.json': pkg('0.28.8', '^19.1.0') },
+		],
+	])('retakes every capture after %s', (_, files, before, after) => {
+		expect(staleCaptures(files, repo(before, after))).toBeNull()
+	})
+
+	it('moves the record to the new commit without the stale captures', () => {
+		expect(
+			moveStamp(stamp, {
+				commit: 'b'.repeat(40),
+				script: 'new-hash',
+				stale: ['edit-states'],
+			}),
+		).toEqual({
+			commit: 'b'.repeat(40),
+			script: 'new-hash',
+			captures: { 'public-pages': [390, 768, 1280] },
+		})
+		expect(
+			moveStamp(stamp, {
+				commit: 'b'.repeat(40),
+				script: 'x',
+				stale: null,
+			}).captures,
+		).toEqual({})
+	})
+
+	it('then retakes just the dropped captures', () => {
+		const moved = moveStamp(stamp, {
+			commit: 'b'.repeat(40),
+			script: 'script-hash',
+			stale: ['edit-states'],
+		})
+		const verdict = reuseVerdict(
+			moved,
+			current(
+				{ 'public-pages': [390], 'edit-states': [390] },
+				{ commit: 'b'.repeat(40) },
+			),
+		)
+
+		expect(verdict.retake).toEqual(['edit-states'])
 	})
 })
