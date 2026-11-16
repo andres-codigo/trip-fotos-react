@@ -268,6 +268,20 @@ describe('authenticationSlice', () => {
 				sessionChecked: true,
 			})
 		})
+
+		it('should handle awaitVerification, then clearAwaitingVerification', () => {
+			let state = authenticationReducer(
+				undefined,
+				authActions.awaitVerification(),
+			)
+			expect(state.awaitingVerification).toBe(true)
+
+			state = authenticationReducer(
+				state,
+				authActions.clearAwaitingVerification(),
+			)
+			expect(state.awaitingVerification).toBe(false)
+		})
 	})
 
 	describe('actions', () => {

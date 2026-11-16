@@ -349,6 +349,9 @@ const authSlice = createSlice({
 		clearAwaitingVerification(state) {
 			state.awaitingVerification = false
 		},
+		awaitVerification(state) {
+			state.awaitingVerification = true
+		},
 		setSession(state, action) {
 			if (state.signingIn) return
 			state.userId = action.payload.userId

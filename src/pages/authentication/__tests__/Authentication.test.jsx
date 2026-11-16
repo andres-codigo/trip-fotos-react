@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
@@ -27,6 +27,7 @@ import { validateEmail, validatePassword } from '@/utils/validation'
 import {
 	authActions,
 	login,
+	refreshVerification,
 	sendPasswordReset,
 } from '@/store/slices/authenticationSlice'
 
@@ -51,10 +52,19 @@ vi.mock('@/store/slices/authenticationSlice', () => {
 		resendVerification: thunk('resend'),
 		startAgain: thunk('startAgain'),
 		authActions: {
+			awaitVerification: vi.fn(() => ({ type: 'awaitVerification' })),
 			clearAwaitingVerification: vi.fn(() => ({
 				type: 'clearAwaitingVerification',
 			})),
 		},
+		selectUserId: (state) => state.authentication?.userId ?? null,
+		selectUserEmail: (state) => state.authentication?.userEmail ?? null,
+		selectEmailVerified: (state) =>
+			state.authentication?.emailVerified ?? false,
+		selectSessionChecked: (state) =>
+			state.authentication?.sessionChecked ?? true,
+		selectAwaitingVerification: (state) =>
+			state.authentication?.awaitingVerification ?? false,
 	}
 })
 
@@ -88,10 +98,18 @@ vi.mock('react-router-dom', async () => {
 
 const mockDispatch = vi.fn(() => Promise.resolve({}))
 let mockState = {}
+const listeners = new Set()
 const mockStore = {
 	getState: () => mockState,
-	subscribe: () => () => {},
+	subscribe: (listener) => {
+		listeners.add(listener)
+		return () => listeners.delete(listener)
+	},
 	dispatch: mockDispatch,
+}
+const setMockState = (state) => {
+	mockState = state
+	listeners.forEach((listener) => listener())
 }
 
 const renderWithProviders = (ui) =>
@@ -146,8 +164,11 @@ describe('<Authentication />', () => {
 	beforeEach(() => {
 		mockState = {}
 		window.history.pushState({}, '', PATHS.AUTHENTICATION)
-		mockDispatch.mockClear()
+		mockDispatch.mockReset()
+		mockDispatch.mockImplementation(() => Promise.resolve({}))
 		mockNavigate.mockClear()
+		vi.mocked(refreshVerification).mockClear()
+		vi.mocked(authActions.awaitVerification).mockClear()
 	})
 
 	describe('Rendering tests', () => {
@@ -840,6 +861,109 @@ describe('<Authentication />', () => {
 			expect(
 				screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
 			).toHaveValue(MOCK_KEYS.EMAIL)
+		})
+	})
+
+	describe('Check your inbox after a reload', () => {
+		const unverifiedSession = (overrides) => ({
+			authentication: {
+				userId: 'u1',
+				userEmail: MOCK_KEYS.EMAIL,
+				emailVerified: false,
+				sessionChecked: false,
+				...overrides,
+			},
+		})
+
+		const expectInbox = () => {
+			expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+				VERIFY_EMAIL_CONFIG.TITLE,
+			)
+			expect(screen.getByRole('status')).toHaveTextContent(
+				MOCK_KEYS.EMAIL,
+			)
+		}
+
+		it('shows Check your inbox for a signed-in, unverified account, with the signed-out chrome', () => {
+			mockState = unverifiedSession()
+
+			renderWithProviders(<Authentication />)
+
+			expectInbox()
+			expect(authActions.awaitVerification).toHaveBeenCalled()
+			// The SDK has not confirmed the saved user yet, so nothing is asked of it
+			expect(refreshVerification).not.toHaveBeenCalled()
+		})
+
+		it('asks once the SDK confirms the user, and continues to Register if it is verified', async () => {
+			mockState = unverifiedSession({ sessionChecked: true })
+			mockDispatch.mockImplementation((action) =>
+				Promise.resolve(
+					action?.type === 'refresh'
+						? { payload: { emailVerified: true } }
+						: {},
+				),
+			)
+
+			renderWithProviders(<Authentication />)
+
+			await waitFor(() =>
+				expect(mockNavigate).toHaveBeenCalledWith(PATHS.REGISTER, {
+					replace: true,
+				}),
+			)
+			expect(refreshVerification).toHaveBeenCalledTimes(1)
+		})
+
+		it('swaps to Check your inbox when an unverified session arrives on the page', async () => {
+			renderWithProviders(<Authentication />)
+			expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+				AUTH_FORM_CONFIG.LOGIN_TITLE,
+			)
+
+			act(() => setMockState(unverifiedSession()))
+
+			await waitFor(() =>
+				expect(
+					screen.getByRole('heading', {
+						name: VERIFY_EMAIL_CONFIG.TITLE,
+					}),
+				).toHaveFocus(),
+			)
+			expectInbox()
+		})
+
+		it('starts again on Create an account with the restored address to correct', async () => {
+			mockState = unverifiedSession()
+			renderWithProviders(<Authentication />)
+			mockDispatch.mockResolvedValueOnce({ payload: MOCK_KEYS.EMAIL })
+			mockState = {}
+
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: VERIFY_EMAIL_CONFIG.START_AGAIN,
+				}),
+			)
+
+			expect(
+				await screen.findByRole('heading', {
+					name: AUTH_FORM_CONFIG.SIGNUP_TITLE,
+				}),
+			).toHaveFocus()
+			expect(
+				screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
+			).toHaveValue(MOCK_KEYS.EMAIL)
+		})
+
+		it('leaves a verified, signed-in account on the login form', () => {
+			mockState = unverifiedSession({ emailVerified: true })
+
+			renderWithProviders(<Authentication />)
+
+			expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+				AUTH_FORM_CONFIG.LOGIN_TITLE,
+			)
+			expect(authActions.awaitVerification).not.toHaveBeenCalled()
 		})
 	})
 

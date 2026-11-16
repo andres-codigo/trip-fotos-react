@@ -17,6 +17,7 @@ import { PATHS } from '@/constants/ui'
 import {
 	authActions,
 	selectAwaitingVerification,
+	selectEmailVerified,
 	selectIsAuthenticated,
 	selectSessionChecked,
 	selectUserId,
@@ -123,6 +124,7 @@ function AppRoutes() {
 	const sessionChecked = useSelector(selectSessionChecked)
 	const userId = useSelector(selectUserId)
 	const awaitingVerification = useSelector(selectAwaitingVerification)
+	const emailVerified = useSelector(selectEmailVerified)
 
 	// Below 1024px the thread screen docks its reply box at the bottom edge, where the tab bar and footer would sit
 	const isThreadScreen = Boolean(
@@ -162,10 +164,11 @@ function AppRoutes() {
 		}
 	}, [userId, location.pathname, navigate])
 
-	// A signed-in user has no use for the login form, unless sign-up has just swapped it to Check your inbox; the login page honours the same redirect target
+	// A signed-in user has no use for the login form, unless it shows Check your inbox: after sign-up, or for an unverified account that reloads (the login page swaps to it after this runs); the login page honours the same redirect target
 	useEffect(() => {
 		if (
 			isLoggedIn &&
+			emailVerified &&
 			!awaitingVerification &&
 			location.pathname === PATHS.AUTHENTICATION
 		) {
@@ -176,13 +179,14 @@ function AppRoutes() {
 		}
 	}, [
 		isLoggedIn,
+		emailVerified,
 		awaitingVerification,
 		location.pathname,
 		location.search,
 		navigate,
 	])
 
-	// Check your inbox only lives on the login page; the flag is persisted, so leaving it set elsewhere (a new tab from the email's Continue button, or moving on once verified) would show a signed-in traveller the signed-out header
+	// Check your inbox only lives on the login page; leaving the flag set elsewhere (moving on once verified) would show a signed-in traveller the signed-out header
 	useEffect(() => {
 		if (
 			awaitingVerification &&

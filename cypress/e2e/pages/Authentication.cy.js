@@ -12,13 +12,14 @@ import {
 	AUTHENTICATION_FORM_SELECTORS,
 	DIALOG_SELECTORS,
 	PASSWORD_RESET_FORM_SELECTORS,
+	VERIFY_EMAIL_INBOX_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 
 import { TEST_USERS } from '../../../src/constants/config/users'
 
-import { performLogin } from '../../support/utils/authHelpers'
+import { hasSdkSession, performLogin } from '../../support/utils/authHelpers'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
@@ -194,6 +195,30 @@ describe('Sign-up journey', () => {
 		signUp(email)
 		verifyElsewhere(email)
 
+		cy.contains('button', VERIFY_EMAIL_CONFIG.CHECK).click()
+
+		shouldBeSignedInOnRegister()
+	})
+
+	it('keeps Check your inbox after a reload, then continues to Register once verified', () => {
+		const email = `reloaded-${Date.now()}@example.com`
+		signUp(email)
+		// The Auth SDK makes a follow-up call before the session is stored, so a reload any sooner logs the user out
+		cy.window({ timeout: REQUEST_TIMEOUT }).should((win) => {
+			expect(hasSdkSession({ ...win.localStorage }, email)).to.equal(true)
+		})
+
+		cy.reload()
+
+		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
+		cy.get('h1', { timeout: REQUEST_TIMEOUT }).should(
+			'have.text',
+			VERIFY_EMAIL_CONFIG.TITLE,
+		)
+		cy.get(VERIFY_EMAIL_INBOX_SELECTORS.STATUS).should('contain', email)
+		cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should('not.exist')
+
+		verifyElsewhere(email)
 		cy.contains('button', VERIFY_EMAIL_CONFIG.CHECK).click()
 
 		shouldBeSignedInOnRegister()
