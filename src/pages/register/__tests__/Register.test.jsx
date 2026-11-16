@@ -5,7 +5,8 @@ import configureTestStore from '@/testUtils/configureTestStore'
 import { MemoryRouter, useNavigate } from 'react-router-dom'
 
 import { registerTraveller } from '@/store/slices/travellersSlice'
-import { TEST_IDS } from '@/constants/test'
+import { TEST_IDS, VERIFY_EMAIL_NOTE } from '@/constants/test'
+import { VERIFY_EMAIL_PROMPT_CONFIG } from '@/constants/auth'
 import { PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
@@ -46,9 +47,12 @@ vi.mock(
 	}),
 )
 
-const createMockStore = (initialState) => {
+const createMockStore = (initialState, emailVerified = true) => {
 	return configureTestStore({
 		reducer: {
+			authentication: (
+				state = { emailVerified, userEmail: 'me@example.com' },
+			) => state,
 			travellers: (
 				state = { status: 'idle', error: null, uploadProgress: null },
 			) => state,
@@ -95,6 +99,32 @@ describe('Register', () => {
 		const form = screen.getByTestId('traveller-registration-form')
 		expect(form.parentElement).toHaveClass('max-w-160', 'lg:max-w-290')
 		expect(form).toHaveAttribute('data-loading', 'false')
+	})
+
+	it('shows the verify note in the narrow column instead of the form for an unverified account', () => {
+		store = createMockStore(
+			{ travellers: { status: 'idle', error: null } },
+			false,
+		)
+		renderRegister()
+
+		expect(screen.getByTestId(VERIFY_EMAIL_NOTE.ROOT)).toHaveTextContent(
+			VERIFY_EMAIL_PROMPT_CONFIG.REGISTER_NOTE,
+		)
+		expect(
+			screen
+				.getByTestId(VERIFY_EMAIL_NOTE.ROOT)
+				.closest('[data-cy="base-card"]'),
+		).toHaveClass('bg-surface')
+		expect(
+			screen.queryByTestId('traveller-registration-form'),
+		).not.toBeInTheDocument()
+		expect(
+			screen.getByRole('heading', {
+				level: 1,
+				name: 'Register as a traveller',
+			}),
+		).toBeInTheDocument()
 	})
 
 	describe('Upload progress', () => {

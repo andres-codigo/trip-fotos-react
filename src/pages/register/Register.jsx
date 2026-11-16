@@ -6,21 +6,28 @@ import {
 	registerTraveller,
 	selectUploadProgress,
 } from '@/store/slices/travellersSlice'
+import { selectEmailVerified } from '@/store/slices/authenticationSlice'
+import { VERIFY_EMAIL_PROMPT_CONFIG } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { handleApiError } from '@/utils/errorHandler'
 import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
+import BaseCard from '@/components/ui/card/BaseCard'
 import BaseDialog from '@/components/ui/dialog/BaseDialog'
 import BaseProgress from '@/components/ui/progress/BaseProgress'
 import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
+import VerifyEmailNote from '@/components/forms/verify-email-note/VerifyEmailNote'
+
+const TITLE = 'Register as a traveller'
 
 const Register = () => {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
 	const uploadProgress = useSelector(selectUploadProgress)
+	const emailVerified = useSelector(selectEmailVerified)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState(null)
 
@@ -57,7 +64,7 @@ const Register = () => {
 			className={'mainContainer cardPage text-left'}
 			data-cy="main-container"
 			data-cy-alt="register-main-container">
-			<title>{`Register as a traveller · ${GLOBAL.SITE_NAME}`}</title>
+			<title>{`${TITLE} · ${GLOBAL.SITE_NAME}`}</title>
 			{error && (
 				<BaseDialog
 					show={true}
@@ -95,11 +102,26 @@ const Register = () => {
 				</BaseDialog>
 			)}
 			{/* A div, as the unlayered section rule would add padding */}
-			<div className={PAGE_LAYOUT.WIDE}>
-				<TravellerRegistrationForm
-					isLoading={isLoading}
-					onSubmit={handleRegistrationSubmit}
-				/>
+			<div
+				className={
+					emailVerified ? PAGE_LAYOUT.WIDE : PAGE_LAYOUT.NARROW
+				}>
+				{/* The rules refuse an unverified account's trip and photos, so the note stands in for the form */}
+				{emailVerified ? (
+					<TravellerRegistrationForm
+						title={TITLE}
+						isLoading={isLoading}
+						onSubmit={handleRegistrationSubmit}
+					/>
+				) : (
+					// A card at every width, as the note has no sections to open up into
+					<BaseCard>
+						<h1 className="mt-0 mb-4 text-[1.5rem]">{TITLE}</h1>
+						<VerifyEmailNote
+							text={VERIFY_EMAIL_PROMPT_CONFIG.REGISTER_NOTE}
+						/>
+					</BaseCard>
+				)}
 			</div>
 		</main>
 	)

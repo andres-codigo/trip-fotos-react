@@ -64,6 +64,7 @@ describe('<Messages />', () => {
 			preloadedState: {
 				authentication: {
 					...authenticationReducer(undefined, { type: '@@init' }),
+					emailVerified: true,
 					userId: 'me',
 				},
 			},

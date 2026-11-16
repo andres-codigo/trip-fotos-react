@@ -50,6 +50,39 @@ export const PASSWORD_RESET_CONFIG = Object.freeze({
 // Firebase refuses a burst of verification emails, so the resend link rests between sends
 export const RESEND_COOLDOWN_SECONDS = 60
 
+export const VERIFY_EMAIL_STATUS = Object.freeze({
+	IDLE: 'idle',
+	SENDING: 'sending',
+	SENT: 'sent',
+	NOT_SENT: 'not-sent',
+	CHECKING: 'checking',
+	NOT_YET: 'not-yet',
+	CHECK_FAILED: 'check-failed',
+})
+
+// The strip and the notes that stand in for a blocked action until the account is verified (#760)
+export const VERIFY_EMAIL_PROMPT_CONFIG = Object.freeze({
+	STRIP_LABEL: 'Verify your email',
+	STRIP_TITLE: 'Verify your email',
+	STRIP_TEXT: 'to register a trip and message travellers.',
+	SENT_LINK_TO: 'We sent a link to',
+	NOTE_TITLE: 'Verify your email first',
+	REGISTER_NOTE:
+		'Other travellers see your trip and can message you, so we check your address before you register.',
+	EDIT_NOTE:
+		'Other travellers see your trip and can message you, so we check your address before you change it.',
+	REPLY_NOTE_TITLE: 'Verify your email to reply.',
+	SEND_AGAIN: 'Send the link again',
+	CHECK: "I've verified",
+	SENDING: 'Sending…',
+	CHECKING: 'Checking…',
+	SENT_TO: (email) => `Sent. Check ${email}.`,
+	SENT: 'Sent. Check your inbox.',
+	NOT_SENT: 'Not sent. Try again in a few minutes.',
+	NOT_YET: 'Not verified yet. Open the link, then try again.',
+	CHECK_FAILED: ERROR_MESSAGES.VERIFICATION_CHECK_FAILED,
+})
+
 export const VERIFY_EMAIL_CONFIG = Object.freeze({
 	TITLE: 'Check your inbox',
 	SENT_PREFIX: 'We have sent a link to',

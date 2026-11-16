@@ -26,7 +26,8 @@
 		"emulators:seed": "node scripts/seed-emulators.mjs",
 		"admin:claim": "node scripts/set-admin-claim.mjs",
 		"public-trips:backfill": "node --env-file-if-exists=.env scripts/backfill-public-trips.mjs",
-		"messages:migrate": "node --env-file-if-exists=.env scripts/migrate-messages-to-threads.mjs"
+		"messages:migrate": "node --env-file-if-exists=.env scripts/migrate-messages-to-threads.mjs",
+		"accounts:mark-verified": "node scripts/mark-accounts-verified.mjs"
 	},
 	"dependencies": {
 		"@radix-ui/react-dialog": "^1.3.1",

@@ -20,6 +20,7 @@ import {
 	THREAD_HEADER,
 	THREAD_NOTE,
 	TOAST,
+	VERIFY_EMAIL_NOTE,
 } from '@/constants/test'
 import { API_DATABASE } from '@/constants/api'
 import { MESSAGES_CONFIG } from '@/constants/travellers'
@@ -28,6 +29,7 @@ import { GLOBAL, PATHS } from '@/constants/ui'
 import Messages from '@/pages/messages/Messages'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 import messagesReducer from '@/store/slices/messagesSlice'
+import { VERIFY_EMAIL_PROMPT_CONFIG } from '@/constants/auth'
 
 const viewport = vi.hoisted(() => ({ width: 390 }))
 
@@ -117,7 +119,7 @@ const writes = (fetchMock) =>
 			body: options.body && JSON.parse(options.body),
 		}))
 
-const renderPage = (path = PATHS.MESSAGES) => {
+const renderPage = (path = PATHS.MESSAGES, { emailVerified = true } = {}) => {
 	const store = configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
@@ -128,6 +130,7 @@ const renderPage = (path = PATHS.MESSAGES) => {
 				...authenticationReducer(undefined, { type: '@@init' }),
 				userId: ME,
 				token: 'token',
+				emailVerified,
 			},
 		},
 	})
@@ -297,6 +300,25 @@ describe('Messages page', () => {
 				MESSAGES_CONFIG.SUMMARY(0, 1),
 			)
 			expect(screen.getByTestId(REPLY_BOX.INPUT)).toBeInTheDocument()
+		})
+
+		it('shows the verify note in place of the reply box for an unverified account', async () => {
+			stubDatabase({ list: null, legacy: null })
+			renderPage(`${PATHS.MESSAGES}/${CID}`, { emailVerified: false })
+
+			fetch.mockImplementation(async (url) => {
+				const path = pathOf(url)
+				if (path.endsWith(`/travellers/${OTHER}.json`))
+					return okResponse({ firstName: 'Tomás', lastName: 'Silva' })
+				return okResponse(null)
+			})
+
+			expect(
+				await screen.findByTestId(VERIFY_EMAIL_NOTE.ROOT),
+			).toHaveTextContent(VERIFY_EMAIL_PROMPT_CONFIG.REPLY_NOTE_TITLE)
+			expect(
+				screen.queryByTestId(REPLY_BOX.INPUT),
+			).not.toBeInTheDocument()
 		})
 
 		it('shows a former traveller’s thread read-only', async () => {

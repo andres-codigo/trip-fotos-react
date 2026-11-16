@@ -11,13 +11,18 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-import { EDIT_TRIP, TRAVELLER_DETAIL } from '@/constants/test'
+import {
+	EDIT_TRIP,
+	TRAVELLER_DETAIL,
+	VERIFY_EMAIL_NOTE,
+} from '@/constants/test'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { EDIT_TRIP_CONFIG } from '@/constants/travellers'
 
 import EditTrip from '@/pages/edit-trip/EditTrip'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 import travellersReducer from '@/store/slices/travellersSlice'
+import { VERIFY_EMAIL_PROMPT_CONFIG } from '@/constants/auth'
 
 const { mockUpdate, mockDelete } = vi.hoisted(() => ({
 	mockUpdate: vi.fn(),
@@ -114,7 +119,12 @@ const LocationProbe = () => {
 	)
 }
 
-const renderPage = ({ id = 'me', userId = 'me', hash = '' } = {}) => {
+const renderPage = ({
+	id = 'me',
+	userId = 'me',
+	hash = '',
+	emailVerified = true,
+} = {}) => {
 	const store = configureTestStore({
 		reducer: {
 			authentication: authenticationReducer,
@@ -124,6 +134,7 @@ const renderPage = ({ id = 'me', userId = 'me', hash = '' } = {}) => {
 			authentication: {
 				...authenticationReducer(undefined, { type: '@@init' }),
 				userId,
+				emailVerified,
 			},
 		},
 	})
@@ -214,6 +225,23 @@ describe('<EditTrip />', () => {
 		expect(screen.getByTestId(EDIT_TRIP.DELETE_SECTION)).toHaveTextContent(
 			EDIT_TRIP_CONFIG.DELETE_SUMMARY(2),
 		)
+	})
+
+	it('shows the verify note in place of the form for an unverified account, keeping Delete', async () => {
+		renderPage({ emailVerified: false })
+		expect(
+			await screen.findByTestId(VERIFY_EMAIL_NOTE.ROOT),
+		).toHaveTextContent(VERIFY_EMAIL_PROMPT_CONFIG.EDIT_NOTE)
+		expect(
+			screen
+				.getByTestId(VERIFY_EMAIL_NOTE.ROOT)
+				.closest('[data-cy="base-card"]'),
+		).toHaveClass('bg-surface')
+		expect(screen.queryByTestId('mock-form')).not.toBeInTheDocument()
+		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+			EDIT_TRIP_CONFIG.TITLE,
+		)
+		expect(screen.getByTestId(EDIT_TRIP.DELETE_SECTION)).toBeInTheDocument()
 	})
 
 	it('asks the form to focus the photos for the photos anchor', async () => {

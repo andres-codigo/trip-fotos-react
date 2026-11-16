@@ -31,7 +31,9 @@ describe('the impact manifest', () => {
 
 describe('affectedCaptures', () => {
 	it('runs only the captures of the page a change touches', () => {
+		// verify-gate shows the thread's verify note in place of the reply box
 		expect(affectedCaptures(['src/pages/messages/Messages.jsx'])).toEqual([
+			'verify-gate',
 			'messages-states',
 			'messages-fallback',
 			'messages-empty',
@@ -91,7 +93,9 @@ describe('affectedCaptures', () => {
 
 describe('affectedSpecs', () => {
 	it('runs the specs for the page a change touches', () => {
+		// EmailVerification checks the edit page's verify note
 		expect(affectedSpecs(['src/pages/edit-trip/EditTrip.jsx'])).toEqual([
+			'cypress/e2e/app/EmailVerification.cy.js',
 			'cypress/e2e/pages/EditTrip.cy.js',
 		])
 	})

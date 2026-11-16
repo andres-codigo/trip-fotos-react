@@ -173,7 +173,10 @@ export const resendVerification = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.RESEND_VERIFICATION,
 	async (_, { rejectWithValue }) => {
 		try {
-			const user = getFirebaseAuth().currentUser
+			// The strip shows from the saved session at once, before the SDK has restored its user
+			const auth = getFirebaseAuth()
+			await auth.authStateReady()
+			const user = auth.currentUser
 			await sendVerification(user)
 			return user.email
 		} catch (error) {
@@ -190,7 +193,9 @@ export const refreshVerification = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.REFRESH_VERIFICATION,
 	async (_, { rejectWithValue }) => {
 		try {
-			const user = getFirebaseAuth().currentUser
+			const auth = getFirebaseAuth()
+			await auth.authStateReady()
+			const user = auth.currentUser
 			if (!user) return { emailVerified: false }
 
 			await user.reload()

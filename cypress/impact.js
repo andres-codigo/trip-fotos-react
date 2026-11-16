@@ -34,6 +34,11 @@ const AREAS = {
 		'src/store/slices/messagesSlice.js',
 	],
 	trips: ['src/store/slices/travellersSlice.js', 'src/utils/tripPhotos/'],
+	verifyGate: [
+		'src/components/layout/verify-email-strip/',
+		'src/components/forms/verify-email-note/',
+		'src/utils/useVerifyEmail/',
+	],
 }
 
 // Captures only: the header, main nav and tab bar show on every page, so the
@@ -77,6 +82,10 @@ export const CAPTURES = {
 	'verify-inbox': {
 		title: 'captures Check your inbox after sign-up, sent, refused, not yet verified, resent and checking',
 		areas: ['authentication'],
+	},
+	'verify-gate': {
+		title: 'captures the verify strip in every state and the notes in place of Register, Edit trip and the reply box for an unverified account',
+		areas: ['verifyGate', 'authentication', 'register', 'edit', 'messages'],
 	},
 	'auth-action': {
 		title: 'captures the email-link page: verified, already verified, expired, invalid, network, loading and the password reset states',
@@ -202,6 +211,13 @@ export const CAPTURES = {
 
 export const E2E_SPECS = {
 	'cypress/e2e/app/AppRoutes.cy.js': ['authentication', 'travellers'],
+	'cypress/e2e/app/EmailVerification.cy.js': [
+		'verifyGate',
+		'authentication',
+		'register',
+		'edit',
+		'messages',
+	],
 	'cypress/e2e/app/StalePersistedStore.cy.js': [
 		'authentication',
 		'travellers',

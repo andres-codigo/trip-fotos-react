@@ -853,11 +853,11 @@ describe('<Authentication />', () => {
 				}),
 			)
 
-			expect(
-				await screen.findByRole('heading', {
-					name: AUTH_FORM_CONFIG.SIGNUP_TITLE,
-				}),
-			).toHaveFocus()
+			const heading = await screen.findByRole('heading', {
+				name: AUTH_FORM_CONFIG.SIGNUP_TITLE,
+			})
+			// Focus moves in an effect after the heading renders, so a busy test worker can look between the two
+			await waitFor(() => expect(heading).toHaveFocus())
 			expect(
 				screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
 			).toHaveValue(MOCK_KEYS.EMAIL)
