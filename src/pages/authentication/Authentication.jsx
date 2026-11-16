@@ -13,9 +13,15 @@ import { ERROR_MESSAGES } from '@/constants/errors'
 import { ACCESSIBILITY, GLOBAL, PATHS } from '@/constants/ui'
 
 import {
+	authActions,
 	login,
 	refreshVerification,
 	resendVerification,
+	selectAwaitingVerification,
+	selectEmailVerified,
+	selectSessionChecked,
+	selectUserEmail,
+	selectUserId,
 	sendPasswordReset,
 	startAgain,
 } from '@/store/slices/authenticationSlice'
@@ -61,10 +67,22 @@ const Authentication = () => {
 	const location = useLocation()
 	const searchParams = new URLSearchParams(location.search)
 
+	// A new account that reloads or reopens the app is still signed in but unverified; Check your inbox is its only way to start again with another address
+	const userId = useSelector(selectUserId)
+	const userEmail = useSelector(selectUserEmail)
+	const emailVerified = useSelector(selectEmailVerified)
+	const sessionChecked = useSelector(selectSessionChecked)
+	const awaitingVerification = useSelector(selectAwaitingVerification)
+	const unverified = Boolean(userId) && !emailVerified
+
 	const [mode, setMode] = useState(() =>
 		initialMode(searchParams.get(AUTH_FORM_CONFIG.MODE_PARAM)),
 	)
 	const [isLoading, setIsLoading] = useState(false)
+
+	// Logging in to an older unverified account moves on as before; isLoading covers the moment between the session arriving and that navigation
+	const isRestored = unverified && !isLoading && mode !== VERIFY_MODE
+	const view = isRestored ? VERIFY_MODE : mode
 	const [error, setError] = useState(false)
 
 	// A visitor sent here from a trip is told why; the name is known when they came from the public list
@@ -83,6 +101,9 @@ const Authentication = () => {
 	const hasSwitchedView = useRef(false)
 	const [reset, setReset] = useState(RESET_IDLE)
 	const [verify, setVerify] = useState(VERIFY_IDLE)
+	const inboxEmail = verify.email || userEmail
+	const hasCheckedRestored = useRef(false)
+	const wasRestored = useRef(isRestored)
 
 	// The heading takes focus when the card swaps views, so a screen reader hears the new one
 	useEffect(() => {
@@ -193,7 +214,7 @@ const Authentication = () => {
 			isChecking: false,
 			error: refreshVerification.rejected.match(result)
 				? result.payload
-				: VERIFY_EMAIL_CONFIG.NOT_YET(v.email),
+				: VERIFY_EMAIL_CONFIG.NOT_YET(inboxEmail),
 		}))
 	}
 
@@ -221,13 +242,37 @@ const Authentication = () => {
 			setVerify((v) => ({ ...v, error: result.payload }))
 			return
 		}
+		// A restored card never had the sign-up form filled in
+		setEmail(inboxEmail)
 		setVerify(VERIFY_IDLE)
 		switchView(API_DATABASE.AUTH_SIGNUP_MODE)
 	}
 
+	// The header and tab bar show the signed-out chrome on Check your inbox
+	useEffect(() => {
+		if (isRestored && !awaitingVerification) {
+			dispatch(authActions.awaitVerification())
+		}
+	}, [isRestored, awaitingVerification, dispatch])
+
+	// A session arriving while the page is open (sign-up in another tab) swaps the card, so its heading takes focus as any swap does
+	useEffect(() => {
+		if (isRestored && !wasRestored.current) titleRef.current?.focus()
+		wasRestored.current = isRestored
+	}, [isRestored])
+
+	// The saved session can predate a link opened on another device, so a restored card asks once the SDK has confirmed the user; sign-up has just sent the link, so it does not
+	useEffect(() => {
+		if (!isRestored || !sessionChecked || hasCheckedRestored.current) return
+		hasCheckedRestored.current = true
+		dispatch(refreshVerification()).then((result) => {
+			if (result.payload?.emailVerified) continueVerified()
+		})
+	})
+
 	// Coming back from the mail app checks again, so the button is a fallback rather than the only way on
 	useEffect(() => {
-		if (mode !== VERIFY_MODE) return
+		if (view !== VERIFY_MODE) return
 		const onVisible = () => {
 			if (document.visibilityState === 'visible') {
 				checkVerified({ quiet: true })
@@ -283,7 +328,7 @@ const Authentication = () => {
 		[API_DATABASE.AUTH_SIGNUP_MODE]: AUTH_FORM_CONFIG.SIGNUP_TITLE,
 		[RESET_MODE]: PASSWORD_RESET_CONFIG.TITLE,
 		[VERIFY_MODE]: VERIFY_EMAIL_CONFIG.TITLE,
-	}[mode]
+	}[view]
 
 	return (
 		<main
@@ -305,10 +350,10 @@ const Authentication = () => {
 			)}
 			<section>
 				<BaseCard>
-					{mode === VERIFY_MODE ? (
+					{view === VERIFY_MODE ? (
 						<VerifyEmailInbox
 							ref={titleRef}
-							email={verify.email}
+							email={inboxEmail}
 							resent={verify.resent}
 							cooldownEndsAt={verify.cooldownEndsAt}
 							isSending={verify.isSending}

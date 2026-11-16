@@ -54,6 +54,7 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 	selectSessionChecked: (state) => state.authentication.sessionChecked,
 	selectAwaitingVerification: (state) =>
 		state.authentication.awaitingVerification,
+	selectEmailVerified: (state) => state.authentication.emailVerified,
 }))
 
 vi.mock('@/store/slices/travellersSlice', () => ({
@@ -131,9 +132,15 @@ describe('App', () => {
 	function setAuthState({
 		userId = null,
 		awaitingVerification = false,
+		emailVerified = true,
 		sessionChecked = true,
 	} = {}) {
-		authState = { userId, awaitingVerification, sessionChecked }
+		authState = {
+			userId,
+			awaitingVerification,
+			emailVerified,
+			sessionChecked,
+		}
 		useSelectorMock.mockImplementation((fn) =>
 			fn({ authentication: authState }),
 		)
@@ -278,6 +285,18 @@ describe('App', () => {
 
 		it('keeps a new account on the login page while it shows Check your inbox', () => {
 			setAuthState({ userId: 'u1', awaitingVerification: true })
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTHENTICATION,
+				search: '',
+			})
+
+			renderWithRoute(PATHS.AUTHENTICATION)
+
+			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
+		it('keeps an unverified account on the login page after a reload, for Check your inbox', () => {
+			setAuthState({ userId: 'u1', emailVerified: false })
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.AUTHENTICATION,
 				search: '',

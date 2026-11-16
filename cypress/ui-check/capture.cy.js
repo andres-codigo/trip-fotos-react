@@ -53,7 +53,7 @@ import {
 	TRAVELLER_REGISTRATION_SUCCESS_MESSAGE,
 } from '../../src/constants/travellers'
 
-import { performLogin } from '../support/utils/authHelpers'
+import { hasSdkSession, performLogin } from '../support/utils/authHelpers'
 import { shows } from '../support/utils/waitForSuccess'
 
 import { CAPTURES } from '../impact'
@@ -622,20 +622,32 @@ describe(`UI check capture (${LABEL})`, () => {
 			const { EMAIL_INPUT, PASSWORD_INPUT, LOGIN_SIGNUP_SUBMIT_BUTTON } =
 				AUTHENTICATION_FORM_SELECTORS
 			eachWidth((width) => {
-				// Each width signs up a new account, so the last width's must be signed out: the app moves a signed-in account off the login page
+				// Each width signs up a new account, so the last width's must be signed out: the login page restores Check your inbox for a signed-in, unverified account
 				cy.clearAllLocalStorage()
 				visit(
 					`${PATHS.AUTHENTICATION}?mode=${API_DATABASE.AUTH_SIGNUP_MODE}`,
 				)
-				cy.get(EMAIL_INPUT).type(
-					`inbox-${width}-${Date.now()}@example.com`,
-				)
+				const email = `inbox-${width}-${Date.now()}@example.com`
+				cy.get(EMAIL_INPUT).type(email)
 				cy.get(PASSWORD_INPUT).type(NEW_PASSWORD)
 				cy.get(LOGIN_SIGNUP_SUBMIT_BUTTON).click()
 				cy.get(INBOX.ROOT, { timeout: TIMEOUT }).should('be.visible')
 				cy.focused().should('have.text', 'Check your inbox')
 				freezeAnimation()
 				shot(`sent-${width}`)
+
+				// A reload any sooner than the SDK storing the session logs the account out
+				cy.window({ timeout: TIMEOUT }).should((win) => {
+					expect(hasSdkSession({ ...win.localStorage }, email)).to.be
+						.true
+				})
+				cy.reload()
+				cy.get(INBOX.STATUS, { timeout: TIMEOUT }).should(
+					'contain',
+					email,
+				)
+				freezeAnimation()
+				shot(`reloaded-${width}`)
 
 				interceptOnce(API_DATABASE.POST, '**/accounts:sendOobCode*', {
 					statusCode: 400,
