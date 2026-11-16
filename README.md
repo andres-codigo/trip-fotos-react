@@ -61,7 +61,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
-- Account settings: the account menu shows your email and opens Account settings, where you can see whether your email is verified, send the link again and change your password
+- Account settings: the account menu shows your email and opens Account settings, where you can see whether your email is verified, send the link again, change your password, and change your email, which takes effect once you open the link sent to the new address, with a link to the old one to change it back
 - Verified email to post: an account can browse straight away, but posting a trip, uploading photos or sending a message waits until its email is verified, with a strip under the header and a note in place of each blocked form to send the link again or check
 - Stay signed in: travellers stay signed in, in the browser and the app added to a phone's home screen, until they log out or their session is revoked, instead of being logged out after an hour
 - Clearer form errors: each field's error sits under its label with a "!" icon, so it is read before the field, and the trip dates stay on one line
