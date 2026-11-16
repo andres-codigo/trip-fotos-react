@@ -2467,6 +2467,10 @@ describe(`UI check capture (${LABEL})`, () => {
 		capture('account-menu', () => {
 			eachWidth((width) => {
 				visit(PATHS.TRAVELLERS)
+				// Settling before the list mounts finds no photo to wait for
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM, {
+					timeout: TIMEOUT,
+				}).should('exist')
 				assertSettled()
 				freezeAnimation()
 				// Hover and keyboard focus on the places, inline above 768px and in the tab bar at and below it. Viewport shots are cut at the browser window's 720px, so the viewport matches it
@@ -2527,6 +2531,11 @@ describe(`UI check capture (${LABEL})`, () => {
 					'have.text',
 					'Go to Travellers',
 				)
+				// The page renders before the restored session puts the account button in the header
+				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON, {
+					timeout: TIMEOUT,
+				}).should('be.visible')
+				assertSettled()
 				freezeAnimation()
 				shot(`not-found-signed-in-${width}`)
 			})
