@@ -14,7 +14,12 @@ import {
 } from '@/constants/travellers'
 import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
 
-import { selectUserId } from '@/store/slices/authenticationSlice'
+import { VERIFY_EMAIL_PROMPT_CONFIG } from '@/constants/auth'
+
+import {
+	selectEmailVerified,
+	selectUserId,
+} from '@/store/slices/authenticationSlice'
 import {
 	deleteTraveller,
 	loadTraveller,
@@ -31,6 +36,7 @@ import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 import ErrorMessage from '@/components/ui/error-message/ErrorMessage'
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
+import VerifyEmailNote from '@/components/forms/verify-email-note/VerifyEmailNote'
 
 const EditTrip = () => {
 	const { id } = useParams()
@@ -38,6 +44,7 @@ const EditTrip = () => {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
 	const userId = useSelector(selectUserId)
+	const emailVerified = useSelector(selectEmailVerified)
 	// userId is persisted, so judging before rehydration would bounce the owner on a hard reload
 	const isRehydrated = useSelector(
 		(state) => state._persist?.rehydrated ?? true,
@@ -281,48 +288,61 @@ const EditTrip = () => {
 					hidden={isDeleting}
 					className={PAGE_LAYOUT.WIDE}
 					data-cy={EDIT_TRIP.LAYOUT}>
-					<TravellerRegistrationForm
-						key={traveller.id}
-						isLoading={isSaving}
-						onSubmit={handleSubmit}
-						initialTraveller={traveller}
-						title={EDIT_TRIP_CONFIG.TITLE}
-						submitLabel={EDIT_TRIP_CONFIG.SAVE_LABEL}
-						focusPhotos={
-							hash === `#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
-						}
-						backLink={
-							<BaseButton
-								isLink
-								to={detailPath}
-								ariaLabel={EDIT_TRIP_CONFIG.BACK_LABEL}
-								className="inline-flex min-h-11 items-center gap-1 text-sm text-text-link underline underline-offset-4"
-								data-cy={EDIT_TRIP.BACK_TO_TRIP}>
-								<svg
-									aria-hidden="true"
-									width="16"
-									height="16"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round">
-									<path d="m15 18-6-6 6-6" />
-								</svg>
-								{EDIT_TRIP_CONFIG.BACK_LABEL}
-							</BaseButton>
-						}
-						actions={
-							<BaseButton
-								isLink
-								to={detailPath}
-								modeType="outline"
-								data-cy={EDIT_TRIP.CANCEL}>
-								{EDIT_TRIP_CONFIG.CANCEL_LABEL}
-							</BaseButton>
-						}
-					/>
+					{/* The rules refuse an unverified account's changes and photos, but still let it delete the trip */}
+					{!emailVerified ? (
+						<BaseCard className={PAGE_LAYOUT.LEFT_COLUMN}>
+							<h1 className="mt-0 mb-4 text-[1.5rem]">
+								{EDIT_TRIP_CONFIG.TITLE}
+							</h1>
+							<VerifyEmailNote
+								text={VERIFY_EMAIL_PROMPT_CONFIG.EDIT_NOTE}
+							/>
+						</BaseCard>
+					) : (
+						<TravellerRegistrationForm
+							key={traveller.id}
+							isLoading={isSaving}
+							onSubmit={handleSubmit}
+							initialTraveller={traveller}
+							title={EDIT_TRIP_CONFIG.TITLE}
+							submitLabel={EDIT_TRIP_CONFIG.SAVE_LABEL}
+							focusPhotos={
+								hash ===
+								`#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
+							}
+							backLink={
+								<BaseButton
+									isLink
+									to={detailPath}
+									ariaLabel={EDIT_TRIP_CONFIG.BACK_LABEL}
+									className="inline-flex min-h-11 items-center gap-1 text-sm text-text-link underline underline-offset-4"
+									data-cy={EDIT_TRIP.BACK_TO_TRIP}>
+									<svg
+										aria-hidden="true"
+										width="16"
+										height="16"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round">
+										<path d="m15 18-6-6 6-6" />
+									</svg>
+									{EDIT_TRIP_CONFIG.BACK_LABEL}
+								</BaseButton>
+							}
+							actions={
+								<BaseButton
+									isLink
+									to={detailPath}
+									modeType="outline"
+									data-cy={EDIT_TRIP.CANCEL}>
+									{EDIT_TRIP_CONFIG.CANCEL_LABEL}
+								</BaseButton>
+							}
+						/>
+					)}
 					{/* After Save and away from it: under the trip details from 1024px */}
 					<BaseCard
 						className={cn('mt-8 lg:mt-6', PAGE_LAYOUT.LEFT_COLUMN)}>

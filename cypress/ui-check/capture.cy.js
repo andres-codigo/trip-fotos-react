@@ -677,6 +677,152 @@ describe(`UI check capture (${LABEL})`, () => {
 			})
 		})
 
+		capture('verify-gate', () => {
+			const STRIP = '[data-cy="verify-email-strip"]'
+			const NOTE = '[data-cy="verify-email-note"]'
+			const stripPart = (part) => `[data-cy="verify-email-strip-${part}"]`
+			const notePart = (part) => `[data-cy="verify-email-note-${part}"]`
+			const settledShot = (name) => {
+				assertSettled()
+				freezeAnimation()
+				shot(name)
+			}
+
+			eachWidth((width) => {
+				// A new account made a traveller with a thread past the rules, as one made before verification was asked for would be
+				const email = `gate-${width}-${Date.now()}@example.com`
+				authRest('signUp', {
+					email,
+					password: NEW_PASSWORD,
+					returnSecureToken: true,
+				}).then(({ localId }) => {
+					const cid = conversationId(localId, OTHER)
+					cy.request({
+						method: 'PATCH',
+						url: emulatorDatabase(''),
+						headers: OWNER,
+						body: {
+							[`travellers/${localId}`]: {
+								firstName: 'Amara',
+								lastName: 'Okafor',
+								tripDescription:
+									'Three days of tiles and trams.',
+								cities: ['lisbon'],
+								daysInCity: 3,
+								registered: NOW,
+							},
+							[`conversations/${cid}/messages/-OGate000000000001`]:
+								{
+									senderId: OTHER,
+									message:
+										'Hi Amara, loved your Lisbon photos! Where was the sunset one?',
+									createdAt: NOW - 60 * 60 * 1000,
+								},
+							[`userConversations/${localId}/${cid}`]: {
+								otherId: OTHER,
+								lastId: '-OGate000000000001',
+								lastMessage:
+									'Hi Amara, loved your Lisbon photos! Where was the sunset one?',
+								lastSenderId: OTHER,
+								lastAt: NOW - 60 * 60 * 1000,
+							},
+						},
+					})
+					performLogin(email, NEW_PASSWORD)
+
+					visit(PATHS.TRAVELLERS)
+					cy.get(STRIP, { timeout: TIMEOUT }).should('contain', email)
+					settledShot(`strip-${width}`)
+					forcePseudo(stripPart('send-again'), [
+						'focus',
+						'focus-visible',
+					])
+					shot(`strip-focus-${width}`)
+					forcePseudo(stripPart('send-again'), [])
+					// Scrolled into view, the strip sits under the sticky header, so its clicks start from the top
+
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:sendOobCode*',
+						{
+							statusCode: 500,
+							body: {},
+							delay: 60000,
+						},
+					)
+					cy.scrollTo('top')
+					cy.get(stripPart('send-again')).click({
+						scrollBehavior: false,
+					})
+					cy.get(stripPart('busy')).should('be.visible')
+					freezeAnimation()
+					shot(`strip-sending-${width}`)
+
+					visit(PATHS.TRAVELLERS)
+					cy.get(stripPart('send-again'), {
+						timeout: TIMEOUT,
+					}).click()
+					cy.get(stripPart('message')).should('contain', 'Sent.')
+					settledShot(`strip-sent-${width}`)
+
+					visit(PATHS.TRAVELLERS)
+					interceptOnce(
+						API_DATABASE.POST,
+						'**/accounts:sendOobCode*',
+						{
+							statusCode: 400,
+							body: {
+								error: {
+									message: 'TOO_MANY_ATTEMPTS_TRY_LATER',
+								},
+							},
+						},
+					)
+					cy.get(stripPart('send-again'), {
+						timeout: TIMEOUT,
+					}).click()
+					cy.get(stripPart('message')).should('contain', 'Not sent.')
+					settledShot(`strip-not-sent-${width}`)
+
+					visit(PATHS.TRAVELLERS)
+					cy.get(stripPart('check'), { timeout: TIMEOUT }).click({
+						scrollBehavior: false,
+					})
+					cy.get(stripPart('message')).should(
+						'contain',
+						'Not verified yet',
+					)
+					settledShot(`strip-not-yet-${width}`)
+
+					visit(PATHS.REGISTER)
+					cy.get(NOTE, { timeout: TIMEOUT }).should('contain', email)
+					cy.get(STRIP).should('not.exist')
+					settledShot(`register-${width}`)
+					cy.get(notePart('send-again')).click()
+					cy.get(notePart('message')).should('contain', 'Sent.')
+					settledShot(`register-sent-${width}`)
+					cy.get(notePart('check')).click()
+					cy.get(notePart('message')).should(
+						'contain',
+						'Not verified yet',
+					)
+					settledShot(`register-not-yet-${width}`)
+
+					visit(`${PATHS.TRAVELLERS}/${localId}/edit`)
+					cy.get(NOTE, { timeout: TIMEOUT }).should('be.visible')
+					settledShot(`edit-${width}`)
+
+					visit(`${PATHS.MESSAGES}/${cid}`)
+					cy.get(NOTE, { timeout: TIMEOUT }).should(
+						'contain',
+						'Verify your email to reply.',
+					)
+					cy.get(MESSAGE_BUBBLE_SELECTORS.ROOT).should('be.visible')
+					settledShot(`thread-${width}`)
+				})
+			})
+		})
+
 		capture('auth-action', () => {
 			failWhileDown('**/accounts:update*')
 			failWhileDown('**/accounts:resetPassword*')

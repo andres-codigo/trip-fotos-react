@@ -34,6 +34,7 @@ Cypress.Commands.add('createMockStore', (signedIn = null) => {
 				userId: signedIn ? TEST_USERS.STANDARD.ID : null,
 				userName: TEST_USERS.STANDARD.NAME,
 				userEmail: TEST_USERS.STANDARD.EMAIL,
+				emailVerified: Boolean(signedIn),
 				sessionChecked: true,
 			},
 			travellers: {

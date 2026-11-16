@@ -979,6 +979,43 @@ describe('authenticationSlice', () => {
 			expect(state.emailVerified).toBe(true)
 		})
 
+		// The strip offers both from the saved session, before the SDK has restored its user
+		const restoreUserWhenReady = (user) => {
+			const ready = firebaseAuth.authStateReady
+			firebaseAuth.currentUser = null
+			firebaseAuth.authStateReady = async () => {
+				firebaseAuth.currentUser = user
+			}
+			return () => {
+				firebaseAuth.authStateReady = ready
+			}
+		}
+
+		it('waits for the SDK to restore the user before a resend', async () => {
+			const user = sessionUser()
+			const restore = restoreUserWhenReady(user)
+			sendEmailVerification.mockResolvedValueOnce()
+
+			const result = await store.dispatch(resendVerification())
+			restore()
+
+			expect(resendVerification.fulfilled.match(result)).toBe(true)
+			expect(sendEmailVerification).toHaveBeenCalledWith(
+				user,
+				expect.anything(),
+			)
+		})
+
+		it('waits for the SDK to restore the user before a check', async () => {
+			const user = sessionUser()
+			const restore = restoreUserWhenReady(user)
+
+			await store.dispatch(refreshVerification())
+			restore()
+
+			expect(user.reload).toHaveBeenCalled()
+		})
+
 		it('leaves the token alone while the address is unverified', async () => {
 			const user = sessionUser()
 			firebaseAuth.currentUser = user

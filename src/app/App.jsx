@@ -32,6 +32,7 @@ import LoadingFallback from '@/components/common/loading-fallback/LoadingFallbac
 
 import SkipLink from '@/components/layout/skip-link/SkipLink'
 import Header from '@/components/layout/header/Header'
+import VerifyEmailStrip from '@/components/layout/verify-email-strip/VerifyEmailStrip'
 import Footer from '@/components/layout/footer/Footer'
 import TabBar from '@/components/layout/tab-bar/TabBar'
 import MessagesPageSkeleton from '@/components/messages/messages-page-skeleton/MessagesPageSkeleton'
@@ -92,6 +93,15 @@ const PROTECTED_PATHS = [
 	PATHS.EDIT_TRAVELLER,
 ]
 
+// Login shows Check your inbox and the action page its own card; the rest carry a note in place of the action, which says the same
+const NO_STRIP_PATHS = [
+	PATHS.AUTHENTICATION,
+	PATHS.AUTH_ACTION,
+	PATHS.REGISTER,
+	PATHS.EDIT_TRAVELLER,
+	PATHS.MESSAGE_THREAD,
+]
+
 const isProtectedPath = (pathname) =>
 	!PUBLIC_PATHS.includes(pathname) &&
 	PROTECTED_PATHS.some((path) => matchPath(path, pathname))
@@ -130,6 +140,12 @@ function AppRoutes() {
 	const isThreadScreen = Boolean(
 		matchPath(PATHS.MESSAGE_THREAD, location.pathname),
 	)
+
+	const showVerifyStrip =
+		isLoggedIn &&
+		!emailVerified &&
+		!awaitingVerification &&
+		!NO_STRIP_PATHS.some((path) => matchPath(path, location.pathname))
 
 	useScrollToTopOnNavigate()
 
@@ -221,6 +237,7 @@ function AppRoutes() {
 			)}
 			<SkipLink />
 			<Header />
+			{showVerifyStrip && <VerifyEmailStrip />}
 			{/* Travellers and Messages have their own boundary, whose skeleton matches the page; the rest share the spinner */}
 			<Suspense fallback={<LoadingFallback />}>
 				<Routes>

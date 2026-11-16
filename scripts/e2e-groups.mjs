@@ -7,6 +7,7 @@ import { affectedSpecs } from '../cypress/impact.js'
 // Seconds per spec on the CI runner, Cypress start-up between specs included (run 43127128644, PR #704 (prune tests)); re-record when a spec grows or the slowest group drifts
 export const SPEC_SECONDS = {
 	'cypress/e2e/app/AppRoutes.cy.js': 9,
+	'cypress/e2e/app/EmailVerification.cy.js': 10,
 	'cypress/e2e/app/StalePersistedStore.cy.js': 4,
 	'cypress/e2e/components/Navigation.cy.js': 11,
 	'cypress/e2e/pages/Authentication.cy.js': 9,

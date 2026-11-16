@@ -7,7 +7,10 @@ import { MESSAGES_PAGE } from '@/constants/test'
 import { MESSAGES_CONFIG, SENDER_STATUS } from '@/constants/travellers'
 import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
 
-import { selectUserId } from '@/store/slices/authenticationSlice'
+import {
+	selectEmailVerified,
+	selectUserId,
+} from '@/store/slices/authenticationSlice'
 import {
 	deleteConversation,
 	deleteLegacyMessage,
@@ -35,6 +38,7 @@ import MessageThread from '@/components/messages/message-thread/MessageThread'
 import ReplyBox from '@/components/messages/reply-box/ReplyBox'
 import ThreadHeader from '@/components/messages/thread-header/ThreadHeader'
 import ThreadNote from '@/components/messages/thread-note/ThreadNote'
+import VerifyEmailNote from '@/components/forms/verify-email-note/VerifyEmailNote'
 
 import Alerts from '@/components/ui/alerts/Alerts'
 import BaseButton from '@/components/ui/button/BaseButton'
@@ -65,6 +69,7 @@ const Messages = () => {
 	const isWide = width >= GLOBAL.BREAKPOINT.TABLET
 
 	const userId = useSelector(selectUserId)
+	const emailVerified = useSelector(selectEmailVerified)
 	const conversations = useSelector(selectConversations)
 	const legacyMessages = useSelector(selectLegacyMessages)
 	const unreadCount = useSelector(selectUnreadConversationsCount)
@@ -527,7 +532,10 @@ const Messages = () => {
 				{threadStatus === SENDER_STATUS.FORMER && (
 					<ThreadNote status={SENDER_STATUS.FORMER} />
 				)}
-				{canReply && (
+				{canReply && !emailVerified && (
+					<VerifyEmailNote variant="bar" />
+				)}
+				{canReply && emailVerified && (
 					<ReplyBox
 						key={`reply-${openId}`}
 						label={MESSAGES_CONFIG.REPLY_LABEL(

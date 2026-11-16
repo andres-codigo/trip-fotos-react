@@ -31,6 +31,7 @@ describe('<EditTrip />', () => {
 			preloadedState: {
 				authentication: {
 					...authenticationReducer(undefined, { type: '@@init' }),
+					emailVerified: true,
 					userId: 'me',
 				},
 			},

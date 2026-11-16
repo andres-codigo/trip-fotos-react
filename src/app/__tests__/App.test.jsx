@@ -83,6 +83,9 @@ vi.mock('@/components/layout/skip-link/SkipLink', () => ({
 vi.mock('@/components/layout/header/Header', () => ({
 	default: () => <div>Header</div>,
 }))
+vi.mock('@/components/layout/verify-email-strip/VerifyEmailStrip', () => ({
+	default: () => <div>VerifyEmailStrip</div>,
+}))
 vi.mock('@/components/layout/tab-bar/TabBar', () => ({
 	default: ({ className }) => <div data-class={className}>TabBar</div>,
 }))
@@ -97,6 +100,9 @@ vi.mock('@/pages/travellers/Travellers', () => ({
 }))
 vi.mock('@/pages/traveller-detail/TravellerDetail', () => ({
 	default: () => <div>TravellerDetailPage</div>,
+}))
+vi.mock('@/pages/register/Register', () => ({
+	default: () => <div>RegisterPage</div>,
 }))
 vi.mock('@/pages/edit-trip/EditTrip', () => ({
 	default: () => <div>EditTripPage</div>,
@@ -230,6 +236,74 @@ describe('App', () => {
 			await waitFor(() => {
 				expect(screen.getByText('PrivacyPage')).toBeInTheDocument()
 			})
+		})
+	})
+
+	describe('Verify email strip', () => {
+		const renderAt = (pathname) => {
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname,
+				search: '',
+			})
+			return renderWithRoute(pathname)
+		}
+
+		it.each([PATHS.TRAVELLERS, PATHS.MESSAGES, '/travellers/u1'])(
+			'shows under the header for an unverified signed-in user on %s',
+			(path) => {
+				setAuthState({ userId: 'u1', emailVerified: false })
+
+				renderAt(path)
+
+				expect(
+					screen
+						.getByText('Header')
+						.compareDocumentPosition(
+							screen.getByText('VerifyEmailStrip'),
+						) & Node.DOCUMENT_POSITION_FOLLOWING,
+				).toBeTruthy()
+			},
+		)
+
+		it.each([
+			PATHS.REGISTER,
+			'/travellers/u1/edit',
+			'/messages/u1_u2',
+			PATHS.AUTH_ACTION,
+			PATHS.AUTHENTICATION,
+		])('leaves it to the page on %s', (path) => {
+			setAuthState({ userId: 'u1', emailVerified: false })
+
+			renderAt(path)
+
+			expect(
+				screen.queryByText('VerifyEmailStrip'),
+			).not.toBeInTheDocument()
+		})
+
+		it('does not show once verified, signed out or on Check your inbox', () => {
+			setAuthState({ userId: 'u1' })
+			const { unmount } = renderAt(PATHS.TRAVELLERS)
+			expect(
+				screen.queryByText('VerifyEmailStrip'),
+			).not.toBeInTheDocument()
+			unmount()
+
+			setAuthState({ emailVerified: false })
+			renderAt(PATHS.TRAVELLERS).unmount()
+			expect(
+				screen.queryByText('VerifyEmailStrip'),
+			).not.toBeInTheDocument()
+
+			setAuthState({
+				userId: 'u1',
+				emailVerified: false,
+				awaitingVerification: true,
+			})
+			renderAt(PATHS.TRAVELLERS)
+			expect(
+				screen.queryByText('VerifyEmailStrip'),
+			).not.toBeInTheDocument()
 		})
 	})
 

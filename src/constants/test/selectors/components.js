@@ -31,6 +31,8 @@ import {
 	NEW_PASSWORD_FORM,
 	AUTH_ACTION_PAGE,
 	VERIFY_EMAIL_INBOX,
+	VERIFY_EMAIL_NOTE,
+	VERIFY_EMAIL_STRIP,
 	PROGRESS,
 	PUBLIC_TRAVELLER_ITEM,
 	REQUIRED_LEGEND,
@@ -450,6 +452,20 @@ export const AUTH_ACTION_PAGE_SELECTORS = Object.fromEntries(
 
 export const VERIFY_EMAIL_INBOX_SELECTORS = Object.fromEntries(
 	Object.entries(VERIFY_EMAIL_INBOX).map(([key, id]) => [
+		key,
+		getByDataCy(id),
+	]),
+)
+
+export const VERIFY_EMAIL_STRIP_SELECTORS = Object.fromEntries(
+	Object.entries(VERIFY_EMAIL_STRIP).map(([key, id]) => [
+		key,
+		getByDataCy(id),
+	]),
+)
+
+export const VERIFY_EMAIL_NOTE_SELECTORS = Object.fromEntries(
+	Object.entries(VERIFY_EMAIL_NOTE).map(([key, id]) => [
 		key,
 		getByDataCy(id),
 	]),

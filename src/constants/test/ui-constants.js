@@ -410,3 +410,20 @@ export const VERIFY_EMAIL_INBOX = Object.freeze({
 	CHECK: 'verify-email-inbox-check',
 	START_AGAIN: 'verify-email-inbox-start-again',
 })
+
+export const VERIFY_EMAIL_STRIP = Object.freeze({
+	ROOT: 'verify-email-strip',
+	MESSAGE: 'verify-email-strip-message',
+	SEND_AGAIN: 'verify-email-strip-send-again',
+	CHECK: 'verify-email-strip-check',
+	BUSY: 'verify-email-strip-busy',
+})
+
+export const VERIFY_EMAIL_NOTE = Object.freeze({
+	ROOT: 'verify-email-note',
+	TITLE: 'verify-email-note-title',
+	MESSAGE: 'verify-email-note-message',
+	SEND_AGAIN: 'verify-email-note-send-again',
+	CHECK: 'verify-email-note-check',
+	BUSY: 'verify-email-note-busy',
+})

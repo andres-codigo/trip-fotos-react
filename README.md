@@ -33,7 +33,7 @@ It is also a working example of AI-assisted development: GitHub Copilot and Clau
 
 ## ✨ Features
 
-- **Authentication** — email/password sign-up and log-in with Firebase Authentication, the password rule shown up front, a show-password toggle and "Forgot password?". Travellers stay signed in, including in the app added to a phone's home screen, until they log out or the session is revoked (a password reset or a disabled account). Sign-up sends a verification email and swaps the card to Check your inbox (send it again with a 60-second rest, I've verified, which also runs on its own when the tab comes back, and Start again for a wrong address), then continues to Register. Every Firebase email link opens the branded `/auth/action` page, which verifies the address (or says the link has expired, was already used or is not valid) or sets a new password
+- **Authentication** — email/password sign-up and log-in with Firebase Authentication, the password rule shown up front, a show-password toggle and "Forgot password?". Travellers stay signed in, including in the app added to a phone's home screen, until they log out or the session is revoked (a password reset or a disabled account). Sign-up sends a verification email and swaps the card to Check your inbox (send it again with a 60-second rest, I've verified, which also runs on its own when the tab comes back, and Start again for a wrong address), then continues to Register. Every Firebase email link opens the branded `/auth/action` page, which verifies the address (or says the link has expired, was already used or is not valid) or sets a new password. Until the address is verified, an account can browse but not register or edit a trip, upload photos or send a message: the database and Storage rules refuse it, a "Verify your email" strip under the header offers to send the link again or check, and a note stands in for the Register and Edit trip forms and the reply box
 - **Forms** — every form marks required fields with a "* required" legend, gives helper text before a mistake rather than after, and on a failed submit shows an error summary linking to each invalid field and moves focus to it, with one wording for every error
 - **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database; trip dates are a From and To pair of native date inputs (no future dates, up to 366 days, the end on or after the start, also enforced by the database rules) with the trip length shown as they are filled; cities visited are chosen through an accessible type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data) that stores each city with its country
 - **Photo uploads** — drag-and-drop or file-picker uploader with a row per photo (preview, name, size and Remove), the accepted types and size limit shown up front, and optional alt text per photo; at least one photo is required on registration, also enforced by the database rules; photos are compressed and uploaded to Cloud Storage as the signed-in user, each with small and medium thumbnails; a progress bar shows how many photos have uploaded while registering
@@ -184,6 +184,9 @@ npm run public-trips:backfill [-- --write]
 
 # Move messages into conversation threads (see Setup > Message threads)
 npm run messages:migrate [-- --write]
+
+# Mark accounts made before email verification as verified (see Setup > Verified email)
+npm run accounts:mark-verified [-- --write]
 ```
 
 <a id="setup"></a>
@@ -288,6 +291,17 @@ GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run messages:migrate -- --w
 ```
 
 Rerunning it is safe: a traveller whose conversation entry already holds a newer message keeps it.
+
+<a id="verified-email"></a>
+
+#### Verified email
+
+The rules let only an account with a verified email write a trip, upload photos or send a message. Accounts made before sign-up asked for verification (0.28.0) never got the email, so mark them verified once with the service-account key from Admin Role. It only lists them until you add `--write`. Run it, then deploy the rules with `npm run firebase:rules`:
+
+```bash
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run accounts:mark-verified
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json npm run accounts:mark-verified -- --write
+```
 
 ### Environment Variables
 
