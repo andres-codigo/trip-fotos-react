@@ -28,7 +28,6 @@ const createStore = ({ isTraveller, messages }) => {
 		preloadedState: {
 			authentication: {
 				...initial.authentication,
-				token: 'token',
 				userId: USER_ID,
 			},
 			travellers: { ...initial.travellers, isTraveller },

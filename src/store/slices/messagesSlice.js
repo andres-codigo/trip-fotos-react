@@ -11,8 +11,9 @@ import { ERROR_MESSAGES } from '@/constants/errors'
 import { SENDER_STATUS } from '@/constants/travellers'
 
 import {
+	authActions,
+	getSessionToken,
 	logout,
-	selectAuthenticationToken,
 	selectUserId,
 } from './authenticationSlice'
 
@@ -62,9 +63,9 @@ const loadSender = async (senderId, token) => {
 // Your side only: the other member keeps the conversation, and a reply to a former traveller is refused by the rules
 export const deleteTravellerMessages = createAsyncThunk(
 	MESSAGES_ACTION_TYPES.DELETE_TRAVELLER_MESSAGES,
-	async (travellerId, { getState, rejectWithValue }) => {
+	async (travellerId, { rejectWithValue }) => {
 		try {
-			const token = selectAuthenticationToken(getState())
+			const token = await getSessionToken()
 
 			await databaseRequest('/', {
 				method: API_DATABASE.PATCH,
@@ -110,7 +111,7 @@ export const loadConversations = createAsyncThunk(
 	async (_, { getState, rejectWithValue }) => {
 		try {
 			const userId = selectUserId(getState())
-			const token = selectAuthenticationToken(getState())
+			const token = await getSessionToken()
 
 			const [entries, legacy] = await Promise.all(
 				[
@@ -173,7 +174,7 @@ export const loadThread = createAsyncThunk(
 	async (cid, { getState, rejectWithValue }) => {
 		try {
 			const userId = selectUserId(getState())
-			const token = selectAuthenticationToken(getState())
+			const token = await getSessionToken()
 			const otherId = otherMemberId(cid, userId)
 			const known = findConversation(getState(), cid)
 
@@ -238,7 +239,7 @@ export const sendMessage = createAsyncThunk(
 
 		try {
 			const userId = selectUserId(getState())
-			const token = selectAuthenticationToken(getState())
+			const token = await getSessionToken()
 			const cid = conversationId(userId, otherId)
 			const summary = {
 				lastId: requestId,
@@ -298,7 +299,7 @@ export const markConversationRead = createAsyncThunk(
 			await stampConversation(
 				cid,
 				{ readAt: API_DATABASE.SERVER_TIMESTAMP },
-				selectAuthenticationToken(getState()),
+				await getSessionToken(),
 				selectUserId(getState()),
 			)
 
@@ -325,7 +326,7 @@ export const deleteConversation = createAsyncThunk(
 					readAt: API_DATABASE.SERVER_TIMESTAMP,
 					clearedAt: API_DATABASE.SERVER_TIMESTAMP,
 				},
-				selectAuthenticationToken(getState()),
+				await getSessionToken(),
 				selectUserId(getState()),
 			)
 
@@ -346,7 +347,7 @@ export const deleteLegacyMessage = createAsyncThunk(
 	async (id, { getState, rejectWithValue }) => {
 		try {
 			const userId = selectUserId(getState())
-			const token = selectAuthenticationToken(getState())
+			const token = await getSessionToken()
 
 			await databaseRequest(`/legacyMessages/${userId}/${id}`, {
 				method: API_DATABASE.DELETE,
@@ -531,10 +532,13 @@ const messagesSlice = createSlice({
 				)
 			})
 
-			// LOGOUT async thunk handlers
-			// The user is cleared before signOut can fail, so private messages must go either way
+			// A session can also end without logout (revoked, or signed out in another tab), and signOut can fail after the user is cleared, so private messages go in every case
 			.addMatcher(
-				isAnyOf(logout.fulfilled, logout.rejected),
+				isAnyOf(
+					authActions.clearUser,
+					logout.fulfilled,
+					logout.rejected,
+				),
 				() => initialState,
 			)
 	},

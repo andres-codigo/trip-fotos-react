@@ -2,6 +2,8 @@ import { useSelector } from 'react-redux'
 
 import { TEST_IDS } from '@/constants/test'
 
+import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
+
 import {
 	ACCESSIBILITY,
 	GLOBAL,
@@ -13,9 +15,7 @@ import BaseCard from '@/components/ui/card/BaseCard'
 import BaseButton from '@/components/ui/button/BaseButton'
 
 const PageNotFound = () => {
-	const isLoggedIn = useSelector(
-		(state) => state.authentication.token !== null,
-	)
+	const isLoggedIn = useSelector(selectIsAuthenticated)
 
 	return (
 		<main

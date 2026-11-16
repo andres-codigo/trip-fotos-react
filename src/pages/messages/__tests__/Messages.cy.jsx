@@ -65,7 +65,6 @@ describe('<Messages />', () => {
 				authentication: {
 					...authenticationReducer(undefined, { type: '@@init' }),
 					userId: 'me',
-					token: 'token',
 				},
 			},
 		})

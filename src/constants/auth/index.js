@@ -14,16 +14,6 @@ export const FIREBASE_ERRORS = Object.freeze({
 	}),
 })
 
-// Keys the session is mirrored under in localStorage; changing one signs out every existing session
-export const SESSION_STORAGE_KEYS = Object.freeze({
-	TOKEN: 'token',
-	USER_ID: 'userId',
-	USER_NAME: 'userName',
-	USER_EMAIL: 'userEmail',
-	TOKEN_EXPIRATION: 'tokenExpiration',
-	IS_ADMIN: 'isAdmin',
-})
-
 export const AUTH_FORM_CONFIG = Object.freeze({
 	LOGIN_TITLE: 'Log in',
 	SIGNUP_TITLE: 'Create an account',

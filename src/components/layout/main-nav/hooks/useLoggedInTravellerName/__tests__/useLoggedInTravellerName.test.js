@@ -1,141 +1,55 @@
+import { createElement } from 'react'
 import { renderHook, act } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
+import { Provider } from 'react-redux'
+import configureTestStore from '@/testUtils/configureTestStore'
+
+import travellersReducer, {
+	setTravellerName,
+} from '@/store/slices/travellersSlice'
 
 import useLoggedInTravellerName from '@/components/layout/main-nav/hooks/useLoggedInTravellerName'
 
-const localStorageMock = {
-	getItem: vi.fn(),
-	setItem: vi.fn(),
-	removeItem: vi.fn(),
-	clear: vi.fn(),
+const renderWithName = (name) => {
+	const store = configureTestStore({
+		reducer: { travellers: travellersReducer },
+	})
+	if (name !== undefined) store.dispatch(setTravellerName(name))
+
+	return renderHook(() => useLoggedInTravellerName(), {
+		wrapper: ({ children }) => createElement(Provider, { store }, children),
+	})
 }
 
-const addEventListenerSpy = vi.fn()
-const removeEventListenerSpy = vi.fn()
-
-Object.defineProperty(window, 'localStorage', {
-	value: localStorageMock,
-})
-
-Object.defineProperty(window, 'addEventListener', {
-	value: addEventListenerSpy,
-})
-
-Object.defineProperty(window, 'removeEventListener', {
-	value: removeEventListenerSpy,
-})
-
 describe('useLoggedInTravellerName', () => {
-	it('should initialise with localStorage value when available', () => {
-		localStorageMock.getItem.mockReturnValue('John Doe')
-
-		const { result } = renderHook(() => useLoggedInTravellerName())
+	it('starts from the traveller name in the store', () => {
+		const { result } = renderWithName('John Doe')
 
 		expect(result.current[0]).toBe('John Doe')
-		expect(localStorageMock.getItem).toHaveBeenCalledWith('userName')
 	})
 
-	it('should initialise with empty string when localStorage is empty', () => {
-		localStorageMock.getItem.mockReturnValue(null)
-
-		const { result } = renderHook(() => useLoggedInTravellerName())
-
-		expect(result.current[0]).toBe('')
-		expect(localStorageMock.getItem).toHaveBeenCalledWith('userName')
-	})
-
-	it('should initialise with localStorage value only once on mount', () => {
-		localStorageMock.getItem.mockReturnValue('Initial Value')
-
-		const { result } = renderHook(() => useLoggedInTravellerName())
-
-		expect(result.current[0]).toBe('Initial Value')
-		// Should only call getItem once during initialization
-		expect(localStorageMock.getItem).toHaveBeenCalledTimes(1)
-		expect(localStorageMock.getItem).toHaveBeenCalledWith('userName')
-	})
-
-	it('should add storage event listener on mount', () => {
-		renderHook(() => useLoggedInTravellerName())
-
-		expect(addEventListenerSpy).toHaveBeenCalledWith(
-			'storage',
-			expect.any(Function),
-		)
-	})
-
-	it('should remove storage event listener on unmount', () => {
-		const { unmount } = renderHook(() => useLoggedInTravellerName())
-
-		unmount()
-
-		expect(removeEventListenerSpy).toHaveBeenCalledWith(
-			'storage',
-			expect.any(Function),
-		)
-	})
-
-	it('should update traveller name when storage event is triggered', () => {
-		localStorageMock.getItem
-			.mockReturnValueOnce('Initial')
-			.mockReturnValueOnce('Updated from storage')
-
-		const { result } = renderHook(() => useLoggedInTravellerName())
-
-		const storageHandler = addEventListenerSpy.mock.calls[0][1]
-
-		act(() => {
-			storageHandler()
-		})
-
-		expect(result.current[0]).toBe('Updated from storage')
-	})
-
-	it('should handle null localStorage value in storage event', () => {
-		localStorageMock.getItem
-			.mockReturnValueOnce('Initial')
-			.mockReturnValueOnce(null)
-
-		const { result } = renderHook(() => useLoggedInTravellerName())
-
-		const storageHandler = addEventListenerSpy.mock.calls[0][1]
-
-		act(() => {
-			storageHandler()
-		})
+	it('starts empty when the store has no name', () => {
+		const { result } = renderWithName()
 
 		expect(result.current[0]).toBe('')
 	})
 
-	it('should return setter function that updates state', () => {
-		localStorageMock.getItem.mockReturnValue('Initial')
-
-		const { result } = renderHook(() => useLoggedInTravellerName())
+	it('updates the name through its setter', () => {
+		const { result } = renderWithName('John Doe')
 
 		act(() => {
-			result.current[1]('New Name')
+			result.current[1]('Jane Smith')
 		})
 
-		expect(result.current[0]).toBe('New Name')
+		expect(result.current[0]).toBe('Jane Smith')
 	})
 
-	it('should return stable setter function reference', () => {
-		const { result, rerender } = renderHook(() =>
-			useLoggedInTravellerName(),
-		)
+	it('never reads the old localStorage name', () => {
+		localStorage.setItem('userName', 'Stale Name')
 
-		const firstSetter = result.current[1]
-		rerender()
-		const secondSetter = result.current[1]
-
-		expect(firstSetter).toBe(secondSetter)
-	})
-
-	it('should handle undefined localStorage value', () => {
-		localStorageMock.getItem.mockReturnValue(undefined)
-
-		const { result } = renderHook(() => useLoggedInTravellerName())
+		const { result } = renderWithName()
 
 		expect(result.current[0]).toBe('')
+		localStorage.clear()
 	})
 })

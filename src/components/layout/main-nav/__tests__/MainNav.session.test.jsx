@@ -1,15 +1,13 @@
 import { act, render, screen } from '@testing-library/react'
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import { PATHS } from '@/constants/ui'
-import { SESSION_STORAGE_KEYS } from '@/constants/auth'
 
 import authenticationReducer, {
 	authActions,
-	tryLogin,
 } from '@/store/slices/authenticationSlice'
 import travellersReducer, {
 	checkIsTraveller,
@@ -26,7 +24,6 @@ const TRAVELLER = {
 }
 const FULL_NAME = 'Ada Lovelace'
 const SESSION = {
-	token: 'token',
 	userId: TRAVELLER.id,
 	userEmail: 'ada@example.com',
 	isAdmin: false,
@@ -45,7 +42,6 @@ const json = (value) => ({ ok: true, json: async () => value })
 
 // A page load without the travellers list: the session is restored and the traveller check reads the record, nothing else
 const restoreSession = async (store, { isTraveller, displayName = '' }) => {
-	localStorage.setItem(SESSION_STORAGE_KEYS.USER_NAME, displayName)
 	global.fetch = vi.fn((url) =>
 		Promise.resolve(
 			json(
@@ -60,7 +56,11 @@ const restoreSession = async (store, { isTraveller, displayName = '' }) => {
 		),
 	)
 	store.dispatch(
-		tryLogin.fulfilled({ ...SESSION, userName: displayName }, 'req'),
+		authActions.setSession({
+			...SESSION,
+			userName: displayName,
+			emailVerified: true,
+		}),
 	)
 	await store.dispatch(checkIsTraveller(TRAVELLER.id))
 }
@@ -81,10 +81,6 @@ const renderNav = (store) =>
 const accountButton = () => screen.getByRole('button', { name: /^Account/ })
 
 describe('<MainNav /> signed-in name', () => {
-	beforeEach(() => {
-		localStorage.clear()
-	})
-
 	it('shows the traveller name straight after a load, without the travellers list or an Auth display name', async () => {
 		const store = createStore()
 		await restoreSession(store, { isTraveller: true })

@@ -46,7 +46,7 @@ import {
 	PAGE_SELECTORS,
 } from '../../src/constants/test/selectors/pages'
 import { PATHS } from '../../src/constants/ui/paths'
-import { SESSION_STORAGE_KEYS } from '../../src/constants/auth'
+import { sdkSessionOf } from '../support/utils/authHelpers'
 import { TEST_USERS } from '../../src/constants/config/users'
 import {
 	EDIT_TRIP_CONFIG,
@@ -356,7 +356,7 @@ const openThread = (cid) => {
 // The account button can render before the restored session fills in the name, so a traveller's page is not settled until it shows
 const assertSignedInName = () =>
 	cy.window({ log: false }).then((win) => {
-		const uid = win.localStorage.getItem(SESSION_STORAGE_KEYS.USER_ID)
+		const uid = sdkSessionOf(win).userId
 		if (!uid) return
 		cy.request({
 			url: emulatorDatabase(`travellers/${uid}`),
@@ -462,7 +462,7 @@ const fallbackThenLoading = ({ path, chunk, data, loading, name }) => {
 		cy.get(`[data-cy="${name}-page-skeleton"]`).should('be.visible')
 		// The header's nav is lazy too, so the shot waits for it rather than catching it mid-load
 		cy.window({ log: false }).then((win) => {
-			if (win.localStorage.getItem(SESSION_STORAGE_KEYS.USER_ID)) {
+			if (sdkSessionOf(win).userId) {
 				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON, {
 					timeout: TIMEOUT,
 				}).should('exist')
@@ -622,6 +622,8 @@ describe(`UI check capture (${LABEL})`, () => {
 			const { EMAIL_INPUT, PASSWORD_INPUT, LOGIN_SIGNUP_SUBMIT_BUTTON } =
 				AUTHENTICATION_FORM_SELECTORS
 			eachWidth((width) => {
+				// Each width signs up a new account, so the last width's must be signed out: the app moves a signed-in account off the login page
+				cy.clearAllLocalStorage()
 				visit(
 					`${PATHS.AUTHENTICATION}?mode=${API_DATABASE.AUTH_SIGNUP_MODE}`,
 				)
@@ -2401,20 +2403,32 @@ describe(`UI check capture (${LABEL})`, () => {
 		})
 
 		capture('detail-states', () => {
+			// Every read of the record is held, not just the first: the nav's conversation list reads the same record to name its sender, and can get there before the page
+			let isHolding = false
+			cy.intercept(
+				'GET',
+				`**/travellers/${TEST_USERS.OTHER_TRAVELLER.ID}.json*`,
+				(req) => {
+					if (isHolding) {
+						req.on('response', (res) => res.setDelay(4000))
+					}
+				},
+			)
 			eachWidth((width) => {
 				// The page the session left open must finish its own requests first; then the record is held back, so the loading frame stays on screen
 				assertSettled()
-				interceptOnce(
-					'GET',
-					`**/travellers/${TEST_USERS.OTHER_TRAVELLER.ID}.json*`,
-					(req) => req.on('response', (res) => res.setDelay(4000)),
-				)
+				cy.then(() => {
+					isHolding = true
+				})
 				visit(`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}`)
 				cy.get(TRAVELLER_DETAIL_SELECTORS.SPINNER).should('be.visible')
 				// A delay that missed would otherwise shoot the loaded page
 				cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE).should('not.exist')
 				freezeAnimation()
 				shot(`traveller-detail-loading-${width}`)
+				cy.then(() => {
+					isHolding = false
+				})
 
 				visit(`${PATHS.TRAVELLERS}/no-such-traveller`)
 				cy.get(TRAVELLER_DETAIL_SELECTORS.NOT_FOUND).should(

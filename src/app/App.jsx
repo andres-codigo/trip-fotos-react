@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from 'react'
+import { useEffect, useRef, lazy, Suspense } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
 	Routes,
@@ -17,8 +17,10 @@ import { PATHS } from '@/constants/ui'
 import {
 	authActions,
 	selectAwaitingVerification,
+	selectIsAuthenticated,
+	selectSessionChecked,
 	selectUserId,
-	tryLogin,
+	watchSession,
 } from '@/store/slices/authenticationSlice'
 import { checkIsTraveller } from '@/store/slices/travellersSlice'
 
@@ -72,6 +74,27 @@ const prefetchNavPages = () => {
 	return () => window.clearTimeout(id)
 }
 
+const PUBLIC_PATHS = [
+	PATHS.HOME,
+	PATHS.AUTHENTICATION,
+	PATHS.TRAVELLERS,
+	PATHS.PRIVACY,
+	PATHS.PAGE_NOT_FOUND,
+]
+
+const PROTECTED_PATHS = [
+	PATHS.REGISTER,
+	PATHS.MESSAGES,
+	PATHS.MESSAGE_THREAD,
+	PATHS.TRAVELLER_DETAIL,
+	PATHS.CONTACT_TRAVELLER,
+	PATHS.EDIT_TRAVELLER,
+]
+
+const isProtectedPath = (pathname) =>
+	!PUBLIC_PATHS.includes(pathname) &&
+	PROTECTED_PATHS.some((path) => matchPath(path, pathname))
+
 // The Contact page went when Message started opening the thread; old links land on the conversation
 function ContactTravellerRedirect() {
 	const { id } = useParams()
@@ -96,13 +119,8 @@ function AppRoutes() {
 	const navigate = useNavigate()
 	const location = useLocation()
 
-	// Access the `isLoggedIn` and `didAutoLogout` states from the Redux store
-	const isLoggedIn = useSelector(
-		(state) => state.authentication.token !== null,
-	)
-	const didAutoLogout = useSelector(
-		(state) => state.authentication.didAutoLogout,
-	)
+	const isLoggedIn = useSelector(selectIsAuthenticated)
+	const sessionChecked = useSelector(selectSessionChecked)
 	const userId = useSelector(selectUserId)
 	const awaitingVerification = useSelector(selectAwaitingVerification)
 
@@ -113,10 +131,10 @@ function AppRoutes() {
 
 	useScrollToTopOnNavigate()
 
-	// Dispatch `tryLogin` on component mount
-	useEffect(() => {
-		dispatch(tryLogin())
-	}, [dispatch])
+	// Returns the unsubscribe, so the listener stops with the app
+	useEffect(() => dispatch(watchSession()), [dispatch])
+
+	const hadSession = useRef(false)
 
 	// Registration lives in the database, not the session, so a new device or cleared storage would otherwise count as a non-traveller
 	useEffect(() => {
@@ -127,12 +145,22 @@ function AppRoutes() {
 
 	useEffect(prefetchNavPages, [])
 
-	// Watch for changes in `didAutoLogout` and redirect to the login page
+	// A session that ends without the Log out button (revoked, refused by the database, or logged out in another tab) still lands on the login page; a protected page is handled below, with its redirect back
 	useEffect(() => {
-		if (didAutoLogout) {
+		if (userId) {
+			hadSession.current = true
+			return
+		}
+		if (!hadSession.current) return
+		hadSession.current = false
+
+		if (
+			location.pathname !== PATHS.AUTHENTICATION &&
+			!isProtectedPath(location.pathname)
+		) {
 			navigate(PATHS.AUTHENTICATION)
 		}
-	}, [didAutoLogout, navigate])
+	}, [userId, location.pathname, navigate])
 
 	// A signed-in user has no use for the login form, unless sign-up has just swapped it to Check your inbox; the login page honours the same redirect target
 	useEffect(() => {
@@ -164,40 +192,20 @@ function AppRoutes() {
 		}
 	}, [awaitingVerification, location.pathname, dispatch])
 
-	// Watch for changes in `isLoggedIn` and redirect to the login page if not logged in
+	// Waits for the SDK to confirm or rule out a saved session, so a reload of a protected page does not send a signed-in traveller to log in
 	useEffect(() => {
-		const publicPaths = [
-			PATHS.HOME,
-			PATHS.AUTHENTICATION,
-			PATHS.TRAVELLERS,
-			PATHS.PRIVACY,
-			PATHS.PAGE_NOT_FOUND,
-		]
-		const isPublic = publicPaths.includes(location.pathname)
-
-		if (!isLoggedIn && !isPublic) {
-			// Only redirect if the route is a known protected route
-			const protectedPaths = [
-				PATHS.REGISTER,
-				PATHS.MESSAGES,
-				PATHS.MESSAGE_THREAD,
-				PATHS.TRAVELLER_DETAIL,
-				PATHS.CONTACT_TRAVELLER,
-				PATHS.EDIT_TRAVELLER,
-			]
-			if (
-				protectedPaths.some((path) =>
-					matchPath(path, location.pathname),
-				)
-			) {
-				// Logging in returns the visitor to the page they asked for, such as a trip from the public list
-				navigate(
-					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent(location.pathname)}`,
-					{ replace: true },
-				)
-			}
+		if (
+			sessionChecked &&
+			!isLoggedIn &&
+			isProtectedPath(location.pathname)
+		) {
+			// Logging in returns the visitor to the page they asked for, such as a trip from the public list
+			navigate(
+				`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent(location.pathname)}`,
+				{ replace: true },
+			)
 		}
-	}, [isLoggedIn, location.pathname, navigate])
+	}, [sessionChecked, isLoggedIn, location.pathname, navigate])
 
 	return (
 		<>

@@ -36,7 +36,7 @@ export const loadMessages = createAsyncThunk(
 	async (_, { getState, rejectWithValue }) => {
 		try {
 			const userId = selectUserId(getState())
-			const token = selectAuthenticationToken(getState())
+			const token = await getSessionToken()
 
 			const response = await databaseRequest(`/messages/${userId}`, {
 				token,
@@ -68,11 +68,13 @@ Reference implementations: `loadMessages` in `src/store/slices/messagesSlice.js`
 
 Persisted state is configured in `src/store/store.js`. When modifying which slices or state properties should persist, update the persist configuration accordingly.
 
-- `authentication` and `travellers` persist; `messages` is blacklisted.
+- `travellers` persists; `authentication` and `messages` are blacklisted. A `migrate` step drops an `authentication` key saved before it was blacklisted.
 - A `resetLastFetch` transform nulls `travellers.lastFetch` on rehydrate so a persisted list is always reconciled with the database.
 - `src/store/storage.js` is a Vite CommonJS interop shim for `redux-persist`'s storage; import storage from it, not from `redux-persist/lib/storage`.
 - Non-serialisable action arguments (e.g. `meta.arg.files`) are listed in `ignoredActionPaths` in the serialisable check; add to it rather than disabling the check.
-- The session is also mirrored to `localStorage` (`token`, `userId`, `userName`, `userEmail`, `tokenExpiration`, `isAdmin`). Read it through the selectors in `authenticationSlice.js` (`selectUserId`, `selectAuthenticationToken`, …), never `localStorage.getItem`. The keys live in `SESSION_STORAGE_KEYS` (`@/constants/auth`); only `authenticationSlice.js` reads or writes them, plus `travellerName` (display name) and `useLoggedInTravellerName`, which needs the `storage` event to follow another tab.
+- The Firebase Auth SDK is the only source of truth for the session; it keeps the user and refresh token in `localStorage` (`browserLocalPersistence`). The app keeps no copy of its own. `watchSession` (started once in `App.jsx`) listens with `onIdTokenChanged` and sets the user ID, name, email, `isAdmin` (from the token claims) and `emailVerified` in Redux, or clears them; The slice starts from the user the SDK saved (`restoreSavedSession`, read from its `localStorage` key at once), so a signed-in traveller's pages render without waiting; `sessionChecked` stays `false` until the SDK confirms or clears that user, and only the protected-route redirect waits for it.
+- Read the session through the selectors in `authenticationSlice.js` (`selectUserId`, `selectIsAuthenticated`, …), never `localStorage`. A REST thunk gets its token per request with `await getSessionToken()`, which waits for the SDK to confirm a saved session and lets it renew the token when less than five minutes are left; never store a token.
+- The session ends only on logout, when the SDK reports no user (revoked, disabled, signed out in another tab), or when `databaseRequest` gets a 401 whose error is not `Permission denied` (a token the database refuses), which signs out. Each lands on the login page.
 
 - Keep private data (e.g. messages) out of redux-persist, and clear it on logout — including when logout is rejected.
 

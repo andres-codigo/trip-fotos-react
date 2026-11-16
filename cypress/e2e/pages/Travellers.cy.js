@@ -14,7 +14,7 @@ import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-travellers'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
-import { performLogin } from '../../support/utils/authHelpers'
+import { performLogin, sdkSessionOf } from '../../support/utils/authHelpers'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
@@ -316,7 +316,7 @@ describe('Public trips database rules', () => {
 	const signedIn = (path, options) =>
 		cy.window().then((win) =>
 			database(path, {
-				auth: win.localStorage.getItem('token'),
+				auth: sdkSessionOf(win).token,
 				...options,
 			}),
 		)
@@ -364,7 +364,7 @@ describe('Public trips database rules', () => {
 		cy.visit(loginUrl)
 		performLogin()
 		cy.window().then((win) =>
-			signedIn(`publicTrips/${win.localStorage.getItem('userId')}`, {
+			signedIn(`publicTrips/${sdkSessionOf(win).userId}`, {
 				method: API_DATABASE.PUT,
 				body: summary({
 					tripExcerpt: 'Eight slow days in Prague.',
@@ -385,7 +385,7 @@ describe('Public trips database rules', () => {
 		cy.visit(loginUrl)
 		performLogin()
 		cy.window().then((win) => {
-			const path = `publicTrips/${win.localStorage.getItem('userId')}`
+			const path = `publicTrips/${sdkSessionOf(win).userId}`
 			signedIn(path, {
 				method: API_DATABASE.PUT,
 				body: summary({ tripDescription: 'Private words.' }),

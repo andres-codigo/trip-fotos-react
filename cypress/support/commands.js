@@ -4,6 +4,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import { mountWithProviders } from './commands-support-files/mountWithProviders'
 import { animationsSettled } from './utils/animations'
 import { successOutcome } from './utils/waitForSuccess'
+import { sdkSessionOf } from './utils/authHelpers'
 
 import {
 	HEADER_SELECTORS,
@@ -19,7 +20,8 @@ import { VIEWPORTS } from '../../src/constants/config/viewports'
 ////
 // HELPERS
 ////
-Cypress.Commands.add('createMockStore', (authToken = null) => {
+// A truthy argument signs the mock store in
+Cypress.Commands.add('createMockStore', (signedIn = null) => {
 	return configureStore({
 		middleware,
 		reducer: {
@@ -29,11 +31,10 @@ Cypress.Commands.add('createMockStore', (authToken = null) => {
 		},
 		preloadedState: {
 			authentication: {
-				token: authToken,
-				userId: TEST_USERS.STANDARD.ID,
+				userId: signedIn ? TEST_USERS.STANDARD.ID : null,
 				userName: TEST_USERS.STANDARD.NAME,
 				userEmail: TEST_USERS.STANDARD.EMAIL,
-				didAutoLogout: false,
+				sessionChecked: true,
 			},
 			travellers: {
 				travellerName: '',
@@ -143,7 +144,7 @@ Cypress.Commands.add('deleteStorageObject', (downloadUrl) => {
 			method: 'DELETE',
 			url: `${origin}${pathname}`,
 			headers: {
-				Authorization: `Firebase ${win.localStorage.getItem('token')}`,
+				Authorization: `Firebase ${sdkSessionOf(win).token}`,
 			},
 		})
 			.its('status')

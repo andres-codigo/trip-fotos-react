@@ -28,16 +28,6 @@ const seedStalePersistedStore = (win) => {
 	win.localStorage.setItem(
 		'persist:root',
 		JSON.stringify({
-			authentication: JSON.stringify({
-				token: win.localStorage.getItem('token'),
-				userId: win.localStorage.getItem('userId'),
-				userName: win.localStorage.getItem('userName'),
-				userEmail: win.localStorage.getItem('userEmail'),
-				didAutoLogout: false,
-				status: 'succeeded',
-				error: null,
-				isAdmin: win.localStorage.getItem('isAdmin') === 'true',
-			}),
 			travellers: JSON.stringify({
 				travellerName: STALE_NAME,
 				isTraveller: true,

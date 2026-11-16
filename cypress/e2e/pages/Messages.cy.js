@@ -17,7 +17,7 @@ import { TEST_USERS } from '../../../src/constants/config/users'
 import { PATHS } from '../../../src/constants/ui/paths'
 import { conversationId } from '../../../src/utils/conversationId'
 
-import { performLogin } from '../../support/utils/authHelpers'
+import { performLogin, sdkSessionOf } from '../../support/utils/authHelpers'
 
 const REQUEST_TIMEOUT = 10000
 const LIST_URL = '**/userConversations/*.json*'
@@ -279,7 +279,7 @@ describe('Conversation database rules', () => {
 		})
 	const read = (path, token) => write(API_DATABASE.GET, path, token)
 	const signedInToken = () =>
-		cy.window().then((win) => win.localStorage.getItem('token'))
+		cy.window().then((win) => sdkSessionOf(win).token)
 
 	// The message and both summaries in one update, field by field, as the app sends them
 	const sendBody = (senderId, otherId, id, message = 'Hello from rules.') => {
@@ -319,8 +319,8 @@ describe('Conversation database rules', () => {
 			write(
 				API_DATABASE.PATCH,
 				'',
-				win.localStorage.getItem('token'),
-				sendBody(win.localStorage.getItem('userId'), OTHER(), PUSH_ID),
+				sdkSessionOf(win).token,
+				sendBody(sdkSessionOf(win).userId, OTHER(), PUSH_ID),
 			)
 				.its('status')
 				.should('be.oneOf', [401, 403]),

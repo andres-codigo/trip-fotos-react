@@ -4,7 +4,7 @@ import { AUTHENTICATION_FORM_SELECTORS } from '../../../src/constants/test/selec
 import { ACCOUNT_MENU_SELECTORS } from '../../../src/constants/test/selectors/components'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
-import { performLogin } from '../../support/utils/authHelpers'
+import { hasSdkSession, performLogin } from '../../support/utils/authHelpers'
 
 const REQUEST_TIMEOUT = 10000
 
@@ -63,7 +63,12 @@ describe('App Routing', () => {
 		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
 		// The Auth SDK makes a follow-up call before the session is stored, so a reload any sooner logs the user out
 		cy.window({ timeout: REQUEST_TIMEOUT }).should((win) => {
-			expect(win.localStorage.getItem('token')).to.be.a('string')
+			expect(
+				hasSdkSession(
+					{ ...win.localStorage },
+					TEST_USERS.STANDARD.EMAIL,
+				),
+			).to.equal(true)
 		})
 		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)
 
@@ -97,5 +102,90 @@ describe('App Routing', () => {
 		)
 
 		cy.location('pathname').should('eq', PATHS.REGISTER)
+	})
+})
+
+describe('Staying signed in', () => {
+	const STALE_TOKEN = 'stale-id-token'
+	const AUTH_EMULATOR = new URL(Cypress.expose('API_URL')).origin
+	const PROJECT = Cypress.expose('FIREBASE_PROJECT_ID')
+
+	// What the SDK saved an hour or more after sign-in: an ID token past its lifetime, with the refresh token still good
+	const expireSavedToken = (win) => {
+		const key = Object.keys(win.localStorage).find((name) =>
+			name.startsWith('firebase:authUser:'),
+		)
+		const user = JSON.parse(win.localStorage.getItem(key))
+		user.stsTokenManager.accessToken = STALE_TOKEN
+		user.stsTokenManager.expirationTime = Date.now() - 1000
+		win.localStorage.setItem(key, JSON.stringify(user))
+	}
+
+	// The emulator's admin API, as the Firebase console would change the account
+	const updateAccount = (body) =>
+		cy.request({
+			method: 'POST',
+			url: `${AUTH_EMULATOR}/identitytoolkit.googleapis.com/v1/projects/${PROJECT}/accounts:update`,
+			headers: { Authorization: 'Bearer owner' },
+			body,
+		})
+
+	it('keeps the traveller signed in past the ID token lifetime, renewing it for each request', () => {
+		performLogin()
+		cy.intercept('GET', '**/travellers.json*').as('travellers')
+
+		cy.visit(BASE_URL_CYPRESS + PATHS.TRAVELLERS, {
+			onBeforeLoad: expireSavedToken,
+		})
+
+		cy.wait('@travellers', { timeout: REQUEST_TIMEOUT }).then(
+			({ request, response }) => {
+				const auth = new URL(request.url).searchParams.get('auth')
+				expect(auth).to.be.a('string').and.not.equal(STALE_TOKEN)
+				expect(response.statusCode).to.equal(200)
+			},
+		)
+		cy.location('pathname').should('eq', PATHS.TRAVELLERS)
+		cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should('be.visible')
+	})
+
+	it('signs the traveller out, to the login page, once the account is disabled', () => {
+		const email = `revoked-${Date.now()}@example.com`
+		const password = 'revoked-password'
+		cy.request(
+			'POST',
+			`${Cypress.expose('API_URL')}signUp?key=${Cypress.expose('API_KEY')}`,
+			{ email, password, returnSecureToken: true },
+		)
+			.its('body.localId')
+			.then((localId) => {
+				updateAccount({ localId, emailVerified: true })
+
+				cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
+				cy.login(email, password)
+				cy.window({ timeout: REQUEST_TIMEOUT }).should((win) => {
+					expect(
+						hasSdkSession({ ...win.localStorage }, email),
+					).to.equal(true)
+				})
+				cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
+					'not.eq',
+					PATHS.AUTHENTICATION,
+				)
+
+				updateAccount({ localId, disableUser: true })
+			})
+
+		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)
+
+		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
+			'eq',
+			PATHS.AUTHENTICATION,
+		)
+		cy.window().should((win) => {
+			expect(hasSdkSession({ ...win.localStorage }, email)).to.equal(
+				false,
+			)
+		})
 	})
 })

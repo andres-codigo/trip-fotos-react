@@ -2,12 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import { API_DATABASE } from '@/constants/api'
-import {
-	MOCK_KEYS,
-	MOCK_STORAGE_KEYS,
-	MOCK_USER,
-	MOCK_ERROR_MESSAGES,
-} from '@/constants/test'
+import { MOCK_KEYS, MOCK_USER, MOCK_ERROR_MESSAGES } from '@/constants/test'
 
 import { API_ERROR_MESSAGE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
@@ -22,11 +17,12 @@ import authenticationReducer, {
 	applyEmailVerification,
 	checkPasswordResetCode,
 	confirmPasswordReset,
-	tryLogin,
 	logout,
-	autoLogout,
+	watchSession,
+	getSessionToken,
+	restoreSavedSession,
 	authActions,
-	selectAuthenticationToken,
+	selectIsAuthenticated,
 	selectUserProfile,
 	selectIsAdmin,
 } from './authenticationSlice'
@@ -38,6 +34,7 @@ import {
 	confirmPasswordReset as confirmFirebasePasswordReset,
 	createUserWithEmailAndPassword,
 	deleteUser,
+	onIdTokenChanged,
 	sendEmailVerification,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
@@ -45,13 +42,14 @@ import {
 	verifyPasswordResetCode,
 } from 'firebase/auth'
 
-import { ACTION_CODE_ERRORS, SESSION_STORAGE_KEYS } from '@/constants/auth'
+import { ACTION_CODE_ERRORS } from '@/constants/auth'
 
 vi.mock('firebase/auth', () => ({
 	applyActionCode: vi.fn(),
 	confirmPasswordReset: vi.fn(),
 	createUserWithEmailAndPassword: vi.fn(),
 	deleteUser: vi.fn(),
+	onIdTokenChanged: vi.fn(() => () => {}),
 	sendEmailVerification: vi.fn(() => Promise.resolve()),
 	verifyPasswordResetCode: vi.fn(),
 	sendPasswordResetEmail: vi.fn(),
@@ -108,31 +106,23 @@ describe('authenticationSlice', () => {
 	})
 
 	describe('selectors', () => {
-		it('should select authentication token from state', () => {
-			const mockState = {
-				authentication: {
-					token: MOCK_KEYS.ID_TOKEN,
-					userId: MOCK_KEYS.LOCAL_ID,
-					userName: MOCK_USER.FULL_NAME,
-					userEmail: MOCK_KEYS.EMAIL,
-					didAutoLogout: false,
-					status: 'succeeded',
-					error: null,
-				},
-			}
-
-			const result = selectAuthenticationToken(mockState)
-			expect(result).toBe(MOCK_KEYS.ID_TOKEN)
+		it('counts a user ID as signed in', () => {
+			expect(
+				selectIsAuthenticated({
+					authentication: { userId: MOCK_KEYS.LOCAL_ID },
+				}),
+			).toBe(true)
+			expect(
+				selectIsAuthenticated({ authentication: { userId: null } }),
+			).toBe(false)
 		})
 
 		it('should select user profile from state', () => {
 			const mockState = {
 				authentication: {
-					token: MOCK_KEYS.ID_TOKEN,
 					userId: MOCK_KEYS.LOCAL_ID,
 					userName: MOCK_USER.FULL_NAME,
 					userEmail: MOCK_KEYS.EMAIL,
-					didAutoLogout: false,
 					status: 'succeeded',
 					error: null,
 				},
@@ -149,14 +139,14 @@ describe('authenticationSlice', () => {
 	describe('reducers', () => {
 		it('should return the initial state', () => {
 			const initialState = {
-				token: null,
 				userId: null,
 				userName: null,
 				userEmail: null,
 				isAdmin: false,
 				emailVerified: false,
 				awaitingVerification: false,
-				didAutoLogout: false,
+				sessionChecked: true,
+				signingIn: false,
 				status: 'idle',
 				error: null,
 			}
@@ -165,13 +155,13 @@ describe('authenticationSlice', () => {
 			expect(state).toEqual(initialState)
 		})
 
-		it('should handle clearUser', () => {
+		it('should handle clearUser, marking the session as checked', () => {
 			const previousState = {
-				token: MOCK_USER.TOKEN,
 				userId: MOCK_USER.USER_ID,
 				userName: MOCK_USER.USER_NAME,
 				userEmail: MOCK_USER.USER_EMAIL,
-				didAutoLogout: false,
+				isAdmin: true,
+				sessionChecked: true,
 				status: 'succeeded',
 				error: 'Test error message',
 			}
@@ -181,42 +171,101 @@ describe('authenticationSlice', () => {
 				authActions.clearUser(),
 			)
 			expect(state).toEqual({
-				token: null,
 				userId: null,
 				userName: null,
 				userEmail: null,
 				isAdmin: false,
 				emailVerified: false,
 				awaitingVerification: false,
-				didAutoLogout: false,
+				sessionChecked: true,
+				signingIn: false,
 				status: 'idle',
 				error: null,
 			})
 		})
 
-		it('should handle setAutoLogout', () => {
-			const previousState = {
-				token: MOCK_USER.TOKEN,
+		it('leaves setSession to the sign-in result while one is in flight, so sign-up keeps Check your inbox', () => {
+			const session = {
 				userId: MOCK_USER.USER_ID,
-				userName: MOCK_USER.USER_NAME,
+				userName: '',
 				userEmail: MOCK_USER.USER_EMAIL,
-				didAutoLogout: false,
-				status: 'succeeded',
-				error: null,
+				isAdmin: false,
+				emailVerified: false,
+			}
+			let state = authenticationReducer(undefined, {
+				type: login.pending.type,
+			})
+
+			state = authenticationReducer(
+				state,
+				authActions.setSession(session),
+			)
+			expect(state.userId).toBeNull()
+
+			state = authenticationReducer(state, {
+				type: login.fulfilled.type,
+				payload: { ...session, awaitingVerification: true },
+			})
+			expect(state).toMatchObject({
+				userId: MOCK_USER.USER_ID,
+				awaitingVerification: true,
+				signingIn: false,
+			})
+
+			state = authenticationReducer(
+				state,
+				authActions.setSession(session),
+			)
+			expect(state.awaitingVerification).toBe(true)
+		})
+
+		it('takes the SDK session again once a sign-in has failed', () => {
+			let state = authenticationReducer(undefined, {
+				type: login.pending.type,
+			})
+			state = authenticationReducer(state, {
+				type: login.rejected.type,
+				payload: 'failed',
+			})
+
+			state = authenticationReducer(
+				state,
+				authActions.setSession({
+					userId: MOCK_USER.USER_ID,
+					userName: '',
+					userEmail: MOCK_USER.USER_EMAIL,
+					isAdmin: false,
+					emailVerified: false,
+				}),
+			)
+
+			expect(state.userId).toBe(MOCK_USER.USER_ID)
+		})
+
+		it('should handle setSession, keeping Check your inbox', () => {
+			const previousState = {
+				...authenticationReducer(undefined, { type: undefined }),
+				sessionChecked: false,
 			}
 
 			const state = authenticationReducer(
-				previousState,
-				authActions.setAutoLogout(),
+				{ ...previousState, awaitingVerification: true },
+				authActions.setSession({
+					userId: MOCK_USER.USER_ID,
+					userName: MOCK_USER.USER_NAME,
+					userEmail: MOCK_USER.USER_EMAIL,
+					isAdmin: true,
+					emailVerified: false,
+				}),
 			)
-			expect(state).toEqual({
-				token: MOCK_USER.TOKEN,
+			expect(state).toMatchObject({
 				userId: MOCK_USER.USER_ID,
 				userName: MOCK_USER.USER_NAME,
 				userEmail: MOCK_USER.USER_EMAIL,
-				didAutoLogout: true,
-				status: 'succeeded',
-				error: null,
+				isAdmin: true,
+				emailVerified: false,
+				awaitingVerification: true,
+				sessionChecked: true,
 			})
 		})
 	})
@@ -288,31 +337,13 @@ describe('authenticationSlice', () => {
 						)
 
 						const state = store.getState().authentication
-						expect(state.token).toBe(MOCK_KEYS.ID_TOKEN)
 						expect(state.userId).toBe(MOCK_KEYS.LOCAL_ID)
 						expect(state.userName).toBe(displayName || '')
 						expect(state.userEmail).toBe(MOCK_KEYS.EMAIL)
+						expect(state.sessionChecked).toBe(true)
+						expect(state).not.toHaveProperty('token')
 
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.TOKEN,
-							MOCK_KEYS.ID_TOKEN,
-						)
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.USER_ID,
-							MOCK_KEYS.LOCAL_ID,
-						)
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.USER_NAME,
-							displayName || '',
-						)
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.USER_EMAIL,
-							MOCK_KEYS.EMAIL,
-						)
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
-							new Date(expirationTime).getTime(),
-						)
+						expect(localStorage.setItem).not.toHaveBeenCalled()
 					},
 				)
 			})
@@ -345,10 +376,6 @@ describe('authenticationSlice', () => {
 						)
 
 						expect(selectIsAdmin(store.getState())).toBe(isAdmin)
-						expect(localStorage.setItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.IS_ADMIN,
-							isAdmin,
-						)
 					},
 				)
 			})
@@ -422,28 +449,6 @@ describe('authenticationSlice', () => {
 					expect(result.payload).toBe(ERROR_MESSAGES.LOGIN_FAILED)
 				})
 
-				it('records the error when the autoLogout action is rejected', async () => {
-					const mockErrorMessage =
-						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR
-
-					const action = {
-						type: autoLogout.rejected.type,
-						payload: mockErrorMessage,
-					}
-					const previousState = {
-						token: MOCK_USER.TOKEN,
-						userId: MOCK_USER.USER_ID,
-						userName: MOCK_USER.USER_NAME,
-						userEmail: MOCK_USER.USER_EMAIL,
-						didAutoLogout: false,
-						status: 'succeeded',
-						error: null,
-					}
-					const state = authenticationReducer(previousState, action)
-					expect(state.status).toBe('failed')
-					expect(state.error).toBe(mockErrorMessage)
-				})
-
 				it('uses the fallback when an error has no code or message', async () => {
 					signInWithEmailAndPassword.mockRejectedValueOnce({})
 
@@ -486,7 +491,6 @@ describe('authenticationSlice', () => {
 					)
 
 					const state = store.getState().authentication
-					expect(state.token).toBeNull()
 					expect(state.userId).toBeNull()
 					expect(state.userName).toBeNull()
 					expect(state.userEmail).toBeNull()
@@ -497,353 +501,272 @@ describe('authenticationSlice', () => {
 			})
 		})
 
-		describe('tryLogin', () => {
-			describe('success scenarios', () => {
-				const tryLoginTestCases = [
-					{
-						description: 'empty string',
-						displayName: '',
-					},
-					{
-						description: 'non-empty string',
-						displayName: 'Test User',
-					},
-				]
+		describe('watchSession', () => {
+			const sdkUser = (overrides = {}) => ({
+				uid: MOCK_KEYS.LOCAL_ID,
+				email: MOCK_KEYS.EMAIL,
+				displayName: MOCK_USER.FULL_NAME,
+				emailVerified: true,
+				getIdTokenResult: vi
+					.fn()
+					.mockResolvedValue({ claims: { admin: true } }),
+				...overrides,
+			})
 
-				describe.each(tryLoginTestCases)(
-					'tryLogin test cases',
-					({ description, displayName }) => {
-						it(`should restore user details from localStorage when displayName is ${description}`, async () => {
-							localStorage.getItem.mockImplementation((key) => {
-								switch (key) {
-									case MOCK_STORAGE_KEYS.TOKEN:
-										return MOCK_KEYS.ID_TOKEN
-									case MOCK_STORAGE_KEYS.USER_ID:
-										return MOCK_KEYS.LOCAL_ID
-									case MOCK_STORAGE_KEYS.USER_NAME:
-										return displayName
-									case MOCK_STORAGE_KEYS.USER_EMAIL:
-										return MOCK_KEYS.EMAIL
-									case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
-										return MOCK_KEYS.EXPIRATION.toString()
-									default:
-										return null
-								}
-							})
+			// The listener the slice registered, called as the SDK would
+			const report = async (user) => {
+				firebaseAuth.currentUser = user
+				await onIdTokenChanged.mock.calls.at(-1)[1](user)
+			}
 
-							await store.dispatch(tryLogin())
+			it('listens to the SDK and returns its unsubscribe', () => {
+				const unsubscribe = vi.fn()
+				onIdTokenChanged.mockReturnValueOnce(unsubscribe)
 
-							const state = store.getState().authentication
+				const result = store.dispatch(watchSession())
 
-							expect(state.token).toBe(MOCK_KEYS.ID_TOKEN)
-							expect(state.userId).toBe(MOCK_KEYS.LOCAL_ID)
-							expect(state.userName).toBe(displayName)
-							expect(state.userEmail).toBe(MOCK_KEYS.EMAIL)
-						})
-					},
+				expect(onIdTokenChanged).toHaveBeenCalledWith(
+					firebaseAuth,
+					expect.any(Function),
 				)
+				expect(result).toBe(unsubscribe)
+			})
 
-				it.each([
-					{ stored: 'true', isAdmin: true },
-					{ stored: 'false', isAdmin: false },
-					{ stored: null, isAdmin: false },
-				])(
-					'restores isAdmin as $isAdmin when the stored value is $stored',
-					async ({ stored, isAdmin }) => {
-						localStorage.getItem.mockImplementation((key) => {
-							switch (key) {
-								case MOCK_STORAGE_KEYS.TOKEN:
-									return MOCK_KEYS.ID_TOKEN
-								case MOCK_STORAGE_KEYS.USER_ID:
-									return MOCK_KEYS.LOCAL_ID
-								case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
-									return MOCK_KEYS.EXPIRATION.toString()
-								case MOCK_STORAGE_KEYS.IS_ADMIN:
-									return stored
-								default:
-									return null
-							}
-						})
+			it('removes the keys the app used to keep its own session under', () => {
+				store.dispatch(watchSession())
 
-						await store.dispatch(tryLogin())
+				for (const key of [
+					'token',
+					'userId',
+					'userName',
+					'userEmail',
+					'isAdmin',
+				]) {
+					expect(localStorage.removeItem).toHaveBeenCalledWith(key)
+				}
+			})
 
-						expect(selectIsAdmin(store.getState())).toBe(isAdmin)
-					},
-				)
+			it('sets the user, with isAdmin from the token claims, when the SDK reports one', async () => {
+				store.dispatch(watchSession())
 
-				it.each([
-					{ description: 'no Auth SDK user', currentUser: null },
-					{
-						description: 'an Auth SDK user with a different uid',
-						currentUser: { uid: 'another-uid' },
-					},
-				])(
-					'logs out instead of restoring the session when there is $description',
-					async ({ currentUser }) => {
-						firebaseAuth.currentUser = currentUser
-						localStorage.getItem.mockImplementation((key) => {
-							switch (key) {
-								case MOCK_STORAGE_KEYS.TOKEN:
-									return MOCK_KEYS.ID_TOKEN
-								case MOCK_STORAGE_KEYS.USER_ID:
-									return MOCK_KEYS.LOCAL_ID
-								case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
-									return MOCK_KEYS.EXPIRATION.toString()
-								default:
-									return null
-							}
-						})
+				await report(sdkUser())
 
-						const result = await store.dispatch(tryLogin())
-
-						const state = store.getState().authentication
-						expect(result.payload).toBeNull()
-						expect(state.token).toBeNull()
-						expect(state.userId).toBeNull()
-						expect(state.didAutoLogout).toBe(false)
-						expect(localStorage.removeItem).toHaveBeenCalledWith(
-							MOCK_STORAGE_KEYS.TOKEN,
-						)
-						expect(signOut).toHaveBeenCalledWith(firebaseAuth)
-					},
-				)
-
-				it('should handle expired token', async () => {
-					localStorage.getItem.mockImplementation((key) => {
-						switch (key) {
-							case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
-								return (new Date().getTime() - 1000).toString()
-							default:
-								return null
-						}
-					})
-
-					await store.dispatch(tryLogin())
-
-					const state = store.getState().authentication
-
-					expect(state.token).toBeNull()
-					expect(state.userId).toBeNull()
-					expect(state.userName).toBeNull()
-					expect(state.userEmail).toBeNull()
+				expect(store.getState().authentication).toMatchObject({
+					userId: MOCK_KEYS.LOCAL_ID,
+					userName: MOCK_USER.FULL_NAME,
+					userEmail: MOCK_KEYS.EMAIL,
+					isAdmin: true,
+					emailVerified: true,
+					sessionChecked: true,
 				})
+				expect(localStorage.setItem).not.toHaveBeenCalled()
+			})
 
-				it('should handle empty localStorage during tryLogin', async () => {
-					localStorage.getItem.mockImplementation(() => null)
+			it('keeps the user, without admin, when the claims cannot be read offline', async () => {
+				store.dispatch(watchSession())
 
-					await store.dispatch(tryLogin())
+				await report(
+					sdkUser({
+						getIdTokenResult: vi.fn().mockRejectedValue({
+							code: 'auth/network-request-failed',
+						}),
+					}),
+				)
 
-					const state = store.getState().authentication
+				const state = store.getState().authentication
+				expect(state.userId).toBe(MOCK_KEYS.LOCAL_ID)
+				expect(state.isAdmin).toBe(false)
+				expect(signOut).not.toHaveBeenCalled()
+			})
 
-					expect(state.token).toBeNull()
-					expect(state.userId).toBeNull()
-					expect(state.userName).toBeNull()
-					expect(state.userEmail).toBeNull()
-					expect(state.didAutoLogout).toBe(false)
+			it('clears the user when the SDK reports none (logged out, revoked or disabled)', async () => {
+				store.dispatch(watchSession())
+				await report(sdkUser())
+
+				await report(null)
+
+				const state = store.getState().authentication
+				expect(state.userId).toBeNull()
+				expect(state.isAdmin).toBe(false)
+				expect(state.sessionChecked).toBe(true)
+			})
+
+			it('ignores a user whose claims arrive after a later change', async () => {
+				store.dispatch(watchSession())
+				const listener = onIdTokenChanged.mock.calls.at(-1)[1]
+				let resolveClaims
+				const slowUser = sdkUser({
+					getIdTokenResult: () =>
+						new Promise((resolve) => (resolveClaims = resolve)),
 				})
+				firebaseAuth.currentUser = slowUser
+				const pending = listener(slowUser)
 
-				it('should clear user details and set didAutoLogout when autoLogout is dispatched after tryLogin', async () => {
-					await store.dispatch(autoLogout())
+				await report(null)
+				resolveClaims({ claims: {} })
+				await pending
 
-					const state = store.getState().authentication
+				expect(store.getState().authentication.userId).toBeNull()
+			})
+		})
 
-					expect(state.token).toBeNull()
-					expect(state.userId).toBeNull()
-					expect(state.userName).toBeNull()
-					expect(state.userEmail).toBeNull()
-					expect(state.didAutoLogout).toBe(true)
+		describe('restoreSavedSession', () => {
+			const API_KEY = 'demo-api-key'
+			const KEY = `firebase:authUser:${API_KEY}:[DEFAULT]`
+			const encode = (claims) =>
+				`header.${btoa(JSON.stringify(claims)).replace(/=+$/, '')}.signature`
+			const storageWith = (user) => ({
+				getItem: (key) => (key === KEY ? JSON.stringify(user) : null),
+			})
+			const savedUser = (overrides = {}) => ({
+				uid: MOCK_KEYS.LOCAL_ID,
+				email: MOCK_KEYS.EMAIL,
+				displayName: MOCK_USER.FULL_NAME,
+				emailVerified: true,
+				stsTokenManager: {
+					accessToken: encode({ admin: true }),
+					expirationTime: 1,
+				},
+				...overrides,
+			})
+
+			it('starts from the user the SDK saved, still to be confirmed', () => {
+				expect(
+					restoreSavedSession(storageWith(savedUser()), API_KEY),
+				).toEqual({
+					userId: MOCK_KEYS.LOCAL_ID,
+					userName: MOCK_USER.FULL_NAME,
+					userEmail: MOCK_KEYS.EMAIL,
+					isAdmin: true,
+					emailVerified: true,
+					sessionChecked: false,
 				})
 			})
 
-			describe('failure scenarios', () => {
-				it('should handle tryLogin failure and set error state', async () => {
-					localStorage.getItem.mockImplementation(() => {
-						throw new Error(MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR)
-					})
-
-					const result = await store.dispatch(tryLogin())
-
-					const state = store.getState().authentication
-					expect(state.status).toBe('failed')
-					expect(state.error).toBe(
-						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR,
-					)
-					expect(result.meta.rejectedWithValue).toBe(true)
+			it('reads admin from the saved token claims, even an expired one', () => {
+				const user = savedUser({
+					stsTokenManager: { accessToken: encode({}) },
 				})
+
+				expect(
+					restoreSavedSession(storageWith(user), API_KEY).isAdmin,
+				).toBe(false)
+			})
+
+			it('keeps the user, without admin, when the saved token cannot be read', () => {
+				const user = savedUser({
+					stsTokenManager: { accessToken: 'not-a-token' },
+				})
+
+				const session = restoreSavedSession(storageWith(user), API_KEY)
+				expect(session.userId).toBe(MOCK_KEYS.LOCAL_ID)
+				expect(session.isAdmin).toBe(false)
+			})
+
+			it('restores nothing when the SDK saved no user', () => {
+				expect(
+					restoreSavedSession({ getItem: () => null }, API_KEY),
+				).toBeNull()
+			})
+
+			it('restores nothing from a user saved for another API key', () => {
+				expect(
+					restoreSavedSession(storageWith(savedUser()), 'other-key'),
+				).toBeNull()
+			})
+
+			it('restores nothing from unreadable storage', () => {
+				expect(
+					restoreSavedSession(
+						{
+							getItem: () => {
+								throw new Error('blocked')
+							},
+						},
+						API_KEY,
+					),
+				).toBeNull()
+			})
+		})
+
+		describe('getSessionToken', () => {
+			it('waits for the SDK to confirm a saved session before asking for the token', async () => {
+				const order = []
+				const ready = firebaseAuth.authStateReady
+				firebaseAuth.authStateReady = async () => {
+					order.push('ready')
+				}
+				firebaseAuth.currentUser = {
+					getIdToken: async () => {
+						order.push('token')
+						return 'token'
+					},
+				}
+
+				await getSessionToken()
+
+				expect(order).toEqual(['ready', 'token'])
+				firebaseAuth.authStateReady = ready
+			})
+
+			it('asks the SDK for the token on each call, so a renewed one is used', async () => {
+				const getIdToken = vi
+					.fn()
+					.mockResolvedValueOnce('first')
+					.mockResolvedValueOnce('renewed')
+				firebaseAuth.currentUser = { getIdToken }
+
+				expect(await getSessionToken()).toBe('first')
+				expect(await getSessionToken()).toBe('renewed')
+			})
+
+			it('returns null when no one is signed in', async () => {
+				firebaseAuth.currentUser = null
+
+				expect(await getSessionToken()).toBeNull()
+			})
+
+			it('throws the request error, not the SDK text, when the token cannot be read', async () => {
+				firebaseAuth.currentUser = {
+					getIdToken: vi
+						.fn()
+						.mockRejectedValue(new Error('Firebase: Error')),
+				}
+
+				await expect(getSessionToken()).rejects.toThrow(
+					ERROR_MESSAGES.REQUEST_ERROR,
+				)
 			})
 		})
 
 		describe('logout', () => {
-			describe('success scenarios', () => {
-				it('should clear user details and localStorage', async () => {
-					await store.dispatch(logout())
+			it('clears the user and signs out of the SDK, writing nothing to localStorage', async () => {
+				await store.dispatch(logout())
 
-					const state = store.getState().authentication
+				const state = store.getState().authentication
 
-					expect(state.token).toBeNull()
-					expect(state.userId).toBeNull()
-					expect(state.userName).toBeNull()
-					expect(state.userEmail).toBeNull()
-					expect(signOut).toHaveBeenCalledWith(firebaseAuth)
-
-					expect(localStorage.removeItem).toHaveBeenCalledWith(
-						MOCK_STORAGE_KEYS.TOKEN,
-					)
-					expect(localStorage.removeItem).toHaveBeenCalledWith(
-						MOCK_STORAGE_KEYS.USER_ID,
-					)
-					expect(localStorage.removeItem).toHaveBeenCalledWith(
-						MOCK_STORAGE_KEYS.USER_NAME,
-					)
-					expect(localStorage.removeItem).toHaveBeenCalledWith(
-						MOCK_STORAGE_KEYS.USER_EMAIL,
-					)
-					expect(localStorage.removeItem).toHaveBeenCalledWith(
-						MOCK_STORAGE_KEYS.TOKEN_EXPIRATION,
-					)
-					expect(localStorage.removeItem).toHaveBeenCalledWith(
-						MOCK_STORAGE_KEYS.IS_ADMIN,
-					)
-					expect(state.isAdmin).toBe(false)
-				})
+				expect(state.userId).toBeNull()
+				expect(state.userName).toBeNull()
+				expect(state.userEmail).toBeNull()
+				expect(state.isAdmin).toBe(false)
+				expect(signOut).toHaveBeenCalledWith(firebaseAuth)
+				expect(localStorage.removeItem).not.toHaveBeenCalled()
 			})
 
-			describe('failure scenarios', () => {
-				it('should handle logout failure and set error state', async () => {
-					localStorage.removeItem.mockImplementation(() => {
-						throw new Error(MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR)
-					})
+			it('should handle logout failure and set error state', async () => {
+				signOut.mockRejectedValueOnce(
+					new Error(MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR),
+				)
 
-					const result = await store.dispatch(logout())
+				const result = await store.dispatch(logout())
 
-					const state = store.getState().authentication
-					expect(state.status).toBe('failed')
-					expect(state.error).toBe(
-						MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR,
-					)
-					expect(result.meta.rejectedWithValue).toBe(true)
-				})
-			})
-		})
-
-		describe('autoLogout', () => {
-			describe('success scenarios', () => {
-				it('should clear user details and set didAutoLogout when autoLogout is dispatched after tryLogin', async () => {
-					await store.dispatch(autoLogout())
-
-					const state = store.getState().authentication
-
-					expect(state.token).toBeNull()
-					expect(state.userId).toBeNull()
-					expect(state.userName).toBeNull()
-					expect(state.userEmail).toBeNull()
-					expect(state.didAutoLogout).toBe(true)
-				})
-			})
-
-			describe('timer functionality', () => {
-				let setTimeoutSpy
-				let clearTimeoutSpy
-
-				beforeEach(() => {
-					vi.useFakeTimers()
-					setTimeoutSpy = vi.spyOn(global, 'setTimeout')
-					clearTimeoutSpy = vi.spyOn(global, 'clearTimeout')
-				})
-
-				afterEach(() => {
-					vi.useRealTimers()
-					setTimeoutSpy.mockRestore()
-					clearTimeoutSpy.mockRestore()
-				})
-
-				it('should set timer and dispatch autoLogout when timer expires after successful login', async () => {
-					const expiresInMs = +MOCK_KEYS.EXPIRES_IN * 1000
-					signInWithEmailAndPassword.mockResolvedValueOnce({
-						user: {
-							uid: MOCK_KEYS.LOCAL_ID,
-							email: MOCK_KEYS.EMAIL,
-							displayName: MOCK_USER.FULL_NAME,
-							getIdTokenResult: vi.fn().mockResolvedValue({
-								token: MOCK_KEYS.ID_TOKEN,
-								expirationTime: new Date(
-									Date.now() + expiresInMs,
-								).toISOString(),
-							}),
-						},
-					})
-
-					await store.dispatch(
-						login({
-							mode: API_DATABASE.AUTH_LOGIN_MODE,
-							email: MOCK_KEYS.EMAIL,
-							password: MOCK_KEYS.PASSWORD,
-						}),
-					)
-
-					// Verify initial state after login
-					let state = store.getState().authentication
-					expect(state.token).toBe(MOCK_KEYS.ID_TOKEN)
-					expect(state.didAutoLogout).toBe(false)
-
-					// Verify setTimeout was called with correct duration
-					const [timerCallback, delay] = setTimeoutSpy.mock.calls[0]
-					expect(delay).toBeGreaterThan(expiresInMs - 1000)
-					expect(delay).toBeLessThanOrEqual(expiresInMs)
-
-					// Execute the callback to trigger autoLogout
-					await timerCallback()
-
-					// Verify autoLogout was executed and state was updated
-					state = store.getState().authentication
-					expect(state.token).toBeNull()
-					expect(state.didAutoLogout).toBe(true)
-				})
-
-				it('should set timer and dispatch autoLogout when timer expires during tryLogin', async () => {
-					const futureExpiration = new Date().getTime() + 60000 // 1 minute from now
-
-					localStorage.getItem.mockImplementation((key) => {
-						switch (key) {
-							case MOCK_STORAGE_KEYS.TOKEN:
-								return MOCK_KEYS.ID_TOKEN
-							case MOCK_STORAGE_KEYS.USER_ID:
-								return MOCK_KEYS.LOCAL_ID
-							case MOCK_STORAGE_KEYS.USER_NAME:
-								return MOCK_USER.FULL_NAME
-							case MOCK_STORAGE_KEYS.USER_EMAIL:
-								return MOCK_KEYS.EMAIL
-							case MOCK_STORAGE_KEYS.TOKEN_EXPIRATION:
-								return futureExpiration.toString()
-							default:
-								return null
-						}
-					})
-
-					await store.dispatch(tryLogin())
-
-					// Verify initial state after tryLogin
-					let state = store.getState().authentication
-					expect(state.token).toBe(MOCK_KEYS.ID_TOKEN)
-					expect(state.didAutoLogout).toBe(false)
-
-					// Verify setTimeout was called with correct duration (60000ms)
-					expect(setTimeoutSpy).toHaveBeenCalledWith(
-						expect.any(Function),
-						60000,
-					)
-
-					// Get the callback function from setTimeout
-					const timerCallback = setTimeoutSpy.mock.calls[0][0]
-
-					// Execute the callback to trigger autoLogout
-					await timerCallback()
-
-					// Verify autoLogout was executed and state was updated
-					state = store.getState().authentication
-					expect(state.token).toBeNull()
-					expect(state.didAutoLogout).toBe(true)
-				})
+				const state = store.getState().authentication
+				expect(state.userId).toBeNull()
+				expect(state.status).toBe('failed')
+				expect(state.error).toBe(
+					MOCK_ERROR_MESSAGES.LOCAL_STORAGE_ERROR,
+				)
+				expect(result.meta.rejectedWithValue).toBe(true)
 			})
 		})
 	})
@@ -937,14 +860,6 @@ describe('authenticationSlice', () => {
 				claims: {},
 			}),
 			...overrides,
-		})
-
-		beforeEach(() => {
-			localStorage.getItem.mockImplementation((key) =>
-				key === SESSION_STORAGE_KEYS.USER_ID
-					? MOCK_KEYS.LOCAL_ID
-					: null,
-			)
 		})
 
 		it('sends the verification email on sign-up and waits on Check your inbox', async () => {
@@ -1048,11 +963,6 @@ describe('authenticationSlice', () => {
 			expect(result.payload.emailVerified).toBe(true)
 			const state = store.getState().authentication
 			expect(state.emailVerified).toBe(true)
-			expect(state.token).toBe('fresh-token')
-			expect(localStorage.setItem).toHaveBeenCalledWith(
-				SESSION_STORAGE_KEYS.TOKEN,
-				'fresh-token',
-			)
 		})
 
 		it('leaves the token alone while the address is unverified', async () => {
@@ -1073,9 +983,7 @@ describe('authenticationSlice', () => {
 			const result = await store.dispatch(startAgain())
 
 			expect(deleteUser).toHaveBeenCalledWith(user)
-			expect(localStorage.removeItem).toHaveBeenCalledWith(
-				SESSION_STORAGE_KEYS.TOKEN,
-			)
+			expect(signOut).toHaveBeenCalledWith(firebaseAuth)
 			expect(result.payload).toBe(MOCK_KEYS.EMAIL)
 		})
 

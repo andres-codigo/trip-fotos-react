@@ -1,33 +1,41 @@
 import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
 import { PATHS } from '../../../src/constants/ui/paths'
 import { TEST_USERS } from '../../../src/constants/config/users'
-import { SESSION_STORAGE_KEYS } from '../../../src/constants/auth'
 
 const REQUEST_TIMEOUT = 10000
 
 const SDK_USER_KEY = /^firebase:authUser:/
 
-// The app keeps its session in localStorage (SESSION_STORAGE_KEYS) and the Auth SDK keeps its user there too (browserLocalPersistence), so cy.session restores both and reading the restored storage is enough: no page load
-export const isSessionValid = (storage, email, now = Date.now()) => {
-	if (!storage?.[SESSION_STORAGE_KEYS.TOKEN]) return false
-	if (!(Number(storage[SESSION_STORAGE_KEYS.TOKEN_EXPIRATION]) > now))
-		return false
-	// Firebase stores the address in lower case
-	if (storage[SESSION_STORAGE_KEYS.USER_EMAIL] !== email?.toLowerCase())
-		return false
-	const sdkUser = Object.keys(storage).find((key) => SDK_USER_KEY.test(key))
-	// tryLogin logs out when the SDK user and the stored user differ
-	return (
-		Boolean(sdkUser) &&
-		JSON.parse(storage[sdkUser]).uid ===
-			storage[SESSION_STORAGE_KEYS.USER_ID]
+const sdkUserIn = (storage) => {
+	const key = Object.keys(storage ?? {}).find((name) =>
+		SDK_USER_KEY.test(name),
 	)
+	return key ? JSON.parse(storage[key]) : null
+}
+
+// The Auth SDK is the app's only session and keeps its user in localStorage (browserLocalPersistence), so cy.session restores it and reading the restored storage is enough: no page load. The SDK renews an expired ID token from the refresh token, so only the user and the refresh token matter
+export const hasSdkSession = (storage, email) => {
+	const user = sdkUserIn(storage)
+	// Firebase stores the address in lower case
+	return (
+		Boolean(user?.stsTokenManager?.refreshToken) &&
+		user.email === email?.toLowerCase()
+	)
+}
+
+// For a spec that talks to the database directly, as the signed-in app would
+export const sdkSessionOf = (win) => {
+	const user = sdkUserIn({ ...win.localStorage })
+	return {
+		userId: user?.uid ?? null,
+		token: user?.stsTokenManager?.accessToken ?? null,
+	}
 }
 
 const validateSession = (email) =>
 	cy.getAllLocalStorage().then((origins) => {
 		const storage = origins[new URL(Cypress.config('baseUrl')).origin]
-		return isSessionValid(storage, email)
+		return hasSdkSession(storage, email)
 	})
 
 export const performLogin = (
@@ -47,7 +55,9 @@ export const performLogin = (
 			cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
 			// The Auth SDK makes a follow-up call before the session is stored, so wait for it before cy.session snapshots storage
 			cy.window({ timeout: REQUEST_TIMEOUT }).should((win) => {
-				expect(win.localStorage.getItem('token')).to.be.a('string')
+				expect(hasSdkSession({ ...win.localStorage }, email)).to.equal(
+					true,
+				)
 			})
 			cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.HOME)
 		},

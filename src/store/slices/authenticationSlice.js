@@ -4,6 +4,7 @@ import {
 	confirmPasswordReset as confirmFirebasePasswordReset,
 	createUserWithEmailAndPassword,
 	deleteUser,
+	onIdTokenChanged,
 	sendEmailVerification,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
@@ -19,12 +20,10 @@ import {
 	ACTION_CODE_ERROR_CODES,
 	ACTION_CODE_ERRORS,
 	FIREBASE_ERRORS,
-	SESSION_STORAGE_KEYS,
 } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { FIREBASE, savedUserStorageKey } from '@/constants/firebase'
 import { PATHS } from '@/constants/ui'
-
-let timer
 
 // Firebase's default email page shows a Continue button back to this path. Preview
 // domains are not authorised, so those emails go without the button rather than not at all
@@ -43,44 +42,96 @@ const sendVerification = (user) =>
 		PATHS.REGISTER,
 	)
 
-const persistSession = async (user, dispatch, forceRefresh = false) => {
-	const { token, expirationTime, claims } =
-		await user.getIdTokenResult(forceRefresh)
+const sessionFrom = (user, claims) => ({
+	userId: user.uid,
+	userName: user.displayName || '',
+	userEmail: user.email,
+	isAdmin: claims?.admin === true,
+	emailVerified: user.emailVerified,
+})
 
-	const expirationDate = new Date(expirationTime).getTime()
-	const expiresIn = expirationDate - new Date().getTime()
-	const userName = user.displayName || ''
-	const isAdmin = claims?.admin === true
+const sessionOf = async (user, forceRefresh = false) =>
+	sessionFrom(user, (await user.getIdTokenResult(forceRefresh)).claims)
 
-	localStorage.setItem(SESSION_STORAGE_KEYS.TOKEN, token)
-	localStorage.setItem(SESSION_STORAGE_KEYS.USER_ID, user.uid)
-	localStorage.setItem(SESSION_STORAGE_KEYS.USER_NAME, userName)
-	localStorage.setItem(SESSION_STORAGE_KEYS.USER_EMAIL, user.email)
-	localStorage.setItem(SESSION_STORAGE_KEYS.TOKEN_EXPIRATION, expirationDate)
-	localStorage.setItem(SESSION_STORAGE_KEYS.IS_ADMIN, isAdmin)
+// The app kept its own copy of the session before the SDK was its only source; a browser that still has it no longer needs it
+const LEGACY_SESSION_KEYS = [
+	'token',
+	'userId',
+	'userName',
+	'userEmail',
+	'tokenExpiration',
+	'isAdmin',
+]
 
-	clearTimeout(timer)
-	timer = setTimeout(() => {
-		dispatch(autoLogout())
-	}, expiresIn)
-
-	return {
-		token,
-		userId: user.uid,
-		userName,
-		userEmail: user.email,
-		isAdmin,
-		emailVerified: user.emailVerified,
+// The claims of the last token the SDK saved; it may have expired, but admin is only a hint until the SDK confirms the session
+const savedClaims = (accessToken) => {
+	try {
+		const payload = accessToken
+			.split('.')[1]
+			.replace(/-/g, '+')
+			.replace(/_/g, '/')
+		return JSON.parse(atob(payload))
+	} catch {
+		return {}
 	}
 }
 
-// The SDK can keep a user after the app's own session has expired; only a matching session counts as signed in
-const sessionUser = () => {
-	const user = getFirebaseAuth().currentUser
-	return user &&
-		localStorage.getItem(SESSION_STORAGE_KEYS.USER_ID) === user.uid
-		? user
-		: null
+// Read at once on start-up, so a signed-in traveller sees their pages without waiting for the SDK's network round trip; watchSession then confirms the user or clears it
+export const restoreSavedSession = (storage, apiKey) => {
+	try {
+		const saved = JSON.parse(storage.getItem(savedUserStorageKey(apiKey)))
+		if (!saved?.uid) return null
+
+		return {
+			...sessionFrom(
+				saved,
+				savedClaims(saved.stsTokenManager?.accessToken),
+			),
+			// A saved user still needs the SDK's answer before a protected page can be trusted to it
+			sessionChecked: false,
+		}
+	} catch {
+		return null
+	}
+}
+
+const savedSession = () =>
+	typeof localStorage === 'undefined'
+		? null
+		: restoreSavedSession(localStorage, FIREBASE.API_KEY)
+
+// The SDK renews the ID token itself when less than five minutes are left, so each request asks for it rather than keeping a copy; a request made while the saved session is still being confirmed waits for the SDK
+export const getSessionToken = async () => {
+	const auth = getFirebaseAuth()
+	await auth.authStateReady()
+	const user = auth.currentUser
+	if (!user) return null
+
+	try {
+		return await user.getIdToken()
+	} catch {
+		throw new Error(ERROR_MESSAGES.REQUEST_ERROR)
+	}
+}
+
+// Started once by the app: a restored, renewed, revoked or ended session all reach Redux through here
+export const watchSession = () => (dispatch) => {
+	LEGACY_SESSION_KEYS.forEach((key) => localStorage.removeItem(key))
+
+	return onIdTokenChanged(getFirebaseAuth(), async (user) => {
+		if (!user) {
+			dispatch(authActions.clearUser())
+			return
+		}
+
+		// Offline with an expired token the claims cannot be read yet; the renewal once back online reports the user again
+		const session = await sessionOf(user).catch(() => sessionFrom(user, {}))
+
+		// A later change may have reported before this one finished
+		if (getFirebaseAuth().currentUser?.uid !== user.uid) return
+
+		dispatch(authActions.setSession(session))
+	})
 }
 
 const actionCodeReason = (error) =>
@@ -88,7 +139,7 @@ const actionCodeReason = (error) =>
 
 export const login = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.LOGIN,
-	async (payload, { dispatch, rejectWithValue }) => {
+	async (payload, { rejectWithValue }) => {
 		const isSignup = payload.mode === API_DATABASE.AUTH_SIGNUP_MODE
 		// The SDK session is what authorises Cloud Storage uploads; the REST API alone leaves Storage anonymous
 		const authenticate = isSignup
@@ -106,7 +157,7 @@ export const login = createAsyncThunk(
 			if (isSignup) await sendVerification(user).catch(() => {})
 
 			return {
-				...(await persistSession(user, dispatch)),
+				...(await sessionOf(user)),
 				awaitingVerification: isSignup,
 			}
 		} catch (error) {
@@ -137,16 +188,16 @@ export const resendVerification = createAsyncThunk(
 
 export const refreshVerification = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.REFRESH_VERIFICATION,
-	async (_, { dispatch, rejectWithValue }) => {
+	async (_, { rejectWithValue }) => {
 		try {
-			const user = sessionUser()
+			const user = getFirebaseAuth().currentUser
 			if (!user) return { emailVerified: false }
 
 			await user.reload()
 			if (!user.emailVerified) return { emailVerified: false }
 
 			// The rules read email_verified from the ID token, so a fresh token makes it live at once
-			return persistSession(user, dispatch, true)
+			return sessionOf(user, true)
 		} catch {
 			return rejectWithValue(ERROR_MESSAGES.VERIFICATION_CHECK_FAILED)
 		}
@@ -178,7 +229,7 @@ export const applyEmailVerification = createAsyncThunk(
 			await applyActionCode(auth, code)
 		} catch (error) {
 			const reason = actionCodeReason(error)
-			const user = sessionUser()
+			const user = auth.currentUser
 
 			// A used link is no error for an account that is already verified
 			if (reason !== ACTION_CODE_ERRORS.NETWORK && user) {
@@ -190,7 +241,7 @@ export const applyEmailVerification = createAsyncThunk(
 			return rejectWithValue(reason)
 		}
 
-		const signedIn = Boolean(sessionUser())
+		const signedIn = Boolean(auth.currentUser)
 		if (signedIn) await dispatch(refreshVerification())
 
 		return { signedIn, alreadyVerified: false }
@@ -250,77 +301,10 @@ export const sendPasswordReset = createAsyncThunk(
 	},
 )
 
-export const tryLogin = createAsyncThunk(
-	AUTHENTICATION_ACTION_TYPES.TRY_LOGIN,
-	async (_, { dispatch, rejectWithValue }) => {
-		try {
-			const token = localStorage.getItem(SESSION_STORAGE_KEYS.TOKEN)
-			const userId = localStorage.getItem(SESSION_STORAGE_KEYS.USER_ID)
-			const userName = localStorage.getItem(
-				SESSION_STORAGE_KEYS.USER_NAME,
-			)
-			const userEmail = localStorage.getItem(
-				SESSION_STORAGE_KEYS.USER_EMAIL,
-			)
-			const tokenExpiration = localStorage.getItem(
-				SESSION_STORAGE_KEYS.TOKEN_EXPIRATION,
-			)
-			const isAdmin =
-				localStorage.getItem(SESSION_STORAGE_KEYS.IS_ADMIN) === 'true'
-
-			if (
-				!token ||
-				!tokenExpiration ||
-				new Date().getTime() > +tokenExpiration
-			) {
-				dispatch(authActions.clearUser())
-				dispatch(authActions.setAutoLogout(false))
-				return null
-			}
-
-			const auth = getFirebaseAuth()
-			await auth.authStateReady()
-			// Storage uploads need the SDK user; sessions from before the SDK sign-in have none, so make them log in again
-			if (auth.currentUser?.uid !== userId) {
-				await dispatch(logout())
-				dispatch(authActions.setAutoLogout(false))
-				return null
-			}
-
-			const expiresIn = +tokenExpiration - new Date().getTime()
-			timer = setTimeout(() => {
-				dispatch(autoLogout())
-			}, expiresIn)
-
-			dispatch(authActions.setAutoLogout(false))
-
-			return {
-				token,
-				userId,
-				userName,
-				userEmail,
-				isAdmin,
-				emailVerified: auth.currentUser.emailVerified,
-			}
-		} catch (error) {
-			return rejectWithValue(error.message)
-		}
-	},
-)
-
 export const logout = createAsyncThunk(
 	AUTHENTICATION_ACTION_TYPES.LOGOUT,
 	async (_, { dispatch, rejectWithValue }) => {
 		try {
-			localStorage.removeItem(SESSION_STORAGE_KEYS.TOKEN)
-			localStorage.removeItem(SESSION_STORAGE_KEYS.USER_ID)
-			localStorage.removeItem(SESSION_STORAGE_KEYS.USER_NAME)
-			localStorage.removeItem(SESSION_STORAGE_KEYS.USER_EMAIL)
-			localStorage.removeItem(SESSION_STORAGE_KEYS.TOKEN_EXPIRATION)
-			localStorage.removeItem(SESSION_STORAGE_KEYS.IS_ADMIN)
-
-			clearTimeout(timer)
-
 			dispatch(authActions.clearUser())
 
 			await signOut(getFirebaseAuth())
@@ -330,48 +314,49 @@ export const logout = createAsyncThunk(
 	},
 )
 
-export const autoLogout = createAsyncThunk(
-	AUTHENTICATION_ACTION_TYPES.AUTO_LOGOUT,
-	async (_, { dispatch }) => {
-		dispatch(logout())
-		dispatch(authActions.clearUser())
-		dispatch(authActions.setAutoLogout())
-	},
-)
+const signedOut = {
+	userId: null,
+	userName: null,
+	userEmail: null,
+	isAdmin: false,
+	emailVerified: false,
+	// Set by sign-up so the login page shows Check your inbox instead of moving on
+	awaitingVerification: false,
+	// False only while the SDK confirms a saved user; with none saved there is nothing to wait for
+	sessionChecked: true,
+	// The SDK reports a new user before sign-up has set Check your inbox, so the login result sets the session instead
+	signingIn: false,
+	status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+	error: null,
+}
 
 const authSlice = createSlice({
 	name: 'authentication',
-	initialState: {
-		token: null,
-		userId: null,
-		userName: null,
-		userEmail: null,
-		isAdmin: false,
-		emailVerified: false,
-		// Set by sign-up so the login page shows Check your inbox instead of moving on
-		awaitingVerification: false,
-		didAutoLogout: false,
-		status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-		error: null,
-	},
+	initialState: () => ({ ...signedOut, ...savedSession() }),
 	reducers: {
 		clearUser(state) {
-			state.token = null
+			state.signingIn = false
 			state.userId = null
 			state.userName = null
 			state.userEmail = null
 			state.isAdmin = false
 			state.emailVerified = false
 			state.awaitingVerification = false
-			state.didAutoLogout = false
+			state.sessionChecked = true
 			state.status = 'idle'
 			state.error = null
 		},
 		clearAwaitingVerification(state) {
 			state.awaitingVerification = false
 		},
-		setAutoLogout(state, action) {
-			state.didAutoLogout = action.payload ?? true
+		setSession(state, action) {
+			if (state.signingIn) return
+			state.userId = action.payload.userId
+			state.userName = action.payload.userName
+			state.userEmail = action.payload.userEmail
+			state.isAdmin = action.payload.isAdmin
+			state.emailVerified = action.payload.emailVerified
+			state.sessionChecked = true
 		},
 	},
 	extraReducers: (builder) => {
@@ -379,48 +364,29 @@ const authSlice = createSlice({
 			// LOGIN async thunk handlers
 			.addCase(login.pending, (state) => {
 				state.status = 'loading'
+				state.signingIn = true
 				state.error = null
 			})
 			.addCase(login.fulfilled, (state, action) => {
 				state.status = 'succeeded'
-				state.token = action.payload.token
 				state.userId = action.payload.userId
 				state.userName = action.payload.userName
 				state.userEmail = action.payload.userEmail
 				state.isAdmin = action.payload.isAdmin
 				state.emailVerified = action.payload.emailVerified
 				state.awaitingVerification = action.payload.awaitingVerification
-				state.didAutoLogout = false
+				state.sessionChecked = true
+				state.signingIn = false
 				state.error = null
 			})
 			.addCase(login.rejected, (state, action) => {
 				state.status = 'failed'
+				state.signingIn = false
 				state.error = action.payload
-			})
-
-			// TRY_LOGIN async thunk handlers
-			.addCase(tryLogin.pending, (state) => {
-				state.status = 'loading'
-			})
-			.addCase(tryLogin.fulfilled, (state, action) => {
-				state.status = 'succeeded'
-				if (action.payload) {
-					state.token = action.payload.token
-					state.userId = action.payload.userId
-					state.userName = action.payload.userName
-					state.userEmail = action.payload.userEmail
-					state.isAdmin = action.payload.isAdmin
-					state.emailVerified = action.payload.emailVerified
-				}
 			})
 
 			.addCase(refreshVerification.fulfilled, (state, action) => {
 				state.emailVerified = action.payload.emailVerified
-				if (action.payload.token) state.token = action.payload.token
-			})
-			.addCase(tryLogin.rejected, (state, action) => {
-				state.status = 'failed'
-				state.error = action.payload
 			})
 
 			// LOGOUT async thunk handlers
@@ -435,38 +401,24 @@ const authSlice = createSlice({
 				state.status = 'failed'
 				state.error = action.payload
 			})
-
-			// AUTO_LOGOUT async thunk handlers
-			.addCase(autoLogout.pending, (state) => {
-				state.status = 'loading'
-			})
-			.addCase(autoLogout.fulfilled, (state) => {
-				state.status = 'succeeded'
-				// User data is cleared by actions called within autoLogout thunk
-			})
-			.addCase(autoLogout.rejected, (state, action) => {
-				state.status = 'failed'
-				state.error = action.payload
-			})
 	},
 })
 
 export const selectAuthenticationState = (state) => state.authentication
 
-// Memoized selectors using createSelector
-export const selectAuthenticationToken = createSelector(
-	[selectAuthenticationState],
-	(authState) => authState.token,
-)
-
-export const selectIsAuthenticated = createSelector(
-	[selectAuthenticationToken],
-	(token) => !!token,
-)
-
 export const selectUserId = createSelector(
 	[selectAuthenticationState],
 	(authState) => authState.userId,
+)
+
+export const selectIsAuthenticated = createSelector(
+	[selectUserId],
+	(userId) => !!userId,
+)
+
+export const selectSessionChecked = createSelector(
+	[selectAuthenticationState],
+	(authState) => authState.sessionChecked,
 )
 
 export const selectUserName = createSelector(
@@ -492,11 +444,6 @@ export const selectEmailVerified = createSelector(
 export const selectAwaitingVerification = createSelector(
 	[selectAuthenticationState],
 	(authState) => authState.awaitingVerification,
-)
-
-export const selectDidAutoLogout = createSelector(
-	[selectAuthenticationState],
-	(authState) => authState.didAutoLogout,
 )
 
 export const selectUserProfile = createSelector(

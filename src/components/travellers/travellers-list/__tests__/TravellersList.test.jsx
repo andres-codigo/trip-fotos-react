@@ -52,12 +52,10 @@ vi.mock('@/store/slices/travellersSlice', () => ({
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
 	selectIsAuthenticated: vi.fn(),
-	selectAuthenticationToken: vi.fn(),
 	selectUserId: vi.fn(),
 	selectUserName: vi.fn(),
 	selectUserEmail: vi.fn(),
 	selectUserProfile: vi.fn(),
-	selectDidAutoLogout: vi.fn(),
 }))
 
 // A pass-through spy, so one test can force the zero-results guard the real hook never reaches
@@ -145,9 +143,6 @@ describe('<TravellersList />', () => {
 			true,
 		)
 		vi.mocked(travellersSlice.selectPublicTrips).mockReturnValue([])
-		vi.mocked(
-			authenticationSlice.selectAuthenticationToken,
-		).mockReturnValue(null)
 		vi.mocked(authenticationSlice.selectUserId).mockReturnValue(null)
 		vi.mocked(authenticationSlice.selectUserName).mockReturnValue(null)
 		vi.mocked(authenticationSlice.selectUserEmail).mockReturnValue(null)
@@ -179,9 +174,6 @@ describe('<TravellersList />', () => {
 		vi.mocked(authenticationSlice.selectIsAuthenticated).mockReturnValue(
 			true,
 		)
-		vi.mocked(
-			authenticationSlice.selectAuthenticationToken,
-		).mockReturnValue(MOCK_USER.TOKEN)
 		vi.mocked(authenticationSlice.selectUserId).mockReturnValue(
 			MOCK_USER.ID,
 		)

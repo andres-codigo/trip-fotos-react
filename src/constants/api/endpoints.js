@@ -29,6 +29,8 @@ export const API_DATABASE = Object.freeze({
 	PATCH: 'PATCH',
 	DELETE: 'DELETE',
 	SERVER_TIMESTAMP: Object.freeze({ '.sv': 'timestamp' }),
+	// The database answers 401 both for a rule that refuses the request and for a token it cannot accept; only this text means the token was fine
+	PERMISSION_DENIED: 'Permission denied',
 })
 
 export const SDK_METHOD_TYPE_URLS = {

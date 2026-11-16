@@ -4,10 +4,7 @@ import { act, render, screen, waitFor } from '@testing-library/react'
 import * as redux from 'react-redux'
 import * as router from 'react-router-dom'
 
-import {
-	AUTHENTICATION_ACTION_TYPES,
-	TRAVELLERS_ACTION_TYPES,
-} from '@/constants/redux'
+import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import { PATHS } from '@/constants/ui'
 
 import App from '@/app/App'
@@ -46,15 +43,15 @@ vi.mock('@/constants/ui', () => ({
 }))
 
 vi.mock('@/store/slices/authenticationSlice', () => ({
-	tryLogin: () => ({
-		type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN_ASYNC.PENDING,
-	}),
+	watchSession: () => ({ type: 'authentication/watchSession' }),
 	authActions: {
 		clearAwaitingVerification: () => ({
 			type: 'authentication/clearAwaitingVerification',
 		}),
 	},
 	selectUserId: (state) => state.authentication.userId,
+	selectIsAuthenticated: (state) => Boolean(state.authentication.userId),
+	selectSessionChecked: (state) => state.authentication.sessionChecked,
 	selectAwaitingVerification: (state) =>
 		state.authentication.awaitingVerification,
 }))
@@ -129,21 +126,16 @@ describe('App', () => {
 	let useDispatchMock
 	let navigateMock
 
-	function setAuthState(
-		token = null,
-		didAutoLogout = false,
+	let authState
+
+	function setAuthState({
 		userId = null,
 		awaitingVerification = false,
-	) {
+		sessionChecked = true,
+	} = {}) {
+		authState = { userId, awaitingVerification, sessionChecked }
 		useSelectorMock.mockImplementation((fn) =>
-			fn({
-				authentication: {
-					token,
-					didAutoLogout,
-					userId,
-					awaitingVerification,
-				},
-			}),
+			fn({ authentication: authState }),
 		)
 	}
 
@@ -167,7 +159,7 @@ describe('App', () => {
 		])(
 			'shows the page skeleton, not the spinner, while %s loads',
 			async (path, skeleton, page) => {
-				setAuthState('token', false)
+				setAuthState({ userId: 'user-1' })
 				vi.spyOn(router, 'useLocation').mockReturnValue({
 					pathname: path,
 				})
@@ -183,7 +175,7 @@ describe('App', () => {
 		)
 
 		it('keeps the spinner for the other routes', async () => {
-			setAuthState(null, false)
+			setAuthState()
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.PRIVACY,
 			})
@@ -206,7 +198,7 @@ describe('App', () => {
 		it('waits for the browser to be idle and stops waiting on unmount', async () => {
 			window.requestIdleCallback = vi.fn(() => 7)
 			window.cancelIdleCallback = vi.fn()
-			setAuthState(null, false)
+			setAuthState()
 
 			const { unmount } = renderWithRoute(PATHS.PRIVACY)
 
@@ -223,7 +215,7 @@ describe('App', () => {
 
 		it('falls back to a timeout where the browser has no idle callback', async () => {
 			const setTimeoutSpy = vi.spyOn(window, 'setTimeout')
-			setAuthState(null, false)
+			setAuthState()
 
 			renderWithRoute(PATHS.PRIVACY)
 
@@ -236,7 +228,7 @@ describe('App', () => {
 
 	describe('Rendering tests', () => {
 		it('renders Header and TravellersPage when logged in and on /home', async () => {
-			setAuthState('token', false)
+			setAuthState({ userId: 'user-1' })
 
 			renderWithRoute(PATHS.HOME)
 
@@ -256,7 +248,7 @@ describe('App', () => {
 		})
 
 		it('does not redirect if not logged in and on public route', async () => {
-			setAuthState(null, false)
+			setAuthState()
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.AUTHENTICATION,
@@ -271,7 +263,7 @@ describe('App', () => {
 		})
 
 		it('moves a signed-in user off the login page', () => {
-			setAuthState('token', false, 'u1')
+			setAuthState({ userId: 'u1' })
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.AUTHENTICATION,
 				search: '',
@@ -285,7 +277,7 @@ describe('App', () => {
 		})
 
 		it('keeps a new account on the login page while it shows Check your inbox', () => {
-			setAuthState('token', false, 'u1', true)
+			setAuthState({ userId: 'u1', awaitingVerification: true })
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.AUTHENTICATION,
 				search: '',
@@ -297,7 +289,7 @@ describe('App', () => {
 		})
 
 		it('opens the email-link page without signing in', async () => {
-			setAuthState(null, false)
+			setAuthState()
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.AUTH_ACTION,
 			})
@@ -311,7 +303,7 @@ describe('App', () => {
 		})
 
 		it('renders PrivacyPage without redirecting when not logged in', async () => {
-			setAuthState(null, false)
+			setAuthState()
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.PRIVACY,
@@ -326,7 +318,7 @@ describe('App', () => {
 		})
 
 		it('renders a canonical link for the current route', () => {
-			setAuthState(null, false)
+			setAuthState()
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.AUTHENTICATION,
@@ -343,7 +335,7 @@ describe('App', () => {
 		})
 
 		it('omits the canonical link on the not found page', () => {
-			setAuthState(null, false)
+			setAuthState()
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.PAGE_NOT_FOUND,
@@ -357,7 +349,7 @@ describe('App', () => {
 		})
 
 		it('renders NotFoundPage for unknown route', async () => {
-			setAuthState('token', false)
+			setAuthState({ userId: 'user-1' })
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: '/unknown',
@@ -378,7 +370,7 @@ describe('App', () => {
 			async (pathname) => {
 				const dispatch = vi.fn()
 				useDispatchMock.mockReturnValue(dispatch)
-				setAuthState('token', false, 'user-1', true)
+				setAuthState({ userId: 'user-1', awaitingVerification: true })
 				vi.spyOn(router, 'useLocation').mockReturnValue({ pathname })
 
 				renderWithRoute(pathname)
@@ -394,7 +386,7 @@ describe('App', () => {
 		it('keeps Check your inbox on the login page', async () => {
 			const dispatch = vi.fn()
 			useDispatchMock.mockReturnValue(dispatch)
-			setAuthState('token', false, 'user-1', true)
+			setAuthState({ userId: 'user-1', awaitingVerification: true })
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.AUTHENTICATION,
 			})
@@ -408,7 +400,7 @@ describe('App', () => {
 		})
 
 		it('redirects to /authentication if not logged in and on protected route', async () => {
-			setAuthState(null, false)
+			setAuthState()
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.REGISTER,
@@ -428,7 +420,7 @@ describe('App', () => {
 		it.each([PATHS.HOME, PATHS.TRAVELLERS])(
 			'lets a logged-out visitor stay on %s',
 			async (pathname) => {
-				setAuthState(null, false)
+				setAuthState()
 				vi.spyOn(router, 'useLocation').mockReturnValue({ pathname })
 
 				renderWithRoute(pathname)
@@ -443,7 +435,7 @@ describe('App', () => {
 		)
 
 		it('redirects to /authentication if not logged in and on a traveller detail route', async () => {
-			setAuthState(null, false)
+			setAuthState()
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: '/travellers/abc123',
@@ -460,7 +452,7 @@ describe('App', () => {
 		})
 
 		it('renders TravellerDetailPage when logged in and on a traveller detail route', async () => {
-			setAuthState('token', false)
+			setAuthState({ userId: 'user-1' })
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: '/travellers/abc123',
@@ -477,7 +469,7 @@ describe('App', () => {
 		})
 
 		it('redirects to /authentication if not logged in and on a contact traveller route', async () => {
-			setAuthState(null, false)
+			setAuthState()
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: '/travellers/abc123/contact',
@@ -495,7 +487,7 @@ describe('App', () => {
 
 		it('sends a contact link to the conversation with that traveller', async () => {
 			useDispatchMock.mockReturnValue(vi.fn())
-			setAuthState('token', false, 'user-1')
+			setAuthState({ userId: 'user-1' })
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: '/travellers/abc123/contact',
@@ -510,7 +502,7 @@ describe('App', () => {
 
 		it('hides the tab bar and footer below 1024px on a thread', async () => {
 			useDispatchMock.mockReturnValue(vi.fn())
-			setAuthState('token', false, 'user-1')
+			setAuthState({ userId: 'user-1' })
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: '/messages/abc123_user-1',
@@ -532,7 +524,7 @@ describe('App', () => {
 		})
 
 		it('redirects to /authentication if not logged in and on an edit trip route', async () => {
-			setAuthState(null, false)
+			setAuthState()
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: '/travellers/abc123/edit',
@@ -549,7 +541,7 @@ describe('App', () => {
 		})
 
 		it('renders EditTripPage when logged in and on an edit trip route', async () => {
-			setAuthState('token', false)
+			setAuthState({ userId: 'user-1' })
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: '/travellers/abc123/edit',
@@ -563,25 +555,73 @@ describe('App', () => {
 			expect(navigateMock).not.toHaveBeenCalled()
 		})
 
-		it('redirects to /authentication on auto logout', async () => {
-			setAuthState('token', true)
-
+		it('sends the traveller to /authentication when the session ends on a public page', async () => {
+			setAuthState({ userId: 'user-1' })
 			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.HOME,
+				pathname: PATHS.TRAVELLERS,
 			})
-			vi.spyOn(router, 'useInRouterContext').mockReturnValue(true)
 
-			renderWithRoute(PATHS.HOME)
+			const { rerender } = renderWithRoute(PATHS.TRAVELLERS)
+			expect(navigateMock).not.toHaveBeenCalled()
+
+			setAuthState()
+			rerender(
+				<router.MemoryRouter initialEntries={[PATHS.TRAVELLERS]}>
+					<App />
+				</router.MemoryRouter>,
+			)
 
 			await waitFor(() => {
 				expect(navigateMock).toHaveBeenCalledWith(PATHS.AUTHENTICATION)
 			})
 		})
 
+		it('does not send a visitor who was never signed in to /authentication', async () => {
+			setAuthState()
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.TRAVELLERS,
+			})
+
+			renderWithRoute(PATHS.TRAVELLERS)
+
+			await waitFor(() => {
+				expect(screen.getByText('TravellersPage')).toBeInTheDocument()
+			})
+			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
+		it('opens a protected page from the saved session at once, redirecting nowhere while the SDK confirms it', async () => {
+			setAuthState({ userId: 'user-1', sessionChecked: false })
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.MESSAGES,
+			})
+
+			renderWithRoute(PATHS.MESSAGES)
+
+			await waitFor(() => {
+				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
+			})
+			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
+		it('waits for the SDK before sending a visitor from a protected page to log in', async () => {
+			setAuthState({ sessionChecked: false })
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.MESSAGES,
+			})
+
+			renderWithRoute(PATHS.MESSAGES)
+
+			await waitFor(() => {
+				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
+			})
+			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
 		it('keeps a restored session on the protected URL it was opened at', async () => {
 			const dispatch = vi.fn()
 			useDispatchMock.mockReturnValue(dispatch)
-			setAuthState('restored-token', false, 'user-1')
+			setAuthState({ userId: 'user-1' })
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.MESSAGES,
@@ -595,13 +635,8 @@ describe('App', () => {
 			expect(navigateMock).not.toHaveBeenCalled()
 		})
 
-		it('sends the user to /authentication when tryLogin finds no session on a protected URL', async () => {
-			const dispatch = vi.fn().mockResolvedValue({
-				type: AUTHENTICATION_ACTION_TYPES.TRY_LOGIN_ASYNC.REJECTED,
-				meta: { rejectedWithValue: true },
-			})
-			useDispatchMock.mockReturnValue(dispatch)
-			setAuthState(null, false)
+		it('sends the user to /authentication when the SDK has no saved session on a protected URL', async () => {
+			setAuthState()
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.MESSAGES,
@@ -618,7 +653,7 @@ describe('App', () => {
 		})
 
 		it('redirects a logged-in user from /authentication to the travellers list', async () => {
-			setAuthState('token', false)
+			setAuthState({ userId: 'user-1' })
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.AUTHENTICATION,
@@ -635,7 +670,7 @@ describe('App', () => {
 		})
 
 		it('sends a logged-in user on /authentication to the redirect target when there is one', async () => {
-			setAuthState('token', false)
+			setAuthState({ userId: 'user-1' })
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.AUTHENTICATION,
@@ -651,10 +686,10 @@ describe('App', () => {
 			})
 		})
 
-		it('dispatches tryLogin on mount', async () => {
+		it('starts the session listener on mount', async () => {
 			const dispatch = vi.fn()
 			useDispatchMock.mockReturnValue(dispatch)
-			setAuthState('token', false)
+			setAuthState({ userId: 'user-1' })
 
 			vi.spyOn(router, 'useLocation').mockReturnValue({
 				pathname: PATHS.HOME,
@@ -664,14 +699,16 @@ describe('App', () => {
 			renderWithRoute(PATHS.HOME)
 
 			await waitFor(() => {
-				expect(dispatch).toHaveBeenCalled()
+				expect(dispatch).toHaveBeenCalledWith({
+					type: 'authentication/watchSession',
+				})
 			})
 		})
 
 		it('checks traveller registration when a user is signed in', async () => {
 			const dispatch = vi.fn()
 			useDispatchMock.mockReturnValue(dispatch)
-			setAuthState('token', false, 'user-1')
+			setAuthState({ userId: 'user-1' })
 
 			renderWithRoute(PATHS.HOME)
 
@@ -687,7 +724,7 @@ describe('App', () => {
 		it('does not check traveller registration when signed out', async () => {
 			const dispatch = vi.fn()
 			useDispatchMock.mockReturnValue(dispatch)
-			setAuthState(null, false, null)
+			setAuthState()
 
 			renderWithRoute(PATHS.PRIVACY)
 

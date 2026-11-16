@@ -6,6 +6,11 @@ import { TAB_BAR } from '@/constants/test'
 import { MESSAGES_CONFIG } from '@/constants/travellers'
 import { NAVIGATION } from '@/constants/ui'
 
+import {
+	selectAwaitingVerification,
+	selectIsAuthenticated,
+} from '@/store/slices/authenticationSlice'
+
 import usePrimaryNavItems from '@/components/layout/main-nav/hooks/usePrimaryNavItems'
 
 import { cn } from '@/utils/cn'
@@ -22,11 +27,9 @@ const DATA_CY_BY_KEY = Object.freeze({
 
 function TabBar({ isTraveller, className }) {
 	// Hidden on Check your inbox, as the header's places are
-	const isLoggedIn = useSelector(
-		(state) =>
-			Boolean(state.authentication.token) &&
-			!state.authentication.awaitingVerification,
-	)
+	const isAuthenticated = useSelector(selectIsAuthenticated)
+	const awaitingVerification = useSelector(selectAwaitingVerification)
+	const isLoggedIn = isAuthenticated && !awaitingVerification
 	const items = usePrimaryNavItems({ isTraveller })
 
 	if (!isLoggedIn) {

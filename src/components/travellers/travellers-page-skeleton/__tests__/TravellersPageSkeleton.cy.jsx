@@ -10,13 +10,13 @@ import {
 } from '@/constants/test'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 
-const mountPage = (token = null) => {
+const mountPage = (userId = null) => {
 	const store = configureTestStore({
 		reducer: { authentication: authenticationReducer },
 		preloadedState: {
 			authentication: {
 				...authenticationReducer(undefined, { type: '@@init' }),
-				token,
+				userId,
 			},
 		},
 	})
@@ -32,7 +32,7 @@ const mountPage = (token = null) => {
 describe('<TravellersPageSkeleton />', () => {
 	// The page's heading row holds the 44px Refresh button, so the stand-in keeps a slot that size at the row's end
 	it('keeps a 44px Refresh slot at the end of the heading row', () => {
-		mountPage('token')
+		mountPage('traveller-uid')
 		cy.contains('h1', 'Travellers')
 			.next()
 			.should(($slot) => {

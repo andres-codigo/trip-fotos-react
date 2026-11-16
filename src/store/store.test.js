@@ -100,6 +100,32 @@ describe('Store Configuration', () => {
 		expect(persistConfigs[0].blacklist).toContain('messages')
 	})
 
+	it('leaves the session to the Auth SDK, saving none of it', () => {
+		expect(persistConfigs[0].blacklist).toContain('authentication')
+	})
+
+	it('drops a session saved before it was left out, keeping the rest', async () => {
+		const saved = {
+			authentication: { token: 'old-token', userId: 'u1' },
+			travellers: { travellerName: 'Ada' },
+			_persist: { version: -1, rehydrated: false },
+		}
+
+		const migrated = await persistConfigs[0].migrate(saved, -1)
+
+		expect(migrated).toEqual({
+			travellers: { travellerName: 'Ada' },
+			_persist: { version: -1, rehydrated: false },
+		})
+		expect(saved).toHaveProperty('authentication')
+	})
+
+	it('migrates nothing when there is no saved state', async () => {
+		await expect(persistConfigs[0].migrate(undefined, -1)).resolves.toBe(
+			undefined,
+		)
+	})
+
 	describe('immutableCheck warning limit', () => {
 		// Each dispatch reads Date.now four times in the immutable check, so a step of n ms per read reports 2n ms
 		const dispatchWithClockStep = (step) => {

@@ -1,28 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
+import { useSelector } from 'react-redux'
 
-import { SESSION_STORAGE_KEYS } from '@/constants/auth'
+import { selectTravellerName } from '@/store/slices/travellersSlice'
 
+// Starts from the persisted name so the account menu is named on the first paint after a reload
 function useLoggedInTravellerName() {
-	const [travellerName, setTravellerName] = useState(
-		() => localStorage.getItem(SESSION_STORAGE_KEYS.USER_NAME) || '',
-	)
-
-	const syncTravellerName = useCallback(() => {
-		const newValue = localStorage.getItem(SESSION_STORAGE_KEYS.USER_NAME)
-		setTravellerName(newValue || '')
-	}, [])
-
-	useEffect(() => {
-		// Only sync when storage changes in another tab/window
-		// Initial value is already set via lazy initializer
-		window.addEventListener('storage', syncTravellerName)
-
-		return () => {
-			window.removeEventListener('storage', syncTravellerName)
-		}
-	}, [syncTravellerName])
-
-	return [travellerName, setTravellerName]
+	const storedName = useSelector(selectTravellerName)
+	return useState(storedName || '')
 }
 
 export default useLoggedInTravellerName

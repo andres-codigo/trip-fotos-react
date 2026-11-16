@@ -17,7 +17,7 @@ const USER_ID = 'traveller-uid'
 const MY_TRIP_PATH = `${PATHS.TRAVELLERS}/${USER_ID}`
 
 const createStore = ({
-	token = 'token',
+	userId = USER_ID,
 	awaitingVerification = false,
 	isTraveller = true,
 	messages = [],
@@ -39,9 +39,8 @@ const createStore = ({
 		preloadedState: {
 			authentication: {
 				...initial.authentication,
-				token,
 				awaitingVerification,
-				userId: USER_ID,
+				userId,
 			},
 			travellers: { ...initial.travellers, isTraveller },
 			messages: { ...initial.messages, conversations: messages },
@@ -63,7 +62,7 @@ const getNav = () =>
 
 describe('<TabBar />', () => {
 	it('renders nothing when the user is not logged in', () => {
-		const { container } = renderTabBar({ token: null })
+		const { container } = renderTabBar({ userId: null })
 
 		expect(container).toBeEmptyDOMElement()
 	})
