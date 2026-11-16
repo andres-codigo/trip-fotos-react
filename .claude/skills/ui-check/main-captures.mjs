@@ -13,9 +13,11 @@ import {
 	runsCapture,
 	widthsFor,
 } from '../../../cypress/ui-check/selection.js'
+import { treeHash } from '../verify/git-tree.mjs'
 import { narrowChange } from './narrow.mjs'
 
 export const MAIN_LABEL = 'main'
+export const BRANCH_LABEL = 'branch'
 // Outside cypress/screenshots, which a component or E2E run trashes
 export const CAPTURES_ROOT = path.join('cypress', 'ui-check-captures')
 // What decides the images besides the app: the capture script, its helpers and the seed data
@@ -120,6 +122,30 @@ export const capturedWidths = (results, widths) => {
 	)
 }
 
+// Every capture a run started, passed or not: each one cleared its folder first
+export const ranCaptures = (results) =>
+	(results?.runs ?? [])
+		.flatMap(({ tests }) => tests ?? [])
+		.map(({ title }) => idByTitle[title.at(-1)])
+		.filter(Boolean)
+
+// A branch run replaces the entries of the captures it ran, each with the working tree it was taken on
+export const mergeBranchRecord = (record, { tree, ran, captures }) => ({
+	captures: {
+		...Object.fromEntries(
+			Object.entries(record?.captures ?? {}).filter(
+				([id]) => !ran.includes(id),
+			),
+		),
+		...Object.fromEntries(
+			Object.entries(captures).map(([id, widths]) => [
+				id,
+				{ tree, widths },
+			]),
+		),
+	},
+})
+
 // The captures a run asks for, with their widths
 export const neededWidths = (widths, only) => {
 	const spec = parseWidthSpec(widths)
@@ -180,7 +206,7 @@ export const reuseVerdict = (stamp, current) => {
 	}
 }
 
-const readStamp = (file) => {
+export const readStamp = (file) => {
 	try {
 		return JSON.parse(fs.readFileSync(file, 'utf8'))
 	} catch {
@@ -188,8 +214,27 @@ const readStamp = (file) => {
 	}
 }
 
+// A branch run can include uncommitted work, so its record names the working tree rather than a commit
+const writeBranchRecord = ({ projectDir, dir, results, widths }) => {
+	const file = stampPath(dir, BRANCH_LABEL)
+	fs.writeFileSync(
+		file,
+		JSON.stringify(
+			mergeBranchRecord(readStamp(file), {
+				tree: treeHash(projectDir),
+				ran: ranCaptures(results),
+				captures: capturedWidths(results, widths),
+			}),
+		),
+	)
+	return true
+}
+
 // Only a main run of committed app code describes that commit
 export const writeStamp = ({ projectDir, dir, label, results, widths }) => {
+	if (label === BRANCH_LABEL) {
+		return writeBranchRecord({ projectDir, dir, results, widths })
+	}
 	if (label !== MAIN_LABEL) return false
 	const dirty = git(
 		'status --porcelain -- src public index.html vite.config.js',
@@ -224,32 +269,34 @@ const showAt = (projectDir, commit, file) => {
 	}
 }
 
-// Moves the record to `commit` and says what it dropped; leaves it alone when git cannot read the recorded commit
-const followMain = (projectDir, file, stamp, commit) => {
+export const scriptHashAt = (projectDir, commit) =>
+	scriptHash(projectDir, (name) => showAt(projectDir, commit, name) ?? '')
+
+// The captures the changes from one tree or commit to another can change (null for all), or undefined when git cannot read `from`
+export const staleBetween = (projectDir, from, to) => {
 	let files
 	try {
-		files = git(
-			`diff --no-renames --name-only ${stamp.commit} ${commit}`,
-			projectDir,
-		)
+		files = git(`diff --no-renames --name-only ${from} ${to}`, projectDir)
 			.split('\n')
 			.filter(Boolean)
 	} catch {
-		return stamp
+		return undefined
 	}
-	const stale = staleCaptures(files, {
-		isNew: (name) => showAt(projectDir, stamp.commit, name) === null,
-		before: (name) => showAt(projectDir, stamp.commit, name),
-		after: (name) => showAt(projectDir, commit, name),
-		diff: (name) =>
-			git(`diff -U0 ${stamp.commit} ${commit} -- ${name}`, projectDir),
+	return staleCaptures(files, {
+		isNew: (name) => showAt(projectDir, from, name) === null,
+		before: (name) => showAt(projectDir, from, name),
+		after: (name) => showAt(projectDir, to, name),
+		diff: (name) => git(`diff -U0 ${from} ${to} -- ${name}`, projectDir),
 	})
+}
+
+// Moves the record to `commit` and says what it dropped; leaves it alone when git cannot read the recorded commit
+export const followMain = (projectDir, file, stamp, commit) => {
+	const stale = staleBetween(projectDir, stamp.commit, commit)
+	if (stale === undefined) return stamp
 	const moved = moveStamp(stamp, {
 		commit,
-		script: scriptHash(
-			projectDir,
-			(name) => showAt(projectDir, commit, name) ?? '',
-		),
+		script: scriptHashAt(projectDir, commit),
 		stale,
 	})
 	fs.writeFileSync(file, JSON.stringify(moved))
