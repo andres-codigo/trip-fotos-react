@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.7](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.6...v0.28.7) (2026-11-16)
+
+
+### Enhancements
+
+* keep travellers signed in until they log out ([#789](https://github.com/andres-codigo/trip-fotos-react/issues/789)) ([13b1667](https://github.com/andres-codigo/trip-fotos-react/commit/13b166754f1851842279342ab85ceda01679c8da))
+
 ## [0.28.6](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.5...v0.28.6) (2026-11-15)
 
 
