@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.8...v0.29.0) (2026-11-16)
+
+
+### Features
+
+* require a verified email to post trips and messages ([#795](https://github.com/andres-codigo/trip-fotos-react/issues/795)) ([b1e946e](https://github.com/andres-codigo/trip-fotos-react/commit/b1e946e278376316d0030bc16aef01209a158b17))
+
 ## [0.28.8](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.7...v0.28.8) (2026-11-16)
 
 
