@@ -24,16 +24,19 @@ import messagesReducer, {
 	selectUnreadConversationsCount,
 } from './messagesSlice'
 
-import { logout } from './authenticationSlice'
+import { authActions, logout } from './authenticationSlice'
 
 vi.mock('@/utils/errorHandler', () => ({
 	handleApiError: vi.fn((error, message) => `${message}: ${error?.message}`),
 }))
 
 vi.mock('./authenticationSlice', async () => {
-	const { createAsyncThunk } = await import('@reduxjs/toolkit')
+	const { createAction, createAsyncThunk } = await import('@reduxjs/toolkit')
 	return {
-		selectAuthenticationToken: vi.fn(() => MOCK_USER.TOKEN),
+		authActions: {
+			clearUser: createAction('authentication/clearUser'),
+		},
+		getSessionToken: vi.fn(async () => MOCK_USER.TOKEN),
 		selectUserId: vi.fn(() => MOCK_USER.USER_ID),
 		logout: createAsyncThunk('authentication/logout', async () => {}),
 	}
@@ -331,6 +334,8 @@ describe('messagesSlice', () => {
 					}),
 				])
 
+				// The token is read before the write, so the request starts a tick later
+				await vi.waitFor(() => expect(release).toBeTypeOf('function'))
 				release({ ok: true })
 				await sending
 
@@ -535,6 +540,16 @@ describe('messagesSlice', () => {
 
 			expect(selectConversations(store.getState())).toEqual([])
 			expect(selectLegacyMessages(store.getState())).toEqual([])
+			expect(store.getState().messages.threads).toEqual({})
+		})
+
+		it('clears them too when the session ends without logout, such as a revoked session', async () => {
+			await store.dispatch(loadConversations())
+			await store.dispatch(loadThread(CID))
+
+			store.dispatch(authActions.clearUser())
+
+			expect(selectConversations(store.getState())).toEqual([])
 			expect(store.getState().messages.threads).toEqual({})
 		})
 	})

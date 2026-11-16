@@ -5,20 +5,27 @@ import { Link, useLocation } from 'react-router-dom'
 import { AUTH_FORM_CONFIG } from '@/constants/auth'
 import { PATHS } from '@/constants/ui'
 
+import {
+	selectAwaitingVerification,
+	selectIsAuthenticated,
+	selectSessionChecked,
+} from '@/store/slices/authenticationSlice'
+
 import BaseButton from '@/components/ui/button/BaseButton'
 
 const MainNav = lazy(() => import('@/components/layout/main-nav/MainNav'))
 
 function Header() {
 	// A new account on Check your inbox is shown the signed-out chrome, so its only ways on are in the card
-	const isLoggedIn = useSelector(
-		(state) =>
-			Boolean(state.authentication.token) &&
-			!state.authentication.awaitingVerification,
-	)
+	const isAuthenticated = useSelector(selectIsAuthenticated)
+	const awaitingVerification = useSelector(selectAwaitingVerification)
+	const isLoggedIn = isAuthenticated && !awaitingVerification
+	// Hidden while a saved session is restored, so a signed-in traveller is not offered Log in on every reload
+	const sessionChecked = useSelector(selectSessionChecked)
 	const { pathname } = useLocation()
 	// Travellers is public, so a logged-out visitor needs a way in from every page but the login form and the email-link page, which offers its own next step
 	const showLogIn =
+		sessionChecked &&
 		!isLoggedIn &&
 		pathname !== PATHS.AUTHENTICATION &&
 		pathname !== PATHS.AUTH_ACTION

@@ -114,7 +114,7 @@ vi.mock('./authenticationSlice', async () => {
 		authActions: {
 			clearUser: createAction('authentication/clearUser'),
 		},
-		selectAuthenticationToken: vi.fn(() => MOCK_USER.TOKEN),
+		getSessionToken: vi.fn(async () => MOCK_USER.TOKEN),
 		selectUserId: vi.fn(() => MOCK_USER.USER_ID),
 		logout: createAsyncThunk('authentication/logout', async () => {}),
 	}
@@ -644,7 +644,7 @@ describe('travellersSlice', () => {
 				})
 			})
 
-			it('should set the Auth display name and userName to the registered name', async () => {
+			it('should set the Auth display name and the store name to the registered name', async () => {
 				const fullName = `${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`
 				fetch.mockResolvedValueOnce({
 					ok: true,
@@ -657,10 +657,7 @@ describe('travellersSlice', () => {
 				expect(updateProfile).toHaveBeenCalledWith(MOCK_AUTH_USER, {
 					displayName: fullName,
 				})
-				expect(localStorage.setItem).toHaveBeenCalledWith(
-					'userName',
-					fullName,
-				)
+				expect(localStorage.setItem).not.toHaveBeenCalled()
 				expect(store.getState().travellers.travellerName).toBe(fullName)
 			})
 
@@ -1771,16 +1768,16 @@ describe('travellersSlice', () => {
 				})
 			})
 
-			it('should keep the record answer when the session restores after it', async () => {
+			it('should keep the record answer when the session is reported again after it', async () => {
 				global.fetch.mockResolvedValueOnce({
 					ok: true,
 					json: async () => null,
 				})
 				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
 
-				// The persisted userId starts the check before tryLogin resolves; a stale display name must not come back
+				// The SDK reports the user again on every token renewal; a stale display name must not come back
 				store.dispatch({
-					type: 'authentication/tryLogin/fulfilled',
+					type: 'authentication/setSession',
 					payload: { userName: MOCK_USER.FULL_NAME },
 				})
 

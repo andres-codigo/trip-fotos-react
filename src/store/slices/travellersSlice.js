@@ -21,14 +21,13 @@ import {
 
 import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
-import { SESSION_STORAGE_KEYS } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { GLOBAL } from '@/constants/ui'
 
 import {
 	authActions,
+	getSessionToken,
 	logout,
-	selectAuthenticationToken,
 	selectUserId,
 } from './authenticationSlice'
 import { deleteTravellerMessages } from './messagesSlice'
@@ -45,8 +44,12 @@ const thumbnailUrls = (fileThumbnails) =>
 	Object.values(fileThumbnails ?? {}).flatMap(thumbnailUrlsOf)
 
 // One multi-path update, so the public summary can never disagree with the trip it comes from
-const saveTrip = (token, updates) =>
-	databaseRequest('/', { method: API_DATABASE.PATCH, token, body: updates })
+const saveTrip = async (updates) =>
+	databaseRequest('/', {
+		method: API_DATABASE.PATCH,
+		token: await getSessionToken(),
+		body: updates,
+	})
 
 const shouldUpdate = (state) => {
 	const lastFetch = state.lastFetch
@@ -231,7 +234,6 @@ export const travellerName = createAsyncThunk(
 				displayName: fullName,
 			})
 
-			localStorage.setItem(SESSION_STORAGE_KEYS.USER_NAME, fullName)
 			dispatch(setTravellerName(fullName))
 			return fullName
 		} catch (error) {
@@ -249,7 +251,6 @@ export const registerTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.REGISTER_TRAVELLER,
 	async (data, { getState, dispatch, rejectWithValue }) => {
 		const userId = selectUserId(getState())
-		const token = selectAuthenticationToken(getState())
 
 		// Every finished upload, so a failed registration can remove the files it left behind
 		const uploadedRefs = []
@@ -280,7 +281,7 @@ export const registerTraveller = createAsyncThunk(
 			}
 
 			try {
-				await saveTrip(token, {
+				await saveTrip({
 					[`travellers/${userId}`]: travellerData,
 					[`publicTrips/${userId}`]: toPublicTrip(travellerData),
 				})
@@ -318,7 +319,6 @@ export const updateTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.UPDATE_TRAVELLER,
 	async (data, { getState, dispatch, rejectWithValue }) => {
 		const userId = selectUserId(getState())
-		const token = selectAuthenticationToken(getState())
 		const keptPhotos = data.keptPhotos ?? []
 		const removedPhotos = data.removedPhotos ?? []
 		const uploadedRefs = []
@@ -355,7 +355,7 @@ export const updateTraveller = createAsyncThunk(
 			}
 
 			try {
-				await saveTrip(token, {
+				await saveTrip({
 					...Object.fromEntries(
 						Object.entries(changes).map(([field, value]) => [
 							`travellers/${userId}/${field}`,
@@ -412,7 +412,7 @@ export const updateTravellers = createAsyncThunk(
 	async (_, { getState, rejectWithValue, dispatch }) => {
 		try {
 			const response = await databaseRequest('/travellers', {
-				token: selectAuthenticationToken(getState()),
+				token: await getSessionToken(),
 			})
 
 			const responseData = await response.json()
@@ -489,12 +489,12 @@ export const updateTravellers = createAsyncThunk(
 
 export const loadTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLER,
-	async (travellerId, { getState, rejectWithValue }) => {
+	async (travellerId, { rejectWithValue }) => {
 		try {
 			const response = await databaseRequest(
 				`/travellers/${travellerId}`,
 				{
-					token: selectAuthenticationToken(getState()),
+					token: await getSessionToken(),
 				},
 			)
 
@@ -542,9 +542,9 @@ const loadOwnName = async (userId, token, dispatch) => {
 
 export const checkIsTraveller = createAsyncThunk(
 	TRAVELLERS_ACTION_TYPES.CHECK_IS_TRAVELLER,
-	async (userId, { getState, dispatch, rejectWithValue }) => {
+	async (userId, { dispatch, rejectWithValue }) => {
 		try {
-			const token = selectAuthenticationToken(getState())
+			const token = await getSessionToken()
 			// shallow avoids downloading the whole record just to test it exists
 			const response = await databaseRequest(`/travellers/${userId}`, {
 				token,
@@ -621,9 +621,7 @@ export const deleteTraveller = createAsyncThunk(
 		{ getState, dispatch, rejectWithValue },
 	) => {
 		try {
-			const token = selectAuthenticationToken(getState())
-
-			await saveTrip(token, {
+			await saveTrip({
 				[`travellers/${travellerId}`]: null,
 				[`publicTrips/${travellerId}`]: null,
 			})

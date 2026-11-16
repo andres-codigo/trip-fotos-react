@@ -25,12 +25,21 @@ const resetLastFetch = createTransform(
 	{ whitelist: ['travellers'] },
 )
 
+// The blacklist only stops saving: a session saved before it was added would still be restored once, over the SDK's own
+const dropSavedSession = async (state) => {
+	if (!state?.authentication) return state
+	const rest = { ...state }
+	delete rest.authentication
+	return rest
+}
+
 const persistConfig = {
 	key: 'root',
 	storage,
-	// Messages are private and fetched fresh on the Messages page, so they must not sit in localStorage
-	blacklist: ['messages'],
+	// Messages are private and fetched fresh on the Messages page, so they must not sit in localStorage; the Auth SDK keeps the session itself
+	blacklist: ['authentication', 'messages'],
 	transforms: [resetLastFetch],
+	migrate: dropSavedSession,
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

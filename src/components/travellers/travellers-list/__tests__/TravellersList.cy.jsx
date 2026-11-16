@@ -43,7 +43,6 @@ const mountList = ({ travellers = {}, props = {} } = {}) => {
 		preloadedState: {
 			authentication: {
 				...authenticationReducer(undefined, { type: '@@init' }),
-				token: 'token',
 				userId: USER_ID,
 			},
 			travellers: {

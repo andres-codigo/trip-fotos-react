@@ -3,13 +3,22 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { API_DATABASE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
 
+import { signOut } from 'firebase/auth'
+
 import { databaseRequest } from './databaseRequest'
+
+vi.mock('firebase/auth', () => ({ signOut: vi.fn(() => Promise.resolve()) }))
+
+vi.mock('@/services/firebase/firebase', () => ({
+	getFirebaseAuth: () => 'mock-auth',
+}))
 
 const BASE = API_DATABASE.BASE_URL
 
 describe('databaseRequest', () => {
 	beforeEach(() => {
 		global.fetch = vi.fn().mockResolvedValue({ ok: true })
+		vi.mocked(signOut).mockClear()
 	})
 
 	it('GETs the path with a .json suffix and the JSON headers by default', async () => {
@@ -101,5 +110,49 @@ describe('databaseRequest', () => {
 		fetch.mockRejectedValueOnce(failure)
 
 		await expect(databaseRequest('/travellers')).rejects.toBe(failure)
+	})
+
+	describe('a refused token', () => {
+		const refused = (error) => ({
+			ok: false,
+			status: 401,
+			json: async () => ({ error }),
+		})
+
+		it('ends the session when the database cannot accept the token', async () => {
+			fetch.mockResolvedValueOnce(refused('Auth token is expired'))
+
+			await expect(
+				databaseRequest('/travellers', { token: 'abc' }),
+			).rejects.toThrow(ERROR_MESSAGES.REQUEST_ERROR)
+			expect(signOut).toHaveBeenCalledWith('mock-auth')
+		})
+
+		it('keeps the session when a rule refuses the request', async () => {
+			fetch.mockResolvedValueOnce(refused(API_DATABASE.PERMISSION_DENIED))
+
+			await expect(
+				databaseRequest('/travellers', { token: 'abc' }),
+			).rejects.toThrow(ERROR_MESSAGES.REQUEST_ERROR)
+			expect(signOut).not.toHaveBeenCalled()
+		})
+
+		it('keeps the session when no token was sent', async () => {
+			fetch.mockResolvedValueOnce(refused('Unauthorized request.'))
+
+			await expect(databaseRequest('/travellers')).rejects.toThrow(
+				ERROR_MESSAGES.REQUEST_ERROR,
+			)
+			expect(signOut).not.toHaveBeenCalled()
+		})
+
+		it('still reports the request error when signing out fails', async () => {
+			fetch.mockResolvedValueOnce(refused('Auth token is expired'))
+			signOut.mockRejectedValueOnce(new Error('offline'))
+
+			await expect(
+				databaseRequest('/travellers', { token: 'abc' }),
+			).rejects.toThrow(ERROR_MESSAGES.REQUEST_ERROR)
+		})
 	})
 })

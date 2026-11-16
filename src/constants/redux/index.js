@@ -23,9 +23,7 @@ const MESSAGES_BASE_ACTIONS = Object.freeze({
 
 const AUTHENTICATION_BASE_ACTIONS = Object.freeze({
 	LOGIN: 'authentication/login',
-	TRY_LOGIN: 'authentication/tryLogin',
 	LOGOUT: 'authentication/logout',
-	AUTO_LOGOUT: 'authentication/autoLogout',
 	SEND_PASSWORD_RESET: 'authentication/sendPasswordReset',
 	RESEND_VERIFICATION: 'authentication/resendVerification',
 	REFRESH_VERIFICATION: 'authentication/refreshVerification',
@@ -84,11 +82,5 @@ export const AUTHENTICATION_ACTION_TYPES = Object.freeze({
 
 	// Async thunk action types
 	LOGIN_ASYNC: createAsyncActionTypes(AUTHENTICATION_BASE_ACTIONS.LOGIN),
-	TRY_LOGIN_ASYNC: createAsyncActionTypes(
-		AUTHENTICATION_BASE_ACTIONS.TRY_LOGIN,
-	),
 	LOGOUT_ASYNC: createAsyncActionTypes(AUTHENTICATION_BASE_ACTIONS.LOGOUT),
-	AUTO_LOGOUT_ASYNC: createAsyncActionTypes(
-		AUTHENTICATION_BASE_ACTIONS.AUTO_LOGOUT,
-	),
 })

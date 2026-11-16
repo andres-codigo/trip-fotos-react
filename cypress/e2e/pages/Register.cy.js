@@ -12,7 +12,7 @@ import { MOCK_TRAVELLERS } from '../../../src/constants/test/mock-data/mock-trav
 
 import { TEST_USERS } from '../../../src/constants/config/users'
 
-import { performLogin } from '../../support/utils/authHelpers'
+import { performLogin, sdkSessionOf } from '../../support/utils/authHelpers'
 import { atPath } from '../../support/utils/waitForSuccess'
 
 const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
@@ -141,10 +141,10 @@ describe('Traveller database rules', () => {
 		cy.window().then((win) =>
 			cy.request({
 				method: API_DATABASE.PUT,
-				url: `${Cypress.expose('VITE_DATABASE_URL')}/travellers/${win.localStorage.getItem('userId')}.json`,
+				url: `${Cypress.expose('VITE_DATABASE_URL')}/travellers/${sdkSessionOf(win).userId}.json`,
 				qs: {
 					ns: Cypress.expose('VITE_DATABASE_NAMESPACE'),
-					auth: win.localStorage.getItem('token'),
+					auth: sdkSessionOf(win).token,
 				},
 				body,
 				failOnStatusCode: false,

@@ -23,7 +23,7 @@ export const firebaseApp = initializeApp(firebaseConfig)
 let firebaseAuth
 
 // Lazy so importing the store doesn't throw auth/invalid-api-key where no Firebase config is set (e.g. CI).
-// localStorage rather than the default IndexedDB keeps the SDK user alongside the app's own session keys, so they are restored and cleared together
+// localStorage rather than the default IndexedDB: the SDK user is the app's only session, and the E2E specs' cy.session restores localStorage but not IndexedDB
 export const getFirebaseAuth = () => {
 	if (!firebaseAuth) {
 		firebaseAuth = initializeAuth(firebaseApp, {

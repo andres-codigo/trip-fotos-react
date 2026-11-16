@@ -10,13 +10,13 @@ import { TRAVELLER_SKELETON, TRAVELLERS_PAGE_SKELETON } from '@/constants/test'
 import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 
-const renderPage = (token = null) => {
+const renderPage = (userId = null) => {
 	const store = configureTestStore({
 		reducer: { authentication: authenticationReducer },
 		preloadedState: {
 			authentication: {
 				...authenticationReducer(undefined, { type: '@@init' }),
-				token,
+				userId,
 			},
 		},
 	})
@@ -56,7 +56,7 @@ describe('TravellersPageSkeleton', () => {
 	})
 
 	it('shows a signed-in user no welcome band and the signed-in card shape', () => {
-		const { container } = renderPage('token')
+		const { container } = renderPage('traveller-uid')
 		expect(
 			container.querySelector('[data-cy="travellers-welcome"]'),
 		).not.toBeInTheDocument()

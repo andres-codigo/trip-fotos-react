@@ -13,16 +13,22 @@ vi.mock('@/components/layout/main-nav/MainNav', () => ({
 		isLoggedIn ? <nav aria-label="Main">places</nav> : null,
 }))
 
-const createMockStore = (token, awaitingVerification = false) => {
+const createMockStore = (
+	userId,
+	awaitingVerification = false,
+	sessionChecked = true,
+) => {
 	return configureTestStore({
 		reducer: {
-			authentication: (state = { token, awaitingVerification }) => state,
+			authentication: (
+				state = { userId, awaitingVerification, sessionChecked },
+			) => state,
 		},
 	})
 }
 
-const renderWithProviders = (token, awaitingVerification) => {
-	const store = createMockStore(token, awaitingVerification)
+const renderWithProviders = (userId, awaitingVerification, sessionChecked) => {
+	const store = createMockStore(userId, awaitingVerification, sessionChecked)
 	return render(
 		<Provider store={store}>
 			<BrowserRouter>
@@ -38,8 +44,8 @@ describe('<Header />', () => {
 	})
 	describe('Behaviour tests', () => {
 		// Travellers is public, so the brand leads there signed in or not
-		it('routes to Travellers when token is falsy', () => {
-			const falsyValues = [null, undefined, '', false, 0]
+		it('routes to Travellers when signed out', () => {
+			const falsyValues = [null, undefined, '']
 
 			falsyValues.forEach((falsyValue) => {
 				const { unmount } = renderWithProviders(falsyValue)
@@ -72,16 +78,24 @@ describe('<Header />', () => {
 			},
 		)
 
-		it('hides Log in once signed in', () => {
-			renderWithProviders('token')
+		it('offers no Log in while a saved session is being restored', () => {
+			renderWithProviders(null, false, false)
 
 			expect(
 				screen.queryByRole('link', { name: 'Log in' }),
 			).not.toBeInTheDocument()
 		})
 
-		it('routes to Travellers when token is truthy', () => {
-			const truthyValues = ['token', 1, true, 'any-string']
+		it('hides Log in once signed in', () => {
+			renderWithProviders('traveller-uid')
+
+			expect(
+				screen.queryByRole('link', { name: 'Log in' }),
+			).not.toBeInTheDocument()
+		})
+
+		it('routes to Travellers when signed in', () => {
+			const truthyValues = ['traveller-uid', 'any-string']
 
 			truthyValues.forEach((truthyValue) => {
 				const { unmount } = renderWithProviders(truthyValue)
@@ -95,7 +109,7 @@ describe('<Header />', () => {
 	})
 
 	it('shows the places once signed in', async () => {
-		renderWithProviders('token')
+		renderWithProviders('traveller-uid')
 
 		expect(
 			await screen.findByRole('navigation', { name: 'Main' }),
@@ -104,7 +118,7 @@ describe('<Header />', () => {
 
 	it('shows no places while a new account is on Check your inbox', async () => {
 		window.history.pushState({}, '', PATHS.AUTHENTICATION)
-		renderWithProviders('token', true)
+		renderWithProviders('traveller-uid', true)
 
 		await screen.findByRole('link', { name: 'Trip Fotos Home' })
 		await new Promise((resolve) => setTimeout(resolve, 0))

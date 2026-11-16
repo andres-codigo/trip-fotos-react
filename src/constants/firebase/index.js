@@ -1,3 +1,7 @@
+// Where the Auth SDK saves its signed-in user (browserLocalPersistence, default app), so the app can start from it before the SDK has confirmed it
+export const savedUserStorageKey = (apiKey) =>
+	`firebase:authUser:${apiKey}:[DEFAULT]`
+
 export const FIREBASE = Object.freeze({
 	// FIREBASE
 	API_KEY: import.meta.env.VITE_FIREBASE_API_KEY,

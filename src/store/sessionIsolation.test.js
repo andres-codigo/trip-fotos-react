@@ -13,14 +13,12 @@ import travellersReducer, {
 } from '@/store/slices/travellersSlice'
 
 const ADMIN_SESSION = {
-	token: 'admin-token',
 	userId: 'admin-uid',
 	userName: 'Admin',
 	userEmail: 'admin@example.com',
 	isAdmin: true,
 }
 const STANDARD_SESSION = {
-	token: 'standard-token',
 	userId: 'standard-uid',
 	userName: 'Standard',
 	userEmail: 'standard@example.com',

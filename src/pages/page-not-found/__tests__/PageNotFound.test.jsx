@@ -30,9 +30,9 @@ describe('PageNotFound', () => {
 		vi.clearAllMocks()
 	})
 
-	const renderAs = (token) => {
+	const renderAs = (userId) => {
 		useSelector.mockImplementation((fn) =>
-			fn({ authentication: { token } }),
+			fn({ authentication: { userId } }),
 		)
 		render(<PageNotFound />)
 		return screen.getByTestId(TEST_IDS.PAGE_NOT_FOUND.ACTION)

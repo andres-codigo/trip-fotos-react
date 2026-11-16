@@ -27,7 +27,7 @@ describe('<Header />', () => {
 
 		describe('Logged in', () => {
 			it('renders correctly for logged in users on mobile, tablet, and desktop', () => {
-				cy.createMockStore('fake-token').then((store) => {
+				cy.createMockStore(true).then((store) => {
 					cy.mountWithProviders(<Header />, store)
 
 					cy.setViewportToMobile()
@@ -59,7 +59,7 @@ describe('<Header />', () => {
 
 		describe('Logged in', () => {
 			it('renders the site title link with the "/travellers" href and label', () => {
-				cy.createMockStore('fake-token').then((store) => {
+				cy.createMockStore(true).then((store) => {
 					cy.mountWithProviders(<Header />, store)
 					cy.get(`${HEADER_SELECTORS.SITE_HEADER_TITLE_LINK} a`)
 						.should('have.attr', 'href', PATHS.TRAVELLERS)
@@ -89,7 +89,7 @@ describe('<Header />', () => {
 
 		describe('Logged in', () => {
 			it('has accessibility labels on header and navigation', () => {
-				cy.createMockStore('fake-token').then((store) => {
+				cy.createMockStore(true).then((store) => {
 					cy.mountWithProviders(<Header />, store)
 
 					cy.get(HEADER_SELECTORS.SITE_HEADER)
