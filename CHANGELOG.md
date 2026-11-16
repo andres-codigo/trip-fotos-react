@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.30.0...v0.31.0) (2026-11-16)
+
+
+### Features
+
+* change account email with verification ([#802](https://github.com/andres-codigo/trip-fotos-react/issues/802)) ([be59537](https://github.com/andres-codigo/trip-fotos-react/commit/be5953765d7918ec5ab2f347be07c36dbde35727))
+
 ## [0.30.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.29.0...v0.30.0) (2026-11-16)
 
 
