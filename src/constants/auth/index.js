@@ -166,3 +166,29 @@ export const AUTH_ACTION_CONFIG = Object.freeze({
 	SAVING: 'Saving…',
 	RESET_PASSWORD: 'Reset your password',
 })
+
+export const ACCOUNT_SETTINGS_CONFIG = Object.freeze({
+	PAGE_TITLE: 'Account settings',
+	TITLE: 'Account settings',
+	EMAIL_HEADING: 'Email',
+	VERIFY_TEXT: 'Verify your email to register a trip and message travellers.',
+	PASSWORD_HEADING: 'Password',
+	PASSWORD_HELP: 'Use at least 6 characters.',
+	CHANGE_PASSWORD: 'Change password',
+	PASSWORD_CHANGED: 'Your password has been changed.',
+})
+
+export const VERIFIED_CHIP_CONFIG = Object.freeze({
+	VERIFIED: 'Verified',
+	NOT_VERIFIED: 'Not verified',
+})
+
+export const CHANGE_PASSWORD_CONFIG = Object.freeze({
+	TITLE: 'Change password',
+	CURRENT_PASSWORD_LABEL: 'Current password',
+	NEW_PASSWORD_LABEL: 'New password',
+	CANCEL: 'Cancel',
+	SAVE_PASSWORD: 'Save password',
+	SAVING: 'Saving…',
+	CURRENT_REQUIRED: 'Enter your current password.',
+})

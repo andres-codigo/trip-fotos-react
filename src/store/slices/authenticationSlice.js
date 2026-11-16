@@ -4,11 +4,14 @@ import {
 	confirmPasswordReset as confirmFirebasePasswordReset,
 	createUserWithEmailAndPassword,
 	deleteUser,
+	EmailAuthProvider,
 	onIdTokenChanged,
+	reauthenticateWithCredential,
 	sendEmailVerification,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	signOut,
+	updatePassword,
 	verifyPasswordResetCode,
 } from 'firebase/auth'
 
@@ -22,6 +25,7 @@ import {
 	FIREBASE_ERRORS,
 } from '@/constants/auth'
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
 import { FIREBASE, savedUserStorageKey } from '@/constants/firebase'
 import { PATHS } from '@/constants/ui'
 
@@ -301,6 +305,37 @@ export const sendPasswordReset = createAsyncThunk(
 				error.code === 'auth/too-many-requests'
 					? ERROR_MESSAGES.TOO_MANY_LOGIN_ATTEMPTS
 					: ERROR_MESSAGES.PASSWORD_RESET_FAILED,
+			)
+		}
+	},
+)
+
+const CHANGE_PASSWORD_ERRORS = {
+	'auth/invalid-credential': ERROR_MESSAGES.WRONG_CURRENT_PASSWORD,
+	'auth/wrong-password': ERROR_MESSAGES.WRONG_CURRENT_PASSWORD,
+	'auth/weak-password': VALIDATION_MESSAGES.PASSWORD_TOO_SHORT,
+	'auth/too-many-requests': ERROR_MESSAGES.TOO_MANY_ATTEMPTS,
+}
+
+export const changePassword = createAsyncThunk(
+	AUTHENTICATION_ACTION_TYPES.CHANGE_PASSWORD,
+	async ({ currentPassword, newPassword }, { rejectWithValue }) => {
+		try {
+			const auth = getFirebaseAuth()
+			await auth.authStateReady()
+			const user = auth.currentUser
+
+			await reauthenticateWithCredential(
+				user,
+				EmailAuthProvider.credential(user.email, currentPassword),
+			)
+			await updatePassword(user, newPassword)
+			// A new password revokes the old refresh token; the fresh one keeps this device signed in
+			await user.getIdToken(true)
+		} catch (error) {
+			return rejectWithValue(
+				CHANGE_PASSWORD_ERRORS[error?.code] ??
+					ERROR_MESSAGES.PASSWORD_CHANGE_FAILED,
 			)
 		}
 	},

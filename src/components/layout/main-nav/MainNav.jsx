@@ -5,6 +5,10 @@ import PropTypes from 'prop-types'
 import { NAVIGATION } from '@/constants/ui'
 
 import {
+	selectEmailVerified,
+	selectUserEmail,
+} from '@/store/slices/authenticationSlice'
+import {
 	loadConversations,
 	selectUnreadConversationsCount,
 } from '@/store/slices/messagesSlice'
@@ -31,6 +35,8 @@ function MainNav({
 	)
 	const isTraveller = isTravellerProp ?? isTravellerFromStore
 	const unreadMessages = useSelector(selectUnreadConversationsCount)
+	const email = useSelector(selectUserEmail)
+	const emailVerified = useSelector(selectEmailVerified)
 	const navItems = usePrimaryNavItems({ isTraveller })
 
 	const [travellerName, setTravellerName] = useLoggedInTravellerName()
@@ -89,6 +95,8 @@ function MainNav({
 			</nav>
 			<AccountMenu
 				name={travellerName}
+				email={email ?? ''}
+				emailVerified={emailVerified}
 				onLogOut={handleLogOut}
 			/>
 		</div>

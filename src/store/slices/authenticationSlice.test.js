@@ -6,6 +6,7 @@ import { MOCK_KEYS, MOCK_USER, MOCK_ERROR_MESSAGES } from '@/constants/test'
 
 import { API_ERROR_MESSAGE } from '@/constants/api'
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { VALIDATION_MESSAGES } from '@/constants/validation'
 import { PATHS } from '@/constants/ui'
 
 import authenticationReducer, {
@@ -17,6 +18,7 @@ import authenticationReducer, {
 	applyEmailVerification,
 	checkPasswordResetCode,
 	confirmPasswordReset,
+	changePassword,
 	logout,
 	watchSession,
 	getSessionToken,
@@ -34,11 +36,14 @@ import {
 	confirmPasswordReset as confirmFirebasePasswordReset,
 	createUserWithEmailAndPassword,
 	deleteUser,
+	EmailAuthProvider,
 	onIdTokenChanged,
+	reauthenticateWithCredential,
 	sendEmailVerification,
 	sendPasswordResetEmail,
 	signInWithEmailAndPassword,
 	signOut,
+	updatePassword,
 	verifyPasswordResetCode,
 } from 'firebase/auth'
 
@@ -49,6 +54,11 @@ vi.mock('firebase/auth', () => ({
 	confirmPasswordReset: vi.fn(),
 	createUserWithEmailAndPassword: vi.fn(),
 	deleteUser: vi.fn(),
+	EmailAuthProvider: {
+		credential: vi.fn((email, password) => ({ email, password })),
+	},
+	reauthenticateWithCredential: vi.fn(),
+	updatePassword: vi.fn(),
 	onIdTokenChanged: vi.fn(() => () => {}),
 	sendEmailVerification: vi.fn(() => Promise.resolve()),
 	verifyPasswordResetCode: vi.fn(),
@@ -854,6 +864,73 @@ describe('authenticationSlice', () => {
 				expect(result.payload).toBe(message)
 			},
 		)
+	})
+
+	describe('changePassword', () => {
+		const passwords = {
+			currentPassword: 'old-secret',
+			newPassword: 'new-secret',
+		}
+		let user
+
+		beforeEach(() => {
+			user = {
+				email: MOCK_KEYS.EMAIL,
+				getIdToken: vi.fn(() => Promise.resolve('fresh-token')),
+			}
+			firebaseAuth.currentUser = user
+			return () => {
+				firebaseAuth.currentUser = null
+			}
+		})
+
+		it('re-authenticates with the current password, saves the new one and refreshes the token', async () => {
+			reauthenticateWithCredential.mockResolvedValueOnce()
+			updatePassword.mockResolvedValueOnce()
+
+			const result = await store.dispatch(changePassword(passwords))
+
+			expect(result.type).toBe(changePassword.fulfilled.type)
+			expect(EmailAuthProvider.credential).toHaveBeenCalledWith(
+				MOCK_KEYS.EMAIL,
+				'old-secret',
+			)
+			expect(reauthenticateWithCredential).toHaveBeenCalledWith(user, {
+				email: MOCK_KEYS.EMAIL,
+				password: 'old-secret',
+			})
+			expect(updatePassword).toHaveBeenCalledWith(user, 'new-secret')
+			expect(user.getIdToken).toHaveBeenCalledWith(true)
+		})
+
+		it.each([
+			['auth/invalid-credential', ERROR_MESSAGES.WRONG_CURRENT_PASSWORD],
+			['auth/wrong-password', ERROR_MESSAGES.WRONG_CURRENT_PASSWORD],
+			['auth/too-many-requests', ERROR_MESSAGES.TOO_MANY_ATTEMPTS],
+			[
+				'auth/network-request-failed',
+				ERROR_MESSAGES.PASSWORD_CHANGE_FAILED,
+			],
+		])(
+			'rejects a %s re-authentication with its message and keeps the password',
+			async (code, message) => {
+				reauthenticateWithCredential.mockRejectedValueOnce({ code })
+
+				const result = await store.dispatch(changePassword(passwords))
+
+				expect(result.payload).toBe(message)
+				expect(updatePassword).not.toHaveBeenCalled()
+			},
+		)
+
+		it('rejects a weak new password with the length message', async () => {
+			reauthenticateWithCredential.mockResolvedValueOnce()
+			updatePassword.mockRejectedValueOnce({ code: 'auth/weak-password' })
+
+			const result = await store.dispatch(changePassword(passwords))
+
+			expect(result.payload).toBe(VALIDATION_MESSAGES.PASSWORD_TOO_SHORT)
+		})
 	})
 
 	describe('email verification', () => {

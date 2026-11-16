@@ -11,6 +11,7 @@ import {
 	ACCOUNT_MENU,
 	AVATAR,
 	BADGE,
+	CHANGE_PASSWORD_FORM,
 	COMBOBOX,
 	INPUT,
 	FILE_DROP,
@@ -30,6 +31,7 @@ import {
 	PASSWORD_RESET_FORM,
 	NEW_PASSWORD_FORM,
 	AUTH_ACTION_PAGE,
+	ACCOUNT_PAGE,
 	VERIFY_EMAIL_INBOX,
 	VERIFY_EMAIL_NOTE,
 	VERIFY_EMAIL_STRIP,
@@ -52,6 +54,7 @@ import {
 	TRAVELLERS_WELCOME,
 	TRAVELLER_ITEM,
 	TRAVELLER_SKELETON,
+	VERIFIED_CHIP,
 	YOU_TAG,
 } from '../ui-constants'
 
@@ -96,6 +99,8 @@ export const ACCOUNT_MENU_SELECTORS = {
 	BUTTON: getByDataCy(ACCOUNT_MENU.BUTTON),
 	PANEL: getByDataCy(ACCOUNT_MENU.PANEL),
 	SIGNED_IN_AS: getByDataCy(ACCOUNT_MENU.SIGNED_IN_AS),
+	EMAIL: getByDataCy(ACCOUNT_MENU.EMAIL),
+	ACCOUNT_SETTINGS: getByDataCy(ACCOUNT_MENU.ACCOUNT_SETTINGS),
 	LOG_OUT: getByDataCy(ACCOUNT_MENU.LOG_OUT),
 }
 
@@ -446,8 +451,23 @@ export const NEW_PASSWORD_FORM_SELECTORS = Object.fromEntries(
 	]),
 )
 
+export const CHANGE_PASSWORD_FORM_SELECTORS = Object.fromEntries(
+	Object.entries(CHANGE_PASSWORD_FORM).map(([key, id]) => [
+		key,
+		key.endsWith('_ERROR') ? getByDataCyError(id) : getByDataCy(id),
+	]),
+)
+
+export const VERIFIED_CHIP_SELECTORS = Object.fromEntries(
+	Object.entries(VERIFIED_CHIP).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
 export const AUTH_ACTION_PAGE_SELECTORS = Object.fromEntries(
 	Object.entries(AUTH_ACTION_PAGE).map(([key, id]) => [key, getByDataCy(id)]),
+)
+
+export const ACCOUNT_PAGE_SELECTORS = Object.fromEntries(
+	Object.entries(ACCOUNT_PAGE).map(([key, id]) => [key, getByDataCy(id)]),
 )
 
 export const VERIFY_EMAIL_INBOX_SELECTORS = Object.fromEntries(

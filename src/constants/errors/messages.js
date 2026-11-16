@@ -27,6 +27,10 @@ export const ERROR_MESSAGES = Object.freeze({
 		'We could not check your email. Check your connection and try again.',
 	START_AGAIN_FAILED:
 		'We could not start again. Check your connection and try again.',
+	WRONG_CURRENT_PASSWORD: 'That password is not right. Try again.',
+	TOO_MANY_ATTEMPTS: 'Too many attempts. Wait a few minutes and try again.',
+	PASSWORD_CHANGE_FAILED:
+		'Your password was not changed. Check your connection and try again.',
 
 	// Traveller-specific errors
 	FAILED_TO_REGISTER_TRAVELLER:

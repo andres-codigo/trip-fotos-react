@@ -1,11 +1,14 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
 import { ACCOUNT_MENU } from '@/constants/test'
-import { NAVIGATION } from '@/constants/ui'
+import { NAVIGATION, PATHS } from '@/constants/ui'
 
 import { cn } from '@/utils/cn'
 import { getInitials } from '@/utils/getInitials'
+
+import VerifiedChip from '@/components/ui/verified-chip/VerifiedChip'
 
 const iconProps = {
 	'aria-hidden': true,
@@ -19,7 +22,16 @@ const iconProps = {
 
 const getWords = (name) => name.trim().split(/\s+/).filter(Boolean)
 
-function AccountMenu({ name, onLogOut, className }) {
+const itemClasses =
+	'flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-sm border-0 bg-transparent px-3 text-left font-sans text-base text-text no-underline hover:bg-surface-accent hover:text-accent-text focus-visible:-outline-offset-3'
+
+function AccountMenu({
+	name,
+	email = '',
+	emailVerified = true,
+	onLogOut,
+	className,
+}) {
 	const [isOpen, setIsOpen] = useState(false)
 	const rootRef = useRef(null)
 	const buttonRef = useRef(null)
@@ -102,21 +114,53 @@ function AccountMenu({ name, onLogOut, className }) {
 					id={panelId}
 					className="absolute top-[calc(100%+0.5rem)] right-0 z-10 flex w-64 flex-col gap-1 rounded-md border border-solid border-border-card bg-surface p-2 text-text shadow-overlay"
 					data-cy={ACCOUNT_MENU.PANEL}>
-					{hasName && (
+					{(hasName || email) && (
 						<div
 							className="border-0 border-b border-solid border-border px-3 pt-1 pb-3"
 							data-cy={ACCOUNT_MENU.SIGNED_IN_AS}>
 							<p className="m-0 text-sm text-text-muted">
 								{NAVIGATION.SIGNED_IN_AS}
 							</p>
-							<p className="m-0 font-medium break-words text-text">
-								{name.trim()}
-							</p>
+							{hasName && (
+								<p className="m-0 font-medium break-words text-text">
+									{name.trim()}
+								</p>
+							)}
+							{email && (
+								<p
+									className="m-0 text-sm wrap-anywhere text-text-muted"
+									data-cy={ACCOUNT_MENU.EMAIL}>
+									{email}
+								</p>
+							)}
+							{!emailVerified && (
+								<VerifiedChip
+									verified={false}
+									className="mt-1.5"
+								/>
+							)}
 						</div>
 					)}
+					<Link
+						to={PATHS.ACCOUNT}
+						className={itemClasses}
+						data-cy={ACCOUNT_MENU.ACCOUNT_SETTINGS}
+						onClick={() => setIsOpen(false)}>
+						<svg
+							{...iconProps}
+							className="size-5 shrink-0">
+							<circle
+								cx="12"
+								cy="12"
+								r="3"
+							/>
+							<path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+						</svg>
+						{NAVIGATION.ACCOUNT_SETTINGS}
+					</Link>
 					<button
 						type="button"
-						className="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-sm border-0 bg-transparent px-3 text-left font-sans text-base text-text hover:bg-surface-accent hover:text-accent-text focus-visible:-outline-offset-3"
+						className={itemClasses}
 						data-cy={ACCOUNT_MENU.LOG_OUT}
 						onClick={handleLogOut}>
 						<svg
@@ -136,6 +180,8 @@ function AccountMenu({ name, onLogOut, className }) {
 
 AccountMenu.propTypes = {
 	name: PropTypes.string.isRequired,
+	email: PropTypes.string,
+	emailVerified: PropTypes.bool,
 	onLogOut: PropTypes.func.isRequired,
 	className: PropTypes.string,
 }

@@ -15,6 +15,7 @@ export const PATHS = Object.freeze({
 	MESSAGES: '/messages',
 	MESSAGE_THREAD: '/messages/:conversationId',
 	PRIVACY: '/privacy',
+	ACCOUNT: '/account',
 	PAGE_NOT_FOUND: '/404',
 	// TEST PATHS
 	NON_EXISTENT_PATH: '/cy-non-existent-route',

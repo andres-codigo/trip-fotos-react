@@ -12,6 +12,12 @@ const AREAS = {
 		'src/pages/auth-action/',
 		'src/store/slices/authenticationSlice.js',
 	],
+	account: [
+		'src/pages/account/',
+		'src/components/forms/change-password/',
+		'src/components/ui/verified-chip/',
+		'src/store/slices/authenticationSlice.js',
+	],
 	privacy: ['src/pages/privacy/'],
 	notFound: ['src/pages/page-not-found/'],
 	travellers: ['src/pages/travellers/', 'src/components/travellers/'],
@@ -86,6 +92,10 @@ export const CAPTURES = {
 	'verify-gate': {
 		title: 'captures the verify strip in every state and the notes in place of Register, Edit trip and the reply box for an unverified account',
 		areas: ['verifyGate', 'authentication', 'register', 'edit', 'messages'],
+	},
+	'account-settings': {
+		title: 'captures Account settings verified and not, sending the link, the account menu unverified, and the change password form open, invalid, refused, saving and saved',
+		areas: ['account'],
 	},
 	'auth-action': {
 		title: 'captures the email-link page: verified, already verified, expired, invalid, network, loading and the password reset states',
@@ -229,6 +239,7 @@ export const E2E_SPECS = {
 		'detail',
 		'privacy',
 	],
+	'cypress/e2e/pages/Account.cy.js': ['account', 'header'],
 	'cypress/e2e/pages/Authentication.cy.js': ['authentication'],
 	'cypress/e2e/pages/ContactTraveller.cy.js': ['messages', 'detail'],
 	'cypress/e2e/pages/EditTrip.cy.js': ['edit', 'detail', 'trips'],
