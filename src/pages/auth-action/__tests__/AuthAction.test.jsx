@@ -17,6 +17,7 @@ import AuthAction from '@/pages/auth-action/AuthAction'
 
 const thunks = vi.hoisted(() => ({
 	apply: vi.fn(),
+	applyChange: vi.fn(),
 	check: vi.fn(),
 	confirm: vi.fn(),
 	resend: vi.fn(),
@@ -37,6 +38,10 @@ vi.mock('@/store/slices/authenticationSlice', async (importOriginal) => {
 		applyEmailVerification: createAsyncThunk(
 			'test/applyEmailVerification',
 			settle(thunks.apply),
+		),
+		applyEmailChange: createAsyncThunk(
+			'test/applyEmailChange',
+			settle(thunks.applyChange),
 		),
 		checkPasswordResetCode: createAsyncThunk(
 			'test/checkPasswordResetCode',
@@ -102,6 +107,9 @@ const renderPage = ({ search, strict = false, ...state } = {}) => {
 
 const verifyLink = `?mode=verifyEmail&oobCode=${CODE}`
 const resetLink = `?mode=resetPassword&oobCode=${CODE}`
+const changeLink = `?mode=verifyAndChangeEmail&oobCode=${CODE}`
+const recoverLink = `?mode=recoverEmail&oobCode=${CODE}`
+const NEW_EMAIL = 'ada.new@example.org'
 
 const findHeading = (name) => screen.findByRole('heading', { level: 1, name })
 const getLink = (name) => screen.getByRole('link', { name })
@@ -142,7 +150,7 @@ describe('<AuthAction />', () => {
 		it.each([
 			['no code', '?mode=verifyEmail'],
 			['no mode', `?oobCode=${CODE}`],
-			['an unknown mode', `?mode=recoverEmail&oobCode=${CODE}`],
+			['an unknown mode', `?mode=signIn&oobCode=${CODE}`],
 		])(
 			'shows the invalid card for %s without calling Firebase',
 			(_, search) => {
@@ -533,6 +541,87 @@ describe('<AuthAction />', () => {
 				code: CODE,
 				password: PASSWORD,
 			})
+		})
+	})
+
+	describe('verifyAndChangeEmail', () => {
+		it('says the email has changed and asks to log in with the new address', async () => {
+			thunks.applyChange.mockResolvedValue(NEW_EMAIL)
+			renderPage({ search: changeLink, signedIn: true })
+
+			const heading = await findHeading(
+				AUTH_ACTION_CONFIG.EMAIL_CHANGED_TITLE,
+			)
+			await waitFor(() => expect(heading).toHaveFocus())
+			expect(thunks.applyChange).toHaveBeenCalledWith(CODE)
+			expect(heading.parentElement).toHaveTextContent(
+				`${AUTH_ACTION_CONFIG.EMAIL_CHANGED_PREFIX} ${NEW_EMAIL}${AUTH_ACTION_CONFIG.EMAIL_CHANGED_SUFFIX}`,
+			)
+			expect(getLink(AUTH_ACTION_CONFIG.LOG_IN)).toHaveAttribute(
+				'href',
+				PATHS.AUTHENTICATION,
+			)
+		})
+
+		it('applies the code once under StrictMode', async () => {
+			thunks.applyChange.mockResolvedValue(NEW_EMAIL)
+			renderPage({ search: changeLink, strict: true })
+
+			await findHeading(AUTH_ACTION_CONFIG.EMAIL_CHANGED_TITLE)
+			expect(thunks.applyChange).toHaveBeenCalledTimes(1)
+		})
+
+		it.each([ACTION_CODE_ERRORS.EXPIRED, ACTION_CODE_ERRORS.INVALID])(
+			'shows the invalid card for a %s link, with no new link to send',
+			async (reason) => {
+				thunks.applyChange.mockResolvedValue(reject(reason))
+				renderPage({ search: changeLink, signedIn: true })
+
+				await findHeading(AUTH_ACTION_CONFIG.INVALID_TITLE)
+				expect(
+					screen.queryByRole('button', {
+						name: AUTH_ACTION_CONFIG.SEND_NEW_LINK,
+					}),
+				).not.toBeInTheDocument()
+			},
+		)
+
+		it('checks the link again on Try again after a network failure', async () => {
+			thunks.applyChange
+				.mockResolvedValueOnce(reject(ACTION_CODE_ERRORS.NETWORK))
+				.mockResolvedValueOnce(NEW_EMAIL)
+			renderPage({ search: changeLink })
+
+			await findHeading(AUTH_ACTION_CONFIG.NETWORK_TITLE)
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: AUTH_ACTION_CONFIG.TRY_AGAIN,
+				}),
+			)
+			await findHeading(AUTH_ACTION_CONFIG.EMAIL_CHANGED_TITLE)
+			expect(thunks.applyChange).toHaveBeenCalledTimes(2)
+		})
+	})
+
+	describe('recoverEmail', () => {
+		it('says the email is back and offers Log in and Reset your password', async () => {
+			thunks.applyChange.mockResolvedValue(EMAIL)
+			renderPage({ search: recoverLink })
+
+			const heading = await findHeading(
+				AUTH_ACTION_CONFIG.EMAIL_RECOVERED_TITLE,
+			)
+			expect(heading.parentElement).toHaveTextContent(
+				`${AUTH_ACTION_CONFIG.EMAIL_RECOVERED_PREFIX} ${EMAIL}${AUTH_ACTION_CONFIG.EMAIL_RECOVERED_SUFFIX}`,
+			)
+			expect(getLink(AUTH_ACTION_CONFIG.LOG_IN)).toHaveAttribute(
+				'href',
+				PATHS.AUTHENTICATION,
+			)
+			expect(getLink(AUTH_ACTION_CONFIG.RESET_PASSWORD)).toHaveAttribute(
+				'href',
+				`${PATHS.AUTHENTICATION}?mode=reset`,
+			)
 		})
 	})
 })

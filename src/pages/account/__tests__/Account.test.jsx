@@ -6,6 +6,7 @@ import configureTestStore from '@/testUtils/configureTestStore'
 
 import {
 	ACCOUNT_SETTINGS_CONFIG,
+	CHANGE_EMAIL_CONFIG,
 	CHANGE_PASSWORD_CONFIG,
 	VERIFIED_CHIP_CONFIG,
 	VERIFY_EMAIL_PROMPT_CONFIG,
@@ -20,6 +21,8 @@ import Account from '@/pages/account/Account'
 
 const thunks = vi.hoisted(() => ({
 	changePassword: vi.fn(),
+	changeEmail: vi.fn(),
+	resendChange: vi.fn(),
 	resend: vi.fn(),
 }))
 
@@ -39,6 +42,14 @@ vi.mock('@/store/slices/authenticationSlice', async (importOriginal) => {
 			'test/changePassword',
 			settle(thunks.changePassword),
 		),
+		changeEmail: createAsyncThunk(
+			'test/changeEmail',
+			settle(thunks.changeEmail),
+		),
+		resendEmailChange: createAsyncThunk(
+			'test/resendEmailChange',
+			settle(thunks.resendChange),
+		),
 		resendVerification: createAsyncThunk(
 			'test/resendVerification',
 			settle(thunks.resend),
@@ -49,6 +60,7 @@ vi.mock('@/store/slices/authenticationSlice', async (importOriginal) => {
 const EMAIL = 'ada@example.com'
 const CURRENT = 'old-secret'
 const NEW = 'new-secret'
+const NEW_EMAIL = 'ada.new@example.org'
 
 const renderPage = ({ emailVerified = true } = {}) => {
 	const reducer = {
@@ -97,10 +109,24 @@ const fillAndSave = () => {
 	)
 }
 
+const changeEmailButton = () =>
+	screen.getByRole('button', { name: ACCOUNT_SETTINGS_CONFIG.CHANGE_EMAIL })
+
+const fillAndSend = () => {
+	fireEvent.change(field(CHANGE_EMAIL_CONFIG.NEW_EMAIL_LABEL), {
+		target: { value: NEW_EMAIL },
+	})
+	fireEvent.change(field(CHANGE_EMAIL_CONFIG.CURRENT_PASSWORD_LABEL), {
+		target: { value: CURRENT },
+	})
+	fireEvent.click(
+		screen.getByRole('button', { name: CHANGE_EMAIL_CONFIG.SEND_LINK }),
+	)
+}
+
 describe('Account', () => {
 	beforeEach(() => {
-		thunks.changePassword.mockReset()
-		thunks.resend.mockReset()
+		Object.values(thunks).forEach((fn) => fn.mockReset())
 	})
 
 	describe('Rendering tests', () => {
@@ -230,6 +256,149 @@ describe('Account', () => {
 				await screen.findByText(ERROR_MESSAGES.WRONG_CURRENT_PASSWORD),
 			).toBeInTheDocument()
 			expect(screen.queryByRole('status')).not.toBeInTheDocument()
+		})
+	})
+
+	describe('Change email', () => {
+		it('opens the form in place with focus in New email, and Cancel returns focus', async () => {
+			renderPage()
+
+			fireEvent.click(changeEmailButton())
+			await waitFor(() =>
+				expect(
+					field(CHANGE_EMAIL_CONFIG.NEW_EMAIL_LABEL),
+				).toHaveFocus(),
+			)
+
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: CHANGE_EMAIL_CONFIG.CANCEL,
+				}),
+			)
+			await waitFor(() => expect(changeEmailButton()).toHaveFocus())
+		})
+
+		it('keeps one form open at a time', () => {
+			renderPage()
+
+			fireEvent.click(changeEmailButton())
+			fireEvent.click(changePasswordButton())
+
+			expect(
+				screen.queryByLabelText(
+					new RegExp(`^${CHANGE_EMAIL_CONFIG.NEW_EMAIL_LABEL}`),
+				),
+			).not.toBeInTheDocument()
+			expect(changeEmailButton()).toBeInTheDocument()
+
+			fireEvent.click(changeEmailButton())
+			expect(
+				screen.queryByLabelText(
+					new RegExp(`^${CHANGE_PASSWORD_CONFIG.NEW_PASSWORD_LABEL}`),
+				),
+			).not.toBeInTheDocument()
+		})
+
+		it('sends the link, closes the form and names both addresses', async () => {
+			thunks.changeEmail.mockResolvedValueOnce(NEW_EMAIL)
+			renderPage()
+
+			fireEvent.click(changeEmailButton())
+			fillAndSend()
+
+			const status = await screen.findByRole('status')
+			expect(status).toHaveTextContent(
+				`${ACCOUNT_SETTINGS_CONFIG.EMAIL_SENT_PREFIX} ${NEW_EMAIL}${ACCOUNT_SETTINGS_CONFIG.EMAIL_SENT_SUFFIX(EMAIL)}`,
+			)
+			await waitFor(() => expect(status).toHaveFocus())
+			expect(thunks.changeEmail).toHaveBeenCalledWith({
+				newEmail: NEW_EMAIL,
+				currentPassword: CURRENT,
+			})
+			expect(screen.getByText(EMAIL)).toBeInTheDocument()
+		})
+
+		it('keeps the form open on a wrong current password', async () => {
+			thunks.changeEmail.mockResolvedValueOnce({
+				rejected: true,
+				reason: ERROR_MESSAGES.WRONG_CURRENT_PASSWORD,
+			})
+			renderPage()
+
+			fireEvent.click(changeEmailButton())
+			fillAndSend()
+
+			expect(
+				await screen.findByText(ERROR_MESSAGES.WRONG_CURRENT_PASSWORD),
+			).toBeInTheDocument()
+			expect(screen.queryByRole('status')).not.toBeInTheDocument()
+		})
+
+		it('sends the link again to the new address, then waits before offering it again', async () => {
+			thunks.changeEmail.mockResolvedValueOnce(NEW_EMAIL)
+			thunks.resendChange.mockResolvedValueOnce(NEW_EMAIL)
+			renderPage()
+			fireEvent.click(changeEmailButton())
+			fillAndSend()
+
+			fireEvent.click(
+				await screen.findByRole('button', { name: /send it again/ }),
+			)
+
+			await waitFor(() =>
+				expect(
+					screen.queryByRole('button', { name: /send it again/ }),
+				).not.toBeInTheDocument(),
+			)
+			expect(thunks.resendChange).toHaveBeenCalledWith(NEW_EMAIL)
+		})
+
+		it('shows why the link could not be sent again', async () => {
+			thunks.changeEmail.mockResolvedValueOnce(NEW_EMAIL)
+			thunks.resendChange.mockResolvedValueOnce({
+				rejected: true,
+				reason: ERROR_MESSAGES.TOO_MANY_EMAILS,
+			})
+			renderPage()
+			fireEvent.click(changeEmailButton())
+			fillAndSend()
+
+			fireEvent.click(
+				await screen.findByRole('button', { name: /send it again/ }),
+			)
+
+			expect(
+				await screen.findByText(ERROR_MESSAGES.TOO_MANY_EMAILS),
+			).toBeInTheDocument()
+		})
+
+		it('reopens the form with the new address when Firebase asks for the password again', async () => {
+			thunks.changeEmail.mockResolvedValueOnce(NEW_EMAIL)
+			thunks.resendChange.mockResolvedValueOnce({
+				rejected: true,
+				reason: ERROR_MESSAGES.EMAIL_CHANGE_SIGN_IN_AGAIN,
+			})
+			renderPage()
+			fireEvent.click(changeEmailButton())
+			fillAndSend()
+
+			fireEvent.click(
+				await screen.findByRole('button', { name: /send it again/ }),
+			)
+
+			expect(
+				await screen.findByText(
+					ERROR_MESSAGES.EMAIL_CHANGE_SIGN_IN_AGAIN,
+				),
+			).toBeInTheDocument()
+			expect(field(CHANGE_EMAIL_CONFIG.NEW_EMAIL_LABEL)).toHaveValue(
+				NEW_EMAIL,
+			)
+			await waitFor(() =>
+				expect(
+					field(CHANGE_EMAIL_CONFIG.CURRENT_PASSWORD_LABEL),
+				).toHaveFocus(),
+			)
 		})
 	})
 })

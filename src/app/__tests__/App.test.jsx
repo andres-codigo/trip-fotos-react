@@ -674,6 +674,28 @@ describe('App', () => {
 			})
 		})
 
+		// The action page signs out itself after an email change and offers its own Log in
+		it('keeps the email-link page when its link ends the session', async () => {
+			setAuthState({ userId: 'user-1' })
+			vi.spyOn(router, 'useLocation').mockReturnValue({
+				pathname: PATHS.AUTH_ACTION,
+			})
+
+			const { rerender } = renderWithRoute(PATHS.AUTH_ACTION)
+
+			setAuthState()
+			rerender(
+				<router.MemoryRouter initialEntries={[PATHS.AUTH_ACTION]}>
+					<App />
+				</router.MemoryRouter>,
+			)
+
+			await waitFor(() => {
+				expect(screen.getByText('AuthActionPage')).toBeInTheDocument()
+			})
+			expect(navigateMock).not.toHaveBeenCalled()
+		})
+
 		it('does not send a visitor who was never signed in to /authentication', async () => {
 			setAuthState()
 			vi.spyOn(router, 'useLocation').mockReturnValue({

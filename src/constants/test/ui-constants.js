@@ -394,6 +394,18 @@ export const CHANGE_PASSWORD_FORM = Object.freeze({
 	ALERT: 'change-password-alert',
 })
 
+export const CHANGE_EMAIL_FORM = Object.freeze({
+	ROOT: 'change-email-form',
+	TITLE: 'change-email-title',
+	NEW_EMAIL_INPUT: 'change-email-new-input',
+	NEW_EMAIL_ERROR: 'change-email-new-error',
+	CURRENT_PASSWORD_INPUT: 'change-email-current-input',
+	CURRENT_PASSWORD_ERROR: 'change-email-current-error',
+	CANCEL: 'change-email-cancel',
+	SEND_LINK: 'change-email-send-link',
+	ALERT: 'change-email-alert',
+})
+
 export const NEW_PASSWORD_FORM = Object.freeze({
 	ROOT: 'new-password-form',
 	TITLE: 'new-password-title',
@@ -416,6 +428,7 @@ export const AUTH_ACTION_PAGE = Object.freeze({
 	SEND_NEW_LINK: 'auth-action-send-new-link',
 	TRY_AGAIN: 'auth-action-try-again',
 	RESET_PASSWORD: 'auth-action-reset-password',
+	EMAIL: 'auth-action-email',
 })
 
 export const ACCOUNT_PAGE = Object.freeze({
@@ -427,6 +440,11 @@ export const ACCOUNT_PAGE = Object.freeze({
 	PASSWORD_SECTION: 'account-password-section',
 	CHANGE_PASSWORD: 'account-change-password',
 	PASSWORD_CHANGED: 'account-password-changed',
+	CHANGE_EMAIL: 'account-change-email',
+	EMAIL_SENT: 'account-email-sent',
+	EMAIL_SENT_HINT: 'account-email-sent-hint',
+	EMAIL_SEND_AGAIN: 'account-email-send-again',
+	EMAIL_SENT_ERROR: 'account-email-sent-error',
 })
 
 export const VERIFY_EMAIL_INBOX = Object.freeze({

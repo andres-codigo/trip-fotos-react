@@ -166,7 +166,7 @@ function AppRoutes() {
 
 	useEffect(prefetchNavPages, [])
 
-	// A session that ends without the Log out button (revoked, refused by the database, or logged out in another tab) still lands on the login page; a protected page is handled below, with its redirect back
+	// A session that ends without the Log out button (revoked, refused by the database, or logged out in another tab) still lands on the login page; a protected page is handled below, with its redirect back. The action page signs out itself after an email change and offers its own Log in
 	useEffect(() => {
 		if (userId) {
 			hadSession.current = true
@@ -177,6 +177,7 @@ function AppRoutes() {
 
 		if (
 			location.pathname !== PATHS.AUTHENTICATION &&
+			location.pathname !== PATHS.AUTH_ACTION &&
 			!isProtectedPath(location.pathname)
 		) {
 			navigate(PATHS.AUTHENTICATION)

@@ -16,7 +16,13 @@ const secondsUntil = (endsAt, now) =>
 	endsAt ? Math.max(0, Math.ceil((endsAt - now) / 1000)) : 0
 
 // Keyed by cooldownEndsAt, so a new cooldown mounts afresh and starts its clock from now
-const ResendHint = ({ cooldownEndsAt, isSending, onResend }) => {
+export const ResendHint = ({
+	cooldownEndsAt,
+	isSending,
+	onResend,
+	hintDataCy = VERIFY_EMAIL_INBOX.HINT,
+	sendAgainDataCy = VERIFY_EMAIL_INBOX.SEND_AGAIN,
+}) => {
 	const [now, setNow] = useState(() => Date.now())
 	const secondsLeft = secondsUntil(cooldownEndsAt, now)
 	const isCoolingDown = secondsLeft > 0
@@ -31,7 +37,7 @@ const ResendHint = ({ cooldownEndsAt, isSending, onResend }) => {
 		return (
 			<p
 				className="m-0 text-text-muted"
-				data-cy={VERIFY_EMAIL_INBOX.HINT}>
+				data-cy={hintDataCy}>
 				{VERIFY_EMAIL_CONFIG.COOLDOWN(secondsLeft)}
 			</p>
 		)
@@ -40,7 +46,7 @@ const ResendHint = ({ cooldownEndsAt, isSending, onResend }) => {
 	return (
 		<p
 			className="m-0 text-text-muted"
-			data-cy={VERIFY_EMAIL_INBOX.HINT}>
+			data-cy={hintDataCy}>
 			{VERIFY_EMAIL_CONFIG.HINT_PREFIX}{' '}
 			{isSending ? (
 				VERIFY_EMAIL_CONFIG.SEND_AGAIN
@@ -50,7 +56,7 @@ const ResendHint = ({ cooldownEndsAt, isSending, onResend }) => {
 					modeType="text"
 					className={textLinkClasses}
 					onClick={onResend}
-					data-cy={VERIFY_EMAIL_INBOX.SEND_AGAIN}>
+					data-cy={sendAgainDataCy}>
 					{VERIFY_EMAIL_CONFIG.SEND_AGAIN}
 				</BaseButton>
 			)}
@@ -62,6 +68,8 @@ ResendHint.propTypes = {
 	cooldownEndsAt: PropTypes.number,
 	isSending: PropTypes.bool,
 	onResend: PropTypes.func.isRequired,
+	hintDataCy: PropTypes.string,
+	sendAgainDataCy: PropTypes.string,
 }
 
 const VerifyEmailInbox = forwardRef(
