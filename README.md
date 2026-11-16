@@ -61,12 +61,12 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- Account settings: the account menu shows your email and opens Account settings, where you can see whether your email is verified, send the link again and change your password
 - Verified email to post: an account can browse straight away, but posting a trip, uploading photos or sending a message waits until its email is verified, with a strip under the header and a note in place of each blocked form to send the link again or check
 - Stay signed in: travellers stay signed in, in the browser and the app added to a phone's home screen, until they log out or their session is revoked, instead of being logged out after an hour
 - Clearer form errors: each field's error sits under its label with a "!" icon, so it is read before the field, and the trip dates stay on one line
 - Clearer menu hover: the menu items in the header and the tab bar show a plainly visible fill under the pointer, with readable labels
 - Email verification: new accounts confirm their email address before going on, with Check your inbox, kept after a reload or reopening the app, to send another link, check again or start over with a different address, then continue to Register signed in, including from the email's Continue button
-- Messages as conversations: each person you message is one thread, like a phone text thread, with both sides in order, the reply box at the bottom, unread markers and delete with Undo
 - Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, CI waits that report once instead of polling, faster local checks that rerun only the checks and tests a change can affect, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches and reuses the main screenshots a later commit cannot change, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
 
 **Next up** — in this order:
