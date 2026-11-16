@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.29.0...v0.30.0) (2026-11-16)
+
+
+### Features
+
+* account settings with email display and password change ([#798](https://github.com/andres-codigo/trip-fotos-react/issues/798)) ([2650422](https://github.com/andres-codigo/trip-fotos-react/commit/2650422d2983b6b9f0f99da1fa3fd7144dc7f120))
+
 ## [0.29.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.28.8...v0.29.0) (2026-11-16)
 
 
