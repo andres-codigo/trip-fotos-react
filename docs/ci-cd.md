@@ -51,7 +51,7 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
 
 - **Workflow File:** `.github/workflows/github-auto-label-prs.yml`
 - **Triggers:**
-    - On **pull_request_target** events (`opened`, `synchronize`, `reopened`, `edited`), so Dependabot PRs can be labelled too; only the base branch is checked out
+    - On **pull_request_target** events (`opened`, `synchronize`, `reopened`, `edited`), so Dependabot PRs can be labelled too; only the base branch is checked out. Allowed by the [event policy](#pull-request-target-policy)
 - **Purpose:** Gives each pull request one **type** label from its conventional-commit title (or branch prefix), e.g. `chore`, `fix`, `feature`, and the **area** labels whose paths its changed files match, e.g. `ui`, `testing`, `config`. Labels it no longer matches are removed; status labels and Dependabot's `javascript` are left alone. The rules live in [`.github/labels.json`](../.github/labels.json) — see [Labels](#labels).
 
 ---
@@ -70,7 +70,7 @@ It also runs the drift checks in `.github/scripts/__tests__/drift.test.mjs`, whi
 
 - **Workflow File:** `.github/workflows/project-item-lifecycle.yml`
 - **Triggers:**
-    - On **pull_request_target** events (`opened`, `reopened`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`). An `edited` event runs only when the PR body changed (a job-level `if`, so no runner starts for a title edit). Not `synchronize`: a push does not change the status, which `opened`, `ready_for_review` and `converted_to_draft` already set, and every run is billed a full minute
+    - On **pull_request_target** events (`opened`, `reopened`, `edited`, `ready_for_review`, `converted_to_draft`, `closed`). An `edited` event runs only when the PR body changed (a job-level `if`, so no runner starts for a title edit). Not `synchronize`: a push does not change the status, which `opened`, `ready_for_review` and `converted_to_draft` already set, and every run is billed a full minute. Allowed by the [event policy](#pull-request-target-policy)
 - **Purpose:** Keeps the issues a pull request closes (`Closes #N`, one or more) in sync with the `Trip Fotos React` GitHub Project lifecycle. The board has one card per piece of work: the issue, with its PRs under **Linked pull requests**. A PR with no linked issue gets a tracking issue; Dependabot PRs get none and appear as their own card instead. Merging removes the `in-progress` label from the issues it closes and, when it closes exactly one issue (a tracking issue included), copies the PR's type and area labels to it; a PR closing several issues leaves their labels alone.
 - **Shared code:** the project and status-field IDs, the Status option IDs and the card helpers (find, add, set Status) live in `.github/scripts/project.mjs`, shared with Issue Intake and covered by Vitest. The Issue Intake logic itself lives in `.github/scripts/intake.mjs` (`run({ github, context, core, getOctokit })`); the workflow only wires the trigger and calls it, and `intake.test.mjs` pins every label-event path. The Project Item Lifecycle logic lives in `.github/scripts/lifecycle.mjs` the same way, with `lifecycle.test.mjs` pinning the PR open, ready, draft, merge, close and tracking-issue paths. A card is found through the issue's own project items, not by paging the whole board.
 - **Secret (Optional but Recommended):** `PROJECT_AUTOMATION_TOKEN`
@@ -83,6 +83,22 @@ If the workflow logs `Resource not accessible by integration`, check the runbook
 - `.github/project-automation-token.md`
 
 The runbook includes expiry handling, recreation steps, secret update instructions, and post-rotation validation.
+
+<a id="pull-request-target-policy"></a>
+
+### `pull_request_target` event policy
+
+From 2 December 2026 GitHub blocks `pull_request_target` in public repositories that have no Actions event policy of their own ([GitHub docs](https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target#default-policy-for-pull_request_target)). The repository policy in [`.github/rulesets/allow-pull-request-target.json`](../.github/rulesets/allow-pull-request-target.json) allows it for the Auto Label and Project Item Lifecycle workflows only. Without it neither runs: PRs get no labels and their issues no longer move on the board.
+
+They stay on `pull_request_target` because `pull_request` gives Dependabot PRs a read-only token and no secrets, so those PRs would get no labels or card. It is safe because both check out only the default branch's `.github` folder, run no PR code, use no cache, and read the PR title and branch as data inside `github-script`, never in a shell. Keep it that way: a step that checks out the PR head or runs its scripts would hand fork code a write token.
+
+A new `pull_request_target` workflow must be added to the policy's `include` list. To recreate the policy, or apply an edit, run as a repository admin (**Settings → Actions → Policies** shows it, and **Policy insights** lists blocked runs):
+
+```bash
+gh api -X POST repos/{owner}/{repo}/actions/policies --input .github/rulesets/allow-pull-request-target.json
+# or, to update the existing policy:
+gh api -X PUT repos/{owner}/{repo}/actions/policies/<id> --input .github/rulesets/allow-pull-request-target.json
+```
 
 ---
 

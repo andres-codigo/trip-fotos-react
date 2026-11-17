@@ -36,10 +36,12 @@ Rotate the token when any of the following happens:
 
 ## Validate After Rotation
 
-1. Trigger a `pull_request_target` event (open, reopen, synchronise, or close a PR).
+1. Trigger a `pull_request_target` event (open, reopen, mark ready, or close a PR; a push does not run this workflow).
 2. Confirm `GitHub - Project Item Lifecycle / sync-project-lifecycle` succeeds.
 3. Confirm PR/issue items are added or updated in project `Trip Fotos React`.
 
 ## Failure Signal
 
 If the workflow logs `Resource not accessible by integration`, token permissions are missing or the secret is not available to the workflow run.
+
+If the workflow does not run at all, or its run shows as blocked by a policy, the token is not the cause: the `pull_request_target` event policy is missing or no longer includes this workflow. See [`pull_request_target` event policy](../docs/ci-cd.md#pull-request-target-policy).
