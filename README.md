@@ -1,7 +1,7 @@
 # trip-fotos-react
 
-[![Component - Run Cypress Component Tests](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-component.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-component.yml)
-[![E2E - Run Cypress Page Tests](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-e2e.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-e2e.yml)
+[![Cypress - Run Component Tests](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-component.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-component.yml)
+[![Cypress - Run E2E Page Tests](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-e2e.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/cypress-e2e.yml)
 [![Vitest - Run Unit Tests](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/vitest-unit-tests.yml/badge.svg)](https://github.com/andres-codigo/trip-fotos-react/actions/workflows/vitest-unit-tests.yml)
 
 ## Contents
@@ -23,35 +23,32 @@
 
 ## 📘 About This Project
 
-This project is a UI and functional conversion from Vue to React and extends the original Udemy Vue - The Complete Guide (incl. Router & Composition API) course > 'Find a coach' project. It has been reimagined as "finding popular travel destinations" tied to a registered traveller.
+Trip Fotos is a place to share and find popular travel destinations: travellers register a trip with its dates, cities and photos, browse each other's trips and message one another. It began as a UI and functional conversion of the "Find a coach" project from the Udemy course _Vue - The Complete Guide (incl. Router & Composition API)_, and has since been rebuilt and extended well beyond it.
 
 **Live:** [trip-fotos-project-react.vercel.app](https://trip-fotos-project-react.vercel.app)
 
-It is also a working example of AI-assisted development: GitHub Copilot and Claude Code share one set of repository instructions, and hooks, a `/verify` skill and CI enforce the quality gates. The Vue port was largely delivered by an agent pipeline under human review — see [AI-Assisted Development Story](docs/ai-assisted-dev-story/README.md).
+Worth highlighting:
+
+- **Rules as the security boundary** — the Firebase database and Storage rules, versioned in the repo, enforce ownership, the admin role, verified email and the public trip summary, so the client is never trusted.
+- **Tested at three layers** — Vitest, Cypress component tests and Cypress E2E specs against the local Firebase emulators, run in CI on every pull request.
+- **AI-assisted development** — GitHub Copilot and Claude Code share one set of repository instructions, with hooks, skills and CI enforcing the quality gates. The Vue port was largely delivered by an agent pipeline under human review: see the [AI-Assisted Development Story](docs/ai-assisted-dev-story/README.md).
 
 <a id="features"></a>
 
 ## ✨ Features
 
-- **Authentication** — email/password sign-up and log-in with Firebase Authentication, the password rule shown up front, a show-password toggle and "Forgot password?". Travellers stay signed in, including in the app added to a phone's home screen, until they log out or the session is revoked (a password reset, an email change or a disabled account). Sign-up sends a verification email and swaps the card to Check your inbox (send it again with a 60-second rest, I've verified, which also runs on its own when the tab comes back, and Start again for a wrong address), then continues to Register. Every Firebase email link opens the branded `/auth/action` page, which verifies the address (or says the link has expired, was already used or is not valid) sets a new password, confirms a changed email or changes it back. Until the address is verified, an account can browse but not register or edit a trip, upload photos or send a message: the database and Storage rules refuse it, a "Verify your email" strip under the header offers to send the link again or check, and a note stands in for the Register and Edit trip forms and the reply box. The account menu shows the email under the name, and Account settings (`/account`) shows the address with its Verified or Not verified state (with Send the link again) changes the email (the new address takes effect only once its link is opened, which logs the traveller out to log in with it, and the old address gets a link to change it back) and changes the password, each after asking for the current password; a changed password keeps the traveller signed in
-- **Forms** — every form marks required fields with a "* required" legend, gives helper text before a mistake rather than after, and on a failed submit shows an error summary linking to each invalid field and moves focus to it, with one wording for every error
-- **Traveller registration** — form with validation that saves a traveller profile to the Realtime Database; trip dates are a From and To pair of native date inputs (no future dates, up to 366 days, the end on or after the start, also enforced by the database rules) with the trip length shown as they are filled; cities visited are chosen through an accessible type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data) that stores each city with its country
-- **Photo uploads** — drag-and-drop or file-picker uploader with a row per photo (preview, name, size and Remove), the accepted types and size limit shown up front, and optional alt text per photo; at least one photo is required on registration, also enforced by the database rules; photos are compressed and uploaded to Cloud Storage as the signed-in user, each with small and medium thumbnails; a progress bar shows how many photos have uploaded while registering
-- **Public preview** — logged-out visitors can browse `/travellers` (`/` leads there): a welcome band with Create an account, then each trip's first name and last initial, trip dates, the first two lines of its description, cities and first three photos, newest first, with the city filter and paging. The full trip, every photo and messaging need sign-in (View trip opens Log in, which names the trip and returns to it), and the database rules let anyone read only that summary
-- **Traveller cards** — the travellers list is a card grid (one column on phones, two from 640px, three from 1024px) with equal-height cards; each opens with the traveller's initials, name and a "You" tag on your own card, then trip dates and length ("12–19 Mar 2025 · 8 days", worked out from the dates; older travellers show their days alone), trip description, city badges and up to five photos (square, thumbnail-sized tiles that load the smallest size the screen needs), with Message {first name} and View trip links (Edit trip on your own card) and an admin-only delete button; the list shows 12 travellers at a time with a "Show 12 more" button and a "Showing 12 of N travellers" status, skeleton cards stand in while it loads, and a failed load shows an inline error with Try again
-- **Traveller details** — `/travellers/:id` shows a Back to travellers link, a traveller's full profile, cities and every photo under a Photos heading with the count (each opens full screen, with swipe and next/previous buttons, a photo counter, a skeleton while it loads and a shareable `?photo=N` link), with Message {first name} in the profile for other travellers; a photo's alt text describes it and captions it full screen, an own trip with no photos offers Add photos, and unknown ids show a not-found message
-- **Messaging** — travellers message each other in conversation threads, like a phone text thread (registered travellers only, enforced by the database rules; no email is shared). Message {first name} on a traveller's card opens the thread at `/messages/{conversation}` (the old `/travellers/:id/contact` address redirects there), with an empty thread saying "Say hello". Messages lists one row per person (avatar, name, last message, time, unread dot); a row opens the thread on its own screen, with both sides as bubbles (yours on the right), day labels, a "New" divider and the reply box docked at the bottom, where the tab bar and footer give way below 1024px. From 1024px the list sits beside the open thread, the first conversation opening on its own. A reply shows at once, dimmed while sending, and stays with Try again if it fails. The thread's ⋯ menu deletes the conversation for you only, with an 8-second Undo toast. A former traveller's thread is read-only and an older email-only message offers "Reply by email". Opening a thread marks it read; the nav count shows unread conversations. Skeletons stand in while it loads, and an empty list links to the travellers
-- **City filter** — city chips, built from the cities the loaded travellers have visited: nothing ticked shows everyone, ticking cities narrows the list to travellers who visited one of them, and Show all cities resets it. On desktop it sits above the list, height-capped with an "N of M cities selected" status; at 768px and below a "Filter · N of M cities" button opens it as a bottom sheet whose "Show N travellers" button closes it. A search box appears once there are more than four cities
-- **Editing your trip** — a traveller's own card and detail page offer Edit trip, and the detail page Add photos; both open `/travellers/:id/edit`, the registration form filled in, with the trip's photos (remove one with Undo; nothing is deleted until Save, and the last photo cannot be removed), more photos to upload, upload progress while saving, and a success alert on the trip. Delete my profile at its foot removes the trip, photos and messages after a confirmation; the account stays, so the user can register again
-- **Navigation** — Travellers, Messages and My trip (Register before you register a trip), inline in the header on desktop and in a tab bar docked to the bottom of the screen at 768px and below, clear of the phone's home indicator; the current page is marked with a bar and `aria-current`. Log out sits in an account menu behind your initials, away from the places, and the brand and the 404 page lead to Travellers
-- **Admin tools** — the admin role is a Firebase custom claim (`admin: true`) enforced by the database and Storage rules; the admin can remove a traveller, with their database record, photos and messages, from the travellers list
-- **Routing and pages** — authentication, the email-link page (`/auth/action`), travellers, traveller details, edit trip, register, messages and message threads, privacy policy and 404 pages
-- **Privacy policy** — a public `/privacy` page, linked from the footer, explains what data the app collects (account, traveller registration, Photon city search, browser storage and cookieless Vercel analytics) and where it is stored
-- **Accessibility** — skip link, landmark structure and per-page titles, following an audit against [The Website Specification](https://specification.website)
-- **Testing and CI** — Vitest unit and integration tests, plus Cypress component and E2E tests, run in GitHub Actions on every pull request; CodeQL scanning and a ruleset protecting `main`
-- **Deployment and security** — Vercel deployment with a route allow-list, real 404s, an enforced Content Security Policy and other security headers; versioned Firebase security rules
-- **Project automation** — issues and pull requests are labelled from one `labels.json` and moved across the GitHub Project board by workflows
-- **AI-assisted workflow** — shared Copilot and Claude Code instructions, scaffolding agents, a lint-on-edit hook, an issue-before-edit hook, a verify-before-commit hook, and `/verify`, `/start-issue`, `/finish-pr`, `/ui-check` and `/design-change` skills (see [AI Assistance](#ai-assistance))
+- **Authentication and account** — email/password sign-up and log-in with Firebase Authentication, email verification and a session that lasts until you log out. Account settings shows whether your email is verified and changes the email or password.
+- **Verified email to post** — an unverified account can browse, but the database and Storage rules refuse a trip, photos or a message until its email is verified.
+- **Trip registration** — a validated form for trip dates, description and cities, found through a type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data).
+- **Photo uploads** — drag-and-drop or file picker with previews and optional alt text; photos are compressed, uploaded to Cloud Storage with thumbnails, and progress is shown while saving.
+- **Public preview** — logged-out visitors browse a summary of every trip; the full trip, every photo and messaging need sign-in.
+- **Travellers** — a card grid with a city filter and paging, and a details page per traveller with a full-screen, swipeable photo viewer.
+- **Editing your trip** — change any part of your trip, add or remove photos with Undo, or delete your profile.
+- **Messaging** — travellers message each other in conversation threads, like a phone text thread, with unread counts and delete with Undo; no email is shared.
+- **Navigation** — header links on desktop and a bottom tab bar on phones, with Log out in an account menu.
+- **Admin tools** — an admin role, set as a Firebase custom claim and enforced by the rules, can remove a traveller and their data.
+- **Privacy and accessibility** — a public privacy policy; skip link, landmarks and per-page titles, following [The Website Specification](https://specification.website).
+- **Deployment and security** — Vercel with a route allow-list, real 404s, an enforced Content Security Policy and other security headers.
 
 <a id="status"></a>
 
@@ -61,17 +58,23 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
-- Account settings: the account menu shows your email and opens Account settings, where you can see whether your email is verified, send the link again, change your password, and change your email, which takes effect once you open the link sent to the new address, with a link to the old one to change it back
-- Verified email to post: an account can browse straight away, but posting a trip, uploading photos or sending a message waits until its email is verified, with a strip under the header and a note in place of each blocked form to send the link again or check
-- Stay signed in: travellers stay signed in, in the browser and the app added to a phone's home screen, until they log out or their session is revoked, instead of being logged out after an hour
-- Clearer form errors: each field's error sits under its label with a "!" icon, so it is read before the field, and the trip dates stay on one line
-- Clearer menu hover: the menu items in the header and the tab bar show a plainly visible fill under the pointer, with readable labels
-- Email verification: new accounts confirm their email address before going on, with Check your inbox, kept after a reload or reopening the app, to send another link, check again or start over with a different address, then continue to Register signed in, including from the email's Continue button
-- Developer tooling: issue-to-PR automation, CI drift checks, cheaper CI runs with the E2E suite split across parallel jobs and scoped to the specs a PR can affect, faster unit tests, CI waits that report once instead of polling, faster local checks that rerun only the checks and tests a change can affect, run the changed pages first and stop on the first error, a faster browser check before them for UI changes that covers only the pages a change touches and reuses the main and merged-branch screenshots a later commit cannot change, a leaner repo, up-to-date, audited dependencies and workflow rules kept in the repo
+- Account settings: see your email's verified state, change your email or password
+- Verified email to post: browse at once, post once your email is verified
+- Stay signed in until you log out, including in the home-screen app
+- Clearer form errors: each error sits under its field's label
+- Clearer menu hover in the header and tab bar
+- Email verification on sign-up, with Check your inbox to resend or start over
+- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, a leaner repo
 
 **Next up** — in this order:
 
-- [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, blocked on `eslint-plugin-react` support
+- [#756](https://github.com/andres-codigo/trip-fotos-react/issues/756) — remove the code each change leaves unused
+- [#757](https://github.com/andres-codigo/trip-fotos-react/issues/757) — audit the codebase for unused code
+
+**Blocked**
+
+- [#770](https://github.com/andres-codigo/trip-fotos-react/issues/770) — Firebase email action URL, so email links still open Firebase's default page rather than `/auth/action`
+- [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, waiting on `eslint-plugin-react` support
 
 <a id="stack"></a>
 
@@ -349,6 +352,7 @@ GitHub Copilot and Claude Code share one set of guidance, so the two tools do no
 - **Shared conventions** — `.github/copilot-instructions.md` and `CLAUDE.md` hold the workspace rules; `.github/instructions/*.instructions.md` hold the component, page, store, styling and testing guidance both tools read (Claude Code loads each through a path-scoped rule in `.claude/rules/`).
 - **Scaffolding agents** — `create-component`, `create-page`, `create-redux-slice` and `create-hook` live in `.github/agents/`, with thin Claude Code wrappers in `.claude/agents/`.
 - **Enforced quality** — a Claude Code `PostToolUse` hook formats and lints every edited file, and the `/verify` skill runs only the lint, Vitest, Cypress component and build gates a change can affect, caching each gate's pass so a re-run skips gates no later edit can affect. `/verify e2e` adds the emulator E2E suite. A change to a page's look goes build, targeted tests, `/ui-check` and its fixes, then `/verify` once: `/verify` refuses a UI change until `/ui-check` has passed on it.
+- **Workflow skills** — `/start-issue` and `/finish-pr` take an issue from the board to a merged PR, and `/design-change` runs a UI redesign from brief to build.
 - **Permissions** — `.claude/settings.json` allows routine checks, commits, pushes and draft PRs, asks before merges, installs and E2E runs, and denies force-pushes and reading `.env` or `certs/`.
 
 Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools are used day to day, and the agent pipeline that delivered the Vue port, are written up in the [AI-Assisted Development Story](docs/ai-assisted-dev-story/README.md).
@@ -405,9 +409,9 @@ trip-fotos-react/
 ├── .claude/
 │   ├── agents/                 # Claude Code subagent wrappers (delegate to .github/agents)
 │   ├── hooks/                  # Claude Code hook scripts (lint/format after edits, issue-before-edit guard, verify-before-commit guard, Status-refresh stop check)
-│   ├── plans/                  # Committed work plans (e.g. deferred Firebase emulator plan)
+│   ├── plans/                  # Committed work plans
 │   ├── rules/                  # Path-scoped Claude Code rules (comments, README sync, deploy config, pointers)
-│   ├── skills/                 # Claude Code skills (/verify, /start-issue, /finish-pr, /ui-check)
+│   ├── skills/                 # Claude Code skills (/verify, /start-issue, /finish-pr, /ui-check, /design-change)
 │   ├── settings.json           # Shared Claude Code permissions and hooks
 │   └── settings.local.json     # Personal Claude Code overrides (gitignored)
 ├── .github/
@@ -425,7 +429,7 @@ trip-fotos-react/
 ├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
-├── scripts/                    # Repo maintenance scripts (set-admin-claim.mjs, seed-emulators.mjs, e2e-groups.mjs and wait-for-ci.mjs with their tests, dependency-check output)
+├── scripts/                    # Repo maintenance scripts (admin claim, emulator seed, data migrations, start-issue, E2E grouping and CI wait, with their tests)
 ├── src/
 │   ├── app/            # Main application component
 │   ├── assets/         # Fonts, SVGs, and other static assets
@@ -450,6 +454,7 @@ trip-fotos-react/
 ├── .prettierrc.json             # Prettier configuration
 ├── CHANGELOG.md                 # Release notes, created by the first release-please release
 ├── CLAUDE.md                    # Workspace-level Claude Code guidelines
+├── components.json              # shadcn/ui configuration
 ├── cypress.config.js            # Cypress testing configuration
 ├── firebase.json                # Firebase CLI config (the rules in `firebase/` and the emulator ports)
 ├── index.html                   # Vite HTML entry point
@@ -467,7 +472,7 @@ trip-fotos-react/
 ## 🧯 Troubleshooting
 
 - **Issue**: `npm install` fails.
-    - **Solution**: Ensure you have Node.js and npm installed. Check the required versions in the [Node.js](https://nodejs.org/) documentation.
+    - **Solution**: Use Node.js 24 or later (see `.nvmrc`), with npm.
 
 - **Issue**: Firebase environment variables are not working.
     - **Solution**: Copy `.env.example` to `.env` in the project root and fill in the Firebase configuration values, then restart `npm run dev` (Vite reads `.env` only at start-up).
