@@ -13,7 +13,6 @@ on:
 permissions:
     contents: read
     issues: write
-    repository-projects: write
 
 concurrency:
     group: issue-intake-${{ github.event.issue.number || inputs.issue_number }}
