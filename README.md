@@ -27,6 +27,11 @@ Trip Fotos is a place to share and find popular travel destinations: travellers 
 
 **Live:** [trip-fotos-project-react.vercel.app](https://trip-fotos-project-react.vercel.app)
 
+<p>
+  <img src="docs/screenshots/travellers-desktop.png" alt="The Travellers page on desktop: a city filter above two trip cards, each with dates, a description, city tags and a grid of photos" width="560">
+  <img src="docs/screenshots/travellers-phone.png" alt="The Travellers page on a phone: one trip card per row, a Filter button and the tab bar at the bottom" width="200">
+</p>
+
 Worth highlighting:
 
 - **Rules as the security boundary** — the Firebase database and Storage rules, versioned in the repo, enforce ownership, the admin role, verified email and the public trip summary on the server, whatever the app sends.
@@ -420,7 +425,7 @@ trip-fotos-react/
 ├── .vscode/                     # Shared VS Code editor settings
 ├── config/                     # ESLint and release-please configuration
 ├── cypress/                    # Cypress tests
-├── docs/                       # Detailed guides: CI/CD, testing, AI assistance, local HTTPS, and the AI-assisted development story
+├── docs/                       # Detailed guides (CI/CD, testing, AI assistance, local HTTPS, the AI-assisted development story) and README screenshots
 ├── firebase/                   # Realtime Database and Cloud Storage security rules
 ├── public/                     # Static assets, app icons, social image, 404 page, robots.txt, sitemap, manifest and .well-known files
 ├── scripts/                    # Repo maintenance scripts (admin claim, emulator seed, data migrations, start-issue, E2E grouping and CI wait, with their tests)
