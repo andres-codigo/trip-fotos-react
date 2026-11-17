@@ -29,7 +29,7 @@ Trip Fotos is a place to share and find popular travel destinations: travellers 
 
 Worth highlighting:
 
-- **Rules as the security boundary** — the Firebase database and Storage rules, versioned in the repo, enforce ownership, the admin role, verified email and the public trip summary, so the client is never trusted.
+- **Rules as the security boundary** — the Firebase database and Storage rules, versioned in the repo, enforce ownership, the admin role, verified email and the public trip summary on the server, whatever the app sends.
 - **Tested at three layers** — Vitest, Cypress component tests and Cypress E2E specs against the local Firebase emulators, run in CI on every pull request.
 - **AI-assisted development** — GitHub Copilot and Claude Code share one set of repository instructions, with hooks, skills and CI enforcing the quality gates. The Vue port was largely delivered by an agent pipeline under human review: see the [AI-Assisted Development Story](docs/ai-assisted-dev-story/README.md).
 
@@ -39,8 +39,7 @@ Worth highlighting:
 
 - **Authentication and account** — email/password sign-up and log-in with Firebase Authentication, email verification and a session that lasts until you log out. Account settings shows whether your email is verified and changes the email or password.
 - **Verified email to post** — an unverified account can browse, but the database and Storage rules refuse a trip, photos or a message until its email is verified.
-- **Trip registration** — a validated form for trip dates, description and cities, found through a type-ahead city search ([Photon](https://photon.komoot.io), OpenStreetMap data).
-- **Photo uploads** — drag-and-drop or file picker with previews and optional alt text; photos are compressed, uploaded to Cloud Storage with thumbnails, and progress is shown while saving.
+- **Trip registration** — one form for the trip dates, description, cities (a type-ahead search with [Photon](https://photon.komoot.io), OpenStreetMap data) and photos, added by drag-and-drop or file picker with previews and optional alt text, then compressed and uploaded to Cloud Storage with a progress bar.
 - **Public preview** — logged-out visitors browse a summary of every trip; the full trip, every photo and messaging need sign-in.
 - **Travellers** — a card grid with a city filter and paging, and a details page per traveller with a full-screen, swipeable photo viewer.
 - **Editing your trip** — change any part of your trip, add or remove photos with Undo, or delete your profile.
@@ -65,11 +64,6 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Clearer menu hover in the header and tab bar
 - Email verification on sign-up, with Check your inbox to resend or start over
 - Developer tooling: issue-to-PR automation, faster scoped CI and local checks, a leaner repo
-
-**Next up** — in this order:
-
-- [#756](https://github.com/andres-codigo/trip-fotos-react/issues/756) — remove the code each change leaves unused
-- [#757](https://github.com/andres-codigo/trip-fotos-react/issues/757) — audit the codebase for unused code
 
 **Blocked**
 
