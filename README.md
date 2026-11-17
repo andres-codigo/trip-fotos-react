@@ -29,7 +29,7 @@ Trip Fotos is a place to share and find popular travel destinations: travellers 
 
 <p>
   <img src="docs/screenshots/travellers-desktop.png" alt="The Travellers page on desktop: a city filter above two trip cards, each with dates, a description, city tags and a grid of photos" width="560">
-  <img src="docs/screenshots/travellers-phone.png" alt="The Travellers page on a phone: one trip card per row, a Filter button and the tab bar at the bottom" width="200">
+  <img src="docs/screenshots/travellers-phone.png" alt="The Travellers page on a phone: one trip card per row, a Filter button and the tab bar at the bottom" width="275">
 </p>
 
 Worth highlighting:
