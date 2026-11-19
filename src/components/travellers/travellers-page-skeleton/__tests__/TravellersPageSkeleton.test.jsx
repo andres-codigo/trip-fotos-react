@@ -13,7 +13,6 @@ import {
 } from '@/constants/test'
 import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
 import authenticationReducer from '@/store/slices/authenticationSlice'
-import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 const renderPage = (userId = null) => {
 	const store = configureTestStore({
@@ -36,10 +35,8 @@ const renderPage = (userId = null) => {
 
 describe('TravellersPageSkeleton', () => {
 	it('is the page landmark with the page heading', () => {
-		const { container } = renderPage()
-		const root = container.querySelector(
-			getByDataCy(TRAVELLERS_PAGE_SKELETON.ROOT),
-		)
+		renderPage()
+		const root = screen.queryByTestId(TRAVELLERS_PAGE_SKELETON.ROOT)
 		expect(root.tagName).toBe('MAIN')
 		expect(
 			screen.getByRole('heading', {
@@ -50,24 +47,22 @@ describe('TravellersPageSkeleton', () => {
 	})
 
 	it('shows a visitor the welcome band and the public card shape', () => {
-		const { container } = renderPage()
+		renderPage()
 		expect(
-			container.querySelector(getByDataCy(TRAVELLERS_WELCOME.ROOT)),
+			screen.queryByTestId(TRAVELLERS_WELCOME.ROOT),
 		).toBeInTheDocument()
 		expect(
-			container.querySelector(getByDataCy(TRAVELLER_SKELETON.TEXT))
-				.children,
+			screen.getAllByTestId(TRAVELLER_SKELETON.TEXT)[0].children,
 		).toHaveLength(2)
 	})
 
 	it('shows a signed-in user no welcome band and the signed-in card shape', () => {
-		const { container } = renderPage('traveller-uid')
+		renderPage('traveller-uid')
 		expect(
-			container.querySelector(getByDataCy(TRAVELLERS_WELCOME.ROOT)),
+			screen.queryByTestId(TRAVELLERS_WELCOME.ROOT),
 		).not.toBeInTheDocument()
 		expect(
-			container.querySelector(getByDataCy(TRAVELLER_SKELETON.TEXT))
-				.children,
+			screen.getAllByTestId(TRAVELLER_SKELETON.TEXT)[0].children,
 		).toHaveLength(5)
 	})
 })

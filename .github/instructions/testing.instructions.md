@@ -45,6 +45,11 @@ Do not introduce `cypress/support/constants` unless explicitly adopted in a futu
 - Keep mocks deterministic and local to each test scope when possible.
 - A test fails on any unexpected `console.error` or `console.warn` (`src/testUtils/vitest/failOnConsole.js`, and `cypress/support/utils/failOnConsole.js`, used by both the component and E2E support files), so React warnings such as an unknown DOM prop or an update outside `act()` are fixed, not ignored. A test that expects a message spies on `console` itself. Add a pattern to `ALLOWED_MESSAGES` (Vitest) or `ALLOWED_CONSOLE_MESSAGES` (Cypress component and E2E) only for noise we cannot fix, with a one-line reason.
 - A mocked child component must not spread props meant for the real one onto a DOM element (map `ariaLabel` to `aria-label`, drop `isLink`, `to` and the like).
+- No class-name, `data-cy`-only, child-prop or wrapper checks: the component test proves the styles, and a check that only finds an element proves nothing on its own.
+- Find by `data-cy` with `screen.getByTestId` (`testIdAttribute` is `data-cy`), with the id from `src/constants/test`. No local `byDataCy` or `querySelector('[data-cy=…]')` helpers.
+- Cases that differ only in input and expected output are one `it.each` table.
+- A page test checks how the page wires its children (what it passes in and what happens next), not the child's own states, which the child's test owns.
+- Reuse a file's own fill, submit and render helpers rather than inlining their steps.
 
 ## Cypress Rules
 

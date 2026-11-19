@@ -35,12 +35,4 @@ describe('<ConversationAvatar />', () => {
 			mark,
 		)
 	})
-
-	it('merges a className onto the root', () => {
-		renderAvatar({ className: 'self-start' })
-
-		expect(screen.getByTestId(CONVERSATION_AVATAR.ROOT)).toHaveClass(
-			'self-start',
-		)
-	})
 })

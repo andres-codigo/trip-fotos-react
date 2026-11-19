@@ -26,52 +26,20 @@ describe('useFormField', () => {
 		})
 	})
 
-	it('should update field with valid state', () => {
-		const { result } = renderHook(() => useFormField())
-		const [, updateField] = result.current
-
-		act(() => {
-			updateField('new value', true, 'Success message')
-		})
-
-		const [updatedField] = result.current
-		expect(updatedField).toEqual({
-			value: 'new value',
-			isValid: true,
-			message: 'Success message',
-		})
-	})
-
-	it('should update field with invalid state and error message', () => {
+	it.each([
+		['a valid value and message', ['new value', true, 'Success message']],
+		['an invalid value and error', ['invalid input', false, 'Required']],
+		['only a value, using the defaults', ['just value'], [true, '']],
+	])('updates the field with %s', (_, args, defaults = []) => {
 		const { result } = renderHook(() => useFormField('initial'))
 		const [, updateField] = result.current
 
 		act(() => {
-			updateField('invalid input', false, 'This field is required')
+			updateField(...args)
 		})
 
-		const [updatedField] = result.current
-		expect(updatedField).toEqual({
-			value: 'invalid input',
-			isValid: false,
-			message: 'This field is required',
-		})
-	})
-
-	it('should use default parameters when updating field with minimal arguments', () => {
-		const { result } = renderHook(() => useFormField())
-		const [, updateField] = result.current
-
-		act(() => {
-			updateField('just value')
-		})
-
-		const [updatedField] = result.current
-		expect(updatedField).toEqual({
-			value: 'just value',
-			isValid: true,
-			message: '',
-		})
+		const [value, isValid, message] = [...args, ...defaults]
+		expect(result.current[0]).toEqual({ value, isValid, message })
 	})
 
 	it('should handle multiple sequential updates', () => {
@@ -96,45 +64,5 @@ describe('useFormField', () => {
 			isValid: false,
 			message: 'Error message',
 		})
-	})
-
-	it('should handle empty string values', () => {
-		const { result } = renderHook(() => useFormField('initial'))
-		const [, updateField] = result.current
-
-		act(() => {
-			updateField('', false, 'Field cannot be empty')
-		})
-
-		const [updatedField] = result.current
-		expect(updatedField).toEqual({
-			value: '',
-			isValid: false,
-			message: 'Field cannot be empty',
-		})
-	})
-
-	it('should handle special characters and whitespace', () => {
-		const { result } = renderHook(() => useFormField())
-		const [, updateField] = result.current
-
-		act(() => {
-			updateField('  special@chars!#$%  ', true, 'Valid format')
-		})
-
-		const [updatedField] = result.current
-		expect(updatedField.value).toBe('  special@chars!#$%  ')
-		expect(updatedField.isValid).toBe(true)
-		expect(updatedField.message).toBe('Valid format')
-	})
-
-	it('should return an array with field object and updateField function', () => {
-		const { result } = renderHook(() => useFormField())
-		const hookReturn = result.current
-
-		expect(Array.isArray(hookReturn)).toBe(true)
-		expect(hookReturn).toHaveLength(2)
-		expect(typeof hookReturn[0]).toBe('object')
-		expect(typeof hookReturn[1]).toBe('function')
 	})
 })

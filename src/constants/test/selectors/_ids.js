@@ -19,6 +19,9 @@ export const TEST_IDS = {
 	},
 	REGISTER: {
 		CONTAINER: 'register-main-container',
+		FORM: 'traveller-registration-form',
+		ERROR_DIALOG: 'invalid-traveller-registration-dialog',
+		REGISTERING_DIALOG: 'registering-dialog',
 	},
 	TRAVELLERS: {
 		CONTAINER: 'travellers-main-container',
@@ -34,7 +37,6 @@ export const TEST_IDS = {
 		REFRESH_BUTTON: 'refresh-button',
 		REGISTER_LINK: 'register-link',
 		LOADING: 'travellers-loading',
-		SKELETON_LIST: 'travellers-skeleton-list',
 		SHOW_MORE: 'show-more-travellers',
 		PAGE_STATUS: 'travellers-page-status',
 		LOAD_ERROR: 'travellers-load-error',
@@ -48,10 +50,5 @@ export const TEST_IDS = {
 	},
 	PRIVACY: {
 		CONTAINER: 'privacy-main-container',
-	},
-	SKIP_LINK: 'skip-link',
-	FOOTER: {
-		SITE_FOOTER: 'site-footer',
-		PRIVACY_LINK: 'footer-privacy-link',
 	},
 }

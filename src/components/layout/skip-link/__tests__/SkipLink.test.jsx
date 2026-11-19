@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 
-import { TEST_IDS } from '@/constants/test'
 import { ACCESSIBILITY } from '@/constants/ui'
 
 import SkipLink from '@/components/layout/skip-link/SkipLink'
@@ -19,7 +18,6 @@ describe('SkipLink', () => {
 				'href',
 				`#${ACCESSIBILITY.MAIN_CONTENT_ID}`,
 			)
-			expect(link).toHaveAttribute('data-cy', TEST_IDS.SKIP_LINK)
 		})
 	})
 })

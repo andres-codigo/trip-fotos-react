@@ -33,6 +33,7 @@ Use this agent when you need a new custom React hook with tests.
 5. **Test File Setup**
     - Create `__tests__/{useHookName}.test.js` in the hook's own folder, next to `index.js`
     - Use `renderHook` and `act` from `@testing-library/react`
+    - Make cases that differ only in input and expected output one `it.each` table
     - Cover the initial state, every returned action, and edge cases (duplicates, empty input, cleanup on unmount)
     - Put reusable test data in `src/constants/test`; a sibling `__tests__/*TestData.js` file (as in `src/utils/useViewport/__tests__/viewportTestData.js`) is only for data used by that one folder
 

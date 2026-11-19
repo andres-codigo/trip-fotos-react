@@ -22,23 +22,22 @@ describe('<NavMenuButtonLink />', () => {
 
 		const link = screen.getByRole('link', { name: 'Travellers' })
 		expect(link).toHaveAttribute('href', '/travellers')
-		expect(link).toHaveAttribute('data-cy', 'nav-link')
 		expect(link).not.toHaveAttribute('aria-current')
 	})
 
-	it('marks the current page with aria-current and the bar', () => {
+	it('marks the current page with aria-current', () => {
 		renderLink({ isActive: true })
 
 		const link = screen.getByRole('link', { name: 'Travellers' })
 		expect(link).toHaveAttribute('aria-current', 'page')
-		expect(link.className).toMatch(/after:bg-accent-text/)
 	})
 
-	it('takes an accessible name and extra classes', () => {
-		renderLink({ ariaLabel: 'All travellers', className: 'extra' })
+	it('takes an accessible name', () => {
+		renderLink({ ariaLabel: 'All travellers' })
 
-		const link = screen.getByRole('link', { name: 'All travellers' })
-		expect(link).toHaveClass('extra')
+		expect(
+			screen.getByRole('link', { name: 'All travellers' }),
+		).toBeInTheDocument()
 	})
 
 	describe('scroll to the top', () => {

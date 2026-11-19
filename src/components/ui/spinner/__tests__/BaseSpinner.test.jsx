@@ -23,15 +23,6 @@ describe('BaseSpinner', () => {
 				screen.getByTestId(TEST_IDS.SPINNER.LABEL),
 			).toHaveTextContent(GLOBAL.SPINNER_LABEL.MESSAGES)
 		})
-
-		it('pulses instead of turning under reduced motion', () => {
-			render(<BaseSpinner />)
-
-			const icon = screen.getByTestId(TEST_IDS.SPINNER.ICON)
-
-			expect(icon).toHaveClass('animate-spin')
-			expect(icon).toHaveClass('motion-reduce:animate-skeleton')
-		})
 	})
 
 	describe('Accessibility tests', () => {

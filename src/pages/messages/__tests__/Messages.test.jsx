@@ -12,7 +12,6 @@ import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 
 import {
 	CONVERSATION_ROW,
-	CONVERSATION_SKELETON,
 	MESSAGE_BUBBLE,
 	MESSAGE_THREAD,
 	MESSAGES_PAGE,
@@ -160,6 +159,15 @@ afterEach(() => {
 	vi.restoreAllMocks()
 })
 
+// A thread with nothing said yet: only the other traveller's record exists
+const serveOnlyOtherTraveller = () =>
+	fetch.mockImplementation(async (url) => {
+		const path = pathOf(url)
+		if (path.endsWith(`/travellers/${OTHER}.json`))
+			return okResponse({ firstName: 'Tomás', lastName: 'Silva' })
+		return okResponse(null)
+	})
+
 describe('Messages page', () => {
 	describe('the list', () => {
 		it('shows skeleton rows while it loads, then one row per conversation', async () => {
@@ -169,9 +177,6 @@ describe('Messages page', () => {
 			expect(screen.getByTestId(MESSAGES_PAGE.LOADING)).toHaveTextContent(
 				GLOBAL.SPINNER_LABEL.MESSAGES,
 			)
-			expect(
-				screen.getAllByTestId(CONVERSATION_SKELETON.ROW),
-			).toHaveLength(MESSAGES_CONFIG.LIST_SKELETON_COUNT)
 
 			expect(
 				await screen.findByTestId(MESSAGES_PAGE.SUMMARY),
@@ -285,12 +290,7 @@ describe('Messages page', () => {
 			stubDatabase({ list: null, legacy: null })
 			renderPage(`${PATHS.MESSAGES}/${CID}`)
 
-			fetch.mockImplementation(async (url) => {
-				const path = pathOf(url)
-				if (path.endsWith(`/travellers/${OTHER}.json`))
-					return okResponse({ firstName: 'Tomás', lastName: 'Silva' })
-				return okResponse(null)
-			})
+			serveOnlyOtherTraveller()
 
 			expect(
 				await screen.findByTestId(MESSAGE_THREAD.HELLO),
@@ -306,12 +306,7 @@ describe('Messages page', () => {
 			stubDatabase({ list: null, legacy: null })
 			renderPage(`${PATHS.MESSAGES}/${CID}`, { emailVerified: false })
 
-			fetch.mockImplementation(async (url) => {
-				const path = pathOf(url)
-				if (path.endsWith(`/travellers/${OTHER}.json`))
-					return okResponse({ firstName: 'Tomás', lastName: 'Silva' })
-				return okResponse(null)
-			})
+			serveOnlyOtherTraveller()
 
 			expect(
 				await screen.findByTestId(VERIFY_EMAIL_NOTE.ROOT),

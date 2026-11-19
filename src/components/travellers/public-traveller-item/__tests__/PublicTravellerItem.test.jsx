@@ -73,7 +73,7 @@ describe('<PublicTravellerItem />', () => {
 		expect(trip).toHaveTextContent('7 days')
 	})
 
-	it('shows the trip excerpt, clamped to two lines', () => {
+	it('shows the trip excerpt', () => {
 		renderItem()
 		expect(
 			screen.getByTestId(PUBLIC_TRAVELLER_ITEM.EXCERPT),

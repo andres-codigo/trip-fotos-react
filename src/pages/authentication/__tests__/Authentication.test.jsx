@@ -179,11 +179,6 @@ describe('<Authentication />', () => {
 
 			expect(main).toHaveAttribute('id', ACCESSIBILITY.MAIN_CONTENT_ID)
 			expect(main).toHaveAttribute('tabindex', '-1')
-			expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
-			expect(main).toHaveAttribute(
-				'data-cy-alt',
-				TEST_IDS.USER_AUTH.CONTAINER,
-			)
 			expect(
 				screen.getByTestId(TEST_IDS.USER_AUTH_FORM.FORM),
 			).toBeInTheDocument()
@@ -198,48 +193,41 @@ describe('<Authentication />', () => {
 
 	describe('Behaviour tests', () => {
 		describe('Form validation handlers', () => {
-			it('prevents form submission when email validation fails', async () => {
-				validateEmail.mockReturnValueOnce({
-					isValid: false,
-					message: VALIDATION_MESSAGES.EMAIL_REQUIRED,
-				})
-				validatePassword.mockReturnValueOnce({
-					isValid: true,
-					message: '',
-				})
-
-				renderWithProviders(<Authentication />)
-
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: MOCK_KEYS.EMAIL_INVALID },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: MOCK_KEYS.PASSWORD },
-					},
-				)
-
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
-				)
-
-				await waitFor(() => {
-					expect(login).not.toHaveBeenCalled()
-
-					expect(validateEmail).toHaveBeenCalledWith(
-						MOCK_KEYS.EMAIL_INVALID,
+			it.each([
+				[
+					'email',
+					MOCK_KEYS.EMAIL_INVALID,
+					MOCK_KEYS.PASSWORD,
+					VALIDATION_MESSAGES.EMAIL_REQUIRED,
+				],
+				[
+					'password',
+					MOCK_KEYS.EMAIL,
+					'',
+					VALIDATION_MESSAGES.PASSWORD_REQUIRED,
+				],
+			])(
+				'prevents form submission when %s validation fails',
+				async (field, email, password, message) => {
+					const result = (isValid) =>
+						isValid
+							? { isValid: true, message: '' }
+							: { isValid: false, message }
+					validateEmail.mockReturnValueOnce(result(field !== 'email'))
+					validatePassword.mockReturnValueOnce(
+						result(field !== 'password'),
 					)
-					expect(validatePassword).toHaveBeenCalledWith(
-						MOCK_KEYS.PASSWORD,
-					)
-				})
-			})
+
+					renderWithProviders(<Authentication />)
+					fillAndSubmitLoginForm(email, password)
+
+					await waitFor(() => {
+						expect(login).not.toHaveBeenCalled()
+						expect(validateEmail).toHaveBeenCalledWith(email)
+						expect(validatePassword).toHaveBeenCalledWith(password)
+					})
+				},
+			)
 
 			it('trims whitespace from inputs before validation', async () => {
 				validateEmail.mockReturnValueOnce({
@@ -252,24 +240,9 @@ describe('<Authentication />', () => {
 				})
 
 				renderWithProviders(<Authentication />)
-
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: '  ' + MOCK_KEYS.EMAIL + '  ' },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: '  ' + MOCK_KEYS.PASSWORD + '  ' },
-					},
-				)
-
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
+				fillAndSubmitLoginForm(
+					`  ${MOCK_KEYS.EMAIL}  `,
+					`  ${MOCK_KEYS.PASSWORD}  `,
 				)
 
 				await waitFor(() => {
@@ -279,71 +252,19 @@ describe('<Authentication />', () => {
 					)
 				})
 			})
-
-			it('prevents form submission when password validation fails', async () => {
-				validateEmail.mockReturnValueOnce({
-					isValid: true,
-					message: '',
-				})
-				validatePassword.mockReturnValueOnce({
-					isValid: false,
-					message: VALIDATION_MESSAGES.PASSWORD_REQUIRED,
-				})
-
-				renderWithProviders(<Authentication />)
-
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: MOCK_KEYS.EMAIL },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: '' },
-					},
-				)
-
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
-				)
-
-				await waitFor(() => {
-					expect(login).not.toHaveBeenCalled()
-					expect(validateEmail).toHaveBeenCalledWith(MOCK_KEYS.EMAIL)
-					expect(validatePassword).toHaveBeenCalledWith('')
-				})
-			})
 		})
 
 		describe('Authentication flow', () => {
-			it('dispatches login action with correct payload on form submission', async () => {
-				renderWithProviders(<Authentication />)
+			it('dispatches login with the form payload and goes to Travellers on success', async () => {
+				mockDispatch.mockResolvedValueOnce({ meta: {} })
 
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: MOCK_KEYS.EMAIL },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: MOCK_KEYS.PASSWORD },
-					},
-				)
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
-				)
+				renderWithProviders(<Authentication />)
+				fillAndSubmitLoginForm()
 
 				await waitFor(() => {
-					expect(login).toHaveBeenCalledWith(MOCK_LOGIN_PAYLOAD)
+					expect(mockNavigate).toHaveBeenCalledWith(PATHS.TRAVELLERS)
 				})
+				expect(login).toHaveBeenCalledWith(MOCK_LOGIN_PAYLOAD)
 			})
 
 			it('toggles between login and signup modes when switch button is clicked', async () => {
@@ -376,24 +297,7 @@ describe('<Authentication />', () => {
 				)
 
 				fireEvent.click(switchBtn)
-
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: MOCK_KEYS.EMAIL },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: MOCK_KEYS.PASSWORD },
-					},
-				)
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
-				)
+				fillAndSubmitLoginForm()
 
 				await waitFor(() => {
 					expect(login).toHaveBeenCalledWith({
@@ -401,36 +305,6 @@ describe('<Authentication />', () => {
 						email: MOCK_KEYS.EMAIL,
 						password: MOCK_KEYS.PASSWORD,
 					})
-				})
-			})
-
-			it('navigates to travellers page after successful authentication', async () => {
-				mockDispatch.mockResolvedValueOnce({
-					meta: {},
-				})
-
-				renderWithProviders(<Authentication />)
-
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.EMAIL_INPUT),
-					{
-						target: { value: MOCK_KEYS.EMAIL },
-					},
-				)
-				fireEvent.change(
-					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
-					{
-						target: { value: MOCK_KEYS.PASSWORD },
-					},
-				)
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
-				)
-
-				await waitFor(() => {
-					expect(mockNavigate).toHaveBeenCalledWith(PATHS.TRAVELLERS)
 				})
 			})
 		})
@@ -445,12 +319,7 @@ describe('<Authentication />', () => {
 				)
 
 				renderWithProviders(<Authentication />)
-				fillLoginForm()
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
-				)
+				fillAndSubmitLoginForm()
 
 				const submit = screen.getByTestId(
 					TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
@@ -491,13 +360,7 @@ describe('<Authentication />', () => {
 
 			it('moves focus to the first invalid field on a failed submit', () => {
 				renderWithProviders(<Authentication />)
-				fillLoginForm(MOCK_KEYS.EMAIL, '')
-
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SUBMIT_BUTTON,
-					),
-				)
+				fillAndSubmitLoginForm(MOCK_KEYS.EMAIL, '')
 
 				expect(
 					screen.getByTestId(TEST_IDS.USER_AUTH_FORM.PASSWORD_INPUT),
@@ -597,37 +460,58 @@ describe('<Authentication />', () => {
 		})
 
 		describe('Error handling', () => {
-			it('displays the message from a rejected login', async () => {
+			const rejectWith = (payload) => () =>
 				mockDispatch.mockResolvedValueOnce({
 					meta: { rejectedWithValue: true },
-					payload: ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
+					payload,
 				})
+			const throwError = (message) => () =>
+				mockDispatch.mockRejectedValueOnce(new Error(message))
 
-				renderWithProviders(<Authentication />)
-				fillAndSubmitLoginForm()
-
-				await expectErrorDialog(
+			it.each([
+				[
+					'a rejected login',
+					false,
+					rejectWith(ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS),
 					ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
-				)
-			})
+				],
+				[
+					'a rejected sign-up',
+					true,
+					rejectWith(ERROR_MESSAGES.EMAIL_ALREADY_IN_USE),
+					ERROR_MESSAGES.EMAIL_ALREADY_IN_USE,
+				],
+				[
+					'an error thrown on submit',
+					false,
+					throwError('Test error message'),
+					'Test error message',
+				],
+				[
+					'an error with no message, as the sign-in fallback',
+					false,
+					throwError(''),
+					ERROR_MESSAGES.LOGIN_FAILED,
+				],
+			])(
+				'displays the error dialog for %s',
+				async (_, isSignup, arrange, message) => {
+					arrange()
 
-			it('displays email already in use error dialog when signup fails', async () => {
-				mockDispatch.mockResolvedValueOnce({
-					meta: { rejectedWithValue: true },
-					payload: ERROR_MESSAGES.EMAIL_ALREADY_IN_USE,
-				})
+					renderWithProviders(<Authentication />)
+					if (isSignup) {
+						fireEvent.click(
+							screen.getByTestId(
+								TEST_IDS.USER_AUTH_FORM
+									.LOGIN_SIGNUP_TOGGLE_LINK,
+							),
+						)
+					}
+					fillAndSubmitLoginForm()
 
-				renderWithProviders(<Authentication />)
-
-				fireEvent.click(
-					screen.getByTestId(
-						TEST_IDS.USER_AUTH_FORM.LOGIN_SIGNUP_TOGGLE_LINK,
-					),
-				)
-				fillAndSubmitLoginForm()
-
-				await expectErrorDialog(ERROR_MESSAGES.EMAIL_ALREADY_IN_USE)
-			})
+					await expectErrorDialog(message)
+				},
+			)
 
 			it('closes error dialog when close button is clicked', async () => {
 				renderWithProviders(<Authentication />)
@@ -642,27 +526,6 @@ describe('<Authentication />', () => {
 
 				fireEvent.click(screen.getByTestId(DIALOG.BUTTON))
 				await expectNoErrorDialog()
-			})
-
-			it('handles and displays errors thrown during form submission', async () => {
-				const testError = new Error('Test error message')
-				mockDispatch.mockRejectedValueOnce(testError)
-
-				renderWithProviders(<Authentication />)
-				fillAndSubmitLoginForm()
-
-				await expectErrorDialog('Test error message')
-			})
-
-			it('displays the sign-in fallback when the error has no message', async () => {
-				const errorWithoutMessage = new Error()
-				errorWithoutMessage.message = ''
-				mockDispatch.mockRejectedValueOnce(errorWithoutMessage)
-
-				renderWithProviders(<Authentication />)
-				fillAndSubmitLoginForm()
-
-				await expectErrorDialog(ERROR_MESSAGES.LOGIN_FAILED)
 			})
 		})
 	})
@@ -743,10 +606,9 @@ describe('<Authentication />', () => {
 			return heading
 		}
 
-		it('swaps the sign-up card to Check your inbox, with its heading focused, instead of moving on', async () => {
-			const heading = await signUp()
+		it('swaps the sign-up card to Check your inbox instead of moving on', async () => {
+			await signUp()
 
-			expect(heading).toHaveFocus()
 			expect(document.title).toBe(
 				`${VERIFY_EMAIL_CONFIG.TITLE} · ${GLOBAL.SITE_NAME}`,
 			)

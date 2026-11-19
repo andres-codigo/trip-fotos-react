@@ -20,21 +20,15 @@ const renderHead = (props = {}) =>
 	)
 
 describe('<TravellerCardHead />', () => {
-	it('shows the initials for a full name', () => {
-		renderHead()
+	it.each([
+		['a full name', 'Amara Okafor'],
+		['a public short name', 'Amara O.'],
+	])('shows the initials for %s', (_, name) => {
+		renderHead({ name })
 
 		expect(screen.getByTestId(AVATAR.ROOT)).toHaveTextContent(/^AO$/)
 		expect(
-			screen.getByRole('heading', { level: 3, name: 'Amara Okafor' }),
-		).toBeInTheDocument()
-	})
-
-	it('shows the initials for a public short name', () => {
-		renderHead({ name: 'Amara O.' })
-
-		expect(screen.getByTestId(AVATAR.ROOT)).toHaveTextContent(/^AO$/)
-		expect(
-			screen.getByRole('heading', { level: 3, name: 'Amara O.' }),
+			screen.getByRole('heading', { level: 3, name }),
 		).toBeInTheDocument()
 	})
 
@@ -57,13 +51,5 @@ describe('<TravellerCardHead />', () => {
 		expect(screen.getByTestId(TRAVELLER_CARD_HEAD.ROOT)).toBeInTheDocument()
 		expect(screen.queryByTestId(TRIP_ID)).not.toBeInTheDocument()
 		expect(screen.queryByText(/Trip:/)).not.toBeInTheDocument()
-	})
-
-	it('passes the name and trip test ids through', () => {
-		renderHead()
-
-		expect(screen.getByTestId(NAME_ID)).toHaveTextContent('Amara Okafor')
-		expect(screen.getByTestId(NAME_ID).tagName).toBe('H3')
-		expect(screen.getByTestId(TRIP_ID)).toHaveTextContent(/Trip:/)
 	})
 })

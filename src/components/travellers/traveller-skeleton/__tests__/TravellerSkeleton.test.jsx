@@ -1,10 +1,8 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 
 import TravellerSkeleton from '@/components/travellers/traveller-skeleton/TravellerSkeleton'
 import { TRAVELLER_SKELETON } from '@/constants/test'
-import { CARD_PHOTOS } from '@/constants/ui'
-import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 const renderSkeleton = (props) =>
 	render(
@@ -13,49 +11,32 @@ const renderSkeleton = (props) =>
 		</ul>,
 	)
 
-const byDataCy = (container, id) => container.querySelector(getByDataCy(id))
-
 describe('TravellerSkeleton', () => {
 	it('renders a list item hidden from assistive technology', () => {
-		const { container } = renderSkeleton()
-		const root = byDataCy(container, TRAVELLER_SKELETON.ROOT)
+		renderSkeleton()
+		const root = screen.getByTestId(TRAVELLER_SKELETON.ROOT)
 		expect(root.tagName).toBe('LI')
 		expect(root).toHaveAttribute('aria-hidden', 'true')
 	})
 
 	// The signed-in description runs to its 250-character cap, which fills about five lines
-	it('takes the signed-in card shape: five text lines and the two-per-row photo strip', () => {
-		const { container } = renderSkeleton()
-		const text = byDataCy(container, TRAVELLER_SKELETON.TEXT)
-		expect(text.querySelectorAll('.animate-skeleton')).toHaveLength(5)
-		expect(byDataCy(container, TRAVELLER_SKELETON.PHOTOS).className).toBe(
-			CARD_PHOTOS.LIST,
-		)
-	})
-
-	it('takes the public card shape: two excerpt lines and the three-across photo strip', () => {
-		const { container } = renderSkeleton({ isPublic: true })
-		const text = byDataCy(container, TRAVELLER_SKELETON.TEXT)
-		expect(text.querySelectorAll('.animate-skeleton')).toHaveLength(2)
-		expect(byDataCy(container, TRAVELLER_SKELETON.PHOTOS).className).toBe(
-			CARD_PHOTOS.PUBLIC_LIST,
-		)
-	})
-
-	it.each([false, true])(
-		'gives the card (public: %s) three photo tiles and a View trip stub',
-		(isPublic) => {
-			const { container } = renderSkeleton({ isPublic })
-			const tiles = byDataCy(
-				container,
-				TRAVELLER_SKELETON.PHOTOS,
-			).querySelectorAll('li')
-			expect(tiles).toHaveLength(3)
-			tiles.forEach((tile) =>
-				expect(tile).toHaveClass(...CARD_PHOTOS.TILE_WIDTH.split(' ')),
-			)
+	it.each([
+		[false, 5],
+		[true, 2],
+	])(
+		'gives the card (public: %s) %i text lines, three photo tiles and a View trip stub',
+		(isPublic, lines) => {
+			renderSkeleton({ isPublic })
 			expect(
-				byDataCy(container, TRAVELLER_SKELETON.BUTTON),
+				screen.getByTestId(TRAVELLER_SKELETON.TEXT).children,
+			).toHaveLength(lines)
+			expect(
+				screen
+					.getByTestId(TRAVELLER_SKELETON.PHOTOS)
+					.querySelectorAll('li'),
+			).toHaveLength(3)
+			expect(
+				screen.getByTestId(TRAVELLER_SKELETON.BUTTON),
 			).toBeInTheDocument()
 		},
 	)

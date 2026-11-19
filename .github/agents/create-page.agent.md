@@ -39,7 +39,7 @@ Use this agent when creating a new route-level page with structure, styling, and
     - Style the page with Tailwind utilities (root `<main>` keeps `mainContainer cardPage`); see `styles.instructions.md`.
 
 6. **Test Scaffolding**
-    - Create `{PageName}.test.jsx` (Vitest page test).
+    - Create `{PageName}.test.jsx` (Vitest page test). It checks the page's wiring only (what it passes its children and what happens next), not their own states; it finds elements with `screen.getByTestId` (or by role), writes no class-name, `data-cy`-only, child-prop or wrapper checks, and makes cases that differ only in input and expected output one `it.each` table (Vitest Rules in `testing.instructions.md`).
     - Create `{PageName}.cy.jsx` (Cypress component test) only when a real browser shows something about the page (layout per width, a computed style, scrolling, a real file input); see "Which layer owns a check" in `testing.instructions.md`. Mount it with `cy.mountWithProviders(ui, store, { initialEntries })`.
     - Create `cypress/e2e/pages/{PageName}.cy.js` (E2E flow test) and call `cy.checkA11y()` once for the route.
     - Use `src/constants/test` for test constants and `cypress/support/utils` for E2E helpers.

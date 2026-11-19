@@ -75,17 +75,18 @@ describe('PageNotFound', () => {
 		expect(document.title).toBe(`Page not found · ${GLOBAL.SITE_NAME}`)
 	})
 
-	it('offers Go to Travellers when logged in', () => {
-		const action = renderAs('abc')
+	it.each([
+		[
+			'Go to Travellers when logged in',
+			'abc',
+			'Go to Travellers',
+			PATHS.TRAVELLERS,
+		],
+		['Log in when logged out', null, 'Log in', PATHS.AUTHENTICATION],
+	])('offers %s', (_, userId, label, href) => {
+		const action = renderAs(userId)
 
-		expect(action).toHaveTextContent('Go to Travellers')
-		expect(action).toHaveAttribute('href', PATHS.TRAVELLERS)
-	})
-
-	it('offers Log in when logged out', () => {
-		const action = renderAs(null)
-
-		expect(action).toHaveTextContent('Log in')
-		expect(action).toHaveAttribute('href', PATHS.AUTHENTICATION)
+		expect(action).toHaveTextContent(label)
+		expect(action).toHaveAttribute('href', href)
 	})
 })

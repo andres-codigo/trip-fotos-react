@@ -108,14 +108,6 @@ describe('<Header />', () => {
 		})
 	})
 
-	it('shows the places once signed in', async () => {
-		renderWithProviders('traveller-uid')
-
-		expect(
-			await screen.findByRole('navigation', { name: 'Main' }),
-		).toBeInTheDocument()
-	})
-
 	it('shows no places while a new account is on Check your inbox', async () => {
 		window.history.pushState({}, '', PATHS.AUTHENTICATION)
 		renderWithProviders('traveller-uid', true)

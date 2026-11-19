@@ -32,15 +32,14 @@ describe('<Input />', () => {
 					disabled={true}
 					required={true}
 					showRequiredMark={true}
-					className="custom-class"
-					data-cy="cy-input"
 					data-cy-error="cy-error"
 				/>,
 			)
-			const input = screen.getByRole('textbox')
+			const input = screen.getByRole('textbox', { name: /Full Label/ })
+			expect(input).toHaveAttribute('id', 'full-input')
 			expect(input).toHaveAttribute('type', 'email')
 			expect(input).toBeDisabled()
-			expect(input).toHaveClass('custom-class')
+			expect(input).toBeRequired()
 			expect(input).toHaveAttribute('aria-required', 'true')
 			expect(input).toHaveAttribute('aria-invalid', 'true')
 			expect(input).toHaveAttribute(
@@ -61,36 +60,6 @@ describe('<Input />', () => {
 				/>,
 			)
 			expect(screen.queryByLabelText(/.+/)).not.toBeInTheDocument()
-		})
-
-		it('renders error message and sets aria attributes when invalid', () => {
-			render(
-				<Input
-					id="invalid-input"
-					value=""
-					onChange={() => {}}
-					isValid={false}
-					message="Error occurred"
-				/>,
-			)
-			const input = screen.getByRole('textbox')
-			expect(input).toHaveAttribute('aria-invalid', 'true')
-			expect(screen.getByText('Error occurred')).toBeInTheDocument()
-		})
-
-		it('associates label with input using htmlFor and id', () => {
-			render(
-				<Input
-					id="assoc-input"
-					label="Associated Label"
-					value=""
-					onChange={() => {}}
-				/>,
-			)
-			const label = screen.getByText('Associated Label')
-			const input = screen.getByRole('textbox')
-			expect(label).toHaveAttribute('for', 'assoc-input')
-			expect(input).toHaveAttribute('id', 'assoc-input')
 		})
 	})
 
@@ -122,32 +91,6 @@ describe('<Input />', () => {
 			const input = screen.getByRole('textbox')
 			fireEvent.blur(input)
 			expect(handleBlur).toHaveBeenCalled()
-		})
-
-		it('applies required attribute when required prop is true', () => {
-			render(
-				<Input
-					id="required-input"
-					value=""
-					onChange={() => {}}
-					required={true}
-				/>,
-			)
-			const input = screen.getByRole('textbox')
-			expect(input).toBeRequired()
-		})
-
-		it('applies disabled attribute when disabled prop is true', () => {
-			render(
-				<Input
-					id="disabled-input"
-					value=""
-					onChange={() => {}}
-					disabled={true}
-				/>,
-			)
-			const input = screen.getByRole('textbox')
-			expect(input).toBeDisabled()
 		})
 	})
 	describe('Helper text, required mark and password', () => {

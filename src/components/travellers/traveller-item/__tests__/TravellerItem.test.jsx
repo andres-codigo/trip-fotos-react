@@ -120,20 +120,15 @@ describe('<TravellerItem />', () => {
 			).not.toBeInTheDocument()
 		})
 
-		it('highlights the signed-in user record', () => {
-			setup({ userId: 'abc' })
+		it.each([
+			['highlights the signed-in user record', 'abc', 'true'],
+			['does not highlight other records', 'me', 'false'],
+		])('%s', (_, userId, own) => {
+			setup({ userId })
 			renderItem()
 			expect(screen.getByTestId(TRAVELLER_ITEM.ROOT)).toHaveAttribute(
 				'data-own',
-				'true',
-			)
-		})
-
-		it('does not highlight other records', () => {
-			renderItem()
-			expect(screen.getByTestId(TRAVELLER_ITEM.ROOT)).toHaveAttribute(
-				'data-own',
-				'false',
+				own,
 			)
 		})
 	})
@@ -156,14 +151,12 @@ describe('<TravellerItem />', () => {
 	})
 
 	describe('Badges', () => {
-		it('gives legacy and object cities a badge tone', () => {
+		it('shows a badge for legacy and object cities', () => {
 			renderItem()
 			const badges = screen.getAllByTestId(BADGE.ID)
 			expect(badges).toHaveLength(2)
 			expect(badges[0]).toHaveTextContent('Tokyo, Japan')
-			expect(badges[0].className).toMatch(/\bbg-badge-\d\b/)
 			expect(badges[1]).toHaveTextContent('Paris, France')
-			expect(badges[1].className).toMatch(/\bbg-badge-\d\b/)
 		})
 	})
 

@@ -26,12 +26,14 @@ describe('<BaseSheet />', () => {
 	})
 
 	describe('Rendering tests', () => {
-		it('renders the title and children when show is true', () => {
+		it('renders the title as an h2 and the children when show is true', () => {
 			renderSheet()
-			expect(screen.getByRole('dialog')).toBeInTheDocument()
-			expect(screen.getByTestId(SHEET.TITLE)).toHaveTextContent(
-				defaultProps.title,
-			)
+			expect(
+				screen.getByRole('heading', {
+					level: 2,
+					name: defaultProps.title,
+				}),
+			).toBeInTheDocument()
 			expect(screen.getByTestId(SHEET.BODY)).toHaveTextContent(
 				defaultProps.children,
 			)
@@ -45,16 +47,6 @@ describe('<BaseSheet />', () => {
 			).not.toBeInTheDocument()
 		})
 
-		it('renders the title as an h2', () => {
-			renderSheet()
-			expect(
-				screen.getByRole('heading', {
-					level: 2,
-					name: defaultProps.title,
-				}),
-			).toBeInTheDocument()
-		})
-
 		it('renders the footer when given', () => {
 			renderSheet({ footer: <button type="button">Show all</button> })
 			expect(screen.getByTestId(SHEET.FOOTER)).toContainElement(
@@ -65,25 +57,6 @@ describe('<BaseSheet />', () => {
 		it('renders no footer row without a footer', () => {
 			renderSheet()
 			expect(screen.queryByTestId(SHEET.FOOTER)).not.toBeInTheDocument()
-		})
-
-		it('uses the default data-cy, or the one given', () => {
-			const { unmount } = renderSheet()
-			expect(screen.getByRole('dialog')).toHaveAttribute(
-				'data-cy',
-				SHEET.ID,
-			)
-			unmount()
-			renderSheet({ 'data-cy': 'city-sheet' })
-			expect(screen.getByRole('dialog')).toHaveAttribute(
-				'data-cy',
-				'city-sheet',
-			)
-		})
-
-		it('merges a className onto the sheet', () => {
-			renderSheet({ className: 'custom-class' })
-			expect(screen.getByRole('dialog')).toHaveClass('custom-class')
 		})
 	})
 

@@ -15,16 +15,4 @@ describe('<InitialsAvatar />', () => {
 		expect(avatar).toHaveAttribute('aria-hidden', 'true')
 		expect(avatar).not.toHaveAttribute('tabindex')
 	})
-
-	it('merges a caller className last', () => {
-		render(
-			<InitialsAvatar
-				name="Amara Okafor"
-				className="size-12"
-			/>,
-		)
-		const avatar = screen.getByText('AO')
-		expect(avatar).toHaveClass('size-12')
-		expect(avatar).not.toHaveClass('size-10')
-	})
 })

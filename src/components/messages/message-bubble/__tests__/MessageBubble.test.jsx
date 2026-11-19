@@ -64,9 +64,6 @@ describe('<MessageBubble />', () => {
 		expect(
 			screen.queryByTestId(MESSAGE_BUBBLE.TIME),
 		).not.toBeInTheDocument()
-		expect(screen.getByTestId(MESSAGE_BUBBLE.TEXT)).toHaveClass(
-			'opacity-60',
-		)
 	})
 
 	it('announces a failed send and retries from the button', () => {
@@ -79,8 +76,6 @@ describe('<MessageBubble />', () => {
 		})
 
 		const alert = screen.getByRole('alert')
-		// The whole line is in the danger colour, as drawn
-		expect(alert.parentElement).toHaveClass('text-danger-text')
 		expect(alert).toHaveTextContent(
 			`${MESSAGES_CONFIG.NOT_SENT}${MESSAGES_CONFIG.TRY_AGAIN}`,
 		)
