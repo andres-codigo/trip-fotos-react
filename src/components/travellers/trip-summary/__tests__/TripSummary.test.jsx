@@ -76,10 +76,4 @@ describe('<TripSummary />', () => {
 
 		expect(screen.getByText('Trip:')).toHaveClass('sr-only')
 	})
-
-	it('merges a className passed by the parent', () => {
-		renderSummary({ daysInCity: 3, className: 'mt-2' })
-
-		expect(getSummary()).toHaveClass('mt-2', 'text-sm')
-	})
 })

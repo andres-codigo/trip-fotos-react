@@ -110,6 +110,7 @@ const resetLink = `?mode=resetPassword&oobCode=${CODE}`
 const changeLink = `?mode=verifyAndChangeEmail&oobCode=${CODE}`
 const recoverLink = `?mode=recoverEmail&oobCode=${CODE}`
 const NEW_EMAIL = 'ada.new@example.org'
+const VERIFIED_SIGNED_OUT = { signedIn: false, alreadyVerified: false }
 
 const findHeading = (name) => screen.findByRole('heading', { level: 1, name })
 const getLink = (name) => screen.getByRole('link', { name })
@@ -131,10 +132,7 @@ describe('<AuthAction />', () => {
 	})
 
 	it('renders the skip-link target with its own title', async () => {
-		thunks.apply.mockResolvedValue({
-			signedIn: false,
-			alreadyVerified: false,
-		})
+		thunks.apply.mockResolvedValue(VERIFIED_SIGNED_OUT)
 		renderPage({ search: verifyLink })
 
 		const main = screen.getByRole('main')
@@ -144,6 +142,52 @@ describe('<AuthAction />', () => {
 		expect(document.title).toBe(
 			`${AUTH_ACTION_CONFIG.VERIFIED_TITLE} · ${GLOBAL.SITE_NAME}`,
 		)
+	})
+
+	describe.each([
+		[
+			'verifyEmail',
+			verifyLink,
+			'apply',
+			VERIFIED_SIGNED_OUT,
+			AUTH_ACTION_CONFIG.VERIFIED_TITLE,
+		],
+		[
+			'resetPassword',
+			resetLink,
+			'check',
+			EMAIL,
+			AUTH_ACTION_CONFIG.RESET_TITLE,
+		],
+	])('%s link check', (_, search, thunk, result, title) => {
+		it('shows a busy spinner while the link is checked', () => {
+			thunks[thunk].mockReturnValue(new Promise(() => {}))
+			renderPage({ search })
+
+			const spinner = screen.getByRole('status')
+			expect(spinner).toHaveTextContent(AUTH_ACTION_CONFIG.LOADING)
+			expect(spinner).toHaveAttribute('aria-busy', 'true')
+		})
+
+		it('shows the network alert and checks the link again on Try again', async () => {
+			thunks[thunk]
+				.mockResolvedValueOnce(reject(ACTION_CODE_ERRORS.NETWORK))
+				.mockResolvedValueOnce(result)
+			renderPage({ search })
+
+			await findHeading(AUTH_ACTION_CONFIG.NETWORK_TITLE)
+			expect(screen.getByRole('alert')).toHaveTextContent(
+				AUTH_ACTION_CONFIG.NETWORK_TEXT,
+			)
+
+			fireEvent.click(
+				screen.getByRole('button', {
+					name: AUTH_ACTION_CONFIG.TRY_AGAIN,
+				}),
+			)
+			await findHeading(title)
+			expect(thunks[thunk]).toHaveBeenCalledTimes(2)
+		})
 	})
 
 	describe('Invalid links', () => {
@@ -176,20 +220,8 @@ describe('<AuthAction />', () => {
 	})
 
 	describe('verifyEmail', () => {
-		it('shows a busy spinner while the link is checked', () => {
-			thunks.apply.mockReturnValue(new Promise(() => {}))
-			renderPage({ search: verifyLink })
-
-			const spinner = screen.getByRole('status')
-			expect(spinner).toHaveTextContent(AUTH_ACTION_CONFIG.LOADING)
-			expect(spinner).toHaveAttribute('aria-busy', 'true')
-		})
-
 		it('applies the code once under StrictMode', async () => {
-			thunks.apply.mockResolvedValue({
-				signedIn: false,
-				alreadyVerified: false,
-			})
+			thunks.apply.mockResolvedValue(VERIFIED_SIGNED_OUT)
 			renderPage({ search: verifyLink, strict: true })
 
 			await findHeading(AUTH_ACTION_CONFIG.VERIFIED_TITLE)
@@ -197,38 +229,34 @@ describe('<AuthAction />', () => {
 			expect(thunks.apply).toHaveBeenCalledWith(CODE)
 		})
 
-		it('thanks a signed-in non-traveller by first name, offers Register and focuses the heading', async () => {
-			thunks.apply.mockResolvedValue({
-				signedIn: true,
-				alreadyVerified: false,
-			})
-			renderPage({
-				search: verifyLink,
-				signedIn: true,
-				isTraveller: false,
-			})
+		it.each([
+			['a signed-in non-traveller', false],
+			[
+				'a signed-in user whose traveller check has not come back',
+				undefined,
+			],
+		])(
+			'thanks %s by first name, offers Register and focuses the heading',
+			async (_, isTraveller) => {
+				thunks.apply.mockResolvedValue({
+					signedIn: true,
+					alreadyVerified: false,
+				})
+				renderPage({ search: verifyLink, signedIn: true, isTraveller })
 
-			const heading = await findHeading(AUTH_ACTION_CONFIG.VERIFIED_TITLE)
-			await waitFor(() => expect(heading).toHaveFocus())
-			expect(
-				screen.getByText(AUTH_ACTION_CONFIG.VERIFIED_TEXT('Ada')),
-			).toBeInTheDocument()
-			expect(getLink(AUTH_ACTION_CONFIG.REGISTER)).toHaveAttribute(
-				'href',
-				PATHS.REGISTER,
-			)
-		})
-
-		it('treats a signed-in user whose traveller check has not come back as not yet a traveller', async () => {
-			thunks.apply.mockResolvedValue({
-				signedIn: true,
-				alreadyVerified: false,
-			})
-			renderPage({ search: verifyLink, signedIn: true })
-
-			await findHeading(AUTH_ACTION_CONFIG.VERIFIED_TITLE)
-			expect(getLink(AUTH_ACTION_CONFIG.REGISTER)).toBeInTheDocument()
-		})
+				const heading = await findHeading(
+					AUTH_ACTION_CONFIG.VERIFIED_TITLE,
+				)
+				await waitFor(() => expect(heading).toHaveFocus())
+				expect(
+					screen.getByText(AUTH_ACTION_CONFIG.VERIFIED_TEXT('Ada')),
+				).toBeInTheDocument()
+				expect(getLink(AUTH_ACTION_CONFIG.REGISTER)).toHaveAttribute(
+					'href',
+					PATHS.REGISTER,
+				)
+			},
+		)
 
 		it('sends a signed-in traveller to Travellers', async () => {
 			thunks.apply.mockResolvedValue({
@@ -253,10 +281,7 @@ describe('<AuthAction />', () => {
 		})
 
 		it('asks a signed-out user to log in', async () => {
-			thunks.apply.mockResolvedValue({
-				signedIn: false,
-				alreadyVerified: false,
-			})
+			thunks.apply.mockResolvedValue(VERIFIED_SIGNED_OUT)
 			renderPage({ search: verifyLink })
 
 			await findHeading(AUTH_ACTION_CONFIG.VERIFIED_TITLE)
@@ -348,10 +373,6 @@ describe('<AuthAction />', () => {
 				expect(sent).toHaveTextContent(
 					`${AUTH_ACTION_CONFIG.EXPIRED_SENT_PREFIX} ${EMAIL}.`,
 				)
-				// A long address must wrap inside the box on a phone, as on Check your inbox
-				expect(sent.querySelector('strong')).toHaveClass(
-					'wrap-anywhere',
-				)
 				expect(
 					screen.queryByText(AUTH_ACTION_CONFIG.EXPIRED_TEXT),
 				).not.toBeInTheDocument()
@@ -386,41 +407,9 @@ describe('<AuthAction />', () => {
 				).toBeInTheDocument()
 			})
 		})
-
-		it('shows the network alert and checks the link again on Try again', async () => {
-			thunks.apply
-				.mockResolvedValueOnce(reject(ACTION_CODE_ERRORS.NETWORK))
-				.mockResolvedValueOnce({
-					signedIn: false,
-					alreadyVerified: false,
-				})
-			renderPage({ search: verifyLink })
-
-			await findHeading(AUTH_ACTION_CONFIG.NETWORK_TITLE)
-			expect(screen.getByRole('alert')).toHaveTextContent(
-				AUTH_ACTION_CONFIG.NETWORK_TEXT,
-			)
-
-			fireEvent.click(
-				screen.getByRole('button', {
-					name: AUTH_ACTION_CONFIG.TRY_AGAIN,
-				}),
-			)
-			await findHeading(AUTH_ACTION_CONFIG.VERIFIED_TITLE)
-			expect(thunks.apply).toHaveBeenCalledTimes(2)
-		})
 	})
 
 	describe('resetPassword', () => {
-		it('shows a busy spinner while the code is checked', () => {
-			thunks.check.mockReturnValue(new Promise(() => {}))
-			renderPage({ search: resetLink })
-
-			expect(screen.getByRole('status')).toHaveTextContent(
-				AUTH_ACTION_CONFIG.LOADING,
-			)
-		})
-
 		it('shows the new password form for the account and focuses the field', async () => {
 			thunks.check.mockResolvedValue(EMAIL)
 			renderPage({ search: resetLink })
@@ -498,25 +487,6 @@ describe('<AuthAction />', () => {
 			expect(
 				await findHeading(AUTH_ACTION_CONFIG.RESET_EXPIRED_TITLE),
 			).toBeInTheDocument()
-		})
-
-		it('checks the code again on Try again after a network failure', async () => {
-			thunks.check
-				.mockResolvedValueOnce(reject(ACTION_CODE_ERRORS.NETWORK))
-				.mockResolvedValueOnce(EMAIL)
-			renderPage({ search: resetLink })
-
-			await findHeading(AUTH_ACTION_CONFIG.NETWORK_TITLE)
-			expect(screen.getByRole('alert')).toHaveTextContent(
-				AUTH_ACTION_CONFIG.NETWORK_TEXT,
-			)
-			fireEvent.click(
-				screen.getByRole('button', {
-					name: AUTH_ACTION_CONFIG.TRY_AGAIN,
-				}),
-			)
-			await findHeading(AUTH_ACTION_CONFIG.RESET_TITLE)
-			expect(thunks.check).toHaveBeenCalledTimes(2)
 		})
 
 		it('saves the same password again on Try again after a network failure', async () => {

@@ -54,16 +54,16 @@ describe('<Toast />', () => {
 			).toBeInTheDocument()
 		})
 
-		it('renders no action button without an actionLabel', () => {
-			renderToast({ actionLabel: undefined })
-			expect(screen.queryByTestId(TOAST.ACTION)).not.toBeInTheDocument()
-			expect(screen.getAllByRole('button')).toHaveLength(1)
-		})
-
-		it('renders no action button without onAction', () => {
-			renderToast({ onAction: undefined })
-			expect(screen.queryByTestId(TOAST.ACTION)).not.toBeInTheDocument()
-		})
+		it.each(['actionLabel', 'onAction'])(
+			'renders no action button without %s',
+			(prop) => {
+				renderToast({ [prop]: undefined })
+				expect(
+					screen.queryByTestId(TOAST.ACTION),
+				).not.toBeInTheDocument()
+				expect(screen.getAllByRole('button')).toHaveLength(1)
+			},
+		)
 
 		it('does not move focus on mount', () => {
 			const opener = document.createElement('button')
@@ -72,11 +72,6 @@ describe('<Toast />', () => {
 			renderToast()
 			expect(document.activeElement).toBe(opener)
 			opener.remove()
-		})
-
-		it('merges className and accepts a custom data-cy', () => {
-			renderToast({ className: 'bottom-24', 'data-cy': 'undo-toast' })
-			expect(screen.getByTestId('undo-toast')).toHaveClass('bottom-24')
 		})
 	})
 

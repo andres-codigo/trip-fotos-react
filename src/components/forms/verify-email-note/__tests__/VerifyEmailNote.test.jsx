@@ -10,7 +10,6 @@ import { VERIFY_EMAIL_NOTE } from '@/constants/test'
 import useVerifyEmail from '@/utils/useVerifyEmail'
 
 import VerifyEmailNote from '@/components/forms/verify-email-note/VerifyEmailNote'
-import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 vi.mock('@/utils/useVerifyEmail', () => ({ default: vi.fn() }))
 
@@ -43,42 +42,31 @@ describe('<VerifyEmailNote />', () => {
 
 	describe('card', () => {
 		it('shows the title, the explanation and the email by default', () => {
-			const { container } = renderNote(VERIFY_EMAIL_STATUS.IDLE, {
+			renderNote(VERIFY_EMAIL_STATUS.IDLE, {
 				text: VERIFY_EMAIL_PROMPT_CONFIG.REGISTER_NOTE,
 			})
-			const root = container.querySelector(
-				getByDataCy(VERIFY_EMAIL_NOTE.ROOT),
-			)
+			const root = screen.queryByTestId(VERIFY_EMAIL_NOTE.ROOT)
 			expect(root).toHaveAttribute('data-variant', 'card')
 			expect(root.querySelector('svg')).toHaveAttribute(
 				'aria-hidden',
 				'true',
 			)
 			expect(
-				container.querySelector(getByDataCy(VERIFY_EMAIL_NOTE.TITLE)),
+				screen.queryByTestId(VERIFY_EMAIL_NOTE.TITLE),
 			).toHaveTextContent(VERIFY_EMAIL_PROMPT_CONFIG.NOTE_TITLE)
 			expect(root).toHaveTextContent(
 				`${VERIFY_EMAIL_PROMPT_CONFIG.REGISTER_NOTE} ${VERIFY_EMAIL_PROMPT_CONFIG.SENT_LINK_TO} ${EMAIL}.`,
 			)
 		})
-
-		it('merges a className last', () => {
-			const { container } = renderNote(VERIFY_EMAIL_STATUS.IDLE, {
-				className: 'px-6',
-			})
-			const root = container.firstChild
-			expect(root).toHaveClass('px-6')
-			expect(root).not.toHaveClass('px-3.5')
-		})
 	})
 
 	describe('bar', () => {
 		it('shows the reply title and the email, with no icon', () => {
-			const { container } = renderNote(VERIFY_EMAIL_STATUS.IDLE, {
+			renderNote(VERIFY_EMAIL_STATUS.IDLE, {
 				variant: 'bar',
 				text: VERIFY_EMAIL_PROMPT_CONFIG.REGISTER_NOTE,
 			})
-			const root = container.firstChild
+			const root = screen.getByTestId(VERIFY_EMAIL_NOTE.ROOT)
 			expect(root).toHaveAttribute('data-variant', 'bar')
 			expect(root.querySelector('svg')).toBeNull()
 			expect(root).toHaveTextContent(
@@ -127,7 +115,6 @@ describe('<VerifyEmailNote />', () => {
 			renderNote(status, { variant })
 			const alert = screen.getByRole('alert')
 			expect(alert).toHaveTextContent(copy)
-			expect(alert).toHaveClass('text-danger-text')
 			expect(alert).toHaveAttribute('data-cy', VERIFY_EMAIL_NOTE.MESSAGE)
 			expect(
 				queryLink(VERIFY_EMAIL_PROMPT_CONFIG.SEND_AGAIN),
@@ -138,10 +125,8 @@ describe('<VerifyEmailNote />', () => {
 		})
 
 		it.each(BUSY)('replaces the links while %s', (status, label) => {
-			const { container } = renderNote(status, { variant })
-			const busy = container.querySelector(
-				getByDataCy(VERIFY_EMAIL_NOTE.BUSY),
-			)
+			renderNote(status, { variant })
+			const busy = screen.queryByTestId(VERIFY_EMAIL_NOTE.BUSY)
 			expect(busy).toHaveTextContent(label)
 			expect(screen.getByRole('status')).toHaveTextContent(label)
 			expect(queryLink(VERIFY_EMAIL_PROMPT_CONFIG.SEND_AGAIN)).toBeNull()

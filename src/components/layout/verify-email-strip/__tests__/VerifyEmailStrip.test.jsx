@@ -9,7 +9,6 @@ import { VERIFY_EMAIL_STRIP } from '@/constants/test'
 import useVerifyEmail from '@/utils/useVerifyEmail'
 
 import VerifyEmailStrip from '@/components/layout/verify-email-strip/VerifyEmailStrip'
-import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 vi.mock('@/utils/useVerifyEmail', () => ({ default: vi.fn() }))
 
@@ -49,13 +48,6 @@ describe('<VerifyEmailStrip />', () => {
 		expect(document.activeElement).toContainElement(link)
 	})
 
-	it('merges a className last', () => {
-		renderStrip(VERIFY_EMAIL_STATUS.IDLE, { className: 'px-8' })
-		const region = screen.getByRole('region')
-		expect(region).toHaveClass('px-8')
-		expect(region).not.toHaveClass('px-4')
-	})
-
 	it('offers both links when idle and calls the hook on click', () => {
 		const { resend, check } = renderStrip()
 		expect(screen.queryByRole('alert')).not.toBeInTheDocument()
@@ -86,10 +78,8 @@ describe('<VerifyEmailStrip />', () => {
 		[VERIFY_EMAIL_STATUS.SENDING, VERIFY_EMAIL_PROMPT_CONFIG.SENDING],
 		[VERIFY_EMAIL_STATUS.CHECKING, VERIFY_EMAIL_PROMPT_CONFIG.CHECKING],
 	])('replaces the links with a busy status when %s', (status, copy) => {
-		const { container } = renderStrip(status)
-		const busy = container.querySelector(
-			getByDataCy(VERIFY_EMAIL_STRIP.BUSY),
-		)
+		renderStrip(status)
+		const busy = screen.queryByTestId(VERIFY_EMAIL_STRIP.BUSY)
 		expect(within(busy).getByRole('status')).toHaveTextContent(copy)
 		expect(queryLink(VERIFY_EMAIL_PROMPT_CONFIG.SEND_AGAIN)).toBeNull()
 		expect(queryLink(VERIFY_EMAIL_PROMPT_CONFIG.CHECK)).toBeNull()

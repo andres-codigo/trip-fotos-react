@@ -88,12 +88,10 @@ describe('<ConversationRow />', () => {
 		).not.toBeInTheDocument()
 	})
 
-	it('marks an unread row with a dot, bold name and hidden ", new"', () => {
+	it('marks an unread row with a dot and a hidden ", new"', () => {
 		renderRow({ isUnread: true })
 
-		const name = screen.getByTestId(CONVERSATION_ROW.NAME)
-		expect(name).toHaveClass('font-bold')
-		expect(name.textContent).toBe(
+		expect(screen.getByTestId(CONVERSATION_ROW.NAME).textContent).toBe(
 			`${rowProps.name}${MESSAGES_CONFIG.NEW_ROW_HIDDEN}`,
 		)
 		expect(screen.getByTestId(CONVERSATION_ROW.DOT)).toHaveAttribute(

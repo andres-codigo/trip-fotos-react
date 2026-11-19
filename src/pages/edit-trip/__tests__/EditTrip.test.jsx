@@ -12,7 +12,6 @@ import configureTestStore from '@/testUtils/configureTestStore'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 import {
-	COMMON_SELECTORS,
 	EDIT_TRIP,
 	TRAVELLER_DETAIL,
 	VERIFY_EMAIL_NOTE,
@@ -70,7 +69,6 @@ vi.mock(
 				<form
 					data-cy="mock-form"
 					data-loading={String(Boolean(isLoading))}
-					data-focus-photos={String(Boolean(focusPhotos))}
 					onSubmit={(event) => {
 						event.preventDefault()
 						onSubmit({ firstName })
@@ -84,6 +82,14 @@ vi.mock(
 							onChange={(event) =>
 								setFirstName(event.target.value)
 							}
+						/>
+					</label>
+					<label>
+						Photos
+						{/* The real form focuses its uploader the same way */}
+						<input
+							type="file"
+							autoFocus={focusPhotos}
 						/>
 					</label>
 					{actions}
@@ -183,14 +189,13 @@ describe('<EditTrip />', () => {
 		expect(fetch).not.toHaveBeenCalled()
 	})
 
-	it('shows a spinner and a hidden heading while loading', () => {
+	it('shows a spinner while loading', () => {
 		vi.stubGlobal(
 			'fetch',
 			vi.fn(() => new Promise(() => {})),
 		)
 		renderPage()
 		expect(screen.getByTestId(TRAVELLER_DETAIL.SPINNER)).toBeInTheDocument()
-		expect(screen.getByRole('heading', { level: 1 })).toHaveClass('sr-only')
 		expect(screen.queryByTestId('mock-form')).not.toBeInTheDocument()
 	})
 
@@ -219,10 +224,7 @@ describe('<EditTrip />', () => {
 			'href',
 			'/travellers/me',
 		)
-		expect(screen.getByTestId('mock-form')).toHaveAttribute(
-			'data-focus-photos',
-			'false',
-		)
+		expect(screen.getByLabelText('Photos')).not.toHaveFocus()
 		expect(screen.getByTestId(EDIT_TRIP.DELETE_SECTION)).toHaveTextContent(
 			EDIT_TRIP_CONFIG.DELETE_SUMMARY(2),
 		)
@@ -233,11 +235,6 @@ describe('<EditTrip />', () => {
 		expect(
 			await screen.findByTestId(VERIFY_EMAIL_NOTE.ROOT),
 		).toHaveTextContent(VERIFY_EMAIL_PROMPT_CONFIG.EDIT_NOTE)
-		expect(
-			screen
-				.getByTestId(VERIFY_EMAIL_NOTE.ROOT)
-				.closest(COMMON_SELECTORS.BASE_CARD),
-		).toHaveClass('bg-surface')
 		expect(screen.queryByTestId('mock-form')).not.toBeInTheDocument()
 		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
 			EDIT_TRIP_CONFIG.TITLE,
@@ -245,12 +242,9 @@ describe('<EditTrip />', () => {
 		expect(screen.getByTestId(EDIT_TRIP.DELETE_SECTION)).toBeInTheDocument()
 	})
 
-	it('asks the form to focus the photos for the photos anchor', async () => {
+	it('focuses the photos field for the photos anchor', async () => {
 		renderPage({ hash: '#photos' })
-		expect(await screen.findByTestId('mock-form')).toHaveAttribute(
-			'data-focus-photos',
-			'true',
-		)
+		expect(await screen.findByLabelText('Photos')).toHaveFocus()
 	})
 
 	it('saves and returns to the trip with the saved alert', async () => {

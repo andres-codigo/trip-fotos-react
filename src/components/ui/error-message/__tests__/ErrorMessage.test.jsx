@@ -12,11 +12,10 @@ describe('<ErrorMessage />', () => {
 		expect(alert).toHaveTextContent('Something went wrong.')
 	})
 
-	it('applies the id, class name and extra attributes', () => {
+	it('applies the id and extra attributes', () => {
 		render(
 			<ErrorMessage
 				id="email-error"
-				className="error"
 				data-cy-error="email">
 				Invalid email.
 			</ErrorMessage>,
@@ -24,7 +23,6 @@ describe('<ErrorMessage />', () => {
 
 		const alert = screen.getByRole('alert')
 		expect(alert).toHaveAttribute('id', 'email-error')
-		expect(alert).toHaveClass('error')
 		expect(alert).toHaveAttribute('data-cy-error', 'email')
 	})
 

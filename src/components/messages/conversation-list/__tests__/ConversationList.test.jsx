@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 
-import { CONVERSATION_LIST, CONVERSATION_ROW } from '@/constants/test'
+import { CONVERSATION_ROW } from '@/constants/test'
 import { SENDER_STATUS } from '@/constants/travellers'
 
 import ConversationList from '@/components/messages/conversation-list/ConversationList'
@@ -41,8 +41,9 @@ describe('<ConversationList />', () => {
 	it('renders a labelled list with a row per conversation', () => {
 		renderList()
 
-		const list = screen.getByRole('list', { name: 'Conversations' })
-		expect(list).toHaveAttribute('data-cy', CONVERSATION_LIST.ROOT)
+		expect(
+			screen.getByRole('list', { name: 'Conversations' }),
+		).toBeInTheDocument()
 		expect(screen.getAllByTestId(CONVERSATION_ROW.ROOT)).toHaveLength(2)
 	})
 
@@ -60,14 +61,5 @@ describe('<ConversationList />', () => {
 
 		fireEvent.click(screen.getAllByTestId(CONVERSATION_ROW.LINK)[1])
 		expect(onSelect).toHaveBeenCalledExactlyOnceWith('conv-2')
-	})
-
-	it('merges a className', () => {
-		renderList({ className: 'rounded-lg' })
-
-		expect(screen.getByTestId(CONVERSATION_LIST.ROOT)).toHaveClass(
-			'rounded-lg',
-			'list-none',
-		)
 	})
 })

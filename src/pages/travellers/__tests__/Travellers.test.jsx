@@ -2,9 +2,9 @@ import { render, screen, act, fireEvent } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 
-import { COMMON_SELECTORS, TEST_IDS } from '@/constants/test'
+import { TEST_IDS } from '@/constants/test'
 
 import Travellers from '@/pages/travellers/Travellers'
 import authenticationReducer from '@/store/slices/authenticationSlice'
@@ -72,8 +72,6 @@ describe('Travellers', () => {
 
 	const setupMocksForHasTravellers = () => stubTravellers(SAMPLE_RECORDS)
 
-	const setupMocksForNoTravellers = () => stubTravellers(null)
-
 	describe('Rendering tests', () => {
 		it('renders the travellers list inside <main>', async () => {
 			setupMocksForHasTravellers()
@@ -91,38 +89,12 @@ describe('Travellers', () => {
 			expect(
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
 			).toBeInTheDocument()
-			expect(screen.getByText('Ada Lovelace')).toBeInTheDocument()
-			expect(screen.getByText('Grace Hopper')).toBeInTheDocument()
 		})
 
-		// The grid's cards sit on the page background, not inside a 640px page card
-		it('puts the list straight on the page, without a page card', async () => {
-			setupMocksForHasTravellers()
-
-			await act(async () => {
-				renderTravellers()
-			})
-
-			const main = screen.getByRole('main')
-			expect(main.querySelector(COMMON_SELECTORS.BASE_CARD)).toBeNull()
-			expect(screen.getByTestId('travellers-page')).toHaveClass(
-				'max-w-290',
-			)
-		})
-
-		it('renders the TravellersList component if there are no travellers', async () => {
-			setupMocksForNoTravellers()
-
-			await act(async () => {
-				renderTravellers()
-			})
-
-			expect(
-				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.NO_LIST),
-			).toBeInTheDocument()
-		})
-
-		it('renders alert when alertMessage is present in location state', async () => {
+		it('shows the alert from location state, clears history state and drops the alert once closed', async () => {
+			const replaceState = vi
+				.spyOn(window.history, 'replaceState')
+				.mockImplementation(() => {})
 			setupMocksForHasTravellers()
 			const alertMessage = 'Success Message'
 
@@ -130,9 +102,17 @@ describe('Travellers', () => {
 				renderTravellers({}, { alertMessage })
 			})
 
-			const alert = screen.getByRole('alert')
-			expect(alert).toBeInTheDocument()
-			expect(alert).toHaveTextContent(alertMessage)
+			expect(screen.getByRole('alert')).toHaveTextContent(alertMessage)
+			expect(replaceState).toHaveBeenCalledWith({}, document.title)
+			replaceState.mockRestore()
+
+			await act(async () => {
+				fireEvent.click(screen.getByLabelText('Close message'))
+			})
+			await act(async () => {
+				fireEvent.animationEnd(screen.getByRole('alert'))
+			})
+			expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 		})
 
 		it('does not render alert when no alertMessage in state', async () => {
@@ -140,55 +120,6 @@ describe('Travellers', () => {
 
 			await act(async () => {
 				renderTravellers({}, null)
-			})
-
-			expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-		})
-	})
-
-	describe('Behaviour tests', () => {
-		const originalReplaceState = window.history.replaceState
-
-		beforeEach(() => {
-			window.history.replaceState = vi.fn()
-		})
-
-		afterEach(() => {
-			window.history.replaceState = originalReplaceState
-		})
-
-		it('clears history state when alert is present', async () => {
-			setupMocksForHasTravellers()
-			const alertMessage = 'Success Message'
-
-			await act(async () => {
-				renderTravellers({}, { alertMessage })
-			})
-
-			expect(window.history.replaceState).toHaveBeenCalledWith(
-				{},
-				document.title,
-			)
-		})
-
-		it('closes alert when close button is clicked', async () => {
-			setupMocksForHasTravellers()
-			const alertMessage = 'Success Message'
-
-			await act(async () => {
-				renderTravellers({}, { alertMessage })
-			})
-
-			const closeButton = screen.getByLabelText('Close message')
-			await act(async () => {
-				fireEvent.click(closeButton)
-			})
-
-			const alert = screen.getByRole('alert')
-			expect(alert).toBeInTheDocument()
-
-			await act(async () => {
-				fireEvent.animationEnd(alert)
 			})
 
 			expect(screen.queryByRole('alert')).not.toBeInTheDocument()

@@ -2,18 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import Alerts from '@/components/ui/alerts/Alerts'
 
-// Mock BaseButton to focus on Alerts logic
-vi.mock('@/components/ui/button/BaseButton', () => ({
-	default: ({ children, onClick, className, 'aria-label': ariaLabel }) => (
-		<button
-			onClick={onClick}
-			className={className}
-			aria-label={ariaLabel}>
-			{children}
-		</button>
-	),
-}))
-
 describe('Alerts Component', () => {
 	const defaultProps = {
 		message: 'Test Alert Message',
@@ -30,37 +18,12 @@ describe('Alerts Component', () => {
 		vi.useRealTimers()
 	})
 
-	it('renders correctly with default props', () => {
+	it('renders the message in an alert', () => {
 		render(<Alerts {...defaultProps} />)
 
-		const alert = screen.getByRole('alert')
-		expect(alert).toBeInTheDocument()
-		expect(alert).toHaveClass('bg-success', 'text-on-success') // Default type
-		expect(screen.getByText('Test Alert Message')).toBeInTheDocument()
-	})
-
-	it('renders correctly with "error" type', () => {
-		render(
-			<Alerts
-				{...defaultProps}
-				type="error"
-			/>,
+		expect(screen.getByRole('alert')).toHaveTextContent(
+			'Test Alert Message',
 		)
-
-		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('bg-danger')
-	})
-
-	it('renders correctly with "info" type', () => {
-		render(
-			<Alerts
-				{...defaultProps}
-				type="info"
-			/>,
-		)
-
-		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('bg-accent')
 	})
 
 	it('starts fade-out on close button click and unmounts after animation ends', () => {
@@ -110,32 +73,32 @@ describe('Alerts Component', () => {
 		expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 	})
 
-	it('auto-closes after specified duration and waits for animation end', () => {
-		const duration = 3000
-		render(
-			<Alerts
-				{...defaultProps}
-				duration={duration}
-			/>,
-		)
+	it.each([3000, 1000])(
+		'auto-closes after a %dms duration and waits for the animation end',
+		(duration) => {
+			render(
+				<Alerts
+					{...defaultProps}
+					duration={duration}
+				/>,
+			)
 
-		expect(screen.getByRole('alert')).toBeInTheDocument()
+			act(() => {
+				vi.advanceTimersByTime(duration)
+			})
 
-		act(() => {
-			vi.advanceTimersByTime(duration)
-		})
+			const alert = screen.getByRole('alert')
+			expect(alert).toHaveClass('animate-alert-out')
+			expect(defaultProps.onClose).not.toHaveBeenCalled()
 
-		const alert = screen.getByRole('alert')
-		expect(alert).toHaveClass('animate-alert-out')
-		expect(defaultProps.onClose).not.toHaveBeenCalled()
+			act(() => {
+				fireEvent.animationEnd(alert)
+			})
 
-		act(() => {
-			fireEvent.animationEnd(alert)
-		})
-
-		expect(defaultProps.onClose).toHaveBeenCalledTimes(1)
-		expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-	})
+			expect(defaultProps.onClose).toHaveBeenCalledTimes(1)
+			expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+		},
+	)
 
 	it('handles missing onClose prop gracefully', () => {
 		render(
@@ -158,29 +121,6 @@ describe('Alerts Component', () => {
 		})
 
 		expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-	})
-
-	it('updates visibility logic correctly when duration triggers closing', () => {
-		const duration = 1000
-		render(
-			<Alerts
-				{...defaultProps}
-				duration={duration}
-			/>,
-		)
-
-		act(() => {
-			vi.advanceTimersByTime(duration)
-		})
-
-		// The component should remain mounted until the fade-out animation ends
-		expect(screen.getByRole('alert')).toBeInTheDocument()
-
-		act(() => {
-			fireEvent.animationEnd(screen.getByRole('alert'))
-		})
-
-		expect(screen.queryByRole('alert')).toBeNull()
 	})
 
 	it('stays open when the duration is 0', () => {

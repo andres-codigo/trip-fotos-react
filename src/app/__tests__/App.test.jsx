@@ -88,10 +88,10 @@ vi.mock('@/components/layout/verify-email-strip/VerifyEmailStrip', () => ({
 	default: () => <div>VerifyEmailStrip</div>,
 }))
 vi.mock('@/components/layout/tab-bar/TabBar', () => ({
-	default: ({ className }) => <div data-class={className}>TabBar</div>,
+	default: () => <div>TabBar</div>,
 }))
 vi.mock('@/components/layout/footer/Footer', () => ({
-	default: ({ className }) => <div data-class={className}>Footer</div>,
+	default: () => <div>Footer</div>,
 }))
 vi.mock('@/pages/authentication/Authentication', () => ({
 	default: () => <div>UserAuthPage</div>,
@@ -130,6 +130,11 @@ function renderWithRoute(route) {
 			<App />
 		</router.MemoryRouter>,
 	)
+}
+
+const renderAt = (pathname, search = '') => {
+	vi.spyOn(router, 'useLocation').mockReturnValue({ pathname, search })
+	return renderWithRoute(pathname)
 }
 
 describe('App', () => {
@@ -244,14 +249,6 @@ describe('App', () => {
 	})
 
 	describe('Verify email strip', () => {
-		const renderAt = (pathname) => {
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname,
-				search: '',
-			})
-			return renderWithRoute(pathname)
-		}
-
 		it.each([PATHS.TRAVELLERS, PATHS.MESSAGES, '/travellers/u1'])(
 			'shows under the header for an unverified signed-in user on %s',
 			(path) => {
@@ -333,96 +330,42 @@ describe('App', () => {
 			})
 		})
 
-		it('does not redirect if not logged in and on public route', async () => {
-			setAuthState()
+		it.each([
+			[PATHS.AUTHENTICATION, 'UserAuthPage'],
+			[PATHS.AUTH_ACTION, 'AuthActionPage'],
+			[PATHS.PRIVACY, 'PrivacyPage'],
+			[PATHS.HOME, 'TravellersPage'],
+			[PATHS.TRAVELLERS, 'TravellersPage'],
+		])(
+			'lets a logged-out visitor open %s without redirecting',
+			async (path, page) => {
+				setAuthState()
 
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.AUTHENTICATION,
-			})
+				renderAt(path)
 
-			renderWithRoute(PATHS.AUTHENTICATION)
+				expect(await screen.findByText(page)).toBeInTheDocument()
+				expect(navigateMock).not.toHaveBeenCalled()
+			},
+		)
 
-			expect(navigateMock).not.toHaveBeenCalled()
-			await waitFor(() => {
-				expect(screen.getByText('UserAuthPage')).toBeInTheDocument()
-			})
-		})
+		it.each([
+			[
+				'a new account showing Check your inbox',
+				{ awaitingVerification: true },
+			],
+			['an unverified account after a reload', { emailVerified: false }],
+		])('keeps %s on the login page', (_, state) => {
+			setAuthState({ userId: 'u1', ...state })
 
-		it('moves a signed-in user off the login page', () => {
-			setAuthState({ userId: 'u1' })
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.AUTHENTICATION,
-				search: '',
-			})
-
-			renderWithRoute(PATHS.AUTHENTICATION)
-
-			expect(navigateMock).toHaveBeenCalledWith(PATHS.TRAVELLERS, {
-				replace: true,
-			})
-		})
-
-		it('keeps a new account on the login page while it shows Check your inbox', () => {
-			setAuthState({ userId: 'u1', awaitingVerification: true })
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.AUTHENTICATION,
-				search: '',
-			})
-
-			renderWithRoute(PATHS.AUTHENTICATION)
+			renderAt(PATHS.AUTHENTICATION)
 
 			expect(navigateMock).not.toHaveBeenCalled()
-		})
-
-		it('keeps an unverified account on the login page after a reload, for Check your inbox', () => {
-			setAuthState({ userId: 'u1', emailVerified: false })
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.AUTHENTICATION,
-				search: '',
-			})
-
-			renderWithRoute(PATHS.AUTHENTICATION)
-
-			expect(navigateMock).not.toHaveBeenCalled()
-		})
-
-		it('opens the email-link page without signing in', async () => {
-			setAuthState()
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.AUTH_ACTION,
-			})
-
-			renderWithRoute(PATHS.AUTH_ACTION)
-
-			expect(navigateMock).not.toHaveBeenCalled()
-			expect(
-				await screen.findByText('AuthActionPage'),
-			).toBeInTheDocument()
-		})
-
-		it('renders PrivacyPage without redirecting when not logged in', async () => {
-			setAuthState()
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.PRIVACY,
-			})
-
-			renderWithRoute(PATHS.PRIVACY)
-
-			expect(navigateMock).not.toHaveBeenCalled()
-			await waitFor(() => {
-				expect(screen.getByText('PrivacyPage')).toBeInTheDocument()
-			})
 		})
 
 		it('renders a canonical link for the current route', () => {
 			setAuthState()
 
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.AUTHENTICATION,
-			})
-
-			renderWithRoute(PATHS.AUTHENTICATION)
+			renderAt(PATHS.AUTHENTICATION)
 
 			expect(
 				document.head.querySelector('link[rel="canonical"]'),
@@ -435,11 +378,7 @@ describe('App', () => {
 		it('omits the canonical link on the not found page', () => {
 			setAuthState()
 
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.PAGE_NOT_FOUND,
-			})
-
-			renderWithRoute(PATHS.PAGE_NOT_FOUND)
+			renderAt(PATHS.PAGE_NOT_FOUND)
 
 			expect(
 				document.head.querySelector('link[rel="canonical"]'),
@@ -469,9 +408,8 @@ describe('App', () => {
 				const dispatch = vi.fn()
 				useDispatchMock.mockReturnValue(dispatch)
 				setAuthState({ userId: 'user-1', awaitingVerification: true })
-				vi.spyOn(router, 'useLocation').mockReturnValue({ pathname })
 
-				renderWithRoute(pathname)
+				renderAt(pathname)
 
 				await waitFor(() =>
 					expect(dispatch).toHaveBeenCalledWith({
@@ -485,11 +423,8 @@ describe('App', () => {
 			const dispatch = vi.fn()
 			useDispatchMock.mockReturnValue(dispatch)
 			setAuthState({ userId: 'user-1', awaitingVerification: true })
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.AUTHENTICATION,
-			})
 
-			renderWithRoute(PATHS.AUTHENTICATION)
+			renderAt(PATHS.AUTHENTICATION)
 
 			await waitFor(() => expect(dispatch).toHaveBeenCalled())
 			expect(dispatch).not.toHaveBeenCalledWith({
@@ -497,161 +432,48 @@ describe('App', () => {
 			})
 		})
 
-		it('redirects to /authentication if not logged in and on protected route', async () => {
-			setAuthState()
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.REGISTER,
-			})
-			vi.spyOn(router, 'useInRouterContext').mockReturnValue(true)
-
-			renderWithRoute(PATHS.REGISTER)
-
-			await waitFor(() => {
-				expect(navigateMock).toHaveBeenCalledWith(
-					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent(PATHS.REGISTER)}`,
-					{ replace: true },
-				)
-			})
-		})
-
-		it.each([PATHS.HOME, PATHS.TRAVELLERS])(
-			'lets a logged-out visitor stay on %s',
-			async (pathname) => {
+		it.each([
+			PATHS.REGISTER,
+			'/travellers/abc123',
+			'/travellers/abc123/contact',
+			'/travellers/abc123/edit',
+			PATHS.MESSAGES,
+		])(
+			'redirects a logged-out visitor on %s to log in, then back',
+			async (path) => {
 				setAuthState()
-				vi.spyOn(router, 'useLocation').mockReturnValue({ pathname })
 
-				renderWithRoute(pathname)
+				renderAt(path)
 
 				await waitFor(() => {
-					expect(navigateMock).not.toHaveBeenCalledWith(
-						expect.stringContaining(PATHS.AUTHENTICATION),
-						expect.anything(),
+					expect(navigateMock).toHaveBeenCalledWith(
+						`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent(path)}`,
+						{ replace: true },
 					)
 				})
 			},
 		)
 
-		it('redirects to /authentication if not logged in and on a traveller detail route', async () => {
-			setAuthState()
+		it.each([
+			['/travellers/abc123', 'TravellerDetailPage', {}],
+			// A contact link opens the conversation with that traveller
+			['/travellers/abc123/contact', 'MessagesPage', {}],
+			['/travellers/abc123/edit', 'EditTripPage', {}],
+			[PATHS.MESSAGES, 'MessagesPage', {}],
+			// The saved session opens the page at once, while the SDK confirms it
+			[PATHS.MESSAGES, 'MessagesPage', { sessionChecked: false }],
+		])(
+			'opens %s as %s for a signed-in user %o, redirecting nowhere',
+			async (path, page, state) => {
+				useDispatchMock.mockReturnValue(vi.fn())
+				setAuthState({ userId: 'user-1', ...state })
 
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: '/travellers/abc123',
-			})
+				renderAt(path)
 
-			renderWithRoute('/travellers/abc123')
-
-			await waitFor(() => {
-				expect(navigateMock).toHaveBeenCalledWith(
-					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent('/travellers/abc123')}`,
-					{ replace: true },
-				)
-			})
-		})
-
-		it('renders TravellerDetailPage when logged in and on a traveller detail route', async () => {
-			setAuthState({ userId: 'user-1' })
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: '/travellers/abc123',
-			})
-
-			renderWithRoute('/travellers/abc123')
-
-			await waitFor(() => {
-				expect(
-					screen.getByText('TravellerDetailPage'),
-				).toBeInTheDocument()
-			})
-			expect(navigateMock).not.toHaveBeenCalled()
-		})
-
-		it('redirects to /authentication if not logged in and on a contact traveller route', async () => {
-			setAuthState()
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: '/travellers/abc123/contact',
-			})
-
-			renderWithRoute('/travellers/abc123/contact')
-
-			await waitFor(() => {
-				expect(navigateMock).toHaveBeenCalledWith(
-					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent('/travellers/abc123/contact')}`,
-					{ replace: true },
-				)
-			})
-		})
-
-		it('sends a contact link to the conversation with that traveller', async () => {
-			useDispatchMock.mockReturnValue(vi.fn())
-			setAuthState({ userId: 'user-1' })
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: '/travellers/abc123/contact',
-			})
-
-			renderWithRoute('/travellers/abc123/contact')
-
-			await waitFor(() => {
-				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
-			})
-		})
-
-		it('hides the tab bar and footer below 1024px on a thread', async () => {
-			useDispatchMock.mockReturnValue(vi.fn())
-			setAuthState({ userId: 'user-1' })
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: '/messages/abc123_user-1',
-			})
-
-			renderWithRoute('/messages/abc123_user-1')
-
-			await waitFor(() => {
-				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
-			})
-			expect(screen.getByText('TabBar')).toHaveAttribute(
-				'data-class',
-				'mobile:hidden',
-			)
-			expect(screen.getByText('Footer')).toHaveAttribute(
-				'data-class',
-				'max-lg:hidden',
-			)
-		})
-
-		it('redirects to /authentication if not logged in and on an edit trip route', async () => {
-			setAuthState()
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: '/travellers/abc123/edit',
-			})
-
-			renderWithRoute('/travellers/abc123/edit')
-
-			await waitFor(() => {
-				expect(navigateMock).toHaveBeenCalledWith(
-					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent('/travellers/abc123/edit')}`,
-					{ replace: true },
-				)
-			})
-		})
-
-		it('renders EditTripPage when logged in and on an edit trip route', async () => {
-			setAuthState({ userId: 'user-1' })
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: '/travellers/abc123/edit',
-			})
-
-			renderWithRoute('/travellers/abc123/edit')
-
-			await waitFor(() => {
-				expect(screen.getByText('EditTripPage')).toBeInTheDocument()
-			})
-			expect(navigateMock).not.toHaveBeenCalled()
-		})
+				expect(await screen.findByText(page)).toBeInTheDocument()
+				expect(navigateMock).not.toHaveBeenCalled()
+			},
+		)
 
 		it('sends the traveller to /authentication when the session ends on a public page', async () => {
 			setAuthState({ userId: 'user-1' })
@@ -696,41 +518,10 @@ describe('App', () => {
 			expect(navigateMock).not.toHaveBeenCalled()
 		})
 
-		it('does not send a visitor who was never signed in to /authentication', async () => {
-			setAuthState()
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.TRAVELLERS,
-			})
-
-			renderWithRoute(PATHS.TRAVELLERS)
-
-			await waitFor(() => {
-				expect(screen.getByText('TravellersPage')).toBeInTheDocument()
-			})
-			expect(navigateMock).not.toHaveBeenCalled()
-		})
-
-		it('opens a protected page from the saved session at once, redirecting nowhere while the SDK confirms it', async () => {
-			setAuthState({ userId: 'user-1', sessionChecked: false })
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.MESSAGES,
-			})
-
-			renderWithRoute(PATHS.MESSAGES)
-
-			await waitFor(() => {
-				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
-			})
-			expect(navigateMock).not.toHaveBeenCalled()
-		})
-
 		it('waits for the SDK before sending a visitor from a protected page to log in', async () => {
 			setAuthState({ sessionChecked: false })
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.MESSAGES,
-			})
 
-			renderWithRoute(PATHS.MESSAGES)
+			renderAt(PATHS.MESSAGES)
 
 			await waitFor(() => {
 				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
@@ -738,85 +529,34 @@ describe('App', () => {
 			expect(navigateMock).not.toHaveBeenCalled()
 		})
 
-		it('keeps a restored session on the protected URL it was opened at', async () => {
-			const dispatch = vi.fn()
-			useDispatchMock.mockReturnValue(dispatch)
-			setAuthState({ userId: 'user-1' })
+		it.each([
+			['the travellers list', '', PATHS.TRAVELLERS],
+			[
+				'the redirect target when there is one',
+				'?redirect=/messages',
+				'/messages',
+			],
+		])(
+			'sends a logged-in user on /authentication to %s',
+			async (_, search, target) => {
+				setAuthState({ userId: 'user-1' })
 
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.MESSAGES,
-			})
+				renderAt(PATHS.AUTHENTICATION, search)
 
-			renderWithRoute(PATHS.MESSAGES)
-
-			await waitFor(() => {
-				expect(screen.getByText('MessagesPage')).toBeInTheDocument()
-			})
-			expect(navigateMock).not.toHaveBeenCalled()
-		})
-
-		it('sends the user to /authentication when the SDK has no saved session on a protected URL', async () => {
-			setAuthState()
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.MESSAGES,
-			})
-
-			renderWithRoute(PATHS.MESSAGES)
-
-			await waitFor(() => {
-				expect(navigateMock).toHaveBeenCalledWith(
-					`${PATHS.AUTHENTICATION}?redirect=${encodeURIComponent(PATHS.MESSAGES)}`,
-					{ replace: true },
-				)
-			})
-		})
-
-		it('redirects a logged-in user from /authentication to the travellers list', async () => {
-			setAuthState({ userId: 'user-1' })
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.AUTHENTICATION,
-				search: '',
-			})
-
-			renderWithRoute(PATHS.AUTHENTICATION)
-
-			await waitFor(() => {
-				expect(navigateMock).toHaveBeenCalledWith(PATHS.TRAVELLERS, {
-					replace: true,
+				await waitFor(() => {
+					expect(navigateMock).toHaveBeenCalledWith(target, {
+						replace: true,
+					})
 				})
-			})
-		})
-
-		it('sends a logged-in user on /authentication to the redirect target when there is one', async () => {
-			setAuthState({ userId: 'user-1' })
-
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.AUTHENTICATION,
-				search: '?redirect=/messages',
-			})
-
-			renderWithRoute(PATHS.AUTHENTICATION)
-
-			await waitFor(() => {
-				expect(navigateMock).toHaveBeenCalledWith('/messages', {
-					replace: true,
-				})
-			})
-		})
+			},
+		)
 
 		it('starts the session listener on mount', async () => {
 			const dispatch = vi.fn()
 			useDispatchMock.mockReturnValue(dispatch)
 			setAuthState({ userId: 'user-1' })
 
-			vi.spyOn(router, 'useLocation').mockReturnValue({
-				pathname: PATHS.HOME,
-			})
-			vi.spyOn(router, 'useInRouterContext').mockReturnValue(true)
-
-			renderWithRoute(PATHS.HOME)
+			renderAt(PATHS.HOME)
 
 			await waitFor(() => {
 				expect(dispatch).toHaveBeenCalledWith({

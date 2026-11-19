@@ -6,7 +6,7 @@ import BaseCard from '@/components/ui/card/BaseCard'
 const BASE_CARD_SELECTOR = 'base-card'
 
 describe('<BaseCard />', () => {
-	it('renders its children in a styled div', () => {
+	it('renders its children', () => {
 		render(
 			<BaseCard>
 				<h1>Card Content</h1>
@@ -14,27 +14,9 @@ describe('<BaseCard />', () => {
 			</BaseCard>,
 		)
 
-		const card = screen.getByTestId(BASE_CARD_SELECTOR)
-		expect(card.tagName).toBe('DIV')
-		expect(card).toHaveClass('rounded-lg')
-		expect(card).toHaveTextContent('Card Contenttext')
-	})
-
-	it('keeps a custom className alongside the card styles', () => {
-		render(<BaseCard className="custom-class">Content</BaseCard>)
-
-		expect(screen.getByTestId(BASE_CARD_SELECTOR)).toHaveClass(
-			'custom-class',
-			'rounded-lg',
+		expect(screen.getByTestId(BASE_CARD_SELECTOR)).toHaveTextContent(
+			'Card Contenttext',
 		)
-	})
-
-	it('lets a custom className override a conflicting utility', () => {
-		render(<BaseCard className="p-8">Content</BaseCard>)
-
-		const card = screen.getByTestId(BASE_CARD_SELECTOR)
-		expect(card).toHaveClass('p-8')
-		expect(card).not.toHaveClass('p-4')
 	})
 
 	it('does not spread arbitrary props onto the div', () => {

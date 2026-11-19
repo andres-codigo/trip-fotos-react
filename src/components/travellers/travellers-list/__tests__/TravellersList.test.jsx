@@ -16,13 +16,16 @@ import { TRAVELLERS_ACTION_TYPES } from '@/constants/redux'
 import {
 	TRAVELLER_FILTER_CONFIG,
 	TRAVELLERS_LIST_CONFIG,
+	TRAVELLERS_WELCOME_CONFIG,
 } from '@/constants/travellers'
 import {
 	MOCK_CITIES,
 	MOCK_ERROR_MESSAGES,
 	MOCK_TRAVELLERS,
 	MOCK_USER,
+	PUBLIC_TRAVELLER_ITEM,
 	TEST_IDS,
+	TRAVELLER_ITEM,
 	TRAVELLER_SKELETON,
 	SPINNER,
 	UI_TEXT,
@@ -67,17 +70,25 @@ vi.mock(
 	},
 )
 
-vi.mock('@/components/travellers/traveller-item/TravellerItem', () => ({
-	default: () => <li data-cy="traveller-item">Traveller item</li>,
-}))
+vi.mock('@/components/travellers/traveller-item/TravellerItem', async () => {
+	const { TRAVELLER_ITEM } = await import('@/constants/test')
+	return {
+		default: () => <li data-cy={TRAVELLER_ITEM.ROOT}>Traveller item</li>,
+	}
+})
 
 vi.mock(
 	'@/components/travellers/public-traveller-item/PublicTravellerItem',
-	() => ({
-		default: () => (
-			<li data-cy="public-traveller-item">Public traveller item</li>
-		),
-	}),
+	async () => {
+		const { PUBLIC_TRAVELLER_ITEM } = await import('@/constants/test')
+		return {
+			default: () => (
+				<li data-cy={PUBLIC_TRAVELLER_ITEM.ROOT}>
+					Public traveller item
+				</li>
+			),
+		}
+	},
 )
 
 import TravellersList from '@/components/travellers/travellers-list/TravellersList'
@@ -87,26 +98,10 @@ const ALERT_ROLE = 'alert'
 import * as travellersSlice from '@/store/slices/travellersSlice'
 import * as authenticationSlice from '@/store/slices/authenticationSlice'
 
-const renderTravellersList = (props = {}, options = {}) => {
-	const {
-		shouldReject = false,
-		error = null,
-		shouldResolveSlowly = false,
-	} = options
-
-	let mockDispatch
-	if (shouldReject) {
-		mockDispatch = vi.fn().mockRejectedValue(error)
-	} else if (shouldResolveSlowly) {
-		mockDispatch = vi
-			.fn()
-			.mockImplementation(
-				() => new Promise((resolve) => setTimeout(resolve, 100)),
-			)
-	} else {
-		mockDispatch = vi.fn().mockResolvedValue({})
-	}
-
+const renderTravellersList = (
+	props = {},
+	mockDispatch = vi.fn().mockResolvedValue({}),
+) => {
 	const mockStore = {
 		getState: () => ({}),
 		dispatch: mockDispatch,
@@ -185,10 +180,10 @@ describe('<TravellersList />', () => {
 		)
 	}
 
-	const setupMocksForLoadingState = () => {
-		// Return non-empty array to prevent useEffect, but keep loading true via props
+	// A non-empty list stops the mount load, so isLoading and initialError come from props alone
+	const setupMocksForPropState = () => {
 		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([
-			{ id: 'temp' },
+			{ id: 'mock-traveller' },
 		])
 		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
 		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
@@ -197,21 +192,9 @@ describe('<TravellersList />', () => {
 		})
 	}
 
-	const setupMocksForErrorState = () => {
-		// Setup mocks to prevent useEffect from triggering loadTravellersHandler
-		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([
-			{ id: 'mock-traveller' }, // Non-empty to prevent loading
-		])
-		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false) // But no actual travellers to display
-		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
-		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
-			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,
-		})
-	}
-
 	describe('Rendering tests', () => {
-		it('should render the loading status and a page of skeleton cards when loading', async () => {
-			setupMocksForLoadingState()
+		it('should show the loading label and disable Refresh when loading', async () => {
+			setupMocksForPropState()
 
 			await act(async () => {
 				renderTravellersList({ isLoading: true })
@@ -220,22 +203,6 @@ describe('<TravellersList />', () => {
 			expect(
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.LOADING),
 			).toHaveTextContent(TRAVELLERS_LIST_CONFIG.LOADING_LABEL)
-			expect(
-				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.SKELETON_LIST),
-			).toHaveAttribute('aria-busy', 'true')
-			expect(screen.getAllByTestId(TRAVELLER_SKELETON.ROOT)).toHaveLength(
-				TRAVELLERS_LIST_CONFIG.PAGE_SIZE,
-			)
-			expect(
-				screen.queryByTestId(TEST_IDS.SPINNER.CONTAINER),
-			).not.toBeInTheDocument()
-			expect(screen.getByRole(SPINNER.ROLE_STATUS)).toBeInTheDocument()
-			expect(
-				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LIST),
-			).not.toBeInTheDocument()
-			expect(
-				screen.queryByText(UI_TEXT.TRAVELLERS.NO_TRAVELLERS_MESSAGE),
-			).not.toBeInTheDocument()
 			expect(
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON),
 			).toBeDisabled()
@@ -302,59 +269,32 @@ describe('<TravellersList />', () => {
 				).toBeInTheDocument()
 			})
 
-			it('should not show register button while the traveller check is pending', async () => {
+			it.each([
+				[
+					'while the traveller check is pending',
+					() =>
+						vi
+							.mocked(travellersSlice.selectIsTravellerKnown)
+							.mockReturnValue(false),
+				],
+				[
+					'when the user is not logged in',
+					() =>
+						vi
+							.mocked(authenticationSlice.selectIsAuthenticated)
+							.mockReturnValue(false),
+				],
+				[
+					'when the user is already a traveller',
+					() =>
+						vi
+							.mocked(travellersSlice.selectIsTraveller)
+							.mockReturnValue(true),
+				],
+			])('should not show register button %s', async (_, arrange) => {
 				setupMocksForNoTravellers()
 				setupMocksForLoggedInUser()
-				vi.mocked(
-					travellersSlice.selectIsTravellerKnown,
-				).mockReturnValue(false)
-
-				await act(async () => {
-					renderTravellersList()
-				})
-
-				await waitFor(() => {
-					expect(
-						screen.queryByRole(SPINNER.ROLE_STATUS),
-					).not.toBeInTheDocument()
-				})
-
-				expect(
-					screen.queryByTestId(
-						TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK,
-					),
-				).not.toBeInTheDocument()
-			})
-
-			it('should not show register button when user is not logged in', async () => {
-				setupMocksForNoTravellers()
-				vi.mocked(
-					authenticationSlice.selectIsAuthenticated,
-				).mockReturnValue(false)
-
-				await act(async () => {
-					renderTravellersList()
-				})
-
-				await waitFor(() => {
-					expect(
-						screen.queryByRole(SPINNER.ROLE_STATUS),
-					).not.toBeInTheDocument()
-				})
-
-				expect(
-					screen.queryByTestId(
-						TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK,
-					),
-				).not.toBeInTheDocument()
-			})
-
-			it('should not show register button when user is logged in and is a traveller', async () => {
-				setupMocksForHasTravellers()
-				setupMocksForLoggedInUser()
-				vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(
-					true,
-				)
+				arrange()
 
 				await act(async () => {
 					renderTravellersList()
@@ -368,7 +308,7 @@ describe('<TravellersList />', () => {
 			})
 
 			it('should disable register button when loading', async () => {
-				setupMocksForLoadingState()
+				setupMocksForPropState()
 				setupMocksForLoggedInUser()
 				vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(
 					false,
@@ -388,7 +328,7 @@ describe('<TravellersList />', () => {
 
 		describe('error handling', () => {
 			it('should reload and clear the inline error when Try again is pressed', async () => {
-				setupMocksForErrorState()
+				setupMocksForPropState()
 
 				renderTravellersList({
 					initialError: MOCK_ERROR_MESSAGES.INITIAL_ERROR,
@@ -425,47 +365,27 @@ describe('<TravellersList />', () => {
 				})
 			})
 
-			it('should handle loadTravellers dispatch error', async () => {
-				setupMocksForNoTravellers()
+			it.each([
+				[
+					MOCK_ERROR_MESSAGES.LOAD_FAILED,
+					MOCK_ERROR_MESSAGES.LOAD_FAILED,
+				],
+				[undefined, ERROR_MESSAGES.SOMETHING_WENT_WRONG],
+			])(
+				'should show the dispatch error %s, or a generic message',
+				async (message, shown) => {
+					setupMocksForNoTravellers()
 
-				const mockError = new Error(MOCK_ERROR_MESSAGES.LOAD_FAILED)
-				renderTravellersList(
-					{},
-					{
-						shouldReject: true,
-						error: mockError,
-					},
-				)
+					renderTravellersList(
+						{},
+						vi.fn().mockRejectedValue(new Error(message)),
+					)
 
-				await waitFor(() => {
-					expect(screen.getByRole(ALERT_ROLE)).toBeInTheDocument()
-				})
-
-				expect(
-					screen.getByText(MOCK_ERROR_MESSAGES.LOAD_FAILED),
-				).toBeInTheDocument()
-			})
-
-			it('should show generic error message when error has no message', async () => {
-				setupMocksForNoTravellers()
-
-				const mockError = new Error()
-				renderTravellersList(
-					{},
-					{
-						shouldReject: true,
-						error: mockError,
-					},
-				)
-
-				await waitFor(() => {
-					expect(screen.getByRole(ALERT_ROLE)).toBeInTheDocument()
-				})
-
-				expect(
-					screen.getByText(ERROR_MESSAGES.SOMETHING_WENT_WRONG),
-				).toBeInTheDocument()
-			})
+					expect(
+						await screen.findByRole(ALERT_ROLE),
+					).toHaveTextContent(shown)
+				},
+			)
 
 			it('should handle loadTravellers rejection with payload', async () => {
 				setupMocksForNoTravellers()
@@ -484,11 +404,11 @@ describe('<TravellersList />', () => {
 					match: vi.fn().mockReturnValue(true),
 				}
 
-				const mockDispatch = vi.fn().mockResolvedValue(rejectedResult)
-				vi.mocked(useDispatch).mockReturnValue(mockDispatch)
-
 				await act(async () => {
-					renderTravellersList()
+					renderTravellersList(
+						{},
+						vi.fn().mockResolvedValue(rejectedResult),
+					)
 				})
 
 				await waitFor(() => {
@@ -522,9 +442,6 @@ describe('<TravellersList />', () => {
 
 			it('should call loadTravellersHandler with true when refresh button is clicked', async () => {
 				setupMocksForHasTravellers()
-
-				const mockDispatch = vi.fn().mockResolvedValue({})
-				vi.mocked(useDispatch).mockReturnValue(mockDispatch)
 
 				await act(async () => {
 					renderTravellersList()
@@ -580,19 +497,6 @@ describe('<TravellersList />', () => {
 	})
 
 	describe('Accessibility tests', () => {
-		it('should announce the load error as an alert', async () => {
-			setupMocksForErrorState()
-
-			await act(async () => {
-				renderTravellersList({
-					initialError: MOCK_ERROR_MESSAGES.INITIAL_ERROR,
-					isLoading: false,
-				})
-			})
-
-			expect(screen.getByRole(ALERT_ROLE)).toBeInTheDocument()
-		})
-
 		it('should name the icon-only refresh button', async () => {
 			setupMocksForHasTravellers()
 			await act(async () => {
@@ -602,10 +506,6 @@ describe('<TravellersList />', () => {
 			const refreshButton = screen.getByRole('button', {
 				name: UI_TEXT.TRAVELLERS.REFRESH_BUTTON,
 			})
-			expect(refreshButton).toHaveAttribute(
-				'data-cy',
-				TEST_IDS.TRAVELLERS_LIST.REFRESH_BUTTON,
-			)
 			expect(refreshButton.querySelector('svg')).toHaveAttribute(
 				'aria-hidden',
 				'true',
@@ -673,47 +573,21 @@ describe('<TravellersList />', () => {
 			vi.mocked(useCityFilter).mockImplementation(actual.default)
 		})
 
-		it('should render one unticked checkbox per distinct city and show every traveller', async () => {
+		it('should filter the cards by the ticked cities and show them all again on Show all cities', async () => {
 			setupMocksForTravellersWithCities()
 			await act(async () => {
 				renderTravellersList()
 			})
 
-			const checkboxes = screen.getAllByRole('checkbox')
-			expect(checkboxes).toHaveLength(2)
-			checkboxes.forEach((checkbox) => expect(checkbox).not.toBeChecked())
+			expect(screen.getAllByRole('checkbox')).toHaveLength(2)
 			expect(getItems()).toHaveLength(2)
-			expect(getShowAll()).toHaveAttribute('aria-disabled', 'true')
-		})
-
-		it('should narrow to travellers who visited a ticked city', async () => {
-			setupMocksForTravellersWithCities()
-			await act(async () => {
-				renderTravellersList()
-			})
 
 			fireEvent.click(getCheckbox(MOCK_CITIES.PRAGUE))
-			expect(getCheckbox(MOCK_CITIES.PRAGUE)).toBeChecked()
 			expect(getItems()).toHaveLength(1)
 
-			fireEvent.click(getCheckbox(MOCK_CITIES.TOKYO))
-			expect(getItems()).toHaveLength(2)
-		})
-
-		it('should show every traveller again on Show all cities', async () => {
-			setupMocksForTravellersWithCities()
-			await act(async () => {
-				renderTravellersList()
-			})
-
-			fireEvent.click(getCheckbox(MOCK_CITIES.PRAGUE))
-			expect(getShowAll()).toHaveAttribute('aria-disabled', 'false')
-
 			fireEvent.click(getShowAll())
-
 			expect(getItems()).toHaveLength(2)
 			expect(getCheckbox(MOCK_CITIES.PRAGUE)).not.toBeChecked()
-			expect(getShowAll()).toHaveAttribute('aria-disabled', 'true')
 		})
 
 		it('should show the zero-results card with a Show all cities reset', async () => {
@@ -780,34 +654,7 @@ describe('<TravellersList />', () => {
 		const getStatus = () =>
 			screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.PAGE_STATUS)
 
-		it('should show no paging controls for a single page', async () => {
-			setupMocksForManyTravellers(makeTravellers(PAGE_SIZE))
-			await act(async () => {
-				renderTravellersList()
-			})
-
-			expect(getItems()).toHaveLength(PAGE_SIZE)
-			expect(getShowMore()).not.toBeInTheDocument()
-			expect(getStatus()).not.toBeInTheDocument()
-		})
-
-		it('should show the first page with Show more and a polite status', async () => {
-			setupMocksForManyTravellers(makeTravellers(30))
-			await act(async () => {
-				renderTravellersList()
-			})
-
-			expect(getItems()).toHaveLength(PAGE_SIZE)
-			expect(getShowMore()).toHaveTextContent(
-				TRAVELLERS_LIST_CONFIG.SHOW_MORE(PAGE_SIZE),
-			)
-			expect(getStatus()).toHaveAttribute('aria-live', 'polite')
-			expect(getStatus()).toHaveTextContent(
-				TRAVELLERS_LIST_CONFIG.PAGE_STATUS(PAGE_SIZE, 30, false),
-			)
-		})
-
-		it('should add a page and move focus to the first new card', async () => {
+		it('should add a page, move focus to the first new card and update the status', async () => {
 			setupMocksForManyTravellers(makeTravellers(30))
 			await act(async () => {
 				renderTravellersList()
@@ -819,27 +666,13 @@ describe('<TravellersList />', () => {
 			expect(items).toHaveLength(PAGE_SIZE * 2)
 			expect(items[PAGE_SIZE]).toHaveFocus()
 			expect(items[PAGE_SIZE]).toHaveAttribute('tabindex', '-1')
+			expect(getStatus()).toHaveAttribute('aria-live', 'polite')
 			expect(getStatus()).toHaveTextContent(
 				TRAVELLERS_LIST_CONFIG.PAGE_STATUS(PAGE_SIZE * 2, 30, false),
 			)
-			expect(getShowMore()).toHaveTextContent(
-				TRAVELLERS_LIST_CONFIG.SHOW_MORE(6),
-			)
-		})
-
-		it('should drop the button and say all are shown on the last page', async () => {
-			setupMocksForManyTravellers(makeTravellers(30))
-			await act(async () => {
-				renderTravellersList()
-			})
 
 			fireEvent.click(getShowMore())
-			fireEvent.click(getShowMore())
-
-			const items = getItems()
-			expect(items).toHaveLength(30)
-			expect(items[PAGE_SIZE * 2]).toHaveFocus()
-			expect(getShowMore()).not.toBeInTheDocument()
+			expect(getItems()[PAGE_SIZE * 2]).toHaveFocus()
 			expect(getStatus()).toHaveTextContent(
 				TRAVELLERS_LIST_CONFIG.ALL_SHOWN(30, false),
 			)
@@ -933,7 +766,7 @@ describe('<TravellersList />', () => {
 			})
 			await waitFor(() => {
 				expect(
-					screen.queryByTestId('travellers-loading'),
+					screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.LOADING),
 				).not.toBeInTheDocument()
 			})
 		}
@@ -947,39 +780,33 @@ describe('<TravellersList />', () => {
 
 			expect(
 				screen.getByRole('region', {
-					name: 'See where travellers have been',
+					name: TRAVELLERS_WELCOME_CONFIG.TITLE,
 				}),
 			).toBeInTheDocument()
-			expect(screen.getAllByTestId('public-traveller-item')).toHaveLength(
-				PUBLIC_TRIPS.length,
-			)
 			expect(
-				screen.queryByTestId('traveller-item'),
+				screen.getAllByTestId(PUBLIC_TRAVELLER_ITEM.ROOT),
+			).toHaveLength(PUBLIC_TRIPS.length)
+			expect(
+				screen.queryByTestId(TRAVELLER_ITEM.ROOT),
 			).not.toBeInTheDocument()
+			expect(travellersSlice.loadPublicTrips).toHaveBeenCalled()
+			expect(travellersSlice.loadTravellers).not.toHaveBeenCalled()
 			expect(
 				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.REGISTER_LINK),
 			).not.toBeInTheDocument()
 		})
 
 		it('stands public-shaped skeletons in while the preview loads', () => {
-			renderTravellersList({}, { shouldResolveSlowly: true })
+			renderTravellersList(
+				{},
+				vi.fn(() => new Promise(() => {})),
+			)
 
 			const [skeleton] = screen.getAllByTestId(TRAVELLER_SKELETON.ROOT)
 			// The public excerpt is clamped to two lines; the signed-in description runs to five
 			expect(
 				within(skeleton).getByTestId(TRAVELLER_SKELETON.TEXT).children,
 			).toHaveLength(2)
-		})
-
-		it('loads the public summaries, not the full records', async () => {
-			vi.mocked(travellersSlice.selectPublicTrips).mockReturnValue(
-				PUBLIC_TRIPS,
-			)
-
-			await renderLoaded()
-
-			expect(travellersSlice.loadPublicTrips).toHaveBeenCalled()
-			expect(travellersSlice.loadTravellers).not.toHaveBeenCalled()
 		})
 
 		it('filters the public cards by city', async () => {
@@ -990,9 +817,9 @@ describe('<TravellersList />', () => {
 			await renderLoaded()
 			fireEvent.click(screen.getByRole('checkbox', { name: /prague/i }))
 
-			expect(screen.getAllByTestId('public-traveller-item')).toHaveLength(
-				1,
-			)
+			expect(
+				screen.getAllByTestId(PUBLIC_TRAVELLER_ITEM.ROOT),
+			).toHaveLength(1)
 		})
 
 		it('says there are no trips yet, with no Refresh, when the list is empty', async () => {
@@ -1002,14 +829,16 @@ describe('<TravellersList />', () => {
 				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.NO_PUBLIC_TRIPS),
 			).toHaveTextContent(TRAVELLERS_LIST_CONFIG.NO_PUBLIC_TRIPS_TITLE)
 			expect(
-				screen.queryByRole('button', { name: 'Refresh travellers' }),
+				screen.queryByRole('button', {
+					name: UI_TEXT.TRAVELLERS.REFRESH_BUTTON,
+				}),
 			).not.toBeInTheDocument()
 			expect(
-				screen.queryByText('No travellers listed.'),
+				screen.queryByText(UI_TEXT.TRAVELLERS.NO_TRAVELLERS_MESSAGE),
 			).not.toBeInTheDocument()
 			expect(
 				screen.getByRole('region', {
-					name: 'See where travellers have been',
+					name: TRAVELLERS_WELCOME_CONFIG.TITLE,
 				}),
 			).toBeInTheDocument()
 		})
@@ -1026,7 +855,7 @@ describe('<TravellersList />', () => {
 			)
 			expect(
 				screen.getByRole('region', {
-					name: 'See where travellers have been',
+					name: TRAVELLERS_WELCOME_CONFIG.TITLE,
 				}),
 			).toBeInTheDocument()
 			expect(

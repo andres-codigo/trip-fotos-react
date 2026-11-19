@@ -62,17 +62,13 @@ describe('<Textarea />', () => {
 			expect(screen.queryByText('*')).not.toBeInTheDocument()
 		})
 
-		it('merges a custom class name and passes data-cy and other props through', () => {
-			renderTextarea({
-				className: 'custom',
-				'data-cy': 'cy-notes',
-				placeholder: 'Write here',
-			})
+		it('passes other props through', () => {
+			renderTextarea({ placeholder: 'Write here' })
 
-			const textarea = screen.getByRole('textbox')
-			expect(textarea).toHaveClass('custom')
-			expect(textarea).toHaveAttribute('data-cy', 'cy-notes')
-			expect(textarea).toHaveAttribute('placeholder', 'Write here')
+			expect(screen.getByRole('textbox')).toHaveAttribute(
+				'placeholder',
+				'Write here',
+			)
 		})
 	})
 

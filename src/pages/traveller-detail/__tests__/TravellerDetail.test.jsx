@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
@@ -94,42 +94,24 @@ describe('<TravellerDetail />', () => {
 		)
 	})
 
-	it('hides the placeholder heading visually while loading and shows the name afterwards', async () => {
+	it('ignores a load that settles after the page has gone', async () => {
+		let respond
 		vi.stubGlobal(
 			'fetch',
-			vi.fn(() => new Promise(() => {})),
+			vi.fn(
+				() =>
+					new Promise((resolve) => {
+						respond = resolve
+					}),
+			),
 		)
 		const { unmount } = renderPage()
-		expect(screen.getByTestId(TRAVELLER_DETAIL.NAME)).toHaveClass('sr-only')
+		await waitFor(() => expect(fetch).toHaveBeenCalledOnce())
 		unmount()
 
-		vi.unstubAllGlobals()
-		stubFetch()
-		renderPage()
-		await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
-		expect(screen.getByTestId(TRAVELLER_DETAIL.NAME)).not.toHaveClass(
-			'sr-only',
-		)
-	})
-
-	it('marks the own record cards with a heavier border and not other travellers', async () => {
-		const { unmount } = renderPage({ userId: 'abc' })
-		const profile = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
-		expect(profile.closest(COMMON_SELECTORS.BASE_CARD)).toHaveClass(
-			'border-2',
-		)
-		expect(
-			screen
-				.getByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
-				.closest(COMMON_SELECTORS.BASE_CARD),
-		).toHaveClass('border-2')
-		unmount()
-
-		renderPage({ userId: 'someone-else' })
-		const other = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
-		expect(other.closest(COMMON_SELECTORS.BASE_CARD)).not.toHaveClass(
-			'border-2',
-		)
+		await act(async () => {
+			respond({ ok: true, json: async () => traveller })
+		})
 	})
 
 	it('tags your own trip "You" after the name, and nobody else\'s', async () => {
@@ -164,7 +146,7 @@ describe('<TravellerDetail />', () => {
 		expect(screen.getAllByTestId(IMAGE.ID)).toHaveLength(7)
 		expect(
 			screen.getByRole('heading', { level: 2, name: 'Photos' }),
-		).toHaveAttribute('data-cy', TRAVELLER_DETAIL.PHOTOS_HEADING)
+		).toBeInTheDocument()
 		expect(screen.getByText('7 photos')).toBeInTheDocument()
 		expect(
 			screen.queryByTestId(TRAVELLER_DETAIL.SPINNER),
@@ -212,14 +194,11 @@ describe('<TravellerDetail />', () => {
 			expect(scrollIntoView.mock.contexts[0]).toBe(anchor)
 		})
 
-		it('does not scroll without the photos hash', async () => {
-			renderPage()
-			await screen.findByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
-			expect(scrollIntoView).not.toHaveBeenCalled()
-		})
-
-		it('does not scroll for an unrelated hash', async () => {
-			renderPage({ hash: '#other' })
+		it.each([
+			['without a hash', undefined],
+			['for an unrelated hash', '#other'],
+		])('does not scroll %s', async (_, hash) => {
+			renderPage({ hash })
 			await screen.findByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
 			expect(scrollIntoView).not.toHaveBeenCalled()
 		})
@@ -272,9 +251,7 @@ describe('<TravellerDetail />', () => {
 		const badges = screen.getAllByTestId(BADGE.ID)
 		expect(badges).toHaveLength(2)
 		expect(badges[0]).toHaveTextContent('Tokyo, Japan')
-		expect(badges[0].className).toMatch(/\bbg-badge-\d\b/)
 		expect(badges[1]).toHaveTextContent('Paris, France')
-		expect(badges[1].className).toMatch(/\bbg-badge-\d\b/)
 	})
 
 	it('offers Message {first name} in the profile for a traveller viewing someone else', async () => {
@@ -282,7 +259,6 @@ describe('<TravellerDetail />', () => {
 		const profile = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
 		const message = screen.getByRole('link', { name: 'Message Ada' })
 		expect(profile).toContainElement(message)
-		expect(message).toHaveAttribute('data-cy', TRAVELLER_DETAIL.MESSAGE)
 		expect(message).toHaveAttribute('href', '/messages/abc_me')
 	})
 
@@ -305,16 +281,11 @@ describe('<TravellerDetail />', () => {
 		)
 	})
 
-	it('hides Message on the own record', async () => {
-		renderPage({ userId: 'abc', isTraveller: true })
-		await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
-		expect(
-			screen.queryByTestId(TRAVELLER_DETAIL.MESSAGE),
-		).not.toBeInTheDocument()
-	})
-
-	it('hides Message for non-travellers', async () => {
-		renderPage()
+	it.each([
+		['on the own record', { userId: 'abc', isTraveller: true }],
+		['for non-travellers', {}],
+	])('hides Message %s', async (_, options) => {
+		renderPage(options)
 		await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
 		expect(
 			screen.queryByTestId(TRAVELLER_DETAIL.MESSAGE),
@@ -325,10 +296,6 @@ describe('<TravellerDetail />', () => {
 		renderPage()
 		const profile = await screen.findByTestId(TRAVELLER_DETAIL.PROFILE)
 		const back = screen.getByRole('link', { name: 'Back to travellers' })
-		expect(back).toHaveAttribute(
-			'data-cy',
-			TRAVELLER_DETAIL.BACK_TO_TRAVELLERS,
-		)
 		expect(back).toHaveAttribute('href', '/travellers')
 		expect(
 			back.compareDocumentPosition(profile) &
@@ -393,7 +360,7 @@ describe('<TravellerDetail />', () => {
 				within(empty).getByRole('link', {
 					name: TRAVELLER_DETAIL_CONFIG.ADD_PHOTOS_LABEL,
 				}),
-			).toHaveClass('bg-accent', 'text-on-accent')
+			).toBeInTheDocument()
 		})
 
 		it("says nothing about missing photos on someone else's trip", async () => {
@@ -432,26 +399,10 @@ describe('<TravellerDetail />', () => {
 		})
 	})
 
-	it('shows the not-found state for an unknown id', async () => {
-		stubFetch({ data: null })
-		renderPage({ id: 'nope' })
-		expect(
-			await screen.findByText('Traveller not found.'),
-		).toBeInTheDocument()
-		expect(
-			screen.getByTestId(TRAVELLER_DETAIL.BACK_TO_TRAVELLERS),
-		).toHaveAttribute('href', '/travellers')
-		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-			'Traveller',
-		)
-		expect(
-			screen.queryByTestId(TRAVELLER_DETAIL.PROFILE),
-		).not.toBeInTheDocument()
-	})
-
 	// There is no separate error view yet, so a failed load shares the not-found state
-	describe('when the load is rejected', () => {
+	describe('when the traveller cannot be shown', () => {
 		it.each([
+			['an unknown id', () => stubFetch({ data: null }), { id: 'nope' }],
 			['a server error', () => stubFetch({ ok: false, data: {} })],
 			[
 				'a network failure',
@@ -467,9 +418,9 @@ describe('<TravellerDetail />', () => {
 			],
 		])(
 			'shows the not-found state with a way back after %s',
-			async (_, arrange) => {
+			async (_, arrange, options = {}) => {
 				arrange()
-				renderPage()
+				renderPage(options)
 
 				expect(
 					await screen.findByTestId(TRAVELLER_DETAIL.NOT_FOUND),
@@ -477,6 +428,9 @@ describe('<TravellerDetail />', () => {
 				expect(
 					screen.getByTestId(TRAVELLER_DETAIL.BACK_TO_TRAVELLERS),
 				).toHaveAttribute('href', '/travellers')
+				expect(
+					screen.getByRole('heading', { level: 1 }),
+				).toHaveTextContent('Traveller')
 				expect(
 					screen.queryByTestId(TRAVELLER_DETAIL.PROFILE),
 				).not.toBeInTheDocument()

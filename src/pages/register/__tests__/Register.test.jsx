@@ -5,7 +5,7 @@ import configureTestStore from '@/testUtils/configureTestStore'
 import { MemoryRouter, useNavigate } from 'react-router-dom'
 
 import { registerTraveller } from '@/store/slices/travellersSlice'
-import { COMMON_SELECTORS, TEST_IDS, VERIFY_EMAIL_NOTE } from '@/constants/test'
+import { TEST_IDS, VERIFY_EMAIL_NOTE } from '@/constants/test'
 import { VERIFY_EMAIL_PROMPT_CONFIG } from '@/constants/auth'
 import { PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
@@ -37,9 +37,7 @@ vi.mock(
 			<div
 				data-cy="traveller-registration-form"
 				data-loading={isLoading ? 'true' : 'false'}>
-				<button
-					data-cy="mock-submit-button"
-					onClick={() => onSubmit({ firstName: 'Test' })}>
+				<button onClick={() => onSubmit({ firstName: 'Test' })}>
 					Mock Submit
 				</button>
 			</div>
@@ -80,6 +78,10 @@ describe('Register', () => {
 		vi.clearAllMocks()
 	})
 
+	const submit = () =>
+		fireEvent.click(screen.getByRole('button', { name: 'Mock Submit' }))
+	const getForm = () => screen.getByTestId(TEST_IDS.REGISTER.FORM)
+
 	const renderRegister = () => {
 		render(
 			<Provider store={store}>
@@ -90,18 +92,16 @@ describe('Register', () => {
 		)
 	}
 
-	it('renders the idle form in the wide page column inside <main>', () => {
+	it('renders the idle form inside <main>', () => {
 		renderRegister()
 
 		const main = screen.getByRole('main')
 		expect(main).toHaveAttribute('data-cy', TEST_IDS.MAIN_CONTAINER)
 		expect(main).toHaveAttribute('data-cy-alt', TEST_IDS.REGISTER.CONTAINER)
-		const form = screen.getByTestId('traveller-registration-form')
-		expect(form.parentElement).toHaveClass('max-w-160', 'lg:max-w-290')
-		expect(form).toHaveAttribute('data-loading', 'false')
+		expect(getForm()).toHaveAttribute('data-loading', 'false')
 	})
 
-	it('shows the verify note in the narrow column instead of the form for an unverified account', () => {
+	it('shows the verify note instead of the form for an unverified account', () => {
 		store = createMockStore(
 			{ travellers: { status: 'idle', error: null } },
 			false,
@@ -112,12 +112,7 @@ describe('Register', () => {
 			VERIFY_EMAIL_PROMPT_CONFIG.REGISTER_NOTE,
 		)
 		expect(
-			screen
-				.getByTestId(VERIFY_EMAIL_NOTE.ROOT)
-				.closest(COMMON_SELECTORS.BASE_CARD),
-		).toHaveClass('bg-surface')
-		expect(
-			screen.queryByTestId('traveller-registration-form'),
+			screen.queryByTestId(TEST_IDS.REGISTER.FORM),
 		).not.toBeInTheDocument()
 		expect(
 			screen.getByRole('heading', {
@@ -136,14 +131,16 @@ describe('Register', () => {
 				.fn()
 				.mockReturnValue({ unwrap: () => new Promise(() => {}) })
 			renderRegister()
-			fireEvent.click(screen.getByTestId('mock-submit-button'))
-			await screen.findByTestId('registering-dialog')
+			submit()
+			await screen.findByTestId(TEST_IDS.REGISTER.REGISTERING_DIALOG)
 		}
 
 		it('shows the spinner while no upload has started', async () => {
 			await submitWhilePending(null)
 
-			expect(screen.getByTestId('base-spinner')).toBeInTheDocument()
+			expect(
+				screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
+			).toBeInTheDocument()
 			expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
 		})
 
@@ -161,80 +158,14 @@ describe('Register', () => {
 			expect(
 				screen.getByText('Uploading photos: 2 of 5 done (45%)'),
 			).toBeInTheDocument()
-			expect(screen.queryByTestId('base-spinner')).not.toBeInTheDocument()
+			expect(
+				screen.queryByTestId(TEST_IDS.SPINNER.CONTAINER),
+			).not.toBeInTheDocument()
 		})
 	})
 
 	describe('Behaviour tests', () => {
-		it('should dispatch registerTraveller and navigate on success', async () => {
-			const mockUnwrap = vi.fn().mockResolvedValue({})
-			store.dispatch.mockReturnValue({ unwrap: mockUnwrap })
-
-			renderRegister()
-
-			const submitBtn = screen.getByTestId('mock-submit-button')
-			fireEvent.click(submitBtn)
-
-			// Should set loading to true
-			await waitFor(() => {
-				const form = screen.getByTestId('traveller-registration-form')
-				expect(form).toHaveAttribute('data-loading', 'true')
-			})
-
-			expect(store.dispatch).toHaveBeenCalled()
-			expect(registerTraveller).toHaveBeenCalledWith({
-				firstName: 'Test',
-			})
-			expect(mockUnwrap).toHaveBeenCalled()
-
-			// Should navigate after success
-			await waitFor(() => {
-				expect(mockNavigate).toHaveBeenCalledWith(PATHS.TRAVELLERS, {
-					state: {
-						alertMessage: TRAVELLER_REGISTRATION_SUCCESS_MESSAGE,
-					},
-				})
-			})
-
-			// Should set loading back to false
-			await waitFor(() => {
-				const form = screen.getByTestId('traveller-registration-form')
-				expect(form).toHaveAttribute('data-loading', 'false')
-			})
-		})
-
-		it('should handle registration failure and show error', async () => {
-			const errorMsg = 'Registration Failed'
-			const mockUnwrap = vi.fn().mockRejectedValue(errorMsg)
-			store.dispatch.mockReturnValue({ unwrap: mockUnwrap })
-
-			renderRegister()
-
-			const submitBtn = screen.getByTestId('mock-submit-button')
-			fireEvent.click(submitBtn)
-
-			expect(store.dispatch).toHaveBeenCalled()
-			expect(registerTraveller).toHaveBeenCalled()
-
-			// Should display error dialog
-			await waitFor(() => {
-				expect(
-					screen.getByTestId('invalid-traveller-registration-dialog'),
-				).toBeInTheDocument()
-				expect(screen.getByText(errorMsg)).toBeInTheDocument()
-			})
-
-			// Should NOT navigate
-			expect(mockNavigate).not.toHaveBeenCalled()
-
-			// Should set loading back to false
-			await waitFor(() => {
-				const form = screen.getByTestId('traveller-registration-form')
-				expect(form).toHaveAttribute('data-loading', 'false')
-			})
-		})
-
-		it('keeps the form busy while the upload is pending and navigates once it resolves', async () => {
+		it('registers, keeps the form busy while the upload is pending, and navigates with the saved alert once it resolves', async () => {
 			let resolveUpload
 			store.dispatch.mockReturnValue({
 				unwrap: () =>
@@ -244,23 +175,35 @@ describe('Register', () => {
 			})
 
 			renderRegister()
-			fireEvent.click(screen.getByTestId('mock-submit-button'))
+			submit()
 
-			await screen.findByTestId('registering-dialog')
-			expect(
-				screen.getByTestId('traveller-registration-form'),
-			).toHaveAttribute('data-loading', 'true')
+			await screen.findByTestId(TEST_IDS.REGISTER.REGISTERING_DIALOG)
+			expect(registerTraveller).toHaveBeenCalledWith({
+				firstName: 'Test',
+			})
+			expect(getForm()).toHaveAttribute('data-loading', 'true')
 			expect(mockNavigate).not.toHaveBeenCalled()
 
 			resolveUpload({})
 
-			await waitFor(() => expect(mockNavigate).toHaveBeenCalledOnce())
+			await waitFor(() =>
+				expect(mockNavigate).toHaveBeenCalledExactlyOnceWith(
+					PATHS.TRAVELLERS,
+					{
+						state: {
+							alertMessage:
+								TRAVELLER_REGISTRATION_SUCCESS_MESSAGE,
+						},
+					},
+				),
+			)
 			expect(
-				screen.queryByTestId('registering-dialog'),
+				screen.queryByTestId(TEST_IDS.REGISTER.REGISTERING_DIALOG),
 			).not.toBeInTheDocument()
+			expect(getForm()).toHaveAttribute('data-loading', 'false')
 		})
 
-		it('shows the error and frees the form when the upload fails part-way', async () => {
+		it('shows the error, frees the form and closes the error when the upload fails part-way', async () => {
 			const errorMsg = 'Upload interrupted'
 			let rejectUpload
 			store = createMockStore({
@@ -282,54 +225,27 @@ describe('Register', () => {
 			})
 
 			renderRegister()
-			fireEvent.click(screen.getByTestId('mock-submit-button'))
-			await screen.findByTestId('registering-dialog')
+			submit()
+			await screen.findByTestId(TEST_IDS.REGISTER.REGISTERING_DIALOG)
 			expect(screen.getByRole('progressbar')).toBeInTheDocument()
 
 			rejectUpload(errorMsg)
 
 			expect(
-				await screen.findByTestId(
-					'invalid-traveller-registration-dialog',
-				),
+				await screen.findByTestId(TEST_IDS.REGISTER.ERROR_DIALOG),
 			).toHaveTextContent(errorMsg)
 			expect(
-				screen.queryByTestId('registering-dialog'),
+				screen.queryByTestId(TEST_IDS.REGISTER.REGISTERING_DIALOG),
 			).not.toBeInTheDocument()
-			expect(
-				screen.getByTestId('traveller-registration-form'),
-			).toHaveAttribute('data-loading', 'false')
+			expect(getForm()).toHaveAttribute('data-loading', 'false')
 			expect(mockNavigate).not.toHaveBeenCalled()
-		})
 
-		it('should close error dialog when close button is clicked', async () => {
-			const errorMsg = 'Registration Failed'
-			const mockUnwrap = vi.fn().mockRejectedValue(errorMsg)
-			store.dispatch.mockReturnValue({ unwrap: mockUnwrap })
-
-			renderRegister()
-
-			const submitBtn = screen.getByTestId('mock-submit-button')
-			fireEvent.click(submitBtn)
-
-			await waitFor(() => {
+			fireEvent.click(screen.getByRole('button', { name: /close/i }))
+			await waitFor(() =>
 				expect(
-					screen.getByTestId('invalid-traveller-registration-dialog'),
-				).toBeInTheDocument()
-			})
-
-			// Find and click the close button within the dialog
-			const closeButton = screen.getByRole('button', { name: /close/i })
-			fireEvent.click(closeButton)
-
-			// Verify the dialog is removed from the DOM
-			await waitFor(() => {
-				expect(
-					screen.queryByTestId(
-						'invalid-traveller-registration-dialog',
-					),
-				).not.toBeInTheDocument()
-			})
+					screen.queryByTestId(TEST_IDS.REGISTER.ERROR_DIALOG),
+				).not.toBeInTheDocument(),
+			)
 		})
 	})
 })

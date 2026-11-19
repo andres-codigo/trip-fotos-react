@@ -26,14 +26,19 @@ describe('<BaseDialog />', () => {
 	})
 
 	describe('Rendering tests', () => {
-		it('renders when show is true', () => {
+		it('renders a modal dialog named by its title and described by its content', () => {
 			renderDialog()
-			expect(screen.getByRole('dialog')).toHaveAttribute(
-				'aria-modal',
-				'true',
+			const dialog = screen.getByRole('dialog')
+			expect(dialog).toHaveAttribute('aria-modal', 'true')
+			expect(dialog).toHaveAccessibleName(defaultProps.title)
+			expect(dialog).toHaveAccessibleDescription(defaultProps.children)
+		})
+
+		it('renders the children inside the text content region', () => {
+			renderDialog({ sectionClasses: true })
+			expect(screen.getByTestId(DIALOG.TEXT_CONTENT)).toHaveTextContent(
+				defaultProps.children,
 			)
-			expect(screen.getByText(defaultProps.title)).toBeInTheDocument()
-			expect(screen.getByText(defaultProps.children)).toBeInTheDocument()
 		})
 
 		it('does not render when show is false', () => {
@@ -89,13 +94,6 @@ describe('<BaseDialog />', () => {
 			expect(defaultProps.onClose).toHaveBeenCalled()
 		})
 
-		it('renders the children inside the text content region', () => {
-			renderDialog({ sectionClasses: true })
-			expect(screen.getByTestId(DIALOG.TEXT_CONTENT)).toHaveTextContent(
-				defaultProps.children,
-			)
-		})
-
 		it('focuses the close button of an error dialog', () => {
 			renderDialog({ isError: true })
 			expect(screen.getByTestId(DIALOG.BUTTON)).toHaveFocus()
@@ -105,17 +103,6 @@ describe('<BaseDialog />', () => {
 			renderDialog()
 			fireEvent.pointerDown(document.body)
 			expect(defaultProps.onClose).not.toHaveBeenCalled()
-		})
-	})
-
-	describe('Accessibility tests', () => {
-		it('sets aria-labelledby and aria-describedby', () => {
-			renderDialog()
-			const dialog = screen.getByRole('dialog')
-			expect(dialog).toHaveAttribute('aria-labelledby')
-			expect(dialog).toHaveAttribute('aria-describedby')
-			expect(dialog).toHaveAccessibleName(defaultProps.title)
-			expect(dialog).toHaveAccessibleDescription(defaultProps.children)
 		})
 	})
 })
