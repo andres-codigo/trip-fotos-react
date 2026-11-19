@@ -1,5 +1,4 @@
 import { FILE_UPLOADER_SELECTORS } from '@/constants/test'
-import { GLOBAL } from '@/constants/ui'
 
 import FilePreview from '@/components/forms/file-uploader/file-preview/FilePreview'
 
@@ -78,24 +77,7 @@ describe('<FilePreview />', () => {
 					},
 				)
 			})
-			cy.contains('2.4 MB').should('be.visible')
 		})
-	})
-
-	it('shows the alt help only when asked', () => {
-		mountRow(IMAGE_FILE, 560)
-		cy.contains(GLOBAL.PHOTO_ALT.HELP).should('be.visible')
-
-		cy.mount(
-			<ul>
-				<FilePreview
-					file={IMAGE_FILE}
-					onRemove={cy.stub()}
-					onAltChange={cy.stub()}
-				/>
-			</ul>,
-		)
-		cy.contains(GLOBAL.PHOTO_ALT.HELP).should('not.exist')
 	})
 
 	it('has no axe violations for an image and a non-image file', () => {

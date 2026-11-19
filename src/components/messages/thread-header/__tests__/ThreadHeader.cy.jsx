@@ -97,7 +97,7 @@ describe('<ThreadHeader />', () => {
 		})
 	})
 
-	it('opens the menu, closes it with Escape and returns focus to the button', () => {
+	it('colours the delete item, gives it a 44px row and has no axe violations with the menu open', () => {
 		mountHeader()
 
 		cy.get(THREAD_HEADER_SELECTORS.MENU_BUTTON).click()
@@ -110,23 +110,6 @@ describe('<ThreadHeader />', () => {
 				)
 			})
 		cy.checkA11y()
-
-		cy.get(THREAD_HEADER_SELECTORS.VIEW_CARD).focus()
-		cy.get(THREAD_HEADER_SELECTORS.VIEW_CARD).trigger('keydown', {
-			key: 'Escape',
-		})
-		cy.get(THREAD_HEADER_SELECTORS.MENU).should('not.exist')
-		cy.get(THREAD_HEADER_SELECTORS.MENU_BUTTON)
-			.should('have.focus')
-			.and('have.attr', 'aria-expanded', 'false')
-	})
-
-	it('closes the menu on a click outside', () => {
-		mountHeader()
-
-		cy.get(THREAD_HEADER_SELECTORS.MENU_BUTTON).click()
-		cy.get(THREAD_HEADER_SELECTORS.SUBTITLE).click()
-		cy.get(THREAD_HEADER_SELECTORS.MENU).should('not.exist')
 	})
 
 	it('sits the menu under the button, aligned to its right edge', () => {

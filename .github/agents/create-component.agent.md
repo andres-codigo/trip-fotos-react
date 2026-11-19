@@ -33,9 +33,9 @@ Use this agent when you need to create a new React component with full structure
     - Reuse the shared error and loading output (`renderVisuallyHiddenError`, `ErrorMessage`, `LoadingAnnouncement`, `BaseSpinner`); do not hand-roll `role="alert"` or `aria-live` markup
 
 5. **Test File Setup**
-    - Create `{ComponentName}.cy.jsx` (Cypress component test) with mount setup
     - Create `{ComponentName}.test.jsx` (Vitest unit test) with render setup
-    - Both test files should import the component and define placeholder test cases
+    - Create `{ComponentName}.cy.jsx` (Cypress component test) only when a real browser shows something about the component (layout, a computed style, a hover or focus style, scrolling, a real file input, or `checkA11y` for a form or `ui` component); see "Which layer owns a check" in `testing.instructions.md`. Mount it with `cy.mountWithProviders` when it needs the store or a router
+    - Each test file imports the component and defines placeholder test cases
     - Tests fail on an unexpected `console.error` or `console.warn`, so fix React warnings rather than ignoring them (see `testing.instructions.md`)
     - Call `cy.checkA11y()` in the Cypress component test of a form or a shared `ui` component
     - A shadcn component follows the move-and-rename rules in `components.instructions.md` → shadcn/ui components

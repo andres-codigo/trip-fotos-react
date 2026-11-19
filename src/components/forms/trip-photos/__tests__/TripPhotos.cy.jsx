@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import PropTypes from 'prop-types'
 
 import TripPhotos from '@/components/forms/trip-photos/TripPhotos'
 
 import { TRIP_PHOTOS_SELECTORS } from '@/constants/test'
 import { TRIP_PHOTOS_CONFIG } from '@/constants/travellers'
-import { GLOBAL } from '@/constants/ui'
 
 // Inline SVG data URLs, so the tiles render without a network request
 const photoUrl = (colour) =>
@@ -19,7 +17,7 @@ const PHOTOS = ['#7a8f5c', '#c9a46b', '#5c7a8f'].map((colour) => ({
 	thumbnails: null,
 }))
 
-const StatefulTripPhotos = ({ photos, newCount = 0 }) => {
+const StatefulTripPhotos = ({ photos }) => {
 	const [removedUrls, setRemovedUrls] = useState([])
 	const [alts, setAlts] = useState({})
 
@@ -27,7 +25,7 @@ const StatefulTripPhotos = ({ photos, newCount = 0 }) => {
 		<TripPhotos
 			photos={photos}
 			removedUrls={removedUrls}
-			newCount={newCount}
+			newCount={0}
 			alts={alts}
 			onAltChange={(url, alt) =>
 				setAlts((current) => ({ ...current, [url]: alt }))
@@ -42,7 +40,6 @@ const StatefulTripPhotos = ({ photos, newCount = 0 }) => {
 
 StatefulTripPhotos.propTypes = {
 	photos: TripPhotos.propTypes.photos,
-	newCount: PropTypes.number,
 }
 
 describe('<TripPhotos />', () => {
@@ -134,96 +131,5 @@ describe('<TripPhotos />', () => {
 				})
 			})
 		})
-	})
-
-	it('keeps the alt text typed for a photo and locks it while the photo is marked for removal', () => {
-		cy.mount(<StatefulTripPhotos photos={PHOTOS} />)
-
-		cy.get(TRIP_PHOTOS_SELECTORS.ALT_INPUT)
-			.eq(1)
-			.type('Harbour at dusk')
-			.should('have.value', 'Harbour at dusk')
-		cy.get(TRIP_PHOTOS_SELECTORS.ALT_INPUT)
-			.eq(1)
-			.should('have.attr', 'id')
-			.then((id) =>
-				cy
-					.get(`label[for="${id}"]`)
-					.should('contain.text', GLOBAL.PHOTO_ALT.LABEL_FOR(2)),
-			)
-
-		cy.get(TRIP_PHOTOS_SELECTORS.REMOVE).eq(1).click()
-		cy.get(TRIP_PHOTOS_SELECTORS.ALT_INPUT).eq(1).should('be.disabled')
-		cy.get(TRIP_PHOTOS_SELECTORS.UNDO).click()
-		cy.get(TRIP_PHOTOS_SELECTORS.ALT_INPUT)
-			.eq(1)
-			.should('be.enabled')
-			.and('have.value', 'Harbour at dusk')
-	})
-
-	it('removes and restores a photo, updating the count', () => {
-		cy.mount(<StatefulTripPhotos photos={PHOTOS} />)
-
-		cy.get(TRIP_PHOTOS_SELECTORS.COUNT).should(
-			'have.text',
-			TRIP_PHOTOS_CONFIG.COUNT(3),
-		)
-
-		cy.get(TRIP_PHOTOS_SELECTORS.REMOVE).eq(1).click()
-		cy.get(TRIP_PHOTOS_SELECTORS.REMOVED).should(
-			'have.text',
-			TRIP_PHOTOS_CONFIG.REMOVED_LABEL,
-		)
-		cy.get(TRIP_PHOTOS_SELECTORS.COUNT).should(
-			'have.text',
-			TRIP_PHOTOS_CONFIG.COUNT_AFTER_SAVE(2, 1, 0),
-		)
-
-		cy.get(TRIP_PHOTOS_SELECTORS.UNDO).click()
-		cy.get(TRIP_PHOTOS_SELECTORS.REMOVED).should('not.exist')
-		cy.get(TRIP_PHOTOS_SELECTORS.REMOVE).should('have.length', 3)
-		cy.get(TRIP_PHOTOS_SELECTORS.COUNT).should(
-			'have.text',
-			TRIP_PHOTOS_CONFIG.COUNT(3),
-		)
-	})
-
-	// Cypress's synthetic Enter does not activate a button, so the focused button is clicked instead
-	it('moves keyboard focus to Undo on removal and back to Remove on undo', () => {
-		cy.mount(<StatefulTripPhotos photos={PHOTOS} />)
-
-		cy.get(TRIP_PHOTOS_SELECTORS.REMOVE).eq(1).focus().click()
-		cy.focused()
-			.should(
-				'have.attr',
-				'aria-label',
-				TRIP_PHOTOS_CONFIG.UNDO_LABEL(2, 3),
-			)
-			.click()
-		cy.focused().should(
-			'have.attr',
-			'aria-label',
-			TRIP_PHOTOS_CONFIG.REMOVE_LABEL(2, 3),
-		)
-	})
-
-	it('stops the last kept photo being removed until a new one is chosen', () => {
-		cy.mount(<StatefulTripPhotos photos={PHOTOS.slice(0, 2)} />)
-
-		cy.get(TRIP_PHOTOS_SELECTORS.LAST_PHOTO_HINT).should('not.exist')
-		cy.get(TRIP_PHOTOS_SELECTORS.REMOVE).first().click()
-		cy.get(TRIP_PHOTOS_SELECTORS.REMOVE).should('be.disabled')
-		cy.get(TRIP_PHOTOS_SELECTORS.LAST_PHOTO_HINT).should(
-			'have.text',
-			TRIP_PHOTOS_CONFIG.LAST_PHOTO_HINT,
-		)
-
-		cy.mount(
-			<StatefulTripPhotos
-				photos={PHOTOS.slice(0, 1)}
-				newCount={1}
-			/>,
-		)
-		cy.get(TRIP_PHOTOS_SELECTORS.REMOVE).should('be.enabled')
 	})
 })

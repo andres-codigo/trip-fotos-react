@@ -1,7 +1,6 @@
 import { MemoryRouter } from 'react-router-dom'
 
 import { ACCOUNT_MENU_SELECTORS } from '@/constants/test'
-import { NAVIGATION } from '@/constants/ui'
 
 import AccountMenu from '@/components/layout/main-nav/account-menu/AccountMenu'
 
@@ -69,9 +68,6 @@ describe('<AccountMenu />', () => {
 				mountMenu()
 				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
 				cy.get(ACCOUNT_MENU_SELECTORS.PANEL).should('be.visible')
-				cy.get(ACCOUNT_MENU_SELECTORS.SIGNED_IN_AS)
-					.should('contain', NAVIGATION.SIGNED_IN_AS)
-					.and('contain', NAME)
 				assertWithinViewport(ACCOUNT_MENU_SELECTORS.PANEL)
 				cy.checkA11y()
 			})
@@ -121,17 +117,6 @@ describe('<AccountMenu />', () => {
 				})
 				cy.checkA11y()
 			})
-
-			it('shows the fallback label and no signed-in block without a name or email', () => {
-				mountMenu({ name: '', email: '' })
-				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should(
-					'contain',
-					NAVIGATION.ACCOUNT_FALLBACK,
-				)
-				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
-				cy.get(ACCOUNT_MENU_SELECTORS.LOG_OUT).should('be.visible')
-				cy.get(ACCOUNT_MENU_SELECTORS.SIGNED_IN_AS).should('not.exist')
-			})
 		})
 	})
 
@@ -150,7 +135,7 @@ describe('<AccountMenu />', () => {
 			})
 		})
 
-		it('moves focus into the panel with Tab and closes on Escape', () => {
+		it('moves focus into the panel with Tab', () => {
 			mountMenu()
 			cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
 			cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should(
@@ -162,27 +147,6 @@ describe('<AccountMenu />', () => {
 			cy.get(ACCOUNT_MENU_SELECTORS.ACCOUNT_SETTINGS).should('have.focus')
 			cy.press(Cypress.Keyboard.Keys.TAB)
 			cy.get(ACCOUNT_MENU_SELECTORS.LOG_OUT).should('have.focus')
-			cy.focused().type('{esc}')
-			cy.get(ACCOUNT_MENU_SELECTORS.PANEL).should('not.exist')
-			cy.get(ACCOUNT_MENU_SELECTORS.BUTTON)
-				.should('have.focus')
-				.and('have.attr', 'aria-expanded', 'false')
-		})
-
-		it('logs out and closes', () => {
-			mountMenu()
-			cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
-			cy.get(ACCOUNT_MENU_SELECTORS.LOG_OUT).click()
-			cy.get('@onLogOut').should('have.been.calledOnce')
-			cy.get(ACCOUNT_MENU_SELECTORS.PANEL).should('not.exist')
-		})
-
-		it('closes on a click outside', () => {
-			mountMenu()
-			cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
-			cy.get(ACCOUNT_MENU_SELECTORS.PANEL).should('be.visible')
-			cy.get('html').click(10, 700)
-			cy.get(ACCOUNT_MENU_SELECTORS.PANEL).should('not.exist')
 		})
 	})
 })

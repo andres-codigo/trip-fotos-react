@@ -1,15 +1,12 @@
-import { Provider } from 'react-redux'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import {
-	CONVERSATION_ROW_SELECTORS,
 	MESSAGE_BUBBLE_SELECTORS,
 	MESSAGES_PAGE_SELECTORS,
 	REPLY_BOX_SELECTORS,
 	THREAD_HEADER_SELECTORS,
 } from '@/constants/test'
-import { MESSAGES_CONFIG } from '@/constants/travellers'
 import { PATHS } from '@/constants/ui'
 
 import Messages from '@/pages/messages/Messages'
@@ -70,17 +67,15 @@ describe('<Messages />', () => {
 			},
 		})
 
-		cy.mount(
-			<Provider store={store}>
-				<MemoryRouter initialEntries={[path]}>
-					<Routes>
-						<Route
-							path={`${PATHS.MESSAGES}/:conversationId?`}
-							element={<Messages />}
-						/>
-					</Routes>
-				</MemoryRouter>
-			</Provider>,
+		cy.mountWithProviders(
+			<Routes>
+				<Route
+					path={`${PATHS.MESSAGES}/:conversationId?`}
+					element={<Messages />}
+				/>
+			</Routes>,
+			store,
+			{ initialEntries: [path] },
 		)
 		cy.wait('@loadConversations')
 	}
@@ -88,12 +83,6 @@ describe('<Messages />', () => {
 	describe('on a phone', () => {
 		beforeEach(() => {
 			cy.viewport(390, 844)
-		})
-
-		it('shows the list alone, one row per conversation', () => {
-			mountPage(PATHS.MESSAGES)
-			cy.get(CONVERSATION_ROW_SELECTORS.ROOT).should('have.length', 1)
-			cy.get(MESSAGES_PAGE_SELECTORS.THREAD_CARD).should('not.exist')
 		})
 
 		it('docks the reply box to the bottom edge, full width, below the thread', () => {
@@ -117,21 +106,6 @@ describe('<Messages />', () => {
 						).to.be.at.most($box[0].getBoundingClientRect().top)
 					})
 				})
-		})
-
-		it('puts your bubbles on the right and theirs on the left, at most 80% wide', () => {
-			mountPage(`${PATHS.MESSAGES}/${CID}`)
-			cy.get(MESSAGES_PAGE_SELECTORS.THREAD_CARD).then(($card) => {
-				const card = $card[0].getBoundingClientRect()
-				cy.get(MESSAGE_BUBBLE_SELECTORS.TEXT).should(($bubbles) => {
-					const [mine, theirs] = [...$bubbles].map((bubble) =>
-						bubble.getBoundingClientRect(),
-					)
-					expect(card.right - mine.right).to.be.lessThan(20)
-					expect(theirs.left - card.left).to.be.lessThan(20)
-					expect(mine.width).to.be.at.most(card.width * 0.8)
-				})
-			})
 		})
 	})
 
@@ -188,10 +162,6 @@ describe('<Messages />', () => {
 		it('has no axe violations with a thread open', () => {
 			mountPage(PATHS.MESSAGES)
 			cy.get(MESSAGE_BUBBLE_SELECTORS.ROOT).should('have.length', 2)
-			cy.get(MESSAGES_PAGE_SELECTORS.SUMMARY).should(
-				'have.text',
-				MESSAGES_CONFIG.SUMMARY(0, 1),
-			)
 			cy.checkA11y()
 		})
 	})

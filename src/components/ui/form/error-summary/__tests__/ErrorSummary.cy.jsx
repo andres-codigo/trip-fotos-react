@@ -24,13 +24,6 @@ describe('<ErrorSummary />', () => {
 		cy.checkA11y()
 	})
 
-	it('focuses the field when its link is clicked', () => {
-		cy.mount(<Form />)
-		cy.get(ERROR_SUMMARY_SELECTORS.LINK).eq(1).click()
-		cy.focused().should('have.id', 'last-name')
-		cy.location('hash').should('eq', '')
-	})
-
 	it('draws a 2px edge in the danger colour', () => {
 		cy.mount(<Form />)
 		cy.get(ERROR_SUMMARY_SELECTORS.LINK)

@@ -5,6 +5,7 @@ import MessagesPageSkeleton from '@/components/messages/messages-page-skeleton/M
 import { CONVERSATION_SKELETON, MESSAGES_PAGE_SKELETON } from '@/constants/test'
 import { MESSAGES_CONFIG } from '@/constants/travellers'
 import { GLOBAL } from '@/constants/ui'
+import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 const viewport = vi.hoisted(() => ({ width: 1280 }))
 
@@ -12,8 +13,7 @@ vi.mock('@/utils/useViewport', () => ({
 	default: () => viewport,
 }))
 
-const byDataCy = (container, id) =>
-	container.querySelectorAll(`[data-cy="${id}"]`)
+const byDataCy = (container, id) => container.querySelectorAll(getByDataCy(id))
 
 describe('MessagesPageSkeleton', () => {
 	beforeEach(() => {

@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest'
 import TravellerSkeleton from '@/components/travellers/traveller-skeleton/TravellerSkeleton'
 import { TRAVELLER_SKELETON } from '@/constants/test'
 import { CARD_PHOTOS } from '@/constants/ui'
+import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 const renderSkeleton = (props) =>
 	render(
@@ -12,7 +13,7 @@ const renderSkeleton = (props) =>
 		</ul>,
 	)
 
-const byDataCy = (container, id) => container.querySelector(`[data-cy="${id}"]`)
+const byDataCy = (container, id) => container.querySelector(getByDataCy(id))
 
 describe('TravellerSkeleton', () => {
 	it('renders a list item hidden from assistive technology', () => {

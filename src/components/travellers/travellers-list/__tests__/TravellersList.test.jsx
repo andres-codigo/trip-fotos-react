@@ -998,9 +998,9 @@ describe('<TravellersList />', () => {
 		it('says there are no trips yet, with no Refresh, when the list is empty', async () => {
 			await renderLoaded()
 
-			expect(screen.getByTestId('no-public-trips')).toHaveTextContent(
-				TRAVELLERS_LIST_CONFIG.NO_PUBLIC_TRIPS_TITLE,
-			)
+			expect(
+				screen.getByTestId(TEST_IDS.TRAVELLERS_LIST.NO_PUBLIC_TRIPS),
+			).toHaveTextContent(TRAVELLERS_LIST_CONFIG.NO_PUBLIC_TRIPS_TITLE)
 			expect(
 				screen.queryByRole('button', { name: 'Refresh travellers' }),
 			).not.toBeInTheDocument()
@@ -1030,7 +1030,7 @@ describe('<TravellersList />', () => {
 				}),
 			).toBeInTheDocument()
 			expect(
-				screen.queryByTestId('no-public-trips'),
+				screen.queryByTestId(TEST_IDS.TRAVELLERS_LIST.NO_PUBLIC_TRIPS),
 			).not.toBeInTheDocument()
 		})
 

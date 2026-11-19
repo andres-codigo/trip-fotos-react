@@ -1,6 +1,7 @@
 import { API_DATABASE } from '../../../src/constants/api'
 import {
 	AUTHENTICATION_FORM_SELECTORS,
+	HEADER_SELECTORS,
 	PUBLIC_TRAVELLER_ITEM_SELECTORS,
 	TRAVELLERS_LIST_SELECTORS,
 	TRAVELLERS_WELCOME_SELECTORS,
@@ -257,7 +258,7 @@ describe('Travellers page > logged out', () => {
 		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.VIEW_TRIP).first().click()
 
 		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
-		cy.get('[data-cy="user-authentication-form-notice"]').should(
+		cy.get(AUTHENTICATION_FORM_SELECTORS.NOTICE).should(
 			'have.text',
 			`Log in or create an account to see ${FIRST.firstName}'s trip.`,
 		)
@@ -285,9 +286,9 @@ describe('Travellers page > logged out', () => {
 	})
 
 	it('offers Log in in the header', () => {
-		cy.get('[data-cy="site-header-log-in"]').click()
+		cy.get(HEADER_SELECTORS.LOG_IN).click()
 		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
-		cy.get('[data-cy="site-header-log-in"]').should('not.exist')
+		cy.get(HEADER_SELECTORS.LOG_IN).should('not.exist')
 	})
 })
 

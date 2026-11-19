@@ -1,18 +1,10 @@
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import TravellerItem from '@/components/travellers/traveller-item/TravellerItem'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 import travellersReducer from '@/store/slices/travellersSlice'
 
-import {
-	AVATAR_SELECTORS,
-	COMMON_SELECTORS,
-	YOU_TAG_SELECTORS,
-	TRAVELLER_ITEM,
-	TRAVELLER_ITEM_SELECTORS,
-} from '@/constants/test'
+import { COMMON_SELECTORS, TRAVELLER_ITEM_SELECTORS } from '@/constants/test'
 
 const traveller = {
 	id: 'abc',
@@ -57,40 +49,19 @@ describe('<TravellerItem />', () => {
 			},
 		})
 
-		cy.mount(
-			<Provider store={store}>
-				<MemoryRouter>
-					<ul style={width ? { width } : undefined}>
-						<TravellerItem
-							{...traveller}
-							{...props}
-						/>
-					</ul>
-				</MemoryRouter>
-			</Provider>,
+		cy.mountWithProviders(
+			<ul style={width ? { width } : undefined}>
+				<TravellerItem
+					{...traveller}
+					{...props}
+				/>
+			</ul>,
+			store,
 		)
 	}
 
-	it('cancels the delete from the keyboard and restores focus', () => {
-		cy.intercept('PATCH', '**/.json*').as('deleteTraveller')
-		render({ auth: { isAdmin: true } })
-		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE).click()
-		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_DIALOG).should('be.visible')
-		cy.focused().should(
-			'have.attr',
-			'data-cy',
-			TRAVELLER_ITEM.DELETE_CANCEL,
-		)
-		cy.get('body').type('{esc}')
-		cy.get(TRAVELLER_ITEM_SELECTORS.DELETE_DIALOG).should('not.exist')
-		cy.focused().should('have.attr', 'data-cy', TRAVELLER_ITEM.DELETE)
-		cy.get('@deleteTraveller.all').should('have.length', 0)
-	})
-
-	it('opens with the initials avatar and marks only your own card', () => {
+	it('outlines only your own card', () => {
 		render()
-		cy.get(AVATAR_SELECTORS.ROOT).should('have.text', 'AL')
-		cy.get(YOU_TAG_SELECTORS.ROOT).should('not.exist')
 		cy.get(TRAVELLER_ITEM_SELECTORS.ROOT).should(
 			'have.css',
 			'outline-style',
@@ -98,7 +69,6 @@ describe('<TravellerItem />', () => {
 		)
 
 		render({ auth: { userId: traveller.id } })
-		cy.get(YOU_TAG_SELECTORS.ROOT).should('have.text', 'You')
 		// accent-text, 2px, drawn over the card edge
 		cy.get(TRAVELLER_ITEM_SELECTORS.ROOT)
 			.should('have.css', 'outline-color', 'rgb(169, 201, 138)')
@@ -128,14 +98,9 @@ describe('<TravellerItem />', () => {
 		})
 	})
 
-	it('has no axe violations, with a named heading and image buttons', () => {
+	it('has no axe violations', () => {
 		render({ props: { files: photos(1) } })
-		cy.get('h3').should('have.text', 'Ada Lovelace')
-		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should(
-			'have.attr',
-			'aria-label',
-			"View Ada Lovelace's photo",
-		)
+		cy.get(COMMON_SELECTORS.BASE_IMAGE_BUTTON).should('be.visible')
 		cy.checkA11y()
 	})
 })

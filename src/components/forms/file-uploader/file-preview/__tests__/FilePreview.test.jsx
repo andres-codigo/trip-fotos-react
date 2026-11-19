@@ -29,6 +29,44 @@ describe('<FilePreview />', () => {
 		)
 	})
 
+	it('shows the file size in MB', () => {
+		render(
+			<ul>
+				<FilePreview
+					file={{ ...IMAGE_FILE, size: 2.4 * 1024 * 1024 }}
+					onRemove={vi.fn()}
+					onAltChange={vi.fn()}
+				/>
+			</ul>,
+		)
+		expect(screen.getByText('2.4 MB')).toBeInTheDocument()
+	})
+
+	it('shows the description help only when asked', () => {
+		const { rerender } = render(
+			<ul>
+				<FilePreview
+					file={IMAGE_FILE}
+					onRemove={vi.fn()}
+					onAltChange={vi.fn()}
+				/>
+			</ul>,
+		)
+		expect(screen.queryByText(GLOBAL.PHOTO_ALT.HELP)).toBeNull()
+
+		rerender(
+			<ul>
+				<FilePreview
+					file={IMAGE_FILE}
+					onRemove={vi.fn()}
+					onAltChange={vi.fn()}
+					showAltHelp
+				/>
+			</ul>,
+		)
+		expect(screen.getByText(GLOBAL.PHOTO_ALT.HELP)).toBeInTheDocument()
+	})
+
 	it('renders a custom tag', () => {
 		render(
 			<FilePreview

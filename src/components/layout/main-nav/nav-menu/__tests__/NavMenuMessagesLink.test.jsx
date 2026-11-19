@@ -41,6 +41,22 @@ describe('<NavMenuMessagesLink />', () => {
 		expect(link.querySelector(countSelector)).toHaveTextContent('12')
 	})
 
+	it.each([
+		[1, 'Messages, 1 unread conversation', '1'],
+		[0, 'Messages', null],
+		[undefined, 'Messages', null],
+	])(
+		'names the link for %s unread and shows the count only when there is one',
+		(unreadMessages, name, count) => {
+			renderLink({ unreadMessages })
+
+			const badge = screen
+				.getByRole('link', { name })
+				.querySelector(countSelector)
+			expect(badge?.textContent ?? null).toBe(count)
+		},
+	)
+
 	it('marks the current page', () => {
 		renderLink({ isActive: true })
 

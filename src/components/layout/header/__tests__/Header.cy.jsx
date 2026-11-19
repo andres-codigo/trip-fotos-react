@@ -1,107 +1,61 @@
-import { HEADER_SELECTORS } from '@/constants/test'
-
-import { PATHS } from '@/constants/ui'
-
-import { headerAssertions } from './test-utilities/headerTestHelpers'
+import {
+	ACCOUNT_MENU_SELECTORS,
+	TOP_NAVIGATION_SELECTORS,
+} from '@/constants/test'
 
 import Header from '@/components/layout/header/Header'
 
+// The nav items sit in the header from the tablet width; on a phone the tab bar carries them
+const assertNav = ({ exists, visible }) => {
+	if (!exists) {
+		cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER).should('not.exist')
+		return
+	}
+	cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEMS_CONTAINER).should(
+		visible ? 'be.visible' : 'not.be.visible',
+	)
+}
+
 describe('<Header />', () => {
-	describe('Rendering tests', () => {
-		describe('Not logged in', () => {
-			it('renders correctly for not logged in users on mobile, tablet, and desktop', () => {
-				cy.createMockStore(null).then((store) => {
-					cy.mountWithProviders(<Header />, store)
+	it('shows the title and no navigation when logged out, on mobile, tablet and desktop', () => {
+		cy.createMockStore(null).then((store) => {
+			cy.mountWithProviders(<Header />, store)
 
-					cy.setViewportToMobile()
-					headerAssertions(PATHS.TRAVELLERS, false, false, false)
-
-					cy.setViewportToTablet()
-					headerAssertions(PATHS.TRAVELLERS, false, false, false)
-
-					cy.setViewportToDesktop()
-					headerAssertions(PATHS.TRAVELLERS, false, false, false)
-				})
-			})
-		})
-
-		describe('Logged in', () => {
-			it('renders correctly for logged in users on mobile, tablet, and desktop', () => {
-				cy.createMockStore(true).then((store) => {
-					cy.mountWithProviders(<Header />, store)
-
-					cy.setViewportToMobile()
-					headerAssertions(PATHS.TRAVELLERS, true, false, true)
-
-					cy.setViewportToTablet()
-					headerAssertions(PATHS.TRAVELLERS, true, true, true)
-
-					cy.setViewportToDesktop()
-					headerAssertions(PATHS.TRAVELLERS, true, true, true)
-				})
+			;['Mobile', 'Tablet', 'Desktop'].forEach((size) => {
+				cy[`setViewportTo${size}`]()
+				cy.assertHeaderTitleLink()
+				assertNav({ exists: false })
+				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should('not.exist')
 			})
 		})
 	})
 
-	describe('Behaviour tests', () => {
-		describe('Not logged in', () => {
-			// Travellers is public, so the brand leads there signed in or not
-			it('renders the site title link with the "/travellers" href and label', () => {
-				cy.createMockStore(null).then((store) => {
-					cy.mountWithProviders(<Header />, store)
-					cy.get(`${HEADER_SELECTORS.SITE_HEADER_TITLE_LINK} a`)
-						.should('have.attr', 'href', PATHS.TRAVELLERS)
-						.and('have.attr', 'aria-label', 'Trip Fotos Home')
-						.and('contain.text', 'Trip Fotos')
-				})
-			})
-		})
+	it('shows the account menu, and the nav items from the tablet width, when logged in', () => {
+		cy.createMockStore(true).then((store) => {
+			cy.mountWithProviders(<Header />, store)
 
-		describe('Logged in', () => {
-			it('renders the site title link with the "/travellers" href and label', () => {
-				cy.createMockStore(true).then((store) => {
-					cy.mountWithProviders(<Header />, store)
-					cy.get(`${HEADER_SELECTORS.SITE_HEADER_TITLE_LINK} a`)
-						.should('have.attr', 'href', PATHS.TRAVELLERS)
-						.and('have.attr', 'aria-label', 'Trip Fotos Home')
-						.and('contain.text', 'Trip Fotos')
-				})
+			;[
+				['Mobile', false],
+				['Tablet', true],
+				['Desktop', true],
+			].forEach(([size, navVisible]) => {
+				cy[`setViewportTo${size}`]()
+				cy.assertHeaderTitleLink()
+				assertNav({ exists: true, visible: navVisible })
+				cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should('be.visible')
 			})
 		})
 	})
 
-	describe('Accessibility tests', () => {
-		describe('Not logged in', () => {
-			it('has accessibility labels on header', () => {
-				cy.createMockStore(null).then((store) => {
-					cy.mountWithProviders(<Header />, store)
-
-					cy.get(HEADER_SELECTORS.SITE_HEADER)
-						.should('have.attr', 'role', 'banner')
-						.and('have.attr', 'aria-label', 'Site header')
-
-					cy.get(
-						`${HEADER_SELECTORS.SITE_HEADER_TITLE_LINK} a`,
-					).should('have.attr', 'aria-label', 'Trip Fotos Home')
-				})
-			})
-		})
-
-		describe('Logged in', () => {
-			it('has accessibility labels on header and navigation', () => {
-				cy.createMockStore(true).then((store) => {
-					cy.mountWithProviders(<Header />, store)
-
-					cy.get(HEADER_SELECTORS.SITE_HEADER)
-						.should('have.attr', 'role', 'banner')
-						.and('have.attr', 'aria-label', 'Site header')
-
-					cy.get(
-						`${HEADER_SELECTORS.SITE_HEADER_TITLE_LINK} a`,
-					).should('have.attr', 'aria-label', 'Trip Fotos Home')
-
-					cy.get('nav').should('have.attr', 'aria-label', 'Main')
-				})
+	;[
+		['logged out', null],
+		['logged in', true],
+	].forEach(([state, user]) => {
+		it(`has no axe violations ${state}`, () => {
+			cy.createMockStore(user).then((store) => {
+				cy.mountWithProviders(<Header />, store)
+				cy.assertHeaderTitleLink()
+				cy.checkA11y()
 			})
 		})
 	})

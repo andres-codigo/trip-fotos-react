@@ -571,6 +571,17 @@ describe('<TravellerRegistrationForm />', () => {
 		expect(mockOnSubmit).not.toHaveBeenCalled()
 	})
 
+	it('keeps the submit button last in tab order', () => {
+		render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+		const form = screen.getByTestId(FORM_SELECTORS.FORM)
+		const focusable = form.querySelectorAll(
+			'input, button, textarea, select, a[href]',
+		)
+		expect(focusable[focusable.length - 1]).toBe(
+			screen.getByRole('button', { name: 'Register' }),
+		)
+	})
+
 	describe('Editing a trip', () => {
 		const photo = (n, alt = '') => ({
 			url: `https://img/${n}.jpg`,

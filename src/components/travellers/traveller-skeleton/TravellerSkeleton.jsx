@@ -59,6 +59,7 @@ const TravellerSkeleton = ({ isPublic = false }) => (
 		<div className="flex flex-wrap gap-2 self-start text-sm">
 			<span
 				className={cn(BLOCK, 'h-[calc(1lh+0.5rem)] w-24 rounded-pill')}
+				data-cy={TRAVELLER_SKELETON.CHIP}
 			/>
 		</div>
 		<div className="pt-3.5">

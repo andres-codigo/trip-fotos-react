@@ -26,19 +26,13 @@ describe('<NavMenuButtonLink />', () => {
 
 	it('draws a 3px bar under the current page only', () => {
 		mountLink({ isActive: true })
+		cy.get('a').then(($link) => {
+			const bar = getComputedStyle($link[0], '::after')
+			expect(bar.height).to.equal('3px')
+			expect(bar.bottom).to.equal('0px')
+		})
 
-		cy.get('a')
-			.should('have.attr', 'aria-current', 'page')
-			.then(($link) => {
-				const bar = getComputedStyle($link[0], '::after')
-				expect(bar.height).to.equal('3px')
-				expect(bar.bottom).to.equal('0px')
-			})
-	})
-
-	it('draws no bar when not current', () => {
 		mountLink()
-
 		cy.get('a').then(($link) => {
 			expect(getComputedStyle($link[0], '::after').content).to.equal(
 				'none',

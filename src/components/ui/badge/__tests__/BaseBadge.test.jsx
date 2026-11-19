@@ -13,6 +13,14 @@ describe('<BaseBadge />', () => {
 		expect(badge).toHaveTextContent('Tokyo')
 	})
 
+	it('hides the pin icon from assistive technology', () => {
+		const { container } = render(<BaseBadge title="Tokyo" />)
+		expect(container.querySelector('svg')).toHaveAttribute(
+			'aria-hidden',
+			'true',
+		)
+	})
+
 	it.each(TRAVELLER_AREAS)('gives the %s type a stable tone', (area) => {
 		const { unmount } = render(
 			<BaseBadge

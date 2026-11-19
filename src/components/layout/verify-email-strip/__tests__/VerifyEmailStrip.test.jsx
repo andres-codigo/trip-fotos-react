@@ -9,6 +9,7 @@ import { VERIFY_EMAIL_STRIP } from '@/constants/test'
 import useVerifyEmail from '@/utils/useVerifyEmail'
 
 import VerifyEmailStrip from '@/components/layout/verify-email-strip/VerifyEmailStrip'
+import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 vi.mock('@/utils/useVerifyEmail', () => ({ default: vi.fn() }))
 
@@ -87,7 +88,7 @@ describe('<VerifyEmailStrip />', () => {
 	])('replaces the links with a busy status when %s', (status, copy) => {
 		const { container } = renderStrip(status)
 		const busy = container.querySelector(
-			`[data-cy="${VERIFY_EMAIL_STRIP.BUSY}"]`,
+			getByDataCy(VERIFY_EMAIL_STRIP.BUSY),
 		)
 		expect(within(busy).getByRole('status')).toHaveTextContent(copy)
 		expect(queryLink(VERIFY_EMAIL_PROMPT_CONFIG.SEND_AGAIN)).toBeNull()

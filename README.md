@@ -68,7 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Clearer form errors: each error sits under its field's label
 - Clearer menu hover in the header and tab bar
 - Email verification on sign-up, with Check your inbox to resend or start over
-- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo
+- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo and test suite
 
 **Blocked**
 

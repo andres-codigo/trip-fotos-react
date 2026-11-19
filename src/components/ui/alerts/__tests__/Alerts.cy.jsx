@@ -1,15 +1,16 @@
 import Alerts from '@/components/ui/alerts/Alerts'
 
 const ALERT = '[role="alert"]'
-const TYPE_CLASSES = {
-	success: 'bg-success',
-	error: 'bg-danger',
-	info: 'bg-accent',
+// Each type's token and its on-colour ink
+const TYPE_COLOURS = {
+	success: 'rgb(127, 196, 140)',
+	error: 'rgb(229, 103, 93)',
+	info: 'rgb(159, 192, 126)',
 }
 
 describe('<Alerts />', () => {
 	;['success', 'error', 'info'].forEach((type) => {
-		it(`styles the ${type} type`, () => {
+		it(`draws the ${type} type with its token and on-colour ink`, () => {
 			cy.mount(
 				<Alerts
 					message="Hello"
@@ -18,31 +19,9 @@ describe('<Alerts />', () => {
 			)
 
 			cy.get(ALERT)
-				.should('have.class', TYPE_CLASSES[type])
-				.and('not.have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+				.should('have.css', 'background-color', TYPE_COLOURS[type])
+				.and('have.css', 'color', 'rgb(20, 19, 15)')
 		})
-	})
-
-	it('draws success with the single success token and its on-success ink', () => {
-		cy.mount(<Alerts message="Saved." />)
-
-		cy.get(ALERT)
-			.should('have.css', 'background-color', 'rgb(127, 196, 140)')
-			.and('have.css', 'color', 'rgb(20, 19, 15)')
-	})
-
-	it('stays open when the duration is 0', () => {
-		cy.clock()
-		cy.mount(
-			<Alerts
-				message="Hello"
-				duration={0}
-			/>,
-		)
-
-		cy.tick(60000)
-
-		cy.get(ALERT).should('exist')
 	})
 
 	;['success', 'error', 'info'].forEach((type) => {

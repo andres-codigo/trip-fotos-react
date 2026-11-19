@@ -8,9 +8,9 @@ import {
 	TRAVELLERS_SKELETON,
 } from '@/constants/test'
 import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
+import { getByDataCy } from '@/testUtils/cypress/selectors'
 
-const byDataCy = (container, id) =>
-	container.querySelectorAll(`[data-cy="${id}"]`)
+const byDataCy = (container, id) => container.querySelectorAll(getByDataCy(id))
 
 describe('TravellersSkeleton', () => {
 	// Shown, the line would leave when the list arrives and pull the page up

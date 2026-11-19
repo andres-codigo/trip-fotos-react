@@ -1,3 +1,4 @@
+import { getByDataCy } from '../../../../src/testUtils/cypress/selectors'
 import { atPath, shows, successOutcome } from '../waitForSuccess'
 
 const page = (html, pathname = '/') => {
@@ -35,9 +36,9 @@ describe('successOutcome', () => {
 		expect(
 			successOutcome(
 				page('<p data-cy="saved"></p>'),
-				shows('[data-cy="saved"]'),
+				shows(getByDataCy('saved')),
 			),
 		).toEqual({ done: true })
-		expect(successOutcome(page(''), shows('[data-cy="saved"]'))).toBe(null)
+		expect(successOutcome(page(''), shows(getByDataCy('saved')))).toBe(null)
 	})
 })

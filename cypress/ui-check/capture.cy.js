@@ -15,31 +15,44 @@ import { MOCK_THREADS } from '../../src/constants/test/mock-data/mock-messages'
 import { conversationId } from '../../src/utils/conversationId'
 import {
 	ACCOUNT_MENU_SELECTORS,
+	ACCOUNT_PAGE_SELECTORS,
 	AUTHENTICATION_FORM_SELECTORS,
+	AUTH_ACTION_PAGE_SELECTORS,
+	CHANGE_EMAIL_FORM_SELECTORS,
+	CHANGE_PASSWORD_FORM_SELECTORS,
 	COMBOBOX_SELECTORS,
 	COMMON_SELECTORS,
+	CONVERSATION_ROW_SELECTORS,
+	CONVERSATION_SKELETON_SELECTORS,
 	DIALOG_SELECTORS,
 	EDIT_TRIP_SELECTORS,
 	ERROR_SUMMARY_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 	FOOTER_SELECTORS,
-	CONVERSATION_ROW_SELECTORS,
+	MESSAGES_PAGE_SELECTORS,
+	MESSAGES_PAGE_SKELETON_SELECTORS,
 	MESSAGE_BUBBLE_SELECTORS,
 	MESSAGE_THREAD_SELECTORS,
-	MESSAGES_PAGE_SELECTORS,
+	NEW_PASSWORD_FORM_SELECTORS,
+	PASSWORD_RESET_FORM_SELECTORS,
+	PUBLIC_TRAVELLER_ITEM_SELECTORS,
 	REPLY_BOX_SELECTORS,
+	TAB_BAR_SELECTORS,
 	THREAD_HEADER_SELECTORS,
 	THREAD_NOTE_SELECTORS,
-	PASSWORD_RESET_FORM_SELECTORS,
-	TAB_BAR_SELECTORS,
 	TOAST_SELECTORS,
 	TOP_NAVIGATION_SELECTORS,
+	TRAVELLERS_LIST_SELECTORS,
+	TRAVELLERS_PAGE_SKELETON_SELECTORS,
+	TRAVELLERS_WELCOME_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
 	TRAVELLER_FILTER_SELECTORS,
 	TRAVELLER_ITEM_SELECTORS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
-	TRAVELLERS_LIST_SELECTORS,
 	TRIP_PHOTOS_SELECTORS,
+	VERIFY_EMAIL_INBOX_SELECTORS,
+	VERIFY_EMAIL_NOTE_SELECTORS,
+	VERIFY_EMAIL_STRIP_SELECTORS,
 } from '../../src/constants/test/selectors/components'
 import {
 	PAGE_NOT_FOUND_SELECTORS,
@@ -155,8 +168,7 @@ const shot = (name, options = {}) => {
 }
 
 // Records each card's photo-row top, grouped by grid row, beside the shots: cards side by side should share one top
-const TRAVELLER_CARD =
-	'[data-cy="traveller-item"], [data-cy="public-traveller-item"]'
+const TRAVELLER_CARD = `${TRAVELLER_ITEM_SELECTORS.ROOT}, ${PUBLIC_TRAVELLER_ITEM_SELECTORS.ROOT}`
 const recordPhotoRows = (name) =>
 	cy.get(TRAVELLER_CARD).then(($cards) => {
 		const rows = {}
@@ -272,16 +284,8 @@ const latestOobCode = (email, requestType) =>
 		)
 const actionPath = (mode, code) =>
 	`${PATHS.AUTH_ACTION}?mode=${mode}&oobCode=${code}`
-// Literal selectors keep the script loadable on main, which lacks them
-const ACTION_TITLE =
-	'[data-cy="auth-action-title"], [data-cy="new-password-title"]'
-const INBOX = {
-	ROOT: '[data-cy="verify-email-inbox"]',
-	ERROR: '[data-cy="verify-email-inbox-error"]',
-	SEND_AGAIN: '[data-cy="verify-email-inbox-send-again"]',
-	CHECK: '[data-cy="verify-email-inbox-check"]',
-	STATUS: '[data-cy="verify-email-inbox-status"]',
-}
+const ACTION_TITLE = `${AUTH_ACTION_PAGE_SELECTORS.TITLE}, ${NEW_PASSWORD_FORM_SELECTORS.TITLE}`
+const INBOX = VERIFY_EMAIL_INBOX_SELECTORS
 // The browser retries a POST whose connection drops, so a one-shot network error is answered by the retry; this fails every attempt while it is on
 const networkDown = { on: false }
 const failWhileDown = (url) =>
@@ -293,7 +297,7 @@ const networkShot = (path, name) => {
 		networkDown.on = true
 	})
 	visit(path)
-	cy.get('[data-cy="auth-action-try-again"]', { timeout: TIMEOUT }).should(
+	cy.get(AUTH_ACTION_PAGE_SELECTORS.TRY_AGAIN, { timeout: TIMEOUT }).should(
 		'be.visible',
 	)
 	freezeAnimation()
@@ -407,9 +411,9 @@ const assertSettled = () => {
 		timeout: TIMEOUT,
 	}).should('not.exist')
 	;[
-		'[data-cy="conversation-skeleton-list"]',
-		'[data-cy="conversation-skeleton-thread"]',
-		'[data-cy="conversation-skeleton-header"]',
+		CONVERSATION_SKELETON_SELECTORS.LIST,
+		CONVERSATION_SKELETON_SELECTORS.THREAD,
+		CONVERSATION_SKELETON_SELECTORS.HEADER,
 	].forEach((selector) =>
 		cy.get(selector, { timeout: TIMEOUT }).should('not.exist'),
 	)
@@ -442,6 +446,10 @@ const eachWidth = (callback) => {
 }
 
 // The page's code and its data held back: the route's skeleton first, then, once the code arrives, the page's own loading state, which should look the same. Literal selectors keep the script loadable on main, which lacks them
+const PAGE_SKELETON = {
+	travellers: TRAVELLERS_PAGE_SKELETON_SELECTORS.ROOT,
+	messages: MESSAGES_PAGE_SKELETON_SELECTORS.ROOT,
+}
 const fallbackThenLoading = ({ path, chunk, data, loading, name }) => {
 	// Requests for the page's code wait here until the shot of the fallback is taken; a held request fails at the command timeout, so it is raised for the capture
 	const commandTimeout = Cypress.config('defaultCommandTimeout')
@@ -459,7 +467,7 @@ const fallbackThenLoading = ({ path, chunk, data, loading, name }) => {
 			isHolding = true
 		})
 		visit(path)
-		cy.get(`[data-cy="${name}-page-skeleton"]`).should('be.visible')
+		cy.get(PAGE_SKELETON[name]).should('be.visible')
 		// The header's nav is lazy too, so the shot waits for it rather than catching it mid-load
 		cy.window({ log: false }).then((win) => {
 			if (sdkSessionOf(win).userId) {
@@ -475,7 +483,7 @@ const fallbackThenLoading = ({ path, chunk, data, loading, name }) => {
 			isHolding = false
 			waiting.splice(0).forEach((release) => release())
 		})
-		cy.get(`[data-cy="${name}-page-skeleton"]`, {
+		cy.get(PAGE_SKELETON[name], {
 			timeout: TIMEOUT,
 		}).should('not.exist')
 		cy.get(loading).should('be.visible')
@@ -678,10 +686,8 @@ describe(`UI check capture (${LABEL})`, () => {
 		})
 
 		capture('verify-gate', () => {
-			const STRIP = '[data-cy="verify-email-strip"]'
-			const NOTE = '[data-cy="verify-email-note"]'
-			const stripPart = (part) => `[data-cy="verify-email-strip-${part}"]`
-			const notePart = (part) => `[data-cy="verify-email-note-${part}"]`
+			const STRIP = VERIFY_EMAIL_STRIP_SELECTORS.ROOT
+			const NOTE = VERIFY_EMAIL_NOTE_SELECTORS.ROOT
 			const settledShot = (name) => {
 				assertSettled()
 				freezeAnimation()
@@ -733,12 +739,12 @@ describe(`UI check capture (${LABEL})`, () => {
 					visit(PATHS.TRAVELLERS)
 					cy.get(STRIP, { timeout: TIMEOUT }).should('contain', email)
 					settledShot(`strip-${width}`)
-					forcePseudo(stripPart('send-again'), [
+					forcePseudo(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN, [
 						'focus',
 						'focus-visible',
 					])
 					shot(`strip-focus-${width}`)
-					forcePseudo(stripPart('send-again'), [])
+					forcePseudo(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN, [])
 					// Scrolled into view, the strip sits under the sticky header, so its clicks start from the top
 
 					interceptOnce(
@@ -751,18 +757,23 @@ describe(`UI check capture (${LABEL})`, () => {
 						},
 					)
 					cy.scrollTo('top')
-					cy.get(stripPart('send-again')).click({
+					cy.get(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN).click({
 						scrollBehavior: false,
 					})
-					cy.get(stripPart('busy')).should('be.visible')
+					cy.get(VERIFY_EMAIL_STRIP_SELECTORS.BUSY).should(
+						'be.visible',
+					)
 					freezeAnimation()
 					shot(`strip-sending-${width}`)
 
 					visit(PATHS.TRAVELLERS)
-					cy.get(stripPart('send-again'), {
+					cy.get(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN, {
 						timeout: TIMEOUT,
 					}).click()
-					cy.get(stripPart('message')).should('contain', 'Sent.')
+					cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE).should(
+						'contain',
+						'Sent.',
+					)
 					settledShot(`strip-sent-${width}`)
 
 					visit(PATHS.TRAVELLERS)
@@ -778,17 +789,22 @@ describe(`UI check capture (${LABEL})`, () => {
 							},
 						},
 					)
-					cy.get(stripPart('send-again'), {
+					cy.get(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN, {
 						timeout: TIMEOUT,
 					}).click()
-					cy.get(stripPart('message')).should('contain', 'Not sent.')
+					cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE).should(
+						'contain',
+						'Not sent.',
+					)
 					settledShot(`strip-not-sent-${width}`)
 
 					visit(PATHS.TRAVELLERS)
-					cy.get(stripPart('check'), { timeout: TIMEOUT }).click({
+					cy.get(VERIFY_EMAIL_STRIP_SELECTORS.CHECK, {
+						timeout: TIMEOUT,
+					}).click({
 						scrollBehavior: false,
 					})
-					cy.get(stripPart('message')).should(
+					cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE).should(
 						'contain',
 						'Not verified yet',
 					)
@@ -798,11 +814,14 @@ describe(`UI check capture (${LABEL})`, () => {
 					cy.get(NOTE, { timeout: TIMEOUT }).should('contain', email)
 					cy.get(STRIP).should('not.exist')
 					settledShot(`register-${width}`)
-					cy.get(notePart('send-again')).click()
-					cy.get(notePart('message')).should('contain', 'Sent.')
+					cy.get(VERIFY_EMAIL_NOTE_SELECTORS.SEND_AGAIN).click()
+					cy.get(VERIFY_EMAIL_NOTE_SELECTORS.MESSAGE).should(
+						'contain',
+						'Sent.',
+					)
 					settledShot(`register-sent-${width}`)
-					cy.get(notePart('check')).click()
-					cy.get(notePart('message')).should(
+					cy.get(VERIFY_EMAIL_NOTE_SELECTORS.CHECK).click()
+					cy.get(VERIFY_EMAIL_NOTE_SELECTORS.MESSAGE).should(
 						'contain',
 						'Not verified yet',
 					)
@@ -824,15 +843,10 @@ describe(`UI check capture (${LABEL})`, () => {
 		})
 
 		capture('account-settings', () => {
-			// Literal selectors keep the script loadable on main, which lacks them
-			const page = (part) => `[data-cy="account-${part}"]`
-			const form = (part) =>
-				part.endsWith('-error')
-					? `[data-cy-error="change-password-${part}"]`
-					: `[data-cy="change-password-${part}"]`
-			const CURRENT = form('current-input')
-			const NEW = form('new-input')
-			const SAVE = form('save-password')
+			const CURRENT =
+				CHANGE_PASSWORD_FORM_SELECTORS.CURRENT_PASSWORD_INPUT
+			const NEW = CHANGE_PASSWORD_FORM_SELECTORS.NEW_PASSWORD_INPUT
+			const SAVE = CHANGE_PASSWORD_FORM_SELECTORS.SAVE_PASSWORD
 			const settledShot = (name) => {
 				assertSettled()
 				freezeAnimation()
@@ -840,7 +854,9 @@ describe(`UI check capture (${LABEL})`, () => {
 			}
 			const openForm = () => {
 				visit(PATHS.ACCOUNT)
-				cy.get(page('change-password'), { timeout: TIMEOUT }).click()
+				cy.get(ACCOUNT_PAGE_SELECTORS.CHANGE_PASSWORD, {
+					timeout: TIMEOUT,
+				}).click()
 				cy.get(CURRENT).should('have.focus')
 			}
 			const fill = (current, next) => {
@@ -851,10 +867,9 @@ describe(`UI check capture (${LABEL})`, () => {
 			eachWidth((width) => {
 				performLogin()
 				visit(PATHS.ACCOUNT)
-				cy.get(page('email'), { timeout: TIMEOUT }).should(
-					'have.text',
-					TEST_USERS.STANDARD.EMAIL,
-				)
+				cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL, {
+					timeout: TIMEOUT,
+				}).should('have.text', TEST_USERS.STANDARD.EMAIL)
 				settledShot(`verified-${width}`)
 
 				// A fresh unverified account, so the saved password change touches no seeded login
@@ -867,11 +882,12 @@ describe(`UI check capture (${LABEL})`, () => {
 					performLogin(email, NEW_PASSWORD)
 
 					visit(PATHS.ACCOUNT)
-					cy.get(page('email'), { timeout: TIMEOUT }).should(
-						'have.text',
-						email,
+					cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL, {
+						timeout: TIMEOUT,
+					}).should('have.text', email)
+					cy.get(VERIFY_EMAIL_STRIP_SELECTORS.ROOT).should(
+						'not.exist',
 					)
-					cy.get('[data-cy="verify-email-strip"]').should('not.exist')
 					settledShot(`unverified-${width}`)
 
 					cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
@@ -880,18 +896,14 @@ describe(`UI check capture (${LABEL})`, () => {
 						'Not verified',
 					)
 					forcePseudo(
-						'[data-cy="account-menu-account-settings"]',
+						ACCOUNT_MENU_SELECTORS.ACCOUNT_SETTINGS,
 						['focus', 'focus-visible'],
 						{ scroll: false },
 					)
 					shot(`menu-unverified-${width}`, { capture: 'viewport' })
-					forcePseudo(
-						'[data-cy="account-menu-account-settings"]',
-						[],
-						{
-							scroll: false,
-						},
-					)
+					forcePseudo(ACCOUNT_MENU_SELECTORS.ACCOUNT_SETTINGS, [], {
+						scroll: false,
+					})
 					cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
 
 					interceptOnce(
@@ -903,8 +915,8 @@ describe(`UI check capture (${LABEL})`, () => {
 							delay: 60000,
 						},
 					)
-					cy.get(page('send-again')).click()
-					cy.get(page('send-again')).should(
+					cy.get(ACCOUNT_PAGE_SELECTORS.SEND_AGAIN).click()
+					cy.get(ACCOUNT_PAGE_SELECTORS.SEND_AGAIN).should(
 						'have.attr',
 						'aria-busy',
 						'true',
@@ -913,32 +925,44 @@ describe(`UI check capture (${LABEL})`, () => {
 					shot(`sending-${width}`)
 
 					visit(PATHS.ACCOUNT)
-					cy.get(page('send-again'), { timeout: TIMEOUT }).click()
-					cy.get(page('email-message')).should('contain', 'Sent.')
+					cy.get(ACCOUNT_PAGE_SELECTORS.SEND_AGAIN, {
+						timeout: TIMEOUT,
+					}).click()
+					cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL_MESSAGE).should(
+						'contain',
+						'Sent.',
+					)
 					settledShot(`sent-${width}`)
 
 					openForm()
 					settledShot(`password-open-${width}`)
-					forcePseudo(form('cancel'), ['focus', 'focus-visible'])
+					forcePseudo(CHANGE_PASSWORD_FORM_SELECTORS.CANCEL, [
+						'focus',
+						'focus-visible',
+					])
 					shot(`password-cancel-focus-${width}`)
-					forcePseudo(form('cancel'), [])
+					forcePseudo(CHANGE_PASSWORD_FORM_SELECTORS.CANCEL, [])
 
 					cy.get(SAVE).click()
-					cy.get(form('current-error')).should('be.visible')
+					cy.get(
+						CHANGE_PASSWORD_FORM_SELECTORS.CURRENT_PASSWORD_ERROR,
+					).should('be.visible')
 					settledShot(`password-empty-${width}`)
 
 					cy.get(CURRENT).type('not-the-password')
 					cy.get(NEW).type('abc').blur()
-					cy.get(form('new-error')).should('contain', '6 characters')
+					cy.get(
+						CHANGE_PASSWORD_FORM_SELECTORS.NEW_PASSWORD_ERROR,
+					).should('contain', '6 characters')
 					settledShot(`password-short-${width}`)
 
 					openForm()
 					fill('not-the-password', 'another-password')
 					cy.get(SAVE).click()
-					cy.get(form('current-error'), { timeout: TIMEOUT }).should(
-						'contain',
-						'not right',
-					)
+					cy.get(
+						CHANGE_PASSWORD_FORM_SELECTORS.CURRENT_PASSWORD_ERROR,
+						{ timeout: TIMEOUT },
+					).should('contain', 'not right')
 					settledShot(`password-wrong-${width}`)
 
 					openForm()
@@ -956,10 +980,9 @@ describe(`UI check capture (${LABEL})`, () => {
 					)
 					fill(NEW_PASSWORD, 'another-password')
 					cy.get(SAVE).click()
-					cy.get(form('alert'), { timeout: TIMEOUT }).should(
-						'contain',
-						'Too many attempts',
-					)
+					cy.get(CHANGE_PASSWORD_FORM_SELECTORS.ALERT, {
+						timeout: TIMEOUT,
+					}).should('contain', 'Too many attempts')
 					settledShot(`password-too-many-${width}`)
 
 					openForm()
@@ -977,26 +1000,25 @@ describe(`UI check capture (${LABEL})`, () => {
 					openForm()
 					fill(NEW_PASSWORD, 'capture-password-changed')
 					cy.get(SAVE).click()
-					cy.get(page('password-changed'), {
+					cy.get(ACCOUNT_PAGE_SELECTORS.PASSWORD_CHANGED, {
 						timeout: TIMEOUT,
 					}).should('be.visible')
-					cy.get(page('change-password')).should('have.focus')
-					cy.get(page('email')).should('have.text', email)
+					cy.get(ACCOUNT_PAGE_SELECTORS.CHANGE_PASSWORD).should(
+						'have.focus',
+					)
+					cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL).should(
+						'have.text',
+						email,
+					)
 					settledShot(`password-changed-${width}`)
 				})
 			})
 		})
 
 		capture('change-email', () => {
-			// Literal selectors keep the script loadable on main, which lacks them
-			const page = (part) => `[data-cy="account-${part}"]`
-			const form = (part) =>
-				part.endsWith('-error')
-					? `[data-cy-error="change-email-${part}"]`
-					: `[data-cy="change-email-${part}"]`
-			const NEW = form('new-input')
-			const CURRENT = form('current-input')
-			const SEND = form('send-link')
+			const NEW = CHANGE_EMAIL_FORM_SELECTORS.NEW_EMAIL_INPUT
+			const CURRENT = CHANGE_EMAIL_FORM_SELECTORS.CURRENT_PASSWORD_INPUT
+			const SEND = CHANGE_EMAIL_FORM_SELECTORS.SEND_LINK
 			const settledShot = (name) => {
 				assertSettled()
 				freezeAnimation()
@@ -1004,7 +1026,9 @@ describe(`UI check capture (${LABEL})`, () => {
 			}
 			const openForm = () => {
 				visit(PATHS.ACCOUNT)
-				cy.get(page('change-email'), { timeout: TIMEOUT }).click()
+				cy.get(ACCOUNT_PAGE_SELECTORS.CHANGE_EMAIL, {
+					timeout: TIMEOUT,
+				}).click()
 				cy.get(NEW).should('have.focus')
 			}
 			const fill = (email, password) => {
@@ -1018,12 +1042,14 @@ describe(`UI check capture (${LABEL})`, () => {
 				settledShot(`open-${width}`)
 
 				cy.get(SEND).click()
-				cy.get(form('current-error')).should('be.visible')
+				cy.get(
+					CHANGE_EMAIL_FORM_SELECTORS.CURRENT_PASSWORD_ERROR,
+				).should('be.visible')
 				settledShot(`empty-${width}`)
 
 				cy.get(NEW).clear().type(TEST_USERS.STANDARD.EMAIL)
 				cy.get(SEND).click()
-				cy.get(form('new-error')).should(
+				cy.get(CHANGE_EMAIL_FORM_SELECTORS.NEW_EMAIL_ERROR).should(
 					'contain',
 					'already your email',
 				)
@@ -1032,10 +1058,9 @@ describe(`UI check capture (${LABEL})`, () => {
 				openForm()
 				fill(`new-${width}@example.org`, 'not-the-password')
 				cy.get(SEND).click()
-				cy.get(form('current-error'), { timeout: TIMEOUT }).should(
-					'contain',
-					'not right',
-				)
+				cy.get(CHANGE_EMAIL_FORM_SELECTORS.CURRENT_PASSWORD_ERROR, {
+					timeout: TIMEOUT,
+				}).should('contain', 'not right')
 				settledShot(`wrong-${width}`)
 
 				// A fresh account, so the real link sent below changes no seeded login
@@ -1053,10 +1078,9 @@ describe(`UI check capture (${LABEL})`, () => {
 					)
 					fill(`taken-${width}@example.org`, NEW_PASSWORD)
 					cy.get(SEND).click()
-					cy.get(form('alert'), { timeout: TIMEOUT }).should(
-						'contain',
-						'cannot be used',
-					)
+					cy.get(CHANGE_EMAIL_FORM_SELECTORS.ALERT, {
+						timeout: TIMEOUT,
+					}).should('contain', 'cannot be used')
 					settledShot(`taken-${width}`)
 
 					openForm()
@@ -1074,10 +1098,15 @@ describe(`UI check capture (${LABEL})`, () => {
 					openForm()
 					fill(`new-${width}@example.org`, NEW_PASSWORD)
 					cy.get(SEND).click()
-					cy.get(page('email-sent'), { timeout: TIMEOUT })
+					cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL_SENT, {
+						timeout: TIMEOUT,
+					})
 						.should('contain', `new-${width}@example.org`)
 						.and('have.focus')
-					cy.get(page('email')).should('have.text', email)
+					cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL).should(
+						'have.text',
+						email,
+					)
 					settledShot(`sent-${width}`)
 
 					interceptOnce(
@@ -1092,12 +1121,14 @@ describe(`UI check capture (${LABEL})`, () => {
 							},
 						},
 					)
-					cy.get(page('email-send-again')).click()
-					cy.get(page('email-sent-error')).should('be.visible')
+					cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL_SEND_AGAIN).click()
+					cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL_SENT_ERROR).should(
+						'be.visible',
+					)
 					settledShot(`send-again-failed-${width}`)
 
-					cy.get(page('email-send-again')).click()
-					cy.get(page('email-sent-hint'), {
+					cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL_SEND_AGAIN).click()
+					cy.get(ACCOUNT_PAGE_SELECTORS.EMAIL_SENT_HINT, {
 						timeout: TIMEOUT,
 					}).should('contain', 'seconds')
 					freezeAnimation()
@@ -1181,7 +1212,7 @@ describe(`UI check capture (${LABEL})`, () => {
 					})
 					visit(actionPath('verifyEmail', 'capture-loading'))
 					cy.contains(
-						'[data-cy="auth-action-view"]',
+						AUTH_ACTION_PAGE_SELECTORS.VIEW,
 						'Checking your link',
 						{
 							timeout: TIMEOUT,
@@ -1212,11 +1243,13 @@ describe(`UI check capture (${LABEL})`, () => {
 							},
 						},
 					)
-					cy.get('[data-cy="auth-action-send-new-link"]').click()
-					cy.get('[data-cy="auth-action-alert"]').should('be.visible')
+					cy.get(AUTH_ACTION_PAGE_SELECTORS.SEND_NEW_LINK).click()
+					cy.get(AUTH_ACTION_PAGE_SELECTORS.ALERT).should(
+						'be.visible',
+					)
 					shot(`expired-send-failed-${width}`)
-					cy.get('[data-cy="auth-action-send-new-link"]').click()
-					cy.get('[data-cy="auth-action-expired-sent"]', {
+					cy.get(AUTH_ACTION_PAGE_SELECTORS.SEND_NEW_LINK).click()
+					cy.get(AUTH_ACTION_PAGE_SELECTORS.EXPIRED_SENT, {
 						timeout: TIMEOUT,
 					}).should('be.visible')
 					shot(`expired-sent-${width}`)
@@ -1257,12 +1290,12 @@ describe(`UI check capture (${LABEL})`, () => {
 							'Choose a new password',
 							`reset-form-${width}`,
 						)
-						cy.get('[data-cy="new-password-save-password"]').click()
-						cy.get('[data-cy="new-password-input"]').should(
-							'have.attr',
-							'aria-invalid',
-							'true',
-						)
+						cy.get(
+							NEW_PASSWORD_FORM_SELECTORS.SAVE_PASSWORD,
+						).click()
+						cy.get(
+							NEW_PASSWORD_FORM_SELECTORS.PASSWORD_INPUT,
+						).should('have.attr', 'aria-invalid', 'true')
 						shot(`reset-error-${width}`)
 
 						interceptOnce(
@@ -1270,15 +1303,15 @@ describe(`UI check capture (${LABEL})`, () => {
 							'**/accounts:resetPassword*',
 							{ statusCode: 500, body: {}, delay: 60000 },
 						)
-						cy.get('[data-cy="new-password-input"]').type(
+						cy.get(NEW_PASSWORD_FORM_SELECTORS.PASSWORD_INPUT).type(
 							NEW_PASSWORD,
 						)
-						cy.get('[data-cy="new-password-save-password"]').click()
-						cy.get('[data-cy="new-password-save-password"]').should(
-							'have.attr',
-							'aria-busy',
-							'true',
-						)
+						cy.get(
+							NEW_PASSWORD_FORM_SELECTORS.SAVE_PASSWORD,
+						).click()
+						cy.get(
+							NEW_PASSWORD_FORM_SELECTORS.SAVE_PASSWORD,
+						).should('have.attr', 'aria-busy', 'true')
 						freezeAnimation()
 						shot(`reset-saving-${width}`)
 
@@ -1287,10 +1320,12 @@ describe(`UI check capture (${LABEL})`, () => {
 							'Choose a new password',
 							`reset-form-again-${width}`,
 						)
-						cy.get('[data-cy="new-password-input"]').type(
+						cy.get(NEW_PASSWORD_FORM_SELECTORS.PASSWORD_INPUT).type(
 							NEW_PASSWORD,
 						)
-						cy.get('[data-cy="new-password-save-password"]').click()
+						cy.get(
+							NEW_PASSWORD_FORM_SELECTORS.SAVE_PASSWORD,
+						).click()
 						cy.get(ACTION_TITLE, { timeout: TIMEOUT }).should(
 							'have.text',
 							'Your password has been changed',
@@ -1313,11 +1348,9 @@ describe(`UI check capture (${LABEL})`, () => {
 
 	context('logged out', () => {
 		capture('public-travellers', () => {
-			// Literal selectors keep the script loadable on main, which lacks the new ones
-			const card = '[data-cy="public-traveller-item"]'
-			const viewTrip = '[data-cy="public-traveller-item-view-trip"]'
-			const band = '[data-cy="travellers-welcome"]'
-			const filter = (name) => `[data-cy="traveller-filter-${name}"]`
+			const card = PUBLIC_TRAVELLER_ITEM_SELECTORS.ROOT
+			const viewTrip = PUBLIC_TRAVELLER_ITEM_SELECTORS.VIEW_TRIP
+			const band = TRAVELLERS_WELCOME_SELECTORS.ROOT
 			const publicTrips = '**/publicTrips.json*'
 			const seeded = () =>
 				cy
@@ -1347,15 +1380,27 @@ describe(`UI check capture (${LABEL})`, () => {
 
 				// Narrowed by city: the sheet at 768px and below, inline above
 				cy.get('body').then(($body) => {
-					if ($body.find(`${filter('trigger')}:visible`).length) {
-						cy.get(filter('trigger')).click()
-						cy.get(filter('sheet'))
-							.contains(filter('option'), /prague/i)
+					if (
+						$body.find(
+							`${TRAVELLER_FILTER_SELECTORS.TRIGGER}:visible`,
+						).length
+					) {
+						cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).click()
+						cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
+							.contains(
+								TRAVELLER_FILTER_SELECTORS.OPTION,
+								/prague/i,
+							)
 							.click()
-						cy.get(filter('show-matches')).click()
-						cy.get(filter('sheet')).should('not.exist')
+						cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_MATCHES).click()
+						cy.get(TRAVELLER_FILTER_SELECTORS.SHEET).should(
+							'not.exist',
+						)
 					} else {
-						cy.contains(filter('option'), /prague/i).click()
+						cy.contains(
+							TRAVELLER_FILTER_SELECTORS.OPTION,
+							/prague/i,
+						).click()
 					}
 				})
 				cy.get(card).should('have.length', 1)
@@ -1392,7 +1437,9 @@ describe(`UI check capture (${LABEL})`, () => {
 				interceptOnce('GET', publicTrips, { body: null })
 				cy.clearAllLocalStorage()
 				visit(PATHS.TRAVELLERS)
-				cy.get('[data-cy="no-public-trips"]').should('be.visible')
+				cy.get(TRAVELLERS_LIST_SELECTORS.NO_PUBLIC_TRIPS).should(
+					'be.visible',
+				)
 				freezeAnimation()
 				shot(`public-travellers-empty-${width}`)
 
@@ -1471,7 +1518,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				cy.clearAllLocalStorage()
 				visit(PATHS.TRAVELLERS)
 				cy.get(viewTrip, { timeout: TIMEOUT }).first().click()
-				cy.get('[data-cy="user-authentication-form-notice"]').should(
+				cy.get(AUTHENTICATION_FORM_SELECTORS.NOTICE).should(
 					'be.visible',
 				)
 				freezeAnimation()
@@ -1582,74 +1629,100 @@ describe(`UI check capture (${LABEL})`, () => {
 				})
 			})
 
-			// Literal selectors keep the script usable on main, which lacks the new ones
-			const filter = (name) => `[data-cy="traveller-filter-${name}"]`
 			// Case-insensitive: main shows stored ids as they are ("oslo")
-			const chip = (name) => [filter('option'), new RegExp(name, 'i')]
+			const chip = (name) => [
+				TRAVELLER_FILTER_SELECTORS.OPTION,
+				new RegExp(name, 'i'),
+			]
 
 			const inlineStates = (width) => {
-				cy.get(filter('list')).first().focus()
+				cy.get(TRAVELLER_FILTER_SELECTORS.LIST).first().focus()
 				shot(`city-filter-list-focus-${width}`)
-				cy.get(filter('search')).first().type('o')
-				cy.get(filter('checkbox')).should('exist')
+				cy.get(TRAVELLER_FILTER_SELECTORS.SEARCH).first().type('o')
+				cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX).should('exist')
 				shot(`city-filter-searched-${width}`)
 				cy.contains(...chip('Oslo')).click()
-				cy.get(filter('status')).should('contain', ' of ')
+				cy.get(TRAVELLER_FILTER_SELECTORS.STATUS).should(
+					'contain',
+					' of ',
+				)
 				shot(`city-filter-ticked-${width}`)
-				cy.get(filter('search')).first().clear().type('zzz')
-				cy.get(filter('empty')).should('be.visible')
+				cy.get(TRAVELLER_FILTER_SELECTORS.SEARCH)
+					.first()
+					.clear()
+					.type('zzz')
+				cy.get(TRAVELLER_FILTER_SELECTORS.EMPTY).should('be.visible')
 				shot(`city-filter-empty-${width}`)
 			}
 
 			const sheetStates = (width) => {
-				cy.get(filter('trigger')).click()
-				cy.get(filter('sheet')).should('be.visible')
+				cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).click()
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHEET).should('be.visible')
 				shot(`city-filter-sheet-${width}`)
-				cy.get(filter('sheet'))
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
 					.contains(...chip('Oslo'))
 					.click()
-				cy.get(filter('sheet'))
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
 					.contains(...chip('Rome'))
 					.click()
-				cy.get(filter('sheet'))
-					.find(`${filter('checkbox')}:checked`)
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
+					.find(`${TRAVELLER_FILTER_SELECTORS.CHECKBOX}:checked`)
 					.should('have.length', 2)
 				shot(`city-filter-sheet-ticked-${width}`)
-				cy.get(filter('sheet')).find(filter('search')).type('o')
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
+					.find(TRAVELLER_FILTER_SELECTORS.SEARCH)
+					.type('o')
 				shot(`city-filter-sheet-searched-${width}`)
-				cy.get(filter('sheet'))
-					.find(filter('search'))
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
+					.find(TRAVELLER_FILTER_SELECTORS.SEARCH)
 					.clear()
 					.type('zzz')
-				cy.get(filter('sheet'))
-					.find(filter('empty'))
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
+					.find(TRAVELLER_FILTER_SELECTORS.EMPTY)
 					.should('be.visible')
 				shot(`city-filter-sheet-empty-${width}`)
-				cy.get(filter('sheet')).find(filter('search')).clear()
-				forcePseudo(`${filter('sheet')} ${filter('checkbox')}`, [
-					'focus',
-					'focus-visible',
-				])
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
+					.find(TRAVELLER_FILTER_SELECTORS.SEARCH)
+					.clear()
+				forcePseudo(
+					`${TRAVELLER_FILTER_SELECTORS.SHEET} ${TRAVELLER_FILTER_SELECTORS.CHECKBOX}`,
+					['focus', 'focus-visible'],
+				)
 				shot(`city-filter-sheet-chip-focus-${width}`)
-				forcePseudo(`${filter('sheet')} ${filter('checkbox')}`, [])
-				cy.get(filter('show-matches')).click()
-				cy.get(filter('sheet')).should('not.exist')
-				cy.get(filter('trigger')).should('contain', '2 of')
+				forcePseudo(
+					`${TRAVELLER_FILTER_SELECTORS.SHEET} ${TRAVELLER_FILTER_SELECTORS.CHECKBOX}`,
+					[],
+				)
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_MATCHES).click()
+				cy.get(TRAVELLER_FILTER_SELECTORS.SHEET).should('not.exist')
+				cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).should(
+					'contain',
+					'2 of',
+				)
 				shot(`city-filter-narrowed-${width}`)
 			}
 
 			eachWidth((width) => {
 				visit(PATHS.TRAVELLERS)
-				cy.get(filter('checkbox')).should('have.length.at.least', 8)
+				cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX).should(
+					'have.length.at.least',
+					8,
+				)
 				assertSettled()
 				freezeAnimation()
 				shot(`city-filter-many-${width}`)
 
 				// The branch swaps the inline filter for a sheet at 768px and below; main and wider screens keep it inline
 				cy.get('body').then(($body) => {
-					if ($body.find(`${filter('trigger')}:visible`).length) {
+					if (
+						$body.find(
+							`${TRAVELLER_FILTER_SELECTORS.TRIGGER}:visible`,
+						).length
+					) {
 						sheetStates(width)
-					} else if ($body.find(filter('search')).length) {
+					} else if (
+						$body.find(TRAVELLER_FILTER_SELECTORS.SEARCH).length
+					) {
 						inlineStates(width)
 					}
 				})
@@ -2346,7 +2419,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				path: PATHS.MESSAGES,
 				chunk: 'Messages',
 				data: '**/userConversations/*.json*',
-				loading: '[data-cy="messages-loading"]',
+				loading: MESSAGES_PAGE_SELECTORS.LOADING,
 				name: 'messages',
 			})
 		})
@@ -2524,7 +2597,7 @@ describe(`UI check capture (${LABEL})`, () => {
 					(req) => req.on('response', (res) => res.setDelay(60000)),
 				)
 				openThread(OTHER_CID)
-				cy.get('[data-cy="conversation-skeleton-thread"]').should(
+				cy.get(CONVERSATION_SKELETON_SELECTORS.THREAD).should(
 					'be.visible',
 				)
 				freezeAnimation()
@@ -3136,7 +3209,7 @@ describe(`UI check capture (${LABEL})`, () => {
 
 			eachWidth((width) => {
 				visit(PATHS.TRAVELLERS)
-				cy.get('[data-cy="traveller-filter-checkbox"]').should(
+				cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX).should(
 					'have.length',
 					3,
 				)

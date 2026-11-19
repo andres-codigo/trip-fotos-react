@@ -1,5 +1,4 @@
-import { Provider } from 'react-redux'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import EditTrip from '@/pages/edit-trip/EditTrip'
@@ -7,6 +6,7 @@ import authenticationReducer from '@/store/slices/authenticationSlice'
 import travellersReducer from '@/store/slices/travellersSlice'
 
 import {
+	COMMON_SELECTORS,
 	EDIT_TRIP_SELECTORS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 } from '@/constants/test'
@@ -37,17 +37,15 @@ describe('<EditTrip />', () => {
 			},
 		})
 
-		cy.mount(
-			<Provider store={store}>
-				<MemoryRouter initialEntries={['/travellers/me/edit']}>
-					<Routes>
-						<Route
-							path="/travellers/:id/edit"
-							element={<EditTrip />}
-						/>
-					</Routes>
-				</MemoryRouter>
-			</Provider>,
+		cy.mountWithProviders(
+			<Routes>
+				<Route
+					path="/travellers/:id/edit"
+					element={<EditTrip />}
+				/>
+			</Routes>,
+			store,
+			{ initialEntries: ['/travellers/me/edit'] },
 		)
 	}
 
@@ -76,7 +74,7 @@ describe('<EditTrip />', () => {
 			rect(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_DETAILS).then(
 				(details) => {
 					cy.get(EDIT_TRIP_SELECTORS.DELETE_SECTION)
-						.closest('[data-cy="base-card"]')
+						.closest(COMMON_SELECTORS.BASE_CARD)
 						.then(($card) => {
 							const card = $card[0].getBoundingClientRect()
 							expect(card.left).to.be.closeTo(details.left, 1)

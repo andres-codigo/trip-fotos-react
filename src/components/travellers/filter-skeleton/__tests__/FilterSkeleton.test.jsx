@@ -3,8 +3,9 @@ import { describe, it, expect } from 'vitest'
 
 import FilterSkeleton from '@/components/travellers/filter-skeleton/FilterSkeleton'
 import { FILTER_SKELETON } from '@/constants/test'
+import { getByDataCy } from '@/testUtils/cypress/selectors'
 
-const byDataCy = (container, id) => container.querySelector(`[data-cy="${id}"]`)
+const byDataCy = (container, id) => container.querySelector(getByDataCy(id))
 
 describe('FilterSkeleton', () => {
 	it('renders a root hidden from assistive technology', () => {

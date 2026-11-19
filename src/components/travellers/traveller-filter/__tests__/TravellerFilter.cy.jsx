@@ -5,7 +5,6 @@ import PropTypes from 'prop-types'
 import TravellerFilter from '@/components/travellers/traveller-filter/TravellerFilter'
 
 import { TRAVELLER_FILTER_SELECTORS } from '@/constants/test'
-import { TRAVELLER_FILTER_CONFIG } from '@/constants/travellers'
 
 const options = [
 	{ id: 'tokyo', label: 'Tokyo, Japan' },
@@ -18,7 +17,7 @@ const many = Array.from({ length: 40 }, (_, i) => ({
 }))
 
 // Holds the ticks like useCityFilter does
-const StatefulFilter = ({ filterOptions = options, onShowAll = () => {} }) => {
+const StatefulFilter = ({ filterOptions = options }) => {
 	const [selectedIds, setSelectedIds] = useState([])
 	return (
 		<TravellerFilter
@@ -32,17 +31,13 @@ const StatefulFilter = ({ filterOptions = options, onShowAll = () => {} }) => {
 						: previous.filter((item) => item !== id),
 				)
 			}
-			onShowAll={() => {
-				onShowAll()
-				setSelectedIds([])
-			}}
+			onShowAll={() => setSelectedIds([])}
 		/>
 	)
 }
 
 StatefulFilter.propTypes = {
 	filterOptions: PropTypes.array,
-	onShowAll: PropTypes.func,
 }
 
 const checkbox = (label) => cy.contains('label', label).find('input')
@@ -56,47 +51,16 @@ describe('<TravellerFilter />', () => {
 
 			cy.get(TRAVELLER_FILTER_SELECTORS.ROOT).should('be.visible')
 			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).should('not.be.visible')
-			cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX)
-				.should('have.length', 2)
-				.and('not.be.checked')
 			cy.checkA11y()
 		})
 
-		it('ticks a chip on a label click, styles it and enables Show all cities', () => {
+		it('styles a ticked chip', () => {
 			cy.mount(<StatefulFilter />)
 
-			cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_ALL).should(
-				'have.attr',
-				'aria-disabled',
-				'true',
-			)
 			cy.contains('label', 'Tokyo, Japan').click()
-			checkbox('Tokyo, Japan').should('be.checked')
 			cy.contains('label', 'Tokyo, Japan')
 				.should('have.css', 'background-color', 'rgb(44, 53, 35)')
 				.and('have.css', 'border-top-color', 'rgb(169, 201, 138)')
-			cy.get(TRAVELLER_FILTER_SELECTORS.STATUS).should(
-				'have.text',
-				'1 of 2 cities selected',
-			)
-
-			cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_ALL)
-				.should('have.attr', 'aria-disabled', 'false')
-				.click()
-			checkbox('Tokyo, Japan').should('not.be.checked')
-			cy.get(TRAVELLER_FILTER_SELECTORS.STATUS).should(
-				'have.text',
-				'All 2 cities',
-			)
-		})
-
-		it('keeps focus on Show all cities after a reset', () => {
-			cy.mount(<StatefulFilter />)
-
-			cy.contains('label', 'Tokyo, Japan').click()
-			cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_ALL).focus()
-			cy.focused().type('{enter}')
-			cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_ALL).should('have.focus')
 		})
 
 		it('gives chips a 44px target and keeps the hidden checkbox focusable', () => {
@@ -122,46 +86,35 @@ describe('<TravellerFilter />', () => {
 			})
 		})
 
-		it('caps the list height, scrolls, and searches', () => {
+		it('caps the list height and lets the keyboard scroll it', () => {
 			cy.mount(<StatefulFilter filterOptions={many} />)
 
 			cy.get(TRAVELLER_FILTER_SELECTORS.LIST)
 				.invoke('outerHeight')
 				.should('be.at.most', 192)
 			cy.get(TRAVELLER_FILTER_SELECTORS.LIST).focus().should('have.focus')
-
-			cy.get(TRAVELLER_FILTER_SELECTORS.SEARCH).type('City 1,')
-			cy.get(TRAVELLER_FILTER_SELECTORS.CHECKBOX).should('have.length', 1)
-			cy.get(TRAVELLER_FILTER_SELECTORS.SEARCH).clear().type('zzz')
-			cy.get(TRAVELLER_FILTER_SELECTORS.EMPTY).should(
-				'have.text',
-				TRAVELLER_FILTER_CONFIG.NO_MATCH('zzz'),
-			)
 		})
 	})
 
 	describe('mobile, 768px and below', () => {
-		beforeEach(() => cy.viewport(390, 844))
+		;[
+			[390, 844],
+			[768, 1024],
+		].forEach(([width, height]) => {
+			it(`shows a 44px trigger instead of the inline filter at ${width}px`, () => {
+				cy.viewport(width, height)
+				cy.mount(<StatefulFilter />)
 
-		it('shows the trigger instead of the inline filter', () => {
-			cy.mount(<StatefulFilter />)
-
-			cy.get(TRAVELLER_FILTER_SELECTORS.ROOT).should('not.be.visible')
-			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER)
-				.should('be.visible')
-				.and('contain.text', 'All 2 cities')
-				.invoke('outerHeight')
-				.should('be.at.least', 44)
+				cy.get(TRAVELLER_FILTER_SELECTORS.ROOT).should('not.be.visible')
+				cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER)
+					.should('be.visible')
+					.invoke('outerHeight')
+					.should('be.at.least', 44)
+			})
 		})
 
-		it('still shows the trigger at 768px', () => {
-			cy.viewport(768, 1024)
-			cy.mount(<StatefulFilter />)
-
-			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).should('be.visible')
-		})
-
-		it('filters in the sheet, closes on the main button and returns focus to the trigger', () => {
+		it('has no axe violations in the open sheet, and styles the trigger of an active filter', () => {
+			cy.viewport(390, 844)
 			cy.mount(<StatefulFilter />)
 
 			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).click()
@@ -171,40 +124,17 @@ describe('<TravellerFilter />', () => {
 			cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
 				.contains('label', 'Prague, Czechia')
 				.click()
-			cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_MATCHES)
-				.should('have.text', 'Show 1 traveller')
-				.click()
-
+			cy.get(TRAVELLER_FILTER_SELECTORS.SHOW_MATCHES).click()
 			cy.get(TRAVELLER_FILTER_SELECTORS.SHEET).should('not.exist')
-			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER)
-				.should('have.focus')
-				.and('contain.text', '1 of 2 cities')
-				.and('have.css', 'background-color', 'rgb(44, 53, 35)')
-		})
-
-		it('closes on Escape and resets from the footer', () => {
-			const onShowAll = cy.stub().as('onShowAll')
-			cy.mount(<StatefulFilter onShowAll={onShowAll} />)
-
-			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).click()
-			cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
-				.contains('label', 'Tokyo, Japan')
-				.click()
-			cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
-				.find(TRAVELLER_FILTER_SELECTORS.SHOW_ALL)
-				.click()
-			cy.get('@onShowAll').should('have.been.calledOnce')
-			cy.get(TRAVELLER_FILTER_SELECTORS.SHEET)
-				.contains('label', 'Tokyo, Japan')
-				.find('input')
-				.should('not.be.checked')
-
-			cy.get('body').type('{esc}')
-			cy.get(TRAVELLER_FILTER_SELECTORS.SHEET).should('not.exist')
-			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).should('have.focus')
+			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).should(
+				'have.css',
+				'background-color',
+				'rgb(44, 53, 35)',
+			)
 		})
 
 		it('scrolls a long list inside the sheet, keeping the footer in view', () => {
+			cy.viewport(390, 844)
 			cy.mount(<StatefulFilter filterOptions={many} />)
 
 			cy.get(TRAVELLER_FILTER_SELECTORS.TRIGGER).click()

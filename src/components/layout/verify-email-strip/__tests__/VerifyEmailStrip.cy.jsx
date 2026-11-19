@@ -1,4 +1,3 @@
-import { VERIFY_EMAIL_PROMPT_CONFIG } from '@/constants/auth'
 import { VERIFY_EMAIL_STRIP_SELECTORS } from '@/constants/test'
 
 import {
@@ -41,77 +40,50 @@ const mountStrip = () => {
 const settle = (pending, action) => cy.then(() => pending.settle(action))
 
 describe('<VerifyEmailStrip />', () => {
-	it('shows the prompt and both links, with no axe violations', () => {
+	it('gives Check a 44px target and has no axe violations', () => {
 		mountStrip()
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.ROOT)
-			.should('have.attr', 'role', 'region')
-			.and('contain.text', EMAIL)
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN).should(
-			'have.text',
-			VERIFY_EMAIL_PROMPT_CONFIG.SEND_AGAIN,
-		)
 		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.CHECK)
-			.should('have.text', VERIFY_EMAIL_PROMPT_CONFIG.CHECK)
 			.invoke('outerHeight')
 			.should('be.at.least', 44)
 		cy.checkA11y()
 	})
 
-	it('shows a busy line while sending, then confirms the send', () => {
+	it('has no axe violations while sending and once sent', () => {
 		const pending = mountStrip()
 		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN).click()
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.BUSY).should(
-			'contain.text',
-			VERIFY_EMAIL_PROMPT_CONFIG.SENDING,
-		)
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN).should('not.exist')
+		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.BUSY).should('be.visible')
 		cy.checkA11y()
 		settle(pending, { type: resendVerification.fulfilled.type })
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE)
-			.should('have.attr', 'role', 'status')
-			.and('have.text', VERIFY_EMAIL_PROMPT_CONFIG.SENT_TO(EMAIL))
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.CHECK).should('not.exist')
+		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE).should('be.visible')
 		cy.checkA11y()
 	})
 
-	it('shows an alert with no links when the send fails', () => {
+	it('has no axe violations when the send fails', () => {
 		const pending = mountStrip()
 		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN).click()
 		settle(pending, { type: resendVerification.rejected.type })
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE)
-			.should('have.attr', 'role', 'alert')
-			.and('have.text', VERIFY_EMAIL_PROMPT_CONFIG.NOT_SENT)
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN).should('not.exist')
+		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE).should('be.visible')
 		cy.checkA11y()
 	})
 
-	it('shows a busy line while checking, then an alert and the links when not verified', () => {
+	it('has no axe violations while checking and when not verified', () => {
 		const pending = mountStrip()
 		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.CHECK).click()
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.BUSY).should(
-			'contain.text',
-			VERIFY_EMAIL_PROMPT_CONFIG.CHECKING,
-		)
+		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.BUSY).should('be.visible')
+		cy.checkA11y()
 		settle(pending, {
 			type: refreshVerification.fulfilled.type,
 			payload: { emailVerified: false },
 		})
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE)
-			.should('have.attr', 'role', 'alert')
-			.and('have.text', VERIFY_EMAIL_PROMPT_CONFIG.NOT_YET)
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.SEND_AGAIN).should('be.visible')
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.CHECK).should('be.visible')
+		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE).should('be.visible')
 		cy.checkA11y()
 	})
 
-	it('shows the check-failed alert when the check fails', () => {
+	it('has no axe violations when the check fails', () => {
 		const pending = mountStrip()
 		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.CHECK).click()
 		settle(pending, { type: refreshVerification.rejected.type })
-		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE).should(
-			'have.text',
-			VERIFY_EMAIL_PROMPT_CONFIG.CHECK_FAILED,
-		)
+		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.MESSAGE).should('be.visible')
 		cy.checkA11y()
 	})
 
@@ -121,7 +93,7 @@ describe('<VerifyEmailStrip />', () => {
 		cy.get(VERIFY_EMAIL_STRIP_SELECTORS.ROOT).then(($root) => {
 			const root = $root[0].getBoundingClientRect()
 			const email = $root
-				.find('.wrap-anywhere')[0]
+				.find(VERIFY_EMAIL_STRIP_SELECTORS.EMAIL)[0]
 				.getBoundingClientRect()
 			expect(email.right).to.be.at.most(root.right)
 			expect($root[0].scrollWidth).to.be.at.most($root[0].clientWidth)

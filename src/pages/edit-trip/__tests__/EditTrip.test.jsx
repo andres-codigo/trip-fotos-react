@@ -12,6 +12,7 @@ import configureTestStore from '@/testUtils/configureTestStore'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 import {
+	COMMON_SELECTORS,
 	EDIT_TRIP,
 	TRAVELLER_DETAIL,
 	VERIFY_EMAIL_NOTE,
@@ -235,7 +236,7 @@ describe('<EditTrip />', () => {
 		expect(
 			screen
 				.getByTestId(VERIFY_EMAIL_NOTE.ROOT)
-				.closest('[data-cy="base-card"]'),
+				.closest(COMMON_SELECTORS.BASE_CARD),
 		).toHaveClass('bg-surface')
 		expect(screen.queryByTestId('mock-form')).not.toBeInTheDocument()
 		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(

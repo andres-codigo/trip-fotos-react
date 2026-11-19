@@ -6,9 +6,14 @@ import { describe, it, expect } from 'vitest'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import TravellersPageSkeleton from '@/components/travellers/travellers-page-skeleton/TravellersPageSkeleton'
-import { TRAVELLER_SKELETON, TRAVELLERS_PAGE_SKELETON } from '@/constants/test'
+import {
+	TRAVELLER_SKELETON,
+	TRAVELLERS_PAGE_SKELETON,
+	TRAVELLERS_WELCOME,
+} from '@/constants/test'
 import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
 import authenticationReducer from '@/store/slices/authenticationSlice'
+import { getByDataCy } from '@/testUtils/cypress/selectors'
 
 const renderPage = (userId = null) => {
 	const store = configureTestStore({
@@ -33,7 +38,7 @@ describe('TravellersPageSkeleton', () => {
 	it('is the page landmark with the page heading', () => {
 		const { container } = renderPage()
 		const root = container.querySelector(
-			`[data-cy="${TRAVELLERS_PAGE_SKELETON.ROOT}"]`,
+			getByDataCy(TRAVELLERS_PAGE_SKELETON.ROOT),
 		)
 		expect(root.tagName).toBe('MAIN')
 		expect(
@@ -47,10 +52,10 @@ describe('TravellersPageSkeleton', () => {
 	it('shows a visitor the welcome band and the public card shape', () => {
 		const { container } = renderPage()
 		expect(
-			container.querySelector('[data-cy="travellers-welcome"]'),
+			container.querySelector(getByDataCy(TRAVELLERS_WELCOME.ROOT)),
 		).toBeInTheDocument()
 		expect(
-			container.querySelector(`[data-cy="${TRAVELLER_SKELETON.TEXT}"]`)
+			container.querySelector(getByDataCy(TRAVELLER_SKELETON.TEXT))
 				.children,
 		).toHaveLength(2)
 	})
@@ -58,10 +63,10 @@ describe('TravellersPageSkeleton', () => {
 	it('shows a signed-in user no welcome band and the signed-in card shape', () => {
 		const { container } = renderPage('traveller-uid')
 		expect(
-			container.querySelector('[data-cy="travellers-welcome"]'),
+			container.querySelector(getByDataCy(TRAVELLERS_WELCOME.ROOT)),
 		).not.toBeInTheDocument()
 		expect(
-			container.querySelector(`[data-cy="${TRAVELLER_SKELETON.TEXT}"]`)
+			container.querySelector(getByDataCy(TRAVELLER_SKELETON.TEXT))
 				.children,
 		).toHaveLength(5)
 	})

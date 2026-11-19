@@ -57,8 +57,8 @@ Cypress.Commands.add('createMockStore', (signedIn = null) => {
 	})
 })
 
-Cypress.Commands.add('mountWithProviders', (ui, store) => {
-	mount(mountWithProviders(ui, store))
+Cypress.Commands.add('mountWithProviders', (ui, store, options) => {
+	mount(mountWithProviders(ui, store, options))
 })
 
 ////
