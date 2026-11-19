@@ -11,9 +11,10 @@ Finish the PR for the current branch (or `$ARGUMENTS`), yourself and without ask
 ## Before marking ready
 
 1. `/verify` has passed on the current code, and a UI-affecting change has had `/ui-check`.
-2. README Status refreshed (Dependabot PRs excepted): add what shipped to Recently shipped as one user-facing line (5–7 lines in all, no issue numbers, no test or process detail; developer tooling stays one line; replace the oldest, never append), drop closed issues from Next up. Version bumps are automatic: never edit `version`.
-3. Project README's Recently shipped matches, via `gh project edit` ([how](../../../docs/ci-cd.md#project-readme-and-status-updates)). It is outside git, so no diff shows it missing.
-4. The PR title is a conventional-commit title: `feat:`/`feature:` bumps minor; `enhancement:`, `fix:`, `perf:` bump patch; `chore`, `docs`, `test`, `refactor` do not release.
+1. Nothing the diff removes, renames or replaces is left with no users: for each removed or renamed name, `git grep` the old name across `src`, `cypress`, `scripts`, `config`, `.github` and `docs`, and delete any export, constant key, selector, action type, persisted key, test helper, mock data or doc line it orphaned (then `/verify` again).
+1. README Status refreshed (Dependabot PRs excepted): add what shipped to Recently shipped as one user-facing line (5–7 lines in all, no issue numbers, no test or process detail; developer tooling stays one line; replace the oldest, never append), drop closed issues from Next up. Version bumps are automatic: never edit `version`.
+1. Project README's Recently shipped matches, via `gh project edit` ([how](../../../docs/ci-cd.md#project-readme-and-status-updates)). It is outside git, so no diff shows it missing.
+1. The PR title is a conventional-commit title: `feat:`/`feature:` bumps minor; `enhancement:`, `fix:`, `perf:` bump patch; `chore`, `docs`, `test`, `refactor` do not release.
 
 ## Merge
 

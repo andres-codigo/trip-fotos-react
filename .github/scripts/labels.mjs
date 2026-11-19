@@ -4,7 +4,7 @@ import { join } from 'node:path'
 export const loadLabelConfig = (root = process.cwd()) =>
 	JSON.parse(readFileSync(join(root, '.github/labels.json'), 'utf8'))
 
-export const allLabels = (config) => [
+const allLabels = (config) => [
 	...config.type,
 	...config.area,
 	...config.status,

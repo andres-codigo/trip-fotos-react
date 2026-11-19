@@ -136,6 +136,9 @@ npm run analyse
 # Run ESLint to check for issues
 npm run lint
 
+# Find unused files, exports and dependencies (knip)
+npm run knip
+
 # Format files with Prettier
 npm run format
 
@@ -350,7 +353,7 @@ GitHub Copilot and Claude Code share one set of guidance, so the two tools do no
 
 - **Shared conventions** — `.github/copilot-instructions.md` and `CLAUDE.md` hold the workspace rules; `.github/instructions/*.instructions.md` hold the component, page, store, styling and testing guidance both tools read (Claude Code loads each through a path-scoped rule in `.claude/rules/`).
 - **Scaffolding agents** — `create-component`, `create-page`, `create-redux-slice` and `create-hook` live in `.github/agents/`, with thin Claude Code wrappers in `.claude/agents/`.
-- **Enforced quality** — a Claude Code `PostToolUse` hook formats and lints every edited file, and the `/verify` skill runs only the lint, Vitest, Cypress component and build gates a change can affect, caching each gate's pass so a re-run skips gates no later edit can affect. `/verify e2e` adds the emulator E2E suite. A change to a page's look goes build, targeted tests, `/ui-check` and its fixes, then `/verify` once: `/verify` refuses a UI change until `/ui-check` has passed on it.
+- **Enforced quality** — a Claude Code `PostToolUse` hook formats and lints every edited file, and the `/verify` skill runs only the lint, unused-code (knip), Vitest, Cypress component and build gates a change can affect, caching each gate's pass so a re-run skips gates no later edit can affect. `/verify e2e` adds the emulator E2E suite. A change to a page's look goes build, targeted tests, `/ui-check` and its fixes, then `/verify` once: `/verify` refuses a UI change until `/ui-check` has passed on it.
 - **Workflow skills** — `/start-issue` and `/finish-pr` take an issue from the board to a merged PR, and `/design-change` runs a UI redesign from brief to build.
 - **Permissions** — `.claude/settings.json` allows routine checks, commits, pushes and draft PRs, asks before merges, installs and E2E runs, and denies force-pushes and reading `.env` or `certs/`.
 
@@ -458,6 +461,7 @@ trip-fotos-react/
 ├── firebase.json                # Firebase CLI config (the rules in `firebase/` and the emulator ports)
 ├── index.html                   # Vite HTML entry point
 ├── jsconfig.json                # JavaScript project configuration for editor support (paths, aliases, IntelliSense)
+├── knip.json                    # knip unused-code check configuration (entry points and ignores)
 ├── package.json                 # Project dependencies and scripts
 ├── README.md                    # Project documentation
 ├── vercel.json                  # Vercel deployment configuration

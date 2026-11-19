@@ -57,6 +57,7 @@ Reference implementations: `loadMessages` in `src/store/slices/messagesSlice.js`
 
 - **Strictly** use centralised constants from `src/constants` (e.g., `PATHS`, `API_DATABASE`, `REQUEST_ERROR`). The Realtime Database base URL is `API_DATABASE.BASE_URL`.
 - Do not hardcode strings for error messages, API URLs, or paths.
+- When a thunk, reducer or state field is removed or renamed, remove what only it used in the same change: its action types and `extraReducers` cases, selectors, constants and error messages, persist whitelist or blacklist entries, `ignoredActionPaths` entries and a `migrate` step for a persisted key that is gone.
 - **Error Constants separation**:
     - Use `API_ERROR_MESSAGE` for internal/technical log messages and logic checks (e.g., 'Failed to fetch').
     - Use `ERROR_MESSAGES` for user-facing UI strings.

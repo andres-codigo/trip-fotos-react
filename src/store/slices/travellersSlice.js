@@ -860,7 +860,7 @@ const travellersSlice = createSlice({
 	},
 })
 
-export const selectTravellersState = (state) => state.travellers
+const selectTravellersState = (state) => state.travellers
 
 export const selectTravellers = createSelector(
 	[selectTravellersState],
@@ -887,7 +887,7 @@ export const selectIsTraveller = createSelector(
 	(travellersState) => travellersState.isTraveller,
 )
 
-export const selectIsTravellerCheckedFor = createSelector(
+const selectIsTravellerCheckedFor = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.isTravellerCheckedFor,
 )
@@ -909,19 +909,9 @@ export const selectSelectedTraveller = createSelector(
 	(travellersState) => travellersState.selectedTraveller,
 )
 
-export const selectTravellersStatus = createSelector(
-	[selectTravellersState],
-	(travellersState) => travellersState.status,
-)
-
 export const selectUploadProgress = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.uploadProgress,
-)
-
-export const selectTravellersError = createSelector(
-	[selectTravellersState],
-	(travellersState) => travellersState.error,
 )
 
 export const selectShouldUpdate = createSelector(

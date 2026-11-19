@@ -71,11 +71,3 @@ export const performLogin = (
 	cy.visit(expectedRedirectUrl)
 	cy.url({ timeout: REQUEST_TIMEOUT }).should('include', expectedRedirectUrl)
 }
-
-export const loginAndNavigateToHome = (
-	email = TEST_USERS.STANDARD.EMAIL,
-	password = TEST_USERS.STANDARD.PASSWORD,
-) => {
-	cy.visit(PATHS.AUTHENTICATION) // Assuming auth route exists
-	performLogin(email, password)
-}

@@ -527,7 +527,7 @@ const authSlice = createSlice({
 	},
 })
 
-export const selectAuthenticationState = (state) => state.authentication
+const selectAuthenticationState = (state) => state.authentication
 
 export const selectUserId = createSelector(
 	[selectAuthenticationState],
@@ -576,21 +576,6 @@ export const selectUserProfile = createSelector(
 		userName,
 		userEmail,
 	}),
-)
-
-export const selectAuthenticationStatus = createSelector(
-	[selectAuthenticationState],
-	(authState) => authState.status,
-)
-
-export const selectAuthenticationError = createSelector(
-	[selectAuthenticationState],
-	(authState) => authState.error,
-)
-
-export const selectIsAuthLoading = createSelector(
-	[selectAuthenticationStatus],
-	(status) => status === 'loading',
 )
 
 export const authActions = authSlice.actions

@@ -50,6 +50,13 @@ const GATES = {
 		// ESLint prints the file path, then indented line:column entries under it
 		failure: /^\/\S+\.\w+$|^\s*\d+:\d+\s+(error|warning)/,
 	},
+	knip: {
+		name: 'Unused code (knip)',
+		command: 'npm run knip',
+		summary: /(Unused .*\(\d+\))/,
+		// knip prints a heading per kind, then one finding per line under it
+		failure: /^Unused |^\S+\s+\S+:\d+:\d+|^[\w./-]+\.\w+$/,
+	},
 	vitest: {
 		name: 'Vitest',
 		command: 'npm run vitest:run',

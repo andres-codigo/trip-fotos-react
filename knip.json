@@ -1,0 +1,6 @@
+{
+	"$schema": "https://unpkg.com/knip@5/schema.json",
+	"entry": [".claude/hooks/*.mjs", ".claude/skills/**/*.mjs"],
+	"ignore": ["docs/ai-assisted-dev-story/**"],
+	"ignoreDependencies": ["axe-core"]
+}

@@ -1,34 +1,36 @@
-const ALL = ['lint', 'vitest', 'ct', 'build']
-// Selected only by the rules below: `all` stays the four full gates
+// knip finds what no file uses, so it follows every file ESLint does
+const ALL = ['lint', 'knip', 'vitest', 'ct', 'build']
+// Selected only by the rules below: `all` stays the five full gates
 const GATE_ORDER = [...ALL, 'yaml']
 
 // First match wins, so narrower patterns sit above broader ones
 const RULES = [
 	// Tests ship nothing, so neither the build nor E2E follows them
-	[/^src\/.*\.cy\.jsx?$/, ['lint', 'ct']],
-	[/^src\/(.*\/__tests__\/|.*\.test\.)/, ['lint', 'vitest']],
+	[/^src\/.*\.cy\.jsx?$/, ['lint', 'knip', 'ct']],
+	[/^src\/(.*\/__tests__\/|.*\.test\.)/, ['lint', 'knip', 'vitest']],
 	[/^src\//, ALL],
 	[/^package(-lock)?\.json$/, ALL],
 	[/^jsconfig\.json$/, ALL],
 	// Repo tooling has Vitest tests but no UI, so no component tests or build
-	[/^(\.claude|\.github|scripts)\/.*\.m?js$/, ['lint', 'vitest']],
+	[/^(\.claude|\.github|scripts)\/.*\.m?js$/, ['lint', 'knip', 'vitest']],
 	// Vitest and Cypress component tests both run through the Vite config
 	// A syntax check is all workflow and action YAML has locally
 	[/^\.github\/(workflows|actions)\/.*\.ya?ml$/, ['yaml']],
 	// Read by .github/scripts/__tests__/drift.test.mjs (README.md is an accepted gap)
 	[/^(vercel\.json|firebase\/|\.env\.example$)/, ['vitest']],
-	[/^vite\.config\./, ['vitest', 'ct', 'build']],
-	[/^cypress\/e2e\//, ['lint']],
+	[/^vite\.config\./, ['knip', 'vitest', 'ct', 'build']],
+	[/^cypress\/e2e\//, ['lint', 'knip']],
 	// The /ui-check capture spec is selected only by UI_CHECK=true, so no gate runs it; its helpers have Vitest tests
-	[/^cypress\/ui-check\/(?!capture\.cy\.js$)/, ['lint', 'vitest']],
-	[/^cypress\/ui-check\//, ['lint']],
+	[/^cypress\/ui-check\/(?!capture\.cy\.js$)/, ['lint', 'knip', 'vitest']],
+	[/^cypress\/ui-check\//, ['lint', 'knip']],
 	// The impact manifest has Vitest tests and no UI
-	[/^cypress\/(impact\.js$|__tests__\/)/, ['lint', 'vitest']],
+	[/^cypress\/(impact\.js$|__tests__\/)/, ['lint', 'knip', 'vitest']],
 	// The support helpers have Vitest tests alongside them
-	[/^cypress\/support\/utils\//, ['lint', 'vitest', 'ct']],
-	[/^cypress\//, ['lint', 'ct']],
-	[/^cypress\.config\./, ['ct']],
-	[/^(config\/|.*\.d\.ts$)/, ['lint']],
+	[/^cypress\/support\/utils\//, ['lint', 'knip', 'vitest', 'ct']],
+	[/^cypress\//, ['lint', 'knip', 'ct']],
+	[/^cypress\.config\./, ['knip', 'ct']],
+	[/^knip\.json$/, ['knip']],
+	[/^(config\/|.*\.d\.ts$)/, ['lint', 'knip']],
 	[/^(index\.html|public\/)/, ['build']],
 ]
 

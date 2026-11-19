@@ -19,7 +19,7 @@ describe('isCommit', () => {
 describe('needsVerify', () => {
 	const branch = ['src/a.js', '.claude/hooks/x.mjs']
 	const cache = {
-		gates: { lint: 't1', vitest: 't1', ct: 't1', build: 't1' },
+		gates: { lint: 't1', knip: 't1', vitest: 't1', ct: 't1', build: 't1' },
 	}
 	const check = ({ tree = 't1', changed = [], ...rest } = {}) =>
 		needsVerify({
@@ -40,7 +40,13 @@ describe('needsVerify', () => {
 				tree: 't2',
 				changed: ['cypress/ui-check/capture.cy.js'],
 				cache: {
-					gates: { lint: 't2', vitest: 't1', ct: 't1', build: 't1' },
+					gates: {
+						lint: 't2',
+						knip: 't2',
+						vitest: 't1',
+						ct: 't1',
+						build: 't1',
+					},
 				},
 			}),
 		).toBe(false))

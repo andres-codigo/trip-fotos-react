@@ -1,5 +1,5 @@
 // Every error dialog is a BaseDialog with isError, which is the only alertdialog
-export const ERROR_DIALOG = '[role="alertdialog"]'
+const ERROR_DIALOG = '[role="alertdialog"]'
 
 export const atPath = (path) => (win) => win.location.pathname === path
 

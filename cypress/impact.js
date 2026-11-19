@@ -270,7 +270,7 @@ const startsWithAny = (file, prefixes) =>
 	prefixes.some((prefix) => file.startsWith(prefix))
 
 // The areas the changed files touch, or 'all' when one could touch every page
-export const affectedAreas = (files, tooling = [], claims = AREAS) => {
+const affectedAreas = (files, tooling = [], claims = AREAS) => {
 	const areas = new Set()
 	for (const file of files) {
 		if (startsWithAny(file, tooling)) return ALL

@@ -544,7 +544,7 @@ const messagesSlice = createSlice({
 	},
 })
 
-export const selectMessagesState = (state) => state.messages
+const selectMessagesState = (state) => state.messages
 
 export const { dismissFailedMessage } = messagesSlice.actions
 

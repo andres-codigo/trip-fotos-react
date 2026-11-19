@@ -31,6 +31,6 @@ Before designing, make sure you have all five. Ask for any that is missing:
 
 Once the user picks an option:
 
-1. Create the issue linking that artifact version, then run `/start-issue` (a `feature/` or `enhancement/` branch).
+1. Create the issue linking that artifact version, then run `/start-issue` (a `feature/` or `enhancement/` branch). When the option replaces a component or variant, the issue lists what the old one leaves unused (its tests, `data-cy` selectors, constants, mock data and docs) and removes it ([Writing an issue](../../../docs/ci-cd.md#writing-an-issue)).
 2. Build the change. A layout change to a shared component gets a size or position component test first ([testing.instructions.md](../../../.github/instructions/testing.instructions.md#visual-check-for-ui-changes)).
 3. Run `/ui-check` and fix what it finds, then `/verify`, commit and `/finish-pr`.
