@@ -68,7 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Clearer form errors: each error sits under its field's label
 - Clearer menu hover in the header and tab bar
 - Email verification on sign-up, with Check your inbox to resend or start over
-- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, a leaner repo
+- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo
 
 **Blocked**
 
@@ -88,6 +88,7 @@ This project uses the following technologies:
 - [Tailwind CSS](https://tailwindcss.com/) v4 for all styling: semantic design tokens and utility classes (theme and utilities only, no preflight) in `src/styles/tailwind.css`, with `class-variance-authority` for component variants. There are no SCSS or CSS modules.
 - [shadcn/ui](https://ui.shadcn.com/) configured through `components.json` (JavaScript, `@/` aliases); components are added with `npx shadcn@latest add` and moved into the folder-per-component layout.
 - [ESLint](https://eslint.org/) for JavaScript linting.
+- [knip](https://knip.dev/) for finding unused files, exports and dependencies.
 - [Prettier](https://prettier.io/) for code formatting, with `prettier-plugin-tailwindcss` sorting the utility classes.
 - [Vitest](https://vitest.dev/) for unit and integration testing.
 - [Cypress](https://www.cypress.io/) for end-to-end and component testing.
