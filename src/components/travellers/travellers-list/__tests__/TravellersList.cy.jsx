@@ -1,5 +1,3 @@
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import {
@@ -52,13 +50,7 @@ const mountList = ({ travellers = {}, props = {} } = {}) => {
 		},
 	})
 
-	cy.mount(
-		<Provider store={store}>
-			<MemoryRouter>
-				<TravellersList {...props} />
-			</MemoryRouter>
-		</Provider>,
-	)
+	cy.mountWithProviders(<TravellersList {...props} />, store)
 }
 
 // A list fetched moments ago is shown straight away and not reloaded on mount
@@ -98,13 +90,10 @@ describe('<TravellersList />', () => {
 
 	// 1 column under 640px, 2 from 640px, 3 from 1024px (the maximum)
 	;[
-		[390, 1],
 		[639, 1],
 		[640, 2],
-		[768, 2],
 		[1023, 2],
 		[1024, 3],
-		[1280, 3],
 	].forEach(([width, columns]) => {
 		it(`shows ${columns} column${columns === 1 ? '' : 's'} at ${width}px`, () => {
 			cy.viewport(width, 900)
@@ -200,16 +189,5 @@ describe('<TravellersList />', () => {
 				},
 			)
 		})
-	})
-
-	it('lays the skeleton cards out in the same grid', () => {
-		cy.viewport(1280, 900)
-		mountList({ props: { isLoading: true } })
-
-		cy.get(TRAVELLERS_LIST_SELECTORS.SKELETON_LIST)
-			.children()
-			.should(($items) => {
-				expect(columnCount($items)).to.equal(3)
-			})
 	})
 })

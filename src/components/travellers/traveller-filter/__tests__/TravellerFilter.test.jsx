@@ -1,6 +1,12 @@
 import { useState } from 'react'
 
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import {
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+	within,
+} from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 
 import { TRAVELLER_FILTER } from '@/constants/test'
@@ -122,6 +128,18 @@ describe('<TravellerFilter />', () => {
 			expect(showAll).toHaveAttribute('aria-disabled', 'false')
 			fireEvent.click(showAll)
 			expect(onShowAll).toHaveBeenCalledTimes(1)
+		})
+
+		it('keeps focus on Show all cities after a reset', () => {
+			render(<StatefulFilter initial={['tokyo']} />)
+			const showAll = inline().getByTestId(TRAVELLER_FILTER.SHOW_ALL)
+			showAll.focus()
+
+			fireEvent.click(showAll)
+
+			expect(showAll).toHaveAttribute('aria-disabled', 'true')
+			expect(showAll).toBeEnabled()
+			expect(showAll).toHaveFocus()
 		})
 
 		it('announces the selection politely', () => {
@@ -290,6 +308,18 @@ describe('<TravellerFilter />', () => {
 			expect(
 				screen.getByTestId(TRAVELLER_FILTER.TRIGGER),
 			).toHaveTextContent('1 of 2 cities')
+		})
+
+		it('returns focus to the trigger when the sheet closes', async () => {
+			render(<StatefulFilter />)
+			const trigger = screen.getByTestId(TRAVELLER_FILTER.TRIGGER)
+			trigger.focus()
+			const sheet = openSheet()
+
+			fireEvent.click(sheet.getByTestId(TRAVELLER_FILTER.SHOW_MATCHES))
+
+			// Radix restores focus on a timeout after the content unmounts
+			await waitFor(() => expect(trigger).toHaveFocus())
 		})
 
 		it('starts the sheet search empty each time it opens', () => {

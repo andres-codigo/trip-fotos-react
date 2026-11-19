@@ -5,20 +5,17 @@ import SkipLink from '@/components/layout/skip-link/SkipLink'
 
 describe('<SkipLink />', () => {
 	beforeEach(() => {
-		cy.createMockStore(null).then((store) => {
-			cy.mountWithProviders(
-				<>
-					<SkipLink />
-					<button type="button">Header control</button>
-					<main
-						id={ACCESSIBILITY.MAIN_CONTENT_ID}
-						tabIndex={-1}>
-						Main content
-					</main>
-				</>,
-				store,
-			)
-		})
+		cy.mount(
+			<>
+				<SkipLink />
+				<button type="button">Header control</button>
+				<main
+					id={ACCESSIBILITY.MAIN_CONTENT_ID}
+					tabIndex={-1}>
+					Main content
+				</main>
+			</>,
+		)
 	})
 
 	describe('Rendering tests', () => {

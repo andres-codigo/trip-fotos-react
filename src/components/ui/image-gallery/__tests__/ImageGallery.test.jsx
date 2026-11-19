@@ -145,6 +145,15 @@ describe('<ImageGallery />', () => {
 		expect(full()).toHaveAttribute('src', '/b.jpg')
 	})
 
+	it('closes the dialog when Escape is pressed', async () => {
+		renderGallery()
+		openAt(0)
+		fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+		await waitFor(() =>
+			expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+		)
+	})
+
 	it('closes the dialog when Close is clicked', async () => {
 		renderGallery()
 		openAt(0)

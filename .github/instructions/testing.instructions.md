@@ -17,7 +17,11 @@ applyTo: '{**/__tests__/**/*,cypress/e2e/**/*.cy.js}'
 Each check is written once, in the layer that owns it. Before adding a test, look for the same check in the other layers.
 
 - **Vitest** owns logic, state and branches, the text and ARIA a user relies on, focus moves and timers.
-- **Component tests** own what needs a real browser: layout, size and position, computed styles, hover and keyboard-focus styles, native `<dialog>` behaviour (backdrop click, Escape), real file selection and drag-drop, and `cy.checkA11y()`. They do not repeat Vitest's rendering, prop or callback checks.
+- **Component tests** own what needs a real browser: layout, size and position, computed styles, hover and keyboard-focus styles, scrolling, real file selection and drag-drop, and `cy.checkA11y()`. They do not repeat Vitest's rendering, prop or callback checks.
+- **Dialogs, menus and popovers** are Radix (`BaseDialog`, `BaseSheet`, `ImageGallery`), not native `<dialog>`, so Escape and outside click are JavaScript. Vitest owns Escape, outside click, focus moving in and out, and the focus trap. Component tests own the overlay covering the viewport, panel position and size per width, scroll lock, the end state of the open animation, and `checkA11y` on the open dialog.
+- **One integration component test** may run the real store or hooks with the network intercepted, where Vitest mocks that path. Name it as the integration check (`AuthAction.cy.jsx` and `TravellerRegistrationForm.cy.jsx` each keep one); everything else it would repeat stays in Vitest.
+- **A component gets a `.cy.jsx` only when a real browser shows something about it**: layout, a computed style, a hover or focus style, scrolling, a real file input, or `checkA11y` for a form or `ui` component. Otherwise it gets none.
+- **Responsive checks test the breakpoint edges** (for example 639/640 and 1023/1024), not every width.
 - **E2E** owns user flows across routes, Firebase and the persisted store.
 - No layer tests class names for their own sake, `data-cy` values alone, the props a child receives, which wrapper component is used, or code written inside the test itself. A page's `<main>` structure (skip-link target, class, `data-cy`) is one test, not one per attribute.
 
@@ -28,8 +32,8 @@ Use existing project paths for shared testing assets:
 - **Test constants and mock data**: `src/constants/test` (`mock-data/` for data, `selectors/` for `getByDataCy` selectors). A colocated `*TestData.js` is acceptable only for data used by that one test folder.
 - **Naming test ids and selector keys**: name each key after what it labels and keep it in step with the config key for the same thing (`CONTACT_TRAVELLER.BACK_TO_MESSAGES` for the link whose text is `CONTACT_TRAVELLER_CONFIG.BACK_TO_MESSAGES`, not `BACK_LINK`). Follow the existing group shape: the outer element is `ROOT`, and the test-id key and the selector key match. Check new keys against their siblings before handing off, so no rename is needed later.
 - **Cypress helper utilities**: `cypress/support/utils`
-- **Cypress provider mounts**: `cypress/support/commands-support-files/mountWithProviders.jsx`
-- **General test helpers**: `src/testUtils` (`vitest/` polyfills, setup; `cypress/` `selectors.js` and `TestLocationDisplay`). Put a helper used by more than one test folder here rather than beside a single test; `vitest/mockReactRedux.js` is the shared `react-redux` mock (real `Provider`, `useSelector` and `useDispatch` as spies), used as `vi.mock('react-redux', async () => (await import('@/testUtils/vitest/mockReactRedux')).createReactReduxMock())` rather than hand-mocking it per test. A test that needs a real store builds it with `configureTestStore` (`@/testUtils/configureTestStore`), `configureStore` with the app's middleware options (`src/store/middleware.js`, both development checks warning only past 128ms), never `configureStore` itself: ESLint enforces it, so a busy run does not fail on a timing warning the app's store would not log.
+- **Cypress provider mounts**: a component test that needs the store or a router mounts with `cy.mountWithProviders(ui, store, { initialEntries })` (`cypress/support/commands-support-files/mountWithProviders.jsx`), passing `initialEntries` for a route page and wrapping it in `<Routes>` when it reads params; never a hand-built `Provider` + `MemoryRouter`. A component that only needs a router mounts in a plain `MemoryRouter`.
+- **General test helpers**: `src/testUtils` (`vitest/` polyfills, setup; `cypress/` `selectors.js`). Put a helper used by more than one test folder here rather than beside a single test; `vitest/mockReactRedux.js` is the shared `react-redux` mock (real `Provider`, `useSelector` and `useDispatch` as spies), used as `vi.mock('react-redux', async () => (await import('@/testUtils/vitest/mockReactRedux')).createReactReduxMock())` rather than hand-mocking it per test. A test that needs a real store builds it with `configureTestStore` (`@/testUtils/configureTestStore`), `configureStore` with the app's middleware options (`src/store/middleware.js`, both development checks warning only past 128ms), never `configureStore` itself: ESLint enforces it, so a busy run does not fail on a timing warning the app's store would not log.
 
 Do not introduce `cypress/support/constants` unless explicitly adopted in a future refactor.
 
@@ -99,6 +103,7 @@ Full-page shots show a duplicated sticky header and a clipped dialog fragment at
 Whenever components, pages, or store logic are modified, update the related tests in the same change.
 
 - Cover every new behaviour path, not only the headline one: for each changed path, name the test that fails without it.
+- Before deleting a test as a duplicate, name the test that still covers it (in the PR). If that test mocks the path, keep the check or move it into a test that runs the real path first, in the same change.
 - When behaviour is replaced or removed, rewrite or delete the tests that covered it, so none keeps passing against behaviour that is gone. Grep tests, Cypress specs and docs for the old behaviour.
 - Delete the test assets that removal leaves unused in the same change: mock data no test imports, Cypress helpers and commands no spec calls, and selector constants and `data-cy` hooks no spec or component uses.
 

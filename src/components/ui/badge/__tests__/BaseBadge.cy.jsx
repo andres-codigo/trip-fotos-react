@@ -4,13 +4,13 @@ import { TRAVELLER_AREAS } from '@/constants/travellers'
 import BaseBadge from '@/components/ui/badge/BaseBadge'
 
 describe('<BaseBadge />', () => {
-	it('renders the title in sentence case after a hidden pin', () => {
+	it('keeps the title in sentence case', () => {
 		cy.mount(<BaseBadge title="Prague" />)
-		cy.get(COMMON_SELECTORS.BASE_BADGE)
-			.should('have.text', 'Prague')
-			.and('have.css', 'text-transform', 'none')
-			.find('svg')
-			.should('have.attr', 'aria-hidden', 'true')
+		cy.get(COMMON_SELECTORS.BASE_BADGE).should(
+			'have.css',
+			'text-transform',
+			'none',
+		)
 	})
 
 	// A label is shorter than a button (46px), so the two cannot be mistaken for each other
@@ -23,20 +23,23 @@ describe('<BaseBadge />', () => {
 			)
 	})
 
-	TRAVELLER_AREAS.forEach((area) => {
-		it(`renders the ${area} type with dark on-badge ink`, () => {
-			cy.mount(
-				<BaseBadge
-					type={area}
-					title={area}
-				/>,
+	it('renders every area type with dark on-badge ink', () => {
+		cy.mount(
+			<>
+				{TRAVELLER_AREAS.map((area) => (
+					<BaseBadge
+						key={area}
+						type={area}
+						title={area}
+					/>
+				))}
+			</>,
+		)
+		cy.get(COMMON_SELECTORS.BASE_BADGE)
+			.should('have.length', TRAVELLER_AREAS.length)
+			.each(($badge) =>
+				expect($badge).to.have.css('color', 'rgb(20, 19, 15)'),
 			)
-			cy.get(COMMON_SELECTORS.BASE_BADGE).should(
-				'have.css',
-				'color',
-				'rgb(20, 19, 15)',
-			)
-		})
 	})
 
 	it('gives different cities different background colours', () => {
@@ -71,17 +74,21 @@ describe('<BaseBadge />', () => {
 		)
 	})
 
-	;[undefined, ...TRAVELLER_AREAS].forEach((area) => {
-		it(`has no axe violations for the ${area ?? 'default'} type`, () => {
-			cy.mount(
-				<BaseBadge
-					type={area}
-					title="Prague"
-				/>,
-			)
+	it('has no axe violations for the default and every area type', () => {
+		const areas = [undefined, ...TRAVELLER_AREAS]
+		cy.mount(
+			<>
+				{areas.map((area) => (
+					<BaseBadge
+						key={area ?? 'default'}
+						type={area}
+						title="Prague"
+					/>
+				))}
+			</>,
+		)
 
-			cy.get(COMMON_SELECTORS.BASE_BADGE).should('exist')
-			cy.checkA11y()
-		})
+		cy.get(COMMON_SELECTORS.BASE_BADGE).should('have.length', areas.length)
+		cy.checkA11y()
 	})
 })

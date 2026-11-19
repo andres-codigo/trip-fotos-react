@@ -93,6 +93,7 @@ export const AVATAR_SELECTORS = {
 export const HEADER_SELECTORS = {
 	SITE_HEADER: getByDataCy('site-header'),
 	SITE_HEADER_TITLE_LINK: getByDataCy('site-header-title-link'),
+	LOG_IN: getByDataCy('site-header-log-in'),
 }
 
 export const ACCOUNT_MENU_SELECTORS = {
@@ -150,6 +151,7 @@ export const AUTHENTICATION_FORM_SELECTORS = {
 	LOGIN_SIGNUP_TOGGLE_LINK: getByDataCy('login-signup-toggle-link'),
 	FORGOT_PASSWORD_LINK: getByDataCy('forgot-password-link'),
 	PASSWORD_TOGGLE: getByDataCy(INPUT.PASSWORD_TOGGLE),
+	NOTICE: getByDataCy('user-authentication-form-notice'),
 }
 
 export const FILE_UPLOADER_SELECTORS = {
@@ -196,6 +198,7 @@ export const TRAVELLERS_LIST_SELECTORS = {
 	CONTROLS: getByDataCy('controls'),
 	NO_TRAVELLERS: getByDataCy('no-travellers-list'),
 	NO_MATCHING_TRAVELLERS: getByDataCy('no-matching-travellers'),
+	NO_PUBLIC_TRIPS: getByDataCy('no-public-trips'),
 	SHOW_ALL_CITIES: getByDataCy('travellers-show-all-cities'),
 	LOADING: getByDataCy('travellers-loading'),
 	SKELETON_LIST: getByDataCy('travellers-skeleton-list'),
@@ -278,6 +281,7 @@ export const DIALOG_SELECTORS = {
 export const TRAVELLER_SKELETON_SELECTORS = {
 	ROOT: getByDataCy(TRAVELLER_SKELETON.ROOT),
 	TEXT: getByDataCy(TRAVELLER_SKELETON.TEXT),
+	CHIP: getByDataCy(TRAVELLER_SKELETON.CHIP),
 	PHOTOS: getByDataCy(TRAVELLER_SKELETON.PHOTOS),
 	BUTTON: getByDataCy(TRAVELLER_SKELETON.BUTTON),
 }

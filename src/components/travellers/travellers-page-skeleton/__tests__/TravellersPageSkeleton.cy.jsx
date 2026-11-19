@@ -1,13 +1,7 @@
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
-
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import TravellersPageSkeleton from '@/components/travellers/travellers-page-skeleton/TravellersPageSkeleton'
-import {
-	FILTER_SKELETON_SELECTORS,
-	TRAVELLERS_PAGE_SKELETON_SELECTORS,
-} from '@/constants/test'
+import { TRAVELLERS_WELCOME_SELECTORS } from '@/constants/test'
 import authenticationReducer from '@/store/slices/authenticationSlice'
 
 const mountPage = (userId = null) => {
@@ -20,13 +14,7 @@ const mountPage = (userId = null) => {
 			},
 		},
 	})
-	cy.mount(
-		<Provider store={store}>
-			<MemoryRouter>
-				<TravellersPageSkeleton />
-			</MemoryRouter>
-		</Provider>,
-	)
+	cy.mountWithProviders(<TravellersPageSkeleton />, store)
 }
 
 describe('<TravellersPageSkeleton />', () => {
@@ -44,10 +32,14 @@ describe('<TravellersPageSkeleton />', () => {
 			})
 	})
 
-	it('shows the welcome band above the heading for a visitor', () => {
+	it('puts the welcome band above the heading for a visitor', () => {
 		mountPage()
-		cy.get('[data-cy="travellers-welcome"]').should('be.visible')
-		cy.get(TRAVELLERS_PAGE_SKELETON_SELECTORS.ROOT).should('be.visible')
-		cy.get(FILTER_SKELETON_SELECTORS.ROOT).should('exist')
+		cy.get(TRAVELLERS_WELCOME_SELECTORS.ROOT).then(($welcome) => {
+			cy.contains('h1', 'Travellers').should(($heading) => {
+				expect($heading[0].getBoundingClientRect().top).to.be.at.least(
+					$welcome[0].getBoundingClientRect().bottom,
+				)
+			})
+		})
 	})
 })

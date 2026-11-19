@@ -40,6 +40,7 @@ const renderPage = ({
 	id = 'abc',
 	userId = 'me',
 	isTraveller = false,
+	search = '',
 	hash = '',
 	state = null,
 } = {}) => {
@@ -64,7 +65,7 @@ const renderPage = ({
 		<Provider store={store}>
 			<MemoryRouter
 				initialEntries={[
-					{ pathname: `/travellers/${id}`, hash, state },
+					{ pathname: `/travellers/${id}`, search, hash, state },
 				]}>
 				<Routes>
 					<Route
@@ -283,6 +284,25 @@ describe('<TravellerDetail />', () => {
 		expect(profile).toContainElement(message)
 		expect(message).toHaveAttribute('data-cy', TRAVELLER_DETAIL.MESSAGE)
 		expect(message).toHaveAttribute('href', '/messages/abc_me')
+	})
+
+	it('hides the Message icon from assistive technology', async () => {
+		renderPage({ isTraveller: true })
+		const message = await screen.findByRole('link', { name: 'Message Ada' })
+		expect(message.querySelector('svg')).toHaveAttribute(
+			'aria-hidden',
+			'true',
+		)
+	})
+
+	it('opens the photo named in the URL', async () => {
+		renderPage({ search: '?photo=3' })
+		await screen.findByRole('dialog')
+		expect(screen.getByTestId(IMAGE.COUNTER)).toHaveTextContent('3 of 7')
+		expect(screen.getByTestId(IMAGE.FULL)).toHaveAttribute(
+			'src',
+			'https://img/2.jpg',
+		)
 	})
 
 	it('hides Message on the own record', async () => {

@@ -127,13 +127,9 @@ describe('<MessageThread />', () => {
 		expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled()
 	})
 
-	it('scrolls to the bottom when a message is appended', () => {
+	// The scroll to the bottom itself is measured in MessageThread.cy, where layout is real
+	it('does not scroll back to the New divider when a message is appended', () => {
 		const { rerender } = renderThread({ newFromId: 'm5' })
-		const region = screen.getByTestId(MESSAGE_THREAD.ROOT)
-		Object.defineProperty(region, 'scrollHeight', {
-			configurable: true,
-			value: 900,
-		})
 
 		rerender(
 			<MessageThread
@@ -154,7 +150,6 @@ describe('<MessageThread />', () => {
 			/>,
 		)
 
-		expect(region.scrollTop).toBe(900)
 		expect(Element.prototype.scrollIntoView).toHaveBeenCalledOnce()
 	})
 

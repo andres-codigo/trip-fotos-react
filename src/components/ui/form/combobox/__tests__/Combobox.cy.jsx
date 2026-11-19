@@ -39,28 +39,6 @@ describe('<Combobox />', () => {
 		cy.checkA11y()
 	})
 
-	it('chooses an option with the keyboard', () => {
-		const onSelect = cy.stub().as('onSelect')
-		cy.mount(<Harness onSelect={onSelect} />)
-
-		cy.get(COMBOBOX_SELECTORS.INPUT).type('to{downArrow}{downArrow}{enter}')
-
-		cy.get('@onSelect').should('have.been.calledWith', OPTIONS[1])
-		cy.get(COMBOBOX_SELECTORS.INPUT).should('have.value', '')
-		cy.get(COMBOBOX_SELECTORS.LISTBOX).should('not.exist')
-	})
-
-	it('chooses an option with the mouse and highlights on hover', () => {
-		const onSelect = cy.stub().as('onSelect')
-		cy.mount(<Harness onSelect={onSelect} />)
-
-		cy.get(COMBOBOX_SELECTORS.INPUT).type('to')
-		cy.get(COMBOBOX_SELECTORS.STATUS).should('have.text', '2 cities found.')
-		cy.get(COMBOBOX_SELECTORS.OPTION).first().click()
-
-		cy.get('@onSelect').should('have.been.calledWith', OPTIONS[0])
-	})
-
 	it('shows the listbox above following content', () => {
 		cy.mount(
 			<div>

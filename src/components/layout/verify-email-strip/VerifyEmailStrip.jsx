@@ -164,7 +164,12 @@ const VerifyEmailStrip = ({ className }) => {
 						</strong>{' '}
 						{VERIFY_EMAIL_PROMPT_CONFIG.STRIP_TEXT}{' '}
 						{VERIFY_EMAIL_PROMPT_CONFIG.SENT_LINK_TO}{' '}
-						<span className="wrap-anywhere">{email}</span>.
+						<span
+							className="wrap-anywhere"
+							data-cy={VERIFY_EMAIL_STRIP.EMAIL}>
+							{email}
+						</span>
+						.
 					</p>
 					<div
 						ref={actionsRef}

@@ -40,7 +40,7 @@ Use this agent when creating a new route-level page with structure, styling, and
 
 6. **Test Scaffolding**
     - Create `{PageName}.test.jsx` (Vitest page test).
-    - Create `{PageName}.cy.jsx` (Cypress component test) when the page has non-trivial interaction.
+    - Create `{PageName}.cy.jsx` (Cypress component test) only when a real browser shows something about the page (layout per width, a computed style, scrolling, a real file input); see "Which layer owns a check" in `testing.instructions.md`. Mount it with `cy.mountWithProviders(ui, store, { initialEntries })`.
     - Create `cypress/e2e/pages/{PageName}.cy.js` (E2E flow test) and call `cy.checkA11y()` once for the route.
     - Use `src/constants/test` for test constants and `cypress/support/utils` for E2E helpers.
 

@@ -3,17 +3,15 @@ import { MESSAGES_CONFIG } from '@/constants/travellers'
 
 import ReplyBox from '@/components/messages/reply-box/ReplyBox'
 
-const mountBox = () => {
-	const onSend = cy.stub().as('onSend')
+const mountBox = () =>
 	cy.mount(
 		<main className="w-[390px]">
 			<ReplyBox
 				label={MESSAGES_CONFIG.REPLY_LABEL('Ana Lopes')}
-				onSend={onSend}
+				onSend={cy.stub()}
 			/>
 		</main>,
 	)
-}
 
 const heightOf = ($el) => $el[0].getBoundingClientRect().height
 
@@ -53,36 +51,17 @@ describe('<ReplyBox />', () => {
 			})
 	})
 
-	it('keeps Send disabled while blank and enables it after typing', () => {
+	it('colours Send by state and shrinks the box back to one line after sending', () => {
 		mountBox()
 
 		cy.get(REPLY_BOX_SELECTORS.SEND)
 			.should('have.css', 'background-color', 'rgb(20, 19, 15)')
 			.and('have.css', 'color', 'rgb(181, 175, 159)')
-			.and('have.attr', 'aria-disabled', 'true')
-		cy.get(REPLY_BOX_SELECTORS.SEND).click()
-		cy.get('@onSend').should('not.have.been.called')
-		cy.get(REPLY_BOX_SELECTORS.SEND).should('have.focus')
-
-		cy.get(REPLY_BOX_SELECTORS.INPUT).type('Hello')
-		cy.get(REPLY_BOX_SELECTORS.SEND)
-			.should('have.css', 'background-color', 'rgb(159, 192, 126)')
-			.and('not.have.attr', 'aria-disabled')
-		cy.get(REPLY_BOX_SELECTORS.SEND).click()
-		cy.get('@onSend').should('have.been.calledOnceWith', 'Hello')
-		cy.get(REPLY_BOX_SELECTORS.INPUT).should('have.value', '')
-	})
-
-	it('sends on Enter and adds a line on Shift+Enter with a fine pointer', () => {
-		mountBox()
-		cy.window()
-			.then((win) => win.matchMedia('(pointer: fine)').matches)
-			.should('equal', true)
 
 		cy.get(REPLY_BOX_SELECTORS.INPUT).type('Hi{shift+enter}there')
-		cy.get('@onSend').should('not.have.been.called')
-		cy.get(REPLY_BOX_SELECTORS.INPUT).type('{enter}')
-		cy.get('@onSend').should('have.been.calledOnceWith', 'Hi\nthere')
+		cy.get(REPLY_BOX_SELECTORS.SEND)
+			.should('have.css', 'background-color', 'rgb(159, 192, 126)')
+			.click()
 		cy.get(REPLY_BOX_SELECTORS.INPUT)
 			.should('have.value', '')
 			.and(($input) => expect(heightOf($input)).to.equal(44))

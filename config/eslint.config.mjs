@@ -149,6 +149,26 @@ export default [
 		},
 	},
 
+	// Tests and the /ui-check capture script select by data-cy through the selector constants (getByDataCy) or getByTestId, never a hand-written selector
+	{
+		files: ['**/*.test.{js,jsx}', '**/*.cy.{js,jsx}'],
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: 'Literal[value=/\\[data-cy=/]',
+					message:
+						'Use a selector constant from @/constants/test (getByDataCy) or getByTestId, not an inline [data-cy=…] string.',
+				},
+				{
+					selector: 'TemplateElement[value.raw=/\\[data-cy=/]',
+					message:
+						'Use getByDataCy(id) or a selector constant from @/constants/test, not an inline [data-cy=…] template.',
+				},
+			],
+		},
+	},
+
 	// Vitest
 	{
 		files: ['**/*.test.js', '**/*.test.jsx'],

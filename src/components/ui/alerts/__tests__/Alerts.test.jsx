@@ -183,6 +183,22 @@ describe('Alerts Component', () => {
 		expect(screen.queryByRole('alert')).toBeNull()
 	})
 
+	it('stays open when the duration is 0', () => {
+		render(
+			<Alerts
+				{...defaultProps}
+				duration={0}
+			/>,
+		)
+
+		act(() => {
+			vi.advanceTimersByTime(60000)
+		})
+
+		expect(screen.getByRole('alert')).toBeInTheDocument()
+		expect(defaultProps.onClose).not.toHaveBeenCalled()
+	})
+
 	it('cleans up timer on unmount', () => {
 		const duration = 5000
 		const { unmount } = render(

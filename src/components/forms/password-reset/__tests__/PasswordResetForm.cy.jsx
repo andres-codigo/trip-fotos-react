@@ -12,7 +12,7 @@ describe('<PasswordResetForm />', () => {
 			/>,
 		)
 
-	it('has no axe violations in the idle view', () => {
+	it('has no axe violations with field and form errors', () => {
 		mount({ error: 'Something went wrong' })
 		cy.get(PASSWORD_RESET_FORM_SELECTORS.SUBMIT).click()
 		cy.get(PASSWORD_RESET_FORM_SELECTORS.EMAIL_ERROR).should('be.visible')

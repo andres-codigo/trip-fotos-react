@@ -1,5 +1,3 @@
-import { Provider } from 'react-redux'
-import { MemoryRouter } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
 
 import { ACCOUNT_SETTINGS_CONFIG } from '@/constants/auth'
@@ -19,13 +17,9 @@ describe('<Account />', () => {
 				travellers: travellersReducer,
 			},
 		})
-		cy.mount(
-			<Provider store={store}>
-				<MemoryRouter initialEntries={[PATHS.ACCOUNT]}>
-					<Account />
-				</MemoryRouter>
-			</Provider>,
-		)
+		cy.mountWithProviders(<Account />, store, {
+			initialEntries: [PATHS.ACCOUNT],
+		})
 	}
 
 	it('renders the Account settings heading', () => {

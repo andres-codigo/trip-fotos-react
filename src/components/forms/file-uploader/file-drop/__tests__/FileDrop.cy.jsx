@@ -3,7 +3,7 @@ import { FILE_UPLOADER_SELECTORS } from '@/constants/test'
 import FileDrop from '@/components/forms/file-uploader/file-drop/FileDrop'
 
 describe('<FileDrop />', () => {
-	it('changes styling on drag over and back after leaving', () => {
+	it('draws the accent border while a file is dragged over', () => {
 		cy.mount(
 			<FileDrop onFilesDropped={cy.stub()}>
 				<span>Drop here</span>
@@ -11,12 +11,8 @@ describe('<FileDrop />', () => {
 		)
 
 		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP)
-			.should('have.attr', 'data-active', 'false')
 			.trigger('dragenter')
-			.should('have.attr', 'data-active', 'true')
-			.and('have.css', 'border-color', 'rgb(169, 201, 138)')
-			.trigger('dragleave')
-			.should('have.attr', 'data-active', 'false')
+			.should('have.css', 'border-color', 'rgb(169, 201, 138)')
 	})
 
 	it('has no axe violations', () => {

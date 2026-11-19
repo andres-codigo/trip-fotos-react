@@ -16,11 +16,6 @@ describe('<UserAuthenticationForm />', () => {
 		message: '',
 	}
 
-	let onEmailChange
-	let onPasswordChange
-	let onSubmit
-	let onSwitchMode
-
 	const render = (props = {}) => {
 		cy.mount(
 			<BrowserRouter>
@@ -28,10 +23,10 @@ describe('<UserAuthenticationForm />', () => {
 					email={email}
 					password={password}
 					mode="login"
-					onEmailChange={onEmailChange}
-					onPasswordChange={onPasswordChange}
-					onSubmit={onSubmit}
-					onSwitchMode={onSwitchMode}
+					onEmailChange={cy.stub()}
+					onPasswordChange={cy.stub()}
+					onSubmit={(event) => event?.preventDefault()}
+					onSwitchMode={cy.stub()}
 					onEmailBlur={cy.stub()}
 					onPasswordBlur={cy.stub()}
 					onForgotPassword={cy.stub()}
@@ -40,16 +35,6 @@ describe('<UserAuthenticationForm />', () => {
 			</BrowserRouter>,
 		)
 	}
-
-	beforeEach(() => {
-		onEmailChange = cy.stub().as('onEmailChange')
-		onPasswordChange = cy.stub().as('onPasswordChange')
-		onSubmit = cy
-			.stub()
-			.callsFake((e) => e && e.preventDefault())
-			.as('onSubmit')
-		onSwitchMode = cy.stub().as('onSwitchMode')
-	})
 
 	it('has no axe violations in login and signup modes', () => {
 		render()

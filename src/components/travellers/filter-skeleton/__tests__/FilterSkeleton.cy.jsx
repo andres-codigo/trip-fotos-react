@@ -5,15 +5,6 @@ import { FILTER_SKELETON_SELECTORS } from '@/constants/test'
 const height = ($element) => $element[0].getBoundingClientRect().height
 
 describe('<FilterSkeleton />', () => {
-	it('is hidden from assistive technology', () => {
-		cy.mount(<FilterSkeleton />)
-		cy.get(FILTER_SKELETON_SELECTORS.ROOT).should(
-			'have.attr',
-			'aria-hidden',
-			'true',
-		)
-	})
-
 	// 768px is the last width with the sheet trigger, as in TravellerFilter
 	it('shows the full-width 44px trigger bar at 768px and not the inline form', () => {
 		cy.viewport(768, 800)

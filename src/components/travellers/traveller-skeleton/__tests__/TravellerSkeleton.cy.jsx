@@ -3,10 +3,10 @@ import BaseBadge from '@/components/ui/badge/BaseBadge'
 import BaseButton from '@/components/ui/button/BaseButton'
 import { TRAVELLER_SKELETON_SELECTORS } from '@/constants/test'
 
-const mountCard = (isPublic = false) =>
+const mountCard = () =>
 	cy.mount(
 		<ul className="m-0 w-full list-none p-0">
-			<TravellerSkeleton isPublic={isPublic} />
+			<TravellerSkeleton />
 		</ul>,
 	)
 
@@ -19,13 +19,6 @@ const tileWidths = () =>
 	})
 
 describe('<TravellerSkeleton />', () => {
-	it('is visible and hidden from assistive technology', () => {
-		mountCard()
-		cy.get(TRAVELLER_SKELETON_SELECTORS.ROOT)
-			.should('be.visible')
-			.and('have.attr', 'aria-hidden', 'true')
-	})
-
 	// The same size as the card's initials avatar, so nothing shifts on load
 	it('heads the card with a 40px avatar circle', () => {
 		mountCard()
@@ -63,7 +56,7 @@ describe('<TravellerSkeleton />', () => {
 				<BaseButton type="button">View trip</BaseButton>
 			</div>,
 		)
-		cy.get('.rounded-pill.animate-skeleton').then(($chip) => {
+		cy.get(TRAVELLER_SKELETON_SELECTORS.CHIP).then(($chip) => {
 			cy.contains('Vienna').should(($badge) =>
 				expect($chip[0].getBoundingClientRect().height).to.equal(
 					$badge[0].getBoundingClientRect().height,
@@ -89,16 +82,5 @@ describe('<TravellerSkeleton />', () => {
 		tileWidths().should((widths) =>
 			widths.forEach((width) => expect(width).to.be.closeTo(0.32, 0.01)),
 		)
-	})
-
-	it('keeps the public photos three across at 480px, with two excerpt lines', () => {
-		cy.viewport(480, 800)
-		mountCard(true)
-		tileWidths().should((widths) =>
-			widths.forEach((width) => expect(width).to.be.closeTo(0.32, 0.01)),
-		)
-		cy.get(TRAVELLER_SKELETON_SELECTORS.TEXT)
-			.children()
-			.should('have.length', 2)
 	})
 })

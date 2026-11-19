@@ -1,8 +1,6 @@
 import { MemoryRouter } from 'react-router-dom'
 
-import { PATHS } from '@/constants/ui'
 import { TRAVELLERS_WELCOME_SELECTORS } from '@/constants/test'
-import { TRAVELLERS_WELCOME_CONFIG } from '@/constants/travellers'
 
 import TravellersWelcome from '@/components/travellers/travellers-welcome/TravellersWelcome'
 
@@ -18,17 +16,6 @@ describe('<TravellersWelcome />', () => {
 		mountWelcome()
 		cy.get(TRAVELLERS_WELCOME_SELECTORS.ROOT).should('be.visible')
 		cy.checkA11y()
-	})
-
-	it('links to the sign-up form and the authentication page', () => {
-		mountWelcome()
-
-		cy.get(TRAVELLERS_WELCOME_SELECTORS.CREATE_ACCOUNT)
-			.should('contain.text', TRAVELLERS_WELCOME_CONFIG.CREATE_ACCOUNT)
-			.and('have.attr', 'href', `${PATHS.AUTHENTICATION}?mode=signup`)
-		cy.get(TRAVELLERS_WELCOME_SELECTORS.LOG_IN)
-			.should('contain.text', TRAVELLERS_WELCOME_CONFIG.LOG_IN)
-			.and('have.attr', 'href', PATHS.AUTHENTICATION)
 	})
 
 	it('stacks the copy above the actions on a phone', () => {

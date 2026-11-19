@@ -43,24 +43,11 @@ const openAt = (position) =>
 
 const rect = ($el) => $el[0].getBoundingClientRect()
 
-describe('<ImageGallery />', () => {
-	it('steps with the arrow keys and closes with Escape', () => {
-		mountGallery()
-		openAt(0)
-		cy.get('body').type('{rightarrow}')
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
-			'contain',
-			'2 of 3',
-		)
-		cy.get('body').type('{leftarrow}')
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
-			'contain',
-			'1 of 3',
-		)
-		cy.get('body').type('{esc}')
-		cy.get(getByDataCy(DIALOG.TITLE)).should('not.exist')
-	})
+// The open animation ends at full opacity, so layout read before then is mid-transition
+const waitForOpen = () =>
+	cy.get('[role="dialog"]').should('have.css', 'opacity', '1')
 
+describe('<ImageGallery />', () => {
 	;[
 		[390, 844],
 		[768, 1024],
@@ -155,7 +142,7 @@ describe('<ImageGallery />', () => {
 				cy.viewport(width, height)
 				mountGallery()
 				openAt(position)
-				cy.get('[role="dialog"]').should('have.css', 'opacity', '1')
+				waitForOpen()
 				// The runner's own scrollbar takes from the window's width, so the screen is the page's client area
 				cy.document().then((doc) => {
 					screenWidth = doc.documentElement.clientWidth
@@ -241,13 +228,10 @@ describe('<ImageGallery />', () => {
 			doc.body.style.minHeight = '3000px'
 		})
 		openAt(0)
-		cy.get('[role="dialog"]').should('have.css', 'opacity', '1')
+		waitForOpen()
 		cy.document().then((doc) => {
 			const scroller = doc.scrollingElement
 			const overflow = doc.defaultView.getComputedStyle(doc.body).overflow
-			cy.log(
-				`body overflow ${overflow}, scroll ${scroller.scrollHeight}/${scroller.clientHeight}, width ${scroller.scrollWidth}/${scroller.clientWidth}`,
-			)
 			expect(overflow).to.equal('hidden')
 			expect(scroller.scrollWidth).to.be.at.most(scroller.clientWidth)
 		})
@@ -256,7 +240,7 @@ describe('<ImageGallery />', () => {
 	it('has no axe violations with the lightbox open', () => {
 		mountGallery()
 		openAt(0)
-		cy.get('[role="dialog"]').should('have.css', 'opacity', '1')
+		waitForOpen()
 		cy.checkA11y()
 	})
 })

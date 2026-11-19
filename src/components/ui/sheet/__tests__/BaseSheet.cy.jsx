@@ -34,12 +34,4 @@ describe('<BaseSheet />', () => {
 			})
 		})
 	})
-
-	describe('Behaviour tests', () => {
-		it('calls onClose when Escape is pressed', () => {
-			mountSheet()
-			cy.get(SHEET_SELECTORS.ROOT).focus().type('{esc}')
-			cy.get('@onClose').should('have.been.called')
-		})
-	})
 })

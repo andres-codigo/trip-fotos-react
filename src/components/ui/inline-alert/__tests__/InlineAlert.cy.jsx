@@ -3,16 +3,10 @@ import { COMMON_SELECTORS } from '@/constants/test'
 import InlineAlert from '@/components/ui/inline-alert/InlineAlert'
 
 describe('<InlineAlert />', () => {
-	it('shows the message beside a hidden icon and has no axe violations', () => {
+	it('has no axe violations', () => {
 		cy.mount(<InlineAlert>We could not send the email.</InlineAlert>)
 
-		cy.get(COMMON_SELECTORS.INLINE_ALERT)
-			.should('be.visible')
-			.and('have.attr', 'role', 'alert')
-			.and('contain.text', 'We could not send the email.')
-			.find('svg')
-			.should('have.attr', 'aria-hidden', 'true')
-		cy.get(COMMON_SELECTORS.INLINE_ALERT).find('button').should('not.exist')
+		cy.get(COMMON_SELECTORS.INLINE_ALERT).should('be.visible')
 		cy.checkA11y()
 	})
 

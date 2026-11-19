@@ -48,21 +48,4 @@ describe('<Toast />', () => {
 			})
 		})
 	})
-
-	describe('Behaviour tests', () => {
-		it('pauses while hovered and resumes when the pointer leaves', () => {
-			cy.clock()
-			mountToast({ duration: 8000 })
-			cy.get(TOAST_SELECTORS.ROOT).should('be.visible')
-			cy.tick(3000)
-			cy.get(TOAST_SELECTORS.MESSAGE).trigger('pointerover')
-			cy.tick(20000)
-			cy.get('@onClose').should('not.have.been.called')
-			cy.get(TOAST_SELECTORS.MESSAGE).trigger('pointerout')
-			cy.tick(4999)
-			cy.get('@onClose').should('not.have.been.called')
-			cy.tick(1)
-			cy.get('@onClose').should('have.been.calledOnce')
-		})
-	})
 })

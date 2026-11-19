@@ -5,7 +5,7 @@ import configureTestStore from '@/testUtils/configureTestStore'
 import { MemoryRouter, useNavigate } from 'react-router-dom'
 
 import { registerTraveller } from '@/store/slices/travellersSlice'
-import { TEST_IDS, VERIFY_EMAIL_NOTE } from '@/constants/test'
+import { COMMON_SELECTORS, TEST_IDS, VERIFY_EMAIL_NOTE } from '@/constants/test'
 import { VERIFY_EMAIL_PROMPT_CONFIG } from '@/constants/auth'
 import { PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
@@ -114,7 +114,7 @@ describe('Register', () => {
 		expect(
 			screen
 				.getByTestId(VERIFY_EMAIL_NOTE.ROOT)
-				.closest('[data-cy="base-card"]'),
+				.closest(COMMON_SELECTORS.BASE_CARD),
 		).toHaveClass('bg-surface')
 		expect(
 			screen.queryByTestId('traveller-registration-form'),

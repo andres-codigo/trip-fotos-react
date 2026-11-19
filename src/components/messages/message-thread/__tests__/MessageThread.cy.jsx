@@ -118,14 +118,12 @@ describe('<MessageThread />', () => {
 		})
 	})
 
-	it('shows a day label per day and the New divider at the top of the view', () => {
+	it('centres the day labels and puts the New divider at the top of the view', () => {
 		mountThread({ newFromId: 'm5' })
 
 		cy.get(MESSAGE_THREAD_SELECTORS.DAY)
-			.should('have.length', 2)
 			.first()
-			.should('have.text', 'Yesterday')
-			.and('have.css', 'text-align', 'center')
+			.should('have.css', 'text-align', 'center')
 		cy.get(MESSAGE_THREAD_SELECTORS.NEW_DIVIDER)
 			.should('have.css', 'text-transform', 'uppercase')
 			.and('have.css', 'color', 'rgb(169, 201, 138)')

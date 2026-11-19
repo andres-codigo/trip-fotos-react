@@ -178,6 +178,7 @@ export const PUBLIC_TRAVELLER_ITEM = Object.freeze({
 export const TRAVELLER_SKELETON = Object.freeze({
 	ROOT: 'traveller-skeleton',
 	TEXT: 'traveller-skeleton-text',
+	CHIP: 'traveller-skeleton-chip',
 	PHOTOS: 'traveller-skeleton-photos',
 	BUTTON: 'traveller-skeleton-button',
 })
@@ -460,6 +461,7 @@ export const VERIFY_EMAIL_INBOX = Object.freeze({
 
 export const VERIFY_EMAIL_STRIP = Object.freeze({
 	ROOT: 'verify-email-strip',
+	EMAIL: 'verify-email-strip-email',
 	MESSAGE: 'verify-email-strip-message',
 	SEND_AGAIN: 'verify-email-strip-send-again',
 	CHECK: 'verify-email-strip-check',
