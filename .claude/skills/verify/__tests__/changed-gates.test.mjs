@@ -11,14 +11,21 @@ describe('planGates', () => {
 			'src/pages/travellers/Travellers.jsx',
 		])
 
-		expect(runArgs).toEqual(['lint', 'vitest', 'ct', 'build', 'e2e'])
+		expect(runArgs).toEqual([
+			'lint',
+			'knip',
+			'vitest',
+			'ct',
+			'build',
+			'e2e',
+		])
 		expect(reasons).toEqual(['routing or pages changed'])
 	})
 
 	it('runs e2e for an E2E-only change, alongside lint', () => {
 		const { runArgs } = planGates(['cypress/e2e/pages/Register.cy.js'])
 
-		expect(runArgs).toEqual(['lint', 'e2e'])
+		expect(runArgs).toEqual(['lint', 'knip', 'e2e'])
 	})
 
 	it('runs no build or e2e for a test-only change under pages', () =>
@@ -26,12 +33,12 @@ describe('planGates', () => {
 			planGates([
 				'src/pages/traveller-detail/__tests__/TravellerDetail.test.jsx',
 			]),
-		).toEqual({ runArgs: ['lint', 'vitest'], reasons: [] }))
+		).toEqual({ runArgs: ['lint', 'knip', 'vitest'], reasons: [] }))
 
 	it('leaves e2e out of a change that cannot break it', () => {
 		const { runArgs, reasons } = planGates(['src/components/ui/Badge.jsx'])
 
-		expect(runArgs).toEqual(['lint', 'vitest', 'ct', 'build'])
+		expect(runArgs).toEqual(['lint', 'knip', 'vitest', 'ct', 'build'])
 		expect(reasons).toEqual([])
 	})
 
@@ -51,7 +58,7 @@ describe('planGates', () => {
 			'.github/scripts/labels.mjs',
 		]) {
 			expect(planGates([file])).toEqual({
-				runArgs: ['lint', 'vitest'],
+				runArgs: ['lint', 'knip', 'vitest'],
 				reasons: [],
 			})
 		}
@@ -69,6 +76,7 @@ describe('planGates', () => {
 	it('forces every gate with all, without e2e', () => {
 		expect(planGates([], { all: true }).runArgs).toEqual([
 			'lint',
+			'knip',
 			'vitest',
 			'ct',
 			'build',
@@ -78,17 +86,19 @@ describe('planGates', () => {
 	it('runs Vitest for the /ui-check helpers but only ESLint for the capture spec', () => {
 		expect(planGates(['cypress/ui-check/only.js']).runArgs).toEqual([
 			'lint',
+			'knip',
 			'vitest',
 		])
 		expect(planGates(['cypress/ui-check/capture.cy.js']).runArgs).toEqual([
 			'lint',
+			'knip',
 		])
 	})
 
 	it('runs Vitest for the Cypress support helpers, which have Vitest tests', () =>
 		expect(
 			planGates(['cypress/support/utils/authHelpers.js']).runArgs,
-		).toEqual(['lint', 'vitest', 'ct', 'e2e']))
+		).toEqual(['lint', 'knip', 'vitest', 'ct', 'e2e']))
 
 	it('selects only the YAML gate for workflow and action YAML', () => {
 		for (const file of [
@@ -109,17 +119,20 @@ describe('planGates', () => {
 		}
 	})
 
+	it('selects only the knip gate for its config', () =>
+		expect(planGates(['knip.json']).runArgs).toEqual(['knip']))
+
 	it('keeps the existing gates when YAML changes alongside code', () => {
 		expect(
 			planGates([
 				'.github/workflows/a.yml',
 				'src/components/ui/Badge.jsx',
 			]).runArgs,
-		).toEqual(['lint', 'vitest', 'ct', 'build', 'yaml'])
+		).toEqual(['lint', 'knip', 'vitest', 'ct', 'build', 'yaml'])
 		expect(
 			planGates(['.github/workflows/a.yml', '.github/scripts/labels.mjs'])
 				.runArgs,
-		).toEqual(['lint', 'vitest', 'yaml'])
+		).toEqual(['lint', 'knip', 'vitest', 'yaml'])
 	})
 
 	it('keeps Markdown, labels and other config exempt', () => {
@@ -137,6 +150,7 @@ describe('gatesForFile', () => {
 	it('adds e2e for anything the build ships', () =>
 		expect([...gatesForFile('src/components/ui/Badge.jsx')]).toEqual([
 			'lint',
+			'knip',
 			'vitest',
 			'ct',
 			'build',
@@ -146,15 +160,18 @@ describe('gatesForFile', () => {
 	it('keeps the /ui-check capture spec to lint', () =>
 		expect([...gatesForFile('cypress/ui-check/capture.cy.js')]).toEqual([
 			'lint',
+			'knip',
 		]))
 
 	it('runs Vitest for the impact manifest and its tests, which no component test covers', () => {
 		expect([...gatesForFile('cypress/impact.js')]).toEqual([
 			'lint',
+			'knip',
 			'vitest',
 		])
 		expect([...gatesForFile('cypress/__tests__/impact.test.js')]).toEqual([
 			'lint',
+			'knip',
 			'vitest',
 		])
 	})
@@ -164,10 +181,10 @@ describe('gatesForFile', () => {
 			...gatesForFile(
 				'src/components/forms/traveller-registration/TravellerRegistrationForm.cy.jsx',
 			),
-		]).toEqual(['lint', 'ct'])
+		]).toEqual(['lint', 'knip', 'ct'])
 		expect([
 			...gatesForFile('src/pages/register/__tests__/Register.cy.jsx'),
-		]).toEqual(['lint', 'ct'])
+		]).toEqual(['lint', 'knip', 'ct'])
 	})
 
 	it('keeps a Vitest test to lint and Vitest, even under pages or the store', () => {
@@ -176,12 +193,12 @@ describe('gatesForFile', () => {
 			'src/store/slices/__tests__/messagesSlice.test.js',
 			'src/utils/formatDate.test.js',
 		])
-			expect([...gatesForFile(file)]).toEqual(['lint', 'vitest'])
+			expect([...gatesForFile(file)]).toEqual(['lint', 'knip', 'vitest'])
 	})
 
 	it('maps tooling scripts to lint and Vitest only', () =>
 		expect([...gatesForFile('.claude/skills/ui-check/status.mjs')]).toEqual(
-			['lint', 'vitest'],
+			['lint', 'knip', 'vitest'],
 		))
 })
 

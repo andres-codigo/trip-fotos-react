@@ -15,8 +15,8 @@ import { API_ENDPOINTS } from '@/constants/api'
 **Cypress files** — use relative paths (the `@/` alias is not available in Cypress):
 
 ```javascript
-import { MOCK_USER_DATA } from '../../src/constants/test'
-import { COMPONENT_SELECTORS } from '../../src/constants/test/selectors'
+import { HEADER_SELECTORS } from '../../../src/constants/test/selectors/components'
+import { IDENTITY_TOOLKIT_ERRORS } from '../../../src/constants/test/mock-data/mock-api'
 ```
 
 ## Directory Structure
@@ -46,23 +46,21 @@ src/constants/
 │   ├── mock-data/
 │   │   ├── mock-api.js
 │   │   ├── mock-common.js
+│   │   ├── mock-messages.js
 │   │   ├── mock-travellers.js
 │   │   └── mock-user.js
 │   ├── selectors/
-│   │   ├── index.js
 │   │   ├── _ids.js
 │   │   ├── components.js
 │   │   └── pages.js
 │   ├── ui-constants.js
 │   └── utilities/
-│       ├── index.js
 │       └── selectors.js
 ├── travellers/
 │   └── index.js               # TRAVELLER_REGISTRATION_FIELDS, TRAVELLER_REGISTRATION_CITIES
 ├── ui/
 │   ├── index.js
 │   ├── accessibility.js
-│   ├── attributes.js
 │   ├── global.js
 │   └── paths.js
 └── validation/

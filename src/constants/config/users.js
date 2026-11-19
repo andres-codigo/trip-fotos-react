@@ -33,9 +33,3 @@ export const TEST_USERS = {
 		PASSWORD: getCypressExposed('CYPRESS_USER_PASSWORD'),
 	},
 }
-
-export const AUTH_TEST_DATA = {
-	INVALID_EMAIL: 'invalid-email',
-	INVALID_PASSWORD: 'invalid-password',
-	INVALID_PASSWORD_TOO_SHORT: '12345',
-}

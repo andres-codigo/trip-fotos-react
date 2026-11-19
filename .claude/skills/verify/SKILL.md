@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Run the project's local quality gates (ESLint, Vitest, Cypress component tests, production build, and a Prettier check of workflow YAML) and report a pass/fail summary. Pass `e2e` to force the Cypress E2E suite for any change; it runs on its own when the change touches routing, pages, the store, Firebase services or the E2E specs. Use before committing, before opening a pull request, or when asked to check that a change is safe.
+description: Run the project's local quality gates (ESLint, knip unused-code check, Vitest, Cypress component tests, production build, and a Prettier check of workflow YAML) and report a pass/fail summary. Pass `e2e` to force the Cypress E2E suite for any change; it runs on its own when the change touches routing, pages, the store, Firebase services or the E2E specs. Use before committing, before opening a pull request, or when asked to check that a change is safe.
 argument-hint: '[e2e] [all]'
 ---
 

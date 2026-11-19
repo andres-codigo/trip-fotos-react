@@ -24,6 +24,7 @@
 - **Error Handling**: Use `src/utils/errorHandler` for API error extraction.
 - **Data**: Server data goes through store thunks only (no RTK Query; database calls go through `databaseRequest`, never from components or hooks); session data is read through the authentication selectors, never `localStorage`.
 - **One pattern per concern**: before adding a new way to do something (errors, loading, hooks, spacing, test selectors), find the existing one in the matching instruction file and use it. If the instruction file is wrong, fix it in the same change.
+- **Remove what a change leaves unused**: when a change removes, renames or replaces something, search `src`, `cypress`, `scripts`, `config`, `.github` and `docs` for every reference to it, and in the same change delete what has no users left: exports, constants and their keys, selectors and `data-cy` hooks, action types, persisted keys, test helpers, mock data and docs. ESLint only sees unused names inside one file, so nothing else catches an export nobody imports or a constant key nobody reads.
 - **Linting and Formatting**: Ensure every edited or newly created file is ESLint-clean and Prettier-formatted before finishing work.
 
 ## Domain-Specific Guidance

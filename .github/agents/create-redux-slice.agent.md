@@ -80,3 +80,4 @@ Use this agent when you need to create a new Redux slice with reducers, async lo
 - Persist configuration must be updated if the slice's state should survive page reloads
 - All generated files must end with a trailing newline at EOF to satisfy linting rules
 - Linting and formatting must be checked for every generated or edited file; keep them ESLint-clean and Prettier-formatted before handoff.
+- When the new slice replaces an old one, remove the old slice with its tests, action types, selectors, constants, persist entries and mock data, after `git grep` shows nothing else uses them

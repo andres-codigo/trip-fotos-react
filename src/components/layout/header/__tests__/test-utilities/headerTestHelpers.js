@@ -4,7 +4,7 @@ import {
 	TOP_NAVIGATION_SELECTORS,
 } from '@/constants/test'
 
-export const assertHeaderTitleLink = (expectedHref) => {
+const assertHeaderTitleLink = (expectedHref) => {
 	cy.get(HEADER_SELECTORS.SITE_HEADER_TITLE_LINK)
 		.should('exist')
 		.find('a')
@@ -12,7 +12,7 @@ export const assertHeaderTitleLink = (expectedHref) => {
 		.and('contain.text', 'Trip Fotos')
 }
 
-export const assertNavMenu = ({ shouldExist, shouldBeVisible }) => {
+const assertNavMenu = ({ shouldExist, shouldBeVisible }) => {
 	const navMenu = cy.get(TOP_NAVIGATION_SELECTORS.NAV_MENU_CONTAINER)
 	if (shouldExist) {
 		navMenu.should('exist')
@@ -29,7 +29,7 @@ export const assertNavMenu = ({ shouldExist, shouldBeVisible }) => {
 	}
 }
 
-export const assertAccountMenu = (shouldBeVisible) => {
+const assertAccountMenu = (shouldBeVisible) => {
 	cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).should(
 		shouldBeVisible ? 'be.visible' : 'not.exist',
 	)

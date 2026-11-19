@@ -58,3 +58,4 @@ Use this agent when creating a new route-level page with structure, styling, and
 - **All generated files must end with a trailing newline at EOF** — enforce this during file creation to satisfy linting rules
 - **Linting and formatting** — ensure all generated and edited files are ESLint-clean and Prettier-formatted before handing off the page work.
 - Every page file includes `data-cy` attributes on page-level containers and custom elements, backed by selector constants
+- When the new page replaces an old one, remove the old page with its tests, route and path constants, `data-cy` selector constants, E2E specs and Cypress helpers, after `git grep` shows nothing else uses them

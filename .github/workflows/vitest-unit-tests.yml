@@ -9,15 +9,17 @@ on:
             - main
         # Draft PRs wait for ready_for_review: /verify already ran the same gates locally
         types: [opened, synchronize, reopened, ready_for_review]
-        # Only files Vitest reads or runs; its tests also live under scripts/, .github/scripts/, .claude/ and two cypress/ helper folders
+        # Only files Vitest or knip reads; Vitest's tests also live under scripts/, .github/scripts/, .claude/ and two cypress/ helper folders, and knip follows imports across src/, cypress/ and the tooling scripts
         paths:
             - 'src/**'
             - 'scripts/**'
             - '.github/scripts/**'
             # Tooling and Cypress helpers with Vitest tests
             - '.claude/**/*.mjs'
-            - 'cypress/support/utils/**'
-            - 'cypress/ui-check/**'
+            - 'cypress/**'
+            - 'cypress.config.js'
+            - 'config/**'
+            - 'knip.json'
             - '.github/labels.json'
             - 'package.json'
             - 'vercel.json'
@@ -67,6 +69,10 @@ jobs:
                       echo "::error::Run 'npm install-scripts approve <pkg>' for each package above and commit package.json"
                       exit 1
                   fi
+
+            # Exports, files and dependencies nothing uses: ESLint only sees unused names inside one file
+            - name: Check for unused code (knip)
+              run: npm run knip
 
             # Runs the whole suite once, with coverage
             - name: Run Vitest Unit Tests with Coverage

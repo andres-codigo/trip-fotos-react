@@ -47,3 +47,4 @@ Use this agent when you need a new custom React hook with tests.
 - **All generated files must end with a trailing newline at EOF**
 - **Linting and formatting** — ensure all generated and edited files are ESLint-clean and Prettier-formatted before handing off
 - Hooks must not touch the DOM directly unless that is their purpose (e.g. click-outside); prefer refs passed in by the caller
+- When the new hook replaces an old one, remove the old hook and its test, after `git grep` shows nothing else uses it

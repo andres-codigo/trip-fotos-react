@@ -8,10 +8,11 @@ Every `uses:` in `.github/workflows` is pinned to a full commit SHA with the rel
 
 - **Workflow File:** `.github/workflows/vitest-unit-tests.yml`
 - **Triggers:**
-    - On **pull requests** to `main` that change `src/**`, `scripts/**`, `.github/scripts/**`, `.claude/**/*.mjs`, `cypress/support/utils/**`, `cypress/ui-check/**`, `.github/labels.json`, `.github/actions/**`, `package.json`, `package-lock.json`, `vite.config.js`, `vercel.json`, `firebase/**`, `.env.example` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
+    - On **pull requests** to `main` that change `src/**`, `scripts/**`, `.github/scripts/**`, `.claude/**/*.mjs`, `cypress/**`, `cypress.config.js`, `config/**`, `knip.json`, `.github/labels.json`, `.github/actions/**`, `package.json`, `package-lock.json`, `vite.config.js`, `vercel.json`, `firebase/**`, `.env.example` or this workflow file. Draft pull requests and release-please pull requests are skipped; a draft runs once, when it is marked ready for review.
     - Manually via **Actions → "Run workflow"**
 - **Purpose:** Runs the full Vitest unit/integration test suite to ensure code quality.
 - **Install scripts check:** Fails if `npm install-scripts ls` reports a package whose install script isn't covered by `package.json` `allowScripts`. Entries are pinned to a version, so a dependency bump (including a Dependabot PR) makes its entry stale and `npm ci` skips the script — e.g. the Cypress binary download. Fix it with `npm install-scripts approve <pkg>` and commit `package.json`.
+- **Unused code:** `npm run knip` fails on a file, export or dependency nothing uses (config in `knip.json`); it runs before the suite, so the job also triggers on `cypress/**`, `config/**` and `knip.json`.
 - **Merge Blocking:** Not a required check — see [Branch Protection](#-branch-protection). Don't merge a pull request whose run failed.
 
 Runs `npm run vitest:coverage -- --run`, which executes the suite once with coverage — see [Scripts](../README.md#scripts) for other Vitest commands. The coverage report is uploaded only when the run fails, and kept for 7 days.
@@ -134,6 +135,10 @@ Order within an epic:
 
 - Hard dependencies are **blocked-by** links on the issue (`POST /repos/{owner}/{repo}/issues/{n}/dependencies/blocked_by`). They show a marker on the issue and board but never change Status, so Blocked keeps its meaning above. Start the body of a dependent issue with `Do after #N.`
 - Keep one `ready` issue per workstream. The workflow already refuses `ready` on an issue with an open blocker.
+
+### Writing an issue
+
+An issue body has a **Scope** checklist and a **Done when** list. When the work removes, renames or replaces something (a component, constant, selector, action type, persisted key, helper or doc), its Scope also lists every reference to the old thing, found by searching `src`, `cypress`, `scripts`, `config`, `.github` and `docs`, and its Done when gains a line that searching for the old names finds nothing. The same sweep runs again before review (`/finish-pr`).
 
 ### Starting an issue
 

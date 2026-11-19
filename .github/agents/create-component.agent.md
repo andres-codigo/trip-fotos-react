@@ -64,3 +64,4 @@ Use this agent when you need to create a new React component with full structure
 - **Linting and formatting** — ensure all generated and edited files are ESLint-clean and Prettier-formatted before handing off the component work.
 - Every new component file must include `data-cy` attributes on all meaningful elements (buttons, inputs, containers, labels, values)
 - When new component markup introduces `data-cy` attributes, add corresponding exported constants to `src/constants/test/selectors/components.js` via `getByDataCy` and use those constants in all new `*.cy.jsx` tests instead of literal selector strings
+- When the new component replaces an old one, remove the old component with its tests, `data-cy` selector constants, mock data and docs, after `git grep` shows nothing else uses them

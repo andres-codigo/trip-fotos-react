@@ -36,6 +36,8 @@ Detailed conventions live in `.github/instructions/` — the single source of tr
 
 Imports (`@/` alias, no parent-relative paths) are enforced by ESLint and listed in `.github/copilot-instructions.md`; comment style is in `.claude/rules/comments.md`.
 
+A change that removes, renames or replaces something also removes what it leaves unused, across `src`, `cypress`, `scripts`, `config`, `.github` and `docs`: the rule is in `.github/copilot-instructions.md` (Remove what a change leaves unused), and `/start-issue`, `/design-change` and `/finish-pr` each carry its step.
+
 ### Constants
 
 - Import from the subdirectory barrel (`@/constants/travellers`), never a file inside it; ESLint enforces this

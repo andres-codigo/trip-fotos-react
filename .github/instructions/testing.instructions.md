@@ -100,6 +100,7 @@ Whenever components, pages, or store logic are modified, update the related test
 
 - Cover every new behaviour path, not only the headline one: for each changed path, name the test that fails without it.
 - When behaviour is replaced or removed, rewrite or delete the tests that covered it, so none keeps passing against behaviour that is gone. Grep tests, Cypress specs and docs for the old behaviour.
+- Delete the test assets that removal leaves unused in the same change: mock data no test imports, Cypress helpers and commands no spec calls, and selector constants and `data-cy` hooks no spec or component uses.
 
 ## Run Commands
 
