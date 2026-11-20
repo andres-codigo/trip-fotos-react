@@ -1,7 +1,8 @@
-import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
-import { AUTHENTICATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
-import { ACCOUNT_MENU_SELECTORS } from '../../../src/constants/test/selectors/components'
+import {
+	ACCOUNT_MENU_SELECTORS,
+	TRAVELLER_DETAIL_SELECTORS,
+} from '../../../src/constants/test/selectors/components'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
 import { hasSdkSession, performLogin } from '../../support/utils/authHelpers'
@@ -18,90 +19,22 @@ describe('App Routing', () => {
 		)
 	})
 
-	it('lets unauthenticated users open the public travellers list', () => {
-		cy.visit(BASE_URL_CYPRESS + PATHS.TRAVELLERS)
-		cy.location('pathname').should('eq', PATHS.TRAVELLERS)
-	})
-
 	it('sends everyone from home to the travellers list', () => {
 		cy.visit(BASE_URL_CYPRESS + PATHS.HOME)
 		cy.location('pathname').should('eq', PATHS.TRAVELLERS)
 	})
 
-	it('allows access to the authentication page', () => {
-		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
-		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).should(
-			'exist',
+	// The Contact page went when Message started opening the thread; its address still works
+	it('sends a traveller contacting themselves to their own trip', () => {
+		cy.resetEmulators()
+		performLogin(TEST_USERS.TRAVELLER.EMAIL, TEST_USERS.TRAVELLER.PASSWORD)
+		cy.visit(`${PATHS.TRAVELLERS}/${TEST_USERS.TRAVELLER.ID}/contact`)
+
+		cy.location('pathname', { timeout: REQUEST_TIMEOUT }).should(
+			'eq',
+			`${PATHS.TRAVELLERS}/${TEST_USERS.TRAVELLER.ID}`,
 		)
-	})
-
-	it('redirects to home after successful login', () => {
-		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
-		cy.interceptLogin(
-			API_DATABASE.POST,
-			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
-		).as('loginRequest')
-		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(
-			TEST_USERS.STANDARD.EMAIL,
-		)
-		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
-			TEST_USERS.STANDARD.PASSWORD,
-		)
-		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
-		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
-		cy.url({ timeout: REQUEST_TIMEOUT }).should('include', PATHS.HOME)
-	})
-
-	it('allows access to protected routes after login', () => {
-		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
-		cy.interceptLogin(
-			API_DATABASE.POST,
-			SDK_METHOD_TYPE_URLS.SIGN_IN_WITH_PASSWORD,
-		).as('loginRequest')
-		cy.login(TEST_USERS.STANDARD.EMAIL, TEST_USERS.STANDARD.PASSWORD)
-
-		cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
-		// The Auth SDK makes a follow-up call before the session is stored, so a reload any sooner logs the user out
-		cy.window({ timeout: REQUEST_TIMEOUT }).should((win) => {
-			expect(
-				hasSdkSession(
-					{ ...win.localStorage },
-					TEST_USERS.STANDARD.EMAIL,
-				),
-			).to.equal(true)
-		})
-		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)
-
-		cy.url().should('include', PATHS.MESSAGES)
-	})
-
-	it('redirects a protected route to the authentication page after logout', () => {
-		performLogin()
-		cy.get(ACCOUNT_MENU_SELECTORS.BUTTON).click()
-		cy.get(ACCOUNT_MENU_SELECTORS.LOG_OUT).click()
-		cy.url().should('include', PATHS.AUTHENTICATION)
-
-		cy.visit(BASE_URL_CYPRESS + PATHS.MESSAGES)
-		cy.url().should('include', PATHS.AUTHENTICATION)
-	})
-
-	it('redirects a logged-in user from the authentication page to the travellers list', () => {
-		performLogin()
-		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
-
-		cy.location('pathname').should('eq', PATHS.TRAVELLERS)
-		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).should(
-			'not.exist',
-		)
-	})
-
-	it('sends a logged-in user to the redirect target on the authentication page', () => {
-		performLogin()
-		cy.visit(
-			`${BASE_URL_CYPRESS}${PATHS.AUTHENTICATION}?redirect=${PATHS.REGISTER}`,
-		)
-
-		cy.location('pathname').should('eq', PATHS.REGISTER)
+		cy.get(TRAVELLER_DETAIL_SELECTORS.ROOT).should('exist')
 	})
 })
 

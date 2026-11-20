@@ -12,7 +12,6 @@ export const SPEC_SECONDS = {
 	'cypress/e2e/components/Navigation.cy.js': 11,
 	'cypress/e2e/pages/Account.cy.js': 8,
 	'cypress/e2e/pages/Authentication.cy.js': 9,
-	'cypress/e2e/pages/ContactTraveller.cy.js': 15,
 	'cypress/e2e/pages/EditTrip.cy.js': 13,
 	'cypress/e2e/pages/Messages.cy.js': 14,
 	'cypress/e2e/pages/PageNotFound.cy.js': 4,

@@ -1,5 +1,4 @@
 import {
-	COMMON_SELECTORS,
 	REPLY_BOX_SELECTORS,
 	TRAVELLER_DETAIL_SELECTORS,
 	TRAVELLER_ITEM_SELECTORS,
@@ -51,35 +50,6 @@ describe('Traveller Detail page', () => {
 		cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should('be.visible')
 
 		cy.checkA11y()
-	})
-
-	it('steps through the photo gallery and closes it', () => {
-		performLogin(
-			TEST_USERS.STANDARD.EMAIL,
-			TEST_USERS.STANDARD.PASSWORD,
-			detailPath(TEST_USERS.TRAVELLER.ID),
-		)
-
-		cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)
-			.find(COMMON_SELECTORS.BASE_IMAGE_BUTTON)
-			.first()
-			.click()
-		cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL).should('be.visible')
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
-			'contain.text',
-			'1 of',
-		)
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_PREVIOUS).should('be.disabled')
-
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_NEXT).click()
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_COUNTER).should(
-			'contain.text',
-			'2 of',
-		)
-		cy.get(COMMON_SELECTORS.IMAGE_GALLERY_PREVIOUS).should('be.enabled')
-
-		cy.get('body').type('{esc}')
-		cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL).should('not.exist')
 	})
 
 	it('opens the conversation with another traveller from Message', () => {

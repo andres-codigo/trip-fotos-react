@@ -1,5 +1,7 @@
 import { API_DATABASE, SDK_METHOD_TYPE_URLS } from '../../../src/constants/api'
-import { PATHS } from '../../../src/constants/ui/paths'
+import { VERIFY_EMAIL_CONFIG } from '../../../src/constants/auth'
+import { AUTHENTICATION_FORM_SELECTORS } from '../../../src/constants/test/selectors/components'
+import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { TEST_USERS } from '../../../src/constants/config/users'
 
 const REQUEST_TIMEOUT = 10000
@@ -71,3 +73,39 @@ export const performLogin = (
 	cy.visit(expectedRedirectUrl)
 	cy.url({ timeout: REQUEST_TIMEOUT }).should('include', expectedRedirectUrl)
 }
+
+// The sign-up journey up to Check your inbox, for specs that start from a new, unverified account
+export const signUp = (email, password = TEST_USERS.STANDARD.PASSWORD) => {
+	cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
+	cy.interceptLogin(
+		API_DATABASE.POST,
+		`${API_DATABASE.URL}signUp?key=${API_DATABASE.KEY}`,
+	)
+	cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK).click()
+	cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(email)
+	cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(password)
+	cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
+	cy.wait('@loginRequest', { timeout: REQUEST_TIMEOUT })
+	cy.get('h1', { timeout: REQUEST_TIMEOUT }).should(
+		'have.text',
+		VERIFY_EMAIL_CONFIG.TITLE,
+	)
+}
+
+// Firebase's default email page verifies the address in another tab, as production does until the custom action URL is set; the auth emulator keeps every link it would have sent
+export const verifyByLink = (email) =>
+	cy
+		.request(
+			`${new URL(API_DATABASE.URL).origin}/emulator/v1/projects/${Cypress.expose('FIREBASE_PROJECT_ID')}/oobCodes`,
+		)
+		.then(({ body }) => {
+			const { oobCode } = body.oobCodes.findLast(
+				(code) =>
+					code.email === email && code.requestType === 'VERIFY_EMAIL',
+			)
+			cy.request(
+				API_DATABASE.POST,
+				`${API_DATABASE.URL}update?key=${API_DATABASE.KEY}`,
+				{ oobCode },
+			)
+		})

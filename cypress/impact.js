@@ -228,7 +228,11 @@ export const CAPTURES = {
 }
 
 export const E2E_SPECS = {
-	'cypress/e2e/app/AppRoutes.cy.js': ['authentication', 'travellers'],
+	'cypress/e2e/app/AppRoutes.cy.js': [
+		'authentication',
+		'travellers',
+		'detail',
+	],
 	'cypress/e2e/app/EmailVerification.cy.js': [
 		'verifyGate',
 		'authentication',
@@ -249,7 +253,6 @@ export const E2E_SPECS = {
 	],
 	'cypress/e2e/pages/Account.cy.js': ['account', 'header'],
 	'cypress/e2e/pages/Authentication.cy.js': ['authentication'],
-	'cypress/e2e/pages/ContactTraveller.cy.js': ['messages', 'detail'],
 	'cypress/e2e/pages/EditTrip.cy.js': ['edit', 'detail', 'trips'],
 	'cypress/e2e/pages/Messages.cy.js': ['messages'],
 	'cypress/e2e/pages/PageNotFound.cy.js': ['notFound'],
