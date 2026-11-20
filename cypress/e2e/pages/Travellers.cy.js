@@ -19,6 +19,7 @@ const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
 describe('Travellers page', () => {
 	beforeEach(() => {
+		cy.resetEmulators()
 		cy.visit(loginUrl)
 	})
 
