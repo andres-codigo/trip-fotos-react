@@ -2,6 +2,8 @@
 export const PAGE_LAYOUT = Object.freeze({
 	NARROW: 'mx-auto w-full max-w-160',
 	WIDE: 'mx-auto w-full max-w-160 lg:max-w-290',
+	// The Travellers grid's width at every size
+	GRID: 'mx-auto w-full max-w-290',
 	COLUMNS:
 		'flex flex-col lg:grid lg:grid-cols-[23.75rem_minmax(0,1fr)] lg:items-start lg:gap-6',
 	// A lone card under the columns that lines up with the left one

@@ -117,6 +117,7 @@ Whenever components, pages, or store logic are modified, update the related test
 - Before deleting a test as a duplicate, name the test that still covers it (in the PR). If that test mocks the path, keep the check or move it into a test that runs the real path first, in the same change.
 - When behaviour is replaced or removed, rewrite or delete the tests that covered it, so none keeps passing against behaviour that is gone. Grep tests, Cypress specs and docs for the old behaviour.
 - Delete the test assets that removal leaves unused in the same change: mock data no test imports, Cypress helpers and commands no spec calls, and selector constants and `data-cy` hooks no spec or component uses.
+- Add a `data-cy` hook, or a test constant key, only with the test that selects it, in the same change. One no test selects is unused code from the start.
 
 ## Run Commands
 

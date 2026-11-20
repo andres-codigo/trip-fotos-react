@@ -33,7 +33,7 @@ Use this agent when creating a new route-level page with structure, styling, and
 5. **Page Composition**
     - Compose reusable UI from `src/components`.
     - Keep reusable logic in hooks/components, not embedded deeply in page files.
-    - Give page-level and custom container elements `data-cy` attributes and export matching selector constants via `getByDataCy` in `src/constants/test/selectors/`, named per `testing.instructions.md` (Test Data & Utilities); tests use the constants, never inline strings.
+    - Give the elements the page's tests select `data-cy` attributes, and only those (Required Updates in `testing.instructions.md`), and export matching selector constants via `getByDataCy` in `src/constants/test/selectors/`, named per `testing.instructions.md` (Test Data & Utilities); tests use the constants, never inline strings.
     - The root `<main>` has `id={ACCESSIBILITY.MAIN_CONTENT_ID}`, `tabIndex={-1}` and its own `<title>` (`Page name · ${GLOBAL.SITE_NAME}`).
     - Exactly one `<h1>`, kept inside the card or column it labels; section headings start at `<h2>` (see `pages.instructions.md` → Page Structure And Accessibility).
     - Style the page with Tailwind utilities (root `<main>` keeps `mainContainer cardPage`); see `styles.instructions.md`.
@@ -57,5 +57,5 @@ Use this agent when creating a new route-level page with structure, styling, and
 - Update tests in the same task as page creation.
 - **All generated files must end with a trailing newline at EOF** — enforce this during file creation to satisfy linting rules
 - **Linting and formatting** — ensure all generated and edited files are ESLint-clean and Prettier-formatted before handing off the page work.
-- Every page file includes `data-cy` attributes on page-level containers and custom elements, backed by selector constants
+- Every `data-cy` attribute on a page is selected by a test and backed by a selector constant
 - When the new page replaces an old one, remove the old page with its tests, route and path constants, `data-cy` selector constants, E2E specs and Cypress helpers, after `git grep` shows nothing else uses them

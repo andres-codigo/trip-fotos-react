@@ -112,11 +112,11 @@ export default defineConfig({
 			},
 		],
 		// Performance optimisations - uses worker threads for parallel test execution
-		// Dynamically sets thread count: 2 in CI, half of CPU cores locally (min 1)
+		// 2 in CI; locally half the cores, at most 3, as /verify runs Vitest beside the build, ESLint and knip and more workers ran the container out of memory
 		pool: 'threads',
 		maxWorkers: process.env.CI
 			? 2
-			: Math.max(1, Math.ceil(os.cpus().length / 2)),
+			: Math.min(3, Math.max(1, Math.ceil(os.cpus().length / 2))),
 		// Optimises file watching - ignores coverage reports, dependencies, and E2E tests
 		// Faster file watching and change detection
 		watch: {
