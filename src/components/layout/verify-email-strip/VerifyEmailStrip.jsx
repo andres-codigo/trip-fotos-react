@@ -6,6 +6,7 @@ import {
 	VERIFY_EMAIL_STATUS,
 } from '@/constants/auth'
 import { VERIFY_EMAIL_STRIP } from '@/constants/test'
+import { PAGE_LAYOUT } from '@/constants/ui'
 import { cn } from '@/utils/cn'
 import useVerifyEmail from '@/utils/useVerifyEmail'
 
@@ -154,7 +155,11 @@ const VerifyEmailStrip = ({ className }) => {
 				className,
 			)}
 			data-cy={VERIFY_EMAIL_STRIP.ROOT}>
-			<div className="mx-auto flex w-full max-w-290 items-start gap-2.5 md:items-center md:gap-3">
+			<div
+				className={cn(
+					PAGE_LAYOUT.GRID,
+					'flex items-start gap-2.5 md:items-center md:gap-3',
+				)}>
 				<MailIcon />
 				{/* One row from 768px: the prompt, then its links */}
 				<div className="min-w-0 flex-1 md:flex md:items-center md:gap-3">

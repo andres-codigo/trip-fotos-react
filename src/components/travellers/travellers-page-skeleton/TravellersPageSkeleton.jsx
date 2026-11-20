@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux'
 
 import { TRAVELLERS_PAGE_SKELETON } from '@/constants/test'
 import { TRAVELLERS_LIST_CONFIG } from '@/constants/travellers'
-import { ACCESSIBILITY, GLOBAL } from '@/constants/ui'
+import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT } from '@/constants/ui'
 
 import { selectIsAuthenticated } from '@/store/slices/authenticationSlice'
 
@@ -20,7 +20,7 @@ const TravellersPageSkeleton = () => {
 			className="mainContainer cardPage text-left"
 			data-cy={TRAVELLERS_PAGE_SKELETON.ROOT}>
 			<title>{`${TRAVELLERS_LIST_CONFIG.TITLE} · ${GLOBAL.SITE_NAME}`}</title>
-			<div className="mx-auto w-full max-w-290">
+			<div className={PAGE_LAYOUT.GRID}>
 				{!isLoggedIn && <TravellersWelcome />}
 				<div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
 					<h1 className="my-0 grow">

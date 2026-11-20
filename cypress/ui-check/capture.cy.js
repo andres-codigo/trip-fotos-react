@@ -59,6 +59,7 @@ import {
 	PAGE_SELECTORS,
 } from '../../src/constants/test/selectors/pages'
 import { PATHS } from '../../src/constants/ui/paths'
+import { GLOBAL } from '../../src/constants/ui/global'
 import { sdkSessionOf } from '../support/utils/authHelpers'
 import { TEST_USERS } from '../../src/constants/config/users'
 import {
@@ -1460,8 +1461,7 @@ describe(`UI check capture (${LABEL})`, () => {
 					cy.clearAllLocalStorage()
 					visit(PATHS.TRAVELLERS)
 					cy.get(card).should('have.length', 1)
-					// Main still says "Image unavailable"; #737 changed the copy
-					cy.contains(/(Image|Photo) unavailable/, {
+					cy.contains(GLOBAL.IMAGE_UNAVAILABLE, {
 						timeout: TIMEOUT,
 					}).should('be.visible')
 					freezeAnimation()
@@ -1730,7 +1730,6 @@ describe(`UI check capture (${LABEL})`, () => {
 		})
 
 		capture('photo-states', () => {
-			const isBranch = LABEL !== 'main'
 			cy.request({
 				method: 'PUT',
 				url: emulatorDatabase(`travellers/${PHOTOS_ID}`),
@@ -1805,7 +1804,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				})
 
 			const listItem = `${TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM}:has([data-cy]:contains("Photo States"))`
-			const branchList = (thumbnailSize) => {
+			const thumbnailList = (thumbnailSize) => {
 				const pick = (photo) =>
 					photo.thumbnails.find(
 						({ width }) => width === thumbnailSize,
@@ -1824,12 +1823,10 @@ describe(`UI check capture (${LABEL})`, () => {
 				assertSettled()
 				showAllTravellers()
 				cy.get(listItem).should('have.length', 1)
-				if (isBranch)
-					assertSources(
-						listItem,
-						branchList(suffix === '2x' ? 640 : 320),
-					)
-				else tiles(listItem)
+				assertSources(
+					listItem,
+					thumbnailList(suffix === '2x' ? 640 : 320),
+				)
 				cy.get(
 					`${listItem} ${TRAVELLER_ITEM_SELECTORS.SEE_ALL_LINK}`,
 				).should('contain.text', 'See all 7 photos')
@@ -1845,22 +1842,18 @@ describe(`UI check capture (${LABEL})`, () => {
 					'be.visible',
 				)
 				assertSettled()
-				if (isBranch) {
-					const size = suffix === '2x' ? 640 : 320
-					assertSources(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST, [
-						...branchList(size),
-						SLOW_PHOTO_URL,
-						panorama.thumbnails.find(({ width }) => width === size)
-							.url,
-						square.thumbnails.find(({ width }) => width === size)
-							.url,
-					])
-				} else tiles(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST)
+				const size = suffix === '2x' ? 640 : 320
+				assertSources(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST, [
+					...thumbnailList(size),
+					SLOW_PHOTO_URL,
+					panorama.thumbnails.find(({ width }) => width === size).url,
+					square.thumbnails.find(({ width }) => width === size).url,
+				])
 				freezeAnimation()
 				shot(`photo-states-detail-${suffix}`)
 			}
 
-			// The full-screen lightbox (#737), which main does not have: focus, every kind of photo, loading, failed and one photo
+			// The full-screen lightbox: focus, every kind of photo, loading, failed and one photo
 			const lightboxStates = (width) => {
 				const closeButton = '[role="dialog"] button[aria-label="Close"]'
 				const settleOn = (position, count = 7) => {
@@ -1967,7 +1960,7 @@ describe(`UI check capture (${LABEL})`, () => {
 					.and(($img) => expect($img[0].naturalWidth).to.equal(1600))
 				freezeAnimation()
 				shot(`photo-states-dialog-${width}`)
-				if (isBranch) lightboxStates(width)
+				lightboxStates(width)
 			})
 
 			// A 2x screen picks the 640 thumbnails: same layout, so only the sources change

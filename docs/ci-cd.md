@@ -138,7 +138,7 @@ Order within an epic:
 
 ### Writing an issue
 
-An issue body has a **Scope** checklist and a **Done when** list. When the work removes, renames or replaces something (a component, constant, selector, action type, persisted key, helper or doc), its Scope also lists every reference to the old thing, found by searching `src`, `cypress`, `scripts`, `config`, `.github` and `docs`, and its Done when gains a line that searching for the old names finds nothing. The same sweep runs again before review (`/finish-pr`).
+An issue body has a **Scope** checklist and a **Done when** list. When the work removes, renames or replaces something (a component, constant, selector, action type, persisted key, helper or doc), its Scope also lists every reference to the old thing, found by searching `src`, `cypress`, `scripts`, `config`, `.github` and `docs` (following aliases and destructures of the object it sits in), and its Done when gains a line that searching for the old names finds nothing. The same sweep runs again before review (`/finish-pr`).
 
 ### Starting an issue
 
