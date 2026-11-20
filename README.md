@@ -412,7 +412,6 @@ trip-fotos-react/
 ├── .claude/
 │   ├── agents/                 # Claude Code subagent wrappers (delegate to .github/agents)
 │   ├── hooks/                  # Claude Code hook scripts (lint/format after edits, issue-before-edit guard, verify-before-commit guard, Status-refresh stop check)
-│   ├── plans/                  # Committed work plans
 │   ├── rules/                  # Path-scoped Claude Code rules (comments, README sync, deploy config, pointers)
 │   ├── skills/                 # Claude Code skills (/verify, /start-issue, /finish-pr, /ui-check, /design-change)
 │   ├── settings.json           # Shared Claude Code permissions and hooks

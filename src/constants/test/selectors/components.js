@@ -67,8 +67,6 @@ export const COMMON_SELECTORS = {
 	BASE_SPINNER: getByDataCy('base-spinner'),
 	BASE_SPINNER_ICON: getByDataCy('base-spinner-icon'),
 	BASE_PROGRESS: getByDataCy(PROGRESS.ID),
-	BASE_PROGRESS_BAR: getByDataCy(PROGRESS.BAR),
-	BASE_PROGRESS_LABEL: getByDataCy(PROGRESS.LABEL),
 	BASE_BADGE: getByDataCy(BADGE.ID),
 	INLINE_ALERT: getByDataCy(INLINE_ALERT.ID),
 	BASE_IMAGE: getByDataCy(IMAGE.ID),
@@ -91,7 +89,6 @@ export const AVATAR_SELECTORS = {
 /// Layout Selectors
 /////
 export const HEADER_SELECTORS = {
-	SITE_HEADER: getByDataCy('site-header'),
 	SITE_HEADER_TITLE_LINK: getByDataCy('site-header-title-link'),
 	LOG_IN: getByDataCy('site-header-log-in'),
 }
@@ -132,7 +129,6 @@ export const TOP_NAVIGATION_SELECTORS = {
 	TOTAL_MESSAGES: getByDataCy('total-messages'),
 	NAV_MENU_ITEM_TRAVELLERS: getByDataCy('nav-menu-item-travellers'),
 	NAV_MENU_ITEM_MY_TRIP: getByDataCy('nav-menu-item-my-trip'),
-	NAV_MENU_ITEM_REGISTER: getByDataCy('nav-menu-item-register'),
 }
 
 /////
@@ -140,10 +136,7 @@ export const TOP_NAVIGATION_SELECTORS = {
 /////
 export const AUTHENTICATION_FORM_SELECTORS = {
 	// Form fields
-	AUTHENTICATION_FORM: getByDataCy('user-authentication-form'),
-	USER_AUTHENTICATION_TITLE: getByDataCy('user-authentication-form-title'),
 	EMAIL_INPUT: getByDataCy('email-input'),
-	EMAIL_ERROR_MESSAGE: getByDataCyError('email-error-message'),
 	PASSWORD_INPUT: getByDataCy('password-input'),
 	PASSWORD_ERROR_MESSAGE: getByDataCyError('password-error-message'),
 	LOGIN_SIGNUP_SUBMIT_BUTTON: getByDataCy('login-submit-button'),
@@ -157,7 +150,6 @@ export const AUTHENTICATION_FORM_SELECTORS = {
 export const FILE_UPLOADER_SELECTORS = {
 	FILE_DROP: getByDataCy(FILE_DROP.ID),
 	FILE_DROP_INPUT: getByDataCy(FILE_DROP.INPUT),
-	FILE_DROP_LIST: getByDataCy(FILE_DROP.LIST),
 	FILE_DROP_ERRORS: getByDataCy(FILE_DROP.ERRORS),
 	FILE_PREVIEW: getByDataCy(FILE_PREVIEW.ID),
 	FILE_PREVIEW_REMOVE: getByDataCy(FILE_PREVIEW.REMOVE_BUTTON),
@@ -171,8 +163,6 @@ export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	FIRST_NAME_INPUT: getByDataCy('first-name-input'),
 	LAST_NAME_INPUT: getByDataCy('last-name-input'),
 	TRIP_DESCRIPTION_INPUT: getByDataCy('trip-description-input'),
-	TRIP_DATES: getByDataCy('trip-dates'),
-	COLUMNS: getByDataCy('traveller-registration-columns'),
 	TRIP_DETAILS: getByDataCy('trip-details'),
 	PHOTOS_SECTION: getByDataCy('traveller-photos-section'),
 	ACTIONS: getByDataCy('traveller-registration-actions'),
@@ -180,7 +170,6 @@ export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 	TRIP_START_INPUT: getByDataCy('trip-start-input'),
 	TRIP_END_INPUT: getByDataCy('trip-end-input'),
 	TRIP_LENGTH: getByDataCy('trip-length'),
-	SELECTED_CITIES: getByDataCy('selected-cities'),
 	SELECTED_CITY: getByDataCy('selected-city'),
 	SELECTED_CITY_REMOVE: getByDataCy('selected-city-remove'),
 	REGISTER_BUTTON: getByDataCy('register-button'),
@@ -190,16 +179,11 @@ export const TRAVELLER_REGISTRATION_FORM_SELECTORS = {
 /// Traveller Selectors
 /////
 export const TRAVELLERS_LIST_SELECTORS = {
-	TRAVELLERS_LIST_CONTAINER: getByDataCy('travellers-list-container'),
 	TRAVELLERS_LIST: getByDataCy('travellers-list'),
 	TRAVELLER_ITEM: getByDataCy('traveller-item'),
 	REGISTER_LINK: getByDataCy('register-link'),
 	REFRESH_BUTTON: getByDataCy('refresh-button'),
-	CONTROLS: getByDataCy('controls'),
-	NO_TRAVELLERS: getByDataCy('no-travellers-list'),
-	NO_MATCHING_TRAVELLERS: getByDataCy('no-matching-travellers'),
 	NO_PUBLIC_TRIPS: getByDataCy('no-public-trips'),
-	SHOW_ALL_CITIES: getByDataCy('travellers-show-all-cities'),
 	LOADING: getByDataCy('travellers-loading'),
 	SKELETON_LIST: getByDataCy('travellers-skeleton-list'),
 	SHOW_MORE: getByDataCy('show-more-travellers'),
@@ -229,11 +213,6 @@ export const REQUIRED_LEGEND_SELECTORS = {
 
 export const SHEET_SELECTORS = {
 	ROOT: getByDataCy(SHEET.ID),
-	BACKDROP: getByDataCy(SHEET.BACKDROP),
-	TITLE: getByDataCy(SHEET.TITLE),
-	CLOSE: getByDataCy(SHEET.CLOSE),
-	BODY: getByDataCy(SHEET.BODY),
-	FOOTER: getByDataCy(SHEET.FOOTER),
 }
 
 export const TOAST_SELECTORS = {
@@ -246,16 +225,10 @@ export const TOAST_SELECTORS = {
 export const DIALOG_SELECTORS = {
 	// Dialog
 	INVALID_EMAIL_OR_PASSWORD: getByDataCy('invalid-email-or-password-dialog'),
-	INVALID_TRAVELLER_REGISTRATION: getByDataCy(
-		'invalid-traveller-registration-dialog',
-	),
-	REGISTERING: getByDataCy('registering-dialog'),
 	// Dialog elements
 	TITLE: getByDataCy('title'),
 	TEXT_CONTENT: getByDataCy('text-content'),
 	CLOSE_BUTTON: getByDataCy('dialog-button'),
-	SPINNER_CONTAINER: getByDataCy('base-spinner'),
-	SPINNER_LABEL: getByDataCy('base-spinner-label'),
 
 	// Messages
 	MESSAGES: {
@@ -269,11 +242,6 @@ export const DIALOG_SELECTORS = {
 		AUTHENTICATION_ERRORS: {
 			[IDENTITY_TOOLKIT_ERRORS.INVALID_LOGIN_CREDENTIALS]:
 				ERROR_MESSAGES.INVALID_LOGIN_CREDENTIALS,
-			[IDENTITY_TOOLKIT_ERRORS.EMAIL_EXISTS]:
-				ERROR_MESSAGES.EMAIL_ALREADY_IN_USE,
-			[IDENTITY_TOOLKIT_ERRORS.TOO_MANY_ATTEMPTS_TRY_LATER]:
-				ERROR_MESSAGES.TOO_MANY_LOGIN_ATTEMPTS,
-			[IDENTITY_TOOLKIT_ERRORS.UNMAPPED]: ERROR_MESSAGES.LOGIN_FAILED,
 		},
 	},
 }
@@ -287,7 +255,6 @@ export const TRAVELLER_SKELETON_SELECTORS = {
 }
 
 export const FILTER_SKELETON_SELECTORS = {
-	ROOT: getByDataCy(FILTER_SKELETON.ROOT),
 	INLINE: getByDataCy(FILTER_SKELETON.INLINE),
 	SEARCH: getByDataCy(FILTER_SKELETON.SEARCH),
 	TRIGGER: getByDataCy(FILTER_SKELETON.TRIGGER),
@@ -310,8 +277,6 @@ export const MESSAGES_PAGE_SKELETON_SELECTORS = {
 export const TRAVELLER_ITEM_SELECTORS = {
 	ROOT: getByDataCy(TRAVELLER_ITEM.ROOT),
 	NAME: getByDataCy(TRAVELLER_ITEM.NAME),
-	TRIP_DESCRIPTION: getByDataCy(TRAVELLER_ITEM.TRIP_DESCRIPTION),
-	TRIP: getByDataCy(TRAVELLER_ITEM.TRIP),
 	BADGES: getByDataCy(TRAVELLER_ITEM.BADGES),
 	IMAGES_LIST: getByDataCy(TRAVELLER_ITEM.IMAGES_LIST),
 	SEE_ALL_LINK: getByDataCy(TRAVELLER_ITEM.SEE_ALL_LINK),
@@ -337,9 +302,7 @@ export const TRAVELLER_CARD_HEAD_SELECTORS = {
 export const PUBLIC_TRAVELLER_ITEM_SELECTORS = {
 	ROOT: getByDataCy(PUBLIC_TRAVELLER_ITEM.ROOT),
 	NAME: getByDataCy(PUBLIC_TRAVELLER_ITEM.NAME),
-	TRIP: getByDataCy(PUBLIC_TRAVELLER_ITEM.TRIP),
 	EXCERPT: getByDataCy(PUBLIC_TRAVELLER_ITEM.EXCERPT),
-	BADGES: getByDataCy(PUBLIC_TRAVELLER_ITEM.BADGES),
 	PHOTOS: getByDataCy(PUBLIC_TRAVELLER_ITEM.PHOTOS),
 	VIEW_TRIP: getByDataCy(PUBLIC_TRAVELLER_ITEM.VIEW_TRIP),
 }
@@ -355,7 +318,6 @@ export const TRAVELLER_DETAIL_SELECTORS = {
 	PHOTOS_HEADING: getByDataCy(TRAVELLER_DETAIL.PHOTOS_HEADING),
 	PROFILE: getByDataCy(TRAVELLER_DETAIL.PROFILE),
 	TRIP_DESCRIPTION: getByDataCy(TRAVELLER_DETAIL.TRIP_DESCRIPTION),
-	TRIP: getByDataCy(TRAVELLER_DETAIL.TRIP),
 	BADGES: getByDataCy(TRAVELLER_DETAIL.BADGES),
 	IMAGES_LIST: getByDataCy(TRAVELLER_DETAIL.IMAGES_LIST),
 	MESSAGE: getByDataCy(TRAVELLER_DETAIL.MESSAGE),

@@ -5,7 +5,6 @@ export const VIEWPORTS = {
 	},
 	TABLET: {
 		WIDTH: 1024,
-		HEIGHT: 768,
 	},
 	DESKTOP: {
 		WIDTH: 1280,

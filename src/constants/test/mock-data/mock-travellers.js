@@ -38,7 +38,6 @@ export const MOCK_TRAVELLERS = {
 		cities: ['tokyo'],
 		files: [],
 	},
-	TEMP_TRAVELLER: { id: 'temp' },
 	TEST_NAME: 'Test Name',
 }
 

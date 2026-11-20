@@ -179,8 +179,7 @@ const EditTrip = () => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className="mainContainer cardPage text-left"
-			data-cy={EDIT_TRIP.ROOT}>
+			className="mainContainer cardPage text-left">
 			<title>{`${EDIT_TRIP_CONFIG.TITLE} · ${GLOBAL.SITE_NAME}`}</title>
 			{(error || deleteError) && (
 				<BaseDialog
@@ -286,8 +285,7 @@ const EditTrip = () => {
 				// Hidden rather than unmounted while deleting, so a failed delete keeps any unsaved edits
 				<div
 					hidden={isDeleting}
-					className={PAGE_LAYOUT.WIDE}
-					data-cy={EDIT_TRIP.LAYOUT}>
+					className={PAGE_LAYOUT.WIDE}>
 					{/* The rules refuse an unverified account's changes and photos, but still let it delete the trip */}
 					{!emailVerified ? (
 						<BaseCard className={PAGE_LAYOUT.LEFT_COLUMN}>

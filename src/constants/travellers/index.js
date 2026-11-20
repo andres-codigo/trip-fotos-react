@@ -116,8 +116,6 @@ export const EDIT_TRIP_CONFIG = Object.freeze({
 	SAVING_TITLE: 'Saving',
 	SAVING_MESSAGE: 'Saving your trip…',
 	SAVED_MESSAGE: 'Your trip has been saved.',
-	PHOTOS_LEGEND: 'Photos',
-	ADD_MORE_PHOTOS: 'Add more photos',
 	DELETE_HEADING: 'Delete my profile',
 	DELETE_LABEL: 'Delete my profile',
 	DELETE_SUMMARY: (photoCount) =>

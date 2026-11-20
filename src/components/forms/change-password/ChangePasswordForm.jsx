@@ -100,8 +100,7 @@ const ChangePasswordForm = ({ onSubmit, onCancel, className }) => {
 			data-cy={CHANGE_PASSWORD_FORM.ROOT}>
 			<h3
 				id={TITLE_ID}
-				className="m-0 text-[1.0625rem]"
-				data-cy={CHANGE_PASSWORD_FORM.TITLE}>
+				className="m-0 text-[1.0625rem]">
 				{CHANGE_PASSWORD_CONFIG.TITLE}
 			</h3>
 			<RequiredLegend />

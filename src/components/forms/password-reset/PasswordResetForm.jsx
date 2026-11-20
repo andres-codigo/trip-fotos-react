@@ -26,8 +26,7 @@ const BackToLogIn = ({ onBack }) => (
 		modeType="text"
 		className="inline-flex min-h-11 items-center gap-1 self-start text-sm text-text-link underline underline-offset-4"
 		onClick={onBack}
-		ariaLabel={PASSWORD_RESET_CONFIG.BACK}
-		data-cy={PASSWORD_RESET_FORM.BACK_TO_LOG_IN}>
+		ariaLabel={PASSWORD_RESET_CONFIG.BACK}>
 		<svg
 			aria-hidden="true"
 			width="16"
@@ -103,8 +102,7 @@ const PasswordResetForm = forwardRef(
 					<h1
 						ref={titleRef}
 						tabIndex={-1}
-						className={titleClasses}
-						data-cy={PASSWORD_RESET_FORM.TITLE}>
+						className={titleClasses}>
 						{PASSWORD_RESET_CONFIG.SENT_TITLE}
 					</h1>
 					<div
@@ -119,8 +117,7 @@ const PasswordResetForm = forwardRef(
 							type="button"
 							modeType="text"
 							className={textLinkClasses}
-							onClick={() => onSubmit(sentTo)}
-							data-cy={PASSWORD_RESET_FORM.SEND_AGAIN}>
+							onClick={() => onSubmit(sentTo)}>
 							{PASSWORD_RESET_CONFIG.SEND_AGAIN}
 						</BaseButton>
 					</p>
@@ -128,8 +125,7 @@ const PasswordResetForm = forwardRef(
 						type="button"
 						modeType="outline"
 						className="self-start [@media(max-width:1024px)]:w-full"
-						onClick={onBack}
-						data-cy={PASSWORD_RESET_FORM.BACK}>
+						onClick={onBack}>
 						{PASSWORD_RESET_CONFIG.BACK}
 					</BaseButton>
 				</div>
@@ -150,8 +146,7 @@ const PasswordResetForm = forwardRef(
 						ref={titleRef}
 						tabIndex={-1}
 						id={TITLE_ID}
-						className={titleClasses}
-						data-cy={PASSWORD_RESET_FORM.TITLE}>
+						className={titleClasses}>
 						{PASSWORD_RESET_CONFIG.TITLE}
 					</h1>
 					<p className="m-0">{PASSWORD_RESET_CONFIG.INTRO}</p>
@@ -174,9 +169,7 @@ const PasswordResetForm = forwardRef(
 					data-cy-error={PASSWORD_RESET_FORM.EMAIL_ERROR}
 				/>
 				{error && (
-					<ErrorMessage
-						className="m-0 text-danger-text"
-						data-cy={PASSWORD_RESET_FORM.SEND_ERROR}>
+					<ErrorMessage className="m-0 text-danger-text">
 						{error}
 					</ErrorMessage>
 				)}

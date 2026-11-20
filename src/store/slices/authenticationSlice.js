@@ -569,14 +569,5 @@ export const selectAwaitingVerification = createSelector(
 	(authState) => authState.awaitingVerification,
 )
 
-export const selectUserProfile = createSelector(
-	[selectUserId, selectUserName, selectUserEmail],
-	(userId, userName, userEmail) => ({
-		userId,
-		userName,
-		userEmail,
-	}),
-)
-
 export const authActions = authSlice.actions
 export default authSlice.reducer

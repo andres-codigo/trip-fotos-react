@@ -252,9 +252,7 @@ const TravellerRegistrationForm = ({
 			/>
 			<LoadingAnnouncement isLoading={isLoading} />
 			{/* Trip details then Photos, each a card from 1024px; the actions come last in reading and tab order */}
-			<div
-				className={PAGE_LAYOUT.COLUMNS}
-				data-cy="traveller-registration-columns">
+			<div className={PAGE_LAYOUT.COLUMNS}>
 				<div
 					className={PAGE_LAYOUT.SECTION_CARD}
 					data-cy="trip-details">
@@ -292,9 +290,7 @@ const TravellerRegistrationForm = ({
 						)}
 					</div>
 
-					<fieldset
-						className="mx-0 my-2 min-w-0 border-0 p-0"
-						data-cy="trip-dates">
+					<fieldset className="mx-0 my-2 min-w-0 border-0 p-0">
 						<legend className={labelClasses}>
 							{TRIP_DATES_CONFIG.LEGEND}
 						</legend>
@@ -349,8 +345,7 @@ const TravellerRegistrationForm = ({
 						{formData[CITIES].value.length > 0 && (
 							<ul
 								className="mt-2 mb-0 flex list-none flex-wrap gap-2 p-0"
-								aria-label={CITY_SEARCH_TEXT.SELECTED_LABEL}
-								data-cy="selected-cities">
+								aria-label={CITY_SEARCH_TEXT.SELECTED_LABEL}>
 								{formData[CITIES].value.map((city) => {
 									const name = formatCity(city)
 									return (

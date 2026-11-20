@@ -56,7 +56,6 @@ const mountList = ({ travellers = {}, props = {} } = {}) => {
 // A list fetched moments ago is shown straight away and not reloaded on mount
 const alreadyLoaded = (overrides = {}) => ({
 	travellers: listed,
-	hasTravellers: true,
 	lastFetch: Date.now(),
 	...overrides,
 })

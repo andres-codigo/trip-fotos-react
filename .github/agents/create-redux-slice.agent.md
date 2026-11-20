@@ -27,7 +27,7 @@ Use this agent when you need to create a new Redux slice with reducers, async lo
 
 4. **Async Logic Implementation**
     - Create thunks using `createAsyncThunk`, reading `token`/`userId` via the authentication selectors
-    - Call the Realtime Database through `databaseRequest` (`src/store/databaseRequest.js`), never a raw `fetch`; copy the `loadMessages` shape in `messagesSlice.js`
+    - Call the Realtime Database through `databaseRequest` (`src/store/databaseRequest.js`), never a raw `fetch`; copy the `loadConversations` shape in `messagesSlice.js`
     - `databaseRequest` throws `ERROR_MESSAGES.REQUEST_ERROR` on `!response.ok`; reject with `rejectWithValue(handleApiError(error, ...))`
     - Do NOT perform granular status code checks (e.g., 404, 500) unless specific UI behaviour depends on them
     - Add extra reducers for pending, fulfilled, and rejected states

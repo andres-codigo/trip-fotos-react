@@ -40,7 +40,6 @@ Cypress.Commands.add('createMockStore', (signedIn = null) => {
 			travellers: {
 				travellerName: '',
 				isTraveller: false,
-				hasTravellers: false,
 				travellers: [],
 				lastFetch: null,
 				status: 'idle',
@@ -49,8 +48,6 @@ Cypress.Commands.add('createMockStore', (signedIn = null) => {
 			messages: {
 				conversations: [],
 				legacyMessages: [],
-				conversationsStatus: 'idle',
-				conversationsError: null,
 				threads: {},
 			},
 		},
@@ -101,15 +98,6 @@ Cypress.Commands.add('interceptLoginError', (method, url, message) => {
 			},
 		},
 	}).as('loginErrorRequest')
-})
-
-// Intercept login requests with a delay
-Cypress.Commands.add('interceptDelayedLogin', (method, url, time) => {
-	cy.intercept(method, url, (req) => {
-		req.on('response', (res) => {
-			res.setDelay(time)
-		})
-	}).as('delayedLogin')
 })
 
 ////

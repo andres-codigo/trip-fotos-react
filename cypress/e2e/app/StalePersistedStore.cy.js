@@ -31,7 +31,6 @@ const seedStalePersistedStore = (win) => {
 			travellers: JSON.stringify({
 				travellerName: STALE_NAME,
 				isTraveller: true,
-				hasTravellers: true,
 				travellers: [STALE_TRAVELLER],
 				selectedTraveller: STALE_TRAVELLER,
 				lastFetch: Date.now(),

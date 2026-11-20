@@ -12,21 +12,15 @@ export const VERIFIED_CHIP = Object.freeze({
 
 export const BUTTON = Object.freeze({
 	ID: 'test-button',
-	LINK_ID: 'test-link',
 	MODE: {
 		FLAT: 'flat',
-		OUTLINED: 'outlined',
-		FILLED: 'filled',
 		PRIMARY: 'primary',
 		OUTLINE: 'outline',
 		DANGER: 'danger',
-		DANGER_OUTLINE: 'dangerOutline',
-		TEXT: 'text',
 	},
 })
 
 export const COMBOBOX = Object.freeze({
-	ID: 'test-combobox',
 	INPUT: 'combobox-input',
 	LISTBOX: 'combobox-listbox',
 	OPTION: 'combobox-option',
@@ -78,8 +72,6 @@ export const IMAGE = Object.freeze({
 
 export const INPUT = Object.freeze({
 	ID: 'test-input',
-	ERROR_ID: 'test-input-error',
-	TYPES: ['text', 'password', 'email', 'number'],
 	PASSWORD_TOGGLE: 'password-toggle',
 })
 
@@ -100,7 +92,6 @@ export const REQUIRED_LEGEND = Object.freeze({
 export const SHEET = Object.freeze({
 	ID: 'base-sheet',
 	BACKDROP: 'base-sheet-backdrop',
-	TITLE: 'base-sheet-title',
 	CLOSE: 'base-sheet-close',
 	BODY: 'base-sheet-body',
 	FOOTER: 'base-sheet-footer',
@@ -112,7 +103,6 @@ export const SPINNER = Object.freeze({
 
 export const TEXTAREA = Object.freeze({
 	ID: 'test-textarea',
-	ERROR_ID: 'test-textarea-error',
 })
 
 export const TOAST = Object.freeze({
@@ -127,10 +117,6 @@ export const UI_TEXT = {
 		NO_TRAVELLERS_MESSAGE: 'No travellers listed.',
 		REGISTER_AS_TRAVELLER: 'Register',
 		REFRESH_BUTTON: 'Refresh travellers',
-	},
-	BUTTONS: {
-		CLOSE: 'Close',
-		REFRESH: 'Refresh',
 	},
 	FORMS: {
 		REGISTER_AS_TRAVELLER: 'Register as a traveller',
@@ -246,8 +232,6 @@ export const TRAVELLER_DETAIL = Object.freeze({
 })
 
 export const EDIT_TRIP = Object.freeze({
-	ROOT: 'edit-trip',
-	LAYOUT: 'edit-trip-layout',
 	BACK_TO_TRIP: 'edit-trip-back-to-trip',
 	CANCEL: 'edit-trip-cancel',
 	SAVING_DIALOG: 'edit-trip-saving-dialog',
@@ -371,21 +355,15 @@ export const THREAD_NOTE = Object.freeze({
 
 export const PASSWORD_RESET_FORM = Object.freeze({
 	ROOT: 'password-reset-form',
-	TITLE: 'password-reset-title',
-	BACK_TO_LOG_IN: 'password-reset-back-to-log-in',
 	EMAIL_INPUT: 'password-reset-email-input',
 	EMAIL_ERROR: 'password-reset-email-error',
-	SEND_ERROR: 'password-reset-send-error',
 	SUBMIT: 'password-reset-submit',
 	SENT: 'password-reset-sent',
 	SENT_MESSAGE: 'password-reset-sent-message',
-	SEND_AGAIN: 'password-reset-send-again',
-	BACK: 'password-reset-back',
 })
 
 export const CHANGE_PASSWORD_FORM = Object.freeze({
 	ROOT: 'change-password-form',
-	TITLE: 'change-password-title',
 	CURRENT_PASSWORD_INPUT: 'change-password-current-input',
 	CURRENT_PASSWORD_ERROR: 'change-password-current-error',
 	NEW_PASSWORD_INPUT: 'change-password-new-input',
@@ -397,12 +375,10 @@ export const CHANGE_PASSWORD_FORM = Object.freeze({
 
 export const CHANGE_EMAIL_FORM = Object.freeze({
 	ROOT: 'change-email-form',
-	TITLE: 'change-email-title',
 	NEW_EMAIL_INPUT: 'change-email-new-input',
 	NEW_EMAIL_ERROR: 'change-email-new-error',
 	CURRENT_PASSWORD_INPUT: 'change-email-current-input',
 	CURRENT_PASSWORD_ERROR: 'change-email-current-error',
-	CANCEL: 'change-email-cancel',
 	SEND_LINK: 'change-email-send-link',
 	ALERT: 'change-email-alert',
 })
@@ -420,11 +396,8 @@ export const AUTH_ACTION_PAGE = Object.freeze({
 	VIEW: 'auth-action-view',
 	TITLE: 'auth-action-title',
 	TICK: 'auth-action-tick',
-	TEXT: 'auth-action-text',
 	ALERT: 'auth-action-alert',
 	EXPIRED_SENT: 'auth-action-expired-sent',
-	REGISTER: 'auth-action-register',
-	GO_TO_TRAVELLERS: 'auth-action-go-to-travellers',
 	LOG_IN: 'auth-action-log-in',
 	SEND_NEW_LINK: 'auth-action-send-new-link',
 	TRY_AGAIN: 'auth-action-try-again',
@@ -450,13 +423,10 @@ export const ACCOUNT_PAGE = Object.freeze({
 
 export const VERIFY_EMAIL_INBOX = Object.freeze({
 	ROOT: 'verify-email-inbox',
-	TITLE: 'verify-email-inbox-title',
 	STATUS: 'verify-email-inbox-status',
 	ERROR: 'verify-email-inbox-error',
-	HINT: 'verify-email-inbox-hint',
 	SEND_AGAIN: 'verify-email-inbox-send-again',
 	CHECK: 'verify-email-inbox-check',
-	START_AGAIN: 'verify-email-inbox-start-again',
 })
 
 export const VERIFY_EMAIL_STRIP = Object.freeze({
