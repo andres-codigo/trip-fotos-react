@@ -62,6 +62,9 @@ Do not introduce `cypress/support/constants` unless explicitly adopted in a futu
 - Run `cy.checkA11y()` once per route in the E2E page specs (signed in where the spec signs in) and in component tests for forms and shared UI (`src/components/ui`, e.g. `BaseBadge`, `BaseImage`). It runs the WCAG 2.2 AA axe rules only.
 - Fix axe violations rather than excluding them; if a rule must be disabled, pass `{ rules: { 'rule-id': { enabled: false } } }` for that call with a one-line reason.
 - If an E2E spec fails in a full run, re-run it on its own before treating it as a regression; specs can flake under load.
+- E2E does not assert an error or loading state it forces with an intercept when Vitest or a component test already covers it. Use an intercept to steer a flow, not to re-test a state.
+- Each flow (sign-up, login, logout, contact) is written in one spec. Other specs reach their start state through the shared helpers in `cypress/support/utils/authHelpers` (`performLogin`, `signUp`, `verifyByLink`) rather than re-writing it.
+- Shared chrome (the brand link and the header actions) is checked in `Navigation.cy.js` only.
 
 ## When to Run E2E Locally
 

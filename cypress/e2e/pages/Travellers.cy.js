@@ -1,14 +1,12 @@
 import { API_DATABASE } from '../../../src/constants/api'
 import {
 	AUTHENTICATION_FORM_SELECTORS,
-	HEADER_SELECTORS,
 	PUBLIC_TRAVELLER_ITEM_SELECTORS,
 	TRAVELLERS_LIST_SELECTORS,
 	TRAVELLERS_WELCOME_SELECTORS,
 	TRAVELLER_FILTER_SELECTORS,
 	TRAVELLER_ITEM_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
-import { ERROR_MESSAGES } from '../../../src/constants/errors'
 import { PAGE_SELECTORS } from '../../../src/constants/test/selectors/pages'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 
@@ -21,6 +19,7 @@ const loginUrl = BASE_URL_CYPRESS + PATHS.AUTHENTICATION
 const REQUEST_TIMEOUT = 10000
 describe('Travellers page', () => {
 	beforeEach(() => {
+		cy.resetEmulators()
 		cy.visit(loginUrl)
 	})
 
@@ -37,16 +36,6 @@ describe('Travellers page', () => {
 	})
 
 	describe('Authentication & User States', () => {
-		it('should show register link when user is logged in and not a traveller', () => {
-			performLogin()
-
-			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should(
-				'contain',
-				'Register',
-			)
-		})
-
 		it('should not show register link when user is logged in and is a traveller', () => {
 			performLogin(
 				TEST_USERS.TRAVELLER.EMAIL,
@@ -76,49 +65,6 @@ describe('Travellers page', () => {
 			cy.url({ timeout: REQUEST_TIMEOUT }).should(
 				'include',
 				PATHS.REGISTER,
-			)
-		})
-	})
-
-	describe('Data Loading & API Integration', () => {
-		it('should load travellers on initial page visit', () => {
-			// The emulator answers too fast for the loading state to be seen without a delay
-			cy.intercept(API_DATABASE.GET, '**/travellers.json*', (req) => {
-				req.on('response', (res) => {
-					res.setDelay(1000)
-				})
-			})
-			performLogin()
-
-			// Should show loading state initially
-			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING).should('exist')
-
-			// Wait for loading to complete
-			cy.get(TRAVELLERS_LIST_SELECTORS.LOADING, {
-				timeout: REQUEST_TIMEOUT,
-			}).should('not.exist')
-
-			// The seed holds two travellers
-			cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST)
-				.find(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM)
-				.should('have.length', 2)
-		})
-	})
-
-	describe('Error Handling', () => {
-		it('should show an inline error when the network fails', () => {
-			cy.intercept(API_DATABASE.GET, '**/travellers.json*', {
-				forceNetworkError: true,
-			}).as('getTravellersNetworkError')
-
-			performLogin()
-			cy.visit(PATHS.TRAVELLERS)
-			cy.wait('@getTravellersNetworkError', { timeout: REQUEST_TIMEOUT })
-
-			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should('be.visible')
-			cy.get(TRAVELLERS_LIST_SELECTORS.LOAD_ERROR).should(
-				'contain',
-				ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
 			)
 		})
 	})
@@ -248,12 +194,6 @@ describe('Travellers page > logged out', () => {
 		cy.get(TRAVELLERS_LIST_SELECTORS.REGISTER_LINK).should('not.exist')
 	})
 
-	it('narrows the preview by city', () => {
-		cy.contains(TRAVELLER_FILTER_SELECTORS.OPTION, 'Prague').click()
-		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.ROOT).should('have.length', 1)
-		cy.contains(FIRST.firstName).should('exist')
-	})
-
 	it('sends View trip to Log in, which names the trip and returns to it', () => {
 		cy.get(PUBLIC_TRAVELLER_ITEM_SELECTORS.VIEW_TRIP).first().click()
 
@@ -283,12 +223,6 @@ describe('Travellers page > logged out', () => {
 		cy.get(TRAVELLERS_WELCOME_SELECTORS.CREATE_ACCOUNT).click()
 		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
 		cy.get('h1').should('have.text', 'Create an account')
-	})
-
-	it('offers Log in in the header', () => {
-		cy.get(HEADER_SELECTORS.LOG_IN).click()
-		cy.location('pathname').should('eq', PATHS.AUTHENTICATION)
-		cy.get(HEADER_SELECTORS.LOG_IN).should('not.exist')
 	})
 })
 

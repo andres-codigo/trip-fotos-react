@@ -1,17 +1,20 @@
 import { API_DATABASE } from '../../../src/constants/api'
-import { VERIFY_EMAIL_CONFIG } from '../../../src/constants/auth'
 import {
-	AUTHENTICATION_FORM_SELECTORS,
 	REPLY_BOX_SELECTORS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 	VERIFY_EMAIL_NOTE_SELECTORS,
 	VERIFY_EMAIL_STRIP_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
 import { TEST_USERS } from '../../../src/constants/config/users'
-import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
+import { PATHS } from '../../../src/constants/ui/paths'
 import { conversationId } from '../../../src/utils/conversationId'
 
-import { performLogin, sdkSessionOf } from '../../support/utils/authHelpers'
+import {
+	performLogin,
+	sdkSessionOf,
+	signUp,
+	verifyByLink,
+} from '../../support/utils/authHelpers'
 
 const REQUEST_TIMEOUT = 10000
 const PROJECT = () => Cypress.expose('FIREBASE_PROJECT_ID')
@@ -36,23 +39,6 @@ const signInUnverifiedTraveller = () => {
 	markUnverified(ME())
 	performLogin(TEST_USERS.TRAVELLER.EMAIL, TEST_USERS.TRAVELLER.PASSWORD)
 }
-
-const verifyByLink = (email) =>
-	cy
-		.request(
-			`${AUTH_EMULATOR()}/emulator/v1/projects/${PROJECT()}/oobCodes`,
-		)
-		.then(({ body }) => {
-			const { oobCode } = body.oobCodes.findLast(
-				(code) =>
-					code.email === email && code.requestType === 'VERIFY_EMAIL',
-			)
-			cy.request(
-				API_DATABASE.POST,
-				`${API_DATABASE.URL}update?key=${API_DATABASE.KEY}`,
-				{ oobCode },
-			)
-		})
 
 // The unverified traveller's saved session would otherwise serve a later spec that signs in as them without re-seeding
 after(() => Cypress.session.clearAllSavedSessions())
@@ -195,16 +181,14 @@ describe('Unverified traveller', () => {
 		cy.checkA11y()
 	})
 
-	it('shows a note in place of the reply box', () => {
+	it('shows a note in place of the reply box and the Edit trip form', () => {
 		cy.visit(`${PATHS.MESSAGES}/${conversationId(ME(), OTHER())}`)
 
 		cy.get(VERIFY_EMAIL_NOTE_SELECTORS.ROOT, {
 			timeout: REQUEST_TIMEOUT,
 		}).should('be.visible')
 		cy.get(REPLY_BOX_SELECTORS.ROOT).should('not.exist')
-	})
 
-	it('shows a note in place of the Edit trip form', () => {
 		cy.visit(`${PATHS.TRAVELLERS}/${ME()}/edit`)
 
 		cy.get(VERIFY_EMAIL_NOTE_SELECTORS.ROOT, {
@@ -217,21 +201,11 @@ describe('Unverified traveller', () => {
 describe('Register before and after verifying', () => {
 	beforeEach(() => {
 		cy.resetEmulators()
-		cy.visit(BASE_URL_CYPRESS + PATHS.AUTHENTICATION)
 	})
 
 	it("shows the note instead of the form, then the form once I've verified", () => {
 		const email = `register-${Date.now()}@example.com`
-		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_TOGGLE_LINK).click()
-		cy.get(AUTHENTICATION_FORM_SELECTORS.EMAIL_INPUT).type(email)
-		cy.get(AUTHENTICATION_FORM_SELECTORS.PASSWORD_INPUT).type(
-			TEST_USERS.STANDARD.PASSWORD,
-		)
-		cy.get(AUTHENTICATION_FORM_SELECTORS.LOGIN_SIGNUP_SUBMIT_BUTTON).click()
-		cy.get('h1', { timeout: REQUEST_TIMEOUT }).should(
-			'have.text',
-			VERIFY_EMAIL_CONFIG.TITLE,
-		)
+		signUp(email)
 
 		cy.visit(PATHS.REGISTER)
 

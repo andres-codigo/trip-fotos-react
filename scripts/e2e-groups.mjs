@@ -4,22 +4,21 @@ import fs from 'node:fs'
 import { suiteSpecs } from '../.claude/skills/verify/spec-results.mjs'
 import { affectedSpecs } from '../cypress/impact.js'
 
-// Seconds per spec on the CI runner, Cypress start-up between specs included (run 43127128644, PR #704 (prune tests)); re-record when a spec grows or the slowest group drifts
+// Seconds per spec on the CI runner, as the Cypress run table reports them (run 44649965810, PR #817 (trim E2E checks)); re-record when a spec grows or the slowest group drifts
 export const SPEC_SECONDS = {
-	'cypress/e2e/app/AppRoutes.cy.js': 9,
-	'cypress/e2e/app/EmailVerification.cy.js': 10,
-	'cypress/e2e/app/StalePersistedStore.cy.js': 4,
-	'cypress/e2e/components/Navigation.cy.js': 11,
-	'cypress/e2e/pages/Account.cy.js': 8,
-	'cypress/e2e/pages/Authentication.cy.js': 9,
-	'cypress/e2e/pages/ContactTraveller.cy.js': 15,
-	'cypress/e2e/pages/EditTrip.cy.js': 13,
-	'cypress/e2e/pages/Messages.cy.js': 14,
-	'cypress/e2e/pages/PageNotFound.cy.js': 4,
-	'cypress/e2e/pages/Privacy.cy.js': 4,
-	'cypress/e2e/pages/Register.cy.js': 16,
-	'cypress/e2e/pages/TravellerDetail.cy.js': 8,
-	'cypress/e2e/pages/Travellers.cy.js': 13,
+	'cypress/e2e/app/AppRoutes.cy.js': 4,
+	'cypress/e2e/app/EmailVerification.cy.js': 12,
+	'cypress/e2e/app/StalePersistedStore.cy.js': 3,
+	'cypress/e2e/components/Navigation.cy.js': 16,
+	'cypress/e2e/pages/Account.cy.js': 10,
+	'cypress/e2e/pages/Authentication.cy.js': 5,
+	'cypress/e2e/pages/EditTrip.cy.js': 11,
+	'cypress/e2e/pages/Messages.cy.js': 25,
+	'cypress/e2e/pages/PageNotFound.cy.js': 2,
+	'cypress/e2e/pages/Privacy.cy.js': 1,
+	'cypress/e2e/pages/Register.cy.js': 18,
+	'cypress/e2e/pages/TravellerDetail.cy.js': 4,
+	'cypress/e2e/pages/Travellers.cy.js': 22,
 }
 
 // A spec with no recorded time still runs, weighted like an average one

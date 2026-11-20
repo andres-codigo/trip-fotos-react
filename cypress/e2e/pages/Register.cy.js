@@ -1,9 +1,7 @@
 import {
-	ERROR_SUMMARY_SELECTORS,
 	TRAVELLER_REGISTRATION_FORM_SELECTORS,
 	FILE_UPLOADER_SELECTORS,
 } from '../../../src/constants/test/selectors/components'
-import { VALIDATION_MESSAGES } from '../../../src/constants/validation'
 import { GLOBAL } from '../../../src/constants/ui/global'
 import { BASE_URL_CYPRESS, PATHS } from '../../../src/constants/ui/paths'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '../../../src/constants/travellers'
@@ -38,19 +36,6 @@ describe('Register Page', () => {
 	it('has no axe violations', () => {
 		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.FORM).should('be.visible')
 
-		cy.checkA11y()
-	})
-
-	it('lists every problem in a focused summary when submitted empty, and a link moves to its field', () => {
-		cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.REGISTER_BUTTON).click()
-
-		cy.get(ERROR_SUMMARY_SELECTORS.ROOT).should('have.focus')
-		cy.get(ERROR_SUMMARY_SELECTORS.LINK)
-			.should('have.length', 7)
-			.last()
-			.should('have.text', VALIDATION_MESSAGES.PHOTOS_REQUIRED)
-			.click()
-		cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).should('have.focus')
 		cy.checkA11y()
 	})
 

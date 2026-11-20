@@ -41,7 +41,7 @@ Use this agent when creating a new route-level page with structure, styling, and
 6. **Test Scaffolding**
     - Create `{PageName}.test.jsx` (Vitest page test). It checks the page's wiring only (what it passes its children and what happens next), not their own states; it finds elements with `screen.getByTestId` (or by role), writes no class-name, `data-cy`-only, child-prop or wrapper checks, and makes cases that differ only in input and expected output one `it.each` table (Vitest Rules in `testing.instructions.md`).
     - Create `{PageName}.cy.jsx` (Cypress component test) only when a real browser shows something about the page (layout per width, a computed style, scrolling, a real file input); see "Which layer owns a check" in `testing.instructions.md`. Mount it with `cy.mountWithProviders(ui, store, { initialEntries })`.
-    - Create `cypress/e2e/pages/{PageName}.cy.js` (E2E flow test) and call `cy.checkA11y()` once for the route.
+    - Create `cypress/e2e/pages/{PageName}.cy.js` (E2E flow test) and call `cy.checkA11y()` once for the route. It covers the route flow only (navigation, Firebase and the persisted store), with no validation, error or loading states the Vitest or component tests already own. It reuses the `authHelpers` flows (`performLogin`, `signUp`, `verifyByLink`) rather than re-writing sign-up or login, and records the spec in `SPEC_SECONDS` (`scripts/e2e-groups.mjs`) and `E2E_SPECS` (`cypress/impact.js`).
     - Use `src/constants/test` for test constants and `cypress/support/utils` for E2E helpers.
 
 7. **Output**
