@@ -33,13 +33,4 @@ describe('configureTestStore', () => {
 		expect(appOptions.middleware).toBe(middleware)
 		expect(configureStore.mock.calls.at(-1)[0].middleware).toBe(middleware)
 	})
-
-	it('passes the reducer and preloaded state through', () => {
-		const store = configureTestStore({
-			reducer,
-			preloadedState: { count: 3 },
-		})
-
-		expect(store.getState()).toEqual({ count: 3 })
-	})
 })

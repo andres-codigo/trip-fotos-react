@@ -23,53 +23,38 @@ describe('useViewport', () => {
 		vi.unstubAllGlobals()
 	})
 
-	it('should return mobile viewport for small screens', () => {
-		mockWindow(TEST_WIDTHS.MOBILE_SMALL)
+	it.each([
+		[
+			'MOBILE_SMALL',
+			'mobile',
+			TEST_WIDTHS.MOBILE_SMALL,
+			true,
+			false,
+			false,
+		],
+		['MOBILE_EDGE', 'mobile', TEST_WIDTHS.MOBILE_EDGE, true, false, false],
+		[
+			'TABLET_SMALL',
+			'tablet',
+			TEST_WIDTHS.TABLET_SMALL,
+			false,
+			true,
+			false,
+		],
+		['TABLET_EDGE', 'desktop', TEST_WIDTHS.TABLET_EDGE, false, false, true],
+		[
+			'DESKTOP_LARGE',
+			'desktop',
+			TEST_WIDTHS.DESKTOP_LARGE,
+			false,
+			false,
+			true,
+		],
+	])('reports %s as %s', (_, __, width, isMobile, isTablet, isDesktop) => {
+		mockWindow(width)
 		const { result } = renderHook(() => useViewport())
 
-		expect(result.current.isMobile).toBe(true)
-		expect(result.current.isTablet).toBe(false)
-		expect(result.current.isDesktop).toBe(false)
-	})
-
-	it('should return tablet viewport for medium screens', () => {
-		mockWindow(TEST_WIDTHS.TABLET_SMALL)
-		const { result } = renderHook(() => useViewport())
-
-		expect(result.current.isMobile).toBe(false)
-		expect(result.current.isTablet).toBe(true)
-		expect(result.current.isDesktop).toBe(false)
-	})
-	it('should return desktop viewport for large screens', () => {
-		mockWindow(TEST_WIDTHS.DESKTOP_LARGE)
-		const { result } = renderHook(() => useViewport())
-
-		expect(result.current).toEqual({
-			isMobile: false,
-			isTablet: false,
-			isDesktop: true,
-			width: TEST_WIDTHS.DESKTOP_LARGE,
-		})
-	})
-
-	it('should handle edge case screen sizes correctly', () => {
-		mockWindow(TEST_WIDTHS.MOBILE_EDGE)
-		const { result: mobileResult } = renderHook(() => useViewport())
-		expect(mobileResult.current.isMobile).toBe(true)
-		expect(mobileResult.current.isTablet).toBe(false)
-		expect(mobileResult.current.isDesktop).toBe(false)
-
-		mockWindow(TEST_WIDTHS.TABLET_SMALL)
-		const { result: tabletResult } = renderHook(() => useViewport())
-		expect(tabletResult.current.isMobile).toBe(false)
-		expect(tabletResult.current.isTablet).toBe(true)
-		expect(tabletResult.current.isDesktop).toBe(false)
-
-		mockWindow(TEST_WIDTHS.TABLET_EDGE)
-		const { result: desktopResult } = renderHook(() => useViewport())
-		expect(desktopResult.current.isMobile).toBe(false)
-		expect(desktopResult.current.isTablet).toBe(false)
-		expect(desktopResult.current.isDesktop).toBe(true)
+		expect(result.current).toEqual({ isMobile, isTablet, isDesktop, width })
 	})
 
 	it('should debounce resize events', () => {

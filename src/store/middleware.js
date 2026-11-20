@@ -1,7 +1,7 @@
 // The 32ms default warns on a busy machine, and Vitest and Cypress fail on any console warning
-export const MIDDLEWARE_WARN_AFTER_MS = 128
+const MIDDLEWARE_WARN_AFTER_MS = 128
 
-export const MIDDLEWARE_OPTIONS = Object.freeze({
+const MIDDLEWARE_OPTIONS = Object.freeze({
 	immutableCheck: { warnAfter: MIDDLEWARE_WARN_AFTER_MS },
 	serializableCheck: {
 		warnAfter: MIDDLEWARE_WARN_AFTER_MS,

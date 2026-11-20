@@ -429,12 +429,23 @@ describe('authenticationSlice', () => {
 						'auth/too-many-requests',
 						ERROR_MESSAGES.TOO_MANY_LOGIN_ATTEMPTS,
 					],
+					['auth/user-disabled', ERROR_MESSAGES.LOGIN_FAILED],
+					[
+						'auth/network-request-failed',
+						ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
+					],
+					// No code: an empty error, or a raw message the user must not see
+					[undefined, ERROR_MESSAGES.LOGIN_FAILED],
+					[
+						new Error(API_ERROR_MESSAGE.NETWORK_ERROR),
+						ERROR_MESSAGES.LOGIN_FAILED,
+					],
 				])(
-					'maps SDK code %s to %s on login',
+					'maps SDK error %s to %s on login, leaving state unchanged',
 					async (code, expected) => {
-						signInWithEmailAndPassword.mockRejectedValueOnce({
-							code,
-						})
+						signInWithEmailAndPassword.mockRejectedValueOnce(
+							code instanceof Error ? code : { code },
+						)
 
 						const result = await store.dispatch(
 							login({
@@ -445,6 +456,11 @@ describe('authenticationSlice', () => {
 
 						expect(result.payload).toBe(expected)
 						expect(result.meta.rejectedWithValue).toBe(true)
+						expect(store.getState().authentication).toMatchObject({
+							userId: null,
+							userName: null,
+							userEmail: null,
+						})
 					},
 				)
 
@@ -463,71 +479,6 @@ describe('authenticationSlice', () => {
 					expect(result.payload).toBe(
 						ERROR_MESSAGES.EMAIL_ALREADY_IN_USE,
 					)
-				})
-
-				it('shows the generic sign-in message for an unmapped SDK code', async () => {
-					signInWithEmailAndPassword.mockRejectedValueOnce({
-						code: 'auth/user-disabled',
-					})
-
-					const result = await store.dispatch(
-						login({
-							mode: API_DATABASE.AUTH_LOGIN_MODE,
-							...credentials,
-						}),
-					)
-
-					expect(result.payload).toBe(ERROR_MESSAGES.LOGIN_FAILED)
-				})
-
-				it('uses the fallback when an error has no code or message', async () => {
-					signInWithEmailAndPassword.mockRejectedValueOnce({})
-
-					const result = await store.dispatch(
-						login({
-							mode: API_DATABASE.AUTH_LOGIN_MODE,
-							...credentials,
-						}),
-					)
-
-					expect(result.payload).toBe(ERROR_MESSAGES.LOGIN_FAILED)
-				})
-
-				it('tells the user to check their connection when the network is down', async () => {
-					signInWithEmailAndPassword.mockRejectedValueOnce({
-						code: 'auth/network-request-failed',
-					})
-
-					const result = await store.dispatch(
-						login({
-							mode: API_DATABASE.AUTH_LOGIN_MODE,
-							...credentials,
-						}),
-					)
-
-					expect(result.payload).toBe(
-						ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
-					)
-				})
-
-				it('should hide a raw error message and leave state unchanged', async () => {
-					const mockError = new Error(API_ERROR_MESSAGE.NETWORK_ERROR)
-					signInWithEmailAndPassword.mockRejectedValueOnce(mockError)
-
-					const result = await store.dispatch(
-						login({
-							mode: API_DATABASE.AUTH_LOGIN_MODE,
-							...credentials,
-						}),
-					)
-
-					const state = store.getState().authentication
-					expect(state.userId).toBeNull()
-					expect(state.userName).toBeNull()
-					expect(state.userEmail).toBeNull()
-
-					expect(result.payload).toBe(ERROR_MESSAGES.LOGIN_FAILED)
-					expect(result.meta.rejectedWithValue).toBe(true)
 				})
 			})
 		})
@@ -1223,30 +1174,34 @@ describe('authenticationSlice', () => {
 			}
 		}
 
-		it('waits for the SDK to restore the user before a resend', async () => {
-			const user = sessionUser()
-			const restore = restoreUserWhenReady(user)
-			sendEmailVerification.mockResolvedValueOnce()
+		it.each([
+			[
+				'a resend',
+				resendVerification,
+				(user) =>
+					expect(sendEmailVerification).toHaveBeenCalledWith(
+						user,
+						expect.anything(),
+					),
+			],
+			[
+				'a check',
+				refreshVerification,
+				(user) => expect(user.reload).toHaveBeenCalled(),
+			],
+		])(
+			'waits for the SDK to restore the user before %s',
+			async (_, thunk, check) => {
+				const user = sessionUser()
+				const restore = restoreUserWhenReady(user)
 
-			const result = await store.dispatch(resendVerification())
-			restore()
+				const result = await store.dispatch(thunk())
+				restore()
 
-			expect(resendVerification.fulfilled.match(result)).toBe(true)
-			expect(sendEmailVerification).toHaveBeenCalledWith(
-				user,
-				expect.anything(),
-			)
-		})
-
-		it('waits for the SDK to restore the user before a check', async () => {
-			const user = sessionUser()
-			const restore = restoreUserWhenReady(user)
-
-			await store.dispatch(refreshVerification())
-			restore()
-
-			expect(user.reload).toHaveBeenCalled()
-		})
+				expect(thunk.fulfilled.match(result)).toBe(true)
+				check(user)
+			},
+		)
 
 		it('leaves the token alone while the address is unverified', async () => {
 			const user = sessionUser()

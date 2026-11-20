@@ -8,6 +8,7 @@ import {
 	vi,
 } from 'vitest'
 import configureTestStore from '@/testUtils/configureTestStore'
+import { okJson, failing } from '@/testUtils/fetchResponses'
 
 import {
 	MOCK_USER,
@@ -91,14 +92,6 @@ vi.mock('browser-image-compression', () => ({
 	default: vi.fn((file) => Promise.resolve(file)),
 }))
 
-vi.mock('@/constants/endpoints', () => ({
-	API_DATABASE: {
-		URL: 'https://mock-api-url.com/',
-		KEY: 'mock-api-key',
-		POST: 'POST',
-	},
-}))
-
 vi.mock('@/utils/errorHandler', () => ({
 	handleApiError: vi.fn((error, message) => {
 		// Handle cases where error is just a string (e.g. from rejectWithValue)
@@ -171,13 +164,6 @@ describe('travellersSlice', () => {
 	describe('actions', () => {
 		describe('travellerName', () => {
 			describe('success scenarios', () => {
-				it('should update travellerName when setTravellerName is dispatched', () => {
-					store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
-
-					const state = store.getState().travellers
-					expect(state.travellerName).toBe(MOCK_USER.FULL_NAME)
-				})
-
 				it('should update the Auth display name and travellerName on success', async () => {
 					await store.dispatch(
 						travellerName({
@@ -236,40 +222,33 @@ describe('travellersSlice', () => {
 	})
 
 	describe('shouldUpdate helper function', () => {
-		it('should return true when lastFetch is null', () => {
-			const state = { lastFetch: null }
-			// Since shouldUpdate is not exported, we test it through selectShouldUpdate
-			const mockState = { travellers: state }
-			const result = selectShouldUpdate(mockState)
-			expect(result).toBe(true)
-		})
+		it.each([
+			['never fetched', null, true],
+			[
+				'fetched over 60 seconds ago',
+				MOCK_TIME.SEVENTY_SECONDS_AGO,
+				true,
+			],
+			[
+				'fetched under 60 seconds ago',
+				MOCK_TIME.THIRTY_SECONDS_AGO,
+				false,
+			],
+		])('selectShouldUpdate when %s', (_, ago, expected) => {
+			const lastFetch = ago === null ? null : Date.now() - ago
 
-		it('should return true when more than 60 seconds have passed', () => {
-			const oldTimestamp =
-				new Date().getTime() - MOCK_TIME.SEVENTY_SECONDS_AGO
-			const state = { lastFetch: oldTimestamp }
-			const mockState = { travellers: state }
-			const result = selectShouldUpdate(mockState)
-			expect(result).toBe(true)
-		})
-
-		it('should return false when less than 60 seconds have passed', () => {
-			const recentTimestamp =
-				new Date().getTime() - MOCK_TIME.THIRTY_SECONDS_AGO
-			const state = { lastFetch: recentTimestamp }
-			const mockState = { travellers: state }
-			const result = selectShouldUpdate(mockState)
-			expect(result).toBe(false)
+			expect(selectShouldUpdate({ travellers: { lastFetch } })).toBe(
+				expected,
+			)
 		})
 	})
 
 	describe('updateTravellers', () => {
 		describe('success scenarios', () => {
 			it('should fetch and transform travellers data successfully', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => MOCK_API_RESPONSES.TRAVELLERS_RESPONSE,
-				})
+				fetch.mockResolvedValueOnce(
+					okJson(MOCK_API_RESPONSES.TRAVELLERS_RESPONSE),
+				)
 
 				const result = await store.dispatch(updateTravellers())
 
@@ -290,10 +269,7 @@ describe('travellersSlice', () => {
 					[userId]: loggedInTraveller,
 					['user2']: otherTraveller,
 				}
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => responseData,
-				})
+				fetch.mockResolvedValueOnce(okJson(responseData))
 
 				selectUserId.mockReturnValueOnce(userId)
 
@@ -306,12 +282,11 @@ describe('travellersSlice', () => {
 
 			it('should clear a stale travellerName when the logged-in record is missing', async () => {
 				store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({
+				fetch.mockResolvedValueOnce(
+					okJson({
 						other: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO,
 					}),
-				})
+				)
 				selectUserId.mockReturnValueOnce('user1')
 
 				await store.dispatch(updateTravellers())
@@ -321,12 +296,11 @@ describe('travellersSlice', () => {
 
 			it('should keep travellerName when nobody is logged in', async () => {
 				store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({
+				fetch.mockResolvedValueOnce(
+					okJson({
 						other: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO,
 					}),
-				})
+				)
 				selectUserId.mockReturnValueOnce(null)
 
 				await store.dispatch(updateTravellers())
@@ -337,10 +311,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should return empty array when response is null', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => null,
-				})
+				fetch.mockResolvedValueOnce(okJson(null))
 
 				const result = await store.dispatch(updateTravellers())
 
@@ -348,10 +319,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should return empty array when response is empty object', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({}),
-				})
+				fetch.mockResolvedValueOnce(okJson({}))
 
 				const result = await store.dispatch(updateTravellers())
 
@@ -360,31 +328,23 @@ describe('travellersSlice', () => {
 		})
 
 		describe('error scenarios', () => {
-			it('should handle network errors with specific message', async () => {
-				const networkError = new TypeError(
-					API_ERROR_MESSAGE.FAILED_TO_FETCH,
-				)
-				fetch.mockRejectedValueOnce(networkError)
+			it.each([
+				['a TypeError', TypeError],
+				['a generic Error', Error],
+			])(
+				'should give the connection message for %s from fetch',
+				async (_, ErrorType) => {
+					fetch.mockRejectedValueOnce(
+						new ErrorType(API_ERROR_MESSAGE.FAILED_TO_FETCH),
+					)
 
-				const result = await store.dispatch(updateTravellers())
+					const result = await store.dispatch(updateTravellers())
 
-				expect(result.payload).toBe(
-					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
-				)
-			})
-
-			it('should handle unexpected errors with generic message', async () => {
-				const unexpectedError = new Error(
-					`${API_ERROR_MESSAGE.FAILED_TO_FETCH}`,
-				)
-				fetch.mockRejectedValueOnce(unexpectedError)
-
-				const result = await store.dispatch(updateTravellers())
-
-				expect(result.payload).toBe(
-					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
-				)
-			})
+					expect(result.payload).toBe(
+						ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
+					)
+				},
+			)
 		})
 	})
 
@@ -408,10 +368,7 @@ describe('travellersSlice', () => {
 
 		describe('success scenarios', () => {
 			it('should upload images and register traveller successfully', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 
 				const result = await store.dispatch(
 					registerTraveller(mockRegistrationData),
@@ -476,10 +433,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should store the measured dimensions of each compressed file, aligned with files', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				vi.stubGlobal(
 					'createImageBitmap',
 					vi.fn().mockResolvedValue({ width: 1600, height: 900 }),
@@ -501,10 +455,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should still upload with a null dimension when measuring fails', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				vi.stubGlobal(
 					'createImageBitmap',
 					vi.fn().mockRejectedValue(new Error('undecodable')),
@@ -521,10 +472,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should upload a thumbnail per width next to the photo and store them aligned with files', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				vi.stubGlobal(
 					'createImageBitmap',
 					vi.fn().mockResolvedValue({ width: 1600, height: 800 }),
@@ -573,10 +521,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should still register, keeping the thumbnails that uploaded, when one fails', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				uploadBytes.mockRejectedValueOnce(new Error('thumbnail failed'))
 
 				const result = await store.dispatch(
@@ -597,10 +542,9 @@ describe('travellersSlice', () => {
 					String(path).includes(`-${failingWidth}w-`)
 
 				beforeEach(() => {
-					fetch.mockResolvedValueOnce({
-						ok: true,
-						json: async () => ({ name: MOCK_USER.USER_ID }),
-					})
+					fetch.mockResolvedValueOnce(
+						okJson({ name: MOCK_USER.USER_ID }),
+					)
 					getDownloadURL.mockImplementation((path) =>
 						isFailingThumbnail(path)
 							? Promise.reject(new Error('url failed'))
@@ -646,10 +590,7 @@ describe('travellersSlice', () => {
 
 			it('should set the Auth display name and the store name to the registered name', async () => {
 				const fullName = `${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 
 				await store.dispatch(registerTraveller(mockRegistrationData))
 
@@ -662,10 +603,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should still register the traveller when the name update fails', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				updateProfile.mockRejectedValueOnce(new Error('profile failed'))
 
 				const result = await store.dispatch(
@@ -713,10 +651,7 @@ describe('travellersSlice', () => {
 			}
 
 			it('should report the file count and percentage as files upload, then clear it', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				stubUpload({
 					snapshots: [{ bytesTransferred: 50, totalBytes: 100 }],
 				})
@@ -746,10 +681,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should not count a file as uploaded before its download URL is ready', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				stubUpload({
 					snapshots: [{ bytesTransferred: 100, totalBytes: 100 }],
 				})
@@ -766,10 +698,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should only dispatch when the visible value changes', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				stubUpload({
 					snapshots: [
 						{ bytesTransferred: 10, totalBytes: 100 },
@@ -786,10 +715,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should not report progress when there are no photos', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ name: MOCK_USER.USER_ID }),
-				})
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				const seen = collectProgress()
 
 				await store.dispatch(
@@ -813,9 +739,7 @@ describe('travellersSlice', () => {
 
 		describe('failure scenarios', () => {
 			it('should return error message when API response is not ok', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: false,
-				})
+				fetch.mockResolvedValueOnce(failing())
 
 				const result = await store.dispatch(
 					registerTraveller(mockRegistrationData),
@@ -851,7 +775,7 @@ describe('travellersSlice', () => {
 				})
 
 				it('should delete every uploaded file when the database write fails', async () => {
-					fetch.mockResolvedValueOnce({ ok: false })
+					fetch.mockResolvedValueOnce(failing())
 
 					const result = await store.dispatch(
 						registerTraveller(mockRegistrationData),
@@ -907,7 +831,7 @@ describe('travellersSlice', () => {
 				})
 
 				it('should still report the registration error when a cleanup delete fails', async () => {
-					fetch.mockResolvedValueOnce({ ok: false })
+					fetch.mockResolvedValueOnce(failing())
 					deleteObject.mockRejectedValueOnce(new Error('denied'))
 
 					const result = await store.dispatch(
@@ -925,7 +849,7 @@ describe('travellersSlice', () => {
 				})
 
 				it('should delete nothing when nothing was uploaded', async () => {
-					fetch.mockResolvedValueOnce({ ok: false })
+					fetch.mockResolvedValueOnce(failing())
 
 					await store.dispatch(
 						registerTraveller({
@@ -938,10 +862,9 @@ describe('travellersSlice', () => {
 				})
 
 				it('should not delete anything after a successful registration', async () => {
-					fetch.mockResolvedValueOnce({
-						ok: true,
-						json: async () => ({ name: MOCK_USER.USER_ID }),
-					})
+					fetch.mockResolvedValueOnce(
+						okJson({ name: MOCK_USER.USER_ID }),
+					)
 
 					await store.dispatch(
 						registerTraveller(mockRegistrationData),
@@ -1039,7 +962,7 @@ describe('travellersSlice', () => {
 		describe('success scenarios', () => {
 			it('should patch the edited fields and the kept photos, dropping the old length', async () => {
 				const testStore = preloadStore()
-				fetch.mockResolvedValueOnce({ ok: true })
+				fetch.mockResolvedValueOnce(okJson())
 
 				const result = await testStore.dispatch(updateTraveller(edit))
 
@@ -1089,7 +1012,7 @@ describe('travellersSlice', () => {
 				const order = []
 				fetch.mockImplementationOnce(async () => {
 					order.push('save')
-					return { ok: true }
+					return okJson()
 				})
 				deleteObject.mockImplementation(async (target) => {
 					order.push(target)
@@ -1110,7 +1033,7 @@ describe('travellersSlice', () => {
 
 			it('should still save when a removed photo cannot be deleted', async () => {
 				const testStore = preloadStore()
-				fetch.mockResolvedValueOnce({ ok: true })
+				fetch.mockResolvedValueOnce(okJson())
 				deleteObject
 					.mockRejectedValueOnce(new Error('storage down'))
 					.mockRejectedValueOnce(new Error('storage down'))
@@ -1122,7 +1045,7 @@ describe('travellersSlice', () => {
 
 			it('should append new uploads after the kept photos', async () => {
 				const testStore = preloadStore()
-				fetch.mockResolvedValueOnce({ ok: true })
+				fetch.mockResolvedValueOnce(okJson())
 
 				await testStore.dispatch(
 					updateTraveller({
@@ -1153,7 +1076,7 @@ describe('travellersSlice', () => {
 
 			it('should update the selected traveller, the list entry and the name', async () => {
 				const testStore = preloadStore()
-				fetch.mockResolvedValueOnce({ ok: true })
+				fetch.mockResolvedValueOnce(okJson())
 
 				await testStore.dispatch(updateTraveller(edit))
 
@@ -1183,7 +1106,7 @@ describe('travellersSlice', () => {
 		describe('failure scenarios', () => {
 			it('should reject with the save message, delete nothing kept or removed, and remove its own uploads', async () => {
 				const testStore = preloadStore()
-				fetch.mockResolvedValueOnce({ ok: false })
+				fetch.mockResolvedValueOnce(failing())
 
 				const result = await testStore.dispatch(
 					updateTraveller({
@@ -1213,10 +1136,7 @@ describe('travellersSlice', () => {
 
 		describe('success scenarios', () => {
 			it('should fetch and set selected traveller', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => mockTravellerData,
-				})
+				fetch.mockResolvedValueOnce(okJson(mockTravellerData))
 
 				const result = await store.dispatch(loadTraveller(mockId))
 
@@ -1239,11 +1159,18 @@ describe('travellersSlice', () => {
 		})
 
 		describe('failure scenarios', () => {
-			it('should handle API error (not ok)', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: false,
-					status: 404, // Simulate Not Found
-				})
+			it.each([
+				[
+					'a failed response',
+					() => fetch.mockResolvedValueOnce(failing(404)),
+				],
+				[
+					'a network error',
+					() =>
+						fetch.mockRejectedValueOnce(new Error('Network Error')),
+				],
+			])('should reject on %s', async (_, arrange) => {
+				arrange()
 
 				const result = await store.dispatch(loadTraveller(mockId))
 
@@ -1258,10 +1185,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should handle missing data (valid 200 OK but null body)', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => null,
-				})
+				fetch.mockResolvedValueOnce(okJson(null))
 
 				const result = await store.dispatch(loadTraveller(mockId))
 
@@ -1271,32 +1195,16 @@ describe('travellersSlice', () => {
 			})
 
 			it('should clear a persisted selected traveller that no longer exists', async () => {
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => mockTravellerData,
-				})
+				fetch.mockResolvedValueOnce(okJson(mockTravellerData))
 				await store.dispatch(loadTraveller(mockId))
 				expect(
 					store.getState().travellers.selectedTraveller,
 				).not.toBeNull()
 
-				fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => null,
-				})
+				fetch.mockResolvedValueOnce(okJson(null))
 				await store.dispatch(loadTraveller(mockId))
 
 				expect(store.getState().travellers.selectedTraveller).toBeNull()
-			})
-
-			it('should handle network errors', async () => {
-				const networkError = new Error('Network Error')
-				fetch.mockRejectedValueOnce(networkError)
-
-				const result = await store.dispatch(loadTraveller(mockId))
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(handleApiError).toHaveBeenCalled()
 			})
 		})
 	})
@@ -1360,12 +1268,11 @@ describe('travellersSlice', () => {
 				})
 
 				const freshTravellers = [MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO]
-				global.fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({
+				global.fetch.mockResolvedValueOnce(
+					okJson({
 						user2: MOCK_TRAVELLERS.SAMPLE_TRAVELLER_TWO,
 					}),
-				})
+				)
 
 				const result = await testStore.dispatch(
 					loadTravellers({ forceRefresh: true }),
@@ -1378,10 +1285,9 @@ describe('travellersSlice', () => {
 			it('should update lastFetch timestamp after successful fetch', async () => {
 				const beforeFetch = new Date().getTime()
 
-				global.fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => MOCK_API_RESPONSES.TRAVELLERS_RESPONSE,
-				})
+				global.fetch.mockResolvedValueOnce(
+					okJson(MOCK_API_RESPONSES.TRAVELLERS_RESPONSE),
+				)
 
 				await store.dispatch(loadTravellers({ forceRefresh: true }))
 
@@ -1394,34 +1300,32 @@ describe('travellersSlice', () => {
 		})
 
 		describe('error scenarios', () => {
-			it('should pass through user-friendly error messages', async () => {
-				global.fetch.mockResolvedValueOnce({
-					ok: false,
-					status: 500,
-				})
-
-				const result = await store.dispatch(
-					loadTravellers({ forceRefresh: true }),
-				)
-
-				expect(result.payload).toBe(
+			it.each([
+				[
+					'a failed response',
+					() => fetch.mockResolvedValueOnce(failing()),
 					`${API_ERROR_MESSAGE.UPDATE_TRAVELLERS_CATCH}: ${ERROR_MESSAGES.REQUEST_ERROR}`,
-				)
-			})
-
-			it('should provide fallback message for short/generic errors', async () => {
-				global.fetch.mockRejectedValueOnce(
-					new Error(API_ERROR_MESSAGE.NETWORK_ERROR),
-				)
-
-				const result = await store.dispatch(
-					loadTravellers({ forceRefresh: true }),
-				)
-
-				expect(result.payload).toBe(
+				],
+				[
+					'a network error',
+					() =>
+						fetch.mockRejectedValueOnce(
+							new Error(API_ERROR_MESSAGE.NETWORK_ERROR),
+						),
 					ERROR_MESSAGES.NETWORK_CONNECTION_ERROR,
-				)
-			})
+				],
+			])(
+				'should give a readable message for %s',
+				async (_, arrange, expected) => {
+					arrange()
+
+					const result = await store.dispatch(
+						loadTravellers({ forceRefresh: true }),
+					)
+
+					expect(result.payload).toBe(expected)
+				},
+			)
 		})
 	})
 
@@ -1478,12 +1382,9 @@ describe('travellersSlice', () => {
 					}
 				}
 				if (options?.method === 'GET') {
-					return {
-						ok: true,
-						json: async () => ({
-							[remainingTraveller.id]: remainingTraveller,
-						}),
-					}
+					return okJson({
+						[remainingTraveller.id]: remainingTraveller,
+					})
 				}
 				throw new Error(`Unexpected request: ${url}`)
 			})
@@ -1546,9 +1447,7 @@ describe('travellersSlice', () => {
 					},
 				})
 				fetch.mockImplementation(async (url, options) =>
-					options?.method === 'GET'
-						? { ok: true, json: async () => null }
-						: { ok: true },
+					options?.method === 'GET' ? okJson(null) : okJson(),
 				)
 
 				const result = await testStore.dispatch(
@@ -1573,7 +1472,8 @@ describe('travellersSlice', () => {
 				expect(testStore.getState().travellers.isTraveller).toBe(true)
 			})
 
-			it('should delete each thumbnail too, read from an array or an index-keyed object', async () => {
+			// tripPhotos.test.js owns the index-keyed object case
+			it('should delete each thumbnail too', async () => {
 				const testStore = preloadStore()
 				mockFetchByUrl()
 				const thumbnail = (name) => ({
@@ -1585,10 +1485,10 @@ describe('travellersSlice', () => {
 					deleteTraveller({
 						travellerId,
 						files,
-						fileThumbnails: {
-							0: [thumbnail('one-320w'), thumbnail('one-640w')],
-							1: [thumbnail('two-320w')],
-						},
+						fileThumbnails: [
+							[thumbnail('one-320w'), thumbnail('one-640w')],
+							[thumbnail('two-320w')],
+						],
 					}),
 				)
 
@@ -1630,16 +1530,43 @@ describe('travellersSlice', () => {
 		})
 
 		describe('failure scenarios', () => {
-			it('should reject without touching Storage when the record delete fails', async () => {
+			it.each([
+				[
+					'the record delete fails, without touching Storage',
+					() => mockFetchByUrl({ travellerOk: false }),
+					() => expect(deleteObject).not.toHaveBeenCalled(),
+				],
+				[
+					'an image delete fails, before the messages',
+					() => {
+						mockFetchByUrl()
+						deleteObject.mockRejectedValueOnce({
+							code: 'storage/unauthorized',
+						})
+					},
+					() => expect(messagesUpdates()).toEqual([]),
+				],
+				[
+					'the messages delete fails',
+					() => mockFetchByUrl({ messagesOk: false }),
+					() => {},
+				],
+				[
+					'a network error',
+					() =>
+						fetch.mockRejectedValueOnce(new Error('Network Error')),
+					() => expect(handleApiError).toHaveBeenCalled(),
+				],
+			])('should reject when %s', async (_, arrange, check) => {
 				const testStore = preloadStore()
-				mockFetchByUrl({ travellerOk: false })
+				arrange()
 
 				const result = await testStore.dispatch(
 					deleteTraveller({ travellerId, files }),
 				)
 
 				expect(result.meta.requestStatus).toBe('rejected')
-				expect(deleteObject).not.toHaveBeenCalled()
+				check()
 
 				const state = testStore.getState().travellers
 				expect(state.status).toBe('failed')
@@ -1648,58 +1575,13 @@ describe('travellersSlice', () => {
 				)
 				expect(state.travellers).toHaveLength(2)
 			})
-
-			it('should reject when an image delete fails', async () => {
-				const testStore = preloadStore()
-				mockFetchByUrl()
-				deleteObject.mockRejectedValueOnce({
-					code: 'storage/unauthorized',
-				})
-
-				const result = await testStore.dispatch(
-					deleteTraveller({ travellerId, files }),
-				)
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(messagesUpdates()).toEqual([])
-				expect(testStore.getState().travellers.status).toBe('failed')
-			})
-
-			it('should reject when the messages delete fails', async () => {
-				const testStore = preloadStore()
-				mockFetchByUrl({ messagesOk: false })
-
-				const result = await testStore.dispatch(
-					deleteTraveller({ travellerId, files }),
-				)
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(result.payload).toContain(
-					`${API_ERROR_MESSAGE.DELETE_TRAVELLER_CATCH}${travellerId}`,
-				)
-			})
-
-			it('should reject on a network error', async () => {
-				const testStore = preloadStore()
-				fetch.mockRejectedValueOnce(new Error('Network Error'))
-
-				const result = await testStore.dispatch(
-					deleteTraveller({ travellerId, files }),
-				)
-
-				expect(result.meta.requestStatus).toBe('rejected')
-				expect(handleApiError).toHaveBeenCalled()
-			})
 		})
 	})
 
 	describe('checkIsTraveller', () => {
 		it('should clear a stale travellerName when the record no longer exists', async () => {
 			store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
-			global.fetch.mockResolvedValueOnce({
-				ok: true,
-				json: async () => null,
-			})
+			global.fetch.mockResolvedValueOnce(okJson(null))
 
 			await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
 
@@ -1708,10 +1590,9 @@ describe('travellersSlice', () => {
 
 		describe('success scenarios', () => {
 			it('should set isTraveller to true when the traveller record exists', async () => {
-				global.fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ firstName: true, lastName: true }),
-				})
+				global.fetch.mockResolvedValueOnce(
+					okJson({ firstName: true, lastName: true }),
+				)
 
 				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
 
@@ -1728,7 +1609,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should take travellerName from the record when the Auth display name is missing', async () => {
-				const json = (value) => ({ ok: true, json: async () => value })
+				const json = (value) => okJson(value)
 				global.fetch
 					.mockResolvedValueOnce(json({ firstName: true }))
 					.mockResolvedValueOnce(json('Ada'))
@@ -1750,12 +1631,9 @@ describe('travellersSlice', () => {
 			it('should still confirm the traveller, keeping the session name, when the record name cannot be read', async () => {
 				store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
 				global.fetch
-					.mockResolvedValueOnce({
-						ok: true,
-						json: async () => ({ firstName: true }),
-					})
-					.mockResolvedValueOnce({ ok: false, status: 500 })
-					.mockResolvedValueOnce({ ok: false, status: 500 })
+					.mockResolvedValueOnce(okJson({ firstName: true }))
+					.mockResolvedValueOnce(failing())
+					.mockResolvedValueOnce(failing())
 
 				const result = await store.dispatch(
 					checkIsTraveller(MOCK_USER.USER_ID),
@@ -1769,10 +1647,7 @@ describe('travellersSlice', () => {
 			})
 
 			it('should keep the record answer when the session is reported again after it', async () => {
-				global.fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => null,
-				})
+				global.fetch.mockResolvedValueOnce(okJson(null))
 				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
 
 				// The SDK reports the user again on every token renewal; a stale display name must not come back
@@ -1786,10 +1661,7 @@ describe('travellersSlice', () => {
 
 			it('should set isTraveller to false when there is no traveller record', async () => {
 				store.dispatch(setIsTraveller(true))
-				global.fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => null,
-				})
+				global.fetch.mockResolvedValueOnce(okJson(null))
 
 				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
 
@@ -1800,7 +1672,7 @@ describe('travellersSlice', () => {
 		describe('failure scenarios', () => {
 			it('should keep the last known value when the request fails', async () => {
 				store.dispatch(setIsTraveller(true))
-				global.fetch.mockResolvedValueOnce({ ok: false, status: 500 })
+				global.fetch.mockResolvedValueOnce(failing())
 
 				const result = await store.dispatch(
 					checkIsTraveller(MOCK_USER.USER_ID),
@@ -1833,10 +1705,7 @@ describe('travellersSlice', () => {
 					),
 				)
 				store.dispatch(setTravellerName(MOCK_USER.FULL_NAME))
-				global.fetch.mockResolvedValueOnce({
-					ok: true,
-					json: async () => ({ firstName: true }),
-				})
+				global.fetch.mockResolvedValueOnce(okJson({ firstName: true }))
 				await store.dispatch(checkIsTraveller(MOCK_USER.USER_ID))
 
 				store.dispatch(action())
@@ -1867,14 +1736,13 @@ describe('travellersSlice', () => {
 
 	describe('loadPublicTrips', () => {
 		it('should read the public summaries without a token, newest trip first', async () => {
-			fetch.mockResolvedValueOnce({
-				ok: true,
-				json: async () => ({
+			fetch.mockResolvedValueOnce(
+				okJson({
 					older: { firstName: 'Kofi', tripStart: '2024-04-02' },
 					undated: { firstName: 'Noor', daysInCity: 5 },
 					newer: { firstName: 'Amara', tripStart: '2025-03-12' },
 				}),
-			})
+			)
 
 			const result = await store.dispatch(loadPublicTrips())
 
@@ -1891,7 +1759,7 @@ describe('travellersSlice', () => {
 		})
 
 		it('should return an empty list when nobody has a trip yet', async () => {
-			fetch.mockResolvedValueOnce({ ok: true, json: async () => null })
+			fetch.mockResolvedValueOnce(okJson(null))
 
 			const result = await store.dispatch(loadPublicTrips())
 
@@ -1899,7 +1767,7 @@ describe('travellersSlice', () => {
 		})
 
 		it('should reject with the handled error and keep the last list', async () => {
-			fetch.mockResolvedValueOnce({ ok: false })
+			fetch.mockResolvedValueOnce(failing())
 			handleApiError.mockReturnValueOnce(
 				'Travellers could not be loaded.',
 			)
@@ -1914,22 +1782,19 @@ describe('travellersSlice', () => {
 
 	describe('reducer actions', () => {
 		describe('setTravellers', () => {
-			it('should set travellers array and hasTravellers to true when array has items', () => {
-				const mockTravellers = [MOCK_TRAVELLERS.TEST_TRAVELLER]
-				store.dispatch(setTravellers(mockTravellers))
+			it.each([
+				['some travellers', [MOCK_TRAVELLERS.TEST_TRAVELLER], true],
+				['no travellers', [], false],
+			])(
+				'should set travellers and hasTravellers for %s',
+				(_, travellers, hasTravellers) => {
+					store.dispatch(setTravellers(travellers))
 
-				const state = store.getState().travellers
-				expect(state.travellers).toEqual(mockTravellers)
-				expect(state.hasTravellers).toBe(true)
-			})
-
-			it('should set travellers array and hasTravellers to false when array is empty', () => {
-				store.dispatch(setTravellers([]))
-
-				const state = store.getState().travellers
-				expect(state.travellers).toEqual([])
-				expect(state.hasTravellers).toBe(false)
-			})
+					const state = store.getState().travellers
+					expect(state.travellers).toEqual(travellers)
+					expect(state.hasTravellers).toBe(hasTravellers)
+				},
+			)
 		})
 	})
 

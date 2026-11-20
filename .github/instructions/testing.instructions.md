@@ -50,6 +50,9 @@ Do not introduce `cypress/support/constants` unless explicitly adopted in a futu
 - Cases that differ only in input and expected output are one `it.each` table.
 - A page test checks how the page wires its children (what it passes in and what happens next), not the child's own states, which the child's test owns.
 - Reuse a file's own fill, submit and render helpers rather than inlining their steps.
+- Every `vi.mock` path resolves to a real module.
+- Slice tests that mock `fetch` build responses with `okJson(data)` and `failing(status)` from `@/testUtils/fetchResponses`, not inline `{ ok, json }` objects.
+- Do not test library behaviour (clsx, module caching), constant values, or bare setters and selectors that the thunk tests already reach.
 
 ## Cypress Rules
 

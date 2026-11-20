@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import configureTestStore from '@/testUtils/configureTestStore'
+import { okJson, failing } from '@/testUtils/fetchResponses'
 
 import { MOCK_USER, MOCK_THREADS } from '@/constants/test'
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { API_DATABASE, API_ERROR_MESSAGE } from '@/constants/api'
 import { SENDER_STATUS } from '@/constants/travellers'
+import { conversationId } from '@/utils/conversationId'
 
 import messagesReducer, {
 	loadConversations,
@@ -44,10 +46,9 @@ vi.mock('./authenticationSlice', async () => {
 
 const ME = MOCK_USER.USER_ID
 const { OTHER_ID, FORMER_ID, LEGACY } = MOCK_THREADS
-const cidWith = (other) => [ME, other].sort().join('_')
-const CID = cidWith(OTHER_ID)
-const FORMER_CID = cidWith(FORMER_ID)
-const CLEARED_CID = cidWith('mock-cleared-id')
+const CID = conversationId(ME, OTHER_ID)
+const FORMER_CID = conversationId(ME, FORMER_ID)
+const CLEARED_CID = conversationId(ME, 'mock-cleared-id')
 
 const NOW = 1794290000000
 const stored = MOCK_THREADS.TWO_SIDED.map(
@@ -94,8 +95,6 @@ const DB = Object.freeze({
 	travellers: { [OTHER_ID]: { firstName: 'Jane', lastName: 'Smith' } },
 })
 
-const okJson = (data) => ({ ok: true, json: async () => data })
-
 // Strips the base rather than parsing the URL: CI sets no VITE_BACKEND_BASE_URL, so the URL starts with "undefined"
 const pathOf = (url) =>
 	url
@@ -104,10 +103,10 @@ const pathOf = (url) =>
 		.replace(/\.json$/, '')
 
 // Answers each read by its path, so the order of requests does not matter
-const mockDatabase = ({ failing } = {}) =>
+const mockDatabase = ({ failingPath } = {}) =>
 	fetch.mockImplementation(async (url, options = {}) => {
 		const path = pathOf(url)
-		if (failing && path.includes(failing)) return { ok: false, status: 500 }
+		if (failingPath && path.includes(failingPath)) return failing()
 		if (options.method && options.method !== 'GET') return okJson(null)
 		if (path === `/userConversations/${ME}`)
 			return okJson(DB.userConversations)
@@ -213,7 +212,7 @@ describe('messagesSlice', () => {
 
 		describe('failure scenarios', () => {
 			it('sets the error when the list cannot be read', async () => {
-				mockDatabase({ failing: '/userConversations/' })
+				mockDatabase({ failingPath: '/userConversations/' })
 
 				await store.dispatch(loadConversations())
 
@@ -261,7 +260,7 @@ describe('messagesSlice', () => {
 
 		describe('failure scenarios', () => {
 			it('sets the thread error when the messages cannot be read', async () => {
-				mockDatabase({ failing: '/conversations/' })
+				mockDatabase({ failingPath: '/conversations/' })
 
 				await store.dispatch(loadThread(CID))
 
@@ -336,7 +335,7 @@ describe('messagesSlice', () => {
 
 				// The token is read before the write, so the request starts a tick later
 				await vi.waitFor(() => expect(release).toBeTypeOf('function'))
-				release({ ok: true })
+				release(okJson())
 				await sending
 
 				expect(
@@ -372,7 +371,7 @@ describe('messagesSlice', () => {
 
 		describe('failure scenarios', () => {
 			it('keeps a failed message, marked, until it is dismissed', async () => {
-				fetch.mockResolvedValueOnce({ ok: false, status: 403 })
+				fetch.mockResolvedValueOnce(failing(403))
 
 				const result = await store.dispatch(sendMessage(payload))
 
@@ -450,7 +449,7 @@ describe('messagesSlice', () => {
 		describe('failure scenarios', () => {
 			it('brings the unread count back when the write fails', async () => {
 				await store.dispatch(loadConversations())
-				fetch.mockResolvedValueOnce({ ok: false, status: 500 })
+				fetch.mockResolvedValueOnce(failing())
 
 				const result = await store.dispatch(markConversationRead(CID))
 
@@ -489,7 +488,7 @@ describe('messagesSlice', () => {
 		describe('failure scenarios', () => {
 			it('keeps the conversation when the write fails', async () => {
 				await store.dispatch(loadConversations())
-				fetch.mockResolvedValueOnce({ ok: false, status: 500 })
+				fetch.mockResolvedValueOnce(failing())
 
 				const result = await store.dispatch(deleteConversation(CID))
 
@@ -520,7 +519,7 @@ describe('messagesSlice', () => {
 
 		it('keeps the message when the delete fails', async () => {
 			await store.dispatch(loadConversations())
-			fetch.mockResolvedValueOnce({ ok: false, status: 500 })
+			fetch.mockResolvedValueOnce(failing())
 
 			const result = await store.dispatch(deleteLegacyMessage(LEGACY.id))
 
@@ -532,26 +531,23 @@ describe('messagesSlice', () => {
 	})
 
 	describe('logout', () => {
-		it('clears conversations and threads so they do not leak between users', async () => {
-			await store.dispatch(loadConversations())
-			await store.dispatch(loadThread(CID))
+		// A revoked session ends without logout, so clearUser must clear them too
+		it.each([
+			['logout', () => store.dispatch(logout())],
+			['clearUser', () => store.dispatch(authActions.clearUser())],
+		])(
+			'%s clears conversations and threads so they do not leak between users',
+			async (_, endSession) => {
+				await store.dispatch(loadConversations())
+				await store.dispatch(loadThread(CID))
 
-			await store.dispatch(logout())
+				await endSession()
 
-			expect(selectConversations(store.getState())).toEqual([])
-			expect(selectLegacyMessages(store.getState())).toEqual([])
-			expect(store.getState().messages.threads).toEqual({})
-		})
-
-		it('clears them too when the session ends without logout, such as a revoked session', async () => {
-			await store.dispatch(loadConversations())
-			await store.dispatch(loadThread(CID))
-
-			store.dispatch(authActions.clearUser())
-
-			expect(selectConversations(store.getState())).toEqual([])
-			expect(store.getState().messages.threads).toEqual({})
-		})
+				expect(selectConversations(store.getState())).toEqual([])
+				expect(selectLegacyMessages(store.getState())).toEqual([])
+				expect(store.getState().messages.threads).toEqual({})
+			},
+		)
 	})
 
 	describe('deleteTravellerMessages', () => {
@@ -583,7 +579,7 @@ describe('messagesSlice', () => {
 
 		describe('failure scenarios', () => {
 			it('rejects when the update fails', async () => {
-				fetch.mockResolvedValueOnce({ ok: false, status: 401 })
+				fetch.mockResolvedValueOnce(failing(401))
 
 				const result = await store.dispatch(
 					deleteTravellerMessages(travellerId),
