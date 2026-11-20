@@ -49,6 +49,6 @@ const store = configureStore({
 	middleware,
 })
 
-export const persistor = persistStore(store)
+persistStore(store)
 
 export default store

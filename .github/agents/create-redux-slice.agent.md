@@ -53,9 +53,10 @@ Use this agent when you need to create a new Redux slice with reducers, async lo
     - Import the reducer, actions, and async logic
     - Write test cases for:
         - Initial state shape
-        - Sync reducer actions
+        - Reducers the thunk tests do not already reach (no bare setter or selector tests)
         - Thunk success and error paths
-        - Error message handling
+        - Error message handling, as one `it.each` table of error codes
+    - Mock `fetch` responses with the shared `okJson` and `failing` helpers (`@/testUtils/fetchResponses`)
     - Use `src/testUtils` and `src/constants/test` for mocks and test data
 
 8. **Store Configuration Update** (`src/store/store.js`)

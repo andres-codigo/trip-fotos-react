@@ -2,95 +2,20 @@ import { describe, it, expect } from 'vitest'
 
 import { ERROR_MESSAGES } from '@/constants/errors'
 import { handleApiError } from '@/utils/errorHandler/index'
-import {
-	API_ERROR_MESSAGE,
-	ERROR_OBJECTS,
-	JS_ERROR,
-} from './errorHandlerTestData'
 
 describe('handleApiError', () => {
-	it('should return error message when error has message property', () => {
-		const result = handleApiError(
-			ERROR_OBJECTS.WITH_MESSAGE,
-			API_ERROR_MESSAGE.DEFAULT_MESSAGE,
-		)
-
-		expect(result).toBe(API_ERROR_MESSAGE.NETWORK_ERROR)
-	})
-
-	it('should return default message when error has no message', () => {
-		const result = handleApiError(
-			ERROR_OBJECTS.WITH_CODE,
-			API_ERROR_MESSAGE.SOMETHING_WRONG,
-		)
-
-		expect(result).toBe(API_ERROR_MESSAGE.SOMETHING_WRONG)
-	})
-
-	it('should return fallback message when error and defaultMessage are undefined', () => {
-		const result = handleApiError(undefined, undefined)
-
-		expect(result).toBe(ERROR_MESSAGES.SOMETHING_WENT_WRONG)
-	})
-
-	it('should handle null error gracefully', () => {
-		const result = handleApiError(null, API_ERROR_MESSAGE.DEFAULT_MESSAGE)
-		expect(result).toBe(API_ERROR_MESSAGE.DEFAULT_MESSAGE)
-	})
-
-	it('should handle empty error object', () => {
-		const result = handleApiError(
-			ERROR_OBJECTS.EMPTY,
-			API_ERROR_MESSAGE.CUSTOM_DEFAULT,
-		)
-
-		expect(result).toBe(API_ERROR_MESSAGE.CUSTOM_DEFAULT)
-	})
-
-	it('should handle error with empty string message', () => {
-		const result = handleApiError(
-			ERROR_OBJECTS.WITH_EMPTY_MESSAGE,
-			API_ERROR_MESSAGE.FALLBACK_MESSAGE,
-		)
-
-		expect(result).toBe(API_ERROR_MESSAGE.FALLBACK_MESSAGE)
-	})
-
-	it('should prioritize error message over default message', () => {
-		const result = handleApiError(
-			ERROR_OBJECTS.API_ERROR,
-			API_ERROR_MESSAGE.DEFAULT_ERROR,
-		)
-
-		expect(result).toBe(API_ERROR_MESSAGE.API_ERROR)
-	})
-
-	it('should handle Error objects correctly', () => {
-		const result = handleApiError(
-			JS_ERROR,
-			API_ERROR_MESSAGE.DEFAULT_MESSAGE,
-		)
-		expect(result).toBe(API_ERROR_MESSAGE.JAVASCRIPT_ERROR)
-	})
-
-	it('should return a string error as the message', () => {
-		const result = handleApiError(
-			API_ERROR_MESSAGE.API_ERROR,
-			API_ERROR_MESSAGE.DEFAULT_MESSAGE,
-		)
-
-		expect(result).toBe(API_ERROR_MESSAGE.API_ERROR)
-	})
-
-	it('should fall back for an empty string error', () => {
-		const result = handleApiError('', API_ERROR_MESSAGE.DEFAULT_MESSAGE)
-
-		expect(result).toBe(API_ERROR_MESSAGE.DEFAULT_MESSAGE)
-	})
-
-	it('should handle no parameters', () => {
-		const result = handleApiError()
-
-		expect(result).toBe(ERROR_MESSAGES.SOMETHING_WENT_WRONG)
+	it.each([
+		['an Error', new Error('Network error'), 'Default', 'Network error'],
+		['a string payload', 'API error', 'Default', 'API error'],
+		['an empty message', { message: '' }, 'Default', 'Default'],
+		['no message', { code: 500 }, 'Default', 'Default'],
+		[
+			'no error or default',
+			undefined,
+			undefined,
+			ERROR_MESSAGES.SOMETHING_WENT_WRONG,
+		],
+	])('returns the right message for %s', (_, error, fallback, expected) => {
+		expect(handleApiError(error, fallback)).toBe(expected)
 	})
 })

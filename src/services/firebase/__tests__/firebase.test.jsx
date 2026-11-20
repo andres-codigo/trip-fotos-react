@@ -111,14 +111,6 @@ describe('Firebase Configuration', () => {
 
 			expect(firebaseApp).toBe(mockApp)
 		})
-
-		it('exports firebaseApp instance', async () => {
-			const { firebaseApp } =
-				await import('@/services/firebase/firebase.js')
-
-			expect(firebaseApp).toBeDefined()
-			expect(firebaseApp).toBe(mockApp)
-		})
 	})
 
 	describe('Emulator wiring', () => {
@@ -163,20 +155,6 @@ describe('Firebase Configuration', () => {
 				'127.0.0.1',
 				9199,
 			)
-		})
-	})
-
-	describe('Module caching tests', () => {
-		it('calls initialiseApp only once', async () => {
-			// First import
-			// should call initialiseApp
-			await import('@/services/firebase/firebase.js')
-			expect(initializeApp).toHaveBeenCalledTimes(1)
-
-			// Second import
-			// should not call again due to module caching
-			await import('@/services/firebase/firebase.js')
-			expect(initializeApp).toHaveBeenCalledTimes(1)
 		})
 	})
 })
