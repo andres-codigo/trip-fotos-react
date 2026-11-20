@@ -7,16 +7,12 @@ import {
 /// Page Selectors
 /////
 export const PAGE_SELECTORS = {
-	MAIN_CONTAINER: getByDataCy('main-container'),
-	HOME_MAIN_CONTAINER: getByDataCyAlt('home-main-container'),
 	TRAVELLERS_MAIN_CONTAINER: getByDataCyAlt('travellers-main-container'),
 	MESSAGES_MAIN_CONTAINER: getByDataCyAlt('messages-main-container'),
 	PRIVACY_MAIN_CONTAINER: getByDataCyAlt('privacy-main-container'),
 	AUTHENTICATION_MAIN_CONTAINER: getByDataCyAlt(
 		'authentication-main-container',
 	),
-	REGISTER_MAIN_CONTAINER: getByDataCyAlt('register-main-container'),
-	AUTH_ACTION_MAIN_CONTAINER: getByDataCyAlt('auth-action-main-container'),
 	ACCOUNT_MAIN_CONTAINER: getByDataCyAlt('account-main-container'),
 	PAGE_NOT_FOUND_MAIN_CONTAINER: getByDataCyAlt(
 		'page-not-found-main-container',

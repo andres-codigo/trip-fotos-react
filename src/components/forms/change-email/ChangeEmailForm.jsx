@@ -123,8 +123,7 @@ const ChangeEmailForm = ({
 			data-cy={CHANGE_EMAIL_FORM.ROOT}>
 			<h3
 				id={TITLE_ID}
-				className="m-0 text-[1.0625rem]"
-				data-cy={CHANGE_EMAIL_FORM.TITLE}>
+				className="m-0 text-[1.0625rem]">
 				{CHANGE_EMAIL_CONFIG.TITLE}
 			</h3>
 			<p
@@ -180,8 +179,7 @@ const ChangeEmailForm = ({
 					type="button"
 					modeType="outline"
 					onClick={onCancel}
-					isDisabled={isSending}
-					data-cy={CHANGE_EMAIL_FORM.CANCEL}>
+					isDisabled={isSending}>
 					{CHANGE_EMAIL_CONFIG.CANCEL}
 				</BaseButton>
 				<BaseButton

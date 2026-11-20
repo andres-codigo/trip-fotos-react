@@ -26,7 +26,6 @@ import travellersReducer, {
 	updateTraveller,
 	travellerName,
 	setTravellerName,
-	selectShouldUpdate,
 	updateTravellers,
 	loadTraveller,
 	loadTravellers,
@@ -37,7 +36,6 @@ import travellersReducer, {
 	loadPublicTrips,
 	selectPublicTrips,
 	selectTravellers,
-	selectHasTravellers,
 	selectIsTraveller,
 	selectIsTravellerKnown,
 	selectTravellerName,
@@ -148,7 +146,6 @@ describe('travellersSlice', () => {
 					travellerName: '',
 					isTraveller: false,
 					isTravellerCheckedFor: null,
-					hasTravellers: false,
 					travellers: [],
 					publicTrips: [],
 					selectedTraveller: null,
@@ -221,7 +218,10 @@ describe('travellersSlice', () => {
 		})
 	})
 
-	describe('shouldUpdate helper function', () => {
+	describe('loadTravellers freshness', () => {
+		// A skipped fetch leaves its stubbed response queued for the next test
+		afterEach(() => fetch.mockReset())
+
 		it.each([
 			['never fetched', null, true],
 			[
@@ -234,12 +234,17 @@ describe('travellersSlice', () => {
 				MOCK_TIME.THIRTY_SECONDS_AGO,
 				false,
 			],
-		])('selectShouldUpdate when %s', (_, ago, expected) => {
+		])('fetches only when stale: %s', async (_, ago, expected) => {
 			const lastFetch = ago === null ? null : Date.now() - ago
+			store = configureTestStore({
+				reducer: { travellers: travellersReducer },
+				preloadedState: { travellers: { travellers: [], lastFetch } },
+			})
+			fetch.mockResolvedValueOnce(okJson(null))
 
-			expect(selectShouldUpdate({ travellers: { lastFetch } })).toBe(
-				expected,
-			)
+			await store.dispatch(loadTravellers({ forceRefresh: false }))
+
+			expect(fetch).toHaveBeenCalledTimes(expected ? 1 : 0)
 		})
 	})
 
@@ -419,7 +424,6 @@ describe('travellersSlice', () => {
 				// Verify state updates
 				const state = store.getState().travellers
 				expect(state.isTraveller).toBe(true)
-				expect(state.hasTravellers).toBe(true)
 				expect(state.travellerName).toBe(
 					`${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.firstName} ${MOCK_TRAVELLERS.SAMPLE_TRAVELLER_ONE.lastName}`,
 				)
@@ -940,7 +944,6 @@ describe('travellersSlice', () => {
 					travellers: {
 						travellerName: '',
 						isTraveller: true,
-						hasTravellers: true,
 						travellers: [existing, { id: 'someone-else' }],
 						selectedTraveller: existing,
 						lastFetch: null,
@@ -1224,7 +1227,6 @@ describe('travellersSlice', () => {
 						travellers: {
 							travellerName: '',
 							isTraveller: false,
-							hasTravellers: true,
 							travellers: cachedTravellers,
 							lastFetch: recentTimestamp,
 							status: 'idle',
@@ -1258,7 +1260,6 @@ describe('travellersSlice', () => {
 						travellers: {
 							travellerName: '',
 							isTraveller: false,
-							hasTravellers: true,
 							travellers: cachedTravellers,
 							lastFetch: recentTimestamp,
 							status: 'idle',
@@ -1347,7 +1348,6 @@ describe('travellersSlice', () => {
 					travellers: {
 						travellerName: '',
 						isTraveller: false,
-						hasTravellers: true,
 						travellers: [
 							remainingTraveller,
 							{ id: travellerId, files },
@@ -1437,7 +1437,6 @@ describe('travellersSlice', () => {
 						travellers: {
 							travellerName: 'Amara Okafor',
 							isTraveller: true,
-							hasTravellers: true,
 							travellers: [{ id: MOCK_USER.USER_ID, files }],
 							selectedTraveller: null,
 							lastFetch: new Date().getTime(),
@@ -1728,7 +1727,6 @@ describe('travellersSlice', () => {
 
 			expect(store.getState().travellers).toMatchObject({
 				travellers: [],
-				hasTravellers: false,
 				lastFetch: null,
 			})
 		})
@@ -1783,18 +1781,15 @@ describe('travellersSlice', () => {
 	describe('reducer actions', () => {
 		describe('setTravellers', () => {
 			it.each([
-				['some travellers', [MOCK_TRAVELLERS.TEST_TRAVELLER], true],
-				['no travellers', [], false],
-			])(
-				'should set travellers and hasTravellers for %s',
-				(_, travellers, hasTravellers) => {
-					store.dispatch(setTravellers(travellers))
+				['some travellers', [MOCK_TRAVELLERS.TEST_TRAVELLER]],
+				['no travellers', []],
+			])('should set travellers for %s', (_, travellers) => {
+				store.dispatch(setTravellers(travellers))
 
-					const state = store.getState().travellers
-					expect(state.travellers).toEqual(travellers)
-					expect(state.hasTravellers).toBe(hasTravellers)
-				},
-			)
+				expect(store.getState().travellers.travellers).toEqual(
+					travellers,
+				)
+			})
 		})
 	})
 
@@ -1811,7 +1806,6 @@ describe('travellersSlice', () => {
 			expect(selectTravellers(state)).toEqual([
 				MOCK_TRAVELLERS.TEST_TRAVELLER,
 			])
-			expect(selectHasTravellers(state)).toBe(true)
 			expect(selectIsTraveller(state)).toBe(true)
 			expect(selectTravellerName(state)).toBe(MOCK_TRAVELLERS.TEST_NAME)
 		})

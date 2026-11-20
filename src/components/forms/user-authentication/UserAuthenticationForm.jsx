@@ -84,7 +84,6 @@ const UserAuthenticationForm = forwardRef(
 						disabled={isLoading}
 						required
 						data-cy="email-input"
-						data-cy-error="email-error-message"
 					/>
 					{renderVisuallyHiddenError(
 						email,

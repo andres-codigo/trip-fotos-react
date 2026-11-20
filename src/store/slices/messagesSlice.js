@@ -28,8 +28,6 @@ const isBlank = (value) => typeof value !== 'string' || value.trim() === ''
 const initialState = {
 	conversations: [],
 	legacyMessages: [],
-	conversationsStatus: 'idle',
-	conversationsError: null,
 	threads: {},
 }
 
@@ -387,18 +385,9 @@ const messagesSlice = createSlice({
 	extraReducers: (builder) => {
 		builder
 			// LOAD_CONVERSATIONS async thunk handlers
-			.addCase(loadConversations.pending, (state) => {
-				state.conversationsStatus = 'loading'
-				state.conversationsError = null
-			})
 			.addCase(loadConversations.fulfilled, (state, action) => {
-				state.conversationsStatus = 'succeeded'
 				state.conversations = action.payload.conversations
 				state.legacyMessages = action.payload.legacyMessages
-			})
-			.addCase(loadConversations.rejected, (state, action) => {
-				state.conversationsStatus = 'failed'
-				state.conversationsError = action.payload
 			})
 
 			// LOAD_THREAD async thunk handlers
@@ -557,12 +546,6 @@ export const selectLegacyMessages = createSelector(
 	[selectMessagesState],
 	(messagesState) => messagesState.legacyMessages,
 )
-
-export const selectConversationsStatus = (state) =>
-	state.messages.conversationsStatus
-
-export const selectConversationsError = (state) =>
-	state.messages.conversationsError
 
 export const selectThread = (state, cid) => state.messages.threads[cid] ?? null
 

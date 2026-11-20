@@ -47,7 +47,6 @@ vi.mock('@/store/slices/travellersSlice', () => ({
 	}),
 	selectPublicTrips: vi.fn(),
 	selectTravellers: vi.fn(),
-	selectHasTravellers: vi.fn(),
 	selectIsTraveller: vi.fn(),
 	selectIsTravellerKnown: vi.fn(),
 	selectLastFetch: vi.fn(),
@@ -58,7 +57,6 @@ vi.mock('@/store/slices/authenticationSlice', () => ({
 	selectUserId: vi.fn(),
 	selectUserName: vi.fn(),
 	selectUserEmail: vi.fn(),
-	selectUserProfile: vi.fn(),
 }))
 
 // A pass-through spy, so one test can force the zero-results guard the real hook never reaches
@@ -149,7 +147,6 @@ describe('<TravellersList />', () => {
 		vi.mocked(travellersSlice.selectTravellers).mockReturnValue(
 			MOCK_TRAVELLERS.SAMPLE_TRAVELLERS,
 		)
-		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(true)
 		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
 		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
 			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,
@@ -158,7 +155,6 @@ describe('<TravellersList />', () => {
 
 	const setupMocksForNoTravellers = () => {
 		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([])
-		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
 		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
 		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
 			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,
@@ -185,7 +181,6 @@ describe('<TravellersList />', () => {
 		vi.mocked(travellersSlice.selectTravellers).mockReturnValue([
 			{ id: 'mock-traveller' },
 		])
-		vi.mocked(travellersSlice.selectHasTravellers).mockReturnValue(false)
 		vi.mocked(travellersSlice.selectIsTraveller).mockReturnValue(false)
 		vi.mocked(travellersSlice.loadTravellers).mockReturnValue({
 			type: TRAVELLERS_ACTION_TYPES.LOAD_TRAVELLERS_ASYNC.PENDING,

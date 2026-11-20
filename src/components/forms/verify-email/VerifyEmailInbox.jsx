@@ -20,7 +20,7 @@ export const ResendHint = ({
 	cooldownEndsAt,
 	isSending,
 	onResend,
-	hintDataCy = VERIFY_EMAIL_INBOX.HINT,
+	hintDataCy,
 	sendAgainDataCy = VERIFY_EMAIL_INBOX.SEND_AGAIN,
 }) => {
 	const [now, setNow] = useState(() => Date.now())
@@ -93,8 +93,7 @@ const VerifyEmailInbox = forwardRef(
 			<h1
 				ref={titleRef}
 				tabIndex={-1}
-				className={titleClasses}
-				data-cy={VERIFY_EMAIL_INBOX.TITLE}>
+				className={titleClasses}>
 				{VERIFY_EMAIL_CONFIG.TITLE}
 			</h1>
 			<div
@@ -135,8 +134,7 @@ const VerifyEmailInbox = forwardRef(
 					type="button"
 					modeType="text"
 					className={textLinkClasses}
-					onClick={onStartAgain}
-					data-cy={VERIFY_EMAIL_INBOX.START_AGAIN}>
+					onClick={onStartAgain}>
 					{VERIFY_EMAIL_CONFIG.START_AGAIN}
 				</BaseButton>
 			</p>

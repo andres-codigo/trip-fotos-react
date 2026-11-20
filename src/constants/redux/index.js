@@ -11,7 +11,7 @@ const TRAVELLERS_BASE_ACTIONS = Object.freeze({
 	LOAD_PUBLIC_TRIPS: 'travellers/loadPublicTrips',
 })
 
-const MESSAGES_BASE_ACTIONS = Object.freeze({
+export const MESSAGES_ACTION_TYPES = Object.freeze({
 	DELETE_TRAVELLER_MESSAGES: 'messages/deleteTravellerMessages',
 	LOAD_CONVERSATIONS: 'messages/loadConversations',
 	LOAD_THREAD: 'messages/loadThread',
@@ -21,7 +21,7 @@ const MESSAGES_BASE_ACTIONS = Object.freeze({
 	DELETE_LEGACY_MESSAGE: 'messages/deleteLegacyMessage',
 })
 
-const AUTHENTICATION_BASE_ACTIONS = Object.freeze({
+export const AUTHENTICATION_ACTION_TYPES = Object.freeze({
 	LOGIN: 'authentication/login',
 	LOGOUT: 'authentication/logout',
 	SEND_PASSWORD_RESET: 'authentication/sendPasswordReset',
@@ -46,45 +46,11 @@ const createAsyncActionTypes = (baseType) => ({
 
 // Complete action types with async variants
 export const TRAVELLERS_ACTION_TYPES = Object.freeze({
-	// Base actions
 	...TRAVELLERS_BASE_ACTIONS,
-
-	// Async thunk action types
-	TRAVELLER_NAME_ASYNC: createAsyncActionTypes(
-		TRAVELLERS_BASE_ACTIONS.TRAVELLER_NAME,
-	),
 	LOAD_TRAVELLERS_ASYNC: createAsyncActionTypes(
 		TRAVELLERS_BASE_ACTIONS.LOAD_TRAVELLERS,
-	),
-	LOAD_TRAVELLER_ASYNC: createAsyncActionTypes(
-		TRAVELLERS_BASE_ACTIONS.LOAD_TRAVELLER,
-	),
-	UPDATE_TRAVELLERS_ASYNC: createAsyncActionTypes(
-		TRAVELLERS_BASE_ACTIONS.UPDATE_TRAVELLERS,
-	),
-	DELETE_TRAVELLER_ASYNC: createAsyncActionTypes(
-		TRAVELLERS_BASE_ACTIONS.DELETE_TRAVELLER,
 	),
 	CHECK_IS_TRAVELLER_ASYNC: createAsyncActionTypes(
 		TRAVELLERS_BASE_ACTIONS.CHECK_IS_TRAVELLER,
 	),
-})
-
-export const MESSAGES_ACTION_TYPES = Object.freeze({
-	// Base actions
-	...MESSAGES_BASE_ACTIONS,
-
-	// Async thunk action types
-	DELETE_TRAVELLER_MESSAGES_ASYNC: createAsyncActionTypes(
-		MESSAGES_BASE_ACTIONS.DELETE_TRAVELLER_MESSAGES,
-	),
-})
-
-export const AUTHENTICATION_ACTION_TYPES = Object.freeze({
-	// Base actions
-	...AUTHENTICATION_BASE_ACTIONS,
-
-	// Async thunk action types
-	LOGIN_ASYNC: createAsyncActionTypes(AUTHENTICATION_BASE_ACTIONS.LOGIN),
-	LOGOUT_ASYNC: createAsyncActionTypes(AUTHENTICATION_BASE_ACTIONS.LOGOUT),
 })

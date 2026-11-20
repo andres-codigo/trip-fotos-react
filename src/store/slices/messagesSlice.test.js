@@ -19,8 +19,6 @@ import messagesReducer, {
 	dismissFailedMessage,
 	selectConversations,
 	selectLegacyMessages,
-	selectConversationsStatus,
-	selectConversationsError,
 	selectThread,
 	selectIsConversationUnread,
 	selectUnreadConversationsCount,
@@ -146,8 +144,6 @@ describe('messagesSlice', () => {
 			expect(store.getState().messages).toEqual({
 				conversations: [],
 				legacyMessages: [],
-				conversationsStatus: 'idle',
-				conversationsError: null,
 				threads: {},
 			})
 		})
@@ -171,9 +167,6 @@ describe('messagesSlice', () => {
 					readAt: null,
 				})
 				expect(conversations[1].otherStatus).toBe(SENDER_STATUS.FORMER)
-				expect(selectConversationsStatus(store.getState())).toBe(
-					'succeeded',
-				)
 			})
 
 			it('loads the email-only messages apart from the conversations', async () => {
@@ -211,15 +204,13 @@ describe('messagesSlice', () => {
 		})
 
 		describe('failure scenarios', () => {
-			it('sets the error when the list cannot be read', async () => {
+			it('rejects with the error when the list cannot be read', async () => {
 				mockDatabase({ failingPath: '/userConversations/' })
 
-				await store.dispatch(loadConversations())
+				const result = await store.dispatch(loadConversations())
 
-				expect(selectConversationsStatus(store.getState())).toBe(
-					'failed',
-				)
-				expect(selectConversationsError(store.getState())).toContain(
+				expect(loadConversations.rejected.match(result)).toBe(true)
+				expect(result.payload).toContain(
 					API_ERROR_MESSAGE.LOAD_CONVERSATIONS_CATCH,
 				)
 			})

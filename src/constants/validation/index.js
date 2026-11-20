@@ -17,11 +17,6 @@ export const VALIDATION_MESSAGES = {
 	CITIES_REQUIRED: 'Add at least one city.',
 	PHOTOS_REQUIRED: 'Add at least one photo.',
 
-	// CONTACT TRAVELLER FORM
-	MESSAGE_REQUIRED: 'Write a message.',
-	MESSAGE_TOO_LONG: (maxLength) =>
-		`Message must be ${maxLength} characters or fewer.`,
-
 	// FILE UPLOAD
 	FILE_TYPE_INVALID: (name) =>
 		`${name} is not a supported image type. Use JPEG, PNG, WebP or GIF.`,

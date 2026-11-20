@@ -40,7 +40,7 @@ src/constants/
 ├── firebase/
 │   └── index.js               # FIREBASE (env-based config)
 ├── redux/
-│   └── index.js               # TRAVELLERS_ACTION_TYPES, AUTHENTICATION_ACTION_TYPES
+│   └── index.js               # TRAVELLERS_, MESSAGES_ and AUTHENTICATION_ACTION_TYPES
 ├── test/
 │   ├── index.js               # Re-exports all test constants
 │   ├── mock-data/

@@ -28,7 +28,6 @@ import authenticationReducer, {
 	restoreSavedSession,
 	authActions,
 	selectIsAuthenticated,
-	selectUserProfile,
 	selectIsAdmin,
 } from './authenticationSlice'
 
@@ -132,24 +131,6 @@ describe('authenticationSlice', () => {
 			expect(
 				selectIsAuthenticated({ authentication: { userId: null } }),
 			).toBe(false)
-		})
-
-		it('should select user profile from state', () => {
-			const mockState = {
-				authentication: {
-					userId: MOCK_KEYS.LOCAL_ID,
-					userName: MOCK_USER.FULL_NAME,
-					userEmail: MOCK_KEYS.EMAIL,
-					status: 'succeeded',
-					error: null,
-				},
-			}
-			const result = selectUserProfile(mockState)
-			expect(result).toEqual({
-				userId: MOCK_KEYS.LOCAL_ID,
-				userName: MOCK_USER.FULL_NAME,
-				userEmail: MOCK_KEYS.EMAIL,
-			})
 		})
 	})
 

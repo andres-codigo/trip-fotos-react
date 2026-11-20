@@ -297,9 +297,7 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 				</div>
 			)}
 			{isLoggedIn && !loading && !error && !hasTravellers && (
-				<div
-					className="my-20 flex min-h-15 items-center justify-center"
-					data-cy="no-travellers-list">
+				<div className="my-20 flex min-h-15 items-center justify-center">
 					<h2 className="my-[1em] text-center text-[1.17em]">
 						No travellers listed.
 					</h2>

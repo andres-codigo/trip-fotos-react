@@ -101,7 +101,6 @@ const BaseButton = ({
 							<span
 								className="size-4 flex-none animate-spin rounded-full border-2 border-solid border-current border-r-transparent motion-reduce:animate-skeleton"
 								aria-hidden="true"
-								data-cy="base-button-spinner"
 							/>
 							{busyLabel}
 						</>

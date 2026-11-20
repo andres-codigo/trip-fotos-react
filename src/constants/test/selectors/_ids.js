@@ -6,9 +6,6 @@ export const TEST_IDS = {
 		LABEL: 'base-spinner-label',
 	},
 	BASE_CARD: 'base-card',
-	USER_AUTH: {
-		CONTAINER: 'authentication-main-container',
-	},
 	USER_AUTH_FORM: {
 		FORM: 'user-authentication-form',
 		FORM_TITLE: 'user-authentication-form-title',
@@ -28,7 +25,6 @@ export const TEST_IDS = {
 	},
 	TRAVELLERS_LIST: {
 		CONTROLS: 'controls',
-		NO_LIST: 'no-travellers-list',
 		NO_MATCHES: 'no-matching-travellers',
 		NO_PUBLIC_TRIPS: 'no-public-trips',
 		SHOW_ALL_CITIES: 'travellers-show-all-cities',
@@ -41,9 +37,6 @@ export const TEST_IDS = {
 		PAGE_STATUS: 'travellers-page-status',
 		LOAD_ERROR: 'travellers-load-error',
 		TRY_AGAIN: 'travellers-try-again',
-	},
-	MESSAGES: {
-		CONTAINER: 'messages-main-container',
 	},
 	PAGE_NOT_FOUND: {
 		ACTION: 'page-not-found-action',

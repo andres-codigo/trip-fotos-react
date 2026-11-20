@@ -14,6 +14,5 @@ export const MOCK_KEYS = Object.freeze({
 	PASSWORD: 'password123',
 	ID_TOKEN: 'mock-id-token',
 	LOCAL_ID: 'mock-local-id',
-	EXPIRATION: new Date().getTime() + 3600 * 1000,
 	EXPIRES_IN: '3600',
 })

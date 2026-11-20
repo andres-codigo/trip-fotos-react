@@ -31,27 +31,33 @@ Thunks (`createAsyncThunk`) are the single standard for server data. There is no
 `databaseRequest` already throws a generic `REQUEST_ERROR` on `!response.ok`; thunks do not check the status again or perform granular status code checks, **unless specific UI behaviour depends on the status code**. Always reject with a string via `handleApiError`/`error.message`, never the error object.
 
 ```javascript
-export const loadMessages = createAsyncThunk(
-	MESSAGES_ACTION_TYPES.LOAD_MESSAGES,
+export const loadConversations = createAsyncThunk(
+	MESSAGES_ACTION_TYPES.LOAD_CONVERSATIONS,
 	async (_, { getState, rejectWithValue }) => {
 		try {
 			const userId = selectUserId(getState())
 			const token = await getSessionToken()
 
-			const response = await databaseRequest(`/messages/${userId}`, {
-				token,
-			})
+			const response = await databaseRequest(
+				`/userConversations/${userId}`,
+				{
+					token,
+				},
+			)
 			return await response.json()
 		} catch (error) {
 			return rejectWithValue(
-				handleApiError(error, API_ERROR_MESSAGE.LOAD_MESSAGES_CATCH),
+				handleApiError(
+					error,
+					API_ERROR_MESSAGE.LOAD_CONVERSATIONS_CATCH,
+				),
 			)
 		}
 	},
 )
 ```
 
-Reference implementations: `loadMessages` in `src/store/slices/messagesSlice.js` (database) and `login` in `src/store/slices/authenticationSlice.js` (Firebase SDK, where `error.code` is mapped to a message).
+Reference implementations: `loadConversations` in `src/store/slices/messagesSlice.js` (database) and `login` in `src/store/slices/authenticationSlice.js` (Firebase SDK, where `error.code` is mapped to a message).
 
 ## Constants & Error Messages
 

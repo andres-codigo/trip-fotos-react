@@ -672,7 +672,6 @@ const travellersSlice = createSlice({
 		travellerName: '',
 		isTraveller: false,
 		isTravellerCheckedFor: null,
-		hasTravellers: false,
 		travellers: [],
 		publicTrips: [],
 		selectedTraveller: null,
@@ -690,7 +689,6 @@ const travellersSlice = createSlice({
 		},
 		setTravellers(state, action) {
 			state.travellers = action.payload
-			state.hasTravellers = action.payload.length > 0
 		},
 		setFetchTimestamp(state) {
 			state.lastFetch = new Date().getTime()
@@ -721,7 +719,6 @@ const travellersSlice = createSlice({
 			.addCase(updateTravellers.fulfilled, (state, action) => {
 				state.status = 'succeeded'
 				state.travellers = action.payload
-				state.hasTravellers = action.payload.length > 0
 			})
 			.addCase(updateTravellers.rejected, (state, action) => {
 				state.status = 'failed'
@@ -735,7 +732,6 @@ const travellersSlice = createSlice({
 			.addCase(loadTravellers.fulfilled, (state, action) => {
 				state.status = 'succeeded'
 				state.travellers = action.payload
-				state.hasTravellers = action.payload.length > 0
 			})
 			.addCase(loadTravellers.rejected, (state, action) => {
 				state.status = 'failed'
@@ -770,7 +766,6 @@ const travellersSlice = createSlice({
 				state.uploadProgress = null
 				state.travellers.unshift(action.payload)
 				state.isTraveller = true
-				state.hasTravellers = true
 				state.travellerName = `${action.payload.firstName} ${action.payload.lastName}`
 			})
 			.addCase(registerTraveller.rejected, (state, action) => {
@@ -811,7 +806,6 @@ const travellersSlice = createSlice({
 				state.travellers = state.travellers.filter(
 					(traveller) => traveller.id !== action.payload,
 				)
-				state.hasTravellers = state.travellers.length > 0
 				if (state.selectedTraveller?.id === action.payload) {
 					state.selectedTraveller = null
 				}
@@ -853,7 +847,6 @@ const travellersSlice = createSlice({
 					state.selectedTraveller = null
 					// The full records need sign-in, so they must not stay in this browser's storage
 					state.travellers = []
-					state.hasTravellers = false
 					state.lastFetch = null
 				},
 			)
@@ -875,11 +868,6 @@ export const selectPublicTrips = (state) =>
 export const selectLastFetch = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.lastFetch,
-)
-
-export const selectHasTravellers = createSelector(
-	[selectTravellersState],
-	(travellersState) => travellersState.hasTravellers,
 )
 
 export const selectIsTraveller = createSelector(
@@ -912,11 +900,6 @@ export const selectSelectedTraveller = createSelector(
 export const selectUploadProgress = createSelector(
 	[selectTravellersState],
 	(travellersState) => travellersState.uploadProgress,
-)
-
-export const selectShouldUpdate = createSelector(
-	[selectTravellersState],
-	(travellersState) => shouldUpdate(travellersState),
 )
 
 export const {

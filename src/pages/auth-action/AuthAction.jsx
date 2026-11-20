@@ -98,7 +98,7 @@ const LinkButton = ({ to, label, dataCy, modeType = 'primary' }) => (
 LinkButton.propTypes = {
 	to: PropTypes.string.isRequired,
 	label: PropTypes.string.isRequired,
-	dataCy: PropTypes.string.isRequired,
+	dataCy: PropTypes.string,
 	modeType: PropTypes.oneOf(['primary', 'outline']),
 }
 
@@ -114,7 +114,6 @@ const travellersButton = (modeType) => (
 	<LinkButton
 		to={PATHS.TRAVELLERS}
 		label={AUTH_ACTION_CONFIG.GO_TO_TRAVELLERS}
-		dataCy={AUTH_ACTION_PAGE.GO_TO_TRAVELLERS}
 		modeType={modeType}
 	/>
 )
@@ -311,7 +310,6 @@ const AuthAction = () => {
 			<LinkButton
 				to={PATHS.REGISTER}
 				label={AUTH_ACTION_CONFIG.REGISTER}
-				dataCy={AUTH_ACTION_PAGE.REGISTER}
 			/>
 		)
 	}
@@ -495,13 +493,7 @@ const AuthAction = () => {
 					{title}
 				</h1>
 				{extra}
-				{text && (
-					<p
-						className="m-0"
-						data-cy={AUTH_ACTION_PAGE.TEXT}>
-						{text}
-					</p>
-				)}
+				{text && <p className="m-0">{text}</p>}
 				{actions}
 			</div>
 		)
@@ -518,8 +510,7 @@ const AuthAction = () => {
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
 			className="mainContainer cardPage"
-			data-cy="main-container"
-			data-cy-alt="auth-action-main-container">
+			data-cy="main-container">
 			<title>{`${pageTitle} · ${GLOBAL.SITE_NAME}`}</title>
 			<section>
 				<BaseCard>{renderView()}</BaseCard>

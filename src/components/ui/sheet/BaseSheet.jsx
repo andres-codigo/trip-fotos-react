@@ -75,9 +75,7 @@ const BaseSheet = ({
 						className="mx-auto mt-2 h-1 w-10 flex-none rounded-pill bg-border-strong"
 					/>
 					<div className="flex flex-none items-center justify-between gap-2 py-1 pr-1 pl-4">
-						<RadixDialog.Title
-							className="m-0 text-xl leading-tight font-bold"
-							data-cy={SHEET.TITLE}>
+						<RadixDialog.Title className="m-0 text-xl leading-tight font-bold">
 							{title}
 						</RadixDialog.Title>
 						<RadixDialog.Close

@@ -14,7 +14,6 @@ export const GLOBAL = Object.freeze({
 	ERROR_DIALOG_TITLE: 'An error occurred',
 
 	// IMAGE UPLOAD
-	LOADING_IMAGE: 'loading',
 	REMOVE_FILE_LABEL: (name) => `Remove ${name}`,
 	FILE_DROP_TEXT: Object.freeze({
 		ACTIVE: 'Drop your photos here',

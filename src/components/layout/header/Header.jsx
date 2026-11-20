@@ -32,7 +32,6 @@ function Header() {
 	return (
 		<header
 			className="fixed z-[2] flex h-20 w-full items-center justify-between bg-header pr-[env(safe-area-inset-right,0px)] pl-[env(safe-area-inset-left,0px)]"
-			data-cy="site-header"
 			role="banner"
 			aria-label="Site header">
 			<p
