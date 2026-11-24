@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.2](https://github.com/andres-codigo/trip-fotos-react/compare/v0.31.1...v0.31.2) (2026-11-24)
+
+
+### Bug Fixes
+
+* mobile and landscape visual fixes from the phone review ([#827](https://github.com/andres-codigo/trip-fotos-react/issues/827)) ([89e6429](https://github.com/andres-codigo/trip-fotos-react/commit/89e6429ac561a0c21878ffc873dd56edb39157a6))
+
 ## [0.31.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.31.0...v0.31.1) (2026-11-24)
 
 
