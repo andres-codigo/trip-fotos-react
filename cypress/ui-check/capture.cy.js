@@ -2880,6 +2880,32 @@ describe(`UI check capture (${LABEL})`, () => {
 			assertSettled()
 			freezeAnimation()
 			shot('photos-anchor-390', { capture: 'viewport' })
+
+			// One column scrolls to the photos; from 1024px they sit at the top beside the profile, so the page stays put with the back link in view
+			;[
+				[768, 1024],
+				[1024, 768],
+				[1280, 800],
+			].forEach(([width, height]) => {
+				cy.viewport(width, height)
+				visit(`${ownTripPath}#photos`)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`photos-anchor-${width}x${height}`, {
+					capture: 'viewport',
+				})
+
+				visit(`${editTripPath}#photos`)
+				cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+				assertSettled()
+				freezeAnimation()
+				shot(`edit-photos-anchor-${width}x${height}`, {
+					capture: 'viewport',
+				})
+			})
 			;[
 				[667, 375],
 				[844, 390],

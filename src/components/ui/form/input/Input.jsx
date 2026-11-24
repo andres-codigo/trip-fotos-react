@@ -52,7 +52,7 @@ const Input = ({
 			className={cn(
 				fieldClasses,
 				isPassword && 'pr-18',
-				isDate && 'min-w-0 pr-8',
+				isDate && 'min-w-0 pr-8 own-date-button:pr-[0.15rem]',
 				className,
 			)}
 			aria-required={required}
@@ -113,7 +113,7 @@ const Input = ({
 					</button>
 				</div>
 			) : isDate ? (
-				// iOS draws no picker icon and Chrome its own, so every browser gets this one; Chrome's stays on top, invisible, to open the picker
+				// iOS draws no picker icon and Chrome its own, so they get this one; Chrome's stays on top, invisible, to open the picker. Firefox's cannot be hidden, so it keeps its own
 				<div className="relative">
 					{field}
 					<svg
@@ -124,7 +124,7 @@ const Input = ({
 						strokeWidth="2"
 						strokeLinecap="round"
 						strokeLinejoin="round"
-						className="pointer-events-none absolute top-1/2 right-2 size-[1.125rem] -translate-y-1/2 text-text-muted">
+						className="pointer-events-none absolute top-1/2 right-2 size-[1.125rem] -translate-y-1/2 text-text-muted own-date-button:hidden">
 						<rect
 							x="3"
 							y="5"

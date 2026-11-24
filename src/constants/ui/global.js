@@ -24,11 +24,11 @@ export const GLOBAL = Object.freeze({
 	}),
 	FILE_LIST_LABEL: 'Selected files',
 	PHOTO_ALT: Object.freeze({
-		LABEL: 'Describe this photo (optional)',
-		// The tile shows "Describe (optional)"; the hidden words keep the accessible name in the same order (WCAG 2.5.3)
-		LABEL_FOR: (position) => `Describe photo ${position} (optional)`,
-		LABEL_FOR_VISIBLE: 'Describe',
-		LABEL_FOR_HIDDEN: (position) => ` photo ${position}`,
+		LABEL: 'Description of this photo (optional)',
+		// The tile shows "Description (optional)"; the hidden words keep the accessible name in the same order (WCAG 2.5.3)
+		LABEL_FOR: (position) => `Description of photo ${position} (optional)`,
+		LABEL_FOR_VISIBLE: 'Description',
+		LABEL_FOR_HIDDEN: (position) => ` of photo ${position}`,
 		LABEL_FOR_OPTIONAL: ' (optional)',
 		HELP: 'For people who can’t see it, e.g. Charles Bridge at sunrise.',
 	}),

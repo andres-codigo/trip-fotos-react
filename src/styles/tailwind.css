@@ -71,6 +71,13 @@
 	}
 }
 
+/* A browser whose date picker button cannot be hidden (Firefox): it keeps its own, so Input draws none */
+@custom-variant own-date-button {
+	@supports (-moz-appearance: none) {
+		@slot;
+	}
+}
+
 @theme inline {
 	--color-bg: var(--bg);
 	--color-surface: var(--surface);

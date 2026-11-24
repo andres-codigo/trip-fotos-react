@@ -19,6 +19,9 @@ export const PAGE_LAYOUT = Object.freeze({
 	ANCHOR_SCROLL_MARGIN: 'scroll-mt-28 mobile:scroll-mt-26',
 })
 
+// Where COLUMNS turns into two: Tailwind's lg. From here the photos sit at the top of the right column, already in view, so a photos anchor does not scroll
+export const COLUMNS_MEDIA_QUERY = '(min-width: 64rem)'
+
 // The photo strip at the foot of a Travellers card, shared by the cards and their skeleton so the two cannot drift. Class names are written out whole, as Tailwind only finds literal ones
 export const CARD_PHOTOS = Object.freeze({
 	// Three tiles across; two from 480px down, where three would be too small to make out

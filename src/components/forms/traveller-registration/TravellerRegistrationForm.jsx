@@ -9,7 +9,7 @@ import {
 	TRIP_DATES_CONFIG,
 	TRAVELLER_ITEM_CONFIG,
 } from '@/constants/travellers'
-import { GLOBAL, PAGE_LAYOUT } from '@/constants/ui'
+import { COLUMNS_MEDIA_QUERY, GLOBAL, PAGE_LAYOUT } from '@/constants/ui'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import Input from '@/components/ui/form/input/Input'
@@ -67,7 +67,8 @@ const TravellerRegistrationForm = ({
 	// "Add photos" lands here, so the uploader takes focus once the form is drawn
 	useEffect(() => {
 		if (!focusPhotos || !photosRef.current) return
-		photosRef.current.scrollIntoView?.()
+		if (!window.matchMedia?.(COLUMNS_MEDIA_QUERY).matches)
+			photosRef.current.scrollIntoView?.()
 		photosRef.current.querySelector('input[type="file"]')?.focus()
 	}, [focusPhotos])
 
@@ -294,8 +295,8 @@ const TravellerRegistrationForm = ({
 						<legend className={labelClasses}>
 							{TRIP_DATES_CONFIG.LEGEND}
 						</legend>
-						{/* One date's error must not push its field below the other's, so each field sits at the foot of its column; minmax(0) stops iOS's wider date field running past the column */}
-						<div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2.5 [&>div]:flex [&>div]:flex-col [&>div>.relative]:mt-auto [&>div>input]:mt-auto">
+						{/* One date's error must not push its field below the other's, so each field sits at the foot of its column; minmax(0) stops iOS's wider date field running past the column. Below 360px two fields side by side cut off the year, so they stack */}
+						<div className="grid grid-cols-1 gap-2.5 min-[22.5rem]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] [&>div]:flex [&>div]:flex-col [&>div>.relative]:mt-auto [&>div>input]:mt-auto">
 							<Input {...getDateInputProps(TRIP_START)} />
 							<Input {...getDateInputProps(TRIP_END)} />
 						</div>

@@ -8,7 +8,13 @@ import {
 	TRAVELLER_DETAIL_CONFIG,
 	TRAVELLER_ITEM_CONFIG,
 } from '@/constants/travellers'
-import { ACCESSIBILITY, GLOBAL, PAGE_LAYOUT, PATHS } from '@/constants/ui'
+import {
+	ACCESSIBILITY,
+	COLUMNS_MEDIA_QUERY,
+	GLOBAL,
+	PAGE_LAYOUT,
+	PATHS,
+} from '@/constants/ui'
 
 import { formatCity, getCityId } from '@/utils/formatCity'
 import { conversationId } from '@/utils/conversationId'
@@ -92,7 +98,9 @@ const TravellerDetail = () => {
 	const addPhotosLink = `${editLink}#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
 
 	const shouldScrollToPhotos =
-		showProfile && hash === `#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
+		showProfile &&
+		hash === `#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}` &&
+		!window.matchMedia?.(COLUMNS_MEDIA_QUERY).matches
 
 	// The photos render after the fetch, so the browser's own hash scrolling has nothing to land on
 	const { ref: photosRef } = useScrollToAnchor({
