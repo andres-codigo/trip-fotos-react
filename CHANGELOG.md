@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.1](https://github.com/andres-codigo/trip-fotos-react/compare/v0.31.0...v0.31.1) (2026-11-24)
+
+
+### Enhancements
+
+* lightbox swipe down to close, and controls aligned on phones ([#825](https://github.com/andres-codigo/trip-fotos-react/issues/825)) ([9ea7cc9](https://github.com/andres-codigo/trip-fotos-react/commit/9ea7cc93adbf9427a91812403550d3e73fe8c052))
+
 ## [0.31.0](https://github.com/andres-codigo/trip-fotos-react/compare/v0.30.0...v0.31.0) (2026-11-16)
 
 
