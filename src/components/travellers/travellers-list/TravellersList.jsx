@@ -165,7 +165,9 @@ const TravellersList = ({ initialError = false, isLoading = false }) => {
 			<div
 				className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1"
 				data-cy="controls">
-				<h1 className="my-0 grow">{TRAVELLERS_LIST_CONFIG.TITLE}</h1>
+				<h1 className="my-0 grow text-title font-bold lg:text-display">
+					{TRAVELLERS_LIST_CONFIG.TITLE}
+				</h1>
 				<div className="ml-auto flex items-center gap-2">
 					{!isPublicEmpty && (
 						<BaseButton

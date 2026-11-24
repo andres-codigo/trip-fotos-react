@@ -37,6 +37,10 @@ export const TRAVELLER_REGISTRATION_SUCCESS_MESSAGE =
 export const TRAVELLER_ITEM_CONFIG = Object.freeze({
 	TRIP_DESCRIPTION_MAX_LENGTH: 250,
 	MAX_IMAGES: 5,
+	// The sixth tile is a photo under a scrim when there are more than six, so a trip of six shows them all
+	SEE_ALL_LABEL: (total) => `See all ${total} photos`,
+	SEE_ALL_COUNT: (hidden) => `+${hidden}`,
+	SEE_ALL_SHORT: (total) => `See all ${total}`,
 	EDIT_PATH_SEGMENT: '/edit',
 	EDIT_LABEL: 'Edit trip',
 	VIEW_LABEL: 'View trip',
@@ -114,7 +118,6 @@ export const EDIT_TRIP_CONFIG = Object.freeze({
 	SAVE_LABEL: 'Save changes',
 	CANCEL_LABEL: 'Cancel',
 	SAVING_TITLE: 'Saving',
-	SAVING_MESSAGE: 'Saving your trip…',
 	SAVED_MESSAGE: 'Your trip has been saved.',
 	DELETE_HEADING: 'Delete my profile',
 	DELETE_LABEL: 'Delete my profile',

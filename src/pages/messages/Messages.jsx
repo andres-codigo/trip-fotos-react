@@ -350,7 +350,7 @@ const Messages = () => {
 		<h1
 			ref={headingRef}
 			tabIndex={-1}
-			className="mt-0 mb-1">
+			className="mt-0 mb-1 text-title font-bold lg:text-display">
 			{MESSAGES_CONFIG.TITLE}
 		</h1>
 	)

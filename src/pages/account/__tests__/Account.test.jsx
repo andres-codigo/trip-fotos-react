@@ -206,13 +206,15 @@ describe('Account', () => {
 			).toBeInTheDocument()
 		})
 
-		it('opens the form in place with focus in Current password, and Cancel returns focus', async () => {
+		it('opens the form in place with focus on its heading, and Cancel returns focus', async () => {
 			renderPage()
 
 			fireEvent.click(changePasswordButton())
 			await waitFor(() =>
 				expect(
-					field(CHANGE_PASSWORD_CONFIG.CURRENT_PASSWORD_LABEL),
+					screen.getByRole('heading', {
+						name: CHANGE_PASSWORD_CONFIG.TITLE,
+					}),
 				).toHaveFocus(),
 			)
 
@@ -260,13 +262,15 @@ describe('Account', () => {
 	})
 
 	describe('Change email', () => {
-		it('opens the form in place with focus in New email, and Cancel returns focus', async () => {
+		it('opens the form in place with focus on its heading, and Cancel returns focus', async () => {
 			renderPage()
 
 			fireEvent.click(changeEmailButton())
 			await waitFor(() =>
 				expect(
-					field(CHANGE_EMAIL_CONFIG.NEW_EMAIL_LABEL),
+					screen.getByRole('heading', {
+						name: CHANGE_EMAIL_CONFIG.TITLE,
+					}),
 				).toHaveFocus(),
 			)
 

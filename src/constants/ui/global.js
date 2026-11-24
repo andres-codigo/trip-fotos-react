@@ -24,8 +24,12 @@ export const GLOBAL = Object.freeze({
 	}),
 	FILE_LIST_LABEL: 'Selected files',
 	PHOTO_ALT: Object.freeze({
-		LABEL: 'Describe this photo (optional)',
-		LABEL_FOR: (position) => `Describe photo ${position} (optional)`,
+		LABEL: 'Description of this photo (optional)',
+		// The tile shows "Description (optional)"; the hidden words keep the accessible name in the same order (WCAG 2.5.3)
+		LABEL_FOR: (position) => `Description of photo ${position} (optional)`,
+		LABEL_FOR_VISIBLE: 'Description',
+		LABEL_FOR_HIDDEN: (position) => ` of photo ${position}`,
+		LABEL_FOR_OPTIONAL: ' (optional)',
 		HELP: 'For people who can’t see it, e.g. Charles Bridge at sunrise.',
 	}),
 
@@ -54,7 +58,13 @@ export const GLOBAL = Object.freeze({
 		'(max-width: 480px) 48vw, (max-width: 639px) 32vw, (max-width: 1023px) 16vw, 110px',
 
 	// UPLOAD PROGRESS
-	REGISTERING_MESSAGE: 'Registering your details, one moment please...',
+	// The saving dialog on Register and Edit your trip: a spinner before and after the upload bar, each with the same message
+	SAVING_DIALOG: Object.freeze({
+		REGISTERING_TITLE: 'Registering',
+		MESSAGE: 'Keep this page open until it finishes.',
+		PREPARING_PHOTOS: 'Preparing photos…',
+		SAVING: 'Saving…',
+	}),
 	UPLOAD_PROGRESS_LABEL: (uploadedFiles, totalFiles, percent) =>
 		`Uploading photos: ${uploadedFiles} of ${totalFiles} done (${percent}%)`,
 

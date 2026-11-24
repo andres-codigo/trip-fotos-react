@@ -410,15 +410,15 @@ describe('<AuthAction />', () => {
 	})
 
 	describe('resetPassword', () => {
-		it('shows the new password form for the account and focuses the field', async () => {
+		it('shows the new password form for the account and focuses its heading', async () => {
 			thunks.check.mockResolvedValue(EMAIL)
 			renderPage({ search: resetLink })
 
-			await findHeading(AUTH_ACTION_CONFIG.RESET_TITLE)
+			const heading = await findHeading(AUTH_ACTION_CONFIG.RESET_TITLE)
 			expect(
 				screen.getByText(AUTH_ACTION_CONFIG.RESET_FOR(EMAIL)),
 			).toBeInTheDocument()
-			await waitFor(() => expect(getPassword()).toHaveFocus())
+			await waitFor(() => expect(heading).toHaveFocus())
 			expect(document.title).toBe(
 				`${AUTH_ACTION_CONFIG.RESET_TITLE} · ${GLOBAL.SITE_NAME}`,
 			)

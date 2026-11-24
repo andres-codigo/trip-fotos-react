@@ -54,7 +54,7 @@ const UserAuthenticationForm = forwardRef(
 						ref={titleRef}
 						tabIndex={-1}
 						id="user-authentication-form-title"
-						className="m-0 text-[1.5rem]"
+						className="m-0 text-title font-bold lg:text-display"
 						data-cy="user-authentication-form-title">
 						{isLogin
 							? AUTH_FORM_CONFIG.LOGIN_TITLE

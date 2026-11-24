@@ -87,6 +87,27 @@ describe('<BaseImage />', () => {
 		).toBeInTheDocument()
 	})
 
+	it('shows the skeleton until the photo loads, then fades the photo in', () => {
+		renderImage()
+		const tile = screen.getByTestId(IMAGE.ID)
+		const img = screen.getByAltText("Ada's photo")
+		expect(tile).toHaveClass('bg-skeleton', 'animate-skeleton')
+		expect(img).toHaveClass('opacity-0')
+
+		fireEvent.load(img)
+		expect(tile).not.toHaveClass('bg-skeleton')
+		expect(tile).not.toHaveClass('bg-surface-sunken')
+		expect(img).not.toHaveClass('opacity-0')
+	})
+
+	it('keeps the sunken well only behind the unavailable state', () => {
+		renderImage()
+		fireEvent.error(screen.getByAltText("Ada's photo"))
+		const tile = screen.getByTestId(IMAGE.ID)
+		expect(tile).toHaveClass('bg-surface-sunken')
+		expect(tile).not.toHaveClass('bg-skeleton')
+	})
+
 	it('sets the stored dimensions so the tile reserves its space', () => {
 		renderImage(vi.fn(), { width: 1600, height: 900 })
 		const img = screen.getByAltText("Ada's photo")

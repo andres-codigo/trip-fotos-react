@@ -37,6 +37,7 @@ const Input = ({
 }) => {
 	const [isShown, setIsShown] = useState(false)
 	const isPassword = type === 'password'
+	const isDate = type === 'date'
 
 	const field = (
 		<input
@@ -48,7 +49,12 @@ const Input = ({
 			data-cy={dataCy}
 			disabled={disabled}
 			required={required}
-			className={cn(fieldClasses, isPassword && 'pr-18', className)}
+			className={cn(
+				fieldClasses,
+				isPassword && 'pr-18',
+				isDate && 'min-w-0 pr-8 own-date-button:pr-[0.15rem]',
+				className,
+			)}
 			aria-required={required}
 			aria-invalid={!isValid}
 			aria-describedby={describedBy(id, helpText, !isValid && message)}
@@ -62,7 +68,7 @@ const Input = ({
 				<label
 					htmlFor={id}
 					className={labelClasses}>
-					{label + ' '}
+					{label}{' '}
 					{(showRequiredMark || required) && (
 						<span
 							aria-hidden="true"
@@ -106,6 +112,29 @@ const Input = ({
 						</span>
 					</button>
 				</div>
+			) : isDate ? (
+				// iOS draws no picker icon and Chrome its own, so they get this one; Chrome's stays on top, invisible, to open the picker. Firefox's cannot be hidden, so it keeps its own
+				<div className="relative">
+					{field}
+					<svg
+						aria-hidden="true"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						className="pointer-events-none absolute top-1/2 right-2 size-[1.125rem] -translate-y-1/2 text-text-muted own-date-button:hidden">
+						<rect
+							x="3"
+							y="5"
+							width="18"
+							height="16"
+							rx="2"
+						/>
+						<path d="M16 3v4M8 3v4M3 10h18" />
+					</svg>
+				</div>
 			) : (
 				field
 			)}
@@ -115,7 +144,7 @@ const Input = ({
 
 Input.propTypes = {
 	id: PropTypes.string.isRequired,
-	label: PropTypes.string,
+	label: PropTypes.node,
 	type: PropTypes.string,
 	value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 	onChange: PropTypes.func.isRequired,

@@ -62,12 +62,12 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Recently shipped**
 
+- Phone polish: clearer menu hover, larger page titles closer to the header, a quieter See all photos tile, photos that load into place and tidier date fields
 - Photo viewer: swipe down to close, and arrows that line up with the title and close button on phones
 - Account settings: see your email's verified state, change your email or password
 - Verified email to post: browse at once, post once your email is verified
 - Stay signed in until you log out, including in the home-screen app
 - Clearer form errors: each error sits under its field's label
-- Clearer menu hover in the header and tab bar
 - Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo and test suite
 
 **Blocked**

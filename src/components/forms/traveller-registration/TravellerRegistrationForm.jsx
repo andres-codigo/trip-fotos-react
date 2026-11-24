@@ -9,7 +9,7 @@ import {
 	TRIP_DATES_CONFIG,
 	TRAVELLER_ITEM_CONFIG,
 } from '@/constants/travellers'
-import { GLOBAL, PAGE_LAYOUT } from '@/constants/ui'
+import { COLUMNS_MEDIA_QUERY, GLOBAL, PAGE_LAYOUT } from '@/constants/ui'
 import { VALIDATION_MESSAGES } from '@/constants/validation'
 
 import Input from '@/components/ui/form/input/Input'
@@ -67,7 +67,8 @@ const TravellerRegistrationForm = ({
 	// "Add photos" lands here, so the uploader takes focus once the form is drawn
 	useEffect(() => {
 		if (!focusPhotos || !photosRef.current) return
-		photosRef.current.scrollIntoView?.()
+		if (!window.matchMedia?.(COLUMNS_MEDIA_QUERY).matches)
+			photosRef.current.scrollIntoView?.()
 		photosRef.current.querySelector('input[type="file"]')?.focus()
 	}, [focusPhotos])
 
@@ -240,7 +241,7 @@ const TravellerRegistrationForm = ({
 			{backLink}
 			<h1
 				id="traveller-registration-title"
-				className="mt-0 mb-2 text-[1.5rem]"
+				className="mt-0 mb-2 text-title font-bold"
 				data-cy="traveller-registration-form-title">
 				{title}
 			</h1>
@@ -294,8 +295,8 @@ const TravellerRegistrationForm = ({
 						<legend className={labelClasses}>
 							{TRIP_DATES_CONFIG.LEGEND}
 						</legend>
-						{/* One date's error must not push its field below the other's, so each field sits at the foot of its column */}
-						<div className="grid grid-cols-2 gap-2.5 [&>div]:flex [&>div]:flex-col [&>div>input]:mt-auto">
+						{/* One date's error must not push its field below the other's, so each field sits at the foot of its column; minmax(0) stops iOS's wider date field running past the column. Below 360px two fields side by side cut off the year, so they stack */}
+						<div className="grid grid-cols-1 gap-2.5 min-[22.5rem]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] [&>div]:flex [&>div]:flex-col [&>div>.relative]:mt-auto [&>div>input]:mt-auto">
 							<Input {...getDateInputProps(TRIP_START)} />
 							<Input {...getDateInputProps(TRIP_END)} />
 						</div>
@@ -387,13 +388,16 @@ const TravellerRegistrationForm = ({
 				<div className="flex flex-col lg:gap-4">
 					{/* The card is a wrapper, as a fieldset border would run through its legend */}
 					<div
-						className={PAGE_LAYOUT.SECTION_CARD}
+						ref={photosRef}
+						id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
+						className={cn(
+							PAGE_LAYOUT.SECTION_CARD,
+							PAGE_LAYOUT.ANCHOR_SCROLL_MARGIN,
+						)}
 						data-cy="traveller-photos-section">
 						<fieldset
-							ref={photosRef}
-							id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
 							data-cy="traveller-photos"
-							className="mx-0 mt-2 mb-6 flex scroll-mt-24 flex-col gap-4 border-0 p-0 lg:my-0">
+							className="mx-0 mt-2 mb-6 flex flex-col gap-4 border-0 p-0 lg:my-0">
 							<legend className="mb-2 font-bold">
 								{TRIP_PHOTOS_CONFIG.LEGEND}{' '}
 								<span

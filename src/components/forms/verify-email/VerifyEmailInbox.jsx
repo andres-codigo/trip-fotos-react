@@ -7,7 +7,7 @@ import { VERIFY_EMAIL_INBOX } from '@/constants/test'
 import BaseButton from '@/components/ui/button/BaseButton'
 import InlineAlert from '@/components/ui/inline-alert/InlineAlert'
 
-const titleClasses = 'm-0 text-[1.5rem]'
+const titleClasses = 'm-0 text-title font-bold lg:text-display'
 const viewClasses = 'm-4 flex flex-col gap-4 p-4'
 const textLinkClasses =
 	'inline-flex min-h-11 items-center text-accent-text underline underline-offset-4 hover:text-accent-hover'

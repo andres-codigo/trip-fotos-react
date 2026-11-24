@@ -26,7 +26,7 @@ const PageNotFound = () => {
 			data-cy-alt="page-not-found-main-container">
 			<title>{`Page not found · ${GLOBAL.SITE_NAME}`}</title>
 			<BaseCard>
-				<h1 className="my-[0.83em] text-[1.5rem]">
+				<h1 className="mt-0 mb-4 text-title font-bold lg:text-display">
 					{PAGE_NOT_FOUND_CONFIG.TITLE}
 				</h1>
 				<p className="text-text-muted">{PAGE_NOT_FOUND_CONFIG.TEXT}</p>

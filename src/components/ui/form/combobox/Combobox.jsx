@@ -182,7 +182,7 @@ const Combobox = ({
 				id={statusId}
 				role="status"
 				aria-live="polite"
-				className="mt-1 mb-0 min-h-5 text-[0.875rem] text-text-muted"
+				className="mt-1 mb-0 min-h-5 text-[0.875rem] text-text-muted empty:mt-0 empty:min-h-0"
 				data-cy={COMBOBOX.STATUS}>
 				{statusMessage}
 			</p>

@@ -71,7 +71,7 @@ function TabBar({ isTraveller, className }) {
 											isActive ? scrollToTop : undefined
 										}
 										className={cn(
-											'relative flex h-14 flex-col items-center justify-center gap-1 rounded-md text-text-muted hover:bg-header-active hover:text-on-header focus-visible:-outline-offset-3 aria-[current=page]:hover:text-on-header',
+											'relative flex h-14 flex-col items-center justify-center gap-1 rounded-md text-text-muted hover:bg-header-active hover:text-on-header-active focus-visible:-outline-offset-3 aria-[current=page]:hover:text-on-header-active',
 											'aria-[current=page]:text-accent-text aria-[current=page]:before:absolute aria-[current=page]:before:top-0 aria-[current=page]:before:left-1/2 aria-[current=page]:before:h-[3px] aria-[current=page]:before:w-2/5 aria-[current=page]:before:-translate-x-1/2 aria-[current=page]:before:rounded-b-sm aria-[current=page]:before:bg-accent-text',
 										)}>
 										<span className="relative flex">

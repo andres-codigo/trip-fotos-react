@@ -1,4 +1,5 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react'
+import { COLUMNS_MEDIA_QUERY } from '@/constants/ui'
 import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import configureTestStore from '@/testUtils/configureTestStore'
@@ -178,6 +179,16 @@ describe('<TravellerDetail />', () => {
 
 		afterEach(() => {
 			delete Element.prototype.scrollIntoView
+			vi.unstubAllGlobals()
+		})
+
+		it('does not scroll from 1024px, where the photos sit at the top beside the profile', async () => {
+			vi.stubGlobal('matchMedia', (query) => ({
+				matches: query === COLUMNS_MEDIA_QUERY,
+			}))
+			renderPage({ hash: '#photos' })
+			await screen.findByTestId(TRAVELLER_DETAIL.IMAGES_LIST)
+			expect(scrollIntoView).not.toHaveBeenCalled()
 		})
 
 		it('scrolls to the photos once the traveller has loaded', async () => {

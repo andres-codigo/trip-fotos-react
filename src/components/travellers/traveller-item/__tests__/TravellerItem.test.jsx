@@ -186,12 +186,35 @@ describe('<TravellerItem />', () => {
 			expect(tiles[1]).not.toHaveAttribute('srcset')
 		})
 
-		it('caps at 5 images and shows the see-all link for 7 files', () => {
-			renderItem({ files: files(7) })
+		it('shows all six images and no link for 6 files', () => {
+			renderItem({ files: files(6) })
+			expect(screen.getAllByTestId(IMAGE.ID)).toHaveLength(6)
+			expect(
+				screen.queryByTestId(TRAVELLER_ITEM.SEE_ALL_LINK),
+			).not.toBeInTheDocument()
+		})
+
+		it('caps at 5 images and puts the sixth photo under the see-all link for 7 files', () => {
+			renderItem({
+				files: files(7),
+				fileThumbnails: [
+					...Array(5).fill(null),
+					[
+						{ width: 640, url: '/5-640w.jpg' },
+						{ width: 320, url: '/5-320w.jpg' },
+					],
+				],
+			})
 			expect(screen.getAllByTestId(IMAGE.ID)).toHaveLength(5)
-			const link = screen.getByTestId(TRAVELLER_ITEM.SEE_ALL_LINK)
-			expect(link).toHaveTextContent('See all 7 photos')
+			const link = screen.getByRole('link', { name: 'See all 7 photos' })
+			expect(link).toHaveAttribute('data-cy', TRAVELLER_ITEM.SEE_ALL_LINK)
 			expect(link).toHaveAttribute('href', '/travellers/abc#photos')
+			expect(link).toHaveTextContent('+2See all 7')
+			expect(link.previousElementSibling).toHaveAttribute(
+				'src',
+				'/5-320w.jpg',
+			)
+			expect(link.previousElementSibling).toHaveAttribute('alt', '')
 		})
 	})
 

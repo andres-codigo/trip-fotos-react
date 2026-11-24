@@ -225,7 +225,17 @@ const TripPhotos = ({
 							</div>
 							<Input
 								id={`${hintId}-alt-${position}`}
-								label={GLOBAL.PHOTO_ALT.LABEL_FOR(position)}
+								label={
+									<>
+										{GLOBAL.PHOTO_ALT.LABEL_FOR_VISIBLE}
+										<span className="sr-only">
+											{GLOBAL.PHOTO_ALT.LABEL_FOR_HIDDEN(
+												position,
+											)}
+										</span>
+										{GLOBAL.PHOTO_ALT.LABEL_FOR_OPTIONAL}
+									</>
+								}
 								value={alts[url] ?? ''}
 								onChange={(e) =>
 									onAltChange(url, e.target.value)

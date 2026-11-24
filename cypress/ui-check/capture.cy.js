@@ -858,7 +858,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				cy.get(ACCOUNT_PAGE_SELECTORS.CHANGE_PASSWORD, {
 					timeout: TIMEOUT,
 				}).click()
-				cy.get(CURRENT).should('have.focus')
+				cy.get(CHANGE_PASSWORD_FORM_SELECTORS.ROOT).should('be.visible')
 			}
 			const fill = (current, next) => {
 				cy.get(CURRENT).type(current)
@@ -1030,7 +1030,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				cy.get(ACCOUNT_PAGE_SELECTORS.CHANGE_EMAIL, {
 					timeout: TIMEOUT,
 				}).click()
-				cy.get(NEW).should('have.focus')
+				cy.get(NEW).should('be.visible')
 			}
 			const fill = (email, password) => {
 				cy.get(NEW).type(email)
@@ -1829,7 +1829,7 @@ describe(`UI check capture (${LABEL})`, () => {
 				)
 				cy.get(
 					`${listItem} ${TRAVELLER_ITEM_SELECTORS.SEE_ALL_LINK}`,
-				).should('contain.text', 'See all 7 photos')
+				).should('be.visible')
 				freezeAnimation()
 				// The seeded list is many screens long, so only this traveller is captured
 				cy.get(listItem).screenshot(
@@ -2743,7 +2743,7 @@ describe(`UI check capture (${LABEL})`, () => {
 						: TOP_NAVIGATION_SELECTORS.NAV_MENU_ITEM_MY_TRIP
 				forcePseudo(place, ['hover'], { scroll: false })
 				shot(`nav-hover-${width}`, { capture: 'viewport' })
-				// The current place hovered: its bar stays and its label takes on-header on the header-active fill
+				// The current place hovered: its bar stays and its label takes on-header-active on the header-active fill
 				const current =
 					width <= 768
 						? TAB_BAR_SELECTORS.TRAVELLERS
@@ -2869,6 +2869,99 @@ describe(`UI check capture (${LABEL})`, () => {
 				assertSettled()
 				freezeAnimation()
 				shot(`edit-trip-${width}`)
+			})
+		})
+
+		// Phones held sideways: the header gutter, the title gap and the Account forms, which must not raise the keyboard
+		capture('landscape-phones', () => {
+			cy.viewport(390, 844)
+			visit(`${ownTripPath}#photos`)
+			cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should('be.visible')
+			assertSettled()
+			freezeAnimation()
+			shot('photos-anchor-390', { capture: 'viewport' })
+
+			// One column scrolls to the photos; from 1024px they sit at the top beside the profile, so the page stays put with the back link in view
+			;[
+				[768, 1024],
+				[1024, 768],
+				[1280, 800],
+			].forEach(([width, height]) => {
+				cy.viewport(width, height)
+				visit(`${ownTripPath}#photos`)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`photos-anchor-${width}x${height}`, {
+					capture: 'viewport',
+				})
+
+				visit(`${editTripPath}#photos`)
+				cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+				assertSettled()
+				freezeAnimation()
+				shot(`edit-photos-anchor-${width}x${height}`, {
+					capture: 'viewport',
+				})
+			})
+			;[
+				[667, 375],
+				[844, 390],
+				[932, 430],
+			].forEach(([width, height]) => {
+				const size = `${width}x${height}`
+				const settledShot = (name) => {
+					assertSettled()
+					freezeAnimation()
+					shot(`${name}-${size}`)
+				}
+				cy.viewport(width, height)
+
+				visit(PATHS.TRAVELLERS)
+				cy.get(TRAVELLERS_LIST_SELECTORS.TRAVELLER_ITEM, {
+					timeout: TIMEOUT,
+				}).should('exist')
+				settledShot('travellers')
+
+				visit(PATHS.MESSAGES)
+				cy.get(
+					`${MESSAGES_PAGE_SELECTORS.LIST_CARD}, ${MESSAGES_PAGE_SELECTORS.EMPTY}`,
+					{ timeout: TIMEOUT },
+				).should('exist')
+				settledShot('messages')
+
+				visit(ownTripPath)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.EDIT).should('be.visible')
+				settledShot('own-trip')
+
+				// See all photos lands the Photos card a title gap under the header, its top edge in view
+				visit(`${ownTripPath}#photos`)
+				cy.get(TRAVELLER_DETAIL_SELECTORS.IMAGES_LIST).should(
+					'be.visible',
+				)
+				assertSettled()
+				freezeAnimation()
+				shot(`photos-anchor-${size}`, { capture: 'viewport' })
+
+				visit(editTripPath)
+				cy.get(TRIP_PHOTOS_SELECTORS.TILE).should('have.length', 4)
+				settledShot('edit-trip')
+
+				visit(PATHS.ACCOUNT)
+				cy.get(ACCOUNT_PAGE_SELECTORS.CHANGE_EMAIL, {
+					timeout: TIMEOUT,
+				}).click()
+				cy.get(CHANGE_EMAIL_FORM_SELECTORS.ROOT).should('be.visible')
+				settledShot('change-email')
+
+				visit(PATHS.ACCOUNT)
+				cy.get(ACCOUNT_PAGE_SELECTORS.CHANGE_PASSWORD, {
+					timeout: TIMEOUT,
+				}).click()
+				cy.get(CHANGE_PASSWORD_FORM_SELECTORS.ROOT).should('be.visible')
+				settledShot('change-password')
 			})
 		})
 

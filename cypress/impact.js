@@ -197,6 +197,18 @@ export const CAPTURES = {
 		title: 'captures your own trip and the edit page at each width',
 		areas: ['detail', 'edit', 'trips'],
 	},
+	'landscape-phones': {
+		title: 'captures Travellers, Messages, your trip, the edit page and the Account forms on phones held sideways',
+		areas: [
+			'travellers',
+			'detail',
+			'edit',
+			'messages',
+			'account',
+			'header',
+			'trips',
+		],
+	},
 	'edit-states': {
 		title: 'captures the edit page photo and field states',
 		areas: ['edit', 'trips'],

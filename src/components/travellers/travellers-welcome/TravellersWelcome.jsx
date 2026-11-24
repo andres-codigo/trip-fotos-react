@@ -18,10 +18,8 @@ const TravellersWelcome = ({ className }) => {
 	const headingId = useId()
 
 	return (
-		// A labelled region rather than <section>: the unlayered page-shell section rule would override the flex layout and padding.
 		// Stacked below 1024px; from there the copy sits on the left and the actions on the right, Create an account above the Log in line, so reading and tab order are unchanged
-		<div
-			role="region"
+		<section
 			aria-labelledby={headingId}
 			className={cn(
 				'mb-4 flex flex-col gap-4 rounded-lg border border-accent-text bg-surface-accent p-4.5 lg:flex-row lg:items-center lg:justify-between lg:gap-8',
@@ -54,7 +52,7 @@ const TravellersWelcome = ({ className }) => {
 					</Link>
 				</p>
 			</div>
-		</div>
+		</section>
 	)
 }
 

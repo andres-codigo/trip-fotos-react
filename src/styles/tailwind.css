@@ -31,8 +31,9 @@
 	--on-accent: #14130f;
 	--accent-text: #a9c98a;
 	--header: #1b1a16;
-	/* Nav item hover fill on header: 3.03:1 on header, on-header text 4.74:1 on it */
-	--header-active: #5c6b4a;
+	/* Nav item hover fill on header: 4.69:1 on header, on-header-active text 5.01:1 on it (on-header cream fails at 3.06:1) */
+	--header-active: #788b60;
+	--on-header-active: #14130f;
 	--on-header: #efe9da;
 	--on-header-hover: #a9c98a;
 	--focus: #fff3c4;
@@ -45,6 +46,9 @@
 	--on-success: #14130f;
 
 	--overlay: rgb(0 0 0 / 0.7);
+	/* Dims a photo under text: cream text stays above 6:1 even over a white photo */
+	--scrim: rgb(20 19 15 / 0.72);
+	--scrim-hover: rgb(20 19 15 / 0.8);
 
 	/* City badge tones, in the order getToneIndex assigns them (the design system's badge-1 to badge-8) */
 	--badge-tone-0: #a9c98a;
@@ -67,6 +71,13 @@
 	}
 }
 
+/* A browser whose date picker button cannot be hidden (Firefox): it keeps its own, so Input draws none */
+@custom-variant own-date-button {
+	@supports (-moz-appearance: none) {
+		@slot;
+	}
+}
+
 @theme inline {
 	--color-bg: var(--bg);
 	--color-surface: var(--surface);
@@ -85,6 +96,7 @@
 	--color-accent-text: var(--accent-text);
 	--color-header: var(--header);
 	--color-header-active: var(--header-active);
+	--color-on-header-active: var(--on-header-active);
 	--color-on-header: var(--on-header);
 	--color-on-header-hover: var(--on-header-hover);
 	--color-focus: var(--focus);
@@ -96,6 +108,8 @@
 	--color-success: var(--success);
 	--color-on-success: var(--on-success);
 	--color-overlay: var(--overlay);
+	--color-scrim: var(--scrim);
+	--color-scrim-hover: var(--scrim-hover);
 
 	--color-badge-0: var(--badge-tone-0);
 	--color-badge-1: var(--badge-tone-1);
@@ -118,6 +132,14 @@
 	--radius-pill: 1.875rem;
 
 	--font-sans: 'Roboto', sans-serif;
+
+	/* Design system type: the page title outranks the brand at every width */
+	--text-brand: 1.5rem;
+	--text-brand--line-height: 1.2;
+	--text-title: 1.875rem;
+	--text-title--line-height: 1.2;
+	--text-display: 2.375rem;
+	--text-display--line-height: 1.2;
 
 	--breakpoint-sm: 640px;
 	--breakpoint-md: 768px;
@@ -309,22 +331,19 @@ main {
 	}
 }
 
-section {
-	display: block;
-	padding: 0 20px;
-	position: relative;
-	width: 100%;
-}
-
 .mainContainer {
 	display: inline-block;
 	padding: 5rem 1.25rem 0;
 	position: relative;
 }
 
-/* Padding, not margin: a page's own utility on the same element would otherwise be overridden */
+/* Padding, not margin: a page's own utility on the same element would otherwise be overridden. The title sits space-6 under the 80px header up to 768px, space-8 from 769px */
 .cardPage {
-	padding-block: 7rem 2rem;
+	padding-block: 6.5rem 2rem;
+
+	@media (width > 768px) {
+		padding-top: 7rem;
+	}
 }
 
 /* Zero specificity so any component class can recolour a link; in the base layer so utilities (a later layer) beat it too */
@@ -341,6 +360,31 @@ section {
 		list-style: none;
 		padding: 0;
 		margin: 0;
+	}
+}
+
+/* Date fields: the value starts at the left as in every other field (iOS centres it), and Input draws the calendar icon over Chrome's invisible one */
+@layer base {
+	input[type='date']::-webkit-date-and-time-value {
+		text-align: start;
+	}
+
+	input[type='date'] {
+		position: relative;
+	}
+
+	/* Over the drawn icon, so a click there still opens Chrome's picker */
+	input[type='date']::-webkit-calendar-picker-indicator {
+		position: absolute;
+		top: 50%;
+		right: 0.5rem;
+		width: 1.125rem;
+		height: 1.125rem;
+		margin: 0;
+		padding: 0;
+		cursor: pointer;
+		opacity: 0;
+		transform: translateY(-50%);
 	}
 }
 

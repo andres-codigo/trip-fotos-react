@@ -7,7 +7,7 @@ import { MemoryRouter, useNavigate } from 'react-router-dom'
 import { registerTraveller } from '@/store/slices/travellersSlice'
 import { TEST_IDS, VERIFY_EMAIL_NOTE } from '@/constants/test'
 import { VERIFY_EMAIL_PROMPT_CONFIG } from '@/constants/auth'
-import { PATHS } from '@/constants/ui'
+import { GLOBAL, PATHS } from '@/constants/ui'
 import { TRAVELLER_REGISTRATION_SUCCESS_MESSAGE } from '@/constants/travellers'
 
 import Register from '@/pages/register/Register'
@@ -39,6 +39,15 @@ vi.mock(
 				data-loading={isLoading ? 'true' : 'false'}>
 				<button onClick={() => onSubmit({ firstName: 'Test' })}>
 					Mock Submit
+				</button>
+				<button
+					onClick={() =>
+						onSubmit({
+							firstName: 'Test',
+							files: [{ name: 'a.jpg' }],
+						})
+					}>
+					Mock Submit With Photos
 				</button>
 			</div>
 		),
@@ -123,7 +132,10 @@ describe('Register', () => {
 	})
 
 	describe('Upload progress', () => {
-		const submitWhilePending = async (uploadProgress) => {
+		const submitWhilePending = async (
+			uploadProgress,
+			buttonName = 'Mock Submit',
+		) => {
 			store = createMockStore({
 				travellers: { status: 'loading', error: null, uploadProgress },
 			})
@@ -131,17 +143,42 @@ describe('Register', () => {
 				.fn()
 				.mockReturnValue({ unwrap: () => new Promise(() => {}) })
 			renderRegister()
-			submit()
+			fireEvent.click(screen.getByRole('button', { name: buttonName }))
 			await screen.findByTestId(TEST_IDS.REGISTER.REGISTERING_DIALOG)
 		}
 
-		it('shows the spinner while no upload has started', async () => {
+		it('says what is happening once, beside the spinner, with no photos to upload', async () => {
 			await submitWhilePending(null)
 
+			expect(
+				screen.getByTestId(TEST_IDS.REGISTER.REGISTERING_DIALOG),
+			).toHaveTextContent(
+				`${GLOBAL.SAVING_DIALOG.MESSAGE}${GLOBAL.SAVING_DIALOG.SAVING}`,
+			)
 			expect(
 				screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
 			).toBeInTheDocument()
 			expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+		})
+
+		it('says the photos are being prepared before the upload starts', async () => {
+			await submitWhilePending(null, 'Mock Submit With Photos')
+
+			expect(
+				screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
+			).toHaveTextContent(GLOBAL.SAVING_DIALOG.PREPARING_PHOTOS)
+		})
+
+		it('goes back to the spinner while the record saves after the uploads finish', async () => {
+			await submitWhilePending(
+				{ uploadedFiles: 1, totalFiles: 1, percent: 100 },
+				'Mock Submit With Photos',
+			)
+
+			expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+			expect(
+				screen.getByTestId(TEST_IDS.SPINNER.CONTAINER),
+			).toHaveTextContent(GLOBAL.SAVING_DIALOG.SAVING)
 		})
 
 		it('shows the progress bar and file count once uploading', async () => {

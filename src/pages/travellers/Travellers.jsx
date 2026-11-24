@@ -30,7 +30,7 @@ const Travellers = () => {
 			data-cy="main-container"
 			data-cy-alt="travellers-main-container">
 			<title>{`Travellers · ${GLOBAL.SITE_NAME}`}</title>
-			{/* No page card: the grid's own cards sit on the page background, capped at 1160px. A div, as the unlayered section rule would add padding */}
+			{/* No page card: the grid's own cards sit on the page background, capped at 1160px. */}
 			<div
 				className={PAGE_LAYOUT.GRID}
 				data-cy="travellers-page">

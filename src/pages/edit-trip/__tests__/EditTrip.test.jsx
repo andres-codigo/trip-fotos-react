@@ -17,6 +17,7 @@ import {
 	VERIFY_EMAIL_NOTE,
 } from '@/constants/test'
 import { ERROR_MESSAGES } from '@/constants/errors'
+import { GLOBAL } from '@/constants/ui'
 import { EDIT_TRIP_CONFIG } from '@/constants/travellers'
 
 import EditTrip from '@/pages/edit-trip/EditTrip'
@@ -262,7 +263,9 @@ describe('<EditTrip />', () => {
 
 		expect(
 			await screen.findByTestId(EDIT_TRIP.SAVING_DIALOG),
-		).toHaveTextContent(EDIT_TRIP_CONFIG.SAVING_MESSAGE)
+		).toHaveTextContent(
+			`${GLOBAL.SAVING_DIALOG.MESSAGE}${GLOBAL.SAVING_DIALOG.SAVING}`,
+		)
 		expect(mockUpdate).toHaveBeenCalledWith({ firstName: 'Grace' })
 
 		resolve({ ...traveller, id: 'me', firstName: 'Grace' })

@@ -1,4 +1,11 @@
-import { act, render, fireEvent, screen, within } from '@testing-library/react'
+import {
+	act,
+	cleanup,
+	render,
+	fireEvent,
+	screen,
+	within,
+} from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import TravellerRegistrationForm from '@/components/forms/traveller-registration/TravellerRegistrationForm'
@@ -10,7 +17,7 @@ import {
 	TRIP_PHOTOS,
 	UI_TEXT,
 } from '@/constants/test'
-import { GLOBAL } from '@/constants/ui'
+import { COLUMNS_MEDIA_QUERY, GLOBAL } from '@/constants/ui'
 import {
 	TRAVELLER_REGISTRATION_FIELDS,
 	TRIP_DATES_CONFIG,
@@ -656,7 +663,10 @@ describe('<TravellerRegistrationForm />', () => {
 			const fieldset = screen.getByRole('group', {
 				name: TRIP_PHOTOS_CONFIG.LEGEND,
 			})
-			expect(fieldset).toHaveAttribute('id', 'photos')
+			// The anchor is the section card, so a scroll shows its top edge
+			expect(
+				screen.getByTestId('traveller-photos-section'),
+			).toHaveAttribute('id', 'photos')
 			expect(
 				within(fieldset).getAllByTestId(TRIP_PHOTOS.TILE),
 			).toHaveLength(3)
@@ -738,6 +748,25 @@ describe('<TravellerRegistrationForm />', () => {
 		it('focuses the uploader when opened from "Add photos"', () => {
 			renderEdit({ focusPhotos: true })
 			expect(screen.getByTestId(FILE_DROP.INPUT)).toHaveFocus()
+		})
+
+		it('scrolls to the photos below 1024px but not from it, where they sit at the top', () => {
+			const scrollIntoView = vi.fn()
+			Element.prototype.scrollIntoView = scrollIntoView
+			renderEdit({ focusPhotos: true })
+			expect(scrollIntoView).toHaveBeenCalledTimes(1)
+
+			cleanup()
+			scrollIntoView.mockClear()
+			vi.stubGlobal('matchMedia', (query) => ({
+				matches: query === COLUMNS_MEDIA_QUERY,
+			}))
+			renderEdit({ focusPhotos: true })
+			expect(scrollIntoView).not.toHaveBeenCalled()
+			expect(screen.getByTestId(FILE_DROP.INPUT)).toHaveFocus()
+
+			vi.unstubAllGlobals()
+			delete Element.prototype.scrollIntoView
 		})
 
 		it('leaves focus alone otherwise', () => {

@@ -62,9 +62,9 @@ const ChangeEmailForm = ({
 	const [current, setCurrent] = useState(EMPTY)
 	const [formError, setFormError] = useState(initialError)
 	const [isSending, setIsSending] = useState(false)
-	// Focus waits for the render, as the fields are still disabled when a send comes back
+	// Focus waits for the render, as the fields are still disabled when a send comes back. On open it goes to the heading, so a phone keeps its keyboard down
 	const [focusId, setFocusId] = useState({
-		id: initialError ? CURRENT_PASSWORD_ID : NEW_EMAIL_ID,
+		id: initialError ? CURRENT_PASSWORD_ID : TITLE_ID,
 	})
 
 	useEffect(() => {
@@ -123,6 +123,7 @@ const ChangeEmailForm = ({
 			data-cy={CHANGE_EMAIL_FORM.ROOT}>
 			<h3
 				id={TITLE_ID}
+				tabIndex={-1}
 				className="m-0 text-[1.0625rem]">
 				{CHANGE_EMAIL_CONFIG.TITLE}
 			</h3>
