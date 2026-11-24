@@ -67,6 +67,7 @@ export const IMAGE = Object.freeze({
 	NEXT: 'image-gallery-next',
 	COUNTER: 'image-gallery-counter',
 	TRACK: 'image-gallery-track',
+	STAGE: 'image-gallery-stage',
 	CAPTION: 'image-caption',
 })
 

@@ -21,12 +21,18 @@ const PLACEHOLDER_DIMENSIONS = { width: 4, height: 3 }
 const SLOW_LOAD_MS = 400
 // Scroll events stop this long after a swipe or a smooth scroll settles
 const SCROLL_SETTLE_MS = 120
+// Swipe down to close: the gesture picks its axis after this much movement, closes past this share of the photo area's height or on a flick this fast, and the backdrop fades to this opacity at the threshold
+const AXIS_LOCK_PX = 10
+const CLOSE_SHARE = 0.25
+const FLICK_PX_PER_MS = 0.5
+const FADED_OPACITY = 0.4
+const RESTING = { y: 0, threshold: 1, isActive: false }
 
-// From 769px, and in a phone held sideways, the arrows sit in the side margins; on a phone they sit beside the counter
-const SHORT = '[@media(height<=30rem)]'
+// On phones, either way up, the arrows share the counter's row at the screen's edges; from 769px on a taller screen they sit in the side margins
 const iconButtonClasses =
 	'inline-flex size-11 flex-none cursor-pointer items-center justify-center rounded-full border border-solid border-border-card bg-surface p-0 text-text hover:bg-surface-accent disabled:cursor-default disabled:opacity-35 disabled:hover:bg-surface'
-const sideButtonClasses = `absolute top-1/2 size-14 -translate-y-1/2 mobile:static mobile:size-11 mobile:translate-y-0 ${SHORT}:size-11`
+const sideButtonClasses =
+	'absolute top-1/2 size-14 -translate-y-1/2 phone:static phone:size-11 phone:translate-y-0'
 
 const Icon = ({ path, size = 22 }) => (
 	<svg
@@ -149,7 +155,7 @@ const Slide = ({
 
 	return (
 		<div
-			className={`flex h-full w-full flex-none snap-center items-center justify-center px-26 mobile:px-4 ${SHORT}:px-18`}
+			className="flex h-full w-full flex-none snap-center items-center justify-center px-26 phone:px-4"
 			aria-hidden={!isCurrent}>
 			{content}
 		</div>
@@ -186,6 +192,9 @@ const ImageGallery = ({
 	const [loaded, setLoaded] = useState(() => new Set())
 	const [slowUrl, setSlowUrl] = useState(null)
 	const [track, setTrack] = useState(null)
+	// How far below its place the photo sits while it is swiped down, and whether the finger is still on it
+	const [drag, setDrag] = useState(RESTING)
+	const gestureRef = useRef(null)
 	const indexRef = useRef(null)
 	const settleTimerRef = useRef(null)
 	// Radix only returns focus to its own Trigger, so the lightbox remembers the tile that opened it
@@ -282,6 +291,77 @@ const ImageGallery = ({
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [isOpen, index, hasPrevious, hasNext, goTo])
 
+	const handleTouchStart = (event) => {
+		if (event.touches.length !== 1) {
+			gestureRef.current = null
+			return
+		}
+		const { clientX, clientY } = event.touches[0]
+		gestureRef.current = {
+			x: clientX,
+			y: clientY,
+			axis: null,
+			dy: 0,
+			time: event.timeStamp,
+			speed: 0,
+			threshold: event.currentTarget.clientHeight * CLOSE_SHARE,
+			isStill: window.matchMedia?.('(prefers-reduced-motion: reduce)')
+				.matches,
+		}
+	}
+
+	const handleTouchMove = (event) => {
+		const gesture = gestureRef.current
+		if (!gesture || event.touches.length !== 1) return
+		const { clientX, clientY } = event.touches[0]
+		const dx = clientX - gesture.x
+		const dy = clientY - gesture.y
+		if (!gesture.axis) {
+			if (Math.max(Math.abs(dx), Math.abs(dy)) < AXIS_LOCK_PX) return
+			gesture.axis = Math.abs(dy) > Math.abs(dx) ? 'y' : 'x'
+		}
+		if (gesture.axis !== 'y') return
+		const elapsed = event.timeStamp - gesture.time
+		if (elapsed > 0) gesture.speed = (dy - gesture.dy) / elapsed
+		gesture.dy = dy
+		gesture.time = event.timeStamp
+		if (!gesture.isStill)
+			setDrag({
+				y: Math.max(dy, 0),
+				threshold: gesture.threshold,
+				isActive: true,
+			})
+	}
+
+	const handleTouchEnd = () => {
+		const gesture = gestureRef.current
+		gestureRef.current = null
+		if (gesture?.axis !== 'y') return
+		const isPastThreshold =
+			gesture.dy >= gesture.threshold ||
+			(gesture.dy > 0 && gesture.speed >= FLICK_PX_PER_MS)
+		if (!isPastThreshold) {
+			setDrag(RESTING)
+			return
+		}
+		// The photo stays where it was let go while the lightbox fades out
+		setDrag((prev) => ({ ...prev, isActive: false }))
+		close()
+	}
+
+	const fadeOpacity =
+		1 - (1 - FADED_OPACITY) * Math.min(drag.y / drag.threshold, 1)
+	const backdropStyle =
+		fadeOpacity < 1
+			? {
+					backgroundColor: `color-mix(in srgb, var(--color-surface-sunken) ${fadeOpacity * 100}%, transparent)`,
+				}
+			: undefined
+	const barStyle = fadeOpacity < 1 ? { opacity: fadeOpacity } : undefined
+	const settleClasses =
+		!drag.isActive &&
+		'transition-[transform,opacity,background-color] duration-300 ease-out'
+
 	const currentUrl = isOpen ? urls[index] : null
 	const isCurrentSettled =
 		currentUrl !== null &&
@@ -320,9 +400,19 @@ const ImageGallery = ({
 				}}>
 				<RadixDialog.Portal>
 					{/* Radix locks the page scroll only while an Overlay is rendered */}
-					<RadixDialog.Overlay className="fixed inset-0 z-100 bg-surface-sunken" />
+					<RadixDialog.Overlay
+						className={cn(
+							'fixed inset-0 z-100 bg-surface-sunken',
+							settleClasses,
+						)}
+						style={backdropStyle}
+					/>
 					<RadixDialog.Content
-						className="fixed inset-0 z-100 flex flex-col bg-surface-sunken pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] text-text outline-none data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
+						className={cn(
+							'fixed inset-0 z-100 flex flex-col bg-surface-sunken pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] text-text outline-none data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in',
+							settleClasses,
+						)}
+						style={backdropStyle}
 						aria-describedby={undefined}
 						// Runs before focus moves into the lightbox, so the tile is still focused
 						onOpenAutoFocus={() => {
@@ -331,10 +421,16 @@ const ImageGallery = ({
 						onCloseAutoFocus={(e) => {
 							e.preventDefault()
 							openerRef.current?.focus()
+							setDrag(RESTING)
 						}}>
 						{isOpen && (
 							<>
-								<div className="flex h-16 flex-none items-center justify-between gap-3 pr-2.5 pl-5">
+								<div
+									className={cn(
+										'flex h-16 flex-none items-center justify-between gap-3 pr-2.5 pl-5',
+										settleClasses,
+									)}
+									style={barStyle}>
 									<RadixDialog.Title
 										className="m-0 min-w-0 truncate text-[0.9375rem] font-medium text-text-muted"
 										data-cy={DIALOG.TITLE}>
@@ -347,14 +443,30 @@ const ImageGallery = ({
 										<Icon path={CLOSE_PATH} />
 									</RadixDialog.Close>
 								</div>
-								<div className="relative min-h-0 flex-1">
+								<div
+									className={cn(
+										'relative min-h-0 flex-1',
+										settleClasses,
+									)}
+									style={
+										drag.y
+											? {
+													transform: `translateY(${drag.y}px)`,
+												}
+											: undefined
+									}
+									onTouchStart={handleTouchStart}
+									onTouchMove={handleTouchMove}
+									onTouchEnd={handleTouchEnd}
+									onTouchCancel={handleTouchEnd}
+									data-cy={IMAGE.STAGE}>
 									<div
 										ref={setTrack}
 										// A scrolling region needs keyboard access; its ring sits inside, as its edges meet the screen's
 										tabIndex={0}
 										role="region"
 										aria-label="Photos"
-										className="flex h-full snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto overflow-y-hidden overscroll-x-contain focus-visible:-outline-offset-3 [&::-webkit-scrollbar]:hidden"
+										className="flex h-full touch-pan-x snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto overflow-y-hidden overscroll-x-contain focus-visible:-outline-offset-3 [&::-webkit-scrollbar]:hidden"
 										onScroll={handleScroll}
 										data-cy={IMAGE.TRACK}>
 										{urls.map((url, position) => (
@@ -397,7 +509,11 @@ const ImageGallery = ({
 										)}
 								</div>
 								<div
-									className="flex flex-none flex-col items-center gap-1.5 px-4 pt-3 pb-5 text-center"
+									className={cn(
+										'flex flex-none flex-col items-center gap-1.5 px-4 pt-3 pb-5 text-center',
+										settleClasses,
+									)}
+									style={barStyle}
 									aria-live="polite">
 									{description && (
 										<p
@@ -407,13 +523,15 @@ const ImageGallery = ({
 										</p>
 									)}
 									{urls.length > 1 && (
-										<div className="flex w-full max-w-80 items-center justify-center mobile:justify-between">
+										<div
+											// On phones, Previous lines up with the title and Next with Close
+											className="flex w-full max-w-80 items-center justify-center phone:-mr-1.5 phone:ml-1 phone:w-auto phone:max-w-none phone:justify-between phone:self-stretch">
 											<button
 												type="button"
 												className={cn(
 													iconButtonClasses,
 													sideButtonClasses,
-													`left-6 ${SHORT}:left-3.5`,
+													'left-6',
 												)}
 												aria-label="Previous photo"
 												disabled={!hasPrevious}
@@ -431,7 +549,7 @@ const ImageGallery = ({
 												className={cn(
 													iconButtonClasses,
 													sideButtonClasses,
-													`right-6 ${SHORT}:right-3.5`,
+													'right-6',
 												)}
 												aria-label="Next photo"
 												disabled={!hasNext}

@@ -13,11 +13,13 @@ const landscape = svg(2400, 1200)
 const portrait = svg(1200, 2400)
 const landscapeAgain = svg(2400, 1201)
 
-// The phone layout runs to 768px inclusive; wider screens and a phone held sideways put the arrows beside the photo
+// The phone layout runs to 768px inclusive and covers a phone held sideways (480px tall or less); wider, taller screens put the arrows beside the photo
 const viewports = [
 	['mobile', 390, 844, 'bottom'],
 	['tablet', 768, 1024, 'bottom'],
-	['mobile-landscape', 844, 390, 'sides'],
+	['small landscape phone', 667, 375, 'bottom'],
+	['landscape phone', 844, 390, 'bottom'],
+	['large landscape phone', 932, 430, 'bottom'],
 	['laptop', 1024, 768, 'sides'],
 	['desktop', 1280, 800, 'sides'],
 ]
@@ -184,6 +186,17 @@ describe('<ImageGallery />', () => {
 										previous.top,
 										'previous below the photo',
 									).to.be.at.least(image.bottom)
+									cy.get(getByDataCy(DIALOG.TITLE)).then(
+										($title) => {
+											expect(
+												previous.left,
+												'previous under the title',
+											).to.be.closeTo(
+												rect($title).left,
+												1,
+											)
+										},
+									)
 								} else {
 									expect(
 										previous.right,
@@ -205,6 +218,17 @@ describe('<ImageGallery />', () => {
 										next.top,
 										'next below the photo',
 									).to.be.at.least(image.bottom)
+									cy.get('button[aria-label="Close"]').then(
+										($close) => {
+											expect(
+												next.right,
+												'next under Close',
+											).to.be.closeTo(
+												rect($close).right,
+												1,
+											)
+										},
+									)
 								} else {
 									expect(
 										next.left,
