@@ -27,7 +27,7 @@ const getSave = () =>
 	screen.getByRole('button', { name: AUTH_ACTION_CONFIG.SAVE_PASSWORD })
 
 describe('<NewPasswordForm />', () => {
-	it('names the form after its heading, says whose password it is and focuses the field', () => {
+	it('names the form after its heading, says whose password it is and focuses the heading', () => {
 		renderForm()
 		expect(
 			screen.getByRole('form', { name: AUTH_ACTION_CONFIG.RESET_TITLE }),
@@ -35,7 +35,11 @@ describe('<NewPasswordForm />', () => {
 		expect(
 			screen.getByText(AUTH_ACTION_CONFIG.RESET_FOR(EMAIL)),
 		).toBeInTheDocument()
-		expect(getPassword()).toHaveFocus()
+		expect(
+			screen.getByRole('heading', {
+				name: AUTH_ACTION_CONFIG.RESET_TITLE,
+			}),
+		).toHaveFocus()
 		expect(getPassword()).toHaveAttribute('type', 'password')
 		expect(getPassword()).toHaveAttribute('autocomplete', 'new-password')
 		expect(getPassword()).toHaveAccessibleDescription(

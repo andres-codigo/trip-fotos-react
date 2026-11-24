@@ -48,7 +48,6 @@ function MessageThread({
 
 	const isEmpty = !isLoading && canSayHello && messages.length === 0
 
-	// The global section rule is unlayered, so its display and padding beat plain utilities
 	return (
 		<section
 			ref={scrollerRef}
@@ -56,7 +55,7 @@ function MessageThread({
 			aria-busy={isLoading || undefined}
 			tabIndex={0}
 			className={cn(
-				'flex! flex-col overflow-y-auto p-3! focus-visible:-outline-offset-3',
+				'flex flex-col overflow-y-auto p-3 focus-visible:-outline-offset-3',
 				className,
 			)}
 			data-cy={MESSAGE_THREAD.ROOT}>

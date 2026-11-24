@@ -15,7 +15,7 @@ import LoadingAnnouncement from '@/components/ui/loading-announcement/LoadingAnn
 const EMAIL_ID = 'reset-email'
 const TITLE_ID = 'password-reset-title'
 
-const titleClasses = 'm-0 text-[1.5rem]'
+const titleClasses = 'm-0 text-title font-bold lg:text-display'
 const viewClasses = 'm-4 flex flex-col gap-4 p-4'
 const textLinkClasses =
 	'inline-flex min-h-11 items-center text-accent-text underline underline-offset-4 hover:text-accent-hover'

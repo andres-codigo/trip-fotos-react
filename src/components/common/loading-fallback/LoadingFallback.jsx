@@ -7,7 +7,7 @@ import BaseSpinner from '@/components/ui/spinner/BaseSpinner'
 
 const LoadingFallback = ({ isComponent }) => {
 	const card = (
-		<BaseCard className="my-8">
+		<BaseCard className={isComponent ? 'my-8' : undefined}>
 			<BaseSpinner />
 		</BaseCard>
 	)
@@ -18,7 +18,7 @@ const LoadingFallback = ({ isComponent }) => {
 		<main
 			id={ACCESSIBILITY.MAIN_CONTENT_ID}
 			tabIndex={-1}
-			className="mainContainer"
+			className="mainContainer cardPage"
 			data-cy="main-container">
 			{card}
 		</main>

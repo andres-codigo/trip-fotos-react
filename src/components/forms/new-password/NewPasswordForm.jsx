@@ -22,11 +22,11 @@ const NewPasswordForm = ({ email, onSubmit, className }) => {
 		message: '',
 	})
 	const [isSaving, setIsSaving] = useState(false)
-	// Focus waits for the render, as the field is still disabled when a save comes back
-	const [focusRequest, setFocusRequest] = useState(1)
+	// Focus waits for the render, as the field is still disabled when a save comes back. On open it goes to the heading, so a phone keeps its keyboard down
+	const [focusRequest, setFocusRequest] = useState(0)
 
 	useEffect(() => {
-		document.getElementById(PASSWORD_ID)?.focus()
+		document.getElementById(focusRequest ? PASSWORD_ID : TITLE_ID)?.focus()
 	}, [focusRequest])
 
 	const validate = (value) => {
@@ -75,7 +75,7 @@ const NewPasswordForm = ({ email, onSubmit, className }) => {
 				<h1
 					tabIndex={-1}
 					id={TITLE_ID}
-					className="m-0 text-[1.5rem]"
+					className="m-0 text-title font-bold lg:text-display"
 					data-cy={NEW_PASSWORD_FORM.TITLE}>
 					{AUTH_ACTION_CONFIG.RESET_TITLE}
 				</h1>

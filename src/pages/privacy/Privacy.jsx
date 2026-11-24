@@ -15,7 +15,9 @@ const Privacy = () => {
 			data-cy-alt="privacy-main-container">
 			<title>{`Privacy policy · ${GLOBAL.SITE_NAME}`}</title>
 			<BaseCard>
-				<h1 className="my-[0.83em] text-[1.5rem]">Privacy policy</h1>
+				<h1 className="mt-0 mb-4 text-title font-bold lg:text-display">
+					Privacy policy
+				</h1>
 				<p>
 					Trip Fotos is a learning project. This page explains what
 					data the app collects, why, and where it is stored.

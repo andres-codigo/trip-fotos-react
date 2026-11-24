@@ -15,6 +15,8 @@ export const PAGE_LAYOUT = Object.freeze({
 		'rounded-lg border border-border-card bg-surface p-4 shadow-card lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none',
 	SECTION_CARD:
 		'lg:rounded-lg lg:border lg:border-border-card lg:bg-surface lg:p-4 lg:shadow-card',
+	// A hash target lands the page-title gap under the 80px header, as .cardPage spaces the title
+	ANCHOR_SCROLL_MARGIN: 'scroll-mt-28 mobile:scroll-mt-26',
 })
 
 // The photo strip at the foot of a Travellers card, shared by the cards and their skeleton so the two cannot drift. Class names are written out whole, as Tailwind only finds literal ones

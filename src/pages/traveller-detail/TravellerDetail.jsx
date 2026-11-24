@@ -102,7 +102,7 @@ const TravellerDetail = () => {
 	const name = (
 		<h1
 			className={cn(
-				'm-0 text-[1.5rem] font-normal',
+				'm-0 text-title font-bold',
 				// Hidden rather than removed while loading, so the page still has its <h1> without a placeholder flashing above the spinner
 				isLoading && 'sr-only',
 			)}
@@ -295,51 +295,43 @@ const TravellerDetail = () => {
 							</BaseCard>
 						)}
 						{files.length > 0 && (
+							// The anchor is the card itself, so a scroll to the photos shows its top edge the page-title gap under the header
 							<BaseCard
+								id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
+								ref={photosRef}
 								className={cn(
 									PAGE_LAYOUT.COLUMN_CARD,
+									PAGE_LAYOUT.ANCHOR_SCROLL_MARGIN,
 									isOwnRecord && OWN,
 								)}>
-								{/* The anchor holds the heading too, so a scroll to the photos shows it under the header */}
-								<div
-									id={TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}
-									ref={photosRef}
-									className="scroll-mt-24">
-									<div className="flex flex-wrap items-baseline justify-between gap-2">
-										<h2
-											className="m-0"
-											data-cy={
-												TRAVELLER_DETAIL.PHOTOS_HEADING
-											}>
-											{
-												TRAVELLER_DETAIL_CONFIG.PHOTOS_HEADING
-											}
-										</h2>
-										<span className="text-sm text-text-muted">
-											{TRAVELLER_DETAIL_CONFIG.PHOTO_COUNT(
-												files.length,
-											)}
-										</span>
-									</div>
-									<ul
-										className={IMAGES_LIST}
-										data-cy={TRAVELLER_DETAIL.IMAGES_LIST}>
-										<ImageGallery
-											title={fullName}
-											urls={files}
-											dimensions={
-												traveller?.fileDimensions
-											}
-											thumbnails={
-												traveller?.fileThumbnails
-											}
-											alts={traveller?.fileAlts}
-											urlParam={
-												TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
-											}
-										/>
-									</ul>
+								<div className="flex flex-wrap items-baseline justify-between gap-2">
+									<h2
+										className="m-0"
+										data-cy={
+											TRAVELLER_DETAIL.PHOTOS_HEADING
+										}>
+										{TRAVELLER_DETAIL_CONFIG.PHOTOS_HEADING}
+									</h2>
+									<span className="text-sm text-text-muted">
+										{TRAVELLER_DETAIL_CONFIG.PHOTO_COUNT(
+											files.length,
+										)}
+									</span>
 								</div>
+								<ul
+									className={IMAGES_LIST}
+									data-cy={TRAVELLER_DETAIL.IMAGES_LIST}>
+									<ImageGallery
+										title={fullName}
+										urls={files}
+										dimensions={traveller?.fileDimensions}
+										thumbnails={traveller?.fileThumbnails}
+										alts={traveller?.fileAlts}
+										urlParam={
+											TRAVELLER_DETAIL_CONFIG.PHOTO_PARAM
+										}
+									/>
+								</ul>
 							</BaseCard>
 						)}
 					</div>

@@ -74,9 +74,11 @@ describe('Logged in > Account settings page', () => {
 	it('refuses a wrong current password and keeps the form open', () => {
 		cy.visit(PATHS.ACCOUNT)
 		cy.get(ACCOUNT_PAGE_SELECTORS.CHANGE_PASSWORD).click()
-		cy.get(CHANGE_PASSWORD_FORM_SELECTORS.CURRENT_PASSWORD_INPUT)
-			.should('have.focus')
-			.type('not-the-password')
+		// Focus goes to the heading on open, so a phone keeps its keyboard down
+		cy.get(`${CHANGE_PASSWORD_FORM_SELECTORS.ROOT} h3`).should('have.focus')
+		cy.get(CHANGE_PASSWORD_FORM_SELECTORS.CURRENT_PASSWORD_INPUT).type(
+			'not-the-password',
+		)
 		cy.get(CHANGE_PASSWORD_FORM_SELECTORS.NEW_PASSWORD_INPUT).type(
 			'another-password',
 		)
@@ -124,9 +126,8 @@ describe('Logged in > Account settings > Change email', () => {
 
 		cy.visit(PATHS.ACCOUNT)
 		cy.get(ACCOUNT_PAGE_SELECTORS.CHANGE_EMAIL).click()
-		cy.get(CHANGE_EMAIL_FORM_SELECTORS.NEW_EMAIL_INPUT)
-			.should('have.focus')
-			.type(newEmail)
+		cy.get(`${CHANGE_EMAIL_FORM_SELECTORS.ROOT} h3`).should('have.focus')
+		cy.get(CHANGE_EMAIL_FORM_SELECTORS.NEW_EMAIL_INPUT).type(newEmail)
 		cy.get(CHANGE_EMAIL_FORM_SELECTORS.CURRENT_PASSWORD_INPUT).type(
 			PASSWORD,
 			{

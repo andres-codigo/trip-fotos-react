@@ -37,6 +37,7 @@ describe('affectedCaptures', () => {
 			'messages-states',
 			'messages-fallback',
 			'messages-empty',
+			'landscape-phones',
 		])
 	})
 
@@ -69,6 +70,7 @@ describe('affectedCaptures', () => {
 			expect(affectedCaptures([file])).toEqual([
 				'public-pages',
 				'account-menu',
+				'landscape-phones',
 			])
 		}
 	})

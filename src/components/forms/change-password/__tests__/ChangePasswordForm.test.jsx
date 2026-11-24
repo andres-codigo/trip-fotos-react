@@ -76,11 +76,14 @@ describe('<ChangePasswordForm />', () => {
 			}),
 		)
 
-	it('starts with focus in Current password', async () => {
+	// A focused field would raise a phone's keyboard over the form
+	it('starts with focus on its heading', async () => {
 		renderForm()
 		await waitFor(() =>
 			expect(
-				getField(CHANGE_PASSWORD_CONFIG.CURRENT_PASSWORD_LABEL),
+				screen.getByRole('heading', {
+					name: CHANGE_PASSWORD_CONFIG.TITLE,
+				}),
 			).toHaveFocus(),
 		)
 	})

@@ -134,7 +134,7 @@ describe('Logged in as a traveller > Navigation > Scroll position', () => {
 	const MY_TRIP_PATH = `${PATHS.TRAVELLERS}/${TEST_USERS.TRAVELLER.ID}`
 
 	// Short enough that both pages scroll at either width
-	const HEIGHT = 500
+	const HEIGHT = 400
 
 	const scrollDown = (
 		content = TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST,

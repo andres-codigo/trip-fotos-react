@@ -59,6 +59,15 @@ const TravellerItem = ({
 	const photosLink = `${detailsLink}#${TRAVELLER_ITEM_CONFIG.PHOTOS_ANCHOR}`
 	const editLink = `${detailsLink}${TRAVELLER_ITEM_CONFIG.EDIT_PATH_SEGMENT}`
 	const isOwnRecord = id === userId
+	const hasSeeAll = files.length > TRAVELLER_ITEM_CONFIG.MAX_IMAGES + 1
+	const shownCount = hasSeeAll
+		? TRAVELLER_ITEM_CONFIG.MAX_IMAGES
+		: files.length
+	// The See all tile only needs the smallest thumbnail of the photo under its scrim
+	const seeAllThumbnails = fileThumbnails?.[shownCount]
+	const seeAllPhoto = seeAllThumbnails?.length
+		? [...seeAllThumbnails].sort((a, b) => a.width - b.width)[0].url
+		: files[shownCount]
 	const canContact = !isOwnRecord && isTraveller
 	const messageLink = canContact
 		? `${PATHS.MESSAGES}/${conversationId(userId, id)}`
@@ -184,26 +193,42 @@ const TravellerItem = ({
 									thumbnails={fileThumbnails}
 									alts={fileAlts}
 									sizes={GLOBAL.IMAGE_CARD_THUMBNAIL_SIZES}
-									urls={files.slice(
-										0,
-										TRAVELLER_ITEM_CONFIG.MAX_IMAGES,
-									)}
+									urls={files.slice(0, shownCount)}
 								/>
-								{files.length >
-									TRAVELLER_ITEM_CONFIG.MAX_IMAGES && (
+								{hasSeeAll && (
 									<li
 										className={cn(
-											'relative overflow-hidden bg-accent font-medium text-on-accent tile-focus-ring',
+											'relative aspect-square overflow-hidden bg-skeleton tile-focus-ring',
 											CARD_PHOTOS.TILE_WIDTH,
 										)}>
+										<img
+											src={seeAllPhoto}
+											alt=""
+											loading="lazy"
+											className="absolute inset-0 block h-full w-full object-cover"
+										/>
 										<Link
-											className="block h-full"
+											className="group absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-scrim p-2 text-center text-text transition-colors duration-200 ease-out hover:bg-scrim-hover active:translate-y-px motion-reduce:transition-none"
 											to={photosLink}
+											aria-label={TRAVELLER_ITEM_CONFIG.SEE_ALL_LABEL(
+												files.length,
+											)}
 											data-cy={
 												TRAVELLER_ITEM.SEE_ALL_LINK
 											}>
-											<span className="flex h-full items-center justify-center p-5 text-center">
-												See all {files.length} photos
+											<span
+												aria-hidden="true"
+												className="text-2xl leading-tight font-bold">
+												{TRAVELLER_ITEM_CONFIG.SEE_ALL_COUNT(
+													files.length - shownCount,
+												)}
+											</span>
+											<span
+												aria-hidden="true"
+												className="text-[0.8125rem] leading-snug font-medium underline-offset-3 group-hover:underline">
+												{TRAVELLER_ITEM_CONFIG.SEE_ALL_SHORT(
+													files.length,
+												)}
 											</span>
 										</Link>
 									</li>

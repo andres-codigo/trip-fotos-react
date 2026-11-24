@@ -23,7 +23,7 @@ const TravellersPageSkeleton = () => {
 			<div className={PAGE_LAYOUT.GRID}>
 				{!isLoggedIn && <TravellersWelcome />}
 				<div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
-					<h1 className="my-0 grow">
+					<h1 className="my-0 grow text-title font-bold lg:text-display">
 						{TRAVELLERS_LIST_CONFIG.TITLE}
 					</h1>
 					{/* Keeps the heading row as tall as the page's, where the Refresh button sits */}

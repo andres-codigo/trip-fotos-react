@@ -54,6 +54,7 @@ const EditTrip = () => {
 
 	const [outcome, setOutcome] = useState({ id: null, failed: false })
 	const [isSaving, setIsSaving] = useState(false)
+	const [hasNewPhotos, setHasNewPhotos] = useState(false)
 	const [isConfirming, setIsConfirming] = useState(false)
 	const [isDeleting, setIsDeleting] = useState(false)
 	const [error, setError] = useState(null)
@@ -100,6 +101,7 @@ const EditTrip = () => {
 
 	const handleSubmit = async (data) => {
 		setIsSaving(true)
+		setHasNewPhotos(data.files?.length > 0)
 		setError(null)
 
 		try {
@@ -166,11 +168,7 @@ const EditTrip = () => {
 	}
 
 	const heading = (
-		<h1
-			className={cn(
-				'm-0 text-[1.5rem] font-normal',
-				isLoading && 'sr-only',
-			)}>
+		<h1 className={cn('m-0 text-title font-bold', isLoading && 'sr-only')}>
 			{EDIT_TRIP_CONFIG.TITLE}
 		</h1>
 	)
@@ -197,9 +195,10 @@ const EditTrip = () => {
 					title={EDIT_TRIP_CONFIG.SAVING_TITLE}
 					fixed
 					data-cy={EDIT_TRIP.SAVING_DIALOG}>
-					{uploadProgress ? (
-						<div className="flex flex-col gap-4">
-							<span>{EDIT_TRIP_CONFIG.SAVING_MESSAGE}</span>
+					<div className="flex flex-col gap-4">
+						<span>{GLOBAL.SAVING_DIALOG.MESSAGE}</span>
+						{/* The record is still saving once the uploads reach 100%, so the spinner comes back for it */}
+						{uploadProgress && uploadProgress.percent < 100 ? (
 							<BaseProgress
 								value={uploadProgress.percent}
 								label={GLOBAL.UPLOAD_PROGRESS_LABEL(
@@ -208,13 +207,17 @@ const EditTrip = () => {
 									uploadProgress.percent,
 								)}
 							/>
-						</div>
-					) : (
-						<>
-							{EDIT_TRIP_CONFIG.SAVING_MESSAGE}
-							<BaseSpinner />
-						</>
-					)}
+						) : (
+							<BaseSpinner
+								className="justify-start"
+								label={
+									hasNewPhotos && !uploadProgress
+										? GLOBAL.SAVING_DIALOG.PREPARING_PHOTOS
+										: GLOBAL.SAVING_DIALOG.SAVING
+								}
+							/>
+						)}
+					</div>
 				</BaseDialog>
 			)}
 			{isConfirming && (
@@ -289,7 +292,7 @@ const EditTrip = () => {
 					{/* The rules refuse an unverified account's changes and photos, but still let it delete the trip */}
 					{!emailVerified ? (
 						<BaseCard className={PAGE_LAYOUT.LEFT_COLUMN}>
-							<h1 className="mt-0 mb-4 text-[1.5rem]">
+							<h1 className="mt-0 mb-4 text-title font-bold">
 								{EDIT_TRIP_CONFIG.TITLE}
 							</h1>
 							<VerifyEmailNote

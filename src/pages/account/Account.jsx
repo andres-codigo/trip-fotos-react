@@ -351,7 +351,7 @@ const Account = () => {
 				<div className="m-4 flex flex-col gap-5 p-4">
 					<h1
 						tabIndex={-1}
-						className="m-0 text-[1.5rem]"
+						className="m-0 text-title font-bold lg:text-display"
 						data-cy={ACCOUNT_PAGE.TITLE}>
 						{ACCOUNT_SETTINGS_CONFIG.TITLE}
 					</h1>

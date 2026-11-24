@@ -50,9 +50,16 @@ describe('<ChangeEmailForm />', () => {
 		expect(currentField()).toHaveAttribute('type', 'password')
 	})
 
-	it('starts with focus in New email', async () => {
+	// A focused field would raise a phone's keyboard over the form
+	it('starts with focus on its heading', async () => {
 		renderForm()
-		await waitFor(() => expect(newEmailField()).toHaveFocus())
+		await waitFor(() =>
+			expect(
+				screen.getByRole('heading', {
+					name: CHANGE_EMAIL_CONFIG.TITLE,
+				}),
+			).toHaveFocus(),
+		)
 	})
 
 	it('submits the trimmed new email and the current password', async () => {

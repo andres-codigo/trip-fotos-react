@@ -35,11 +35,11 @@ function Header() {
 			role="banner"
 			aria-label="Site header">
 			<p
-				className="my-[0.67em] text-2xl font-bold"
+				className="my-[0.67em] text-brand font-bold"
 				data-cy="site-header-title-link">
 				<Link
 					to={PATHS.TRAVELLERS}
-					className="m-0 px-6 py-3 text-on-header"
+					className="m-0 px-5 py-3 text-on-header"
 					aria-label="Trip Fotos Home">
 					Trip Fotos
 				</Link>

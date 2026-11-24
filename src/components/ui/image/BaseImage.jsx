@@ -18,6 +18,7 @@ const BaseImage = ({
 }) => {
 	const [hasError, setHasError] = useState(false)
 	const [isThumbnailFailed, setIsThumbnailFailed] = useState(false)
+	const [isLoaded, setIsLoaded] = useState(false)
 
 	const alt = description || `${title}'s photo`
 	const { width, height } = dimensions ?? PLACEHOLDER_DIMENSIONS
@@ -41,7 +42,16 @@ const BaseImage = ({
 			width={width}
 			height={height}
 			loading="lazy"
+			// A cached photo can finish before React attaches onLoad
+			ref={(node) => {
+				if (node?.complete && node.naturalWidth > 0) setIsLoaded(true)
+			}}
+			onLoad={() => setIsLoaded(true)}
 			onError={handleError}
+			className={cn(
+				'transition-opacity duration-150 motion-reduce:transition-none',
+				!isLoaded && 'opacity-0',
+			)}
 			data-cy={IMAGE.THUMBNAIL}
 		/>
 	)
@@ -49,8 +59,12 @@ const BaseImage = ({
 	return (
 		<li
 			className={cn(
-				'relative aspect-square overflow-hidden bg-surface-sunken [&_img]:block [&_img]:h-full [&_img]:w-full [&_img]:object-cover',
+				'relative aspect-square overflow-hidden [&_img]:block [&_img]:h-full [&_img]:w-full [&_img]:object-cover',
 				CARD_PHOTOS.TILE_WIDTH,
+				// The skeleton while loading, so a slow grid never reads as dead black squares; the sunken well only behind "unavailable"
+				hasError
+					? 'bg-surface-sunken'
+					: !isLoaded && 'animate-skeleton bg-skeleton',
 				onOpen && 'tile-focus-ring [&_img]:cursor-pointer',
 			)}
 			data-cy={IMAGE.ID}>

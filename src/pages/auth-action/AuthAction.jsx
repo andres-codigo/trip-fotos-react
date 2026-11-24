@@ -59,7 +59,7 @@ const STEPS = Object.freeze({ CHECK: 'check', CONFIRM: 'confirm' })
 const RESEND_IDLE = { status: 'idle', error: '', email: '' }
 
 const viewClasses = 'm-4 flex flex-col gap-4 p-4'
-const titleClasses = 'm-0 text-[1.5rem]'
+const titleClasses = 'm-0 text-title font-bold lg:text-display'
 const buttonClasses = 'self-start [@media(max-width:1024px)]:w-full'
 
 const Tick = () => (

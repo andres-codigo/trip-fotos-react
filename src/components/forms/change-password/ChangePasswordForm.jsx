@@ -42,8 +42,8 @@ const ChangePasswordForm = ({ onSubmit, onCancel, className }) => {
 	const [next, setNext] = useState(EMPTY)
 	const [formError, setFormError] = useState('')
 	const [isSaving, setIsSaving] = useState(false)
-	// Focus waits for the render, as the fields are still disabled when a save comes back
-	const [focusId, setFocusId] = useState({ id: CURRENT_PASSWORD_ID })
+	// Focus waits for the render, as the fields are still disabled when a save comes back. On open it goes to the heading, so a phone keeps its keyboard down
+	const [focusId, setFocusId] = useState({ id: TITLE_ID })
 
 	useEffect(() => {
 		document.getElementById(focusId.id)?.focus()
@@ -100,6 +100,7 @@ const ChangePasswordForm = ({ onSubmit, onCancel, className }) => {
 			data-cy={CHANGE_PASSWORD_FORM.ROOT}>
 			<h3
 				id={TITLE_ID}
+				tabIndex={-1}
 				className="m-0 text-[1.0625rem]">
 				{CHANGE_PASSWORD_CONFIG.TITLE}
 			</h3>

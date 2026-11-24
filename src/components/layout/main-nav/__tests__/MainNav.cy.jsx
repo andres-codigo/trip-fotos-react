@@ -42,7 +42,7 @@ const createStore = () =>
 const mountNav = () =>
 	cy.mountWithProviders(
 		<header className="fixed flex h-20 w-full items-center justify-between bg-header">
-			<p className="px-6 text-2xl font-bold">Trip Fotos</p>
+			<p className="px-5 text-brand font-bold">Trip Fotos</p>
 			<MainNav
 				isLoggedIn
 				isTraveller

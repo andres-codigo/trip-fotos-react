@@ -29,12 +29,14 @@ const Register = () => {
 	const uploadProgress = useSelector(selectUploadProgress)
 	const emailVerified = useSelector(selectEmailVerified)
 	const [isLoading, setIsLoading] = useState(false)
+	const [hasNewPhotos, setHasNewPhotos] = useState(false)
 	const [error, setError] = useState(null)
 
 	const handleCloseError = () => setError(null)
 
 	const handleRegistrationSubmit = async (formData) => {
 		setIsLoading(true)
+		setHasNewPhotos(formData.files?.length > 0)
 		setError(null)
 
 		try {
@@ -78,12 +80,13 @@ const Register = () => {
 			{isLoading && (
 				<BaseDialog
 					show={true}
-					title="Registering"
+					title={GLOBAL.SAVING_DIALOG.REGISTERING_TITLE}
 					fixed
 					data-cy="registering-dialog">
-					{uploadProgress ? (
-						<div className="flex flex-col gap-4">
-							<span>{GLOBAL.REGISTERING_MESSAGE}</span>
+					<div className="flex flex-col gap-4">
+						<span>{GLOBAL.SAVING_DIALOG.MESSAGE}</span>
+						{/* The record is still saving once the uploads reach 100%, so the spinner comes back for it */}
+						{uploadProgress && uploadProgress.percent < 100 ? (
 							<BaseProgress
 								value={uploadProgress.percent}
 								label={GLOBAL.UPLOAD_PROGRESS_LABEL(
@@ -92,16 +95,19 @@ const Register = () => {
 									uploadProgress.percent,
 								)}
 							/>
-						</div>
-					) : (
-						<>
-							{GLOBAL.REGISTERING_MESSAGE}
-							<BaseSpinner />
-						</>
-					)}
+						) : (
+							<BaseSpinner
+								className="justify-start"
+								label={
+									hasNewPhotos && !uploadProgress
+										? GLOBAL.SAVING_DIALOG.PREPARING_PHOTOS
+										: GLOBAL.SAVING_DIALOG.SAVING
+								}
+							/>
+						)}
+					</div>
 				</BaseDialog>
 			)}
-			{/* A div, as the unlayered section rule would add padding */}
 			<div
 				className={
 					emailVerified ? PAGE_LAYOUT.WIDE : PAGE_LAYOUT.NARROW
@@ -116,7 +122,9 @@ const Register = () => {
 				) : (
 					// A card at every width, as the note has no sections to open up into
 					<BaseCard>
-						<h1 className="mt-0 mb-4 text-[1.5rem]">{TITLE}</h1>
+						<h1 className="mt-0 mb-4 text-title font-bold">
+							{TITLE}
+						</h1>
 						<VerifyEmailNote
 							text={VERIFY_EMAIL_PROMPT_CONFIG.REGISTER_NOTE}
 						/>

@@ -6,7 +6,7 @@ import { scrollToTop } from '@/utils/useScrollToTopOnNavigate'
 
 // The current page gets a 3px bar under the label, never colour alone; the ring sits inside so it clears the header edge
 const linkClasses =
-	'relative flex h-full items-center gap-2 px-4 text-[0.9375rem] font-medium text-on-header no-underline hover:bg-header-active focus-visible:-outline-offset-3'
+	'relative flex h-full items-center gap-2 px-4 text-[0.9375rem] font-medium text-on-header no-underline hover:bg-header-active hover:text-on-header-active focus-visible:-outline-offset-3'
 const activeClasses =
 	'after:absolute after:inset-x-3 after:bottom-0 after:h-[3px] after:rounded-t-[3px] after:bg-accent-text'
 

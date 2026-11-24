@@ -21,7 +21,9 @@ const MessagesPageSkeleton = () => {
 			data-cy={MESSAGES_PAGE_SKELETON.ROOT}>
 			<title>{`${MESSAGES_CONFIG.TITLE} · ${GLOBAL.SITE_NAME}`}</title>
 			<div className={PAGE_LAYOUT.WIDE}>
-				<h1 className="mt-0 mb-1">{MESSAGES_CONFIG.TITLE}</h1>
+				<h1 className="mt-0 mb-1 text-title font-bold lg:text-display">
+					{MESSAGES_CONFIG.TITLE}
+				</h1>
 				<p
 					role="status"
 					className="mt-1 mb-3 text-sm text-text-muted lg:mb-4">

@@ -656,7 +656,10 @@ describe('<TravellerRegistrationForm />', () => {
 			const fieldset = screen.getByRole('group', {
 				name: TRIP_PHOTOS_CONFIG.LEGEND,
 			})
-			expect(fieldset).toHaveAttribute('id', 'photos')
+			// The anchor is the section card, so a scroll shows its top edge
+			expect(
+				screen.getByTestId('traveller-photos-section'),
+			).toHaveAttribute('id', 'photos')
 			expect(
 				within(fieldset).getAllByTestId(TRIP_PHOTOS.TILE),
 			).toHaveLength(3)
