@@ -60,6 +60,12 @@
 
 /* Matches useViewport and GLOBAL.BREAKPOINT.MOBILE: the mobile layout includes 768px itself */
 @custom-variant mobile (@media (width <= 768px));
+/* A phone either way up: the mobile width, or a screen 480px tall or less held sideways */
+@custom-variant phone {
+	@media (width <= 768px), (height <= 30rem) {
+		@slot;
+	}
+}
 
 @theme inline {
 	--color-bg: var(--bg);

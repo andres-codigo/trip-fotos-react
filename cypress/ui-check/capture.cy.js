@@ -1882,6 +1882,36 @@ describe(`UI check capture (${LABEL})`, () => {
 				shot(`photo-states-lightbox-focus-${width}`, LIGHTBOX_SHOT)
 				forcePseudo(closeButton, [], { scroll: false })
 
+				// Mid swipe down: the photo follows the finger and the backdrop fades; a last move that goes nowhere makes the release slow, so it springs back
+				if (width < 768) {
+					const touchAt = (type, clientY) =>
+						cy
+							.get(COMMON_SELECTORS.IMAGE_GALLERY_STAGE)
+							.trigger(type, {
+								touches:
+									type === 'touchend'
+										? []
+										: [{ clientX: 200, clientY }],
+								changedTouches: [{ clientX: 200, clientY }],
+							})
+					touchAt('touchstart', 300)
+					touchAt('touchmove', 340)
+					touchAt('touchmove', 420)
+					touchAt('touchmove', 420)
+					cy.get(COMMON_SELECTORS.IMAGE_GALLERY_STAGE).should(
+						'have.attr',
+						'style',
+						'transform: translateY(120px);',
+					)
+					shot(`photo-states-lightbox-swipe-${width}`, LIGHTBOX_SHOT)
+					touchAt('touchend', 420)
+					cy.get(COMMON_SELECTORS.IMAGE_GALLERY_STAGE).should(
+						($stage) =>
+							expect($stage[0].style.transform).to.equal(''),
+					)
+					cy.get('[role="dialog"]').should('be.visible')
+				}
+
 				next(1)
 				settleOn(1)
 				cy.get(COMMON_SELECTORS.BASE_IMAGE_FULL)
@@ -1902,14 +1932,20 @@ describe(`UI check capture (${LABEL})`, () => {
 					.should('have.attr', 'src', panorama.file)
 					.and('be.visible')
 				shot(`photo-states-lightbox-panorama-${width}`, LIGHTBOX_SHOT)
-				// A phone held sideways: wide enough for the side arrows, short enough for the smaller ones
+				// Phones held sideways keep the arrows in the bottom row, lined up with the title and Close
 				if (width === 1280) {
-					cy.viewport(844, 390)
-					settleOn(5)
-					shot(
-						'photo-states-lightbox-landscape-844x390',
-						LIGHTBOX_SHOT,
-					)
+					;[
+						[667, 375],
+						[844, 390],
+						[932, 430],
+					].forEach(([landscapeWidth, landscapeHeight]) => {
+						cy.viewport(landscapeWidth, landscapeHeight)
+						settleOn(5)
+						shot(
+							`photo-states-lightbox-landscape-${landscapeWidth}x${landscapeHeight}`,
+							LIGHTBOX_SHOT,
+						)
+					})
 					cy.viewport(width, HEIGHT)
 					settleOn(5)
 				}

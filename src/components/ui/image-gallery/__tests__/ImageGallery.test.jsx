@@ -1,5 +1,12 @@
-import { describe, it, expect, vi } from 'vitest'
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
+import {
+	act,
+	createEvent,
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+} from '@testing-library/react'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 
 import { IMAGE } from '@/constants/test'
@@ -46,6 +53,29 @@ const openAt = (position) =>
 	)
 
 const full = () => screen.getByTestId(IMAGE.FULL)
+
+// The photo area is 800px tall, so the close threshold is 200px; time is faked so each move's speed is set by the test
+const swipe = (points, { msPerMove = 100 } = {}) => {
+	const stage = screen.getByTestId(IMAGE.STAGE)
+	Object.defineProperty(stage, 'clientHeight', { value: 800 })
+	// jsdom drops plain objects from a TouchList, so the touches are set on the event itself; the dialog's scroll lock reads changedTouches
+	const touch = (create, [clientX, clientY], isEnd = false) => {
+		const event = create(stage)
+		const point = [{ clientX, clientY }]
+		Object.defineProperty(event, 'touches', { value: isEnd ? [] : point })
+		Object.defineProperty(event, 'changedTouches', { value: point })
+		fireEvent(stage, event)
+	}
+	touch(createEvent.touchStart, points[0])
+	points.slice(1).forEach((point) => {
+		vi.advanceTimersByTime(msPerMove)
+		touch(createEvent.touchMove, point)
+	})
+	return {
+		stage,
+		release: () => touch(createEvent.touchEnd, points.at(-1), true),
+	}
+}
 
 describe('<ImageGallery />', () => {
 	it('uses a photo’s description as its alt text and caption, and the name and number otherwise', () => {
@@ -239,6 +269,107 @@ describe('<ImageGallery />', () => {
 		fireEvent.click(tile)
 		fireEvent.click(screen.getByRole('button', { name: 'Close' }))
 		await waitFor(() => expect(tile).toHaveFocus())
+	})
+
+	describe('swipe down to close', () => {
+		beforeEach(() => vi.useFakeTimers({ toFake: ['Date', 'performance'] }))
+		afterEach(() => {
+			vi.useRealTimers()
+			vi.unstubAllGlobals()
+		})
+
+		it('moves the photo with the finger and closes past the threshold, returning focus to the tile', async () => {
+			renderGallery()
+			const tile = screen.getAllByRole('button', { name: /View Ada/ })[1]
+			tile.focus()
+			fireEvent.click(tile)
+			const { stage, release } = swipe([
+				[100, 100],
+				[102, 200],
+				[104, 320],
+			])
+			expect(stage).toHaveStyle({ transform: 'translateY(220px)' })
+			release()
+			await waitFor(() =>
+				expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+			)
+			await waitFor(() => expect(tile).toHaveFocus())
+		})
+
+		it('closes on a fast flick short of the threshold', async () => {
+			renderGallery()
+			openAt(0)
+			const { release } = swipe(
+				[
+					[100, 100],
+					[100, 120],
+					[100, 180],
+				],
+				{ msPerMove: 20 },
+			)
+			release()
+			await waitFor(() =>
+				expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+			)
+		})
+
+		it('springs back when released short of the threshold', () => {
+			renderGallery()
+			openAt(0)
+			const { stage, release } = swipe([
+				[100, 100],
+				[100, 140],
+				[100, 180],
+			])
+			expect(stage).toHaveStyle({ transform: 'translateY(80px)' })
+			release()
+			expect(screen.getByRole('dialog')).toBeInTheDocument()
+			expect(stage.style.transform).toBe('')
+		})
+
+		it('springs back from a swipe up without moving the photo', () => {
+			renderGallery()
+			openAt(0)
+			const { stage, release } = swipe([
+				[100, 500],
+				[100, 300],
+				[100, 100],
+			])
+			expect(stage.style.transform).toBe('')
+			release()
+			expect(screen.getByRole('dialog')).toBeInTheDocument()
+		})
+
+		it('locks a sideways gesture to the horizontal axis', () => {
+			renderGallery()
+			openAt(0)
+			const { stage, release } = swipe([
+				[300, 100],
+				[250, 105],
+				[200, 400],
+			])
+			expect(stage.style.transform).toBe('')
+			release()
+			expect(screen.getByRole('dialog')).toBeInTheDocument()
+		})
+
+		it('closes without the photo following the finger under reduced motion', async () => {
+			vi.stubGlobal('matchMedia', (query) => ({
+				matches: query === '(prefers-reduced-motion: reduce)',
+			}))
+			renderGallery()
+			openAt(0)
+			const { stage, release } = swipe([
+				[100, 100],
+				[100, 200],
+				[100, 340],
+			])
+			expect(stage.style.transform).toBe('')
+			release()
+			await waitFor(() =>
+				expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+			)
+		})
 	})
 
 	describe('with a urlParam', () => {
