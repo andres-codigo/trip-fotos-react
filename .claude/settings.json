@@ -38,7 +38,13 @@
 			"Bash(node .claude/skills/verify/verify.mjs *)",
 			"Bash(node .claude/skills/verify/reset-checks.mjs)",
 			"Bash(node .claude/skills/verify/reset-checks.mjs cache)",
-			"Bash(gh api repos/andres-codigo/trip-fotos-react/issues/*/dependencies/blocked_by --jq *)"
+			"Bash(gh api repos/andres-codigo/trip-fotos-react/issues/*/dependencies/blocked_by --jq *)",
+			"Bash(gh project view *)",
+			"Bash(npm run knip)",
+			"Bash(node .claude/skills/ui-check/affected.mjs)",
+			"Bash(node .claude/skills/ui-check/status.mjs *)",
+			"Bash(node .claude/skills/ui-check/compare.mjs)",
+			"Bash(node .claude/skills/ui-check/compare.mjs *)"
 		],
 		"ask": ["Bash(npm install *)", "Bash(npm run cy:run:e2e:live)"],
 		"deny": [

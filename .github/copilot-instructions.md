@@ -25,6 +25,7 @@
 - **Data**: Server data goes through store thunks only (no RTK Query; database calls go through `databaseRequest`, never from components or hooks); session data is read through the authentication selectors, never `localStorage`.
 - **One pattern per concern**: before adding a new way to do something (errors, loading, hooks, spacing, test selectors), find the existing one in the matching instruction file and use it. If the instruction file is wrong, fix it in the same change.
 - **Remove what a change leaves unused**: when a change removes, renames or replaces something, search `src`, `cypress`, `scripts`, `config`, `.github` and `docs` for every reference to it, following aliases and destructures of the object it sits in (`const INBOX = VERIFY_EMAIL_INBOX_SELECTORS`, then `INBOX.ROOT`, which a search for the full name misses), and in the same change delete what has no users left: exports, constants and their keys, selectors and `data-cy` hooks, action types, persisted keys, test helpers, mock data and docs. Deleting a test counts too: an export, mock or test-data file it was the last user of goes with it. ESLint only sees unused names inside one file, and knip does not see constant keys, so run `npm run knip` and the search before `/verify` rather than leaving it to fail there.
+- **Finish what you check**: before calling a check, review or test pass complete, list everything the change can touch (every consumer, prop, mode, state and width) and cover each one. Report a gap only when it is impossible to close (live writes, unseedable data, a missing tool), with the reason; do the reachable ones instead of listing them.
 - **Linting and Formatting**: Ensure every edited or newly created file is ESLint-clean and Prettier-formatted before finishing work.
 
 ## Domain-Specific Guidance
@@ -36,6 +37,8 @@ For detailed guidance, refer to the following instruction files:
 - **Redux Store**: `.github/instructions/store.instructions.md` — Slices, thunks, error handling, persistence, testing.
 - **Styling**: `.github/instructions/styles.instructions.md` — Tailwind utilities, `cn()`, semantic tokens, layers and state variants.
 - **Testing**: `.github/instructions/testing.instructions.md` — Vitest/Cypress standards, shared test data paths, and anti-flakiness practices.
+- **CI and scripts**: `.github/instructions/ci.instructions.md` — Workflows, trigger paths, `pull_request_target`, script tests and data-script safety.
+- **Constants**: `src/constants/README.md` — Barrel imports and where each kind of constant belongs.
 
 ## Workflow Automation
 

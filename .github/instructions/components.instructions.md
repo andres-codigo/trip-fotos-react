@@ -79,6 +79,27 @@ Build a form from the parts in `src/components/ui/form/`, not hand-rolled fields
 - A form with required fields shows `RequiredLegend` once, above its fields, and marks each required field with `showRequiredMark`. Help text says the rule before the user breaks it.
 - A form with several fields shows `ErrorSummary` above them. Pass the errors as `{ id, message }`, with `id` matching the field's id, and bump `focusKey` once per failed submit, so the summary takes focus then and not on every edit.
 
+- Check a field when it is left and on submit, never while typing. Login and Reset have no summary: focus moves to the first invalid field.
+- Set `autocomplete` on every identity field (`email`, `current-password` on Log in, `new-password` on Create an account, `given-name`, `family-name`), and `off` on search boxes.
+
+### Copy
+
+Messages, labels and status text live in `src/constants` (long-form prose such as Privacy may stay in the page), and all copy follows the design system's content rules:
+
+- British English, sentence case, second person kept to a minimum. The app's words: "Email", "Log in", "Log out", "Create an account".
+- A button is one word where possible (Register, Refresh, Cancel, Delete). One that leads to a person or page says so: "Message {first name}", "View trip", "Go to Travellers".
+- A loading button keeps its width and swaps its label for the -ing form with an ellipsis ("Sending…", "Saving…").
+- An error says what to do, starting with the verb and ending with a full stop: "Enter your first name.", "Add at least one city." Never count characters down in an error.
+- Dates read "12 Mar 2025" and a trip "12–19 Mar 2025 · 8 days"; city names come from one formatter. Use `@/utils/tripDates` and `@/utils/formatCity`, never a local format.
+- Signed-in users see full names ("Amara Okafor"); logged-out visitors see the first name and last initial ("Amara O.").
+
+### Destructive And Failed Actions
+
+- Prefer Undo to a confirm dialog for what can be put back: the `toast` shows Undo for 8 seconds without moving focus, and the delete waits until it closes, so Undo never waits on the network.
+- What cannot be undone (deleting a profile) is confirmed in a dialog that spells out the consequence, with Cancel first and focused; Escape cancels and focus returns to the button that opened it.
+- A failed load is an inline alert (`InlineAlert`) with Try again, never a dialog. A failed save keeps every edit and says what was not saved.
+- Do not lose focus when a control disappears: move it to what replaced it (the first card "Show more" added, the next conversation).
+
 ### Consistency
 
 Maintain **API consistency** (prop names, validation patterns) when creating similar UI components. This ensures developers can switch between components with minimal cognitive load.

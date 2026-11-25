@@ -31,6 +31,17 @@ Changing a token or colour value: before running `/verify`, search the specs (`s
 
 Space a row or column of items with `gap` on the flex or grid parent, plus `items-center` for mixed-height rows. Do not give reusable components (`BaseButton`, `BaseBadge`, `BaseCard`, `BaseImage`) an outer margin to fake spacing: it compounds and misaligns wherever the component is reused. `BaseCard` keeps only `mx-auto` to centre itself; a page adds the global `cardPage` class for its vertical spacing.
 
+## Layout, Breakpoints And Touch
+
+The look, layouts and per-page rules come from the design system (the "00: Trip Fotos" Claude Design artifact, used by `/design-change`); these are the parts every build keeps.
+
+- Breakpoints are the `--breakpoint-*` tokens in `tailwind.css`: `sm` 640px, `md` 768px, `lg` 1024px, the same as the design system. Write mobile first and add `sm:`, `md:` and `lg:` upwards. The phone layout includes 768px itself: use the `mobile:` variant (`width <= 768px`, matching `useViewport` and `GLOBAL.BREAKPOINT.MOBILE`) for what changes there, such as the docked tab bar, which is never shown above 768px. `phone:` adds a phone held sideways.
+- Content widths: a single 640px card column; Travellers, and the two-column pages from `lg`, at 1160px.
+- Every button, input, chip and icon-only control is at least 44px tall (`min-h-11`; `size-11` for an icon-only button). An icon-only control also carries an accessible name. Do not shrink a control below it to fit a row: let the row wrap.
+- Never rely on colour alone: a selected filter shows a tick, the current page a bar and `aria-current`, a status alert words.
+- Motion: 200ms for hover and press, 300ms for fades and toasts, `ease-out`.
+- Icons are line icons (2px stroke) beside or carrying an accessible name; decorative ones take `aria-hidden="true"`. No emoji.
+
 ## States And Accessibility
 
 - Drive visual state from state, not class names: `aria-invalid:`, `data-[state=open]:`, `disabled:` and `aria-current:` variants, so a test can assert the attribute.
