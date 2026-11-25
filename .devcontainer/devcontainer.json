@@ -11,6 +11,7 @@
 		}
 	},
 	"remoteUser": "vscode",
+	"appPort": [3000, 4000, 9000, 9099, 9199],
 	"forwardPorts": [3000, 4000, 9000, 9099, 9199],
 	"portsAttributes": {
 		"3000": { "label": "Vite dev server" },
