@@ -68,7 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Verified email to post: browse at once, post once your email is verified
 - Stay signed in until you log out, including in the home-screen app
 - Clearer form errors: each error sits under its field's label
-- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo and test suite
+- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo and test suite, a dev container that works outside VS Code
 
 **Blocked**
 
@@ -113,7 +113,7 @@ npm run dev       # http://localhost:3000
 
 The app needs a Firebase project and a `.env` file first — see [Setup](#setup).
 
-A [VS Code Dev Container](.devcontainer/devcontainer.json) is included. It bind-mounts `~/.gitconfig`, `~/.config/gh` and `~/.claude` from the host, so set those up first; if they are missing, Docker creates empty placeholders and the matching tool is unauthenticated inside the container. Claude Code keeps its config in `~/.claude/.claude.json` (via `CLAUDE_CONFIG_DIR`) rather than a bind-mounted `~/.claude.json`, because a single-file mount breaks when Claude Code replaces the file on save.
+A [VS Code Dev Container](.devcontainer/devcontainer.json) is included. It bind-mounts `~/.gitconfig`, `~/.config/gh` and `~/.claude` from the host, so set those up first; if they are missing, Docker creates empty placeholders and the matching tool is unauthenticated inside the container. Claude Code keeps its config in `~/.claude/.claude.json` (via `CLAUDE_CONFIG_DIR`) rather than a bind-mounted `~/.claude.json`, because a single-file mount breaks when Claude Code replaces the file on save. The dev server and emulator ports are published with `appPort`, so `https://localhost:3000` also works from a terminal outside VS Code (`devcontainer exec --workspace-folder . bash`), and git authenticates through `gh` (`gh auth setup-git` runs on create) rather than VS Code's credential helper, so pushes work there too; rebuild the container after pulling this change.
 
 <a id="scripts"></a>
 
