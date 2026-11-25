@@ -68,7 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Verified email to post: browse at once, post once your email is verified
 - Stay signed in until you log out, including in the home-screen app
 - Clearer form errors: each error sits under its field's label
-- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo and test suite, a dev container that works outside VS Code
+- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo and test suite, a dev container that works outside VS Code, and AI guidance with a drift check
 
 **Blocked**
 
@@ -352,11 +352,11 @@ Optional: with a self-signed certificate in `certs/`, `npm run dev` serves over 
 
 GitHub Copilot and Claude Code share one set of guidance, so the two tools do not drift apart:
 
-- **Shared conventions** — `.github/copilot-instructions.md` and `CLAUDE.md` hold the workspace rules; `.github/instructions/*.instructions.md` hold the component, page, store, styling and testing guidance both tools read (Claude Code loads each through a path-scoped rule in `.claude/rules/`).
+- **Shared conventions** — `.github/copilot-instructions.md` and `CLAUDE.md` hold the workspace rules; `.github/instructions/*.instructions.md` hold the component, page, store, styling, testing and CI/scripts guidance both tools read (Claude Code loads each through a path-scoped rule in `.claude/rules/`).
 - **Scaffolding agents** — `create-component`, `create-page`, `create-redux-slice` and `create-hook` live in `.github/agents/`, with thin Claude Code wrappers in `.claude/agents/`.
-- **Enforced quality** — a Claude Code `PostToolUse` hook formats and lints every edited file, and the `/verify` skill runs only the lint, unused-code (knip), Vitest, Cypress component and build gates a change can affect, caching each gate's pass so a re-run skips gates no later edit can affect. `/verify e2e` adds the emulator E2E suite. A change to a page's look goes build, targeted tests, `/ui-check` and its fixes, then `/verify` once: `/verify` refuses a UI change until `/ui-check` has passed on it.
+- **Enforced quality** — Claude Code hooks format and lint every edited file, block file changes without an issue branch and draft PR, block commits without a `/verify` pass, and stop a ready PR from ending a turn with a stale README Status; and the `/verify` skill runs only the lint, unused-code (knip), Vitest, Cypress component and build gates a change can affect, caching each gate's pass so a re-run skips gates no later edit can affect. `/verify e2e` adds the emulator E2E suite. A change to a page's look goes build, targeted tests, `/ui-check` and its fixes, then `/verify` once: `/verify` refuses a UI change until `/ui-check` has passed on it.
 - **Workflow skills** — `/start-issue` and `/finish-pr` take an issue from the board to a merged PR, and `/design-change` runs a UI redesign from brief to build.
-- **Permissions** — `.claude/settings.json` allows routine checks, commits, pushes and draft PRs, asks before merges, installs and E2E runs, and denies force-pushes and reading `.env` or `certs/`.
+- **Permissions** — `.claude/settings.json` allows routine checks, commits, pushes and draft PRs, merges once CI is green, asks before installs and live E2E runs, and denies force-pushes and reading `.env` or `certs/`.
 
 Full detail is in [docs/ai-assistance.md](docs/ai-assistance.md). How the tools are used day to day, and the agent pipeline that delivered the Vue port, are written up in the [AI-Assisted Development Story](docs/ai-assisted-dev-story/README.md).
 

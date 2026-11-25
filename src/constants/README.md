@@ -19,6 +19,8 @@ import { HEADER_SELECTORS } from '../../../src/constants/test/selectors/componen
 import { IDENTITY_TOOLKIT_ERRORS } from '../../../src/constants/test/mock-data/mock-api'
 ```
 
+Keep domain constants (`auth`, `travellers`, `validation`) separate from UI constants (`ui`).
+
 ## Directory Structure
 
 ```
@@ -53,15 +55,15 @@ src/constants/
 │   │   ├── _ids.js
 │   │   ├── components.js
 │   │   └── pages.js
-│   ├── ui-constants.js
-│   └── utilities/
-│       └── selectors.js
+│   └── ui-constants.js
 ├── travellers/
 │   └── index.js               # TRAVELLER_REGISTRATION_FIELDS, TRAVELLER_REGISTRATION_CITIES
 ├── ui/
 │   ├── index.js
 │   ├── accessibility.js
 │   ├── global.js
+│   ├── layout.js
+│   ├── navigation.js
 │   └── paths.js
 └── validation/
     └── index.js               # VALIDATION_MESSAGES, FILE_UPLOAD (accepted types, size limit)

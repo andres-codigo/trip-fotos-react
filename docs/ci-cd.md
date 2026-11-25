@@ -93,7 +93,7 @@ From 2 December 2026 GitHub blocks `pull_request_target` in public repositories 
 
 They stay on `pull_request_target` because `pull_request` gives Dependabot PRs a read-only token and no secrets, so those PRs would get no labels or card. It is safe because both check out only the default branch's `.github` folder, run no PR code, use no cache, and read the PR title and branch as data inside `github-script`, never in a shell. Keep it that way: a step that checks out the PR head or runs its scripts would hand fork code a write token.
 
-A new `pull_request_target` workflow must be added to the policy's `include` list. To recreate the policy, or apply an edit, run as a repository admin (**Settings → Actions → Policies** shows it, and **Policy insights** lists blocked runs):
+Prefer `pull_request` for a new workflow unless it needs a write token or secrets on Dependabot PRs. A new or renamed `pull_request_target` workflow must be added to the policy's `include` list, or it silently never runs. Applying the edit changes a repository setting, so ask the maintainer first. The existing policy's id is `15204`. To recreate the policy, or apply an edit, run as a repository admin (**Settings → Actions → Policies** shows it, and **Policy insights** lists blocked runs):
 
 ```bash
 gh api -X POST repos/{owner}/{repo}/actions/policies --input .github/rulesets/allow-pull-request-target.json

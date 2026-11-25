@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 import { PATHS } from '@/constants/ui'
 
@@ -78,5 +78,63 @@ describe('README and package.json', () => {
 				(entry) => !example.some((n) => covers(entry, n)),
 			),
 		).toEqual([])
+	})
+})
+
+describe('AI guidance files', () => {
+	const list = (dir, pattern) =>
+		readdirSync(join(root, dir))
+			.filter((name) => pattern.test(name))
+			.map((name) => `${dir}/${name}`)
+	const skills = readdirSync(join(root, '.claude/skills')).map(
+		(name) => `.claude/skills/${name}/SKILL.md`,
+	)
+	const guidance = [
+		'CLAUDE.md',
+		'.github/copilot-instructions.md',
+		'docs/ai-assistance.md',
+		...list('.github/instructions', /\.md$/),
+		...list('.github/agents', /\.md$/),
+		...list('.claude/rules', /\.md$/),
+		...list('.claude/agents', /\.md$/),
+		...skills,
+	]
+
+	it('links only to files that exist', () => {
+		const broken = guidance.flatMap((file) =>
+			[...read(file).matchAll(/\]\(([^)\s]+)\)/g)]
+				.map((m) => m[1].split('#')[0])
+				.filter((target) => target && !/^[a-z]+:/.test(target))
+				.filter((target) => {
+					try {
+						read(join(dirname(file), target))
+						return false
+					} catch (error) {
+						return error.code !== 'EISDIR'
+					}
+				})
+				.map((target) => `${file} -> ${target}`),
+		)
+		expect(broken).toEqual([])
+	})
+
+	it('gives every Claude agent wrapper its shared workflow', () => {
+		const missing = list('.claude/agents', /\.md$/).filter(
+			(file) =>
+				!read(file).includes(
+					`.github/agents/${file.split('/').pop().replace('.md', '.agent.md')}`,
+				),
+		)
+		expect(missing).toEqual([])
+	})
+
+	it('points a path-scoped rule at every instructions file', () => {
+		const rules = list('.claude/rules', /\.md$/)
+			.map(read)
+			.join('\n')
+		const unpointed = list('.github/instructions', /\.md$/).filter(
+			(file) => !rules.includes(file),
+		)
+		expect(unpointed).toEqual([])
 	})
 })
