@@ -68,7 +68,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 - Verified email to post: browse at once, post once your email is verified
 - Stay signed in until you log out, including in the home-screen app
 - Clearer form errors: each error sits under its field's label
-- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo and test suite
+- Developer tooling: issue-to-PR automation, faster scoped CI and local checks, an unused-code check, a leaner repo and test suite, a dev container that works outside VS Code
 
 **Blocked**
 
