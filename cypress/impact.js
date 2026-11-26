@@ -276,10 +276,18 @@ export const E2E_SPECS = {
 
 const ALL = 'all'
 
-// Tests, stories and test ids change no page
+// Tests, test ids, Vitest helpers and docs change no page; the specs read src/testUtils/cypress/
 const isAppFile = (file) =>
 	file.startsWith('src/') &&
-	!/(\/__tests__\/|\.(test|cy)\.jsx?$|^src\/constants\/test\/)/.test(file)
+	!/(\/__tests__\/|\.(test|cy)\.jsx?$|\.md$|^src\/constants\/test\/|^src\/testUtils\/(?!cypress\/))/.test(
+		file,
+	)
+
+// Inside the tooling folders, but no E2E run or capture loads them: their own tests and the component-test entry
+const isUnusedTooling = (file) =>
+	/(\/__tests__\/|^cypress\/support\/component(\.js|-index\.html)$)/.test(
+		file,
+	)
 
 const startsWithAny = (file, prefixes) =>
 	prefixes.some((prefix) => file.startsWith(prefix))
@@ -288,7 +296,7 @@ const startsWithAny = (file, prefixes) =>
 const affectedAreas = (files, tooling = [], claims = AREAS) => {
 	const areas = new Set()
 	for (const file of files) {
-		if (startsWithAny(file, tooling)) return ALL
+		if (startsWithAny(file, tooling) && !isUnusedTooling(file)) return ALL
 		if (!isAppFile(file)) continue
 		const matched = Object.entries(claims).filter(([, prefixes]) =>
 			startsWithAny(file, prefixes),

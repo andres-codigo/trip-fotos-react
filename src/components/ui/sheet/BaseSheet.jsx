@@ -46,13 +46,13 @@ const BaseSheet = ({
 			}}>
 			<RadixDialog.Portal container={container}>
 				<RadixDialog.Overlay
-					className="fixed inset-0 z-10 bg-overlay data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
+					className="fixed inset-0 z-overlay bg-overlay data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
 					onClick={onClose}
 					data-cy={SHEET.BACKDROP}
 				/>
 				<RadixDialog.Content
 					className={cn(
-						'fixed inset-x-0 bottom-0 z-100 flex max-h-[85dvh] flex-col rounded-t-[1.5rem] border border-b-0 border-border-card bg-surface text-text shadow-overlay data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in motion-reduce:data-[state=closed]:animate-fade-out motion-reduce:data-[state=open]:animate-fade-in',
+						'fixed inset-x-0 bottom-0 z-modal flex max-h-[85dvh] flex-col rounded-t-[1.5rem] border border-b-0 border-border-card bg-surface text-text shadow-overlay data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in motion-reduce:data-[state=closed]:animate-fade-out motion-reduce:data-[state=open]:animate-fade-in',
 						className,
 					)}
 					data-cy={dataCy}

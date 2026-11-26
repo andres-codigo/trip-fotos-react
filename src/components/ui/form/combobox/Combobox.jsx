@@ -159,7 +159,7 @@ const Combobox = ({
 					ref={listboxRef}
 					role="listbox"
 					aria-label={label}
-					className="absolute inset-x-0 z-10 m-0 max-h-64 list-none overflow-y-auto border border-border-card bg-surface p-0 shadow-overlay"
+					className="absolute inset-x-0 z-popover m-0 max-h-64 list-none overflow-y-auto border border-border-card bg-surface p-0 shadow-overlay"
 					data-cy={COMBOBOX.LISTBOX}>
 					{options.map((option, index) => (
 						<li

@@ -51,7 +51,7 @@ function TabBar({ isTraveller, className }) {
 				aria-label={NAVIGATION.MAIN_LABEL}
 				data-cy={TAB_BAR.ROOT}
 				className={cn(
-					'fixed inset-x-0 bottom-0 z-[1] hidden border-t border-border-card bg-surface pt-1 pr-[max(0.25rem,env(safe-area-inset-right))] pb-[env(safe-area-inset-bottom)] pl-[max(0.25rem,env(safe-area-inset-left))] shadow-overlay mobile:block',
+					'fixed inset-x-0 bottom-0 z-tabbar hidden border-t border-border-card bg-surface pt-1 pr-[max(0.25rem,env(safe-area-inset-right))] pb-[env(safe-area-inset-bottom)] pl-[max(0.25rem,env(safe-area-inset-left))] shadow-overlay mobile:block',
 					className,
 				)}>
 				<ul className="m-0 grid auto-cols-fr grid-flow-col p-0">

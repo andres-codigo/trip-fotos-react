@@ -4,6 +4,7 @@ import {
 	changedCaptures,
 	narrowChange,
 	onlyAddsExposeKeys,
+	onlyChangesBlock,
 } from '../narrow.mjs'
 import { CAPTURES, affectedCaptures } from '../../../../cypress/impact.js'
 
@@ -197,6 +198,37 @@ describe('onlyAddsExposeKeys', () => {
 
 	it('rejects a missing diff', () => {
 		expect(onlyAddsExposeKeys(null, CONFIG)).toBe(false)
+	})
+})
+
+describe('onlyChangesBlock', () => {
+	const before = 'export default {\n\ttest: {\n\t\ta: 1,\n\t},\n\tb: 2,\n}'
+
+	it('accepts lines changed, added or removed inside the block', () => {
+		const after = before.replace('a: 1,', 'a: 2,\n\t\tc: 3,')
+
+		expect(
+			onlyChangesBlock(
+				'test',
+				'@@ -3 +3,2 @@\n-\t\ta: 1,\n+\t\ta: 2,\n+\t\tc: 3,',
+				before,
+				after,
+			),
+		).toBe(true)
+	})
+
+	it('rejects a change outside the block, or a missing diff', () => {
+		const after = before.replace('b: 2', 'b: 3')
+
+		expect(
+			onlyChangesBlock(
+				'test',
+				'@@ -5 +5 @@\n-\tb: 2,\n+\tb: 3,',
+				before,
+				after,
+			),
+		).toBe(false)
+		expect(onlyChangesBlock('test', null, before, after)).toBe(false)
 	})
 })
 

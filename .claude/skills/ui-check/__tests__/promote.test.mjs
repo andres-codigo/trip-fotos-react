@@ -115,7 +115,9 @@ describe('promoting after a squash merge', () => {
 	const git = (args) =>
 		execSync(`git ${args}`, { cwd: repo, encoding: 'utf8' }).trim()
 	const write = (file, text) => {
-		fs.mkdirSync(path.dirname(path.resolve(repo, file)), { recursive: true })
+		fs.mkdirSync(path.dirname(path.resolve(repo, file)), {
+			recursive: true,
+		})
 		fs.writeFileSync(path.resolve(repo, file), text)
 	}
 	const dir = () => capturesDir(repo)

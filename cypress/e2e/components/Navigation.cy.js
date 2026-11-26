@@ -140,8 +140,11 @@ describe('Logged in as a traveller > Navigation > Scroll position', () => {
 		content = TRAVELLERS_LIST_SELECTORS.TRAVELLERS_LIST,
 	) => {
 		cy.get(content).should('be.visible')
-		cy.scrollTo('bottom', { ensureScrollable: false })
-		cy.window().its('scrollY').should('be.gt', 0)
+		// Scrolls again on each retry, as the page may not yet be taller than the viewport
+		cy.window().should((win) => {
+			win.scrollTo(0, win.document.body.scrollHeight)
+			expect(win.scrollY).to.be.gt(0)
+		})
 	}
 	const shouldBeAtTop = () => cy.window().its('scrollY').should('eq', 0)
 
