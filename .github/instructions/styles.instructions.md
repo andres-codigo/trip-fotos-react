@@ -23,7 +23,7 @@ Changing a token or colour value: before running `/verify`, search the specs (`s
 
 ## Layers And Specificity
 
-- Stack with the `z-*` tokens in `tailwind.css` (`z-raised`, `z-tabbar`, `z-header`, `z-skip-link`, `z-popover`, `z-alert`, `z-overlay`, `z-toast`, `z-modal`), never a number or an arbitrary value. A new layer becomes a token placed in that order.
+- Stack with the `z-*` tokens in `tailwind.css` (`z-raised`, `z-tabbar`, `z-header`, `z-skip-link`, `z-popover`, `z-alert`, `z-overlay`, `z-modal`, `z-toast`), never a number or an arbitrary value. A new layer becomes a token placed in that order.
 
 - Tailwind's theme and utilities layers are imported; preflight is left out because its reset would change headings, lists and form controls.
 - Utilities sit in a layer, and unlayered CSS always beats a layer. The global page-shell rules (`html`, `body`, `main`, `section`, `.mainContainer`, `.cardPage`) are unlayered on purpose. Element defaults that a utility must be able to override (`a`, `li`) sit in `@layer base`, wrapped in `:where()` so they have zero specificity.

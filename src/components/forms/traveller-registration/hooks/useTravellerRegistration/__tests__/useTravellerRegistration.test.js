@@ -389,6 +389,65 @@ describe('useTravellerRegistration', () => {
 			})
 		})
 
+		describe('the end date following the start date', () => {
+			const pick = (result, id, value) =>
+				act(() => {
+					result.current.handleInputChange({ target: { id, value } })
+				})
+
+			it('fills an empty end date with the start date', () => {
+				const { result } = renderHook(() => useTravellerRegistration())
+
+				pick(result, 'tripStart', '2025-03-10')
+
+				expect(result.current.formData.tripEnd).toEqual({
+					value: '2025-03-10',
+					message: '',
+					isValid: true,
+				})
+			})
+
+			it('keeps following while the start date is typed digit by digit', () => {
+				const { result } = renderHook(() => useTravellerRegistration())
+
+				pick(result, 'tripStart', '0002-03-10')
+				pick(result, 'tripStart', '2025-03-10')
+
+				expect(result.current.formData.tripEnd.value).toBe('2025-03-10')
+			})
+
+			it('never overwrites an end date the traveller set', () => {
+				const { result } = renderHook(() => useTravellerRegistration())
+
+				pick(result, 'tripEnd', '2025-03-19')
+				pick(result, 'tripStart', '2025-03-10')
+
+				expect(result.current.formData.tripEnd.value).toBe('2025-03-19')
+			})
+
+			it('never overwrites the saved end date of a trip being edited', () => {
+				const { result } = renderHook(() =>
+					useTravellerRegistration({
+						tripStart: '2025-03-12',
+						tripEnd: '2025-03-19',
+					}),
+				)
+
+				pick(result, 'tripStart', '2025-03-10')
+
+				expect(result.current.formData.tripEnd.value).toBe('2025-03-19')
+			})
+
+			it('leaves the end date alone when the start date is cleared', () => {
+				const { result } = renderHook(() => useTravellerRegistration())
+
+				pick(result, 'tripStart', '2025-03-10')
+				pick(result, 'tripStart', '')
+
+				expect(result.current.formData.tripEnd.value).toBe('2025-03-10')
+			})
+		})
+
 		it('refuses a date after today', () => {
 			const { result } = renderHook(() => useTravellerRegistration())
 

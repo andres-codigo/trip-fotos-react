@@ -684,7 +684,7 @@ describe('travellersSlice', () => {
 				expect(selectUploadProgress(store.getState())).toBeNull()
 			})
 
-			it('should not count a file as uploaded before its download URL is ready', async () => {
+			it('should count a file once its bytes finish and hold at 99% until every file is saved', async () => {
 				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
 				stubUpload({
 					snapshots: [{ bytesTransferred: 100, totalBytes: 100 }],
@@ -693,11 +693,48 @@ describe('travellersSlice', () => {
 
 				await store.dispatch(registerTraveller(mockRegistrationData))
 
-				const beforeUrl = seen.find(({ percent }) => percent === 99)
-				expect(beforeUrl).toEqual({
-					uploadedFiles: 0,
+				expect(seen).toContainEqual({
+					uploadedFiles: 1,
 					totalFiles: 1,
 					percent: 99,
+				})
+			})
+
+			it('should never show 100% while the count trails the total', async () => {
+				fetch.mockResolvedValueOnce(okJson({ name: MOCK_USER.USER_ID }))
+				const tenFiles = {
+					...mockRegistrationData,
+					files: Array.from({ length: 10 }, (_, i) => ({
+						name: `${i}.jpg`,
+						file: new Blob(),
+					})),
+				}
+				Array.from({ length: 10 }).forEach(() =>
+					stubUpload({
+						snapshots: [
+							{ bytesTransferred: 50, totalBytes: 100 },
+							{ bytesTransferred: 100, totalBytes: 100 },
+						],
+					}),
+				)
+				const seen = collectProgress()
+
+				await store.dispatch(registerTraveller(tenFiles))
+
+				const atFull = seen.filter(({ percent }) => percent === 100)
+				expect(
+					atFull.every(({ uploadedFiles }) => uploadedFiles === 10),
+				).toBe(true)
+				expect(
+					seen.every(
+						({ uploadedFiles, percent }) =>
+							Math.min(uploadedFiles * 10, 99) <= percent,
+					),
+				).toBe(true)
+				expect(seen.at(-1)).toEqual({
+					uploadedFiles: 10,
+					totalFiles: 10,
+					percent: 100,
 				})
 			})
 
@@ -797,8 +834,8 @@ describe('travellersSlice', () => {
 					)
 				})
 
-				it('should delete the earlier batch and the settled uploads of the failing batch', async () => {
-					// The sixth file is the only one in the second batch and fails
+				it('should delete every settled upload when one file fails', async () => {
+					// The sixth file waits for a free upload slot and fails
 					Array.from({ length: 6 }, (_, i) => `ref-${i}`).forEach(
 						(name) =>
 							uploadBytesResumable.mockImplementationOnce(() =>

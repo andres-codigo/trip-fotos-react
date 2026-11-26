@@ -155,8 +155,9 @@
 	--z-index-popover: 10;
 	--z-index-alert: 10;
 	--z-index-overlay: 10;
-	--z-index-toast: 50;
 	--z-index-modal: 100;
+	/* Above modal so Undo stays reachable while a dialog is open */
+	--z-index-toast: 110;
 }
 
 /* Alerts slide in on mount and drift out on close; Alerts waits for the fade-out animationend */
@@ -384,6 +385,14 @@ main {
 
 	input[type='date'] {
 		position: relative;
+	}
+
+	/* iOS only: its native date control keeps its own minimum width, so it ran past a narrow column whatever min-width said */
+	@supports (-webkit-touch-callout: none) {
+		input[type='date'] {
+			-webkit-appearance: none;
+			appearance: none;
+		}
 	}
 
 	/* Over the drawn icon, so a click there still opens Chrome's picker */

@@ -66,11 +66,10 @@ const altOf = (alt) => alt?.trim() || null
 
 const uploadPhotos = async (files, { userId, dispatch, uploadedRefs }) => {
 	const MAX_CONCURRENT_UPLOADS = 5
-	const imageQueue = [...files]
-	const imageUrls = []
-
-	const totalFiles = imageQueue.length
+	const totalFiles = files.length
+	const imageUrls = new Array(totalFiles).fill(null)
 	const fractions = new Array(totalFiles).fill(0)
+	let savedFiles = 0
 	const fileDimensions = new Array(totalFiles).fill(null)
 	const fileThumbnails = new Array(totalFiles).fill(null)
 	let lastReported = ''
@@ -80,10 +79,14 @@ const uploadPhotos = async (files, { userId, dispatch, uploadedRefs }) => {
 		const uploadedFiles = fractions.filter(
 			(fraction) => fraction === 1,
 		).length
-		const percent = Math.round(
-			(fractions.reduce((sum, fraction) => sum + fraction, 0) /
-				totalFiles) *
-				100,
+		// Held below 100 until every photo and its thumbnails are saved, so 100% always means done
+		const percent = Math.min(
+			Math.round(
+				(fractions.reduce((sum, fraction) => sum + fraction, 0) /
+					totalFiles) *
+					100,
+			),
+			savedFiles === totalFiles ? 100 : 99,
 		)
 		const key = `${uploadedFiles}/${percent}`
 		if (key === lastReported) return
@@ -129,9 +132,7 @@ const uploadPhotos = async (files, { userId, dispatch, uploadedRefs }) => {
 			.map((result) => result.value)
 	}
 
-	let nextIndex = 0
-	const uploadImage = async (image) => {
-		const index = nextIndex++
+	const uploadImage = async (image, index) => {
 		const storage = getFirebaseStorage()
 		// Distinct files can share a name, and the same path would overwrite the earlier upload
 		const id = crypto.randomUUID()
@@ -170,11 +171,8 @@ const uploadPhotos = async (files, { userId, dispatch, uploadedRefs }) => {
 			uploadTask.on(
 				'state_changed',
 				(snapshot) => {
-					// A finished file is only counted once its download URL is in hand
-					fractions[index] = Math.min(
-						snapshot.bytesTransferred / (snapshot.totalBytes || 1),
-						0.99,
-					)
+					fractions[index] =
+						snapshot.bytesTransferred / (snapshot.totalBytes || 1)
 					reportProgress()
 				},
 				() => {
@@ -186,8 +184,6 @@ const uploadPhotos = async (files, { userId, dispatch, uploadedRefs }) => {
 						const url = await getDownloadURL(
 							uploadTask.snapshot.ref,
 						)
-						fractions[index] = 1
-						reportProgress()
 						resolve(url)
 					} catch (error) {
 						reject(error)
@@ -203,23 +199,33 @@ const uploadPhotos = async (files, { userId, dispatch, uploadedRefs }) => {
 		])
 		if (photo.status === 'rejected') throw photo.reason
 		fileThumbnails[index] = thumbnails.value
-		return photo.value
+		imageUrls[index] = photo.value
+		fractions[index] = 1
+		savedFiles += 1
+		reportProgress()
 	}
 
-	const uploadNextBatch = async () => {
-		const batch = imageQueue.splice(0, MAX_CONCURRENT_UPLOADS)
-		// Waiting for the whole batch to settle means no upload can land after the cleanup below
-		const batchResults = await Promise.allSettled(batch.map(uploadImage))
-		const failed = batchResults.find(
-			(result) => result.status === 'rejected',
-		)
-		if (failed) throw failed.reason
-		imageUrls.push(...batchResults.map((result) => result.value))
+	// A rolling queue: each worker takes the next file as soon as its last one is saved
+	let nextIndex = 0
+	let failure = null
+	const worker = async () => {
+		while (!failure && nextIndex < totalFiles) {
+			const index = nextIndex++
+			try {
+				await uploadImage(files[index], index)
+			} catch (error) {
+				failure ??= error
+			}
+		}
 	}
-
-	while (imageQueue.length > 0) {
-		await uploadNextBatch()
-	}
+	// Waiting for every worker means no upload can land after the caller's cleanup
+	await Promise.all(
+		Array.from(
+			{ length: Math.min(MAX_CONCURRENT_UPLOADS, totalFiles) },
+			worker,
+		),
+	)
+	if (failure) throw failure
 
 	return { urls: imageUrls, fileDimensions, fileThumbnails }
 }
