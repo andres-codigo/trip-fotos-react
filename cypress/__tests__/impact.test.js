@@ -91,6 +91,26 @@ describe('affectedCaptures', () => {
 			]),
 		).toEqual([])
 	})
+
+	it('ignores docs and Vitest helpers in src, and the tooling no capture loads', () => {
+		expect(
+			affectedCaptures([
+				'src/constants/README.md',
+				'src/testUtils/vitest/failOnConsole.js',
+				'src/testUtils/configureTestStore.js',
+				'cypress/support/component.js',
+				'cypress/support/component-index.html',
+				'cypress/support/utils/__tests__/animations.test.js',
+				'cypress/ui-check/__tests__/selection.test.js',
+			]),
+		).toEqual([])
+	})
+
+	it('runs every capture when the selectors the specs read change', () => {
+		expect(
+			affectedCaptures(['src/testUtils/cypress/selectors.js']),
+		).toHaveLength(Object.keys(CAPTURES).length)
+	})
 })
 
 describe('affectedSpecs', () => {
@@ -112,6 +132,7 @@ describe('affectedSpecs', () => {
 		const all = Object.keys(E2E_SPECS)
 
 		expect(affectedSpecs(['cypress/support/commands.js'])).toEqual(all)
+		expect(affectedSpecs(['cypress/support/component.js'])).toEqual([])
 		expect(affectedSpecs(['src/app/App.jsx'])).toEqual(all)
 		expect(
 			affectedSpecs(['src/components/layout/header/Header.jsx']),

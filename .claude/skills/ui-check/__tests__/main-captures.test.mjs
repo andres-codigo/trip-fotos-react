@@ -170,8 +170,56 @@ describe('following main to a newer commit', () => {
 	it.each([
 		['docs and tests', ['README.md', 'src/app/__tests__/App.test.jsx']],
 		['an E2E spec', ['cypress/e2e/pages/Authentication.cy.js']],
+		['a README in src', ['src/constants/README.md']],
+		[
+			'public files no page shows',
+			['public/sitemap.xml', 'public/icon.svg'],
+		],
 	])('keeps every capture after %s', (_, files) => {
 		expect(staleCaptures(files, repo({}))).toEqual([])
+	})
+
+	it('keeps every capture after an npm script change', () => {
+		const withScript = (script) =>
+			JSON.stringify({
+				...JSON.parse(pkg('0.28.7')),
+				scripts: { script },
+			})
+		const git = repo(
+			{ 'package.json': withScript('vite') },
+			{ 'package.json': withScript('vite --open') },
+		)
+
+		expect(staleCaptures(['package.json'], git)).toEqual([])
+	})
+
+	describe('after a vite.config.js change', () => {
+		const config = (workers) =>
+			`export default {\n\tbuild: {\n\t\tminify: true,\n\t},\n\ttest: {\n\t\tmaxWorkers: ${workers},\n\t},\n}\n`
+		const vite = (before, after, diff) => ({
+			...repo({ 'vite.config.js': before }, { 'vite.config.js': after }),
+			diff: () => diff,
+		})
+
+		it('keeps every capture when only the Vitest test block changed', () => {
+			const git = vite(
+				config(2),
+				config(4),
+				'@@ -6 +6 @@\n-\t\tmaxWorkers: 2,\n+\t\tmaxWorkers: 4,',
+			)
+
+			expect(staleCaptures(['vite.config.js'], git)).toEqual([])
+		})
+
+		it('retakes every capture when the build changed', () => {
+			const git = vite(
+				config(2),
+				config(2).replace('minify: true', 'minify: false'),
+				'@@ -3 +3 @@\n-\t\tminify: true,\n+\t\tminify: false,',
+			)
+
+			expect(staleCaptures(['vite.config.js'], git)).toBeNull()
+		})
 	})
 
 	it('retakes only the captures an area maps to', () => {
@@ -208,6 +256,7 @@ describe('following main to a newer commit', () => {
 		['the selection helper', ['cypress/ui-check/selection.js'], {}, {}],
 		['the seed data', ['scripts/seed-emulators.mjs'], {}, {}],
 		['the HTML shell', ['index.html'], {}, {}],
+		['the fonts', ['public/fonts/Roboto-Regular.woff2'], {}, {}],
 		[
 			'shared capture setup',
 			['cypress/ui-check/capture.cy.js'],

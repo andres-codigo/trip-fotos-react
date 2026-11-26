@@ -814,6 +814,12 @@ describe(`UI check capture (${LABEL})`, () => {
 					visit(PATHS.REGISTER)
 					cy.get(NOTE, { timeout: TIMEOUT }).should('contain', email)
 					cy.get(STRIP).should('not.exist')
+					// The unread count arrives after the page settles, so the shot waits for it
+					cy.get(
+						width <= 768
+							? TAB_BAR_SELECTORS.UNREAD
+							: TOP_NAVIGATION_SELECTORS.TOTAL_MESSAGES,
+					).should('be.visible')
 					settledShot(`register-${width}`)
 					cy.get(VERIFY_EMAIL_NOTE_SELECTORS.SEND_AGAIN).click()
 					cy.get(VERIFY_EMAIL_NOTE_SELECTORS.MESSAGE).should(

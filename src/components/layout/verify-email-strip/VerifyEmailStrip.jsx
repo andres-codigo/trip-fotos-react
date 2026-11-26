@@ -151,7 +151,7 @@ const VerifyEmailStrip = ({ className }) => {
 			role="region"
 			aria-label={VERIFY_EMAIL_PROMPT_CONFIG.STRIP_LABEL}
 			className={cn(
-				'relative top-20 z-[1] w-full border-0 border-b border-solid border-accent-text bg-surface-accent px-4 py-2.5 text-[0.9375rem] md:px-6',
+				'relative top-20 z-raised w-full border-0 border-b border-solid border-accent-text bg-surface-accent px-4 py-2.5 text-[0.9375rem] md:px-6',
 				className,
 			)}
 			data-cy={VERIFY_EMAIL_STRIP.ROOT}>

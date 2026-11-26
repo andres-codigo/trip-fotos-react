@@ -112,7 +112,7 @@ function AccountMenu({
 			{isOpen && (
 				<div
 					id={panelId}
-					className="absolute top-[calc(100%+0.5rem)] right-0 z-10 flex w-64 flex-col gap-1 rounded-md border border-solid border-border-card bg-surface p-2 text-text shadow-overlay"
+					className="absolute top-[calc(100%+0.5rem)] right-0 z-popover flex w-64 flex-col gap-1 rounded-md border border-solid border-border-card bg-surface p-2 text-text shadow-overlay"
 					data-cy={ACCOUNT_MENU.PANEL}>
 					{(hasName || email) && (
 						<div

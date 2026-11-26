@@ -402,14 +402,14 @@ const ImageGallery = ({
 					{/* Radix locks the page scroll only while an Overlay is rendered */}
 					<RadixDialog.Overlay
 						className={cn(
-							'fixed inset-0 z-100 bg-surface-sunken',
+							'fixed inset-0 z-modal bg-surface-sunken',
 							settleClasses,
 						)}
 						style={backdropStyle}
 					/>
 					<RadixDialog.Content
 						className={cn(
-							'fixed inset-0 z-100 flex flex-col bg-surface-sunken pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] text-text outline-none data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in',
+							'fixed inset-0 z-modal flex flex-col bg-surface-sunken pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] text-text outline-none data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in',
 							settleClasses,
 						)}
 						style={backdropStyle}

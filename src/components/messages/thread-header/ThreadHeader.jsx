@@ -158,7 +158,7 @@ function ThreadHeader({
 				{isOpen && (
 					<div
 						id={menuId}
-						className="absolute top-[calc(100%+0.25rem)] right-0 z-10 flex min-w-55 flex-col rounded-md border border-solid border-border-card bg-surface p-1.5 shadow-overlay"
+						className="absolute top-[calc(100%+0.25rem)] right-0 z-popover flex min-w-55 flex-col rounded-md border border-solid border-border-card bg-surface p-1.5 shadow-overlay"
 						data-cy={THREAD_HEADER.MENU}>
 						{isTraveller && (
 							<BaseButton

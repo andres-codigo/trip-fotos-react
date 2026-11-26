@@ -14,7 +14,7 @@ import {
 	widthsFor,
 } from '../../../cypress/ui-check/selection.js'
 import { treeHash } from '../verify/git-tree.mjs'
-import { narrowChange } from './narrow.mjs'
+import { VITE_CONFIG, narrowChange, onlyChangesBlock } from './narrow.mjs'
 
 export const MAIN_LABEL = 'main'
 export const BRANCH_LABEL = 'branch'
@@ -42,20 +42,22 @@ export const scriptHash = (
 	return hash.digest('hex')
 }
 
-// Files outside src/ that change every page: the HTML shell, the build, static assets, the rules and the emulator env
+// Files outside src/ that change every page: the HTML shell, the build, the fonts, the rules and the emulator env.
+// Nothing else in public/ shows in a capture (icons, manifest, crawler files)
 const APP_FILES = [
 	'index.html',
-	'vite.config.js',
-	'public/',
+	VITE_CONFIG,
+	'public/fonts/',
 	'firebase/',
 	'.env.emulators',
 ]
 const PACKAGE_FILES = ['package.json', 'package-lock.json']
 
-// The package files with their own version left out, which a release commit bumps and nothing renders
+// The package files without their own version, which a release commit bumps, or the npm scripts, as the capture run calls its tools directly
 const withoutVersion = (text) => {
 	const json = JSON.parse(text)
 	delete json.version
+	delete json.scripts
 	delete json.packages?.['']?.version
 	return JSON.stringify(json)
 }
@@ -71,9 +73,18 @@ const onlyVersionChanged = (before, after) => {
 // The captures the files changed between two main commits can change, or null when they can change them all.
 // `git` answers per file as narrowChange expects; a release, docs or test commit changes none
 export const staleCaptures = (files, git) => {
-	if (files.some((file) => APP_FILES.some((app) => file.startsWith(app)))) {
-		return null
-	}
+	const changesApp = (file) =>
+		APP_FILES.some((app) => file.startsWith(app)) &&
+		!(
+			file === VITE_CONFIG &&
+			onlyChangesBlock(
+				'test',
+				git.diff(file),
+				git.before(file),
+				git.after(file),
+			)
+		)
+	if (files.some(changesApp)) return null
 	const changedPackage = files.some(
 		(file) =>
 			PACKAGE_FILES.includes(file) &&

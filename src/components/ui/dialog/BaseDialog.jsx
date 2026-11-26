@@ -33,12 +33,12 @@ const BaseDialog = ({
 			}}>
 			<RadixDialog.Portal container={container}>
 				<RadixDialog.Overlay
-					className="fixed inset-0 z-10 bg-overlay data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
+					className="fixed inset-0 z-overlay bg-overlay data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
 					onClick={tryClose}
 					data-cy={DIALOG.BACKDROP}
 				/>
 				<RadixDialog.Content
-					className="fixed inset-0 z-100 m-auto h-fit w-4/5 overflow-hidden rounded-lg border border-border-card bg-surface shadow-overlay outline-none data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in md:w-1/2"
+					className="fixed inset-0 z-modal m-auto h-fit w-4/5 overflow-hidden rounded-lg border border-border-card bg-surface shadow-overlay outline-none data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in md:w-1/2"
 					data-cy={dataCy}
 					aria-modal="true"
 					role={

@@ -146,6 +146,19 @@
 	--breakpoint-lg: 1024px;
 }
 
+/* Stacking layers, lowest first; equal values stack by DOM order */
+@theme {
+	--z-index-raised: 1;
+	--z-index-tabbar: 1;
+	--z-index-header: 2;
+	--z-index-skip-link: 3;
+	--z-index-popover: 10;
+	--z-index-alert: 10;
+	--z-index-overlay: 10;
+	--z-index-toast: 50;
+	--z-index-modal: 100;
+}
+
 /* Alerts slide in on mount and drift out on close; Alerts waits for the fade-out animationend */
 @theme {
 	--animate-alert-in: alert-in 0.3s ease-out;

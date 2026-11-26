@@ -2,6 +2,7 @@
 // Reads the Prettier layout (tabs, closing brackets on their own line), never a parser: the capture script and config are formatted on commit
 export const CAPTURE_SCRIPT = 'cypress/ui-check/capture.cy.js'
 export const CYPRESS_CONFIG = 'cypress.config.js'
+export const VITE_CONFIG = 'vite.config.js'
 
 const indentOf = (line) => line.match(/^\t*/)[0].length
 const CLOSING = /^\s*[}\])]/
@@ -84,12 +85,12 @@ export const changedCaptures = (before, after) => {
 	)
 }
 
-// The line numbers inside each `expose: { ... }` block
-const exposeLines = (source) => {
+// The line numbers inside each `<key>: { ... }` block
+const blockLines = (source, key) => {
 	const lines = source.split('\n')
 	const inside = new Set()
 	lines.forEach((line, index) => {
-		if (!/^\t*expose: \{$/.test(line)) return
+		if (!new RegExp(`^\\t*${key}: \\{$`).test(line)) return
 		const close = new RegExp(`^\\t{${indentOf(line)}}\\},?$`)
 		for (
 			let at = index + 1;
@@ -102,22 +103,38 @@ const exposeLines = (source) => {
 	return inside
 }
 
+const HUNK = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/gm
+const lineRange = (start, count) =>
+	Array.from({ length: Number(count) }, (_, offset) => Number(start) + offset)
+
+// True when every line a `git diff -U0` removes or adds sits inside a `<key>: { ... }` block, as vite.config.js's Vitest-only `test` block
+export const onlyChangesBlock = (key, diff, before, after) => {
+	if (!diff || before == null || after == null) return false
+	const old = blockLines(before, key)
+	const next = blockLines(after, key)
+	const hunks = [...diff.matchAll(HUNK)]
+	return (
+		hunks.length > 0 &&
+		hunks.every(
+			([, oldStart, removed = '1', newStart, added = '1']) =>
+				lineRange(oldStart, removed).every((line) => old.has(line)) &&
+				lineRange(newStart, added).every((line) => next.has(line)),
+		)
+	)
+}
+
 // True when a `git diff -U0` of the config only adds lines inside an `expose` block, which a capture reads only by name
 export const onlyAddsExposeKeys = (diff, after) => {
 	if (!diff || after == null) return false
-	const inside = exposeLines(after)
-	const hunks = [
-		...diff.matchAll(/^@@ -\d+(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/gm),
-	]
+	const inside = blockLines(after, 'expose')
+	const hunks = [...diff.matchAll(HUNK)]
 	return (
 		hunks.length > 0 &&
-		hunks.every(([, removed = '1', start, added = '1']) => {
-			if (Number(removed) !== 0) return false
-			return Array.from(
-				{ length: Number(added) },
-				(_, offset) => Number(start) + offset,
-			).every((line) => inside.has(line))
-		})
+		hunks.every(
+			([, , removed = '1', start, added = '1']) =>
+				Number(removed) === 0 &&
+				lineRange(start, added).every((line) => inside.has(line)),
+		)
 	)
 }
 

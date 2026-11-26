@@ -459,7 +459,7 @@ const Messages = () => {
 			}
 			className={cn(
 				'flex min-h-0 flex-col bg-bg',
-				'max-lg:fixed max-lg:inset-x-0 max-lg:top-20 max-lg:bottom-0 max-lg:z-[1]',
+				'max-lg:fixed max-lg:inset-x-0 max-lg:top-20 max-lg:bottom-0 max-lg:z-raised',
 				'lg:h-[calc(100dvh-15rem)] lg:min-h-[28rem] lg:overflow-hidden',
 				CARD,
 				'max-lg:rounded-none max-lg:border-0 max-lg:shadow-none',

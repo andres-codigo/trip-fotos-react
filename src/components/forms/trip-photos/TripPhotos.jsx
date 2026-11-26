@@ -16,7 +16,7 @@ const resetButtonClasses =
 // The ring sits on the 24px disc, not the 44px hit area, so it matches the file-preview remove button
 const removeButtonClasses = cn(
 	resetButtonClasses,
-	'group absolute top-0 right-0 z-1 flex size-11 items-start justify-end p-2.5 focus-visible:outline-none',
+	'group absolute top-0 right-0 z-raised flex size-11 items-start justify-end p-2.5 focus-visible:outline-none',
 )
 
 const discClasses =
