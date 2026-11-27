@@ -3,7 +3,9 @@ import PropTypes from 'prop-types'
 import { GLOBAL } from '@/constants/ui'
 import { cn } from '@/utils/cn'
 
-// Turns, or pulses under reduced motion so loading never looks frozen; the label is always visible
+import SpinnerIcon from '@/components/ui/spinner/SpinnerIcon'
+
+// Turns, or shows brightening dots in place of the ring under reduced motion, so loading never looks frozen; the label is always visible
 const BaseSpinner = ({ label = GLOBAL.SPINNER_LABEL.DEFAULT, className }) => {
 	return (
 		<div
@@ -15,11 +17,7 @@ const BaseSpinner = ({ label = GLOBAL.SPINNER_LABEL.DEFAULT, className }) => {
 			role="status"
 			aria-live="polite"
 			aria-busy="true">
-			<span
-				className="size-6 flex-none animate-spin rounded-full border-3 border-solid border-accent-text border-r-transparent motion-reduce:animate-skeleton"
-				aria-hidden="true"
-				data-cy="base-spinner-icon"
-			/>
+			<SpinnerIcon data-cy="base-spinner-icon" />
 			<span data-cy="base-spinner-label">{label}</span>
 		</div>
 	)

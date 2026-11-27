@@ -200,6 +200,7 @@
 	--animate-fade-in: fade-in 0.3s ease-out;
 	--animate-fade-out: fade-out 0.3s ease-in forwards;
 	--animate-skeleton: skeleton-pulse 1.6s ease-in-out infinite;
+	--animate-loading-dot: loading-dot 1.2s ease-in-out infinite;
 
 	@keyframes dialog-in {
 		from {
@@ -236,6 +237,18 @@
 	@keyframes skeleton-pulse {
 		50% {
 			opacity: 0.55;
+		}
+	}
+
+	/* Opacity only, so it is the loading indicator under prefers-reduced-motion */
+	@keyframes loading-dot {
+		0%,
+		60%,
+		100% {
+			opacity: 0.3;
+		}
+		30% {
+			opacity: 1;
 		}
 	}
 

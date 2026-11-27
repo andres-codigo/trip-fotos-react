@@ -49,7 +49,7 @@ The look, layouts and per-page rules come from the design system (the "00: Trip 
 - Drive visual state from state, not class names: `aria-invalid:`, `data-[state=open]:`, `disabled:` and `aria-current:` variants, so a test can assert the attribute.
 - Hover and active states must differ visibly from the resting state and keep text contrast at or above WCAG AA (4.5:1) in every state. Check the hover colour, not just the resting one: a lighter red hover under white text can fall below 4.5:1.
 - Focus: a global `:focus-visible` rule draws one cream `focus` ring (3px, 2px offset) on every control; do not add per-component focus colours or `outline-none`. A photo tile takes `tile-focus-ring`, which draws the ring outside the photo past a gap in the `surface` colour.
-- Respect reduced motion for any animation. A spinner pulses instead of turning (`motion-reduce:animate-skeleton`) and always sits beside visible text.
+- Respect reduced motion for any animation. A spinner (`SpinnerIcon`) swaps its turning ring for three dots that only change opacity (`animate-loading-dot`) and always sits beside visible text.
 
 ## Linting And Formatting
 
