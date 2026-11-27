@@ -23,7 +23,7 @@ Changing a token or colour value: before running `/verify`, search the specs (`s
 
 ## Layers And Specificity
 
-- Stack with the `z-*` tokens in `tailwind.css` (`z-raised`, `z-tabbar`, `z-header`, `z-skip-link`, `z-popover`, `z-alert`, `z-overlay`, `z-toast`, `z-modal`), never a number or an arbitrary value. A new layer becomes a token placed in that order.
+- Stack with the `z-*` tokens in `tailwind.css` (`z-raised`, `z-tabbar`, `z-header`, `z-skip-link`, `z-popover`, `z-alert`, `z-overlay`, `z-modal`, `z-toast`), never a number or an arbitrary value. A new layer becomes a token placed in that order.
 
 - Tailwind's theme and utilities layers are imported; preflight is left out because its reset would change headings, lists and form controls.
 - Utilities sit in a layer, and unlayered CSS always beats a layer. The global page-shell rules (`html`, `body`, `main`, `section`, `.mainContainer`, `.cardPage`) are unlayered on purpose. Element defaults that a utility must be able to override (`a`, `li`) sit in `@layer base`, wrapped in `:where()` so they have zero specificity.
@@ -49,7 +49,7 @@ The look, layouts and per-page rules come from the design system (the "00: Trip 
 - Drive visual state from state, not class names: `aria-invalid:`, `data-[state=open]:`, `disabled:` and `aria-current:` variants, so a test can assert the attribute.
 - Hover and active states must differ visibly from the resting state and keep text contrast at or above WCAG AA (4.5:1) in every state. Check the hover colour, not just the resting one: a lighter red hover under white text can fall below 4.5:1.
 - Focus: a global `:focus-visible` rule draws one cream `focus` ring (3px, 2px offset) on every control; do not add per-component focus colours or `outline-none`. A photo tile takes `tile-focus-ring`, which draws the ring outside the photo past a gap in the `surface` colour.
-- Respect reduced motion for any animation. A spinner pulses instead of turning (`motion-reduce:animate-skeleton`) and always sits beside visible text.
+- Respect reduced motion for any animation. A spinner (`SpinnerIcon`) swaps its turning ring for three dots that only change opacity (`animate-loading-dot`) and always sits beside visible text.
 
 ## Linting And Formatting
 

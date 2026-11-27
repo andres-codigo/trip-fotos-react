@@ -169,10 +169,18 @@ const TravellerRegistrationForm = ({
 		tripDatesValid &&
 		getTripLength(formData[TRIP_START].value, formData[TRIP_END].value)
 
+	const tripStart = formData[TRIP_START].value
+	const tripEnd = formData[TRIP_END].value
+	// iOS ignores min and max in its picker, so the end-before-start error stays
+	const dateBounds = {
+		[TRIP_START]: { max: tripEnd && tripEnd < today ? tripEnd : today },
+		[TRIP_END]: { min: tripStart || undefined, max: today },
+	}
+
 	const getDateInputProps = (field) => ({
 		...getInputProps(field),
 		type: 'date',
-		max: today,
+		...dateBounds[field],
 		'aria-describedby': formData[field].isValid
 			? TRIP_DATES_HINT_ID
 			: `${TRIP_DATES_HINT_ID} ${field}-error`,
@@ -295,7 +303,7 @@ const TravellerRegistrationForm = ({
 						<legend className={labelClasses}>
 							{TRIP_DATES_CONFIG.LEGEND}
 						</legend>
-						{/* One date's error must not push its field below the other's, so each field sits at the foot of its column; minmax(0) stops iOS's wider date field running past the column. Below 360px two fields side by side cut off the year, so they stack */}
+						{/* One date's error must not push its field below the other's, so each field sits at the foot of its column; minmax(0) keeps the columns equal (iOS's own date field width is reset in tailwind.css). Below 360px two fields side by side cut off the year, so they stack */}
 						<div className="grid grid-cols-1 gap-2.5 min-[22.5rem]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] [&>div]:flex [&>div]:flex-col [&>div>.relative]:mt-auto [&>div>input]:mt-auto">
 							<Input {...getDateInputProps(TRIP_START)} />
 							<Input {...getDateInputProps(TRIP_END)} />

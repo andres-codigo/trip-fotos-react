@@ -44,8 +44,17 @@ describe('useScrollToTopOnNavigate', () => {
 		expect(window.scrollTo).toHaveBeenCalledExactlyOnceWith(0, 0)
 	})
 
-	it('does not scroll when the new location has a hash', () => {
+	it('scrolls to the top when the new location has a hash, so the loading page is never left part-way down', () => {
 		const { result } = renderWithRouter()
+		window.scrollTo.mockClear()
+
+		act(() => result.current('/travellers/abc#photos'))
+
+		expect(window.scrollTo).toHaveBeenCalledExactlyOnceWith(0, 0)
+	})
+
+	it('does not scroll when only the hash changes', () => {
+		const { result } = renderWithRouter('/travellers/abc')
 		window.scrollTo.mockClear()
 
 		act(() => result.current('/travellers/abc#photos'))

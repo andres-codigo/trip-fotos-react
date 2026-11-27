@@ -62,6 +62,8 @@ const useTravellerRegistration = (initialTraveller = null) => {
 		[CITIES]: field(initialTraveller?.cities ?? []),
 	}))
 	const [files, setFiles] = useState([])
+	// The end date follows the start date until the traveller sets it, so typing a year digit by digit still lands
+	const [isEndSet, setIsEndSet] = useState(Boolean(initialTraveller?.tripEnd))
 
 	const handleFilesUpdated = useCallback((updatedFiles) => {
 		setFiles(updatedFiles)
@@ -134,14 +136,21 @@ const useTravellerRegistration = (initialTraveller = null) => {
 	}
 
 	// Typing never raises a new error; it only clears or updates one the field already shows
+	const changeField = (prev, id, value) =>
+		prev[id].isValid
+			? { ...prev, [id]: { ...prev[id], value } }
+			: applyField(prev, id, value)
+
 	const handleInputChange = (e) => {
 		const { id, value } = e.target
 
-		setFormData((prev) =>
-			prev[id].isValid
-				? { ...prev, [id]: { ...prev[id], value } }
-				: applyField(prev, id, value),
-		)
+		if (id === TRIP_END) setIsEndSet(true)
+		const endFollows = id === TRIP_START && !isEndSet && parseIsoDate(value)
+
+		setFormData((prev) => {
+			const next = changeField(prev, id, value)
+			return endFollows ? changeField(next, TRIP_END, value) : next
+		})
 	}
 
 	const handleInputBlur = (e) => {

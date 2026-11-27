@@ -6,6 +6,8 @@ import PropTypes from 'prop-types'
 
 import { cn } from '@/utils/cn'
 
+import SpinnerIcon from '@/components/ui/spinner/SpinnerIcon'
+
 const buttonVariants = cva('border border-solid', {
 	variants: {
 		shape: {
@@ -98,10 +100,7 @@ const BaseButton = ({
 					{...props}>
 					{isBusy ? (
 						<>
-							<span
-								className="size-4 flex-none animate-spin rounded-full border-2 border-solid border-current border-r-transparent motion-reduce:animate-skeleton"
-								aria-hidden="true"
-							/>
+							<SpinnerIcon size="sm" />
 							{busyLabel}
 						</>
 					) : (

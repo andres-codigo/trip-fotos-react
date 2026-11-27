@@ -2303,7 +2303,11 @@ describe(`UI check capture (${LABEL})`, () => {
 				TRAVELLER_REGISTRATION_FORM_SELECTORS
 			eachWidth((width) => {
 				visit(PATHS.REGISTER)
+				// On this branch To follows From until the traveller sets it
 				cy.get(TRIP_START_INPUT).type('2025-03-12')
+				freezeAnimation()
+				shot(`register-trip-end-follows-${width}`)
+
 				cy.get(TRIP_END_INPUT).type('2025-03-19')
 				cy.get(TRIP_LENGTH).should('have.text', '8 days')
 				freezeAnimation()
@@ -2349,11 +2353,21 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.viewport(1280, HEIGHT)
 			visit(PATHS.REGISTER)
 			cy.selectCity()
-			cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
-				'cypress/fixtures/test-image.png',
-				{ force: true },
+			// Ten photos, so the count and the percent can be seen to move together
+			cy.readFile('cypress/fixtures/test-image.png', null).then(
+				(contents) =>
+					cy.get(FILE_UPLOADER_SELECTORS.FILE_DROP_INPUT).selectFile(
+						Array.from({ length: 10 }, (_, i) => ({
+							contents,
+							fileName: `photo-${i + 1}.png`,
+						})),
+						{ force: true },
+					),
 			)
-			cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should('be.visible')
+			cy.get(FILE_UPLOADER_SELECTORS.FILE_PREVIEW).should(
+				'have.length',
+				10,
+			)
 			freezeAnimation()
 			;[
 				['file-remove', FILE_UPLOADER_SELECTORS.FILE_PREVIEW_REMOVE],
@@ -2393,6 +2407,20 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.get(TRAVELLER_REGISTRATION_FORM_SELECTORS.TRIP_END_INPUT).type(
 				'2025-03-15',
 			)
+			// Every label the upload shows, written out after the run
+			const labels = []
+			cy.window().then((win) => {
+				new win.MutationObserver(() => {
+					const text = win.document.body.innerText.match(
+						/Uploading photos: \d+ of \d+ done \(\d+%\)/,
+					)?.[0]
+					if (text && text !== labels.at(-1)) labels.push(text)
+				}).observe(win.document.body, {
+					subtree: true,
+					childList: true,
+					characterData: true,
+				})
+			})
 			// Frozen before the upload starts, so the bar shows its real width rather than a frame of its width transition
 			freezeAnimation()
 			cy.get(
@@ -2401,8 +2429,8 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.get(COMMON_SELECTORS.BASE_PROGRESS, {
 				timeout: TIMEOUT,
 			}).should('be.visible')
-			// The bytes sent first and the reply waits on the throttled network, so 99% is the one stable frame
-			cy.contains('(99%)', { timeout: 30000 }).should('be.visible')
+			// The bytes go first and the reply waits on the throttled network, so the last few percent hold long enough to shoot
+			cy.contains(/\(9\d%\)/, { timeout: 90000 }).should('be.visible')
 			freezeAnimation()
 			shot('register-upload-progress')
 			cdp('Network.emulateNetworkConditions', {
@@ -2418,6 +2446,13 @@ describe(`UI check capture (${LABEL})`, () => {
 			// The URL changes before the page renders, so wait for the content or the frame is mid-navigation
 			cy.contains(TRAVELLER_REGISTRATION_SUCCESS_MESSAGE).should(
 				'be.visible',
+			)
+			// Read beside the shots: no label may show 100% before 10 of 10
+			cy.then(() =>
+				cy.writeFile(
+					`cypress/ui-check-captures/capture.cy.js/${LABEL}/upload-labels.json`,
+					labels,
+				),
 			)
 			assertSettled()
 			shot('register-success')
@@ -3122,6 +3157,38 @@ describe(`UI check capture (${LABEL})`, () => {
 					isHolding = false
 				})
 
+				// See all from far down the list (no seeded card has six photos, so the same in-app navigation goes through history): the loading page starts at the top, not part-way down under the header
+				// A phone's visible height, so the loading page is taller than the screen and a kept scroll position would show
+				cy.viewport(width, 640)
+				visit(PATHS.TRAVELLERS)
+				assertSettled()
+				cy.scrollTo(0, 1500)
+				cy.window().its('scrollY').should('be.greaterThan', 0)
+				cy.then(() => {
+					isHolding = true
+				})
+				cy.window().then((win) => {
+					win.history.pushState(
+						{},
+						'',
+						`${PATHS.TRAVELLERS}/${TEST_USERS.OTHER_TRAVELLER.ID}#photos`,
+					)
+					win.dispatchEvent(new win.PopStateEvent('popstate'))
+				})
+				cy.location('hash').should('equal', '#photos')
+				cy.get(TRAVELLER_DETAIL_SELECTORS.SPINNER).should('be.visible')
+				freezeAnimation()
+				shot(`traveller-detail-see-all-loading-${width}`, {
+					capture: 'viewport',
+				})
+				cy.then(() => {
+					isHolding = false
+				})
+				cy.get(TRAVELLER_DETAIL_SELECTORS.PROFILE, {
+					timeout: TIMEOUT,
+				}).should('be.visible')
+				cy.viewport(width, HEIGHT)
+
 				visit(`${PATHS.TRAVELLERS}/no-such-traveller`)
 				cy.get(TRAVELLER_DETAIL_SELECTORS.NOT_FOUND).should(
 					'be.visible',
@@ -3215,7 +3282,7 @@ describe(`UI check capture (${LABEL})`, () => {
 			cy.get(COMMON_SELECTORS.BASE_PROGRESS, { timeout: TIMEOUT }).should(
 				'be.visible',
 			)
-			// The bytes sent first and the reply waits on the throttled network, so 99% is the one stable frame
+			// The bytes go first and the reply waits on the throttled network, so the last few percent hold long enough to shoot
 			cy.contains('(99%)', { timeout: 30000 }).should('be.visible')
 			freezeAnimation()
 			shot('edit-trip-upload-progress')

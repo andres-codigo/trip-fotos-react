@@ -301,6 +301,38 @@ describe('<TravellerRegistrationForm />', () => {
 			).toHaveTextContent(TRIP_DATES_CONFIG.HINT)
 		})
 
+		it('bounds To from From, and From by the earlier of To and today', () => {
+			vi.useFakeTimers({ toFake: ['Date'] })
+			vi.setSystemTime(new Date(2026, 10, 11, 12, 0))
+			useTravellerRegistration.mockReturnValue({
+				...mockHookReturnValue,
+				formData: {
+					...mockHookReturnValue.formData,
+					tripStart: {
+						value: '2025-03-12',
+						message: '',
+						isValid: true,
+					},
+					tripEnd: {
+						value: '2025-03-19',
+						message: '',
+						isValid: true,
+					},
+				},
+			})
+			render(<TravellerRegistrationForm onSubmit={mockOnSubmit} />)
+			vi.useRealTimers()
+
+			const group = screen.getByRole('group', { name: /Trip dates/ })
+			const from = within(group).getByLabelText(/^From/)
+			const to = within(group).getByLabelText(/^To/)
+
+			expect(from).toHaveAttribute('max', '2025-03-19')
+			expect(from).not.toHaveAttribute('min')
+			expect(to).toHaveAttribute('min', '2025-03-12')
+			expect(to).toHaveAttribute('max', '2026-11-11')
+		})
+
 		it('shows the trip length once both dates are valid', () => {
 			useTravellerRegistration.mockReturnValue({
 				...mockHookReturnValue,
