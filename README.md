@@ -72,7 +72,7 @@ Feature parity with the original Vue app is complete (epic [#274](https://github
 
 **Blocked**
 
-- [#770](https://github.com/andres-codigo/trip-fotos-react/issues/770) — Firebase email action URL, so email links still open Firebase's default page rather than `/auth/action`
+- [#770](https://github.com/andres-codigo/trip-fotos-react/issues/770) — en-GB sender name and copy for Firebase emails, blocked while an `%APP_NAME%` issue is resolved with Firebase Support
 - [#321](https://github.com/andres-codigo/trip-fotos-react/issues/321) — ESLint 10, waiting on `eslint-plugin-react` support
 
 <a id="stack"></a>
